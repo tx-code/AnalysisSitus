@@ -45,6 +45,17 @@ a:visited:hover {
   border: 1px dotted rgb(100, 87, 71);
   font-size: 16px;
 }
+.faq {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-right: 5%;
+  margin-left: 5%;
+  background-color: rgb(245, 245, 245);
+  border: 1px dotted rgb(100, 87, 71);
+  font-size: 16px;
+}
 .bib {
   margin: 0 0 8px 0
 }
