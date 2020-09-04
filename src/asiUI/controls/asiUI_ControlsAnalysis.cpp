@@ -507,6 +507,12 @@ void asiUI_ControlsAnalysis::onShowAAG()
   TopTools_IndexedMapOfShape selected;
   asiEngine_Part( m_model, m_partViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
 
+  if ( !part_n->GetAAG().IsNull() )
+  {
+    m_notifier.SendLogMessage( LogNotice(Normal) << "Num. of connected components: %1."
+                                                 << part_n->GetAAG()->GetConnectedComponentsNb() );
+  }
+
   // Show graph.
   asiUI_PartGraph* pGraphView = new asiUI_PartGraph(m_model, m_partViewer, m_notifier);
   pGraphView->RenderAdjacency(part_n->GetAAG(), selected);
@@ -531,6 +537,9 @@ void asiUI_ControlsAnalysis::onShowAAGWoSel()
 
   // Remove highlighted sub-shapes.
   aag->Remove(selected);
+  //
+  m_notifier.SendLogMessage( LogNotice(Normal) << "Num. of connected components (w/o selected faces): %1."
+                                               << aag->GetConnectedComponentsNb() );
 
   // Show graph.
   asiUI_PartGraph* pGraphView = new asiUI_PartGraph(m_model, m_partViewer, m_notifier);
