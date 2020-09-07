@@ -27,6 +27,10 @@ if (NOT WIN32)
 endif()
 #
 message (STATUS "... Qt cmake configuration at ${Qt5_DIR}")
+find_program(QMAKE_EXECUTABLE NAMES qmake HINTS ${QTDIR} ENV QTDIR PATH_SUFFIXES bin)
+execute_process(COMMAND ${QMAKE_EXECUTABLE} -query QT_VERSION OUTPUT_VARIABLE QT_VERSION)
+string(REGEX REPLACE "\n$" "" QT_VERSION "${QT_VERSION}")
+message (STATUS "... Qt version: ${QT_VERSION}")
 
 # Hide specific paths
 mark_as_advanced (Qt5Gui_DIR)
@@ -53,10 +57,10 @@ if (WIN32)
 else()
   message (STATUS "... Qt libraries: ${Qt5_DIR}")
 
-  install (FILES ${Qt5_DIR}/../../libQt5Core.so.5.9.5    DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Gui.so.5.9.5     DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Widgets.so.5.9.5 DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Svg.so.5.9.5     DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt5Core.so.${QT_VERSION}    DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt5Gui.so.${QT_VERSION}     DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt5Widgets.so.${QT_VERSION} DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt5Svg.so.${QT_VERSION}     DESTINATION bin)
 
   install (DIRECTORY ${Qt5_DIR}/../../qt5/plugins/imageformats   DESTINATION bin/imageformats/)
   install (DIRECTORY ${Qt5_DIR}/../../qt5/plugins/platforms      DESTINATION bin/platforms/)

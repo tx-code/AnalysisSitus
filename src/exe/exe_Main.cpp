@@ -135,7 +135,7 @@ int main(int argc, char** argv)
     fmt.setBlueBufferSize(1);
     fmt.setDepthBufferSize(1);
     fmt.setStencilBufferSize(0);
-    fmt.setAlphaBufferSize(1);
+    //fmt.setAlphaBufferSize(1); // Commented out as this setting causes transparent background on linux.
     fmt.setStereo(false);
     fmt.setSamples( vtkOpenGLRenderWindow::GetGlobalMaximumNumberOfMultiSamples() );
 

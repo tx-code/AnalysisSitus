@@ -313,13 +313,16 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
           item = Handle(StepRepr_RepresentationItem)::DownCast( seqRI(i) );
 
         Handle(StepVisual_PresentationStyleAssignment) PSA;
+
         if ( !surfColor.IsNull() )
+          //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
           PSA = Styles.MakeColorPSA(item, surfColor, nullptr, false);
         else
         {
           // Default color is white.
           surfColor = Styles.EncodeColor(Quantity_Color(1, 1, 1, Quantity_TOC_RGB), DPDCs, ColRGBs);
           //
+          //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
           PSA = Styles.MakeColorPSA(item, surfColor, nullptr, false);
         }
 

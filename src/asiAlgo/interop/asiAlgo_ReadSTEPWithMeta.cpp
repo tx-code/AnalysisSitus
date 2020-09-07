@@ -312,15 +312,17 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
       break;
     }
 
-    Handle(StepVisual_Colour) SurfCol, BoundCol, CurveCol;
-    // check if it is component style
+    Handle(StepVisual_Colour) SurfCol, BoundCol, CurveCol, RenderCol;
+    double RenderTransp;
     bool IsComponent = false;
-    if (!Styles.GetColors(style, SurfCol, BoundCol, CurveCol, IsComponent) && IsVisible)
+    //if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, RenderCol, RenderTransp, IsComponent) && IsVisible )
+    if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, IsComponent) && IsVisible )
       continue;
 
     // find shape
     NCollection_Vector<Handle(Standard_Transient)> anItems;
-    if (!style->Item().IsNull()) {
+    if ( !style->Item().IsNull() )
+    {
       anItems.Append(style->Item());
     }
     else if (!style->ItemAP242().Representation().IsNull()) {
