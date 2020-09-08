@@ -148,7 +148,10 @@ bool asiEngine_Isomorphism::Compute(const TCollection_AsciiString& featureName,
 
       // Find isomorphisms.
       if ( !isomorphism.Perform(P) )
+      {
+        G->PopSubgraph();
         continue;
+      }
 
       // Get bijection matrices.
       const std::vector<Eigen::MatrixXd>& isos = isomorphism.GetIsomorphisms();
