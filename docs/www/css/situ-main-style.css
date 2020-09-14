@@ -2,8 +2,8 @@ body {
   font-family: medium-content-serif-font, Georgia, Cambria, "Times New Roman", Times, serif;
   font-size: 18px;
   color: rgb(40,40,40);
-  margin-left: 25%;
-  margin-right: 25%;
+  margin-left: 5%;
+  margin-right: 5%;
   margin-top: 0px;
   line-height: 1.5;
 }
@@ -100,6 +100,23 @@ a:visited:hover {
   color: rgb(30, 30, 30);
   border-bottom: 1px dotted rgb(150, 150, 150);
   font-size: 18px;
+}
+.table-story-header {
+  color: rgb(250, 250, 250);
+  border-left: 4px solid rgb(100, 100, 100);
+  border-top: 4px solid rgb(100, 100, 100);
+  background-color: rgb(30, 30, 30);
+  font-size: 22px;
+  font-weight: normal;
+  text-align: center;
+}
+.table-story-block {
+  color: rgb(0, 0, 0);
+  border-bottom: 1px dotted rgb(200, 200, 200);
+  background-color: rgb(230, 230, 230);
+  font-size: 18px;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 .code {
   padding-left: 15px;
