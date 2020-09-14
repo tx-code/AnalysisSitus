@@ -58,6 +58,7 @@
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepOffset.hxx>
 #include <BRepOffset_MakeOffset.hxx>
@@ -293,36 +294,134 @@ int ENGINE_MakeEdge(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 3 )
+  if ( argc != 3 && argc != 6 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  // Get Curve Node.
-  Handle(asiData_IVCurveNode)
-    node = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
-  //
-  if ( node.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a Curve object with name %1." << argv[2]);
-    return TCL_OK;
-  }
+  TopoDS_Edge E;
 
-  // Get geometry of a curve.
-  double f, l;
-  Handle(Geom_Curve) curve = node->GetCurve(f, l);
-  //
-  if ( curve.IsNull() )
+  if ( argc == 3 )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Curve in question is null.");
-    return TCL_OK;
-  }
+    // Get Curve Node.
+    Handle(asiData_IVCurveNode)
+      node = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a Curve object with name %1." << argv[2]);
+      return TCL_OK;
+    }
 
-  // Make edge.
-  TopoDS_Edge E = BRepBuilderAPI_MakeEdge(curve);
+    // Get geometry of a curve.
+    double f, l;
+    Handle(Geom_Curve) curve = node->GetCurve(f, l);
+    //
+    if ( curve.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Curve in question is null.");
+      return TCL_OK;
+    }
+
+    // Make edge.
+    E = BRepBuilderAPI_MakeEdge(curve);
+  }
+  else if ( argc == 6 )
+  {
+    std::string v1Name, v2Name;
+
+    if ( !interp->GetKeyValue(argc, argv, "p1", v1Name) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "No -p1 argument is passed.");
+      return TCL_OK;
+    }
+
+    if ( !interp->GetKeyValue(argc, argv, "p2", v2Name) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "No -p2 argument is passed.");
+      return TCL_OK;
+    }
+
+    // Get Point Nodes.
+    Handle(asiData_IVPointSetNode)
+      p1Node = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName( v1Name.c_str() ) );
+    Handle(asiData_IVPointSetNode)
+      p2Node = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName( v2Name.c_str() ) );
+    //
+    if ( p1Node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a point with the name %1." << v1Name);
+      return TCL_ERROR;
+    }
+    //
+    if ( p2Node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a point with the name %1." << v2Name);
+      return TCL_ERROR;
+    }
+
+    Handle(asiAlgo_BaseCloud<double>) p1Set = p1Node->GetPoints();
+    Handle(asiAlgo_BaseCloud<double>) p2Set = p2Node->GetPoints();
+
+    gp_XYZ P1 = p1Set->GetElement(0);
+    gp_XYZ P2 = p2Set->GetElement(0);
+
+    E = BRepBuilderAPI_MakeEdge(P1, P2);
+  }
 
   // Draw in IV.
-  interp->GetPlotter().REDRAW_SHAPE(argv[1], E, Color_Red, 1.0, true);
+  if ( !E.IsNull() )
+  {
+    interp->GetPlotter().REDRAW_SHAPE(argv[1], E, Color_Red, 1.0, true);
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot create edge: invalid arguments.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_MakeWire(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc < 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  BRepBuilderAPI_MakeWire mkWire;
+
+  for ( int k = 2; k < argc; ++k )
+  {
+    // Get Topology Item Node.
+    Handle(asiData_IVTopoItemNode)
+      node = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(argv[k]) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name %1." << argv[k]);
+      return TCL_ERROR;
+    }
+
+    TopoDS_Shape sh = node->GetShape();
+    //
+    if ( sh.ShapeType() != TopAbs_EDGE )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The shape %1 is not an edge." << argv[k]);
+      return TCL_ERROR;
+    }
+
+    TopoDS_Edge E = TopoDS::Edge(sh);
+
+    mkWire.Add(E);
+  }
+
+  interp->GetPlotter().REDRAW_SHAPE(argv[1], mkWire.Wire(), Color_Magenta, 1.0, true);
 
   return TCL_OK;
 }
@@ -333,35 +432,79 @@ int ENGINE_MakeFace(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 3 )
+  if ( argc != 3 && argc != 4 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  // Get Surface Node.
-  Handle(asiData_IVSurfaceNode)
-    node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
-  //
-  if ( node.IsNull() )
+  TopoDS_Face F;
+
+  if ( argc == 3 )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a Surface object with name %1." << argv[2]);
-    return TCL_OK;
+    // Get Surface Node.
+    Handle(asiData_IVSurfaceNode)
+      node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a Surface object with name %1." << argv[2]);
+      return TCL_OK;
+    }
+
+    // Get geometry of a surface.
+    Handle(Geom_Surface) surface = node->GetSurface();
+    //
+    if ( surface.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface in question is null.");
+      return TCL_OK;
+    }
+
+    // Make face.
+    F = BRepBuilderAPI_MakeFace( surface, Precision::Confusion() );
+  }
+  else if ( argc == 4 )
+  {
+    std::string wireName;
+
+    if ( !interp->GetKeyValue(argc, argv, "w", wireName) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "No -w argument is passed.");
+      return TCL_OK;
+    }
+
+    // Get Topology Item Node.
+    Handle(asiData_IVTopoItemNode)
+      node = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName( wireName.c_str() ) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name %1." << wireName);
+      return TCL_ERROR;
+    }
+
+    TopoDS_Shape sh = node->GetShape();
+    //
+    if ( sh.ShapeType() != TopAbs_WIRE )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The shape %1 is not a wire." << wireName);
+      return TCL_ERROR;
+    }
+
+    TopoDS_Wire W = TopoDS::Wire(sh);
+
+    F = BRepBuilderAPI_MakeFace(W);
   }
 
-  // Get geometry of a surface.
-  Handle(Geom_Surface) surface = node->GetSurface();
-  //
-  if ( surface.IsNull() )
+  if ( !F.IsNull() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface in question is null.");
-    return TCL_OK;
+    interp->GetPlotter().REDRAW_SHAPE(argv[1], F, Color_White, 1.0, false);
   }
-
-  // Make face.
-  TopoDS_Face F = BRepBuilderAPI_MakeFace( surface, Precision::Confusion() );
-
-  // Draw in IV.
-  interp->GetPlotter().REDRAW_SHAPE(argv[1], F, Color_White, 1.0, false);
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot create face: invalid arguments.");
+    return TCL_ERROR;
+  }
 
   return TCL_OK;
 }
@@ -1413,6 +1556,7 @@ namespace
     }
 
     // TODO: NYI
+    return false;
   }
 }
 
@@ -1594,17 +1738,31 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("make-edge",
     //
     "make-edge <result> <curveName>\n"
-    "\t Creates edge from a curve. The <curveName> variable should exist\n"
-    "\t as a Curve object in the scene graph of imperative plotter.",
+    "make-edge <result> -p1 <pointName> -p2 <pointName>\n"
+    "\n"
+    "\t Creates an edge from a curve or a pair of points. The <curveName>/<pointName>\n"
+    "\t variables should exist in the scene graph of the imperative plotter.",
     //
     __FILE__, group, ENGINE_MakeEdge);
+
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("make-wire",
+    //
+    "make-wire <result> <edgeName1> [<edgeName2> [...]]\n"
+    "\n"
+    "\t Creates a wire from the passed series of edges.",
+    //
+    __FILE__, group, ENGINE_MakeWire);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-face",
     //
     "make-face <result> <surfaceName>\n"
-    "\t Creates face from a surface. The <surfaceName> variable should exist\n"
-    "\t as a Surface object in the scene graph of imperative plotter.",
+    "make-face <result> -w <wireName>\n"
+    "\n"
+    "\t Creates face from a surface or wire. The <surfaceName>/<wireName> variables\n"
+    "\t should exist in the scene graph of the imperative plotter.",
     //
     __FILE__, group, ENGINE_MakeFace);
 
