@@ -76,13 +76,13 @@ set (part_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (mesh_H_FILES
+  mesh/asiData_MeshNormsNode.h
   mesh/asiData_TessNode.h
-  mesh/asiData_TessNormsNode.h
   mesh/asiData_TriangulationNode.h
 )
 set (mesh_CPP_FILES
+  mesh/asiData_MeshNormsNode.cpp
   mesh/asiData_TessNode.cpp
-  mesh/asiData_TessNormsNode.cpp
   mesh/asiData_TriangulationNode.cpp
 )
 

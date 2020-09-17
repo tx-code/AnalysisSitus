@@ -190,6 +190,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdDDF)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdEngine)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdMisc)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdRE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdMobius)
 
 #-------------------------------------------------------------------------------
 # Setup compiler
@@ -226,6 +227,7 @@ set_property(TARGET cmdDDF    PROPERTY FOLDER Commands)
 set_property(TARGET cmdEngine PROPERTY FOLDER Commands)
 set_property(TARGET cmdMisc   PROPERTY FOLDER Commands)
 set_property(TARGET cmdRE     PROPERTY FOLDER Commands)
+set_property(TARGET cmdMobius PROPERTY FOLDER Commands)
 
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 

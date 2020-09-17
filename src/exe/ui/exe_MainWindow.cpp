@@ -454,6 +454,10 @@ void exe_MainWindow::createDockWindows()
   EXE_LOAD_MODULE("cmdEngine")
   EXE_LOAD_MODULE("cmdRE")
   EXE_LOAD_MODULE("cmdDDF")
+  //
+#ifdef USE_MOBIUS
+  EXE_LOAD_MODULE("cmdMobius")
+#endif
 
   // Lookup for custom plugins and try to load them.
   QDir pluginDir( QDir::currentPath() + "/asi-plugins" );

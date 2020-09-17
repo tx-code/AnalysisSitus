@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_TessNormsNode_h
-#define asiData_TessNormsNode_h
+#ifndef asiData_MeshNormsNode_h
+#define asiData_MeshNormsNode_h
 
 // asiData includes
 #include <asiData.h>
@@ -40,8 +40,9 @@
 // Active Data includes
 #include <ActData_BaseNode.h>
 
-//! Data Node representing a normal field supplementing Tessellation Node.
-//! Vector results are internally stored in the following way:
+//! Data Node representing a normal field supplementing mesh Nodes,
+//! such as Tessellation or Triangulation. Vectors are internally
+//! stored in the following way:
 //!
 //! 1. Array of involved element/node IDs:
 //!
@@ -58,15 +59,15 @@
 //!    | F1{1} | F1{2} | F1{3} | ... | Fn{1} | Fn{2} | Fn{3} |
 //!    +-------+-------+-------+-----+-------+-------+-------+
 //! </pre>
-class asiData_TessNormsNode : public ActData_BaseNode
+class asiData_MeshNormsNode : public ActData_BaseNode
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiData_TessNormsNode, ActData_BaseNode)
+  DEFINE_STANDARD_RTTI_INLINE(asiData_MeshNormsNode, ActData_BaseNode)
 
   // Automatic registration of Node type in global factory
-  DEFINE_NODE_FACTORY(asiData_TessNormsNode, Instance)
+  DEFINE_NODE_FACTORY(asiData_MeshNormsNode, Instance)
 
 public:
 
@@ -94,8 +95,8 @@ public:
 public:
 
   asiData_EXPORT void
-    Init(const Handle(HIntArray)&  ids,
-         const Handle(HRealArray)& vectors);
+    Init(const Handle(HIntArray)&  ids     = nullptr,
+         const Handle(HRealArray)& vectors = nullptr);
 
 // Generic naming support:
 public:
@@ -131,7 +132,7 @@ protected:
 
   //! Allocation is allowed only via Instance() method.
   asiData_EXPORT
-    asiData_TessNormsNode();
+    asiData_MeshNormsNode();
 
 };
 

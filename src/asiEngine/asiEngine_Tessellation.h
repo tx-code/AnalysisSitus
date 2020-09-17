@@ -35,8 +35,8 @@
 #include <asiEngine_Base.h>
 
 // asiData includes
+#include <asiData_MeshNormsNode.h>
 #include <asiData_TessNode.h>
-#include <asiData_TessNormsNode.h>
 
 // asiVisu includes
 #include <asiVisu_PrsManager.h>
@@ -79,6 +79,17 @@ public:
   asiEngine_EXPORT Handle(asiData_TessNode)
     CreateTessellation();
 
+  //! Creates new Tessellation Norms Node.
+  //! \param[in] parent      parent Node.
+  //! \param[in] name        name to set.
+  //! \param[in] isElemental indicates whether the normal field to be stored
+  //!                        in the Node is elemental (true) or nodal (false).
+  //! \return newly created Node.
+  asiEngine_EXPORT Handle(asiData_MeshNormsNode)
+    CreateNorms(const Handle(ActAPI_INode)&       parent,
+                const TCollection_ExtendedString& name,
+                const bool                        isElemental);
+
   //! Computes normal field for the given Tessellation Node. This method
   //! creates a child Node under the passed one to store the computed
   //! normal vectors.
@@ -87,7 +98,7 @@ public:
   //!                        elements. The alternative is to compute
   //!                        norms by nodes (averaging the elements' nodes).
   //! \return child Data Node representing the computed normal field.
-  asiEngine_EXPORT Handle(asiData_TessNormsNode)
+  asiEngine_EXPORT Handle(asiData_MeshNormsNode)
     ComputeNorms(const Handle(asiData_TessNode)& tessNode,
                  const bool                      doElemNorms);
 

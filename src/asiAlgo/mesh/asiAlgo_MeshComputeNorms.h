@@ -52,6 +52,37 @@ public:
 
 public:
 
+  //! Repacks the passed data map to persistent arrays which can
+  //! be stored in OCAF Nodes.
+  //! \param[in]  norms   normal vectors by element IDs.
+  //! \param[out] ids     node IDs having the vectors associated.
+  //! \param[out] vectors coordinates of the corresponding vectors.
+  static void GetResultArrays(const NCollection_DataMap<int, gp_Vec>& norms,
+                              Handle(HIntArray)&                      ids,
+                              Handle(HRealArray)&                     vectors)
+  {
+    const int numNodes = norms.Extent();
+
+    // Allocate arrays.
+    ids     = new HIntArray  (0, numNodes - 1);
+    vectors = new HRealArray (0, numNodes*3 - 1);
+
+    // Populate arrays.
+    int arrIdx = 0;
+    for ( NCollection_DataMap<int, gp_Vec>::Iterator it(norms); it.More(); it.Next(), ++arrIdx )
+    {
+      const int     nodeId = it.Key();
+      const gp_Vec& vec    = it.Value();
+      //
+      ids->SetValue     ( arrIdx, nodeId );
+      vectors->SetValue ( arrIdx*3 + 0, vec.X() );
+      vectors->SetValue ( arrIdx*3 + 1, vec.Y() );
+      vectors->SetValue ( arrIdx*3 + 2, vec.Z() );
+    }
+  }
+
+public:
+
   //! Ctor.
   //! \param[in] mesh     mesh in question.
   //! \param[in] progress progress notifier.
@@ -85,24 +116,7 @@ public:
   void GetResultArrays(Handle(HIntArray)&  ids,
                        Handle(HRealArray)& vectors) const
   {
-    const int numNodes = m_norms.Extent();
-
-    // Allocate arrays.
-    ids     = new HIntArray  (0, numNodes - 1);
-    vectors = new HRealArray (0, numNodes*3 - 1);
-
-    // Populate arrays.
-    int arrIdx = 0;
-    for ( NCollection_DataMap<int, gp_Vec>::Iterator it(m_norms); it.More(); it.Next(), ++arrIdx )
-    {
-      const int     nodeId = it.Key();
-      const gp_Vec& vec    = it.Value();
-      //
-      ids->SetValue     ( arrIdx, nodeId );
-      vectors->SetValue ( arrIdx*3 + 0, vec.X() );
-      vectors->SetValue ( arrIdx*3 + 1, vec.Y() );
-      vectors->SetValue ( arrIdx*3 + 2, vec.Z() );
-    }
+    GetResultArrays(m_norms, ids, vectors);
   }
 
 protected:

@@ -33,6 +33,7 @@
 
 // asiData includes
 #include <asiData_TessNode.h>
+#include <asiData_TriangulationNode.h>
 
 // asiAlgo includes
 #include <asiAlgo_PointCloudUtils.h>
@@ -50,7 +51,7 @@
 
 //! Constructor.
 //! \param[in] N source Data Node.
-asiVisu_TessNormalsDataProvider::asiVisu_TessNormalsDataProvider(const Handle(asiData_TessNormsNode)& N)
+asiVisu_TessNormalsDataProvider::asiVisu_TessNormalsDataProvider(const Handle(asiData_MeshNormsNode)& N)
 : asiVisu_VectorsDataProvider(N)
 {}
 
@@ -60,16 +61,13 @@ asiVisu_TessNormalsDataProvider::asiVisu_TessNormalsDataProvider(const Handle(as
 Handle(asiAlgo_BaseCloud<double>) asiVisu_TessNormalsDataProvider::GetPointsd()
 {
   // Get vectors.
-  Handle(asiData_TessNormsNode)
-    normsNode = Handle(asiData_TessNormsNode)::DownCast(m_source);
+  Handle(asiData_MeshNormsNode)
+    normsNode = Handle(asiData_MeshNormsNode)::DownCast(m_source);
   //
   m_vectors = asiAlgo_PointCloudUtils::AsCloudd( normsNode->GetVectors() );
 
-  // Access parent Tessellation Node to get geometry of mesh.
-  Handle(asiData_TessNode)
-    tessNode = Handle(asiData_TessNode)::DownCast( normsNode->GetParentNode() );
-  //
-  Handle(ActData_Mesh) mesh = tessNode->GetMesh();
+  // Get tessellation holder.
+  Handle(ActAPI_INode) PN = normsNode->GetParentNode();
 
   // Get mask of node/element IDs.
   Handle(HIntArray) ids = normsNode->GetIDs();
@@ -82,56 +80,101 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_TessNormalsDataProvider::GetPointsd()
   // Prepare the position cloud to return.
   m_points = new asiAlgo_BaseCloud<double>;
 
-  // Get positions of the vectors.
-  if ( normsNode->IsElemental() )
+  /* ==================
+   *  FEA tessellation.
+   * ================== */
+
+  if ( PN->IsKind( STANDARD_TYPE(asiData_TessNode) ) )
   {
-    // Compute COGs of mesh elements.
-    for ( ActData_Mesh_ElementsIterator eit(mesh, ActData_Mesh_ET_Face); eit.More(); eit.Next() )
+    Handle(ActData_Mesh) mesh = Handle(asiData_TessNode)::DownCast(PN)->GetMesh();
+
+    // Get positions of the vectors.
+    if ( normsNode->IsElemental() )
     {
-      const Handle(ActData_Mesh_Element)& elem = eit.GetValue();
-      //
-      if ( !idsMap.Contains( elem->GetID() ) )
-        continue;
-
-      // Get nodes of the element.
-      std::vector<Handle(ActData_Mesh_Node)> nodes;
-      //
-      this->elementNodes(mesh, elem, nodes);
-
-      // Compute COG.
-      gp_XYZ cog;
-      //
-      if ( elem->IsKind( STANDARD_TYPE(ActData_Mesh_Triangle) ) )
+      // Compute COGs of mesh elements.
+      for ( ActData_Mesh_ElementsIterator eit(mesh, ActData_Mesh_ET_Face); eit.More(); eit.Next() )
       {
-        const gp_Pnt& P0 = nodes[0]->Pnt();
-        const gp_Pnt& P1 = nodes[1]->Pnt();
-        const gp_Pnt& P2 = nodes[2]->Pnt();
+        const Handle(ActData_Mesh_Element)& elem = eit.GetValue();
+        //
+        if ( !idsMap.Contains( elem->GetID() ) )
+          continue;
 
-        cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() ) / 3.0;
+        // Get nodes of the element.
+        std::vector<Handle(ActData_Mesh_Node)> nodes;
+        //
+        this->elementNodes(mesh, elem, nodes);
+
+        // Compute COG.
+        gp_XYZ cog;
+        //
+        if ( elem->IsKind( STANDARD_TYPE(ActData_Mesh_Triangle) ) )
+        {
+          const gp_Pnt& P0 = nodes[0]->Pnt();
+          const gp_Pnt& P1 = nodes[1]->Pnt();
+          const gp_Pnt& P2 = nodes[2]->Pnt();
+
+          cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() ) / 3.0;
+        }
+        else if ( elem->IsKind( STANDARD_TYPE(ActData_Mesh_Quadrangle) ) )
+        {
+          const gp_Pnt& P0 = nodes[0]->Pnt();
+          const gp_Pnt& P1 = nodes[1]->Pnt();
+          const gp_Pnt& P2 = nodes[2]->Pnt();
+          const gp_Pnt& P3 = nodes[3]->Pnt();
+
+          cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() + P3.XYZ() ) / 4.0;
+        }
+
+        m_points->AddElement( cog.X(), cog.Y(), cog.Z() );
       }
-      else if ( elem->IsKind( STANDARD_TYPE(ActData_Mesh_Quadrangle) ) )
+    }
+    else
+    {
+      // Get array of node indices and extract nodes of interest.
+      for ( ActData_Mesh_ElementsIterator nit(mesh, ActData_Mesh_ET_Node); nit.More(); nit.Next() )
       {
-        const gp_Pnt& P0 = nodes[0]->Pnt();
-        const gp_Pnt& P1 = nodes[1]->Pnt();
-        const gp_Pnt& P2 = nodes[2]->Pnt();
-        const gp_Pnt& P3 = nodes[3]->Pnt();
-
-        cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() + P3.XYZ() ) / 4.0;
+        Handle(ActData_Mesh_Node)
+          node = Handle(ActData_Mesh_Node)::DownCast( nit.GetValue() );
+        //
+        if ( idsMap.Contains( node->GetID() ) )
+          m_points->AddElement( node->Pnt().X(), node->Pnt().Y(), node->Pnt().Z() );
       }
-
-      m_points->AddElement( cog.X(), cog.Y(), cog.Z() );
     }
   }
-  else
+
+  /* ===============
+   *  Triangulation.
+   * =============== */
+
+  else if ( PN->IsKind( STANDARD_TYPE(asiData_TriangulationNode) ) )
   {
-    // Get array of node indices and extract nodes of interest.
-    for ( ActData_Mesh_ElementsIterator nit(mesh, ActData_Mesh_ET_Node); nit.More(); nit.Next() )
+    Handle(Poly_Triangulation)
+      tris = Handle(asiData_TriangulationNode)::DownCast(PN)->GetTriangulation();
+
+    // Get positions of the vectors.
+    if ( normsNode->IsElemental() )
     {
-      Handle(ActData_Mesh_Node)
-        node = Handle(ActData_Mesh_Node)::DownCast( nit.GetValue() );
-      //
-      if ( idsMap.Contains( node->GetID() ) )
-        m_points->AddElement( node->Pnt().X(), node->Pnt().Y(), node->Pnt().Z() );
+      // Compute COGs of mesh elements.
+      for ( int tidx = 1; tidx <= tris->NbTriangles(); ++tidx )
+      {
+        if ( !idsMap.Contains(tidx - 1) )
+          continue;
+
+        // Get nodes of the element.
+        int n0, n1, n2;
+        const Poly_Triangle& tri = tris->Triangle(tidx);
+        //
+        tri.Get(n0, n1, n2);
+        //
+        const gp_Pnt& P0 = tris->Node(n0);
+        const gp_Pnt& P1 = tris->Node(n1);
+        const gp_Pnt& P2 = tris->Node(n2);
+
+        // Compute COG.
+        gp_XYZ cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() ) / 3.0;
+
+        m_points->AddElement( cog.X(), cog.Y(), cog.Z() );
+      }
     }
   }
 
@@ -209,8 +252,8 @@ Handle(ActAPI_HParameterList)
   ActParamStream out;
 
   // Register Parameter as sensitive.
-  out << m_source->Parameter(asiData_TessNormsNode::PID_IDs)
-      << m_source->Parameter(asiData_TessNormsNode::PID_Vectors);
+  out << m_source->Parameter(asiData_MeshNormsNode::PID_IDs)
+      << m_source->Parameter(asiData_MeshNormsNode::PID_Vectors);
 
   return out;
 }

@@ -55,6 +55,7 @@
 #include <asiData_IVTextNode.h>
 #include <asiData_IVTopoItemNode.h>
 #include <asiData_IVTopoNode.h>
+#include <asiData_MeshNormsNode.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_OctreeNode.h>
 #include <asiData_Partition.h>
@@ -70,7 +71,6 @@
 #include <asiData_RootNode.h>
 #include <asiData_SurfDeviationNode.h>
 #include <asiData_TessNode.h>
-#include <asiData_TessNormsNode.h>
 #include <asiData_ThicknessNode.h>
 #include <asiData_TolerantRangeNode.h>
 #include <asiData_TriangulationNode.h>
@@ -293,11 +293,11 @@ public:
     return Handle(asiData_Partition<asiData_TessNode>)::DownCast( this->Partition(Partition_Tessellation) );
   }
 
-  //! Accessor for a Partition instance dedicated to Tessellation Norms Nodes.
+  //! Accessor for a Partition instance dedicated to Mesh Norms Nodes.
   //! \return requested Partition.
-  Handle(asiData_Partition<asiData_TessNormsNode>) GetTessellationNormsPartition() const
+  Handle(asiData_Partition<asiData_MeshNormsNode>) GetMeshNormsPartition() const
   {
-    return Handle(asiData_Partition<asiData_TessNormsNode>)::DownCast( this->Partition(Partition_TessellationNorms) );
+    return Handle(asiData_Partition<asiData_MeshNormsNode>)::DownCast( this->Partition(Partition_MeshNorms) );
   }
 
   //! Accessor for a Partition instance dedicated to ReTopo Nodes.
@@ -543,7 +543,7 @@ protected:
   //---------------------------------------------------------------------------
     Partition_Triangulation,
     Partition_Tessellation,
-    Partition_TessellationNorms,
+    Partition_MeshNorms,
   //---------------------------------------------------------------------------
     Partition_ReTopo,
     Partition_RePatch,

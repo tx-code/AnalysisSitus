@@ -35,13 +35,15 @@
   <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
   <td class="header-menu"><a href="../features.html">Features</a></td>
   <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
-  <td class="header-menu"><a href="../terminology.html">Terminology</a></td>
   <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
 </tr>
 </table>
 </td></tr></table>
 
 <h1>Architecture overview</h1>
+
+<h2>Data Model highlights</h2>
 
 <p>
 All packages of Analysis Situs can be
@@ -97,6 +99,27 @@ a Node may have different relations to other Nodes, including:
 The functional dependencies are optional in the whole framework. All operations in Analysis Situs, except
 the <a href="./features_re-overview.html">reverse engineering</a> workflow, assume no automatic dependency
 execution.
+</p>
+
+<h2>Object validity</h2>
+
+<p>
+A Data Node may have one of the following states in runtime:
+<ul>
+  <li>Detached (not connected to the database, i.e., to OCAF);</li>
+  <li>Attached, bad-formed (connected to the database, but not entirely initialized);</li>
+  <li>Attached, well-formed (connected to the database and fully initialized.</li>
+</ul>
+</p>
+<p>
+Only the Nodes having the "well-formed" status can be used to read and write application data. If a Node is
+not in its well-formed state, Object Browser renders its name with red background in the project hierarchy:
+</p>
+<div align="center"><img src="../imgs/situ_arch_object-browser_bad-formed-node.png"/></div>
+<p>
+Invalid Nodes usually appear when you make mistakes while programming your extensions to Analysis Situs. There should
+never be any bad-formed Nodes in a well-written module. At the same time, the "detached" state of a Data Node is
+perfectly valid. A Node goes to a detached state right after construction, if not initialized with any OCAF label.
 </p>
 
 <h1>Visualization</h1>

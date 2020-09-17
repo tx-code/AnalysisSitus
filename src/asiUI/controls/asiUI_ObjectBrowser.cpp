@@ -796,7 +796,7 @@ void asiUI_ObjectBrowser::onComputeNorms(const bool doElemNorms)
     tessNode = Handle(asiData_TessNode)::DownCast(selected_n);
 
   // Modify Data Model.
-  Handle(asiData_TessNormsNode) tessNormsNode;
+  Handle(asiData_MeshNormsNode) tessNormsNode;
   //
   m_model->OpenCommand();
   {

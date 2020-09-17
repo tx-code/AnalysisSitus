@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiData_TessNormsNode.h>
+#include <asiData_MeshNormsNode.h>
 
 // Active Data includes
 #include <ActData_ParameterFactory.h>
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 
 //! Default constructor. Registers all involved Parameters.
-asiData_TessNormsNode::asiData_TessNormsNode() : ActData_BaseNode()
+asiData_MeshNormsNode::asiData_MeshNormsNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name,      PID_Name);
   REGISTER_PARAMETER(IntArray,  PID_IDs);
@@ -50,9 +50,9 @@ asiData_TessNormsNode::asiData_TessNormsNode() : ActData_BaseNode()
 //! Returns new DETACHED instance of the Node ensuring its correct
 //! allocation in a heap.
 //! \return new instance of the Node.
-Handle(ActAPI_INode) asiData_TessNormsNode::Instance()
+Handle(ActAPI_INode) asiData_MeshNormsNode::Instance()
 {
-  return new asiData_TessNormsNode();
+  return new asiData_MeshNormsNode();
 }
 
 //-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ Handle(ActAPI_INode) asiData_TessNormsNode::Instance()
 //! Performs initial actions required to make Node WELL-FORMED.
 //! \param[in] ids     element IDs.
 //! \param[in] vectors vector coordinates.
-void asiData_TessNormsNode::Init(const Handle(HIntArray)&  ids,
+void asiData_MeshNormsNode::Init(const Handle(HIntArray)&  ids,
                                  const Handle(HRealArray)& vectors)
 {
   // Initialize name Parameter
@@ -75,7 +75,7 @@ void asiData_TessNormsNode::Init(const Handle(HIntArray)&  ids,
 
 //! Accessor for the Node's name.
 //! \return name of the Node.
-TCollection_ExtendedString asiData_TessNormsNode::GetName()
+TCollection_ExtendedString asiData_MeshNormsNode::GetName()
 {
   return ActParamTool::AsName( this->Parameter(PID_Name) )->GetValue();
 }
@@ -84,7 +84,7 @@ TCollection_ExtendedString asiData_TessNormsNode::GetName()
 
 //! Sets name for the Node.
 //! \param[in] name name to set.
-void asiData_TessNormsNode::SetName(const TCollection_ExtendedString& name)
+void asiData_MeshNormsNode::SetName(const TCollection_ExtendedString& name)
 {
   ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(name);
 }
@@ -93,7 +93,7 @@ void asiData_TessNormsNode::SetName(const TCollection_ExtendedString& name)
 
 //! Sets array of mesh element IDs having vector values associated.
 //! \param[in] ids array to set.
-void asiData_TessNormsNode::SetIDs(const Handle(HIntArray)& ids)
+void asiData_MeshNormsNode::SetIDs(const Handle(HIntArray)& ids)
 {
   ActData_ParameterFactory::AsIntArray( this->Parameter(PID_IDs) )->SetArray(ids);
 }
@@ -102,7 +102,7 @@ void asiData_TessNormsNode::SetIDs(const Handle(HIntArray)& ids)
 
 //! Accessor for the array of mesh element IDs having vector values associated.
 //! \return requested array.
-Handle(HIntArray) asiData_TessNormsNode::GetIDs() const
+Handle(HIntArray) asiData_MeshNormsNode::GetIDs() const
 {
   return ActData_ParameterFactory::AsIntArray( this->Parameter(PID_IDs) )->GetArray();
 }
@@ -111,7 +111,7 @@ Handle(HIntArray) asiData_TessNormsNode::GetIDs() const
 
 //! Sets array of mesh elemental vectors.
 //! \param[in] vectors array to set.
-void asiData_TessNormsNode::SetVectors(const Handle(HRealArray)& vectors)
+void asiData_MeshNormsNode::SetVectors(const Handle(HRealArray)& vectors)
 {
   ActData_ParameterFactory::AsRealArray( this->Parameter(PID_Vectors) )->SetArray(vectors);
 }
@@ -120,7 +120,7 @@ void asiData_TessNormsNode::SetVectors(const Handle(HRealArray)& vectors)
 
 //! Accessor for the array of mesh elemental vectors.
 //! \return requested array.
-Handle(HRealArray) asiData_TessNormsNode::GetVectors() const
+Handle(HRealArray) asiData_MeshNormsNode::GetVectors() const
 {
   return ActData_ParameterFactory::AsRealArray( this->Parameter(PID_Vectors) )->GetArray();
 }
@@ -130,7 +130,7 @@ Handle(HRealArray) asiData_TessNormsNode::GetVectors() const
 //! Sets the flag indicating that the stored vector field corresponds to mesh
 //! elements rather than to mesh nodes.
 //! \param[in] isElemental value to set.
-void asiData_TessNormsNode::SetIsElemental(const bool isElemental)
+void asiData_MeshNormsNode::SetIsElemental(const bool isElemental)
 {
   ActData_ParameterFactory::AsBool( this->Parameter(PID_IsElemental) )->SetValue(isElemental);
 }
@@ -138,7 +138,7 @@ void asiData_TessNormsNode::SetIsElemental(const bool isElemental)
 //-----------------------------------------------------------------------------
 
 //! \return true if the stored vector field corresponds to mesh elements.
-bool asiData_TessNormsNode::IsElemental() const
+bool asiData_MeshNormsNode::IsElemental() const
 {
   return ActData_ParameterFactory::AsBool( this->Parameter(PID_IsElemental) )->GetValue();
 }

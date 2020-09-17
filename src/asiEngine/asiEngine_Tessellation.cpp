@@ -55,7 +55,32 @@ Handle(asiData_TessNode) asiEngine_Tessellation::CreateTessellation()
 
 //-----------------------------------------------------------------------------
 
-Handle(asiData_TessNormsNode)
+Handle(asiData_MeshNormsNode)
+  asiEngine_Tessellation::CreateNorms(const Handle(ActAPI_INode)&       parent,
+                                      const TCollection_ExtendedString& name,
+                                      const bool                        isElemental)
+{
+  // Add Tessellation Norms Node to Partition.
+  Handle(asiData_MeshNormsNode)
+    tessNorms_n = Handle(asiData_MeshNormsNode)::DownCast( asiData_MeshNormsNode::Instance() );
+  //
+  m_model->GetMeshNormsPartition()->AddNode(tessNorms_n);
+
+  // Initialize.
+  tessNorms_n->Init();
+  tessNorms_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  tessNorms_n->SetName(name);
+  tessNorms_n->SetIsElemental(isElemental);
+
+  // Add as child.
+  parent->AddChildNode(tessNorms_n);
+
+  return tessNorms_n;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_MeshNormsNode)
   asiEngine_Tessellation::ComputeNorms(const Handle(asiData_TessNode)& tessNode,
                                        const bool                      doElemNorms)
 {
@@ -77,18 +102,13 @@ Handle(asiData_TessNormsNode)
   algo.GetResultArrays(nodeIds, vectors);
 
   // Add Tessellation Norms Node to Partition.
-  Handle(asiData_TessNormsNode)
-    tessNorms_n = Handle(asiData_TessNormsNode)::DownCast( asiData_TessNormsNode::Instance() );
-  //
-  m_model->GetTessellationNormsPartition()->AddNode(tessNorms_n);
+  Handle(asiData_MeshNormsNode)
+    tessNorms_n = CreateNorms(tessNode,
+                              doElemNorms ? "Elemental norms" : "Nodal (averaged) norms",
+                              doElemNorms);
 
   // Initialize.
   tessNorms_n->Init(nodeIds, vectors);
-  tessNorms_n->SetIsElemental(doElemNorms);
-  tessNorms_n->SetName(doElemNorms ? "Elemental norms" : "Nodal (averaged) norms");
-
-  // Add as child.
-  tessNode->AddChildNode(tessNorms_n);
 
   return tessNorms_n;
 }

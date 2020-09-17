@@ -47,7 +47,7 @@ asiVisu_TessellationNormsPrs::asiVisu_TessellationNormsPrs(const Handle(ActAPI_I
 {
   // Create Data Provider.
   Handle(asiVisu_TessNormalsDataProvider)
-    DP = new asiVisu_TessNormalsDataProvider( Handle(asiData_TessNormsNode)::DownCast(N) );
+    DP = new asiVisu_TessNormalsDataProvider( Handle(asiData_MeshNormsNode)::DownCast(N) );
 
   // Create pipeline for the vector field.
   Handle(asiVisu_VectorsPipeline) PL = new asiVisu_VectorsPipeline;

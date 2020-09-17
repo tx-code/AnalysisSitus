@@ -35,7 +35,7 @@
 #include <asiVisu_VectorsDataProvider.h>
 
 // asiData includes
-#include <asiData_TessNormsNode.h>
+#include <asiData_MeshNormsNode.h>
 
 // Active Data includes
 #include <ActData_Mesh.h>
@@ -53,7 +53,7 @@ public:
 public:
 
   asiVisu_EXPORT
-    asiVisu_TessNormalsDataProvider(const Handle(asiData_TessNormsNode)& N);
+    asiVisu_TessNormalsDataProvider(const Handle(asiData_MeshNormsNode)& N);
 
 public:
 

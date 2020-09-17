@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 05 October 2018
+// Created on: 17 September 2020
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,43 +28,52 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiVisu_TessellationNormsPrs_h
-#define asiVisu_TessellationNormsPrs_h
+#ifndef cmdMobius_h
+#define cmdMobius_h
 
-// asiVisu includes
-#include <asiVisu_DefaultPrs.h>
+#define cmdMobius_NotUsed(x)
 
-// asiData includes
-#include <asiData_MeshNormsNode.h>
+#ifdef _WIN32
+  #ifdef cmdMobius_EXPORTS
+    #define cmdMobius_EXPORT __declspec(dllexport)
+  #else
+    #define cmdMobius_EXPORT __declspec(dllimport)
+  #endif
+#else
+  #define cmdMobius_EXPORT
+#endif
 
-//! Presentation class for Tessellation Norms Nodes.
-class asiVisu_TessellationNormsPrs : public asiVisu_DefaultPrs
+//-----------------------------------------------------------------------------
+
+// asiTcl includes
+#include <asiTcl_Interp.h>
+
+// asiEngine includes
+#include <asiEngine_Model.h>
+
+// asiUI includes
+#include <asiUI_CommonFacilities.h>
+
+//-----------------------------------------------------------------------------
+
+//! Tcl commands for running Mobius' functions.
+class cmdMobius
 {
 public:
 
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_TessellationNormsPrs, asiVisu_DefaultPrs)
-
-  // Allows to register this Presentation class
-  DEFINE_PRESENTATION_FACTORY(asiData_MeshNormsNode, Instance)
+  cmdMobius_EXPORT static void
+    Factory(const Handle(asiTcl_Interp)&      interp,
+            const Handle(Standard_Transient)& data);
 
 public:
 
-  //! Pipelines.
-  enum PipelineId
-  {
-    Pipeline_Main = 1
-  };
+  cmdMobius_EXPORT static void
+    ClearViewers(const bool repaint = true);
 
 public:
 
-  asiVisu_EXPORT static Handle(asiVisu_Prs)
-    Instance(const Handle(ActAPI_INode)& N);
-
-private:
-
-  //! Allocation is allowed only via Instance() method.
-  asiVisu_TessellationNormsPrs(const Handle(ActAPI_INode)& N);
+  static Handle(asiEngine_Model)        model; //!< Data Model instance.
+  static Handle(asiUI_CommonFacilities) cf;    //!< UI common facilities.
 
 };
 
