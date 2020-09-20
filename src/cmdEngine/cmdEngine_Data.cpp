@@ -47,6 +47,8 @@
 #include <asiUI_DialogOCAFDump.h>
 
 // asiVisu includes
+#include <asiVisu_PartPipeline.h>
+#include <asiVisu_PartPrs.h>
 #include <asiVisu_Utils.h>
 
 // asiTcl includes
@@ -54,6 +56,11 @@
 
 // Active Data includes
 #include <ActData_GraphToDot.h>
+
+// VTK includes
+#pragma warning(push, 0)
+#include <vtkXMLPolyDataWriter.h>
+#pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 
@@ -836,6 +843,48 @@ int ENGINE_DumpExecutionGraphDot(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_DumpVTP(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+
+  // Get pipeline to access the data source.
+  Handle(asiVisu_PartPrs)
+    partPrs = Handle(asiVisu_PartPrs)::DownCast( cmdEngine::cf->ViewerPart->PrsMgr()->GetPresentation(partNode) );
+  //
+  Handle(asiVisu_PartPipeline)
+    partPl = Handle(asiVisu_PartPipeline)::DownCast( partPrs->GetPipeline(asiVisu_PartPrs::Pipeline_Main) );
+  //
+  const vtkSmartPointer<asiVisu_ShapeRobustSource>& partSource = partPl->GetSource();
+
+  // Update and dump to file.
+  partSource->Update();
+  //
+  vtkSmartPointer<vtkXMLPolyDataWriter>
+    writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  //
+  writer->SetFileName( argv[1] );
+  writer->SetInputConnection( partSource->GetOutputPort() );
+  writer->Write();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
                               const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -971,4 +1020,13 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Dumps execution graph of the project to DOT file (Graphviz).",
     //
     __FILE__, group, ENGINE_DumpExecutionGraphDot);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("dump-vtp",
+    //
+    "dump-vtp <filename>\n"
+    "\t Dumps the polygonal data of the active parts to a file in the VTP format\n"
+    "\t of VTK.",
+    //
+    __FILE__, group, ENGINE_DumpVTP);
 }

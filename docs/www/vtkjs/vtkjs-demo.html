@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="https://unpkg.com/vtk.js"></script>
+  </head>
+<body>
+  <div id="glcontainer" style="border: 1px solid black; height: 400px; width: 400px;"></div>
+  <br>
+  <input type="file" id="file-input" />
+  <h3>Contents of the file:</h3>
+  <pre id="file-content"></pre>
+
+  <script type="text/javascript">
+    const container = document.querySelector("#glcontainer");
+    const dims = container.getBoundingClientRect();
+
+    var renderWindow = vtk.Rendering.Core.vtkRenderWindow.newInstance();
+    var renderer     = vtk.Rendering.Core.vtkRenderer.newInstance();
+    renderWindow.addRenderer(renderer);
+
+    // OpenGlRenderWindow
+    var glRenderWindow = vtk.Rendering.OpenGL.vtkRenderWindow.newInstance();
+    glRenderWindow.setContainer(container);
+    glRenderWindow.setSize(dims.width, dims.height);
+    renderWindow.addView(glRenderWindow);
+
+    const interactor = vtk.Rendering.Core.vtkRenderWindowInteractor.newInstance();
+    interactor.setView(glRenderWindow);
+    interactor.initialize();
+    interactor.bindEvents(container);
+
+    const trackball = vtk.Interaction.Style.vtkInteractorStyleTrackballCamera.newInstance();
+    interactor.setInteractorStyle(trackball);
+
+    var actor  = vtk.Rendering.Core.vtkActor.newInstance();
+    var mapper = vtk.Rendering.Core.vtkMapper.newInstance();
+
+    function readSingleFile(e) {
+      var file = e.target.files[0];
+      if (!file) {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var contents = e.target.result;
+        displayContents(contents);
+
+        var vtpReader = vtk.IO.XML.vtkXMLPolyDataReader.newInstance();
+        vtpReader.parseAsArrayBuffer(reader.result);
+        const vtpSource = vtpReader.getOutputData(0);
+
+        mapper.setInputData(vtpSource);
+        actor.setMapper(mapper);
+        renderer.addActor(actor);
+
+        renderer.resetCamera();
+        renderWindow.render();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function displayContents(contents) {
+      var element = document.getElementById('file-content');
+      element.textContent = contents;
+    }
+
+    document.getElementById('file-input')
+      .addEventListener('change', readSingleFile, false);
+
+    renderer.resetCamera();
+    renderWindow.render();
+
+  </script>
+
+</body>
+</html>
