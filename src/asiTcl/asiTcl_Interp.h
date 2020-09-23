@@ -259,12 +259,11 @@ public:
                  const std::string& key)
   {
     std::string slashedKey = "-"; slashedKey += key;
-    size_t      found      = opt.find(slashedKey);
     //
-    if ( found == std::string::npos )
-      return false;
+    if ( slashedKey.compare(opt) == 0 )
+      return true;
 
-    return true;
+    return false;
   }
 
   //! Checks whether the passed command line arguments contain the given
