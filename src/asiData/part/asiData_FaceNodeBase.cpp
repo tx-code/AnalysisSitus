@@ -81,25 +81,25 @@ void asiData_FaceNodeBase::SetSelectedFace(const int faceId)
 {
   Handle(ActData_SelectionParameter)
     param = ActParamTool::AsSelection( this->Parameter(PID_SelectedFaces) );
-
-  if ( faceId <= 0 )
-  {
+  //
+  if ( !param->IsWellFormed() )
     param->SetMask(nullptr);
-  }
-  else
-  {
-    // Prepare map.
-    Handle(TColStd_HPackedMapOfInteger) hmap = param->GetMask();
-    //
-    if ( hmap.IsNull() )
-      hmap = new TColStd_HPackedMapOfInteger;
-    //
-    hmap->ChangeMap().Clear();
-    hmap->ChangeMap().Add(faceId);
 
-    // Set as a parameter value.
-    param->SetMask(hmap);
+  // Prepare map.
+  Handle(TColStd_HPackedMapOfInteger) hmap = param->GetMask();
+  //
+  if ( hmap.IsNull() )
+    hmap = new TColStd_HPackedMapOfInteger;
+  else
+    hmap->ChangeMap().Clear();
+
+  if ( faceId > 0 )
+  {
+    hmap->ChangeMap().Add(faceId);
   }
+
+  // Set as a parameter value.
+  param->SetMask(hmap);
 }
 
 //! Sets indices of the active faces.
