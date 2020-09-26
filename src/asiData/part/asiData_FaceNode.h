@@ -49,11 +49,44 @@ public:
 
 public:
 
+  //! IDs for the underlying Parameters.
+  enum ParamId
+  {
+    //! Whether to show orientation tips for the edges.
+    PID_ShowOriTips = asiData_FaceNodeBase::PID_Last,
+    PID_Last        = PID_ShowOriTips + ActData_BaseNode::RESERVED_PARAM_RANGE
+  };
+
+public:
+
+  //! Returns new DETACHED instance of Face Node ensuring its correct
+  //! allocation in a heap.
+  //! \return new instance of the Face Node.
   asiData_EXPORT static Handle(ActAPI_INode)
     Instance();
 
+public:
+
+  //! Performs initial actions required to make Node WELL-FORMED.
+  asiData_EXPORT void
+    Init();
+
+public:
+
+  //! Sets a flag indicating whether the orientation tips should
+  //! be visualized or not.
+  //! \param[in] on the Boolean value to set.
+  asiData_EXPORT void
+    SetShowOriTips(const bool on);
+
+  //! \return the flag indicating whether the orientation tips for
+  //!         edges are supposed to be visualized or not.
+  asiData_EXPORT bool
+    GetShowOriTips() const;
+
 protected:
 
+  //! Default ctor. Registers all involved Parameters.
   //! Allocation is allowed only via Instance() method.
   asiData_EXPORT
     asiData_FaceNode();

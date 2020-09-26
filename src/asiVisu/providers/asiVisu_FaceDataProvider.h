@@ -70,6 +70,9 @@ public:
   asiVisu_EXPORT TopoDS_Face
     ExtractFace() const;
 
+  asiVisu_EXPORT bool
+    GetShowOriTips() const;
+
 public:
 
   asiVisu_EXPORT virtual Handle(Standard_Type)

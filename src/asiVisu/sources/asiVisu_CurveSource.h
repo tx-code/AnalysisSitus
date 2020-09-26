@@ -42,7 +42,7 @@
 #include <NCollection_Sequence.hxx>
 #include <TopoDS_Edge.hxx>
 
-//! Source of polygonal data representing a 3D curve.
+//! Source of polygonal data representing a parametric curve.
 class asiVisu_CurveSource : public asiVisu_CurveSourceBase
 {
 // RTTI and construction:

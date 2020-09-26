@@ -59,6 +59,7 @@ asiVisu_PDomainSource::asiVisu_PDomainSource()
   this->SetNumberOfInputPorts(0); // Connected directly to our own Data Provider
                                   // which has nothing to do with VTK pipeline
   this->SetPCurveModeOn();
+  this->SetTipMode(true);
 }
 
 //! Destructor.
@@ -89,6 +90,13 @@ void asiVisu_PDomainSource::SetPCurveModeOn()
 void asiVisu_PDomainSource::Set3DCurveModeOn()
 {
   m_bPCurveMode = false;
+  this->Modified();
+}
+
+//! Enables/disables a visualization mode for orientation tips.
+void asiVisu_PDomainSource::SetTipMode(const bool on)
+{
+  m_bTipMode = on;
   this->Modified();
 }
 
@@ -128,7 +136,7 @@ int asiVisu_PDomainSource::RequestData(vtkInformation*        request,
   polyOutput->Allocate();
 
   // Compute tip size for the orientation markers
-  const double tipSize = this->computeTipSize();
+  const double tipSize = m_bTipMode ? this->computeTipSize() : 0.;
 
   // Append filter
   vtkSmartPointer<vtkAppendPolyData>

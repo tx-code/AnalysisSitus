@@ -36,14 +36,38 @@
 
 //-----------------------------------------------------------------------------
 
-//! Default constructor. Registers all involved Parameters.
 asiData_FaceNode::asiData_FaceNode() : asiData_FaceNodeBase()
-{}
+{
+  REGISTER_PARAMETER(Bool, PID_ShowOriTips);
+}
 
-//! Returns new DETACHED instance of Face Node ensuring its correct
-//! allocation in a heap.
-//! \return new instance of Face Node.
+//-----------------------------------------------------------------------------
+
 Handle(ActAPI_INode) asiData_FaceNode::Instance()
 {
   return new asiData_FaceNode();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_FaceNode::Init()
+{
+  asiData_FaceNodeBase::Init();
+
+  this->SetShowOriTips(true);
+  this->InitParameter(PID_ShowOriTips, "Show tips", "", ParameterFlag_IsVisible, true);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_FaceNode::SetShowOriTips(const bool on)
+{
+  ActParamTool::AsBool( this->Parameter(PID_ShowOriTips) )->SetValue(on);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_FaceNode::GetShowOriTips() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_ShowOriTips) )->GetValue();
 }

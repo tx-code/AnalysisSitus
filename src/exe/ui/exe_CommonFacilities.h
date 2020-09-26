@@ -83,21 +83,7 @@ private:
   exe_CommonFacilities() //!< ctor.
   //
   : asiUI_CommonFacilities()
-  {
-    // Create Data Model
-    this->Model = new asiEngine_Model;
-    //
-    if ( !this->Model->NewEmpty() )
-    {
-      Standard_ProgramError::Raise("Cannot create Data Model");
-    }
-    //
-    this->Model->DisableTransactions();
-    {
-      this->Model->Populate();
-    }
-    this->Model->EnableTransactions();
-  }
+  {}
 
 };
 

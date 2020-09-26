@@ -54,6 +54,7 @@ public:
   void SetFace          (const TopoDS_Face& face);
   void SetPCurveModeOn  ();
   void Set3DCurveModeOn ();
+  void SetTipMode       (const bool on);
   void SetTipNorm       (const gp_Vec& tipNorm);
 
 protected:
@@ -80,6 +81,7 @@ private:
 
   TopoDS_Face m_face;        //!< Face to convert.
   bool        m_bPCurveMode; //!< Indicates whether p-curve mode is activated.
+  bool        m_bTipMode;    //!< Indicates whether to visualize orientation tips.
   gp_Vec      m_tipNorm;     //!< Optional normal vector for tips.
 
 };

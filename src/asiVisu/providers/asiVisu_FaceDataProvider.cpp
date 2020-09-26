@@ -140,6 +140,16 @@ TopoDS_Face asiVisu_FaceDataProvider::ExtractFace() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_FaceDataProvider::GetShowOriTips() const
+{
+  if ( m_node->IsInstance( STANDARD_TYPE(asiData_FaceNode) ) )
+    return Handle(asiData_FaceNode)::DownCast(m_node)->GetShowOriTips();
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 //! \return surface type.
 Handle(Standard_Type) asiVisu_FaceDataProvider::GetSurfaceType() const
 {
@@ -228,14 +238,15 @@ void asiVisu_FaceDataProvider::init(const Handle(ActAPI_INode)& subNode)
 //! \return source Parameters.
 Handle(ActAPI_HParameterList) asiVisu_FaceDataProvider::translationSources() const
 {
-  int PID = -1;
   if ( m_node->IsInstance( STANDARD_TYPE(asiData_FaceNode) ) )
-    PID = asiData_FaceNode::PID_SelectedFaces;
+  {
+    return ActParamStream() << m_node->Parameter(asiData_FaceNode::PID_SelectedFaces)
+                            << m_node->Parameter(asiData_FaceNode::PID_ShowOriTips);
+  }
   else if ( m_node->IsInstance( STANDARD_TYPE(asiData_SurfNode) ) )
-    PID = asiData_SurfNode::PID_SelectedFaces;
+  {
+    return ActParamStream() << m_node->Parameter(asiData_SurfNode::PID_SelectedFaces);
+  }
 
-  if ( PID == -1 )
-    return nullptr;
-
-  return ActParamStream() << m_node->Parameter(PID); // Parameter for face index
+  return nullptr;
 }

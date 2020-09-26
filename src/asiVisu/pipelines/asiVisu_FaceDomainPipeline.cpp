@@ -125,6 +125,7 @@ void asiVisu_FaceDomainPipeline::SetInput(const Handle(asiVisu_DataProvider)& DP
       source = vtkSmartPointer<asiVisu_PDomainSource>::New();
     //
     source->SetFace( faceProvider->ExtractFace() );
+    source->SetTipMode( faceProvider->GetShowOriTips() );
 
     // Apply selection
     if ( m_selected->GetSize() )
