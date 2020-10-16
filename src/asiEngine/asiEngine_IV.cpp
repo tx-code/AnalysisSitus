@@ -738,7 +738,7 @@ void asiEngine_IV::Update_Curve2d(const Handle(asiData_IVCurve2dNode)& node,
 
   // Initialize
   node->Init();
-  node->SetUserFlags(NodeFlag_IsPresentedInPartView);
+  node->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
   node->SetCONS(geometry, surface, f, l);
 }
 
