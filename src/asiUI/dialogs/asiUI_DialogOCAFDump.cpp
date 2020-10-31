@@ -99,7 +99,7 @@ asiUI_DialogOCAFDump::asiUI_DialogOCAFDump(const Handle(ActAPI_IModel)& model,
   this->setWindowTitle("Project dump");
 
   // Set good initial size
-  this->setMinimumSize( QSize(900, 600) );
+  this->resize( QSize(900, 600) );
 }
 
 //-----------------------------------------------------------------------------
