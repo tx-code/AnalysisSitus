@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_Common.h>
 #include <asiUI_DependencyGraph.h>
+#include <asiUI_DialogOCAFDump.h>
 #include <asiUI_DialogPipelines.h>
 #include <asiUI_ViewerPart.h>
 
@@ -713,6 +714,22 @@ void asiUI_ObjectBrowser::onSaveToREK()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onDumpContents()
+{
+  Handle(ActAPI_INode) selected_n;
+  if ( !this->selectedNode(selected_n) ) return;
+
+  asiUI_DialogOCAFDump*
+    pDumpProject = new asiUI_DialogOCAFDump(m_model, m_progress);
+  //
+  pDumpProject->SetNode(selected_n);
+  pDumpProject->Populate();
+  //
+  pDumpProject->show();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_ObjectBrowser::onPrintParameters()
 {
   Handle(ActAPI_INode) selected_n;
@@ -1071,6 +1088,7 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
 
   if ( numSelected == 1 )
   {
+    pMenu->addAction( "Dump contents",    this, SLOT( onDumpContents    () ) );
     pMenu->addAction( "Print parameters", this, SLOT( onPrintParameters () ) );
     pMenu->addAction( "Copy name",        this, SLOT( onCopyName        () ) );
     pMenu->addAction( "Copy ID",          this, SLOT( onCopyID          () ) );

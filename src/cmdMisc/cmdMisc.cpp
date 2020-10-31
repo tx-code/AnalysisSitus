@@ -91,6 +91,7 @@
 #include <IntTools_FClass2d.hxx>
 #include <NCollection_CellFilter.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
+#include <ShapeAnalysis_Surface.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
@@ -1432,7 +1433,6 @@ int MISC_TestEvalSurf(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 }
-
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
@@ -1440,6 +1440,121 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
               const char**                 argv)
 {
   // Test anything here.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int MISC_TestPointInversion1(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  // Test anything here.
+
+  TColgp_Array2OfPnt points(1,5,1,5);
+  points.SetValue(1,1,gp_Pnt(-100.,-100.,0.));
+  points.SetValue(1,2,gp_Pnt(-100.,-50.,0.));
+  points.SetValue(1,3,gp_Pnt(-100.,0.,0.));
+  points.SetValue(1,4,gp_Pnt(-100.,50.,0.));
+  points.SetValue(1,5,gp_Pnt(-100.,100.,0.));
+  points.SetValue(2,1,gp_Pnt(-50.,-100.,0.));
+  points.SetValue(2,2,gp_Pnt(-50.,-50.,25.));
+  points.SetValue(2,3,gp_Pnt(-50.,0.,50.));
+  points.SetValue(2,4,gp_Pnt(-50.,50.,100.));
+  points.SetValue(2,5,gp_Pnt(-50.,100.,0.));
+  points.SetValue(3,1,gp_Pnt(0.,-100.,0.));
+  points.SetValue(3,2,gp_Pnt(0.,-50.,25.));
+  points.SetValue(3,3,gp_Pnt(0.,0.,50.));
+  points.SetValue(3,4,gp_Pnt(0.,50.,25.));
+  points.SetValue(3,5,gp_Pnt(0.,100.,0.));
+  points.SetValue(4,1,gp_Pnt(50.,-100.,0.));
+  points.SetValue(4,2,gp_Pnt(50.,-50.,25.));
+  points.SetValue(4,3,gp_Pnt(50.,0.,150.));
+  points.SetValue(4,4,gp_Pnt(50.,50.,25.));
+  points.SetValue(4,5,gp_Pnt(50.,100.,0.));
+  points.SetValue(5,1,gp_Pnt(100.,-100.,0.));
+  points.SetValue(5,2,gp_Pnt(100.,-50.,0.));
+  points.SetValue(5,3,gp_Pnt(100.,0.,0.));
+  points.SetValue(5,4,gp_Pnt(100.,50.,0.));
+  points.SetValue(5,5,gp_Pnt(100.,100.,0.));
+  Standard_Integer uDegree = 3;
+  TColStd_Array1OfReal uKnots(1,3);
+  TColStd_Array1OfInteger uMults(1,3);
+  uKnots.SetValue(1,0.);
+  uKnots.SetValue(2,0.5);
+  uKnots.SetValue(3,1.);
+  uMults.SetValue(1,4);
+  uMults.SetValue(2,1);
+  uMults.SetValue(3,4);
+  Standard_Integer vDegree = 3;
+  TColStd_Array1OfReal vKnots(1,3);
+  TColStd_Array1OfInteger vMults(1,3);
+  vKnots.SetValue(1,0.);
+  vKnots.SetValue(2,0.5);
+  vKnots.SetValue(3,1.);
+  vMults.SetValue(1,4);
+  vMults.SetValue(2,1);
+  vMults.SetValue(3,4);
+
+  Handle(Geom_BSplineSurface)
+    occtBSurf = new Geom_BSplineSurface(points, uKnots, vKnots, uMults, vMults, uDegree, vDegree);
+
+  // Convert to Mobius.
+  t_ptr<t_bsurf> mobBSurf = cascade::GetMobiusBSurface(occtBSurf);
+
+  interp->GetPlotter().REDRAW_SURFACE("occtBSurf", occtBSurf, Color_Default);
+
+  Handle(asiAlgo_BaseCloud<double>) initPts = new asiAlgo_BaseCloud<double>;
+  Handle(asiAlgo_BaseCloud<double>) projPts = new asiAlgo_BaseCloud<double>;
+
+  const bool isMobius = interp->HasKeyword(argc, argv, "mobius");
+
+  ShapeAnalysis_Surface sas(occtBSurf);
+
+  TIMER_NEW
+  TIMER_GO
+
+  for( int i = 0; i < 3*360; ++i )
+  {
+    double x = i*0.1*cos(M_PI*i/180.);
+    double y = i*0.1*sin(M_PI*i/180.);
+    double z = 0;
+    gp_Pnt P(x, y, z), PP;
+
+    initPts->AddElement(P);
+
+    if ( isMobius )
+    {
+      t_uv Puv;
+      if ( !mobBSurf->InvertPoint(cascade::GetMobiusPnt(P), Puv) )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot invert point %1." << i);
+        continue;
+      }
+
+      // Evaluate the surface at the projected point.
+      t_xyz Pproj;
+      mobBSurf->Eval(Puv.U(), Puv.V(), Pproj);
+
+      PP = cascade::GetOpenCascadePnt(Pproj);
+    }
+    else
+    {
+      gp_Pnt2d Pproj = sas.ValueOfUV( P, Precision::Confusion() );
+
+      // Evaluate the surface at the projected point.
+      PP = occtBSurf->Value( Pproj.X(), Pproj.Y() );
+    }
+
+    projPts->AddElement(PP);
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Invert points")
+
+  interp->GetPlotter().REDRAW_POINTS("initPts", initPts->GetCoordsArray(), Color_Red);
+  interp->GetPlotter().REDRAW_POINTS("projPts", projPts->GetCoordsArray(), Color_Green);
 
   return TCL_OK;
 }
@@ -3633,6 +3748,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Problem reproducer for anything.",
     //
     __FILE__, group, MISC_Test);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("test-point-inversion1",
+    //
+    "test-point-inversion1\n"
+    "\t Test for point inversion.",
+    //
+    __FILE__, group, MISC_TestPointInversion1);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-fibers",

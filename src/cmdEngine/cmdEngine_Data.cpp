@@ -520,6 +520,8 @@ int ENGINE_DumpProject(const Handle(asiTcl_Interp)& interp,
   asiUI_DialogOCAFDump*
     pDumpProject = new asiUI_DialogOCAFDump( cmdEngine::model, interp->GetProgress() );
   //
+  pDumpProject->Populate();
+  //
   pDumpProject->show();
 
   return TCL_OK;

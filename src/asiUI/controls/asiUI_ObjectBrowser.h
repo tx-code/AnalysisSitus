@@ -155,6 +155,7 @@ protected slots:
   //
   void onSaveToREK             ();
   //
+  void onDumpContents          ();
   void onPrintParameters       ();
   void onCopyName              ();
   void onCopyID                ();

@@ -59,9 +59,16 @@ public:
   asiUI_EXPORT virtual
     ~asiUI_DialogOCAFDump();
 
-protected:
+public:
 
-  virtual void initialize();
+  //! Sets the Data Node to dump.
+  //! \param[in] node the Node to dump.
+  asiUI_EXPORT void
+    SetNode(const Handle(ActAPI_INode)& node);
+
+  //! Populates the widget.
+  asiUI_EXPORT void
+    Populate();
 
 public slots:
 
@@ -93,6 +100,7 @@ protected:
 protected:
 
   Handle(ActAPI_IModel) m_model;    //!< Data Model instance.
+  Handle(ActAPI_INode)  m_node;     //!< Data Node to dump.
   ActAPI_ProgressEntry  m_notifier; //!< Progress Notifier.
 
 };

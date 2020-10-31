@@ -100,12 +100,6 @@ asiUI_DialogOCAFDump::asiUI_DialogOCAFDump(const Handle(ActAPI_IModel)& model,
 
   // Set good initial size
   this->setMinimumSize( QSize(900, 600) );
-
-  //---------------------------------------------------------------------------
-  // Fill editor with data
-  //---------------------------------------------------------------------------
-
-  this->initialize();
 }
 
 //-----------------------------------------------------------------------------
@@ -121,12 +115,22 @@ asiUI_DialogOCAFDump::~asiUI_DialogOCAFDump()
 // Initialization
 //-----------------------------------------------------------------------------
 
+void asiUI_DialogOCAFDump::SetNode(const Handle(ActAPI_INode)& node)
+{
+  m_node = node;
+}
+
+//-----------------------------------------------------------------------------
+
 //! Fills editor with OCAF dump.
-void asiUI_DialogOCAFDump::initialize()
+void asiUI_DialogOCAFDump::Populate()
 {
   std::ostringstream buff;
 
-  if ( !ActData_CAFDumper::Dump(buff, m_model) )
+  const bool isOk = m_node.IsNull() ? ActData_CAFDumper::Dump(buff, m_model)
+                                    : ActData_CAFDumper::Dump(buff, m_model, m_node);
+
+  if ( !isOk )
     m_widgets.pEditor->setText("### FAILED TO DUMP");
   else
     m_widgets.pEditor->setText( buff.str().c_str() );
