@@ -1450,7 +1450,7 @@ int MISC_TestPointInversion1(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
 {
-  // Test anything here.
+#ifdef USE_MOBIUS
 
   TColgp_Array2OfPnt points(1,5,1,5);
   points.SetValue(1,1,gp_Pnt(-100.,-100.,0.));
@@ -1557,6 +1557,10 @@ int MISC_TestPointInversion1(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_POINTS("projPts", projPts->GetCoordsArray(), Color_Green);
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius module is disabled.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
