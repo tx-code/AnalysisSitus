@@ -149,6 +149,7 @@ void asiUI_ControlsPart::onLoadFromBRep()
   if ( !asiAlgo_Utils::ReadBRep(QStr2AsciiStr(filename), shape) )
   {
     m_notifier.SendLogMessage(LogErr(Normal) << "Cannot read BREP file.");
+    m_notifier.SetProgressStatus(Progress_Failed);
     return;
   }
   m_notifier.SendLogMessage( LogNotice(Normal) << "Part loaded from BREP file %1." << QStr2AsciiStr(filename) );
@@ -187,6 +188,7 @@ void asiUI_ControlsPart::onLoadFromBRepAppend()
   if ( !asiAlgo_Utils::ReadBRep(QStr2AsciiStr(filename), shape) )
   {
     m_notifier.SendLogMessage(LogErr(Normal) << "Cannot read BREP file.");
+    m_notifier.SetProgressStatus(Progress_Failed);
     return;
   }
   m_notifier.SendLogMessage( LogNotice(Normal) << "Part added from BREP file %1" << QStr2AsciiStr(filename) );
