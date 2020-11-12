@@ -132,7 +132,16 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_DomainPointsDataProvider::GetPoints() 
   for ( int v = 0; v < nVertices; ++v )
   {
     const TopoDS_Vertex& V = TopoDS::Vertex( vertices(v + 1) );
-    gp_Pnt2d             P = BRep_Tool::Parameters(V, face);
+    gp_Pnt2d             P;
+
+    try // Exception can occur in OpenCascade.
+    {
+      P = BRep_Tool::Parameters(V, face);
+    }
+    catch ( ... )
+    {
+      return nullptr;
+    }
 
     coords->SetValue( v*3,     P.X() );
     coords->SetValue( v*3 + 1, P.Y() );
