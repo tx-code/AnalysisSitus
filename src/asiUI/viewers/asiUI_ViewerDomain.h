@@ -69,6 +69,15 @@ public:
 
   void Repaint();
 
+public:
+
+  //! Sets an optional reference to the Part viewer for communicating both.
+  //! \param[in] pPartViewer the reference to set.
+  void SetPartViewer(asiUI_Viewer* pPartViewer)
+  {
+    m_pPartViewer = pPartViewer;
+  }
+
 public slots:
 
   void onResetView();
@@ -88,6 +97,9 @@ private:
   vtkSmartPointer<asiUI_PDomainCallback> m_domainCallback; //!< Callback for domain operations.
   vtkSmartPointer<asiUI_PickCallback>    m_pickCallback;   //!< Pick callback.
   vtkSmartPointer<vtkTextWidget>         m_textWidget;     //!< Annotation.
+
+  //! Optional reference to the Part viewer.
+  asiUI_Viewer* m_pPartViewer;
 
 };
 

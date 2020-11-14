@@ -178,7 +178,9 @@ void exe_MainWindow::createDockWindows()
                              QDockWidget::DockWidgetFloatable |
                              QDockWidget::DockWidgetVerticalTitleBar);
     //
-    Widgets.wViewerDomain = new asiUI_ViewerDomain(cf->Model, nullptr, nullptr, pDockDomain);
+    Widgets.wViewerDomain = new asiUI_ViewerDomain(cf->Model, cf->Progress, nullptr, pDockDomain);
+    Widgets.wViewerDomain->SetPartViewer(Widgets.wViewerPart); // Back reference to the Part viewer.
+    //
     pDockDomain->setWidget(Widgets.wViewerDomain);
     //
     this->addDockWidget(Qt::RightDockWidgetArea, pDockDomain);
@@ -198,7 +200,7 @@ void exe_MainWindow::createDockWindows()
                            QDockWidget::DockWidgetFloatable |
                            QDockWidget::DockWidgetVerticalTitleBar);
     //
-    Widgets.wViewerSurface = new asiUI_ViewerHost(cf->Model, nullptr, nullptr, pDockHost);
+    Widgets.wViewerSurface = new asiUI_ViewerHost(cf->Model, cf->Progress, nullptr, pDockHost);
     pDockHost->setWidget(Widgets.wViewerSurface);
     //
     this->addDockWidget(Qt::RightDockWidgetArea, pDockHost);

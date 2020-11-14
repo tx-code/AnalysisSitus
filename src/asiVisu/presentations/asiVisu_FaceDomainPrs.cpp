@@ -70,7 +70,12 @@ asiVisu_FaceDomainPrs::asiVisu_FaceDomainPrs(const Handle(ActAPI_INode)& N)
   // Create Data Provider
   Handle(asiVisu_FaceDataProvider) DP = new asiVisu_FaceDataProvider(face_n);
 
-  this->addPipeline        ( Pipeline_DomainLoop, new asiVisu_FaceDomainPipeline );
+  // Create pipeline
+  Handle(asiVisu_FaceDomainPipeline) PL = new asiVisu_FaceDomainPipeline;
+  //
+  PL->Actor()->SetPickable(1);
+
+  this->addPipeline        ( Pipeline_DomainLoop, PL );
   this->assignDataProvider ( Pipeline_DomainLoop, DP );
 
   // Initialize text widget used for annotations
@@ -133,7 +138,7 @@ asiVisu_FaceDomainPrs::asiVisu_FaceDomainPrs(const Handle(ActAPI_INode)& N)
   sel_pl->Actor()->GetProperty()->SetColor(sel_color[0], sel_color[1], sel_color[2]);
   sel_pl->Actor()->GetProperty()->SetLineWidth( asiVisu_Utils::DefaultPickLineWidth() + 1 );
   sel_pl->Actor()->GetProperty()->SetPointSize( asiVisu_Utils::DefaultHilightPointSize() );
-  sel_pl->Actor()->SetPickable(1);
+  sel_pl->Actor()->SetPickable(0);
   sel_pl->Mapper()->ScalarVisibilityOff();
   //
   sel_pl->Actor()->GetProperty()->SetOpacity(1.0);
@@ -290,73 +295,62 @@ void asiVisu_FaceDomainPrs::afterUpdatePipelines() const
 
 //! Callback for highlighting.
 void asiVisu_FaceDomainPrs::highlight(vtkRenderer*,
-                                      const Handle(asiVisu_PickerResult)&,
-                                      const asiVisu_SelectionNature) const
+                                      const Handle(asiVisu_PickerResult)& pickRes,
+                                      const asiVisu_SelectionNature       selNature) const
 {
-  //// Get target actor which is the only sensitive
-  //Handle(asiVisu_Pipeline) poles_pl = this->GetPipeline(Pipeline_Main);
-  ////
-  //vtkActor* poles_actor = poles_pl->Actor();
+  Handle(asiVisu_CellPickerResult)
+    cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+  //
+  if ( cellPickRes.IsNull() )
+    return;
 
-  //// Get the list of picked cell IDs
-  //TColStd_PackedMapOfInteger cellIds;
-  //if ( thePickRes.IsSelectionWorkpiece() )
-  //{
-  //  const asiVisu_ActorElemMap& pickMap = thePickRes.GetPickMap();
-  //  for ( asiVisu_ActorElemMap::Iterator it(pickMap); it.More(); it.Next() )
-  //  {
-  //    const vtkSmartPointer<vtkActor>& aResActor = it.Key();
-  //    if ( aResActor != poles_actor )
-  //      continue;
+  // Get the list of picked cell IDs.
+  const TColStd_PackedMapOfInteger& cellIds = cellPickRes->GetPickedElementIds();
 
-  //    cellIds = it.Value();
-  //  }
-  //}
+  //---------------------------------------------------------------------------
+  // Update highlighting pipelines
+  //---------------------------------------------------------------------------
 
-  ////---------------------------------------------------------------------------
-  //// Update highlighting pipelines
-  ////---------------------------------------------------------------------------
+  // Access pipeline for highlighting.
+  Handle(asiVisu_FaceDomainPipeline) hili_pl;
+  //
+  if ( selNature == SelectionNature_Persistent )
+    hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetSelectionPipeline() );
+  else
+    hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetDetectionPipeline() );
 
-  //// Access pipeline for highlighting
-  //Handle(asiVisu_FaceDomainPipeline) hili_pl;
-  ////
-  //if ( theSelNature == SelectionNature_Pick )
-  //  hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetSelectionPipeline() );
-  //else
-  //  hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetDetectionPipeline() );
+  if ( !hili_pl )
+    return;
 
-  //if ( !hili_pl )
-  //  return;
+  // Set selection mask...
+  hili_pl->SetSelectedCells(cellIds);
+  hili_pl->ForceExecution();
+  hili_pl->SetInput( this->dataProviderDetection() );
 
-  //// Set selection mask...
-  //hili_pl->SetSelectedCells(cellIds);
-  //hili_pl->ForceExecution();
-  //hili_pl->SetInput( this->dataProviderDetection() );
-
-  //// ... and visibility
-  //hili_pl->Actor()->SetVisibility( !cellIds.IsEmpty() );
+  // ... and visibility.
+  hili_pl->Actor()->SetVisibility( !cellIds.IsEmpty() );
 }
 
 //! Callback for highlighting reset.
 void asiVisu_FaceDomainPrs::unHighlight(vtkRenderer*,
-                                        const asiVisu_SelectionNature) const
+                                        const asiVisu_SelectionNature selNature) const
 {
-  //// Access pipeline for highlighting
-  //Handle(asiVisu_FaceDomainPipeline) hili_pl;
-  ////
-  //if ( theSelNature == SelectionNature_Pick )
-  //  hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetSelectionPipeline() );
-  //else
-  //  hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetDetectionPipeline() );
+  // Access pipeline for highlighting.
+  Handle(asiVisu_FaceDomainPipeline) hili_pl;
+  //
+  if ( selNature == SelectionNature_Persistent )
+    hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetSelectionPipeline() );
+  else
+    hili_pl = Handle(asiVisu_FaceDomainPipeline)::DownCast( this->GetDetectionPipeline() );
 
-  //if ( !hili_pl )
-  //  return;
+  if ( !hili_pl )
+    return;
 
-  //// Set selection mask...
-  //hili_pl->SetSelectedCells( TColStd_PackedMapOfInteger() );
+  // Set selection mask...
+  hili_pl->SetSelectedCells( TColStd_PackedMapOfInteger() );
 
-  //// ... and visibility
-  //hili_pl->Actor()->SetVisibility(0);
+  // ... and visibility.
+  hili_pl->Actor()->SetVisibility(0);
 }
 
 //! Callback for rendering.
