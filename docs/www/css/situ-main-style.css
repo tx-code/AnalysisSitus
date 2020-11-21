@@ -47,6 +47,9 @@ a:visited:hover {
   border: 1px dotted rgb(100, 87, 71);
   font-size: 18px;
 }
+.alert {
+  background-color: rgb(250, 200, 200);
+}
 .faq {
   padding-left: 15px;
   padding-right: 15px;
@@ -80,6 +83,22 @@ a:visited:hover {
   color: rgb(230, 230, 230);
   font-size: 38px;
   font-family: medium-content-serif-font, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+.footer {
+  padding-left: 25px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: rgb(60, 60, 60);
+  border-bottom: 10px solid rgb(80, 80, 80);
+  color: rgb(230, 230, 230);
+  font-size: 12pt;
+  font-family: Menlo, Monaco, "Courier New", Courier, monospace;
+}
+a.footer-href {
+  color: rgb(230, 230, 230);
+  text-decoration: underline;
+  font-size: 12pt;
+  font-family: Menlo, Monaco, "Courier New", Courier, monospace;
 }
 .header-menu {
   padding: 10px 25px;

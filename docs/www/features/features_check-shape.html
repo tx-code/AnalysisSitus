@@ -20,6 +20,7 @@
  </head>
 <body>
 
+<a name="top"></a> <!-- anchor for 'back to top' link -->
 <table width="100%"><tr><td>
 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
@@ -41,61 +42,54 @@
 </table>
 </td></tr></table>
 
-<h1>What a good model is?</h1>
+<blockquote class="quote">"All models are wrong, but some are useful." George Box</blockquote>
 
 <p>
-  A careful analysis of CAD model validity should employ thinking at several levels of abstraction:
-</p>
-
-<ul>
-  <li>Consistency of representation
-    <ul>
-      <li>Geometric validity (parameterization irregularities, curve/surface self-intersections, parametric discontinuities, etc.).</li>
-      <li>Topological validity (orientations of boundary elements, face/solid closeness, formal shape structure, etc.).</li>
-    </ul>
-  </li>
-  <li>Health of a valid representation (dirtiness).</li>
-  <li>Fitness to functional requirements.</li>
-</ul>
-
-<p>
-  The geometric validity checks are concerned with the mathematics of form. The input data for those checks
-  are the equations of curves and surfaces while the verification methods usually employ some computationally
-  expensive algorithms (intersection tests, sampling, evaluation of derivatives, etc.).
-  The topological validity checks are concerned with the syntactical analysis of the model and perform
-  verification of the data structure consistency. Finally, the analysis of the design intent requires the
-  understanding of the function of the part, its manufacturing constraints and other reasoning which may
-  often require human intervention.
-  The following rule often works in practice: to fix the problem of a lower level, it is necessary to
-  rise to the upper level of abstraction. E.g., to correctly fill a gap due to a missing face,
-  it might be necessary to recognize and recover its containing feature (e.g., to
-  extend and intersect surfaces rather than to patch a hole with a NURBS surface).
+This text is a digest of shape defects often occurring in various CAD applications. The problems come from different sources. CAD packages are based on different geometric modeling kernels (e.g., Parasolid for SolidWorks, CGM for Catia, ACIS for SpaceClaim), so they basically "speak different geometric languages," hence there are inevitable "translation errors." The geometric flaws are often due to the approximation errors and imprecision of low-level numerical algorithms. Sometimes, it’s lossy data exchange to blame or even an improper design software used to build the geometry.
 </p>
 
 <p>
-  The reasoning on the validity of a CAD model should always be based on its
-  application domain. E.g., self-intersection defects might be critical for mesh
-  generation algorithms while they often have zero impact on specific modeling
-  procedures such as unfolding of sheet metals.
+As shape healing remains largely a challenge for CAD practitioners, one must be aware of possible anomalies and their implications on subsequent engineering workflows. Being attentive to a CAD shape's validity, you will avoid many die-hard obstacles down the road. Most of the listed flaws are tough to resolve, although for simple cases it is possible to automate healing pre-processing (e.g., fixing missing seam edges).
 </p>
 
-<h1>Consistency of representation</h1>
+<h1>What is a valid CAD model?</h1>
 
 <p>
-  From the application point of view, it is rarely needed to distinguish between
-  pure geometric and topological invalidities. Such separation is done for
-  better CAD kernel maintainability and exists only due to the separation between
-  geometry and topology in B-Rep representation scheme. In practice, maintaining
-  representation integrity is a direct function of a geometric modeling system
-  whatever abstraction layers it uses under the cover.
+A comprehensive analysis of CAD model validity should employ thinking at several levels of abstraction: math, data structures, and design intent.
 </p>
 
 <p>
-  The following table provides a checklist for a CAD model to
-  verify its validity (both geometric and topological). These checks are relevant to a B-Rep
-  representation scheme of OpenCascade kernel exclusively. The set of
-  checks listed below is not full though the most frequently occurring defects
-  are enumerated.
+The following rule usually works in shape healing: fixing a lower-level problem requires thinking at the upper level of abstraction. E.g., to wisely fill a gap due to a missing face (a pure geometric flaw), it might be necessary to recognize and recover its entire containing feature. One way of doing so is extending and intersecting surfaces rather than patching a hole with a NURBS surface. Thinking of features brings us to the design intent that’s not a geometric issue anymore.
+</p>
+
+<p>
+Checking for the CAD model’s validity should always be based on its application domain. E.g., self-intersection defects might be critical for mesh generation algorithms. At the same time, they often have zero impact on specific shape interrogation and modeling workflows, such as the unfolding of sheet metals. Therefore, a “silver bullet” solution does not exist in shape healing. Keep in mind that “all models are wrong, but some are useful.”
+</p>
+
+<p>
+The remainder of this article provides a checklist for a CAD model to verify its validity. These checks are relevant to a B-Rep representation scheme of OpenCascade kernel only, though some of them can be generalized. The set of checks listed below is not complete, as there are too many. At the same time, the most frequently occurring defects are enumerated.
+</p>
+
+<h2>Consistency of representation</h2>
+
+<p>
+<i>Geometric validity</i> (parameterization irregularities, curve/surface self-intersections, parametric discontinuities, etc.). The geometric validity checks are concerned with the mathematics of form. The input data here are the equations of curves and surfaces, while the verification methods usually employ some computationally expensive algorithms (intersection tests, sampling, evaluation of derivatives, etc.).
+</p>
+
+<p>
+<b>Example:</b> an aerodynamic surface having C<sup>0</sup> continuity (smoothness defect) in its interior.
+</p>
+
+<p>
+<i>Topological validity</i> (orientations of boundary elements, face/solid closeness, formal shape structure, etc.). The topological validity checkers perform syntactic analysis, i.e. they check that the data structures respect some formal rules of consistency.
+</p>
+
+<p>
+<b>Example:</b> a face with 3 contours nested into each other.
+</p>
+
+<p>
+The distinguishing between pure geometric and topological invalidities makes little sense to the end-users. Such division facilitates software maintainability and reflects the separation between “geometry” and “topology” in B-Rep data structures. In practice, maintaining representation integrity is a direct function of a geometric modeling system, whatever abstraction it uses under the cover.
 </p>
 
 <table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
@@ -123,6 +117,14 @@
       Checks if the <a href="./features_euler-ops.html">Euler-Poincare property</a> holds
       for the user-specified genus.
     </p>
+    <p>
+      <span class="code-inline">v - e + f = 2(s - h) + r</span>
+    </p>
+    <p>
+      Here <span class="code-inline">v</span> is the number of vertices, <span class="code-inline">e</span> is the number of edges, <span class="code-inline">f</span> is the number of faces, <span class="code-inline">s</span> is the number of shells, <span class="code-inline">h</span> is the genus of manifold, and <span class="code-inline">r</span> is the number of internal loops.
+    </p>
+    <div align="center"><img src="../imgs/anomaly_donut.png"/></div>
+    <p><i>Analogy:</i> when you download an archive from the Internet and do a checksum verification.</p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -135,11 +137,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      Checks if the vertices of the part are distinguishable by their orientation
-      flags. A valid edge should have one FORWARD vertex and one REVERSED vertex to properly signify
-      its topological extremities. As a result of some poorly implemented modeling operators,
-      this rule may appear to be violated.
+     Checks if the vertices of the part are distinguishable by their orientation flags. A valid edge should have one FORWARD vertex and one REVERSED vertex to properly signify its topological extremities. As a result of some poorly implemented modeling operators or lossy data exchange, this rule may appear to be violated.
     </p>
+    <div align="center"><img src="../imgs/anomaly_ori-vertex-in-edge.png"/></div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -152,9 +152,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      The edges should be oriented so that their owning contour is traversed
-      in a determined order (clockwise or counterclockwise).
+      The edges should be oriented so that their owning contour is traversed in a determined order (clockwise or counterclockwise).
     </p>
+    <div align="center"><img src="../imgs/anomaly_ori-edge-in-wire.png"/></div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -167,9 +167,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      The wire should be oriented so that the material of its owning face
-      is either enclosed (for the outer wires) or lies outside (for holes).
+      The wire should be oriented so that the material of its owning face is either enclosed (for the outer wires) or lies outside (for holes).
     </p>
+    <div align="center"><img src="../imgs/anomaly_ori-wire-in-face.png"/></div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -182,9 +182,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      The faces of a solid model should be oriented so that to point outwards the
-      bounded volume. This requirement is relaxed for surface modeling (shells).
+      The faces of a solid model should be oriented so as to point outwards of the bounded volume. This requirement is relaxed for surface modeling (shells).
     </p>
+    <div align="center"><img src="../imgs/anomaly_ori-face-in-solid.png"/></div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -197,9 +197,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      Checks if the contours of the part faces are closed (have no gaps). The optional
-      "tolerance" argument is used to tune the precision of coincidence test. You
-      can find more details in the <a href="./features_is-contour-closed.html">corresponding chapter</a>.
+      Checks if the contours of the part faces are closed (have no gaps). The optional "tolerance" argument is used to tune the precision of coincidence test. If not passed, the tolerance values baked into the B-Rep entities are used for coincidence testing. You can find more details in the <a href="./features_is-contour-closed.html">corresponding chapter</a>.
     </p>
     <p><div align="center"><img src="../imgs/anomaly_contour-closeness-domain.png"/></div>
        <div align="center"><img src="../imgs/anomaly_contour-closeness-face.png"/></div>
@@ -216,8 +214,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      The face's contours should be properly nested into each other. Since the inner contours
-      determine where the material of a shape resides, their nesting is not arbitrary.
+      The face's contours should be properly nested into each other. Since the inner contours determine where the material of a shape resides, their nesting is not arbitrary.
     </p>
     <p><div align="center"><img src="../imgs/anomaly_inv-imbrication-of-wires.png"/></div>
        <div align="center" class="code-inline">cad/anomalies/flat-pattern_inv-imbrication-of-wires.brep</div></p>
@@ -255,6 +252,8 @@
     </p>
     <p><div align="center"><img src="../imgs/anomaly_naked_edges.png"/></div>
        <div align="center" class="code-inline">cad/anomalies/shading_wrongshape_015.brep</div></p>
+    <p>
+      Face stitching works for small gaps only. If applied to a model with huge gaps, this operation may end up with enormous tolerances.</p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -281,11 +280,10 @@
   </td>
   <td class="table-content-block">
     <p>
-      All surface intersections should be resolved by inserting the corresponding topological primitives (vertices,
-      edges or patches in case of overlapping). If surfaces interact while having no topological
-      resolution, the shape is considered locally faulty. Intersections or overlaps of the trimmed NURBS
-      surfaces are a huge challenge for healing algorithms
-      <a href="../references.html#frischmann-2011">[Frischmann, 2011]</a>.
+      All surface intersections should be resolved by inserting the corresponding topological primitives (vertices, edges or patches in case of overlapping). If surfaces interact while having no topological resolution, the shape is considered locally faulty. Intersections or overlaps of the trimmed NURBS surfaces are a huge challenge for healing algorithms <a href="../references.html#frischmann-2011">[Frischmann, 2011]</a>. One way to solve this issue is to manually remove and repatch faces.
+    </p>
+    <p><div align="center"><img src="../imgs/anomaly_self-inter-surf.png"/></div>
+       <div align="center" class="code-inline">cad/anomalies/hpdc-self-intersecting-with-gap.brep</div>
     </p>
   </td>
 </tr>
@@ -299,35 +297,19 @@
   </td>
   <td class="table-content-block">
     <p>
-      A correct shape with all its subshapes must bound a piece of volume in the modeling
-      space unambiguously. However, sometimes this essential requirement is not satisfied.
+      A correct shape with all its subshapes must bound a piece of volume in the modeling space unambiguously. However, sometimes this basic requirement is not satisfied.
     </p>
     <p>
-      Let's take a solid with some inner shells as an example.
-      A shell entity contained in a solid can represent either the outer boundary or an inner
-      cavity of a body. A point in the cavity shell should be formally inside its
-      parent solid (simply because any cavity is entirely enclosed by its bounding solid).
-      Otherwise, there is an inclusion error (see the figure below).
+      Let's take a solid with some inner shells as an example. A shell entity contained in a solid can represent either the outer boundary or an inner cavity of a body. A point in the cavity shell should be formally inside its parent solid (simply because any cavity is entirely enclosed by its bounding solid). Otherwise, there is an inclusion error (see the figure below). 
     </p>
     <p><div align="center"><img src="../imgs/anomaly_inv_shells_expl.png"/></div></p>
     <p>
-      In some rare cases, such invalid space partitioning may occur as a result of the faulty
-      Boolean operation. Imagine that a Tool body is being subtracted from an Object body to
-      produce a Result shape (its expected form is illustrated above on the right). Now imagine
-      that the modeling kernel fails (for whatever reason) to classify the Tool correctly. In
-      the figure above, the Tool solid was incorrectly classified as lying INSIDE the Object.
-      Hence the orientation of the Tool was reversed while the boundary edges were taken as is.
-      If you sample any point on the cavity shell, you would generally expect that this point is
-      INSIDE the parent solid. However, in the example above, some points of the Tool body are
-      classified as OUTSIDE w.r.t. the Result shape.
+      In some rare cases, such invalid space partitioning may occur as a result of the faulty Boolean operation. Imagine that a Tool body is being subtracted from an Object body to produce a Result shape (its expected form is illustrated above on the right). Now imagine that the modeling kernel fails (for whatever reason) to classify the Tool correctly. In the figure above, the Tool solid was incorrectly classified as lying INSIDE the Object. Hence the orientation of the Tool was reversed while the boundary edges were taken as is. If you sample any point on the cavity shell, you would generally expect that this point is INSIDE the parent solid. However, in the example above, some points of the Tool body are classified as OUTSIDE w.r.t. the Result shape.
     </p>
     <p><div align="center"><img src="../imgs/anomaly_inv_shells.png"/></div>
        <div align="center" class="code-inline">cad/anomalies/freecad/index_hmd_frunk.stp</div></p>
     <p>
-      This problem can hardly be fixed automatically as the ambiguous space partitioning leaves
-      the design intent unclear. The users obtaining this sort of error should instead return
-      to the corresponding design tools to try fixing the source of the issue (e.g., tweak the
-      operands of the Boolean cut as in the example above).
+      This problem can hardly be fixed automatically as the ambiguous space partitioning leaves the design intent unclear. The users observing this sort of error should instead return to the corresponding design tools to try fixing the source of the issue (e.g., tweak the operands of the Boolean cut as in the example above).
     </p>
   </td>
 </tr>
@@ -341,10 +323,10 @@
   </td>
   <td class="table-content-block">
     <p>
-      Surface degeneracies usually occur due to the coincidence of NURBS control points. Such surfaces
-      are often used to represent triangular patches, e.g., in ship
-      hull design. Even though the singularity points are usually allowed by a modeler,
-      their existence may cause problems in subsequent operators (e.g., offsets).
+      Surface degeneracies usually occur due to the coincidence of NURBS control points (that’s a valid situation). Such surfaces are often used to represent triangular patches, e.g., in ship hull design. Even though the singularity points are usually allowed by a modeler, their existence may cause problems in subsequent operators (e.g., offsets), especially, if the coordinates are not perfectly equal.
+    </p>
+    <p><div align="center"><img src="../imgs/anomaly_surf-degen-corner.png"/></div>
+       <div align="center" class="code-inline">cad/anomalies/platebase-degenerated.brep</div>
     </p>
   </td>
 </tr>
@@ -358,10 +340,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      The 3D curve is a primary edge representation. If the 3D curve does not
-      exist, it is clearly a problem. To fix the issue, the corresponding p-curves
-      should be evaluated against their host surfaces. The obtained points are then
-      reapproximated.
+      The 3D curve is a primary edge representation. If the 3D curve does not exist, it is clearly a problem. To fix the issue, the corresponding p-curves should be evaluated against their host surfaces. The obtained points are then reapproximated.
     </p>
   </td>
 </tr>
@@ -375,9 +354,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      In OpenCascade kernel, the primary 3D curve should be followed by its
-      images in all surface patches meeting at this curve. These p-curves
-      can be recovered by projection of a 3D curve to each host surface.
+      In OpenCascade kernel, the primary 3D curve should be followed by its images in all surface patches meeting at this curve. These p-curves can be recovered by projection of a 3D curve to each host surface.
     </p>
   </td>
 </tr>
@@ -391,9 +368,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      The 3D curves and the corresponding p-curves should be parameterized synchronously, so that
-      they yield identical points for the same parameter value (with tolerance).
+      The 3D curves and the corresponding p-curves should be parameterized synchronously, so that they yield identical points for the same parameter value (with tolerance). Inconsistency between 3D and 2D curves can cause large tolerances without any visual cracks in the model.
     </p>
+    <div align="center"><img src="../imgs/anomaly_non-sync-param-curves.png"/>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -406,9 +383,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      The seam edges correspond to a period value of a periodic surface. These edges
-      are necessary to close the parametric domain of a face. Not all geometric kernels
-      use the notion of seam edges, so it is necessary to recover them sometimes after data exchange.
+      The seam edges correspond to a period value of a periodic surface. These edges are necessary to close the parametric domain of a face. Not all geometric kernels use the notion of seam edges (e.g. ACIS), so it is necessary to recover them sometimes after data exchange.
     </p>
   </td>
 </tr>
@@ -422,15 +397,10 @@
   </td>
   <td class="table-content-block">
     <p>
-      A boundary surface is two-manifold if it is homeomorphic to a disk in the
-      neighborhood of every point (i.e., resembles a two-dimensional Euclidian
-      space near each point).
+      A boundary surface is two-manifold if it is homeomorphic to a disk in the neighborhood of every point (i.e., resembles a two-dimensional Euclidian space near each point).
     </p>
     <p>
-      Non-manifold vertices, edges and faces might be perfectly valid if they
-      are modeled like this intentionally. Otherwise, the existence of non-manifold
-      boundary elements might be a problem for subsequent modeling operators
-      and manufacturing planning (such models are clearly non-manufacturable).
+      Non-manifold vertices, edges and faces might be perfectly valid if they are modeled like this intentionally. Otherwise, the existence of non-manifold boundary elements might be a problem for subsequent modeling operators and manufacturing (such models are clearly non-manufacturable).
     </p>
     <p><div align="center"><img src="../imgs/anomaly_non-manifold.png"/></div>
        <div align="center" class="code-inline">cad/anomalies/non-manifold/non-manifold-01.brep</div></p>
@@ -446,11 +416,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      It sometimes happens that the visually fine, closed models are defined as
-      shells instead of being formal solids. Other examples include single faces defined
-      as shells or compound parts wrapping a single result of a solid Boolean operation.
-      These anomalies can be traced down using a topology graph representation of B-Rep
-      model. The graph will contain excessive nodes and/or nodes of improper type.
+      It sometimes happens that the visually fine, closed models are defined as shells instead of being formal solids. Other examples include single faces defined as shells or compound parts wrapping a single result of a solid Boolean operation. These anomalies can be traced down using a topology graph representation of B-Rep model. The graph will contain excessive nodes and/or nodes of improper type.
     </p>
   </td>
 </tr>
@@ -464,40 +430,33 @@
   </td>
   <td class="table-content-block">
     <p>
-      A geometric tolerance of a vertex should not be less than a geometric
-      tolerance of an edge. A geometric tolerance of an edge should not be
-      less than a geometric tolerance of a face.
+      A geometric tolerance of a vertex should not be less than a geometric tolerance of an edge. A geometric tolerance of an edge should not be less than a geometric tolerance of a face.
     </p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
 </table>
 
-<h1>B-Rep health</h1>
+<h2>B-Rep health or dirtiness of representation</h2>
 
-<div align="right">
-  <i>
-    "All languages may be used to convey the wrong message, or to
-    incorrectly convey the right message."
-  </i>
-  <a href="../references.html#gonzales-2017">[González-Lluch et al, 2017]</a>
-</div>
+<blockquote class="quote">
+"All languages may be used to convey the wrong message, or to incorrectly convey the right message." <a href="../references.html#gonzales-2017">[González-Lluch et al, 2017]</a></blockquote>
 
 <p>
-  There are two aspects which contribute to what we call shape "dirtiness" here:
+  A formally sound CAD model can happen to contain redundant information, such as overcomplicated geometry definition or excessive boundary elements. While such models do not violate any validity rules, they challenge the modeling algorithms and require extra computational resources.
 </p>
 
+<p><b>Example:</b> a spline surface where canonical geometry is a better fit, like a cone or cylinder.</p>
+
+<p>The following two sources of "shape dirtiness" tend to be common:
 <ul>
   <li>Excessive shape description.</li>
   <li>High geometric tolerances.</li>
 </ul>
+</p>
 
 <p>
-  The excessive shape description might lead to an increase of data volume or influence the processing
-  time of geometry-based algorithms. Moreover, excessive shape representation and dirtiness might cause
-  serious numeric problems within the downstream engineering workflows
-  <a href="../references.html#frischmann-2011">[Frischmann, 2011]</a>. At the same time,
-  all flaws enumerated below do not break the formal validity of a CAD model.
+  The excessive shape description might lead to an aggressive increase in memory consumption or badly influence geometry processing algorithms. Moreover, excessive shape representation might cause numeric instability within the downstream engineering workflows <a href="../references.html#frischmann-2011">[Frischmann, 2011]</a>. At the same time, such flaws do not break the formal validity of a CAD model.
 </p>
 
 <table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
@@ -540,9 +499,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      Sometimes a CAD model contains excessive number of small (usually straight)
-      edges which are hard to treat numerically (e.g., when generating FEA meshes).
-      Such edges can be enlarged by reapproximation.
+      Sometimes a CAD model contains excessive number of small (usually straight) edges which are hard to treat numerically (e.g., when generating FEA meshes). Such edges can be enlarged by reapproximating.
     </p>
     <p><div align="center"><img src="../imgs/anomaly_small-edges-domain.png"/></div>
        <div align="center"><img src="../imgs/anomaly_small-edges-face.png"/></div>
@@ -561,6 +518,7 @@
     <p>
       It is possible to merge small faces by reapproximating them.
     </p>
+    <div align="center" class="code-inline">cad/industrial/repatch-hpdc-colored.stp</div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -576,6 +534,7 @@
       Face/edge maximization is usually performed as a post-processing stage of
       a Boolean operation.
     </p>
+    <div align="center" class="code-inline">cad/gehause_rohteil.stp</div>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -588,21 +547,27 @@
   </td>
   <td class="table-content-block">
     <p>
-      See the <a href="./features_check-toler.html">corresponding chapter</a> for details.
+      Maintaining high-fidelity B-Rep is a challenge. Geometric modeling kernels, such as OpenCascade or Parasolid, implement the "tolerant modeling" approach. I.e., instead of using a global geometric inaccuracy, each boundary element (vertex, edge and face) has its own associated imprecision value called [geometric] tolerance.
+    </p>
+    <p>
+      A visually fine B-Rep model may contain significant geometric flaws like small gaps between faces or wild parameterization of curves. Since what you see on a display is not the real shape but only its faceted approximation, such imperfections remain hidden unless your modeling engine suddenly stops working on downstream operations.
+    </p>
+    <p>
+      See also the <a href="./features_check-toler.html">corresponding chapter</a> for details.
     </p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
 <tr>
   <td width="20%" class="table-content-block">
-    C0 geometry
+    C<sup>0</sup> geometry
   </td>
   <td width="20%" class="table-content-block">
     <span class="code-inline">split-by-continuity</span>
   </td>
   <td class="table-content-block">
     <p>
-      The support of C0 geometric primitives is limited in all geometric kernels. It is
+      The support of C<sup>0</sup> geometric primitives is limited in all geometric kernels. It is
       usually a good idea to split such entities with the relevant boundary elements (vertices or edges)
       to enhance the smoothness of the geometry. Alternatively, for NURBS curves
       and surfaces, it is possible to remove knots if the shape is geometrically continuous
@@ -624,33 +589,9 @@
   </td>
   <td class="table-content-block">
     <p>
-      In OpenCascade kernel, each topological element might be assigned with a local
-      transformation to place it relative to its parent element. While this capacity
-      of the modeler is convenient for representing assemblies as compounds, we
-      discourage using the transformed boundary elements in a single solid representation.
-      Formally speaking, a local transformation is a property of an arc in the topology
-      graph. In Analysis Situs, it is possible to colorize the arcs for a visual check
-      of internal transformations. It is Ok to have a local transformation for in-compound
-      inclusions and not Ok to have them deeper in the graph.
+      In OpenCascade kernel, each topological element might be assigned with a local transformation to place it relative to its parent element. While this capacity of the modeler is convenient for representing assemblies as compounds, we discourage using the transformed boundary elements in a single solid representation. Formally speaking, a local transformation is a property of an arc in the topology graph. It is OK to have a local transformation for in-compound inclusions and not OK to have them deeper in the graph.
     </p>
-  </td>
-</tr>
-<!---------------------------------------------------------------------------->
-<tr>
-  <td width="20%" class="table-content-block">
-    Non-beautified model
-  </td>
-  <td width="20%" class="table-content-block">
-    N/A
-  </td>
-  <td class="table-content-block">
-    <p>
-      A beautified geometric model is a modification of the input model that
-      incorporates appropriate symmetries and regularities
-      <a href="../references.html#gonzales-2017">[González-Lluch et al, 2017]</a>.
-      Beautification-pending models usually emerge as a result of reverse engineering
-      of a B-Rep model from a discrete dataset (point clouds, mesh).
-    </p>
+    <div align="center"><img src="../imgs/anomaly_nested-locations.png"/>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
@@ -663,24 +604,23 @@
   </td>
   <td class="table-content-block">
     <p>
-      For some operations like removing face, push/pull, etc. surface extensions
-      are used. It may easily happen that if parameter lines of a surface are
-      converging, the surface extension starts to self-intersect. In such
-      situations, any modeling operators which require surface extensions will
-      likely fail.
+      For some operations like removing face, push/pull, etc. surface extensions are used. It may easily happen that if parameter lines of a surface are converging, the surface extension starts to self-intersect. In such situations, any modeling operators which require surface extensions will likely fail. Another problem is a highly oscillating surface when sampled out of its trimming contour.
     </p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
 </table>
 
-<h1>Fitness</h1>
+<h2>Fitness to functional requirements</h2>
 
 <p>
-  It is necessary to add a few words for the situations when we have a consistent &
-  clean CAD model which is still not valid from the human's point of view. It is not
-  a geometric kernel to blame in such situations. At the same time, a geometric kernel might still
-  be helpful to discover some sorts of violated technological or functional requirements.
+  The function of the part and its manufacturing constraints are encoded in what’s called a “design intent.” The improperly designed models can have no geometric flaws yet remain incorrect from the engineering standpoint.
+</p>
+
+<p><b>Example:</b> a sheet metal part of uneven thickness.</p>
+
+<p>
+  It is not a geometric kernel to blame in such situations. At the same time, a geometric kernel might still be helpful in discovering the violated functional and technological requirements.
 </p>
 
 <table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
@@ -705,10 +645,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      The overcomplicated CAD parts may require simplification prior to
-      the engineering analysis, manufacturing planning, data interoperability,
-      visualization, etc. To simplify model, the defeaturing techniques should
-      be employed.
+      The overcomplicated CAD parts may require simplification prior to the engineering analysis, manufacturing planning, data interoperability, visualization, etc. To simplify model, the defeaturing techniques should be employed.
     </p>
   </td>
 </tr>
@@ -722,7 +659,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      Thickness is a severe requirement, e.g., in die casting manufacturing.
+      Sufficient thickness is a severe requirement, e.g., in high-pressure die casting.
     </p>
   </td>
 </tr>
@@ -736,20 +673,85 @@
   </td>
   <td class="table-content-block">
     <p>
-      Non-existing bends or non-constant sheet thickness is somewhat
-      unexpected in sheet metal working.
+      Non-existing bends or uneven sheet thickness is somewhat unexpected in sheet metal working. Other examples that complicate manufacturing include too short flanges, impossible features, etc.
+    </p>
+  </td>
+</tr>
+<!---------------------------------------------------------------------------->
+<tr>
+  <td width="20%" class="table-content-block">
+    Non-beautified model
+  </td>
+  <td width="20%" class="table-content-block">
+    N/A
+  </td>
+  <td class="table-content-block">
+    <p>
+      A beautified geometric model is a modification of the input model that incorporates appropriate symmetries and constraints like parallelism, orthogonality, etc. <a href="../references.html#gonzales-2017">[González-Lluch et al, 2017]</a>. Beautification-pending models can emerge as a result of reverse engineering of a B-Rep model from a discrete dataset (point clouds, mesh).
+    </p>
+    <div align="center"><img src="../imgs/anomaly_non-beautified.png"/>
+  </td>
+</tr>
+<!---------------------------------------------------------------------------->
+<tr>
+  <td width="20%" class="table-content-block">
+    Inconsistent tolerances
+  </td>
+  <td width="20%" class="table-content-block">
+    N/A
+  </td>
+  <td class="table-content-block">
+    <p>
+      The following picture illustrates a problem of inconsistent tolerance definition (taken from <a href="http://blog.flightstory.net/137/787-problems-joining-fuselage-sections-fuselage-gaps/">Flightstory.net</a> aviation blog):
+    </p>
+    <div align="center"><img src="../imgs/anomaly_tolerance-stack-up.png"/></div>
+    <p>
+      This is a typical stack-up problem: the parts do not assemble properly in their maximum tolerance condition.
+    </p>
+    <p>
+      The problems like this gave raise to Computer-Aided Tolerancing field, which is concerned with providing a consistent set of technological/assembly tolerances. It is necessary to ensure that the part can function in maximum, minimum, and varied conditions.
+    </p>
+  </td>
+</tr>
+<!---------------------------------------------------------------------------->
+<tr>
+  <td width="20%" class="table-content-block">
+    Collisions
+  </td>
+  <td width="20%" class="table-content-block">
+    N/A
+  </td>
+  <td class="table-content-block">
+    <p>
+      Geometric collisions between different components of an assembly.
+    </p>
+  </td>
+</tr>
+<!---------------------------------------------------------------------------->
+<tr>
+  <td width="20%" class="table-content-block">
+    Lost instancing
+  </td>
+  <td width="20%" class="table-content-block">
+    N/A
+  </td>
+  <td class="table-content-block">
+    <p>
+      Duplication of assembly parts and components instead of sharing them with appropriate transformation matrices.
     </p>
   </td>
 </tr>
 <!---------------------------------------------------------------------------->
 </table>
 
-<h1>Addendum</h1>
-
-<p>
-  Since the Analysis Situs software is mostly focused on individual CAD parts, we do not
-  speak of assembly-specific invalidities, such as collisions, lost instancing, etc.
-</p>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
 
 </body>
 </html>

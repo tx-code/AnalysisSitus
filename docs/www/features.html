@@ -20,6 +20,7 @@
  </head>
 <body>
 
+<a name="top"></a> <!-- anchor for 'back to top' link -->
 <table width="100%"><tr><td>
 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
@@ -41,71 +42,84 @@
 </table>
 </td></tr></table>
 
-<h1>Architecture</h1>
+<h1>Inspection and Healing</h1>
 
 <ul>
-  <li><a href="./features/features_architecture.html">Architecture overview</a>.</li>
-  <li><a href="./features/features_project-overview.html">Project internals overview</a>.</li>
-  <li><a href="./features/features_part-node.html">Part Node</a>.</li>
-  <li>Tessellation Nodes.</li>
-  <li><a href="./features/features_imperative-plotter.html">Imperative plotter</a>.</li>
-</ul>
-
-<h1>Precise modeling</h1>
-
-<ul>
-  <li><a href="./features/features_nurbs.html">NURBS modeling</a>.</li>
-  <li><a href="./features/features_topo-killer.html">Topology killer</a>.</li>
-  <li><a href="./features/features_euler-ops.html">Euler operators</a>.</li>
-  <li><a href="./features/features_rebuild-edge.html">Rebuild edge</a>.</li>
-  <li><a href="./features/features_suppress-blends.html">Suppress blends</a>.</li>
-  <li>Basic surface and solid modeling operators.</li>
-  <li>Detach and remove faces.</li>
-  <li>Explode shapes to sub-shapes.</li>
-  <li>Compute distances between shapes.</li>
+  <li><a href="./features/features_check-shape.html">Check CAD model validity</a>.</li>
+  <li><a href="./features/features_check-toler.html">Check geometric tolerances</a>.</li>
+  <li><a href="./features/features_is-contour-closed.html">Check if face contour is closed</a>.</li>
+  <li><a href="./features/features_fix-small-edges.html">Merge small edges</a>.</li>
+  <li>Check naked (open) edges.</li>
+  <li>Check non-manifold edges.</li>
   <li>Repatch faces.</li>
   <li>Fill gaps.</li>
   <li>Stitch faces.</li>
-  <li><a href="./features/features_fix-small-edges.html">Get rid of small edges</a>.</li>
-  <li>History of modifications.</li>
-  <li>On-fly naming service.</li>
+  <li>Curvature plots and combs.</li>
+  <li>Gaussian and mean curvature maps.</li>
+  <li>Build thickness map.</li>
 </ul>
 
-<h1>Mesh toolkit</h1>
-
-<ul>
-  <li>Read/write STL and PLY.</li>
-  <li>Offset mesh shells.</li>
-</ul>
-
-<h1>Inspection</h1>
+<h1>Feature Recognition</h1>
 
 <div class="note">
-This block contains description of the shape interrogation facilities available in Analysis Situs. In general,
-using the inspection tools, it is possible to extract the following information:
+This block contains description of the shape interrogation and feature recognition facilities
+available in Analysis Situs. Feature recognition is a backbone for such use cases as:
 
 <ul class="light">
-  <li>Topological connectivity in form of graphs.</li>
-  <li>Host geometry of edges and faces (types of curves and surfaces, their properties).</li>
-  <li>Local tolerances, locations and orientations associated with the boundary elements.</li>
+  <li>Simplification of design models.</li>
+  <li>Manufacturing planning.</li>
+  <li>Automatic pricing for on-demand manufacturing.</li>
 </ul>
 </div>
 
 <ul>
   <li><a href="./features/features_aag.html">Attributed adjacency graph</a>.</li>
   <li>Topology graph.</li>
-  <li><a href="./features/features_check-shape.html">Check CAD model validity</a>.</li>
-  <li><a href="./features/features_check-toler.html">Check geometric tolerances</a>.</li>
-  <li>Check naked (open) edges.</li>
-  <li>Check non-manifold edges.</li>
   <li><a href="./features/features_check-dih-angles.html">Check dihedral angles</a>.</li>
-  <li>Curvature plots and combs.</li>
-  <li>Gaussian and mean curvature maps.</li>
-  <li><a href="./features/features_is-contour-closed.html">Check if face contour is closed</a>.</li>
   <li><a href="./features/features_check-face-norms.html">Check face normal vectors</a>.</li>
+  <li>Find isomorphous faces.</li>
+  <li>Recognize drilled holes <span class="alert">(think of architecture and parameters)</span>.</li>
+  <li>Recognize arbitrary holes <span class="alert">(think of architecture and parameters)</span>.</li>
+  <li>Recognize fillets.</li>
+  <li>Isolate features.</li>
+  <li>Recognize sheet metal features.</li>
 </ul>
 
-<h1>Reverse engineering</h1>
+<h1>Simplification</h1>
+
+<div class="note">
+  Part-level simplification is also known as defeaturing. It becomes necessary in different engineering applications, such as IP protection or preparation for CAE simulations. Analysis Situs comes with a CAD simplification framework to serve these needs.
+</div>
+
+<ul>
+  <li>Suppress faces.</li>
+  <li><a href="./features/features_suppress-blends.html">Suppress blends</a>.</li>
+  <li><a href="./features/features_fill-with-prism.html">Fill with prism</a>.</li>
+  <li>Exchange with prism <span class="alert">(add other types of exchange operations)</span>.</li>
+</ul>
+
+<h1>Low-level Modeling</h1>
+
+<ul>
+  <li><a href="./features/features_nurbs.html">NURBS modeling</a>.</li>
+  <li><a href="./features/features_topo-killer.html">Topology killer</a>.</li>
+  <li><a href="./features/features_euler-ops.html">Euler operators</a>.</li>
+  <li><a href="./features/features_rebuild-edge.html">Rebuild edge</a>.</li>
+  <li>Basic surface and solid modeling operators.</li>
+  <li>Explode shapes to sub-shapes.</li>
+  <li>Compute distances between shapes.</li>
+  <li>History of modifications.</li>
+  <li>On-fly naming service.</li>
+</ul>
+
+<h1>Mesh Toolkit</h1>
+
+<ul>
+  <li>Read/write STL and PLY.</li>
+  <li>Offset mesh shells.</li>
+</ul>
+
+<h1>Reverse Engineering</h1>
 
 <div class="note">
 Reverse engineering eliminates the need to design from a blank sheet. The
@@ -134,7 +148,7 @@ techniques can contribute to solving the following tasks:
   <li>Extend surface.</li>
 </ul>
 
-<h1>Tips & tricks</h1>
+<h1>Tips & Tricks</h1>
 
 <ul>
   <li><a href="./features/features_find-entity.html">Find entity</a>.</li>
@@ -153,6 +167,25 @@ techniques can contribute to solving the following tasks:
   <li><a href="./features/features_voxelization.html">Voxelization of CAD models</a>.</li>
   <li>Using Parameter Editor.</li>
 </ul>
+
+<h1>Architecture</h1>
+
+<ul>
+  <li><a href="./features/features_architecture.html">Architecture overview</a>.</li>
+  <li><a href="./features/features_project-overview.html">Project internals overview</a>.</li>
+  <li><a href="./features/features_part-node.html">Part Node</a>.</li>
+  <li>Tessellation Nodes.</li>
+  <li><a href="./features/features_imperative-plotter.html">Imperative plotter</a>.</li>
+</ul>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
 
 </body>
 </html>
