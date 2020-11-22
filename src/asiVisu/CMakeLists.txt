@@ -544,7 +544,11 @@ foreach (FILE ${widgets_H_UI_FILES})
   set (src_files ${src_files} ${FILE})
   #
   unset (MOC_FILE)
-  qt5_wrap_cpp(MOC_FILE ${FILE})
+  if(${QT_MAJOR_VERSION} EQUAL 5)
+    qt5_wrap_cpp(MOC_FILE ${FILE})
+  elseif(${QT_MAJOR_VERSION} EQUAL 6)
+    qt6_wrap_cpp(MOC_FILE ${FILE})
+  endif()
   message (STATUS "... Info: next MOC file ${MOC_FILE}")
   set (ui_moc_files ${ui_moc_files} ${MOC_FILE})
   #
@@ -610,10 +614,10 @@ add_library (asiVisu SHARED
 
 target_link_libraries(asiVisu asiAlgo asiData)
 
-qt5_use_modules(asiVisu Core Widgets)
+target_link_libraries(asiVisu Core Widgets)
 #
 if (NOT WIN32)
-  qt5_use_modules(asiVisu X11Extras)
+  target_link_libraries(asiVisu X11Extras)
 endif()
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)

@@ -123,7 +123,11 @@ foreach (FILE ${ui_H_UI_FILES})
   set (src_files ${src_files} ${FILE})
   #
   unset (MOC_FILE)
-  qt5_wrap_cpp(MOC_FILE ${FILE})
+  if(${QT_MAJOR_VERSION} EQUAL 5)
+    qt5_wrap_cpp(MOC_FILE ${FILE})
+  elseif(${QT_MAJOR_VERSION} EQUAL 6)
+    qt6_wrap_cpp(MOC_FILE ${FILE})
+  endif()
   message (STATUS "... Info: next MOC file ${MOC_FILE}")
   set (ui_moc_files ${ui_moc_files} ${MOC_FILE})
   #
@@ -176,7 +180,12 @@ COPY_RESOURCES_TO_BINARY_DIRS(resources/asiExeDictionary.xml)
 # Qt resources
 #------------------------------------------------------------------------------
 
-qt5_add_resources(RCC_FILE resources/style.qrc)
+if(${QT_MAJOR_VERSION} EQUAL 5)
+  qt5_add_resources(RCC_FILE resources/style.qrc)
+elseif(${QT_MAJOR_VERSION} EQUAL 6)
+  qt6_add_resources(RCC_FILE resources/style.qrc)
+endif()
+
 source_group ("Resources" FILES resources/style.qrc)
 source_group ("Generated" FILES "${RCC_FILE}")
 
@@ -208,7 +217,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
 # Dependencies
 #------------------------------------------------------------------------------
 
-qt5_use_modules(asiExe Core Widgets)
+target_link_libraries(asiExe Core Widgets)
 
 target_link_libraries(asiExe asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
 

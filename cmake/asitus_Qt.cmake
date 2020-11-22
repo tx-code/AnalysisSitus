@@ -17,26 +17,32 @@ endif()
 # Without this setting find_package() will not work
 set(CMAKE_PREFIX_PATH ${3RDPARTY_QT_DIR})
 
-# Now we can apply standard CMake finder for Qt5. We do this mostly
-# to have qt5_wrap_cpp() function available
-find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
-#
-if (NOT WIN32)
-  find_package(Qt5 REQUIRED COMPONENTS X11Extras)
-  mark_as_advanced (Qt5X11Extras_DIR)
-endif()
-#
-message (STATUS "... Qt cmake configuration at ${Qt5_DIR}")
 find_program(QMAKE_EXECUTABLE NAMES qmake HINTS ${QTDIR} ENV QTDIR PATH_SUFFIXES bin)
 execute_process(COMMAND ${QMAKE_EXECUTABLE} -query QT_VERSION OUTPUT_VARIABLE QT_VERSION)
 string(REGEX REPLACE "\n$" "" QT_VERSION "${QT_VERSION}")
+
+string(REPLACE "." ";" QT_VERSIONS_LIST ${QT_VERSION})
+list(GET QT_VERSIONS_LIST 0 QT_MAJOR_VERSION)
+set (QT_MAJOR_VERSION "${QT_MAJOR_VERSION}" CACHE STRING "Qt major version.")
+
+message (STATUS "... Qt cmake configuration at ${3RDPARTY_QT_DIR}")
 message (STATUS "... Qt version: ${QT_VERSION}")
 
+# Now we can apply standard CMake finder for Qt5 (or later). We do this mostly
+# to have qt5_wrap_cpp() function available
+find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Widgets Core)
+#
+if (NOT WIN32)
+  find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS X11Extras)
+  mark_as_advanced (Qt${QT_MAJOR_VERSION}X11Extras_DIR)
+endif()
+#
+
 # Hide specific paths
-mark_as_advanced (Qt5Gui_DIR)
-mark_as_advanced (Qt5Widgets_DIR)
-mark_as_advanced (Qt5Core_DIR)
-mark_as_advanced (Qt5_DIR)
+mark_as_advanced (Qt${QT_MAJOR_VERSION}Gui_DIR)
+mark_as_advanced (Qt${QT_MAJOR_VERSION}Widgets_DIR)
+mark_as_advanced (Qt${QT_MAJOR_VERSION}Core_DIR)
+mark_as_advanced (Qt${QT_MAJOR_VERSION}_DIR)
 
 #--------------------------------------------------------------------------
 # Installation
@@ -45,24 +51,24 @@ mark_as_advanced (Qt5_DIR)
 if (WIN32)
   message (STATUS "... Qt libraries: ${3RDPARTY_QT_DIR}")
 
-  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Core.dll    DESTINATION bin)
-  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Gui.dll     DESTINATION bin)
-  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Widgets.dll DESTINATION bin)
-  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Svg.dll     DESTINATION bin)
+  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt${QT_MAJOR_VERSION}Core.dll    DESTINATION bin)
+  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt${QT_MAJOR_VERSION}Gui.dll     DESTINATION bin)
+  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt${QT_MAJOR_VERSION}Widgets.dll DESTINATION bin)
+  install (FILES ${3RDPARTY_QT_DIR}/bin/Qt${QT_MAJOR_VERSION}Svg.dll     DESTINATION bin)
 
   install (DIRECTORY ${3RDPARTY_QT_DIR}/plugins/imageformats/   DESTINATION bin/imageformats/)
   install (DIRECTORY ${3RDPARTY_QT_DIR}/plugins/platforms/      DESTINATION bin/platforms/)
   install (DIRECTORY ${3RDPARTY_QT_DIR}/qml/Qt/                 DESTINATION bin/Qt/)
   install (DIRECTORY ${3RDPARTY_QT_DIR}/qml/QtGraphicalEffects/ DESTINATION bin/QtGraphicalEffects/)
 else()
-  message (STATUS "... Qt libraries: ${Qt5_DIR}")
+  message (STATUS "... Qt libraries: ${Qt${QT_MAJOR_VERSION}_DIR}")
 
-  install (FILES ${Qt5_DIR}/../../libQt5Core.so.${QT_VERSION}    DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Gui.so.${QT_VERSION}     DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Widgets.so.${QT_VERSION} DESTINATION bin)
-  install (FILES ${Qt5_DIR}/../../libQt5Svg.so.${QT_VERSION}     DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt${QT_MAJOR_VERSION}Core.so.${QT_VERSION}    DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt${QT_MAJOR_VERSION}Gui.so.${QT_VERSION}     DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt${QT_MAJOR_VERSION}Widgets.so.${QT_VERSION} DESTINATION bin)
+  install (FILES ${Qt5_DIR}/../../libQt${QT_MAJOR_VERSION}Svg.so.${QT_VERSION}     DESTINATION bin)
 
-  install (DIRECTORY ${Qt5_DIR}/../../qt5/plugins/imageformats   DESTINATION bin/imageformats/)
-  install (DIRECTORY ${Qt5_DIR}/../../qt5/plugins/platforms      DESTINATION bin/platforms/)
-  install (DIRECTORY ${Qt5_DIR}/../../qt5/qml/QtGraphicalEffects DESTINATION bin/QtGraphicalEffects/)
+  install (DIRECTORY ${Qt5_DIR}/../../qt${QT_MAJOR_VERSION}/plugins/imageformats   DESTINATION bin/imageformats/)
+  install (DIRECTORY ${Qt5_DIR}/../../qt${QT_MAJOR_VERSION}/plugins/platforms      DESTINATION bin/platforms/)
+  install (DIRECTORY ${Qt5_DIR}/../../qt${QT_MAJOR_VERSION}/qml/QtGraphicalEffects DESTINATION bin/QtGraphicalEffects/)
 endif()
