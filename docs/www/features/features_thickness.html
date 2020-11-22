@@ -44,8 +44,10 @@
 
 <h1>Thickness distribution</h1>
 
+<h2>Overview</h2>
+
 <p>
-Two methods for thickness calculation are widely adopted in the CAD/CAM/CAE applications:
+  Two methods for thickness calculation are widely adopted in the CAD/CAM/CAE applications:
 </p>
 
 <ol>
@@ -84,6 +86,8 @@ Two methods for thickness calculation are widely adopted in the CAD/CAM/CAE appl
 <div class="alert">
   Currently, Analysis Situs provides the ray-based method only.
 </div>
+
+<h2>Run thickness analysis</h2>
 
 <p>
   To run thickness computation, use <span class="code-inline">check-thickness</span> command. Once executed, you can select the newly created Thickness Node in the Object Browser and tune the algorithm's parameters. One option is to specify a fixed direction for the thickness measurement. The following figure illustrates thickness distribution map for OZ direction. The mesh elements having no associated thickness values (e.g., because they are parallel to the test ray) are not rendered.
