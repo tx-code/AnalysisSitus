@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: check thickness distribution</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/thickness distribution
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1>Thickness distribution</h1>
+
+<p>
+Two methods for thickness calculation are widely adopted in the CAD/CAM/CAE applications:
+</p>
+
+<ol>
+  <li>Ray-based method.</li>
+  <li>Sphere-based method.</li>
+</ol>
+
+<p>
+  The ray-based method measures the thickness value at each point by casting a ray orthogonally to that point until the intersection with the opposite surface element. The sphere-based method attempts to inscribe spheres in the solid body instead.
+</p>
+
+<p>
+  The following image illustrates the thickness map obtained with the ray-based method. You can see that inner features (such as holes) leave their imprints in the distribution when mapped to the color scale.
+</p>
+
+<div align="center">
+  <img src="../imgs/thickness_ray-based-01.png"/>
+</div>
+
+<p>
+  While the ray-based method is somewhat easier to implement, the thickness distribution obtained with that method is ambiguous. E.g., take a look at the point <b>P</b> in the figure below. While we can use a convention that the thickness value at this point is the value d<sub>2</sub> measured by shooting a ray <i>from</i> this point, one could argue that the better value is d<sub>1</sub> from the <i>incoming</i> ray. Therefore, there is inherent ambiguity attached to the ray-based method.
+</p>
+
+<div align="center">
+  <img src="../imgs/thickness_ray-based-02.png"/>
+</div>
+
+<p>
+  In contrast, the sphere-based method does not suffer from such an ambiguity. It yields the results that are consistent with the mechanical drawing definition of thickness. In the sphere-based method, the thickness value at a point <b>P</b> is defined as a diameter of the maximum inscribed sphere (MIS) contacting the surface at this point. The locus of the center points of the inscribed spheres constitutes the medial surface (medial axis in 2D) of a CAD model. The method described in <a href="../references.html#inui-2015">[Inui et al, 2015]</a> uses distance fields hosted at voxelization to calculate the diameters of the inscribed spheres.
+</p>
+
+<p>
+  In <a href="../references.html#inui-2016">[Inui et al, 2016]</a>, the authors propose a method of shrinking spheres, which can be implemented using the same algorithmic core as in the ray-based method. Both approaches start from a triangulation covering the boundary of a CAD model. To obtain accurate results, the initial mesh should be fine enough. The shrinking spheres method attempts to construct a series of MIS starting from the mean point of each triangle. From each mean point, the algorithm casts a ray in the direction opposite to the surface normal. The midpoint between the ray source and its closest intersection is taken as the initial center of a sphere. All triangles intersected by this sphere are collected, and the closest one is chosen to shrink the initial guess. The shrinking procedure stops when the radius of the newly generated sphere is stabilized at some value, which is taken as the result. For the ray-triangle and triangle-sphere intersection tests, the algorithms from the monograph <a href="../references.html#ericson-2005">[Ericson, 2005]</a> can be employed. In the broad-phase of the intersection, these algorithms use the bounding volume hierarchy structures (BVH) constructed on the axis-aligned bounding boxes (AABB) to which the initial CAD model is decomposed after the surface meshing.
+</p>
+
+<div class="alert">
+  Currently, Analysis Situs provides the ray-based method only.
+</div>
+
+<p>
+  To run thickness computation, use <span class="code-inline">check-thickness</span> command. Once executed, you can select the newly created Thickness Node in the Object Browser and tune the algorithm's parameters. One option is to specify a fixed direction for the thickness measurement. The following figure illustrates thickness distribution map for OZ direction. The mesh elements having no associated thickness values (e.g., because they are parallel to the test ray) are not rendered.
+</p>
+
+<div align="center">
+  <img src="../imgs/thickness_ray-based-03.png"/>
+</div>
+
+<p>
+  The thickness map can be computed for mesh Nodes as well as for the primary Part Node. In the latter case, the visualization facets available in the corresponding B-rep structures will be used. Since the visualization facets are essentially sparse, using them is not recommended as it badly affects the accuracy of the thickness map.
+</p>
+
+<div class="code">
+  check-thickness [-owner &lt;parentNodeId&gt;]
+</div>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
