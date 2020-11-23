@@ -210,11 +210,11 @@ bool asiAlgo_PatchJointAdaptor::UnifySurfaces(const Handle(Geom_BSplineCurve)& i
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_PatchJointAdaptor::IsJointCompatible(const Handle(Geom_BSplineCurve)& isoLeft,
                                                   const Handle(Geom_BSplineCurve)& isoRight,
                                                   const bool                       areOpposite) const
 {
-#if defined USE_MOBIUS
   // Convert curves to Mobius structures.
   t_ptr<t_bcurve> mbIsoLeft  = cascade::GetMobiusBCurve(isoLeft);
   t_ptr<t_bcurve> mbIsoRight = cascade::GetMobiusBCurve(isoRight);
@@ -254,18 +254,20 @@ bool asiAlgo_PatchJointAdaptor::IsJointCompatible(const Handle(Geom_BSplineCurve
   }
 
   return true;
+}
 #else
-  asiAlgo_NotUsed(isoLeft);
-  asiAlgo_NotUsed(isoRight);
-  asiAlgo_NotUsed(areOpposite);
-
+bool asiAlgo_PatchJointAdaptor::IsJointCompatible(const Handle(Geom_BSplineCurve)&,
+                                                  const Handle(Geom_BSplineCurve)&,
+                                                  const bool) const
+{
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_PatchJointAdaptor::AlignControlPoles(const Handle(Geom_BSplineCurve)& isoLeft,
                                                   const bool                       isoLeftU,
                                                   const bool                       isoLeftMin,
@@ -274,7 +276,6 @@ bool asiAlgo_PatchJointAdaptor::AlignControlPoles(const Handle(Geom_BSplineCurve
                                                   const bool                       isoRightMin,
                                                   const bool                       areOpposite)
 {
-#if defined USE_MOBIUS
   // Contract check.
   if ( !this->IsJointCompatible(isoLeft, isoRight, areOpposite) )
     return false;
@@ -347,19 +348,20 @@ bool asiAlgo_PatchJointAdaptor::AlignControlPoles(const Handle(Geom_BSplineCurve
   m_surfRight = cascade::GetOpenCascadeBSurface(mbSurfRight);
 
   return true; // Success.
+}
 #else
-  asiAlgo_NotUsed(isoLeft);
-  asiAlgo_NotUsed(isoLeftU);
-  asiAlgo_NotUsed(isoLeftMin);
-  asiAlgo_NotUsed(isoRight);
-  asiAlgo_NotUsed(isoRightU);
-  asiAlgo_NotUsed(isoRightMin);
-  asiAlgo_NotUsed(areOpposite);
-
+bool asiAlgo_PatchJointAdaptor::AlignControlPoles(const Handle(Geom_BSplineCurve)&,
+                                                  const bool,
+                                                  const bool,
+                                                  const Handle(Geom_BSplineCurve)&,
+                                                  const bool,
+                                                  const bool,
+                                                  const bool)
+{
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -468,12 +470,12 @@ bool asiAlgo_PatchJointAdaptor::getIso(const Handle(Geom_BSplineSurface)& surf,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 void asiAlgo_PatchJointAdaptor::insertKnotsLeft(const Handle(Geom_BSplineCurve)& isoLeft,
                                                 const Handle(Geom_BSplineCurve)& isoRight,
                                                 const bool                       isoLeftU,
                                                 const bool                       areOpposite)
 {
-#if defined USE_MOBIUS
   // Convert curves to Mobius structures.
   t_ptr<t_bcurve> mbIsoLeft  = cascade::GetMobiusBCurve(isoLeft);
   t_ptr<t_bcurve> mbIsoRight = cascade::GetMobiusBCurve(isoRight);
@@ -509,24 +511,25 @@ void asiAlgo_PatchJointAdaptor::insertKnotsLeft(const Handle(Geom_BSplineCurve)&
 
   // Update left surface.
   m_surfLeft = cascade::GetOpenCascadeBSurface(mbSurfLeft);
-#else
-  asiAlgo_NotUsed(isoLeft);
-  asiAlgo_NotUsed(isoRight);
-  asiAlgo_NotUsed(isoLeftU);
-  asiAlgo_NotUsed(areOpposite);
-
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
-#endif
 }
+#else
+void asiAlgo_PatchJointAdaptor::insertKnotsLeft(const Handle(Geom_BSplineCurve)&,
+                                                const Handle(Geom_BSplineCurve)&,
+                                                const bool,
+                                                const bool)
+{
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 void asiAlgo_PatchJointAdaptor::insertKnotsRight(const Handle(Geom_BSplineCurve)& isoLeft,
                                                  const Handle(Geom_BSplineCurve)& isoRight,
                                                  const bool                       isoRightU,
                                                  const bool                       areOpposite)
 {
-#if defined USE_MOBIUS
   // Convert curves to Mobius structures.
   t_ptr<t_bcurve> mbIsoLeft  = cascade::GetMobiusBCurve(isoLeft);
   t_ptr<t_bcurve> mbIsoRight = cascade::GetMobiusBCurve(isoRight);
@@ -562,12 +565,13 @@ void asiAlgo_PatchJointAdaptor::insertKnotsRight(const Handle(Geom_BSplineCurve)
 
   // Update right surface.
   m_surfRight = cascade::GetOpenCascadeBSurface(mbSurfRight);
-#else
-  asiAlgo_NotUsed(isoLeft);
-  asiAlgo_NotUsed(isoRight);
-  asiAlgo_NotUsed(isoRightU);
-  asiAlgo_NotUsed(areOpposite);
-
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
-#endif
 }
+#else
+void asiAlgo_PatchJointAdaptor::insertKnotsRight(const Handle(Geom_BSplineCurve)&,
+                                                 const Handle(Geom_BSplineCurve)&,
+                                                 const bool,
+                                                 const bool)
+{
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+}
+#endif

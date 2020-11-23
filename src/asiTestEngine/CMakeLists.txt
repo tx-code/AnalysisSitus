@@ -89,26 +89,26 @@ target_link_libraries(asiTestEngine asiAlgo asiData)
 
 install (TARGETS asiTestEngine
          CONFIGURATIONS Release
-         RUNTIME DESTINATION framework/bin COMPONENT Runtime
-         ARCHIVE DESTINATION framework/lib COMPONENT Library
-         LIBRARY DESTINATION framework/lib COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library)
 
 install (TARGETS asiTestEngine
          CONFIGURATIONS RelWithDebInfo
-         RUNTIME DESTINATION framework/bini COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libi COMPONENT Library
-         LIBRARY DESTINATION framework/libi COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bini COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library)
 
 install (TARGETS asiTestEngine
          CONFIGURATIONS Debug
-         RUNTIME DESTINATION framework/bind COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libd COMPONENT Library
-         LIBRARY DESTINATION framework/libd COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
 
 if (MSVC)
   install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiTestEngine.pdb DESTINATION bind CONFIGURATIONS Debug)
   install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiTestEngine.pdb DESTINATION bini CONFIGURATIONS RelWithDebInfo)
 endif()
 
-install (FILES ${H_FILES}           DESTINATION framework/include)
-install (FILES ${reportgen_H_FILES} DESTINATION framework/include)
+install (FILES ${H_FILES}           DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${reportgen_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)

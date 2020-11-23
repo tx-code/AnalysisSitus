@@ -679,33 +679,33 @@ install (TARGETS asiVisu RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONE
 
 install (TARGETS asiVisu
          CONFIGURATIONS Release
-         RUNTIME DESTINATION framework/bin COMPONENT Runtime
-         ARCHIVE DESTINATION framework/lib COMPONENT Library
-         LIBRARY DESTINATION framework/lib COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library)
 
 install (TARGETS asiVisu
          CONFIGURATIONS RelWithDebInfo
-         RUNTIME DESTINATION framework/bini COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libi COMPONENT Library
-         LIBRARY DESTINATION framework/libi COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bini COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library)
 
 install (TARGETS asiVisu
          CONFIGURATIONS Debug
-         RUNTIME DESTINATION framework/bind COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libd COMPONENT Library
-         LIBRARY DESTINATION framework/libd COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
 
 if (MSVC)
-  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiVisu.pdb DESTINATION framework/bind CONFIGURATIONS Debug)
+  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiVisu.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
 endif()
 
-install (FILES ${H_FILES}               DESTINATION framework/include)
-install (FILES ${filters_H_FILES}       DESTINATION framework/include)
-install (FILES ${pipelines_H_FILES}     DESTINATION framework/include)
-install (FILES ${presentations_H_FILES} DESTINATION framework/include)
-install (FILES ${providers_H_FILES}     DESTINATION framework/include)
-install (FILES ${selection_H_FILES}     DESTINATION framework/include)
-install (FILES ${sources_H_FILES}       DESTINATION framework/include)
-install (FILES ${utils_H_FILES}         DESTINATION framework/include)
-install (FILES ${widgets_H_FILES}       DESTINATION framework/include)
-install (FILES ${widgets_H_UI_FILES}    DESTINATION framework/include)
+install (FILES ${H_FILES}               DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${filters_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${pipelines_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${presentations_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${providers_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${selection_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${sources_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${utils_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${widgets_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${widgets_H_UI_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)

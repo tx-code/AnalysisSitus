@@ -728,41 +728,41 @@ install (TARGETS asiUI RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT
 
 install (TARGETS asiUI
          CONFIGURATIONS Release
-         RUNTIME DESTINATION framework/bin COMPONENT Runtime
-         ARCHIVE DESTINATION framework/lib COMPONENT Library
-         LIBRARY DESTINATION framework/lib COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library)
 
 install (TARGETS asiUI
          CONFIGURATIONS RelWithDebInfo
-         RUNTIME DESTINATION framework/bini COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libi COMPONENT Library
-         LIBRARY DESTINATION framework/libi COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bini COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library)
 
 install (TARGETS asiUI
          CONFIGURATIONS Debug
-         RUNTIME DESTINATION framework/bind COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libd COMPONENT Library
-         LIBRARY DESTINATION framework/libd COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
 
 if (MSVC)
-  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiUI.pdb DESTINATION framework/bind CONFIGURATIONS Debug)
+  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiUI.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
 endif()
 
-install (FILES ${H_FILES}                DESTINATION framework/include)
-install (FILES ${controls_H_FILES}       DESTINATION framework/include)
-install (FILES ${controls_H_UI_FILES}    DESTINATION framework/include)
-install (FILES ${salome_H_FILES}         DESTINATION framework/include)
-install (FILES ${salome_H_UI_FILES}      DESTINATION framework/include)
-install (FILES ${datum_H_FILES}          DESTINATION framework/include)
-install (FILES ${datum_H_UI_FILES}       DESTINATION framework/include)
-install (FILES ${dialogs_H_FILES}        DESTINATION framework/include)
-install (FILES ${dialogs_H_UI_FILES}     DESTINATION framework/include)
-install (FILES ${graphs_H_FILES}         DESTINATION framework/include)
-install (FILES ${graphs_H_UI_FILES}      DESTINATION framework/include)
-install (FILES ${plots_H_UI_FILES}       DESTINATION framework/include)
-install (FILES ${interaction_H_FILES}    DESTINATION framework/include)
-install (FILES ${interaction_H_UI_FILES} DESTINATION framework/include)
-install (FILES ${utils_H_FILES}          DESTINATION framework/include)
-install (FILES ${utils_H_UI_FILES}       DESTINATION framework/include)
-install (FILES ${viewers_H_FILES}        DESTINATION framework/include)
-install (FILES ${viewers_H_UI_FILES}     DESTINATION framework/include)
+install (FILES ${H_FILES}                DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${controls_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${controls_H_UI_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${salome_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${salome_H_UI_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${datum_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${datum_H_UI_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${dialogs_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${dialogs_H_UI_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${graphs_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${graphs_H_UI_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${plots_H_UI_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${interaction_H_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${interaction_H_UI_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${utils_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${utils_H_UI_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${viewers_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${viewers_H_UI_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)

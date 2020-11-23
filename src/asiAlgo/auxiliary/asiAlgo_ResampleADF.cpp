@@ -154,9 +154,9 @@ asiAlgo_ResampleADF::asiAlgo_ResampleADF(void*                pSVO,
 
 //-----------------------------------------------------------------------------
 
+#ifdef USE_MOBIUS
 bool asiAlgo_ResampleADF::Perform(const float step)
 {
-#ifdef USE_MOBIUS
   if ( m_pSVO == nullptr )
     return false;
 
@@ -210,11 +210,14 @@ bool asiAlgo_ResampleADF::Perform(const float step)
   m_progress.SendLogMessage(LogErr(Normal) << "Threading is not available. Configure with TBB.");
   return false;
 #endif
+}
 #else
+bool asiAlgo_ResampleADF::Perform(const float)
+{
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 

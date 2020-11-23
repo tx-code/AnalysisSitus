@@ -464,27 +464,29 @@ if (USE_MOBIUS)
   )
 endif()
 #------------------------------------------------------------------------------
-set (VTK_LIB_FILES
-  vtkCommonCore-8.2
-  vtkCommonDataModel-8.2
-  vtkCommonExecutionModel-8.2
-  vtkCommonMath-8.2
-  vtkCommonTransforms-8.2
-  vtkCommonMisc-8.2
-  vtkFiltersCore-8.2
-  vtkFiltersGeneral-8.2
-  vtkFiltersSources-8.2
-  vtkFiltersGeometry-8.2
-  vtkFiltersParallel-8.2
-  vtkFiltersExtraction-8.2
-  vtkFiltersModeling-8.2
-  vtkIOCore-8.2
-  vtkIOImage-8.2
-  vtkIOExport-8.2
-  vtkIOXML-8.2
-  vtkImagingCore-8.2
-  vtkInteractionStyle-8.2
-)
+if (NOT BUILD_ALGO_ONLY)
+  set (VTK_LIB_FILES
+    vtkCommonCore-8.2
+    vtkCommonDataModel-8.2
+    vtkCommonExecutionModel-8.2
+    vtkCommonMath-8.2
+    vtkCommonTransforms-8.2
+    vtkCommonMisc-8.2
+    vtkFiltersCore-8.2
+    vtkFiltersGeneral-8.2
+    vtkFiltersSources-8.2
+    vtkFiltersGeometry-8.2
+    vtkFiltersParallel-8.2
+    vtkFiltersExtraction-8.2
+    vtkFiltersModeling-8.2
+    vtkIOCore-8.2
+    vtkIOImage-8.2
+    vtkIOExport-8.2
+    vtkIOXML-8.2
+    vtkImagingCore-8.2
+    vtkInteractionStyle-8.2
+  )
+endif()
 
 #------------------------------------------------------------------------------
 # Add sources
@@ -708,20 +710,22 @@ foreach (LIB_FILE ${AD_LIB_FILES})
   endif()
 endforeach()
 
-foreach (LIB_FILE ${VTK_LIB_FILES})
-  if (WIN32)
-    set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  else()
-    set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  endif()
+if (NOT BUILD_ALGO_ONLY)
+  foreach (LIB_FILE ${VTK_LIB_FILES})
+    if (WIN32)
+      set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 
-  if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiAlgo debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiAlgo optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  else()
-    target_link_libraries (asiAlgo ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  endif()
-endforeach()
+    if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+      target_link_libraries (asiAlgo debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+      target_link_libraries (asiAlgo optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    else()
+      target_link_libraries (asiAlgo ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    endif()
+  endforeach()
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software
@@ -735,36 +739,36 @@ install (TARGETS asiAlgo RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONE
 
 install (TARGETS asiAlgo
          CONFIGURATIONS Release
-         RUNTIME DESTINATION framework/bin COMPONENT Runtime
-         ARCHIVE DESTINATION framework/lib COMPONENT Library
-         LIBRARY DESTINATION framework/lib COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library)
 
 install (TARGETS asiAlgo
          CONFIGURATIONS RelWithDebInfo
-         RUNTIME DESTINATION framework/bini COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libi COMPONENT Library
-         LIBRARY DESTINATION framework/libi COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bini COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library)
 
 install (TARGETS asiAlgo
          CONFIGURATIONS Debug
-         RUNTIME DESTINATION framework/bind COMPONENT Runtime
-         ARCHIVE DESTINATION framework/libd COMPONENT Library
-         LIBRARY DESTINATION framework/libd COMPONENT Library)
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
 
 if (MSVC)
-  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiAlgo.pdb DESTINATION framework/bind CONFIGURATIONS Debug)
+  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiAlgo.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
 endif()
 
-install (FILES ${H_FILES}             DESTINATION framework/include)
-install (FILES ${aux_H_FILES}         DESTINATION framework/include)
-install (FILES ${blends_H_FILES}      DESTINATION framework/include)
-install (FILES ${dict_H_FILES}        DESTINATION framework/include)
-install (FILES ${dict_salome_H_FILES} DESTINATION framework/include)
-install (FILES ${editing_H_FILES}     DESTINATION framework/include)
-install (FILES ${features_H_FILES}    DESTINATION framework/include)
-install (FILES ${interop_H_FILES}     DESTINATION framework/include)
-install (FILES ${mesh_H_FILES}        DESTINATION framework/include)
-install (FILES ${opt_H_FILES}         DESTINATION framework/include)
-install (FILES ${points_H_FILES}      DESTINATION framework/include)
-install (FILES ${re_H_FILES}          DESTINATION framework/include)
-install (FILES ${utils_H_FILES}       DESTINATION framework/include)
+install (FILES ${H_FILES}             DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${aux_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${blends_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${dict_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${dict_salome_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${editing_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${features_H_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${interop_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${mesh_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${opt_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${points_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${re_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${utils_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)

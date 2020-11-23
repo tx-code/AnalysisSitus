@@ -17,13 +17,15 @@ endif()
 # Installation
 #--------------------------------------------------------------------------
 
-if (WIN32)
-  install (FILES ${3RDPARTY_tcl_DIR}/bin/tcl86.dll DESTINATION bin)
-  install (FILES ${3RDPARTY_tcl_DIR}/bin/zlib1.dll DESTINATION bin)
+if (NOT BUILD_ALGO_ONLY)
+  if (WIN32)
+    install (FILES ${3RDPARTY_tcl_DIR}/bin/tcl86.dll DESTINATION bin)
+    install (FILES ${3RDPARTY_tcl_DIR}/bin/zlib1.dll DESTINATION bin)
 
-  if (USE_THREADING)
-    install (FILES ${3RDPARTY_tbb_DLL_DIR}/tbb.dll DESTINATION bin)
+    if (USE_THREADING)
+      install (FILES ${3RDPARTY_tbb_DLL_DIR}/tbb.dll DESTINATION bin)
+    endif()
+  else()
+    install (FILES ${3RDPARTY_tcl_LIBRARY_DIR}/libtcl8.6.so DESTINATION bin)
   endif()
-else()
-  install (FILES ${3RDPARTY_tcl_LIBRARY_DIR}/libtcl8.6.so DESTINATION bin)
 endif()

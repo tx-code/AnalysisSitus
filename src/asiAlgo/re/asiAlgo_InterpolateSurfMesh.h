@@ -178,13 +178,16 @@ public:
 
 protected:
 
+#ifdef USE_MOBIUS
   asiAlgo_EXPORT bool
     performInternal(const std::vector<gp_XYZ>&   contour,
                     const double                 grainCoeff,
                     const int                    degU,
                     const int                    degV,
                     Handle(Geom_BSplineSurface)& result);
+#endif
 
+#ifdef USE_MOBIUS
   asiAlgo_EXPORT static bool
     collectInteriorNodes(const Handle(Poly_Triangulation)&    tris,
                          const std::vector<gp_XYZ>&           contour,
@@ -196,6 +199,7 @@ protected:
                          double&                              size,
                          ActAPI_ProgressEntry                 progress,
                          ActAPI_PlotterEntry                  plotter);
+#endif
 
 protected:
 

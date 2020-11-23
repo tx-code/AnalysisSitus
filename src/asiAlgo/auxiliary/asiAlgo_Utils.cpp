@@ -1248,11 +1248,11 @@ bool asiAlgo_Utils::ReadStl(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
                             Handle(ActData_Mesh)&          mesh,
                             ActAPI_ProgressEntry           progress)
 {
-#if defined USE_MOBIUS
   progress.SendLogMessage(LogInfo(Normal) << "Use Mobius PLY reader.");
 
   // Prepare reader.
@@ -1322,23 +1322,24 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
   }
 
   return true;
-#else
-  asiAlgo_NotUsed(filename);
-  asiAlgo_NotUsed(mesh);
-
-  progress.SendLogMessage(LogErr(Normal) << "PLY reader is unavailable.");
-
-  return false;
-#endif
 }
+#else
+bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString&,
+                            Handle(ActData_Mesh)&,
+                            ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "PLY reader is unavailable (USE_MOBIUS is off).");
+  return false;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
                             Handle(ActData_Mesh)&          mesh,
                             ActAPI_ProgressEntry           progress)
 {
-#if defined USE_MOBIUS
   progress.SendLogMessage(LogInfo(Normal) << "Use Mobius OBJ reader.");
 
   // Prepare reader.
@@ -1408,15 +1409,17 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
   }
 
   return true;
+}
 #else
-  asiAlgo_NotUsed(filename);
-  asiAlgo_NotUsed(mesh);
-
-  progress.SendLogMessage(LogErr(Normal) << "OBJ reader is unavailable.");
+bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString&,
+                            Handle(ActData_Mesh)&,
+                            ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "OBJ reader is unavailable (USE_MOBIUS is off).");
 
   return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -2931,10 +2934,10 @@ bool asiAlgo_Utils::CalculateStrainEnergy(const Handle(Geom_Curve)& curve,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::CalculateBendingEnergy(const Handle(Geom_Surface)& surface,
                                            double&                     result)
 {
-#if defined USE_MOBIUS
   if ( !surface->IsInstance( STANDARD_TYPE(Geom_BSplineSurface) ) )
     return false;
 
@@ -2948,12 +2951,15 @@ bool asiAlgo_Utils::CalculateBendingEnergy(const Handle(Geom_Surface)& surface,
   // Evaluate bending energy.
   result = mobSurf->ComputeBendingEnergy();
   return true;
+}
 #else
-  asiAlgo_NotUsed(surface);
+bool asiAlgo_Utils::CalculateBendingEnergy(const Handle(Geom_Surface)&,
+                                           double& result)
+{
   result = 0.0;
   return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -3340,13 +3346,13 @@ bool asiAlgo_Utils::GetNeighborsThru(const TopoDS_Shape&         shape,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::JoinCurves(Handle(Geom_BSplineCurve)& curve1,
                                Handle(Geom_BSplineCurve)& curve2,
                                const int                  order,
                                Handle(Geom_BSplineCurve)& result,
                                ActAPI_ProgressEntry       progress)
 {
-#if defined USE_MOBIUS
   if ( curve1->Degree() != curve2->Degree() )
   {
     progress.SendLogMessage(LogErr(Normal) << "Cannot join curves of different degrees.");
@@ -3395,25 +3401,27 @@ bool asiAlgo_Utils::JoinCurves(Handle(Geom_BSplineCurve)& curve1,
   result = cascade::GetOpenCascadeBCurve(mobResult);
 
   return true;
-#else
-  asiAlgo_NotUsed(curve1);
-  asiAlgo_NotUsed(curve2);
-  asiAlgo_NotUsed(order);
-  asiAlgo_NotUsed(result);
-
-  progress.SendLogMessage(LogErr(Normal) << "This function is not available.");
-  return false;
-#endif
 }
+#else
+bool asiAlgo_Utils::JoinCurves(Handle(Geom_BSplineCurve)&,
+                               Handle(Geom_BSplineCurve)&,
+                               const int,
+                               Handle(Geom_BSplineCurve)&,
+                               ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "This function is not available (USE_MOBIUS is off).");
+  return false;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::JoinCurves(std::vector<Handle(Geom_BSplineCurve)>& curves,
                                const int                               order,
                                Handle(Geom_BSplineCurve)&              result,
                                ActAPI_ProgressEntry                    progress)
 {
-#if defined USE_MOBIUS
   const size_t numCurves = curves.size();
   //
   if ( numCurves < 2 )
@@ -3437,15 +3445,17 @@ bool asiAlgo_Utils::JoinCurves(std::vector<Handle(Geom_BSplineCurve)>& curves,
   // Set the result.
   result = curve1;
   return true;
-#else
-  asiAlgo_NotUsed(curves);
-  asiAlgo_NotUsed(order);
-  asiAlgo_NotUsed(result);
-
-  progress.SendLogMessage(LogErr(Normal) << "This function is not available.");
-  return false;
-#endif
 }
+#else
+bool asiAlgo_Utils::JoinCurves(std::vector<Handle(Geom_BSplineCurve)>&,
+                               const int,
+                               Handle(Geom_BSplineCurve)&,
+                               ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "This function is not available (USE_MOBIUS is off).");
+  return false;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 

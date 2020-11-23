@@ -39,12 +39,14 @@
 #include <ActData_Mesh_Quadrangle.h>
 #include <ActData_Mesh_Triangle.h>
 
-// VTK includes
-#pragma warning(push, 0)
-#include <vtkCellArray.h>
-#include <vtkIdList.h>
-#include <vtkSmartPointer.h>
-#pragma warning(pop)
+#if defined USE_VTK
+  // VTK includes
+  #pragma warning(push, 0)
+  #include <vtkCellArray.h>
+  #include <vtkIdList.h>
+  #include <vtkSmartPointer.h>
+  #pragma warning(pop)
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -172,6 +174,8 @@ bool asiAlgo_MeshConvert::FromPersistent(const Handle(ActData_Mesh)& source,
 }
 
 //-----------------------------------------------------------------------------
+
+#if defined USE_VTK
 
 //! Converts VTK polygonal data set to the persistent one.
 //! \param source [in]  VTK polygonal data set.
@@ -380,3 +384,5 @@ vtkIdType
 
   return (*resPidPtr);
 }
+
+#endif

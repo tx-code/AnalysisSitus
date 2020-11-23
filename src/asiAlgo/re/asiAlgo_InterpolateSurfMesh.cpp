@@ -134,6 +134,7 @@ bool appendNodeInGlobalCollection(asiAlgo_InterpolateSurfMesh::t_gridNode&      
 
 //-----------------------------------------------------------------------------
 
+#ifdef USE_MOBIUS
 bool asiAlgo_InterpolateSurfMesh::CollectInteriorNodes(const Handle(Poly_Triangulation)&  tris,
                                                        const std::vector<gp_XYZ>&         contour,
                                                        const bool                         boxClipping,
@@ -168,6 +169,18 @@ bool asiAlgo_InterpolateSurfMesh::CollectInteriorNodes(const Handle(Poly_Triangu
 
   return true;
 }
+#else
+bool asiAlgo_InterpolateSurfMesh::CollectInteriorNodes(const Handle(Poly_Triangulation)&,
+                                                       const std::vector<gp_XYZ>&,
+                                                       const bool,
+                                                       Handle(asiAlgo_BaseCloud<double>)&,
+                                                       ActAPI_ProgressEntry progress,
+                                                       ActAPI_PlotterEntry)
+{
+  progress.SendLogMessage(LogErr(Normal) << "This function is not available (USE_MOBIUS is off).");
+  return false;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -181,6 +194,7 @@ asiAlgo_InterpolateSurfMesh::asiAlgo_InterpolateSurfMesh(const Handle(Poly_Trian
 
 //-----------------------------------------------------------------------------
 
+#ifdef USE_MOBIUS
 bool asiAlgo_InterpolateSurfMesh::Perform(const std::vector<gp_XYZ>&   contour,
                                           const double                 grainCoeff,
                                           const int                    degU,
@@ -192,16 +206,27 @@ bool asiAlgo_InterpolateSurfMesh::Perform(const std::vector<gp_XYZ>&   contour,
 
   return this->performInternal(contour, grainCoeff, degU, degV, result);
 }
+#else
+bool asiAlgo_InterpolateSurfMesh::Perform(const std::vector<gp_XYZ>&,
+                                          const double,
+                                          const int,
+                                          const int,
+                                          Handle(Geom_BSplineSurface)&)
+{
+  m_progress.SendLogMessage(LogErr(Normal) << "Interpolation is impossible (USE_MOBIUS is off).");
+  return false;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
+#ifdef USE_MOBIUS
 bool asiAlgo_InterpolateSurfMesh::performInternal(const std::vector<gp_XYZ>&   contour,
                                                   const double                 grainCoeff,
                                                   const int                    degU,
                                                   const int                    degV,
                                                   Handle(Geom_BSplineSurface)& result)
 {
-#ifdef USE_MOBIUS
   // Average plane.
   Handle(Geom_Plane) plane;
 
@@ -496,21 +521,12 @@ bool asiAlgo_InterpolateSurfMesh::performInternal(const std::vector<gp_XYZ>&   c
 #endif
 
   return true;
-
-#else
-  asiAlgo_NotUsed(contour);
-  asiAlgo_NotUsed(grainCoeff);
-  asiAlgo_NotUsed(degU);
-  asiAlgo_NotUsed(degV);
-  asiAlgo_NotUsed(result);
-
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius library is not available.");
-  return false;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
+#ifdef USE_MOBIUS
 bool asiAlgo_InterpolateSurfMesh::collectInteriorNodes(const Handle(Poly_Triangulation)&    tris,
                                                        const std::vector<gp_XYZ>&           contour,
                                                        const bool                           boxClipping,
@@ -522,7 +538,6 @@ bool asiAlgo_InterpolateSurfMesh::collectInteriorNodes(const Handle(Poly_Triangu
                                                        ActAPI_ProgressEntry                 progress,
                                                        ActAPI_PlotterEntry                  plotter)
 {
-#ifdef USE_MOBIUS
   // Get center point and bounding box of the contour.
   gp_XYZ  P_center;
   Bnd_Box contourAABB;
@@ -666,18 +681,5 @@ bool asiAlgo_InterpolateSurfMesh::collectInteriorNodes(const Handle(Poly_Triangu
 #endif
 
   return true;
-#else
-  asiAlgo_NotUsed(tris);
-  asiAlgo_NotUsed(contour);
-  asiAlgo_NotUsed(boxClipping);
-  asiAlgo_NotUsed(filter);
-  asiAlgo_NotUsed(avrPlane);
-  asiAlgo_NotUsed(pts);
-  asiAlgo_NotUsed(lastPtIdx);
-  asiAlgo_NotUsed(size);
-  asiAlgo_NotUsed(plotter);
-
-  progress.SendLogMessage(LogErr(Normal) << "Mobius library is not available.");
-  return false;
-#endif
 }
+#endif

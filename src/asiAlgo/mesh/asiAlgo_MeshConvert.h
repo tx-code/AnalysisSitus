@@ -31,7 +31,7 @@
 #ifndef asiAlgo_MeshConvert_h
 #define asiAlgo_MeshConvert_h
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
 
 // OCCT includes
@@ -41,10 +41,12 @@
 // Mesh (Active Data) includes
 #include <ActData_Mesh.h>
 
-// VTK includes
-#pragma warning(push, 0)
-#include <vtkPolyData.h>
-#pragma warning(pop)
+#if defined USE_VTK
+  // VTK includes
+  #pragma warning(push, 0)
+  #include <vtkPolyData.h>
+  #pragma warning(pop)
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -63,6 +65,7 @@ namespace asiAlgo_MeshConvert
     FromPersistent(const Handle(ActData_Mesh)& source,
                    Handle(Poly_Triangulation)& result);
 
+#if defined USE_VTK
   asiAlgo_EXPORT bool
     ToPersistent(vtkPolyData*          source,
                  Handle(ActData_Mesh)& result);
@@ -74,8 +77,6 @@ namespace asiAlgo_MeshConvert
   asiAlgo_EXPORT bool
     ToVTK(const Handle(Poly_Triangulation)& source,
           vtkSmartPointer<vtkPolyData>&     result);
-
-//-----------------------------------------------------------------------------
 
   //! Translates the passed mesh element to VTK polygonal cell.
   //! \param[in]      source   source mesh.
@@ -105,8 +106,8 @@ namespace asiAlgo_MeshConvert
                        NCollection_DataMap<int, vtkIdType>& nodeRepo);
 
   //! Adds a mesh node as a point to the passed polygonal data.
-  //! \param[in] source       source mesh.
-  //! \param[in] nodeID       node ID.
+  //! \param[in]     source   source mesh.
+  //! \param[in]     nodeID   node ID.
   //! \param[in,out] polyData output polygonal data.
   //! \param[in,out] nodeRepo registered nodes.
   //! \return internal VTK ID for the newly added point.
@@ -115,6 +116,7 @@ namespace asiAlgo_MeshConvert
                        const int                            nodeID,
                        vtkPolyData*                         polyData,
                        NCollection_DataMap<int, vtkIdType>& nodeRepo);
+#endif
 
 };
 

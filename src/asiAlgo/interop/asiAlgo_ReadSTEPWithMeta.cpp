@@ -313,7 +313,7 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
     }
 
     Handle(StepVisual_Colour) SurfCol, BoundCol, CurveCol, RenderCol;
-    double RenderTransp;
+    //double RenderTransp;
     bool IsComponent = false;
     //if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, RenderCol, RenderTransp, IsComponent) && IsVisible )
     if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, IsComponent) && IsVisible )

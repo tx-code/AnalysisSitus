@@ -40,11 +40,13 @@
 // OCCT includes
 #include <ShapeAnalysis_Surface.hxx>
 
-// VTK includes
-#pragma warning(push, 0)
-#include <vtkCutter.h>
-#include <vtkPlane.h>
-#pragma warning(pop)
+#if defined USE_VTK
+  // VTK includes
+  #pragma warning(push, 0)
+  #include <vtkCutter.h>
+  #include <vtkPlane.h>
+  #pragma warning(pop)
+#endif
 
 #undef DRAW_DEBUG
 #if defined DRAW_DEBUG
@@ -63,6 +65,7 @@ asiAlgo_MeshInterPlane::asiAlgo_MeshInterPlane(const Handle(Poly_Triangulation)&
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_VTK
 bool asiAlgo_MeshInterPlane::Perform(const Handle(Geom_Plane)& plane,
                                      const bool                doSort)
 {
@@ -213,3 +216,11 @@ bool asiAlgo_MeshInterPlane::Perform(const Handle(Geom_Plane)& plane,
 
   return true;
 }
+#else
+bool asiAlgo_MeshInterPlane::Perform(const Handle(Geom_Plane)&,
+                                     const bool)
+{
+  m_progress.SendLogMessage(LogErr(Normal) << "VTK is not available.");
+  return false;
+}
+#endif
