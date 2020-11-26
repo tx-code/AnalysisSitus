@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: topology graph</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/topology graph
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</table></tr></td>
+
+<h1>Topology graph</h1>
+
+<p>
+  Because of its inherent simplicity, the apparatus of graph theory found extensive use in industrial geometric modeling. One of the well-turned ideas emerged early on was distinguishing between the syntax (topology) and the semantics (geometry) of digital shape representation. In the boundary representation scheme, the topology can be expressed in the form of an acyclic directed simple graph (having no self-loops and parallel edges <a href="../references.html#deo-1974">[Deo, 1974]</a>). The topology graph determines how the primary topological elements (faces, edges, and vertices) are nested. The possibility to have several parent nodes for a single child enables sharing and instancing of the boundary elements.
+</p>
+
+<p>
+  Let's take a simple box shape in its boundary representation.
+</p>
+
+<div align="center"><img src="../imgs/topograph_box-initial.png"/></div>
+
+<p>
+  The topology graph is the B-rep structure itself, so to construct the explicit graph, one has to iterate from the topmost boundary elements (compounds, solids, etc.) down to the atomic entities, i.e., vertices while constructing the corresponding graph nodes and arcs along the way. The following image illustrates a formal topology graph for the box shape.
+</p>
+
+<div align="center"><img src="../imgs/topograph_box.png"/></div>
+
+<h2>Options</h2>
+
+<p>
+  You can see that even for such simple shapes as boxes, the topology graph is a massive thing. Two options are letting you reduce the complexity of the graph:
+</p>
+
+<ol>
+  <li>Select a boundary element of interest, and build a graph for this element alone.</li>
+  <li>Specify the level of details you want to get out of the topology graph.</li>
+</ol>
+
+<p>
+  The following graph represents a single face selected in the viewer:
+</p>
+
+<div align="center"><img src="../imgs/topograph_box-face.png"/></div>
+
+<p>
+  The color codes of nodes denote different types of boundary elements.
+</p>
+
+<table>
+  <tr>
+    <td class="code-cell" style="background-color: #AAAAAA; color: black;">selected</td>
+    <td class="code-cell" style="background-color: #DA00AA; color: white;">COMPOUND</td>
+    <td class="code-cell" style="background-color: #DA00AA; color: white;">COMPSOLID</td>
+    <td class="code-cell" style="background-color: #DA00AA; color: white;">SOLID</td>
+    <td class="code-cell" style="background-color: #DA00AA; color: white;">SHELL</td>
+  </tr>
+  <tr>
+    <td class="code-cell" style="background-color: #3D84DA; color: white;">FACE</td>
+    <td class="code-cell" style="background-color: #980000; color: white;">WIRE</td>
+    <td class="code-cell" style="background-color: #E50404; color: white;">EDGE</td>
+    <td class="code-cell" style="background-color: #FFF200; color: black;">VERTEX</td>
+    <td class="code-cell" style="background-color: white; color: black;">&nbsp;</td>
+  </tr>
+</table>
+
+<p>
+  The color codes of arcs denote different topological orientations.
+</p>
+
+<table>
+  <tr>
+    <td class="code-cell" style="background-color: #EC4328; color: white;">FORWARD</td>
+    <td class="code-cell" style="background-color: #278BCC; color: white;">REVERSED</td>
+  </tr>
+</table>
+
+<p>
+  To specify the level of details, use the corresponding selector in the corresponding dialog box.
+</p>
+
+<div align="center"><img src="../imgs/topograph_show.png"/></div>
+
+<p>
+  The "colorize locations" checkbox allows one to visualize the <a href="http://quaoar.su/blog/page/check-internal-locations">internal locations</a> of subshapes.
+</p>
+
+<h2>Why bother?</h2>
+
+<p>
+  A topology graph is a low-level thing. You need to work with it, for example, when implementing <a href="./features_euler-ops.html">Euler operators</a>. The topology graph is also a syntactic descriptor of your CAD model that does not specify any geometry. Therefore, if you do some shape editing, you should first ask yourself if it's a topology-only operation (like defeaturing of some isolated CAD features). The topology-only approaches are very efficient and 100% robust if implemented properly.
+</p>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

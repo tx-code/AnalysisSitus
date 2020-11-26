@@ -137,6 +137,15 @@ a.footer-href {
   padding-left: 25px;
   padding-right: 25px;
 }
+.code-cell {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border: 0px;
+  font-size: 18px;
+  font-family: Menlo, Monaco, "Courier New", Courier, monospace;
+}
 .code {
   padding-left: 15px;
   padding-right: 15px;
