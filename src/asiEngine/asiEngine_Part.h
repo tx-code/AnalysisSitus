@@ -237,22 +237,28 @@ public:
   asiEngine_EXPORT void
     HighlightSubShapes(const TopTools_IndexedMapOfShape& subShapes);
 
-  //! Retrieves highlighted sub-shapes from the viewer.
+  //! Retrieves the highlighted sub-shapes from the viewer.
   //! \param[out] subShapes result collection.
   asiEngine_EXPORT void
     GetHighlightedSubShapes(TopTools_IndexedMapOfShape& subShapes);
 
-  //! Retrieves indices of the highlighted faces in a collection
+  //! Retrieves the indices of the highlighted faces in a collection
   //! without repetitions.
   //! \param[out] faceIndices indices of the highlighted faces.
   asiEngine_EXPORT void
     GetHighlightedFaces(TColStd_PackedMapOfInteger& faceIndices);
 
-  //! Retrieves indices of the highlighted edges in a collection
+  //! Retrieves the indices of the highlighted edges in a collection
   //! without repetitions.
   //! \param[out] edgeIndices indices of the highlighted edges.
   asiEngine_EXPORT void
     GetHighlightedEdges(TColStd_PackedMapOfInteger& edgeIndices);
+
+  //! Retrieves the indices of the highlighted vertices in a collection
+  //! without repetitions.
+  //! \param[out] vertIndices indices of the highlighted vertices.
+  asiEngine_EXPORT void
+    GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndices);
 
   //! Finds a pair face for the given seed face.
   //! \param[in]  aag         the attributed adjacency graph to access faces by IDs.

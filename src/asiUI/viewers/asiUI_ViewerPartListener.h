@@ -114,6 +114,7 @@ protected:
   QAction* m_pSetAsVariableAction;
   QAction* m_pFindIsolated;
   QAction* m_pCheckDihAngle;
+  QAction* m_pMeasureLength;
 
 };
 

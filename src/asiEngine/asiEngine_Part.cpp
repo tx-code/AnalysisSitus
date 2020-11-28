@@ -926,3 +926,25 @@ void asiEngine_Part::GetHighlightedEdges(TColStd_PackedMapOfInteger& edgeIndices
       edgeIndices.Add(e);
   }
 }
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Part::GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndices)
+{
+  TopTools_IndexedMapOfShape subShapes;
+  GetHighlightedSubShapes(subShapes);
+  //
+  if ( subShapes.IsEmpty() )
+    return;
+
+  // Take all vertices
+  const TopTools_IndexedMapOfShape&
+    allVertices = m_model->GetPartNode()->GetAAG()->RequestMapOfVertices();
+
+  // Filter out non-selected vertices
+  for ( int v = 1; v <= allVertices.Extent(); ++v )
+  {
+    if ( subShapes.Contains( allVertices(v) ) )
+      vertIndices.Add(v);
+  }
+}

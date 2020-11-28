@@ -284,22 +284,23 @@ void asiUI_ViewerPartListener::onVertexPicked(asiVisu_PickerResult* pickRes)
 void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
 {
   // Get highlighted faces and edges.
-  TColStd_PackedMapOfInteger faceIndices, edgeIndices;
+  TColStd_PackedMapOfInteger faceIndices, edgeIndices, vertIndices;
   //
-  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedFaces(faceIndices);
-  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedEdges(edgeIndices);
+  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedFaces    (faceIndices);
+  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedEdges    (edgeIndices);
+  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedVertices (vertIndices);
 
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();
   //
   if ( part_n.IsNull() || !part_n->IsWellFormed() )
   {
-    m_progress.SendLogMessage( LogErr(Normal) << "Part Node is null or bad-formed" );
+    m_progress.SendLogMessage( LogErr(Normal) << "Part Node is null or bad-formed." );
     return;
   }
 
   // Prepare the context menu items.
-  if ( faceIndices.Extent() || edgeIndices.Extent() )
+  if ( faceIndices.Extent() || edgeIndices.Extent() || vertIndices.Extent() )
   {
     // Add items specific to faces.
     if ( faceIndices.Extent() )
@@ -325,6 +326,12 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     if ( faceIndices.Extent() == 1 || edgeIndices.Extent() == 1 )
     {
       m_pCopyAsStringAction = menu.addAction("Copy as JSON");
+    }
+
+    // Selected items are vertices.
+    if ( vertIndices.Extent() == 2 )
+    {
+      m_pMeasureLength = menu.addAction("Measure length");
     }
   }
 }
@@ -639,5 +646,43 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     //
     m_plotter.REDRAW_VECTOR_AT("FN", FP, FN*glyphCoeff, Color_Red);
     m_plotter.REDRAW_VECTOR_AT("GN", GP, GN*glyphCoeff, Color_Red);
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: measure length
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pMeasureLength )
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get AAG to access vertices by indices.
+    Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+    //
+    if ( aag.IsNull() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "AAG is null.");
+      return;
+    }
+
+    // Get highlighted vertices.
+    TColStd_PackedMapOfInteger vertIndices;
+    partApi.GetHighlightedVertices(vertIndices);
+
+    // Distance between two vertices.
+    if ( vertIndices.Extent() == 2 )
+    {
+      const int iV1 = vertIndices.GetMinimalMapped();
+      const int iV2 = vertIndices.GetMaximalMapped();
+      //
+      TopoDS_Vertex V1 = TopoDS::Vertex( aag->RequestMapOfVertices()(iV1) );
+      TopoDS_Vertex V2 = TopoDS::Vertex( aag->RequestMapOfVertices()(iV2) );
+
+      gp_Pnt P1 = BRep_Tool::Pnt(V1);
+      gp_Pnt P2 = BRep_Tool::Pnt(V2);
+
+      m_plotter.REDRAW_LINK("length", P1, P2, Color_White);
+      m_progress.SendLogMessage( LogInfo(Normal) << "Length between vertices: %1."
+                                                 << P1.Distance(P2) );
+    }
   }
 }

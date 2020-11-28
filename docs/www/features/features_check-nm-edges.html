@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: check non-manifold edges</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/check non-manifold edges
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1>Check non-manifold edges</h1>
+
+<p>
+  The non-manifold edges are the edges that belong to three faces or more. In B-rep modeling kernels, it is advantageous to have a non-manifold topology to construct ad-hoc idealized simulation models. Analysis Situs shows non-manifold edges in yellow right after the model is loaded.
+</p>
+
+<div align="center"><img src="../imgs/nonmanifold_01.png"/></div>
+
+<p>
+  In the model above, the non-manifold topology serves to represent the compartments of a ship hull. The nice implication of having extra non-manifold sharing between the B-rep elements is that it brings conformal mesh subdomains when tessellated for FEA. To get non-manifold edges in Analysis Situs, use the corresponding GUI button in the "Analysis" panel.
+</p>
+
+<div align="center"><img src="../imgs/nonmanifold_02.png"/></div>
+
+<p>
+  It is worth mentioning that non-manifoldness is the property of a geometric kernel. Therefore, to design and analyze non-manifold B-rep entities, one does not have to apply any non-trivial algorithms: all information is encoded right in the <a href="./features_topology-graph.html">topology graph</a>.
+</p>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
