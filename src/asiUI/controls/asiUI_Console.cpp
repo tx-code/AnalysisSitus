@@ -221,7 +221,8 @@ void asiUI_Console::keyPressEvent(QKeyEvent* e)
         // and reuse it so.
 
         const int bbefore = c.blockNumber();
-        c.movePosition(QTextCursor::Down);
+        c.movePosition(QTextCursor::EndOfBlock);
+        c.movePosition(QTextCursor::Down);;
         const int bafter = c.blockNumber();
         //
         if ( bbefore == bafter ) // No next block exists, so the cursor did not move
