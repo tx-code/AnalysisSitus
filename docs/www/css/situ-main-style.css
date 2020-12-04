@@ -184,12 +184,31 @@ ul.light {
 }
 h1 {
   color: rgb(0, 0, 0);
-  border-bottom: 1px dotted rgb(150, 150, 150);
 }
 h2 {
   color: rgb(30, 30, 30);
+  font-size: 26px;
+  border-bottom: 1px dashed rgb(150, 150, 150);
+}
+h3 {
+  color: rgb(50, 50, 50);
   font-size: 22px;
+  font-style: italic;
 }
 :target {
   background-color: #ffa;
+}
+.toc-panel
+{
+  background-color: white;
+  float: right;
+  padding-left: 5px;
+}
+#toc {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px;
+  float: right;
+  background-color: rgb(240, 240, 240);
 }

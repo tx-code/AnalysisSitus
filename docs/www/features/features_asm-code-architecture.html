@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: assemblies code architecture</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/assemblies code architecture
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1 id="toc-asm">Assemblies code architecture</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-asm-preface">Preface</h2>
+
+<p>
+  In boundary representation, we do not have many design choices: any model is composed of vertices, edges and faces. The representation of assemblies is, in contrast, often application-dependent as it expresses not just a shape, but some domain knowledge as well. The attempts to design generic representation schemes for CAD assemblies gave rise to verbose standards like STEP, PRC or JT. A comprehensive representation scheme covers many digital product representation aspects, such as versioning, design review notes, configurations, and many others. While having a rich data model is a must for enterprise applications, you do not really need all these options for the geometry-centric CAD algorithms. Therefore, we will not focus on niche or rare use cases below. In Analysis Situs, we designed our data framework for CAD assemblies based on the following requirements:
+</p>
+
+<ol>
+  <li><i>In-memory access has the first-class support.</i> For performant algorithms, the data should be available in memory. Of course, you cannot store everything in RAM in some scenarios, especially if you work with huge CAD assemblies. Hence the second requirement.</li>
+  <br/>
+  <li><i>Clear implementation-independent API.</i> We have been working with many data frameworks that violated this simple rule not to mix up the exposed API with the implementation details. In some frameworks, it is a B-rep shape that is messed up with the assembly structure. In others, it is the need to call SQL queries to get product structure from databases. A good data model should not bother the caller code with the nuances of its implementation. The underlying technology (whether it is OCAF, Mongo, or Sqlite) should be kept where it is supposed to be: in the engine room.</li>
+  <br/>
+  <li><i>Extensibility.</i> The data framework should expose some extension points so that the client applications are free to add their domain-specific information. Think of all sorts of metadata, including the design review notes mentioned above. A good data model should not fall apart whenever a new object type is added there.</li>
+</ol>
+
+<h2 id="toc-asm-ent">Entities</h2>
+
+<p>
+  Building up a data framework requires careful thinking of the employed primitive types and their interplay. We have derived the entity types based on years of experience in the CAD domain and other products we've ever touched, used or developed ourselves.
+</p>
+
+<h3 id="toc-asm-ent-part">Part</h3>
+
+<p>
+  The first entity type that's one step close to a geometric primitive is a <i>Part</i>. A Part does not have to contain any geometry though. Also, it might contain more than one representation, e.g., you may have a single bolt represented with different levels of detail (LOD). A Part is something <i>instanced</i> in the assembly structure, i.e., it can have multiple occurrences with different locations in the modeling space.
+</p>
+
+<h3 id="toc-asm-ent-subassembly">Subassembly</h3>
+
+<p>
+  A <i>Subassembly</i> is a composite unit containing references (Instances) to several Parts or nested Subassemblies (yeah, recursive definition is intentional here).
+</p>
+
+<h3 id="toc-asm-ent-instance">Instance</h3>
+
+<p>
+  An <i>Instance</i> is a located reference to a Part or Subassembly. An Instance is nested into a Subassembly, i.e., a Subassembly contains Instances as its child elements.
+</p>
+
+<h3 id="toc-asm-ent-prototype">Prototype</h3>
+
+<p>
+  A <i>Prototype</i> is something instanced. I.e., it is either a Part or a Subassembly. A Prototype is a term we use to denote reusable units in the assembly structure.
+</p>
+
+<h3 id="toc-asm-ent-representation">Representation</h3>
+
+<p>
+  A <i>Representation</i> is a piece of geometric data associated with a Prototype. One Prototype may have a set of Representations, e.g., a B-rep and a series of LOD. It is also valid for a Subassembly to have some Representations (hence Representations are attached to Prototypes and not to Parts).
+</p>
+
+<h3 id="toc-asm-ent-subdomain">Subdomain</h3>
+
+<p>
+  A <i>Subdomain</i> is a subset selection of elements in a specific representation. It is assumed that any Representation is indexed in some way (e.g., all B-rep or mesh elements are given numeric IDs), and a Subdomain contains a series of indices of interest. Subdomains capture a geometric region of a Representation that allows for attaching boundary conditions, materials or appearance attributes, such as colors.
+</p>
+
+<h3 id="toc-asm-ent-metadata">Metadata</h3>
+
+<p>
+  A <i>Metadata</i> is an abstract object that can be attached to the following entities:
+</p>
+
+<ol>
+  <li>Prototype.</li>
+  <li>Representation.</li>
+  <li>Subdomain.</li>
+  <li><a href="./features_asm-code-architecture.html#toc-asm-hag-item">Assembly item</a>.</li>
+</ol>
+
+<h2 id="toc-asm-hag">Hierarchical Assembly Graph</h2>
+
+<h3 id="toc-asm-hag-overview">Overview</h3>
+
+<h3 id="toc-asm-hag-item">Assembly item</h3>
+
+<h3 id="toc-asm-hag-scene-tree">Scene tree</h3>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

@@ -87,7 +87,7 @@ public:
   virtual bool
     GetNeighbors(TColStd_PackedMapOfInteger& neighbors) const = 0;
 
-  //! \return face ID of current AAG.
+  //! \return 1-based ID of current face in AAG.
   virtual t_topoId
     GetFaceId() const = 0;
 
