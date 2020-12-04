@@ -50,6 +50,7 @@
 #include <asiAlgo_STEPReduce.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
+#include <asiAlgo_WriteDXF.h>
 
 // VTK includes
 #include <vtkXMLPolyDataWriter.h>
@@ -193,6 +194,105 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save STEP file.");
     return TCL_ERROR;
   }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SaveDxf(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Check arguments.
+  if ( argc < 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get shape to export.
+  TopoDS_Shape shape;
+  std::string  varName;
+  const bool   isVar = interp->GetKeyValue(argc, argv, "var", varName);
+  //
+  if ( !isVar )
+  {
+    // Get Part Node to access shape.
+    Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+    //
+    if ( partNode.IsNull() || !partNode->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+      return TCL_ERROR;
+    }
+    //
+    shape = partNode->GetShape();
+  }
+  else
+  {
+    // Get topological variable.
+    Handle(asiData_IVTopoItemNode)
+      topoItem = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName( varName.c_str() ) );
+    //
+    if ( topoItem.IsNull() || !topoItem->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find topological object with name %1." << varName);
+      return TCL_ERROR;
+    }
+    //
+    shape = topoItem->GetShape();
+  }
+
+  // Get filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, specify filename with -filename key.");
+    return TCL_ERROR;
+  }
+
+  // Get the segment length.
+  double seglen = 0.;
+  //
+  if ( !interp->GetKeyValue<double>(argc, argv, "seglen", seglen) || (seglen < 1e-6) )
+    seglen = 1.0; // The default arc length for freeform curves.
+
+  // Get the format version.
+  int ver = 0;
+  //
+  if ( !interp->GetKeyValue<int>(argc, argv, "ver", ver) )
+    ver = 14;
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Export to DXF.
+  asiAlgo_WriteDXF exportDxf( filename.c_str(),
+                              interp->GetProgress(),
+                              interp->GetPlotter() );
+  //
+  if ( !exportDxf.CanOpen() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Could not open file for writing '%1'."
+                                                        << filename);
+    return TCL_ERROR;
+  }
+
+  // Set props.
+  exportDxf.SetSegmentLength(seglen);
+  exportDxf.SetDxfVersion(ver);
+
+  // Translate and write.
+  if ( !exportDxf.Perform(shape) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Could not export DXF into '%1'."
+                                                        << filename);
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "DXF export")
 
   return TCL_OK;
 }
@@ -441,6 +541,16 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t given name.",
     //
     __FILE__, group, ENGINE_SaveStep);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-dxf",
+    //
+    "save-dxf [-var <var-name>] -filename <filename> [-seglen <seglen>] [-ver <ver>]\n"
+    "\t Exports the shape variable named <var-name> or part shape to DXF file <filename>.\n"
+    "\t Pass the <seglen> optional value to control the discretization of splines.\n"
+    "\t Pass the <ver> optional value to specify the format version of DXF (12 is the default).",
+    //
+    __FILE__, group, ENGINE_SaveDxf);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-brep",

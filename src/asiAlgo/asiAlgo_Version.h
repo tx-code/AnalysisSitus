@@ -28,11 +28,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_Version_h
-#define exe_Version_h
+#ifndef asiAlgo_Version_h
+#define asiAlgo_Version_h
 
 //-----------------------------------------------------------------------------
-// A-Situs version
+// Analysis Situs version
 //-----------------------------------------------------------------------------
 
 #define ASITUS_VERSION_MAJOR 0 // Major: incremented by major releases
