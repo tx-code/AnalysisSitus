@@ -81,7 +81,10 @@
       The C++ entry point to the recognition routine. The recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
     </p>
     <p>
-      The Recognizer contains the main loop of iterating over the B-rep faces. It also looks for the seed faces that look promising to start actual recognition from.
+      The Recognizer contains the main loop of iterating over the B-rep faces. It also looks for the seed faces that look promising to start actual recognition from. Actually, it can just iterate over all faces of the model and let the Rules decide whether they can start recognition from the current face or not.
+    </p>
+    <p>
+      The Recognizer manages the Rules. It may apply several Rules if necessary.
     </p>
   </td>
 </tr>
@@ -93,9 +96,24 @@
     <p>
       For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited notes can be recorded to avoid checking them twice in the main loop.
     </p>
+    <p>
+      One of the fundamental heuristics is the <a href="./features_check-dih-angles.html">dihedral angle</a> between feature faces.
+    </p>
   </td>
 </tr>
 </table>
+
+<h2>Limitations</h2>
+
+<p>
+  There are some limitations in the recognition methods that employ geometric and topological heuristics:
+</p>
+
+<ol>
+  <li>The input model should be a <a href="./features_check-shape.html">valid</a> solid.</li>
+  <li>The CAD faces should be maximized.</li>
+  <li>The canonical faces should be represented with the analytical surfaces (e.g., if a face is visually planar, it needs to be declared as a plane in the underlying B-rep).</li>
+</ol>
 
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">
