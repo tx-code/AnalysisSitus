@@ -65,6 +65,38 @@
   There is a bit of ambiguity in referring to some feature recognition approach as "graph-based." For example, <a href="./features_find-isomorphous-faces.html">finding isomorphous faces</a> is completely abstract and graph-based as it searches for a pattern's subgraph in the entire model's <a href="./features_aag.html">AAG</a>. At the same time, the rule-based approach is also graph-based as it matches just the same AAG, though in different ways (i.e., by iteration). Therefore, we avoid using this "graph-based" naming in Analysis Situs.
 </p>
 
+<h2>More on rule-based approach</h2>
+
+<p>
+  Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
+</p>
+
+<table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
+<tr>
+  <td align="center" class="table-content-header">
+    Recognizer
+  </td>
+  <td class="table-content-block">
+    <p>
+      The C++ entry point to the recognition routine. The recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
+    </p>
+    <p>
+      The Recognizer contains the main loop of iterating over the B-rep faces. It also looks for the seed faces that look promising to start actual recognition from.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td align="center" class="table-content-header">
+    Rule
+  </td>
+  <td class="table-content-block">
+    <p>
+      For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited notes can be recorded to avoid checking them twice in the main loop.
+    </p>
+  </td>
+</tr>
+</table>
+
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">
 <tr>
