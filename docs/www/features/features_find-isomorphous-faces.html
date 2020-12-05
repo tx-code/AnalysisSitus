@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: find subgraph isomorphisms</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/isomorphism
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</table></tr></td>
+
+<h1>Find isomorphous faces</h1>
+
+<p>
+  Searching for subgraph isomorphisms has been considered as a general way of a feature matching over the past decades. Although this method is known to possess high complexity, it has remarkable advantages over the rule-based approaches which employ ad-hoc shape interrogation procedures. The primary benefit of the subgraph isomorphism method is its ability to handle custom feature definitions (i.e., the user's features). It is a single common algorithm that operates with whatever feature descriptors represented with their AAG subgraphs. In practice, the availability of isomorphism searching algorithms allows users of a geometric modeling system to specify their features using a formal graph language or simply by interactive picking of feature faces.
+</p>
+
+<p>
+  The computational complexity of subgraph isomorphism is O(N^K), where N is the number of faces in the problem graph, and K is the number of feature faces to match. While such a complexity implies a computationally exhaustive implementation, the overall approach remains practical. An appropriate set of topological and geometric heuristics should be employed to reduce computation time. The purpose of heuristics is two-fold. First, by preliminary elimination of some nodes from the CAD model's AAG, one reduces the dimension of a problem, i.e., the employed adjacency matrix. Second, eliminating impossible bijections from the candidate isomorphism matrix reduces the number of checks, making the overall computation less intensive than in a general case.
+</p>
+
+<p>
+  You can find more information on this approach in our paper <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a>.
+</p>
+
+<p>
+  
+</p>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
