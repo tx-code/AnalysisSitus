@@ -6,6 +6,7 @@ project(asiAlgo)
 
 set (H_FILES
   asiAlgo.h
+  asiAlgo_Version.h
 )
 set (CPP_FILES
 )
@@ -225,7 +226,7 @@ set (features_H_FILES
   features/asiAlgo_FeatureAttrAngle.h
   features/asiAlgo_FeatureAttrFace.h
   features/asiAlgo_FeatureFaces.h
-        features/asiAlgo_FeatureType.h
+  features/asiAlgo_FeatureType.h
   features/asiAlgo_Isomorphism.h
   features/asiAlgo_RecognizeIsolated.h
   features/asiAlgo_Recognizer.h
@@ -263,9 +264,11 @@ set (interop_H_FILES
   interop/asiAlgo_ReadSTEPWithMetaOutput.h
   interop/asiAlgo_STEP.h
   interop/asiAlgo_STEPReduce.h
+  interop/asiAlgo_WriteDXF.h
   interop/asiAlgo_WriteREK.h
   interop/asiAlgo_WriteSTEPWithMeta.h
   interop/asiAlgo_WriteSTEPWithMetaInput.h
+  interop/dxf.h
 )
 set (interop_CPP_FILES
   interop/asiAlgo_FileFormat.cpp
@@ -275,8 +278,11 @@ set (interop_CPP_FILES
   interop/asiAlgo_ReadSTEPWithMeta.cpp
   interop/asiAlgo_STEP.cpp
   interop/asiAlgo_STEPReduce.cpp
+  interop/asiAlgo_WriteDXF.cpp
   interop/asiAlgo_WriteREK.cpp
   interop/asiAlgo_WriteSTEPWithMeta.cpp
+  interop/dxf.cpp
+  interop/dxf_plate.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -33,13 +33,15 @@
 
 // exe includes
 #include <exe_CommonFacilities.h>
-#include <exe_Version.h>
 
 // asiUI includes
 #include <asiUI_ParamEditorImpl.h>
 #include <asiUI_ParameterEditorListenerDefault.h>
 #include <asiUI_StatusBar.h>
 #include <asiUI_StatusBarImpl.h>
+
+// asiAlgo includes
+#include <asiAlgo_Version.h>
 
 // asiTcl includes
 #include <asiTcl_Plugin.h>

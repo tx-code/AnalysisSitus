@@ -1,0 +1,1102 @@
+#include <unordered_map>
+
+//-----------------------------------------------------------------------------
+
+//! DXF plate blocks.
+static std::unordered_map<std::string, std::string>
+  __dxfBlocks = {
+
+/* ------------------------- */
+{"blocks10.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+BLOCKS\n\
+  0\n\
+BLOCK\n\
+  5\n\
+60\n\
+  2\n\
+*MODEL_SPACE\n\
+ 70\n\
+    0\n\
+ 10\n\
+0.0\n\
+ 20\n\
+0.0\n\
+ 30\n\
+0.0\n\
+  3\n\
+*MODEL_SPACE\n\
+  1\n\
+\n\
+  0\n\
+ENDBLK\n\
+"},
+
+/* ------------------------- */
+{"blocks112.rub",
+/* ------------------------- */
+""},
+
+/* ------------------------- */
+{"blocks114.rub",
+/* ------------------------- */
+""},
+
+/* ------------------------- */
+{"classes14.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+CLASSES\n\
+  0\n\
+CLASS\n\
+  1\n\
+ACDBDICTIONARYWDFLT\n\
+  2\n\
+AcDbDictionaryWithDefault\n\
+  3\n\
+ObjectDBX Classes\n\
+ 90\n\
+        0\n\
+280\n\
+     0\n\
+281\n\
+     0\n\
+  0\n\
+CLASS\n\
+  1\n\
+XRECORD\n\
+  2\n\
+AcDbXrecord\n\
+  3\n\
+ObjectDBX Classes\n\
+ 90\n\
+        0\n\
+280\n\
+     0\n\
+281\n\
+     0\n\
+  0\n\
+CLASS\n\
+  1\n\
+LWPOLYLINE\n\
+  2\n\
+AcDbPolyline\n\
+  3\n\
+ObjectDBX Classes\n\
+ 90\n\
+        0\n\
+280\n\
+     0\n\
+281\n\
+     1\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"entities0.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+ENTITIES\n\
+"},
+
+/* ------------------------- */
+{"entities12.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+ENTITIES\n\
+"},
+
+/* ------------------------- */
+{"entities14.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+ENTITIES\n\
+"},
+
+/* ------------------------- */
+{"header0.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+HEADER\n\
+  9\n\
+$DIMSTYLE\n\
+  2\n\
+STANDARD\n\
+  9\n\
+$MEASUREMENT\n\
+ 70\n\
+1\n\
+  9\n\
+$TEXTSIZE\n\
+ 40\n\
+3.5\n\
+  9\n\
+$TEXTSTYLE\n\
+  7\n\
+STANDARD\n\
+  9\n\
+$DIMTXT\n\
+ 40\n\
+3.5\n\
+  9\n\
+$HANDLING\n\
+ 70\n\
+0\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"header12.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+HEADER\n\
+  9\n\
+$ACADVER\n\
+  1\n\
+AC1009\n\
+  9\n\
+$DWGCODEPAGE\n\
+  3\n\
+ANSI_1252\n\
+  9\n\
+$TEXTSTYLE\n\
+  7\n\
+STANDARD\n\
+  9\n\
+$DIMSTYLE\n\
+  2\n\
+STANDARD\n\
+  9\n\
+$DIMTXSTY\n\
+  7\n\
+STANDARD\n\
+  9\n\
+$CMLSTYLE\n\
+  2\n\
+STANDARD\n\
+  9\n\
+$HANDLING\n\
+ 70\n\
+0\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"header14.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+HEADER\n\
+  9\n\
+$ACADVER\n\
+  1\n\
+AC1014\n\
+  9\n\
+$ACADMAINTVER\n\
+ 70\n\
+     9\n\
+  9\n\
+$DWGCODEPAGE\n\
+  3\n\
+ANSI_1252\n\
+  9\n\
+$TEXTSTYLE\n\
+  7\n\
+STANDARD\n\
+  9\n\
+$DIMSTYLE\n\
+  2\n\
+STANDARD\n\
+  9\n\
+$DIMTXSTY\n\
+  7\n\
+STANDARD\n\
+  9\n\
+$CMLSTYLE\n\
+  2\n\
+STANDARD\n\
+  9\n\
+$PEXTMAX\n\
+ 10\n\
+50\n\
+ 20\n\
+50\n\
+ 30\n\
+50\n\
+  9\n\
+$PEXTMIN\n\
+ 10\n\
+0\n\
+ 20\n\
+0\n\
+ 30\n\
+0\n\
+  9\n\
+$HANDSEED\n\
+  5\n\
+FFFF\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"objects14.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+OBJECTS\n\
+  0\n\
+DICTIONARY\n\
+  5\n\
+F000\n\
+330\n\
+0\n\
+100\n\
+AcDbDictionary\n\
+  3\n\
+ACAD_GROUP\n\
+350\n\
+F001\n\
+  0\n\
+DICTIONARY\n\
+  5\n\
+F001\n\
+330\n\
+F000\n\
+100\n\
+AcDbDictionary\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"tables10.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+TABLES\n\
+  0\n\
+TABLE\n\
+  0\n\
+VPORT\n\
+  2\n\
+VPORT\n\
+  5\n\
+20\n\
+ 70\n\
+    0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  0\n\
+LTYPE\n\
+  5\n\
+22\n\
+  2\n\
+CONTINUOUS\n\
+  3\n\
+Solid line\n\
+ 70\n\
+    0\n\
+ 72\n\
+   65\n\
+ 73\n\
+    0\n\
+ 40\n\
+0.0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  0\n\
+STYLE\n\
+  5\n\
+26\n\
+  2\n\
+STANDARD\n\
+  3\n\
+TXT\n\
+ 70\n\
+    3\n\
+  5\n\
+27\n\
+ 70\n\
+    0\n\
+ 40\n\
+0\n\
+ 41\n\
+1\n\
+ 50\n\
+0\n\
+ 71\n\
+    0\n\
+ 42\n\
+1\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+DIMSTYLE\n\
+  5\n\
+55\n\
+ 70\n\
+    1\n\
+  0\n\
+DIMSTYLE\n\
+105\n\
+56\n\
+  2\n\
+STANDARD\n\
+ 70\n\
+   0\n\
+ 40\n\
+   1\n\
+ 41\n\
+0.18\n\
+ 42\n\
+0.0625\n\
+ 43\n\
+0.38\n\
+ 44\n\
+0.18\n\
+ 45\n\
+0.0\n\
+ 46\n\
+0.0\n\
+ 47\n\
+0.0\n\
+ 48\n\
+0\n\
+ 49\n\
+1\n\
+140\n\
+0.18\n\
+141\n\
+0.09\n\
+142\n\
+0.0\n\
+143\n\
+25.4\n\
+144\n\
+1.0\n\
+145\n\
+0.0\n\
+146\n\
+1.0\n\
+147\n\
+0.09\n\
+ 71\n\
+   0\n\
+ 72\n\
+   0\n\
+ 73\n\
+   1\n\
+ 74\n\
+   1\n\
+ 75\n\
+   0\n\
+ 76\n\
+   0\n\
+ 77\n\
+   0\n\
+ 78\n\
+   0\n\
+170\n\
+   0\n\
+171\n\
+   2\n\
+172\n\
+   0\n\
+173\n\
+   0\n\
+174\n\
+   0\n\
+175\n\
+   0\n\
+176\n\
+   0\n\
+177\n\
+   0\n\
+178\n\
+0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  0\n\
+LAYER\n\
+  2\n\
+LAYER\n\
+  5\n\
+28\n\
+ 70\n\
+   1\n\
+  5\n\
+29\n\
+  2\n\
+0\n\
+ 70\n\
+   0\n\
+ 62\n\
+   7\n\
+  6\n\
+CONTINUOUS\n\
+"},
+
+/* ------------------------- */
+{"tables112.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+TABLES\n\
+  0\n\
+TABLE\n\
+  2\n\
+VPORT\n\
+  5\n\
+20\n\
+ 70\n\
+    1\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+LTYPE\n\
+  5\n\
+22\n\
+ 70\n\
+     1\n\
+  0\n\
+LTYPE\n\
+  5\n\
+23\n\
+  2\n\
+BYLAYER\n\
+ 70\n\
+     0\n\
+  3\n\
+NORMAL\n\
+ 72\n\
+    65\n\
+ 73\n\
+1\n\
+ 40\n\
+1\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+STYLE\n\
+  5\n\
+24\n\
+ 70\n\
+   1\n\
+  0\n\
+STYLE\n\
+  5\n\
+26\n\
+  2\n\
+STANDARD\n\
+  3\n\
+txt\n\
+ 70\n\
+   0\n\
+ 40\n\
+   0\n\
+ 41\n\
+   1\n\
+ 50\n\
+   0\n\
+ 71\n\
+   0\n\
+ 42\n\
+   1\n\
+  4\n\
+\n\
+  0\n\
+ENDTAB\n\
+"},
+
+/* ------------------------- */
+{"tables114.rub",
+/* ------------------------- */
+"  0\n\
+SECTION\n\
+  2\n\
+TABLES\n\
+  0\n\
+TABLE\n\
+  2\n\
+VPORT\n\
+  5\n\
+20\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     1\n\
+  0\n\
+VPORT\n\
+  5\n\
+21\n\
+330\n\
+20\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbViewportTableRecord\n\
+  2\n\
+*ACTIVE\n\
+ 70\n\
+     0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+LTYPE\n\
+  5\n\
+22\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     1\n\
+  0\n\
+LTYPE\n\
+  5\n\
+23\n\
+330\n\
+21\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbLinetypeTableRecord\n\
+  2\n\
+BYBLOCK\n\
+ 70\n\
+     0\n\
+  3\n\
+\n\
+ 72\n\
+    65\n\
+ 73\n\
+     0\n\
+ 40\n\
+0.0\n\
+  0\n\
+LTYPE\n\
+  5\n\
+24\n\
+330\n\
+21\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbLinetypeTableRecord\n\
+  2\n\
+BYLAYER\n\
+ 70\n\
+     0\n\
+  3\n\
+\n\
+ 72\n\
+    65\n\
+ 73\n\
+     0\n\
+ 40\n\
+0.0\n\
+  0\n\
+LTYPE\n\
+  5\n\
+25\n\
+330\n\
+21\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbLinetypeTableRecord\n\
+  2\n\
+CONTINUOUS\n\
+ 70\n\
+     0\n\
+  3\n\
+Solid line\n\
+ 72\n\
+    65\n\
+ 73\n\
+     0\n\
+ 40\n\
+0.0\n\
+  0\n\
+ENDTAB\n\
+"},
+
+/* ------------------------- */
+{"tables20.rub",
+/* ------------------------- */
+"  0\n\
+ENDTAB\n\
+  0\n\
+ENDSEC\n\
+"},
+
+/* ------------------------- */
+{"tables212.rub",
+/* ------------------------- */
+"  0\n\
+TABLE\n\
+  2\n\
+VIEW\n\
+  5\n\
+50\n\
+ 70\n\
+   0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+UCS\n\
+  5\n\
+51\n\
+ 70\n\
+   0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+APPID\n\
+  5\n\
+52\n\
+ 70\n\
+   3\n\
+  0\n\
+APPID\n\
+  5\n\
+53\n\
+  2\n\
+ACAD\n\
+ 70\n\
+   0\n\
+  0\n\
+APPID\n\
+  5\n\
+54\n\
+  2\n\
+FreeCAD\n\
+ 70\n\
+    0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+DIMSTYLE\n\
+  5\n\
+55\n\
+ 70\n\
+   2\n\
+  0\n\
+DIMSTYLE\n\
+105\n\
+56\n\
+  2\n\
+STANDARD\n\
+ 70\n\
+   0\n\
+  3\n\
+0\n\
+  4\n\
+0\n\
+  5\n\
+0\n\
+  6\n\
+0\n\
+  7\n\
+0\n\
+ 40\n\
+   1\n\
+ 41\n\
+0.18\n\
+ 42\n\
+0.0625\n\
+ 43\n\
+0.38\n\
+ 44\n\
+0.18\n\
+ 45\n\
+0.0\n\
+ 46\n\
+0.0\n\
+ 47\n\
+0.0\n\
+ 48\n\
+0\n\
+140\n\
+0.18\n\
+141\n\
+0.09\n\
+142\n\
+0.0\n\
+143\n\
+25.4\n\
+144\n\
+1.0\n\
+145\n\
+0.0\n\
+146\n\
+1.0\n\
+147\n\
+0.09\n\
+ 71\n\
+   0\n\
+ 72\n\
+   0\n\
+ 73\n\
+   1\n\
+ 74\n\
+   1\n\
+ 75\n\
+   0\n\
+ 76\n\
+   0\n\
+ 77\n\
+   0\n\
+ 78\n\
+   0\n\
+170\n\
+   0\n\
+171\n\
+   2\n\
+172\n\
+   0\n\
+173\n\
+   0\n\
+174\n\
+   0\n\
+175\n\
+   0\n\
+176\n\
+   0\n\
+177\n\
+   0\n\
+178\n\
+   0\n\
+  0\n\
+ENDTAB\n\
+"},
+
+/* ------------------------- */
+{"tables214.rub",
+/* ------------------------- */
+"  0\n\
+TABLE\n\
+  2\n\
+STYLE\n\
+  5\n\
+70\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     2\n\
+  0\n\
+STYLE\n\
+  5\n\
+71\n\
+330\n\
+70\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbTextStyleTableRecord\n\
+  2\n\
+STANDARD\n\
+ 70\n\
+     0\n\
+ 40\n\
+0.0\n\
+ 41\n\
+1.0\n\
+ 50\n\
+0.0\n\
+ 71\n\
+     0\n\
+ 42\n\
+2.5\n\
+  3\n\
+arial.ttf\n\
+  4\n\
+\n\
+  0\n\
+STYLE\n\
+  5\n\
+72\n\
+330\n\
+70\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbTextStyleTableRecord\n\
+  2\n\
+ANNOTATIVE\n\
+ 70\n\
+     0\n\
+ 40\n\
+0.0\n\
+ 41\n\
+1.0\n\
+ 50\n\
+0.0\n\
+ 71\n\
+     0\n\
+ 42\n\
+2.5\n\
+  3\n\
+arial.ttf\n\
+  4\n\
+\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+VIEW\n\
+  5\n\
+73\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+UCS\n\
+  5\n\
+74\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+APPID\n\
+  5\n\
+75\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     2\n\
+  0\n\
+APPID\n\
+  5\n\
+76\n\
+330\n\
+75\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbRegAppTableRecord\n\
+  2\n\
+ACAD\n\
+ 70\n\
+     0\n\
+  0\n\
+APPID\n\
+  5\n\
+77\n\
+330\n\
+75\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbRegAppTableRecord\n\
+  2\n\
+ACADANNOTATIVE\n\
+ 70\n\
+     0\n\
+  0\n\
+ENDTAB\n\
+  0\n\
+TABLE\n\
+  2\n\
+DIMSTYLE\n\
+  5\n\
+78\n\
+330\n\
+0\n\
+100\n\
+AcDbSymbolTable\n\
+ 70\n\
+     2\n\
+  0\n\
+DIMSTYLE\n\
+105\n\
+79\n\
+330\n\
+78\n\
+100\n\
+AcDbSymbolTableRecord\n\
+100\n\
+AcDbDimStyleTableRecord\n\
+  2\n\
+STANDARD\n\
+ 70\n\
+     0\n\
+  3\n\
+\n\
+  4\n\
+\n\
+  5\n\
+\n\
+  6\n\
+\n\
+  7\n\
+\n\
+ 40\n\
+0.0\n\
+ 41\n\
+2.5\n\
+ 42\n\
+0.625\n\
+ 43\n\
+3.75\n\
+ 44\n\
+1.25\n\
+ 45\n\
+0.0\n\
+ 46\n\
+0.0\n\
+ 47\n\
+0.0\n\
+ 48\n\
+0.0\n\
+140\n\
+2.5\n\
+141\n\
+2.5\n\
+142\n\
+0.0\n\
+143\n\
+0.03937007874016\n\
+144\n\
+1.0\n\
+145\n\
+0.0\n\
+146\n\
+1.0\n\
+147\n\
+0.625\n\
+ 71\n\
+     0\n\
+ 72\n\
+     0\n\
+ 73\n\
+     0\n\
+ 74\n\
+     0\n\
+ 75\n\
+     0\n\
+ 76\n\
+     0\n\
+ 77\n\
+     1\n\
+ 78\n\
+     8\n\
+170\n\
+     0\n\
+171\n\
+     3\n\
+172\n\
+     1\n\
+173\n\
+     0\n\
+174\n\
+     0\n\
+175\n\
+     0\n\
+176\n\
+     0\n\
+177\n\
+     0\n\
+178\n\
+     0\n\
+270\n\
+     2\n\
+271\n\
+     2\n\
+272\n\
+     2\n\
+273\n\
+     2\n\
+274\n\
+     3\n\
+340\n\
+71\n\
+275\n\
+     0\n\
+280\n\
+     0\n\
+281\n\
+     0\n\
+282\n\
+     0\n\
+283\n\
+     0\n\
+284\n\
+     8\n\
+285\n\
+     0\n\
+286\n\
+     0\n\
+287\n\
+     3\n\
+288\n\
+     0\n\
+  0\n\
+ENDTAB\n\
+"}
+
+};
