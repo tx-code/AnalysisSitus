@@ -70,6 +70,7 @@
 asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*              wViewerPart,
                                                    asiUI_ViewerDomain*            wViewerDomain,
                                                    asiUI_ViewerHost*              wViewerHost,
+                                                   asiUI_ObjectBrowser*           wBrowser,
                                                    const Handle(asiEngine_Model)& model,
                                                    ActAPI_ProgressEntry           progress,
                                                    ActAPI_PlotterEntry            plotter)
@@ -77,6 +78,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
 : asiUI_Viewer3dListener  (wViewerPart, model, progress, plotter),
   m_wViewerDomain         (wViewerDomain),
   m_wViewerHost           (wViewerHost),
+  m_wBrowser              (wBrowser),
   m_pSaveBREPAction       (nullptr),
   m_pShowNormsAction      (nullptr),
   m_pInvertFacesAction    (nullptr),
@@ -315,6 +317,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       m_pInvertFacesAction = menu.addAction("Invert faces");
       m_pFindIsolated      = menu.addAction("Find isolated");
       m_pCheckDihAngle     = menu.addAction("Check dihedral angle");
+      m_pAddAsFeature      = menu.addAction("Add as feature");
     }
 
     menu.addSeparator();
@@ -646,6 +649,36 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     //
     m_plotter.REDRAW_VECTOR_AT("FN", FP, FN*glyphCoeff, Color_Red);
     m_plotter.REDRAW_VECTOR_AT("GN", GP, GN*glyphCoeff, Color_Red);
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: add as feature
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pAddAsFeature )
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get highlighted faces.
+    asiAlgo_Feature faceIndices;
+    partApi.GetHighlightedFaces(faceIndices);
+
+    // Add Data Node.
+    m_model->OpenCommand();
+    {
+      const int numFeatures = partApi.GetNumOfFeatures();
+
+      // Get feature to store the recognition result.
+      Handle(asiData_FeatureNode)
+        featureNode = partApi.FindFeature(numFeatures + 1, true);
+
+      // Store indices.
+      featureNode->SetMask(faceIndices);
+    }
+    m_model->CommitCommand();
+
+    // Update object browser.
+    if ( m_wBrowser )
+      m_wBrowser->Populate();
   }
 
   //---------------------------------------------------------------------------

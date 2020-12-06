@@ -2504,11 +2504,6 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
                            int                          argc,
                            const char**                 argv)
 {
-  if ( argc > 6 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   // Attempt to read the seed face.
   int fid = 0;
   TCollection_AsciiString fidStr;
@@ -2526,6 +2521,9 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
   // Get EBF/VBF qualifier.
   const bool isEbf = interp->HasKeyword(argc, argv, "ebf");
   const bool isVbf = interp->HasKeyword(argc, argv, "vbf");
+
+  // Whether to store the recognition result.
+  const bool isStore = interp->HasKeyword(argc, argv, "store");
 
   // Get part.
   Handle(asiData_PartNode)
@@ -2581,10 +2579,32 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
     featureRes->GetFaceIndices(resIndices);
   }
 
+  asiEngine_Part partApi( cmdEngine::model,
+                          cmdEngine::cf->ViewerPart->PrsMgr() );
+
   // Highlight the detected faces.
   if ( !cmdEngine::cf.IsNull() && cmdEngine::cf->ViewerPart )
-    asiEngine_Part( cmdEngine::model,
-                    cmdEngine::cf->ViewerPart->PrsMgr() ).HighlightFaces(resIndices);
+    partApi.HighlightFaces(resIndices);
+
+  if ( isStore )
+  {
+    cmdEngine::model->OpenCommand();
+    {
+      const int numFeatures = partApi.GetNumOfFeatures();
+
+      // Get feature to store the recognition result.
+      Handle(asiData_FeatureNode)
+        featureNode = partApi.FindFeature(numFeatures + 1, true);
+
+      // Store indices.
+      featureNode->SetMask(resIndices);
+    }
+    cmdEngine::model->CommitCommand();
+
+    // Update object browser.
+    if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+      cmdEngine::cf->ObjectBrowser->Populate();
+  }
 
   // Dump to result.
   *interp << resIndices;
@@ -3532,12 +3552,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("recognize-blends",
     //
-    "recognize-blends [-radius <r>] [-fid <id>] [{-ebf | -vbf}]\n"
+    "recognize-blends [-radius <r>] [-fid <id>] [{-ebf | -vbf}] [-store]\n"
     "\t Recognizes all blend faces in AAG representing the part. The optional\n"
     "\t '-fid' key allows to specify the face ID to start recognition from.\n"
     "\t The optional '-radius' key allows to limit the recognized radius.\n"
     "\t The optional '-ebf|-vbf' keys allows you to find the blend faces of\n"
-    "\t a certain type (EBF = edge-blend face, VBF = vertex-blend face).",
+    "\t a certain type (EBF = edge-blend face, VBF = vertex-blend face).\n"
+    "\t If the '-store' key is passed, the recognized faces will be stored\n"
+    "\t as a feature under the Part Node.",
     //
     __FILE__, group, ENGINE_RecognizeBlends);
 

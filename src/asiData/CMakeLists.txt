@@ -35,6 +35,8 @@ set (part_H_FILES
   part/asiData_FaceNode.h
   part/asiData_FaceNodeBase.h
   part/asiData_FaceNormsNode.h
+  part/asiData_FeatureNode.h
+  part/asiData_FeaturesNode.h
   part/asiData_MetadataNode.h
   part/asiData_NamingAttr.h
   part/asiData_NamingParameter.h
@@ -60,6 +62,8 @@ set (part_CPP_FILES
   part/asiData_FaceNode.cpp
   part/asiData_FaceNodeBase.cpp
   part/asiData_FaceNormsNode.cpp
+  part/asiData_FeatureNode.cpp
+  part/asiData_FeaturesNode.cpp
   part/asiData_MetadataNode.cpp
   part/asiData_NamingAttr.cpp
   part/asiData_NamingParameter.cpp

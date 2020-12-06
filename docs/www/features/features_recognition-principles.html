@@ -78,10 +78,10 @@
   </td>
   <td class="table-content-block">
     <p>
-      The C++ entry point to the recognition routine. The recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
+      The C++ class, which is the entry point to the recognition routine. The Recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
     </p>
     <p>
-      The Recognizer contains the main loop of iterating over the B-rep faces. It also looks for the seed faces that look promising to start actual recognition from. Actually, it can just iterate over all faces of the model and let the Rules decide whether they can start recognition from the current face or not.
+      The Recognizer contains the main loop of iterating over the B-rep faces. It may also search for the seed faces that look promising to start actual recognition from. Actually, it can just iterate over all faces of the model and let the Rules (see below) decide whether they can start recognition from the current face or not.
     </p>
     <p>
       The Recognizer manages the Rules. It may apply several Rules if necessary.
@@ -96,12 +96,33 @@
     <p>
       For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited notes can be recorded to avoid checking them twice in the main loop.
     </p>
-    <p>
+    <div class="note">
       One of the fundamental heuristics is the <a href="./features_check-dih-angles.html">dihedral angle</a> between feature faces.
+    </div>
+    <p>
+      A typical Rule employs the following stages:
+    </p>
+    <ol>
+      <li><i>Get ready:</i> take the current face and mark it as "visited."</li>
+      <li><i>Apply heuristics:</i> attempt to recognize a feature starting from the current face inclusively (the iterated faces are marked as "visited" down the road).</li>
+      <li><i>Compose the result:</i> in case of success, and return all "visited" faces as a result.</li>
+    </ol>
+    <p>
+      The Recognizer checks the Rule's status at each iteration. If a Rule fails, the Recognizer cancels the "visited" faces returned by a Rule. If a Rule succeeds, the Recognizer makes sure to skip the visited faces, i.e., to avoid passing them as new seeds at subsequent iterations.
     </p>
   </td>
 </tr>
 </table>
+
+<h2>Recognition workflow</h2>
+
+<p>
+  The feature recognition tools available in Analysis Situs might be combined freely. They all work on the AAG constructed out of the initial shape. You may choose to build up a new AAG each time you run a recognizer or, alternatively, reuse the same AAG and collect all recognized features as its attributes. Whatever option you prefer, the recognizers will give you a series of indices to address the detected feature faces uniquely.
+</p>
+
+<p>
+  Imagine you detect all cylindrical holes in the model using the rule-based approach. Let's also assume that the applied rule does not differentiate between different types of holes, i.e., you get through, blind, countersunk, and counterbored holes all in one result set. To distinguish between various hole types, you can apply isomorphism matching. That would be a good idea since the rule-based recognizers have narrowed down the entire search space, and you have as many connected components out of the initial AAG as many features were detected. Finding isomorphous faces is a computationally expensive operation, and partitioning the initial graph will speed up the process drastically (see <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a> for more details).
+</p>
 
 <h2>Limitations</h2>
 

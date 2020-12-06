@@ -37,6 +37,9 @@
 // asiData includes
 #include <asiData_ElemMetadataNode.h>
 
+// asiEngine includes
+#include <asiEngine_Part.h>
+
 //-----------------------------------------------------------------------------
 
 asiUI_ObjectBrowserListener::asiUI_ObjectBrowserListener(const Handle(asiUI_CommonFacilities)& cf)
@@ -78,6 +81,10 @@ void asiUI_ObjectBrowserListener::processNode(const ActAPI_DataObjectId& nid)
   if ( node.IsNull() || !node->IsWellFormed() )
     return;
 
+  /* ==================
+   *  Metadata element.
+   * ================== */
+
   if ( node->IsInstance( STANDARD_TYPE(asiData_ElemMetadataNode) ) )
   {
     Handle(asiData_ElemMetadataNode)
@@ -93,5 +100,25 @@ void asiUI_ObjectBrowserListener::processNode(const ActAPI_DataObjectId& nid)
       m_cf->Progress.SendLogMessage(LogInfo(Normal) << "Sub-shape is ALIVE.");
     else
       m_cf->Progress.SendLogMessage(LogWarn(Normal) << "Sub-shape is DEAD.");
+  }
+
+  /* ==================
+   *  Metadata element.
+   * ================== */
+
+  if ( node->IsInstance( STANDARD_TYPE(asiData_FeatureNode) ) )
+  {
+    Handle(asiData_FeatureNode)
+      fn = Handle(asiData_FeatureNode)::DownCast(node);
+
+    // Get feature.
+    asiAlgo_Feature feature;
+    fn->GetMask(feature);
+    //
+    m_cf->Progress.SendLogMessage(LogInfo(Normal) << "Feature faces: %1." << feature);
+
+    // Select feature faces.
+    asiEngine_Part( m_cf->Model,
+                    m_cf->ViewerPart->PrsMgr() ).HighlightFaces(feature);
   }
 }

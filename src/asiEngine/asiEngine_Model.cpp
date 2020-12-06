@@ -80,6 +80,8 @@ REGISTER_NODE_TYPE(asiData_TolerantShapesNode)
 REGISTER_NODE_TYPE(asiData_TolerantRangeNode)
 REGISTER_NODE_TYPE(asiData_MetadataNode)
 REGISTER_NODE_TYPE(asiData_ElemMetadataNode)
+REGISTER_NODE_TYPE(asiData_FeaturesNode)
+REGISTER_NODE_TYPE(asiData_FeatureNode)
 REGISTER_NODE_TYPE(asiData_DeviationNode)
 REGISTER_NODE_TYPE(asiData_OctreeNode)
 REGISTER_NODE_TYPE(asiData_ThicknessNode)
@@ -217,6 +219,22 @@ Handle(asiData_MetadataNode) asiEngine_Model::GetMetadataNode() const
   return nullptr;
 }
 
+
+//-----------------------------------------------------------------------------
+
+//! \return Features Node attached to the Part Node.
+Handle(asiData_FeaturesNode) asiEngine_Model::GetFeaturesNode() const
+{
+  for ( ActData_BasePartition::Iterator it( this->GetFeaturesPartition() ); it.More(); it.Next() )
+  {
+    Handle(asiData_FeaturesNode) N = Handle(asiData_FeaturesNode)::DownCast( it.Value() );
+    //
+    if ( !N.IsNull() && N->IsWellFormed() )
+      return N;
+  }
+  return nullptr;
+}
+
 //-----------------------------------------------------------------------------
 
 //! \return single Triangulation Node.
@@ -287,6 +305,8 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_PartNode>,           Partition_Part);
   REGISTER_PARTITION(asiData_Partition<asiData_MetadataNode>,       Partition_Metadata);
   REGISTER_PARTITION(asiData_Partition<asiData_ElemMetadataNode>,   Partition_ElemMetadata);
+  REGISTER_PARTITION(asiData_Partition<asiData_FeaturesNode>,       Partition_Features);
+  REGISTER_PARTITION(asiData_Partition<asiData_FeatureNode>,        Partition_Feature);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceNode>,           Partition_Face);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceNormsNode>,      Partition_FaceNorms);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceContourNode>,    Partition_FaceContour);

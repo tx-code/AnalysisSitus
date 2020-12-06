@@ -87,6 +87,8 @@ public:
     CheckDeviation(const Handle(asiData_IVPointSetNode)& pcNode,
                    Handle(asiData_DeviationNode)&        devNode);
 
+public:
+
   //! Creates metadata holder.
   //! \return Metadata Node.
   asiEngine_EXPORT Handle(asiData_MetadataNode)
@@ -127,6 +129,45 @@ public:
   asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
     FindElemMetadata(const TopoDS_Shape& shape,
                      const bool          create = false);
+public:
+
+  //! Creates Features Node.
+  //! \return Features Node.
+  asiEngine_EXPORT Handle(asiData_FeaturesNode)
+    CreateFeatures();
+
+  //! Creates Feature Node.
+  //! \param[in] name    name of the Node.
+  //! \param[in] id      feature ID.
+  //! \param[in] feature feature to set.
+  //! \return Feature Node.
+  asiEngine_EXPORT Handle(asiData_FeatureNode)
+    CreateFeature(const TCollection_ExtendedString& name,
+                  const int                         id,
+                  const TColStd_PackedMapOfInteger& feature);
+
+  //! Cleans up the children of Features Node.
+  asiEngine_EXPORT void
+    CleanFeatures();
+
+  //! \return number of Feature Nodes.
+  asiEngine_EXPORT int
+    GetNumOfFeatures() const;
+
+  //! Gathers all Feature Nodes.
+  //! \param[out] nodes Feature Nodes.
+  asiEngine_EXPORT void
+    GetFeatures(Handle(ActAPI_HNodeList)& nodes) const;
+
+  //! Finds or creates Feature Node for the passed ID.
+  //! \param[in] featureId feature ID in question.
+  //! \param[in] create    whether to create a Node if it does not exist.
+  //! \return found or newly created Feature Node.
+  asiEngine_EXPORT Handle(asiData_FeatureNode)
+    FindFeature(const int  featureId,
+                const bool create = false);
+
+public:
 
   //! Updates part's geometry in a smart way, so all dependent attributes
   //! are also actualized.

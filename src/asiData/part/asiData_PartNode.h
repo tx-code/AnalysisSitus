@@ -41,6 +41,7 @@
 #include <asiData_FaceContourNode.h>
 #include <asiData_FaceNode.h>
 #include <asiData_FaceNormsNode.h>
+#include <asiData_FeaturesNode.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_NamingParameter.h>
 #include <asiData_SurfNode.h>
@@ -116,6 +117,7 @@ public:
   // References             //
   //------------------------//
     PID_MetadataElems,      //!< Metadata elements.
+    PID_Features,           //!< Features.
   //------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -308,6 +310,9 @@ public:
 
   asiData_EXPORT Handle(asiData_MetadataNode)
     GetMetadata() const;
+
+  asiData_EXPORT Handle(asiData_FeaturesNode)
+    GetFeatures() const;
 
 // Initialization:
 public:

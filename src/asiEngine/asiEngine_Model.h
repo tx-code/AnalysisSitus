@@ -55,6 +55,7 @@
 #include <asiData_IVTextNode.h>
 #include <asiData_IVTopoItemNode.h>
 #include <asiData_IVTopoNode.h>
+#include <asiData_FeaturesNode.h>
 #include <asiData_MeshNormsNode.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_OctreeNode.h>
@@ -119,6 +120,9 @@ public:
   asiEngine_EXPORT Handle(asiData_MetadataNode)
     GetMetadataNode() const;
 
+  asiEngine_EXPORT Handle(asiData_FeaturesNode)
+    GetFeaturesNode() const;
+
   asiEngine_EXPORT Handle(asiData_TriangulationNode)
     GetTriangulationNode() const;
 
@@ -172,6 +176,21 @@ public:
   Handle(asiData_Partition<asiData_ElemMetadataNode>) GetElemMetadataPartition() const
   {
     return Handle(asiData_Partition<asiData_ElemMetadataNode>)::DownCast( this->Partition(Partition_ElemMetadata) );
+  }
+
+  
+  //! Accessor for a Partition instance dedicated to Features Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_FeaturesNode>) GetFeaturesPartition() const
+  {
+    return Handle(asiData_Partition<asiData_FeaturesNode>)::DownCast( this->Partition(Partition_Features) );
+  }
+
+  //! Accessor for a Partition instance dedicated to Feature Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_FeatureNode>) GetFeaturePartition() const
+  {
+    return Handle(asiData_Partition<asiData_FeatureNode>)::DownCast( this->Partition(Partition_Feature) );
   }
 
   //! Accessor for a Partition instance dedicated to Face Nodes.
@@ -526,6 +545,8 @@ protected:
     Partition_Part,
     Partition_Metadata,
     Partition_ElemMetadata,
+    Partition_Features,
+    Partition_Feature,
     Partition_Face,
     Partition_FaceNorms,
     Partition_FaceContour,

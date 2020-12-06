@@ -434,6 +434,119 @@ Handle(asiData_ElemMetadataNode)
 
 //-----------------------------------------------------------------------------
 
+Handle(asiData_FeaturesNode) asiEngine_Part::CreateFeatures()
+{
+  Handle(ActAPI_INode) features_base = asiData_FeaturesNode::Instance();
+  m_model->GetFeaturesPartition()->AddNode(features_base);
+
+  // Initialize.
+  Handle(asiData_FeaturesNode)
+    features_n = Handle(asiData_FeaturesNode)::DownCast(features_base);
+  //
+  features_n->Init();
+  features_n->SetName("Features");
+
+  // Set as child for the Part Node.
+  m_model->GetPartNode()->AddChildNode(features_n);
+
+  return features_n;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_FeatureNode)
+  asiEngine_Part::CreateFeature(const TCollection_ExtendedString& name,
+                                const int                         id,
+                                const TColStd_PackedMapOfInteger& feature)
+{
+  Handle(asiData_FeatureNode)
+    node = Handle(asiData_FeatureNode)::DownCast( asiData_FeatureNode::Instance() );
+  //
+  m_model->GetFeaturePartition()->AddNode(node);
+
+  // Initialize.
+  node->Init();
+  node->SetName(name);
+  node->SetFeatureId(id);
+  node->SetMask( new TColStd_HPackedMapOfInteger(feature) );
+
+  // Set as child for the Features Node.
+  m_model->GetFeaturesNode()->AddChildNode(node);
+
+  // Add reference in the Part Node.
+  m_model->GetPartNode()->ConnectReferenceToList(asiData_PartNode::PID_Features,
+                                                 node);
+
+  return node;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Part::CleanFeatures()
+{
+  this->_cleanChildren( m_model->GetFeaturesNode() );
+}
+
+//-----------------------------------------------------------------------------
+
+int asiEngine_Part::GetNumOfFeatures() const
+{
+  Handle(ActData_ReferenceListParameter)
+    refListParam = ActParamTool::AsReferenceList( m_model->GetPartNode()->Parameter(asiData_PartNode::PID_Features) );
+  //
+  const int numElems = refListParam->NbTargets();
+
+  return numElems;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Part::GetFeatures(Handle(ActAPI_HNodeList)& nodes) const
+{
+  nodes = new ActAPI_HNodeList;
+
+  for ( Handle(ActAPI_IChildIterator) cit = m_model->GetFeaturesNode()->GetChildIterator();
+        cit->More(); cit->Next() )
+  {
+    Handle(asiData_FeatureNode)
+      feature_n = Handle(asiData_FeatureNode)::DownCast( cit->Value() );
+    //
+    if ( !feature_n.IsNull() && feature_n->IsWellFormed() )
+      nodes->Append(feature_n);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_FeatureNode) asiEngine_Part::FindFeature(const int  featureId,
+                                                        const bool create)
+{
+  // Access Features.
+  Handle(asiData_FeaturesNode) features_n = m_model->GetFeaturesNode();
+  //
+  if ( features_n.IsNull() )
+    features_n = this->CreateFeatures();
+
+  // Access Feature.
+  Handle(asiData_FeatureNode)
+    feature_n = m_model->GetFeaturesNode()->FindFeature(featureId);
+
+  // Create if requested.
+  if ( feature_n.IsNull() && create )
+  {
+    // Prepare name.
+    TCollection_AsciiString nodeName("Feature ");
+    nodeName += featureId;
+
+    // Create elementary Feature Node.
+    feature_n = this->CreateFeature( nodeName.ToCString(), featureId, TColStd_PackedMapOfInteger() );
+  }
+
+  return feature_n;
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            model,
                                                 const Handle(asiAlgo_History)& history,
                                                 const bool                     doResetTessParams)
@@ -672,7 +785,12 @@ void asiEngine_Part::GetSubShapeIndicesByFaceIndices(const TColStd_PackedMapOfIn
   for ( TColStd_MapIteratorOfPackedMapOfInteger fit(faceIndices); fit.More(); fit.Next() )
   {
     const int input_face_idx = fit.Key();
-    SelectedFaces.Add( AllFaces.FindKey(input_face_idx) );
+
+    if ( input_face_idx > AllFaces.Extent() )
+      m_progress.SendLogMessage(LogInfo(Normal) << "Face index %1 is out of range."
+                                                << input_face_idx);
+    else
+      SelectedFaces.Add( AllFaces.FindKey(input_face_idx) );
   }
 
   // Get indices of the faces among all sub-shapes

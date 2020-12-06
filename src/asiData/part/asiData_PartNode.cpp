@@ -72,6 +72,7 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,          PID_RenderEdgesAsTubes);
   //
   REGISTER_PARAMETER(ReferenceList, PID_MetadataElems);
+  REGISTER_PARAMETER(ReferenceList, PID_Features);
 
   // Register custom Parameters specific to Analysis Situs.
   this->registerParameter(PID_AAG,    asiData_AAGParameter    ::Instance(), false);
@@ -710,6 +711,21 @@ Handle(asiData_MetadataNode) asiData_PartNode::GetMetadata() const
 
     if ( !meta_n.IsNull() && meta_n->IsWellFormed() )
       return meta_n;
+  }
+
+  return nullptr;
+}
+
+//! \return underlying Node which stores features.
+Handle(asiData_FeaturesNode) asiData_PartNode::GetFeatures() const
+{
+  Handle(asiData_FeaturesNode) features_n;
+  for ( Handle(ActAPI_IChildIterator) cit = this->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    features_n = Handle(asiData_FeaturesNode)::DownCast( cit->Value() );
+
+    if ( !features_n.IsNull() && features_n->IsWellFormed() )
+      return features_n;
   }
 
   return nullptr;

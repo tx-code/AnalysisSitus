@@ -51,12 +51,14 @@ public:
   //! \param[in] wViewerPart   part viewer.
   //! \param[in] wViewerDomain domain viewer.
   //! \param[in] wViewerHost   host viewer.
+  //! \param[in] wBrowser      object browser.
   //! \param[in] model         Data Model instance.
   //! \param[in] progress      progress notifier.
   //! \param[in] plotter       imperative plotter.
   asiUI_ViewerPartListener(asiUI_ViewerPart*              wViewerPart,
                            asiUI_ViewerDomain*            wViewerDomain,
                            asiUI_ViewerHost*              wViewerHost,
+                           asiUI_ObjectBrowser*           wBrowser,
                            const Handle(asiEngine_Model)& model,
                            ActAPI_ProgressEntry           progress,
                            ActAPI_PlotterEntry            plotter);
@@ -102,8 +104,9 @@ protected:
 
 protected:
 
-  asiUI_ViewerDomain* m_wViewerDomain; //!< Domain viewer.
-  asiUI_ViewerHost*   m_wViewerHost;   //!< Host viewer.
+  asiUI_ViewerDomain*  m_wViewerDomain; //!< Domain viewer.
+  asiUI_ViewerHost*    m_wViewerHost;   //!< Host viewer.
+  asiUI_ObjectBrowser* m_wBrowser;      //!< Object browser.
 
   //! Custom actions.
   QAction* m_pSaveBREPAction;
@@ -114,6 +117,7 @@ protected:
   QAction* m_pSetAsVariableAction;
   QAction* m_pFindIsolated;
   QAction* m_pCheckDihAngle;
+  QAction* m_pAddAsFeature;
   QAction* m_pMeasureLength;
 
 };

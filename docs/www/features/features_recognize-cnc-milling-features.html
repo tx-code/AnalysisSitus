@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: recognize CNC milling features</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/recognize CNC features
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</table></tr></td>
+
+<h1>Recognize CNC milling features</h1>
+
+<p>
+  The recognition of general CNC features is challenging. In this article, we provide a brief overview of some useful techniques that can help in engineering use cases, such as automating quotation (MaaS) and design for manufacturing (DFM). It is required to match the low-level geometric information encoded in B-rep with some stages of the corresponding manufacturing process in both scenarios.
+</p>
+
+<h2>Front and side faces</h2>
+
+<p>
+  It is possible to define the base, and the side milling faces from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
+</p>
+
+<div class="note">
+  In our paper <a href="../references.html#malyshev-rule-based-2017">[Malyshev et al, 2017]</a>, we rather define base faces as just any faces having inner loops. But let's stick to the Muniappan's formulation as it is manufacturing-wise. To avoid ambiguity, we redefine such faces as "front" ones.
+</div>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

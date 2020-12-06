@@ -379,6 +379,7 @@ void exe_MainWindow::createDockWindows()
   Listeners.pViewerPart = new asiUI_ViewerPartListener(Widgets.wViewerPart,
                                                        Widgets.wViewerDomain,
                                                        Widgets.wViewerSurface,
+                                                       Widgets.wBrowser,
                                                        cf->Model,
                                                        cf->Progress,
                                                        cf->Plotter);
