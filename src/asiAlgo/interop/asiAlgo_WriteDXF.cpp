@@ -23,13 +23,18 @@
 // Own include
 #include <asiAlgo_WriteDxf.h>
 
+// asiAlgo includes
+#include <asiAlgo_Utils.h>
+
 // OpenCascade includes
 #include <Approx_Curve3d.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_HCurve.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAPI_PointsToBSpline.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
+#include <gp_Ax3.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Elips.hxx>
 #include <TopExp_Explorer.hxx>
@@ -129,6 +134,13 @@ void asiAlgo_WriteDXF::SetDxfVersion(const int ver)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_WriteDXF::SetAutoOrient(const bool on)
+{
+  m_bAutoOrient = on;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_WriteDXF::Perform(const TopoDS_Shape& shape)
 {
   this->init();
@@ -143,8 +155,47 @@ bool asiAlgo_WriteDXF::Perform(const TopoDS_Shape& shape)
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& input)
+bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
 {
+  TopoDS_Shape input = shape; // Reassign for relocation.
+
+  if ( m_bAutoOrient )
+  {
+    gp_Ax3 drawingPlnAx( gp::XOY() );
+
+    // Get the referene plane.
+    gp_Ax3 fpAx3;
+    for ( TopExp_Explorer fexp(input, TopAbs_FACE); fexp.More(); fexp.Next() )
+    {
+      const TopoDS_Face& face = TopoDS::Face( fexp.Current() );
+
+      // We're looking for any plane.
+      Handle(Geom_Plane) plane;
+      //
+      if ( asiAlgo_Utils::IsPlanar(face, plane) )
+      {
+        fpAx3 = plane->Position();
+        break;
+      }
+    }
+
+    // B goes to global origin.
+    gp_Trsf T_B;
+    T_B.SetTransformation(fpAx3);
+
+    // Global origin goes to A.
+    gp_Trsf T_A;
+    T_A.SetTransformation(drawingPlnAx);
+    T_A.Invert();
+
+    // Final transformation from B to A.
+    gp_Trsf T = T_A * T_B;
+
+    // Transform.
+    BRepBuilderAPI_Transform mkTransform(input, T, true);
+    input = mkTransform.Shape();
+  }
+
   // Export edges, no matter how they are organized (wires, compounds, etc.).
   TopExp_Explorer edges(input, TopAbs_EDGE);
   //

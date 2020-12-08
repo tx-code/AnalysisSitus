@@ -321,6 +321,20 @@ namespace asiAlgo_Utils
     return IsTypeOf<TSurf>(face, basesurf);
   }
 
+  //! Checks if the passed face has planar support.
+  //! \param[in] face face to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsPlanar(const TopoDS_Face& face);
+
+  //! Checks if the passed face has planar support.
+  //! \param[in]  face  face to check.
+  //! \param[out] plane planar support.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsPlanar(const TopoDS_Face&  face,
+              Handle(Geom_Plane)& plane);
+
   //! Checks whether the passed shape is empty.
   asiAlgo_EXPORT bool
     IsEmptyShape(const TopoDS_Shape& shape);

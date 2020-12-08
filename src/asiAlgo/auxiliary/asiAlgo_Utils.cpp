@@ -917,6 +917,25 @@ std::string asiAlgo_Utils::ShapeAddr(const TopoDS_Shape& shape)
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsPlanar(const TopoDS_Face& face)
+{
+  return IsTypeOf<Geom_Plane>(face);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsPlanar(const TopoDS_Face&  face,
+                             Handle(Geom_Plane)& plane)
+{
+  if ( !IsTypeOf<Geom_Plane>(face) )
+    return false;
+
+  plane = Handle(Geom_Plane)::DownCast( BRep_Tool::Surface(face) );
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsEmptyShape(const TopoDS_Shape& shape)
 {
   if ( shape.IsNull() )

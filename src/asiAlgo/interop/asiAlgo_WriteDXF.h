@@ -31,8 +31,6 @@ class BRepAdaptor_Curve;
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup FRA-ALGO_INTEROP
-//!
 //! Exports B-rep wireframe to DXF.
 //!
 //! The code is originally taken from FreeCAD (LGPL terms). We use protected
@@ -85,6 +83,14 @@ public:
   //! \param[in] ver the version to set.
   asiAlgo_EXPORT void
     SetDxfVersion(const int ver);
+
+  //! Sets the auto-orientation mode on/off. If enabled, the shape
+  //! will be relocated to XOY plane, which is the default drawing
+  //! plane for the DXF writer. It is assumed that the shape is planar,
+  //! so any of its faces can be taken for computing the reference frame.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetAutoOrient(const bool on);
 
   //! Exports the edges of the passed shape to the DXF file with the
   //! specified filename.
@@ -152,6 +158,9 @@ protected:
 
   //! Discretization step.
   double m_fSegLength;
+
+  //! Indicates whether auto-orientation mode is enabled.
+  bool m_bAutoOrient;
 
 };
 

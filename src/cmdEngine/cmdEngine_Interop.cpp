@@ -272,6 +272,8 @@ int ENGINE_SaveDxf(const Handle(asiTcl_Interp)& interp,
                               interp->GetProgress(),
                               interp->GetPlotter() );
   //
+  exportDxf.SetAutoOrient( interp->HasKeyword(argc, argv, "orient") );
+  //
   if ( !exportDxf.CanOpen() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Could not open file for writing '%1'."
@@ -545,10 +547,12 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-dxf",
     //
-    "save-dxf [-var <var-name>] -filename <filename> [-seglen <seglen>] [-ver <ver>]\n"
-    "\t Exports the shape variable named <var-name> or part shape to DXF file <filename>.\n"
+    "save-dxf [-var <var-name>] -filename <filename> [-seglen <seglen>] [-ver <ver>] [-orient]\n"
+    "\t Exports the shape variable named <var-name> or the part shape to DXF file <filename>.\n"
     "\t Pass the <seglen> optional value to control the discretization of splines.\n"
-    "\t Pass the <ver> optional value to specify the format version of DXF (12 is the default).",
+    "\t Pass the <ver> optional value to specify the format version of DXF (14 is the default).\n"
+    "\t If the '-orient' flag is passed, Analysis Situs will attempt to relocate the shape to\n"
+    "\t the XOY plane.",
     //
     __FILE__, group, ENGINE_SaveDxf);
 
