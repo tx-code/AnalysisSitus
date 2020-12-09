@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 // Own include
-#include <asiAlgo_WriteDxf.h>
+#include <asiAlgo_WriteDXF.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
