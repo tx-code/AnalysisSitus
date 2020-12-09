@@ -2580,7 +2580,7 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
   }
 
   asiEngine_Part partApi( cmdEngine::model,
-                          cmdEngine::cf->ViewerPart->PrsMgr() );
+                          cmdEngine::cf.IsNull() ? nullptr : cmdEngine::cf->ViewerPart->PrsMgr() );
 
   // Highlight the detected faces.
   if ( !cmdEngine::cf.IsNull() && cmdEngine::cf->ViewerPart )
