@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Created on: 23 August 2017
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2017-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // cmdMisc includes
-#include <cmdMisc.h>
+#include <cmdMisc_FuseVertices.h>
 
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
@@ -3606,6 +3606,49 @@ int MISC_GenHeightMap(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MISC_FuseVertices(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Get input shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  }
+
+  // Get tolerance.
+  double toler = Precision::Confusion();
+  interp->GetKeyValue<double>(argc, argv, "toler", toler);
+
+  cmdMisc_FuseVertices fuse(toler);
+
+  // Update part shape.
+  partShape = fuse(partShape);
+
+  // Modify Data Model.
+  cmdMisc::model->OpenCommand();
+  {
+    asiEngine_Part(cmdMisc::model).Update(partShape);
+  }
+  cmdMisc::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
+    cmdMisc::cf->ViewerPart->PrsMgr()->Actualize( M->GetPartNode() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
                       const Handle(Standard_Transient)& data)
 {
@@ -3851,6 +3894,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Generates height map.",
     //
     __FILE__, group, MISC_GenHeightMap);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-fuse-vertices",
+    //
+    "misc-fuse-vertices [-toler <toler>]\n"
+    "\t Fuses vertices of the Part shape to the edges of the shape.",
+    //
+    __FILE__, group, MISC_FuseVertices);
 
   // Load sub-modules.
   Commands_Coons(interp, data);

@@ -19,10 +19,12 @@ endif()
 
 set (H_FILES
   cmdMisc.h
+  cmdMisc_FuseVertices.h
 )
 set (CPP_FILES
   cmdMisc.cpp
   cmdMisc_Coons.cpp
+  cmdMisc_FuseVertices.cpp
 )
 
 #------------------------------------------------------------------------------
