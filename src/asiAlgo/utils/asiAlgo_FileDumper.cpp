@@ -67,13 +67,17 @@
 //! Default constructor.
 asiAlgo_FileDumper::asiAlgo_FileDumper()
 {
+  this->SetDecoration(true);
 }
 
 //! Constructor opening file for dumping.
 //! \param filename [in] file to dump data to.
-asiAlgo_FileDumper::asiAlgo_FileDumper(const std::string& filename)
+//! \param mode     [in] file open mode.
+asiAlgo_FileDumper::asiAlgo_FileDumper(const std::string&            filename,
+                                       const std::ios_base::openmode mode)
 {
-  this->Open(filename);
+  this->SetDecoration(true);
+  this->Open(filename, mode);
 }
 
 //! Destructor releasing the acquired resources.
@@ -84,17 +88,30 @@ asiAlgo_FileDumper::~asiAlgo_FileDumper()
 }
 
 //-----------------------------------------------------------------------------
-// Dumping
+// Initialization
 //-----------------------------------------------------------------------------
+
+//! Enables/disables decoration.
+//! \param[in] on the Boolean value to set.
+void asiAlgo_FileDumper::SetDecoration(const bool on)
+{
+  m_bDecorum = on;
+}
 
 //! Opens file with the passed filename for dumping.
 //! \param filename [in] file to open.
+//! \param mode     [in] file open mode.
 //! \return true in case of success, false -- otherwise.
-bool asiAlgo_FileDumper::Open(const std::string& filename)
+bool asiAlgo_FileDumper::Open(const std::string&            filename,
+                              const std::ios_base::openmode mode)
 {
-  m_FILE.open(filename.c_str(), std::ios::out | std::ios::trunc);
+  m_FILE.open(filename.c_str(), mode);
   return m_FILE.is_open();
 }
+
+//-----------------------------------------------------------------------------
+// Dumping
+//-----------------------------------------------------------------------------
 
 //! Dumps the passed message to the target file.
 //! \param msg [in] message to dump.
@@ -103,7 +120,10 @@ void asiAlgo_FileDumper::Dump(const TCollection_AsciiString& msg)
   if ( !m_FILE.is_open() )
     return;
 
-  m_FILE << msg.ToCString() << QRDUMP_NL << QRDUMP_NL;
+  m_FILE << msg.ToCString();
+
+  if ( m_bDecorum )
+    m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed message to the target file.
@@ -113,7 +133,23 @@ void asiAlgo_FileDumper::Dump(const std::string& msg)
   if ( !m_FILE.is_open() )
     return;
 
-  m_FILE << msg.c_str() << QRDUMP_NL << QRDUMP_NL;
+  m_FILE << msg.c_str();
+
+  if ( m_bDecorum )
+    m_FILE << QRDUMP_NL << QRDUMP_NL;
+}
+
+//! Dumps the passed message to the target file.
+//! \param msg [in] message to dump.
+void asiAlgo_FileDumper::Dump(const char* msg)
+{
+  if ( !m_FILE.is_open() )
+    return;
+
+  m_FILE << msg;
+
+  if ( m_bDecorum )
+    m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed scalar value to the target file.
@@ -128,9 +164,11 @@ void asiAlgo_FileDumper::Dump(const int          val,
   if ( msg.length() )
     m_FILE << QRDUMP_LBRACKET << msg.c_str() << QRDUMP_RBRACKET << QRDUMP_SPACE;
 
-  m_FILE << QRDUMP_PREFIX_TYPE_INT << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_PREFIX_TYPE_INT << QRDUMP_NL;
+
   m_FILE << val;
-  m_FILE << QRDUMP_NL << QRDUMP_NL;
+
+  if ( m_bDecorum ) m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed scalar value to the target file.
@@ -145,9 +183,11 @@ void asiAlgo_FileDumper::Dump(const double       val,
   if ( msg.length() )
     m_FILE << QRDUMP_LBRACKET << msg.c_str() << QRDUMP_RBRACKET << QRDUMP_SPACE;
 
-  m_FILE << QRDUMP_PREFIX_TYPE_REAL << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_PREFIX_TYPE_REAL << QRDUMP_NL;
+
   m_FILE << val;
-  m_FILE << QRDUMP_NL << QRDUMP_NL;
+
+  if ( m_bDecorum ) m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed Boolean value to the target file.
@@ -162,9 +202,11 @@ void asiAlgo_FileDumper::Dump(const bool         val,
   if ( msg.length() )
     m_FILE << QRDUMP_LBRACKET << msg.c_str() << QRDUMP_RBRACKET << QRDUMP_SPACE;
 
-  m_FILE << QRDUMP_PREFIX_TYPE_BOOL << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_PREFIX_TYPE_BOOL << QRDUMP_NL;
+
   m_FILE << (val ? QRDUMP_TRUE : QRDUMP_FALSE);
-  m_FILE << QRDUMP_NL << QRDUMP_NL;
+
+  if ( m_bDecorum ) m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed array of real values to the target file.
@@ -184,7 +226,7 @@ void asiAlgo_FileDumper::Dump(const double*      arr,
   if ( msg.length() )
     m_FILE << QRDUMP_LBRACKET << msg.c_str() << QRDUMP_RBRACKET << QRDUMP_SPACE;
 
-  m_FILE << QRDUMP_PREFIX_TYPE_ARRAY << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_PREFIX_TYPE_ARRAY << QRDUMP_NL;
 
   for ( int i = 0; i < numElems; ++i )
   {
@@ -193,7 +235,7 @@ void asiAlgo_FileDumper::Dump(const double*      arr,
       m_FILE << QRDUMP_TAB;
   }
 
-  m_FILE << QRDUMP_NL << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_NL << QRDUMP_NL;
 }
 
 //! Dumps the passed array of real values as matrix to the target file.
@@ -215,7 +257,7 @@ void asiAlgo_FileDumper::Dump(const double*      mx,
   if ( msg.length() )
     m_FILE << QRDUMP_LBRACKET << msg.c_str() << QRDUMP_RBRACKET << QRDUMP_SPACE;
 
-  m_FILE << QRDUMP_PREFIX_TYPE_MATRIX << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_PREFIX_TYPE_MATRIX << QRDUMP_NL;
 
   for ( int i = 0; i < numRows; ++i )
   {
@@ -228,5 +270,65 @@ void asiAlgo_FileDumper::Dump(const double*      mx,
     m_FILE << QRDUMP_NL;
   }
 
-  m_FILE << QRDUMP_NL;
+  if ( m_bDecorum ) m_FILE << QRDUMP_NL;
+}
+
+//! Dumps the passed message without decorations.
+//! \param[in] msg the message to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const TCollection_AsciiString& msg)
+{
+  this->Dump(msg);
+  return *this;
+}
+
+//! Dumps the passed message without decorations.
+//! \param[in] msg the message to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const std::string& msg)
+{
+  this->Dump(msg);
+  return *this;
+}
+
+//! Dumps the passed message without decorations.
+//! \param[in] msg the message to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const char* msg)
+{
+  this->Dump(msg);
+  return *this;
+}
+
+//! Dumps the passed value without decorations.
+//! \param[in] val the value to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const int val)
+{
+  this->Dump(val);
+  return *this;
+}
+
+//! Dumps the passed value without decorations.
+//! \param[in] val the value to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const double val)
+{
+  this->Dump(val);
+  return *this;
+}
+
+//! Dumps the passed Boolean value without decorations.
+//! \param[in] val the Boolean value to dump.
+//! \return this non-const reference.
+asiAlgo_FileDumper&
+  asiAlgo_FileDumper::operator<<(const bool val)
+{
+  this->Dump(val);
+  return *this;
 }

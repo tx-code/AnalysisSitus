@@ -44,6 +44,9 @@
 
 //! Utility class providing functionality for dumping of algorithmic data
 //! to ASCII files in different manners.
+//!
+//! This class follows RAII idiom, i.e., the file handle is released
+//! in the dtor of this class.
 class asiAlgo_FileDumper
 {
 public:
@@ -52,21 +55,31 @@ public:
     asiAlgo_FileDumper();
 
   asiAlgo_EXPORT
-    asiAlgo_FileDumper(const std::string& filename);
+    asiAlgo_FileDumper(const std::string&            filename,
+                       const std::ios_base::openmode mode = std::ios::out | std::ios::trunc);
 
   asiAlgo_EXPORT
     ~asiAlgo_FileDumper();
 
 public:
 
+  asiAlgo_EXPORT void
+    SetDecoration(const bool on);
+
   asiAlgo_EXPORT bool
-    Open(const std::string& filename);
+    Open(const std::string&            filename,
+         const std::ios_base::openmode mode = std::ios::out | std::ios::trunc);
+
+public:
 
   asiAlgo_EXPORT void
     Dump(const TCollection_AsciiString& msg);
 
   asiAlgo_EXPORT void
     Dump(const std::string& msg);
+
+  asiAlgo_EXPORT void
+    Dump(const char* msg);
 
   asiAlgo_EXPORT void
     Dump(const int          val,
@@ -91,9 +104,30 @@ public:
          const int          numCols,
          const std::string& msg = "");
 
-private:
+  /* Dumping without decorations */
 
-  std::ofstream m_FILE; //!< File stream.
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const TCollection_AsciiString& msg);
+
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const std::string& msg);
+
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const char* msg);
+
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const int val);
+
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const double val);
+
+  asiAlgo_EXPORT asiAlgo_FileDumper&
+    operator<<(const bool val);
+
+protected:
+
+  std::ofstream m_FILE;     //!< File stream.
+  bool          m_bDecorum; //!< Whether decoration is on/off.
 
 };
 
