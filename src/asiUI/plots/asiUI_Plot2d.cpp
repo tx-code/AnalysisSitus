@@ -55,6 +55,40 @@
 #include <QVBoxLayout>
 #pragma warning(pop)
 
+namespace
+{
+  static void ColorForIndex(const int      idx,
+                            unsigned char& red,
+                            unsigned char& green,
+                            unsigned char& blue)
+  {
+    if ( idx == 1 )
+    {
+      red   = 225;
+      green = 0;
+      blue  = 0;
+    }
+    else if ( idx == 2 )
+    {
+      red   = 0;
+      green = 225;
+      blue  = 0;
+    }
+    else if ( idx == 3 )
+    {
+      red   = 0;
+      green = 0;
+      blue  = 225;
+    }
+    else
+    {
+      red   = 0;
+      green = 0;
+      blue  = 0;
+    }
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 //! Constructor.
@@ -91,13 +125,34 @@ void asiUI_Plot2d::SetLogScale(const bool logScale)
 //-----------------------------------------------------------------------------
 
 //! Renders the plot.
-//! \param[in] x  arguments.
-//! \param[in] fx function values.
+//! \param[in] x         arguments.
+//! \param[in] fx        functions values.
+//! \param[in] xLabel    label of X axis.
+//! \param[in] yLabel    label of Y axis.
+//! \param[in] plotTitle plot title.
 void asiUI_Plot2d::Render(const std::vector<double>& x,
                           const std::vector<double>& fx,
                           const std::string&         xLabel,
-                          const std::string&         fxLabel,
+                          const std::string&         yLabel,
                           const std::string&         plotTitle)
+{
+  std::vector< std::vector<double> > fxs = {fx};
+  this->Render(x, fxs, xLabel, yLabel, plotTitle);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Renders the plot.
+//! \param[in] x         arguments.
+//! \param[in] fxs       functions' values.
+//! \param[in] xLabel    label of X axis.
+//! \param[in] yLabel    label of Y axis.
+//! \param[in] plotTitle plot title.
+void asiUI_Plot2d::Render(const std::vector<double>&                x,
+                          const std::vector< std::vector<double> >& fxs,
+                          const std::string&                        xLabel,
+                          const std::string&                        yLabel,
+                          const std::string&                        plotTitle)
 {
   /* =================
    *  Fill data table
@@ -109,18 +164,30 @@ void asiUI_Plot2d::Render(const std::vector<double>& x,
   arrX->SetName( xLabel.c_str() );
   table->AddColumn(arrX);
 
-  vtkSmartPointer<vtkFloatArray> arrC = vtkSmartPointer<vtkFloatArray>::New();
-  arrC->SetName( fxLabel.c_str() );
-  table->AddColumn(arrC);
+  for ( int f = 0; f < int( fxs.size() ); ++f )
+  {
+    // Generate unique label. If a label is repeated, VTK 8.2 crashes
+    // on an attempt to SetInputData() for a line chart.
+    std::string label(yLabel);
+    label.append( asiAlgo_Utils::Str::ToString<int>(f + 1) );
+
+    vtkSmartPointer<vtkFloatArray> arrFx = vtkSmartPointer<vtkFloatArray>::New();
+    arrFx->SetName( label.c_str() );
+    table->AddColumn(arrFx);
+  }
 
   // Fill data table.
-  const int numPoints = int ( x.size() );
+  const int numPoints = int( x.size() );
   table->SetNumberOfRows(numPoints);
   //
   for ( int i = 0; i < numPoints; ++i )
   {
     table->SetValue(i, 0, x[i]);
-    table->SetValue(i, 1, fx[i]);
+
+    for ( int f = 0; f < int( fxs.size() ); ++f )
+    {
+      table->SetValue(i, f + 1, fxs[f][i]);
+    }
   }
 
   /* =======================
@@ -139,30 +206,39 @@ void asiUI_Plot2d::Render(const std::vector<double>& x,
   m_pViewer = new asiUI_VtkWindow();
   m_pViewer->SetRenderWindow( m_contextView->GetRenderWindow() );
 
-  // Add multiple line plots, setting the colors, etc.
   vtkSmartPointer<vtkChartXY> chart = vtkSmartPointer<vtkChartXY>::New();
   m_contextView->GetScene()->AddItem(chart);
-  vtkPlot* line = chart->AddPlot(vtkChart::LINE);
-  //
-  line->SetInputData(table, 0, 1);
-  line->SetColor(225, 0, 0, 255);
-  line->SetWidth(2.0f);
-  //
-  line->GetXAxis()->SetTitle( xLabel.c_str() );
-  line->GetXAxis()->GetTitleProperties()->BoldOff();
-  line->GetXAxis()->GetTitleProperties()->SetLineOffset(8);
-  line->GetXAxis()->GetLabelProperties()->BoldOff();
-  line->GetXAxis()->GetLabelProperties()->SetColor(0.25, 0.25, 0.25);
-  line->GetXAxis()->GetLabelProperties()->SetLineOffset(4);
-  line->GetXAxis()->SetLogScale(m_bLogScale);
-  //
-  line->GetYAxis()->SetTitle( fxLabel.c_str() );
-  line->GetYAxis()->GetTitleProperties()->BoldOff();
-  line->GetYAxis()->GetTitleProperties()->SetLineOffset(8);
-  line->GetYAxis()->GetLabelProperties()->BoldOff();
-  line->GetYAxis()->GetLabelProperties()->SetColor(0.25, 0.25, 0.25);
-  line->GetYAxis()->GetLabelProperties()->SetLineOffset(4);
-  line->GetYAxis()->SetLogScale(m_bLogScale);
+
+  // Add plots.
+  for ( int f = 0; f < int( fxs.size() ); ++f )
+  {
+    unsigned char ucolor[3];
+    ::ColorForIndex(f + 1, ucolor[0], ucolor[1], ucolor[2]);
+
+    // Add line plot.
+    vtkPlot* line = chart->AddPlot(vtkChart::LINE);
+    //
+    line->SetInputData(table, 0, f + 1);
+    line->SetColor(ucolor[0], ucolor[1], ucolor[2], 255);
+    line->SetWidth(2.0f);
+    //
+    line->GetXAxis()->SetTitle( xLabel.c_str() );
+    line->GetXAxis()->GetTitleProperties()->BoldOff();
+    line->GetXAxis()->GetTitleProperties()->SetLineOffset(8);
+    line->GetXAxis()->GetLabelProperties()->BoldOff();
+    line->GetXAxis()->GetLabelProperties()->SetColor(0.25, 0.25, 0.25);
+    line->GetXAxis()->GetLabelProperties()->SetLineOffset(4);
+    line->GetXAxis()->SetLogScale(m_bLogScale);
+    //
+    line->GetYAxis()->SetUnscaledMaximum(20);
+    line->GetYAxis()->SetTitle( yLabel.c_str() );
+    line->GetYAxis()->GetTitleProperties()->BoldOff();
+    line->GetYAxis()->GetTitleProperties()->SetLineOffset(8);
+    line->GetYAxis()->GetLabelProperties()->BoldOff();
+    line->GetYAxis()->GetLabelProperties()->SetColor(0.25, 0.25, 0.25);
+    line->GetYAxis()->GetLabelProperties()->SetLineOffset(4);
+    line->GetYAxis()->SetLogScale(m_bLogScale);
+  }
 
   /* =====================
    *  Prepare main widget

@@ -69,8 +69,15 @@ public:
     Render(const std::vector<double>& x,
            const std::vector<double>& fx,
            const std::string&         xLabel,
-           const std::string&         fxLabel,
+           const std::string&         yLabel,
            const std::string&         plotTitle);
+
+  asiUI_EXPORT void
+    Render(const std::vector<double>&                x,
+           const std::vector< std::vector<double> >& fxs,
+           const std::string&                        xLabel,
+           const std::string&                        yLabel,
+           const std::string&                        plotTitle);
 
 public slots:
 

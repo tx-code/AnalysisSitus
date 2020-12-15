@@ -2625,18 +2625,33 @@ int ENGINE_DrawPlot(const Handle(asiTcl_Interp)& interp,
 
   const bool isLogScale = interp->HasKeyword(argc, argv, "log");
 
-  // Get table of values to plot.
-  std::vector<double> xvec, fxvec;
+  int numFunc = 1; // One by default.
+  interp->GetKeyValue<int>(argc, argv, "numFunc", numFunc);
+
+  // Prepare table of values to plot.
+  std::vector<double> xvec;
+  std::vector< std::vector<double> > fxvec;
   //
-  for ( int k = 1; k < argc; k += 2 )
+  for ( int k = 0; k < numFunc; ++k )
+    fxvec.push_back( std::vector<double>() );
+
+  // Collect data.
+  for ( int k = 1; k < argc; k += (numFunc + 1) )
   {
     if ( interp->IsKeyword(argv[k], "log") ) continue;
+    if ( interp->IsKeyword(argv[k], "numFunc") ) break;
 
-    const double x  = atof(argv[k]);
-    const double fx = atof(argv[k + 1]);
+    // Coordinate value.
+    const double x = atof(argv[k]);
+
+    // Function values.
+    for ( int j = 1; j <= numFunc; ++j )
+    {
+      const double fx = atof(argv[k + j]);
+      fxvec[j - 1].push_back(fx);
+    }
 
     xvec.push_back(x);
-    fxvec.push_back(fx);
   }
 
   // Open curvature plot.
@@ -3566,8 +3581,10 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("draw-plot",
     //
-    "draw-plot <x1> <f1> <x2> <f2> [<x3> <f3> [...]] [-log]\n"
-    "\t Draws two-dimensional plot of the given values.",
+    "draw-plot <x1> <f1> <x2> <f2> [<x3> <f3> [...]] [-log] [-numFunc <numFunc>]\n"
+    "\t Draws two-dimensional plot of the given values.\n"
+    "\t If the <numFunc> value is passed with the '-numFunc' key,\n"
+    "\t several plots can be rendered at once.",
     //
     __FILE__, group, ENGINE_DrawPlot);
 
