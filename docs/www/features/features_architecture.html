@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -42,9 +49,11 @@
 </table>
 </td></tr></table>
 
-<h1>Architecture overview</h1>
+<h1 id="toc-overview">Architecture overview</h1>
 
-<h2>Data Model highlights</h2>
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-overview-dm">Data Model highlights</h2>
 
 <p>
 All packages of Analysis Situs can be
@@ -102,7 +111,7 @@ the <a href="./features_re-overview.html">reverse engineering</a> workflow, assu
 execution.
 </p>
 
-<h2>Object validity</h2>
+<h2 id="toc-overview-objectvalidity">Object validity</h2>
 
 <p>
 A Data Node may have one of the following states in runtime:
@@ -125,7 +134,7 @@ perfectly valid. A Node goes to a detached state right after construction, if no
 
 <h1 id="feature-architecture-visualization">Visualization</h1>
 
-<h2>Visualization basics</h2>
+<h2 id="feature-architecture-visualization-basics">Visualization basics</h2>
 
 <p>
 The visualization module (implemented in <span class="code-inline">asiVisu</span>
@@ -177,7 +186,7 @@ state. Technically, since a Pipeline is not aware of OCAF and Data Model Paramet
 a Data Provider.
 </p>
 
-<h2>Presentation Manager</h2>
+<h2 id="feature-architecture-visualization-prsmgr">Presentation Manager</h2>
 
 <p>
 To visualize a Node, you need to construct a Presentation object for it. Additionally, it is necessary
@@ -197,7 +206,7 @@ you need this viewer to be managed by a dedicated Presentation Manager class. In
 Presentation Manager.
 </p>
 
-<h1>Data Model facade</h1>
+<h1 id="feature-architecture-datamodel">Data Model facade</h1>
 
 <p>
 There is a single entry point to the Data Model which is <span class="code-inline">asiEngine_Model</span> class. Using this
@@ -206,7 +215,7 @@ such basic operations as Open/Save, Undo/Redo and compatibility conversion betwe
 On start-up, the empty Data Model is created and populated with the predefined structure of Nodes.
 </p>
 
-<h1>User interface</h1>
+<h1 id="feature-architecture-ui">User interface</h1>
 
 <p>
 Analysis Situs is based on Qt framework, hence it fully exploits the mechanism of signals-slots to organize the communication
@@ -251,7 +260,7 @@ or more small functions. You can no longer follow the execution flow by reading 
 [Asaf Shelly. 2015. Flaws of Object Oriented Modeling]
 </div>
 
-<h1>Algorithms</h1>
+<h1 id="feature-architecture-algo">Algorithms</h1>
 
 <p>
 The vast majority of algorithms provided within Analysis Situs is accessible via the
@@ -277,9 +286,9 @@ determined by the graph.
 <p>
 Some examples of the algorithms organized into the Tree Functions include:
 <ul>
-  <li>Surface fitting.</li>
-  <li>Voxelization.</li>
-  <li>Thickness analysis.</li>
+  <li><a href="./features_re-surface-fitting.html">Surface fitting</a>.</li>
+  <li><a href="./features_voxelization.html">Voxelization</a>.</li>
+  <li><a href="./features_thickness.html">Thickness analysis</a>.</li>
 </ul>
 </p>
 <p>

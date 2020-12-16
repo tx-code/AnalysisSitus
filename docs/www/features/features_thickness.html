@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -42,9 +49,11 @@
 </table>
 </td></tr></table>
 
-<h1>Thickness distribution</h1>
+<h1 id="toc-thickness">Thickness distribution</h1>
 
-<h2>Overview</h2>
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-thickness-overview">Overview</h2>
 
 <p>
   Two methods for thickness calculation are widely adopted in the CAD/CAM/CAE applications:
@@ -87,7 +96,7 @@
   Currently, Analysis Situs provides the ray-based method only.
 </div>
 
-<h2>Run thickness analysis</h2>
+<h2 id="toc-thickness-run-analysis">Run thickness analysis</h2>
 
 <p>
   To run thickness computation, use <span class="code-inline">check-thickness</span> command. Once executed, you can select the newly created Thickness Node in the Object Browser and tune the algorithm's parameters. One option is to specify a fixed direction for the thickness measurement. The following figure illustrates thickness distribution map for OZ direction. The mesh elements having no associated thickness values (e.g., because they are parallel to the test ray) are not rendered.

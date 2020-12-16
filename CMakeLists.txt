@@ -200,6 +200,7 @@ endif()
 #-------------------------------------------------------------------------------
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiAlgo)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiAsm)
 
 if (NOT BUILD_ALGO_ONLY)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTcl)
@@ -235,6 +236,7 @@ endif()
 
 if (NOT BUILD_ALGO_ONLY)
   set_property(TARGET asiAlgo       PROPERTY FOLDER Framework)
+  set_property(TARGET asiAsm        PROPERTY FOLDER Framework)
   set_property(TARGET asiData       PROPERTY FOLDER Framework)
   set_property(TARGET asiVisu       PROPERTY FOLDER Framework)
   set_property(TARGET asiEngine     PROPERTY FOLDER Framework)

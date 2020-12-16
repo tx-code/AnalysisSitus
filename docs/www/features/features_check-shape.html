@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -42,7 +49,11 @@
 </table>
 </td></tr></table>
 
+<h1 id="toc-cad-model-validity">CAD model validity</h1>
+
 <blockquote class="quote">"All models are wrong, but some are useful." George Box</blockquote>
+
+<div class="toc-panel"><div id="toc"></div></div>
 
 <p>
 This text is a digest of shape defects often occurring in various CAD applications. The problems come from different sources. CAD packages are based on different geometric modeling kernels (e.g., Parasolid for SolidWorks, CGM for Catia, ACIS for SpaceClaim), so they basically "speak different geometric languages," hence there are inevitable "translation errors." The geometric flaws are often due to the approximation errors and imprecision of low-level numerical algorithms. Sometimes, it’s lossy data exchange to blame or even an improper design software used to build the geometry.
@@ -52,7 +63,7 @@ This text is a digest of shape defects often occurring in various CAD applicatio
 As shape healing remains largely a challenge for CAD practitioners, one must be aware of possible anomalies and their implications on subsequent engineering workflows. Being attentive to a CAD shape's validity, you will avoid many die-hard obstacles down the road. Most of the listed flaws are tough to resolve, although for simple cases it is possible to automate healing pre-processing (e.g., fixing missing seam edges).
 </p>
 
-<h1>What is a valid CAD model?</h1>
+<h1 id="toc-levels-of-validity">Different levels of validity</h1>
 
 <p>
 A comprehensive analysis of CAD model validity should employ thinking at several levels of abstraction: math, data structures, and design intent.
@@ -70,7 +81,7 @@ Checking for the CAD model’s validity should always be based on its applicatio
 The remainder of this article provides a checklist for a CAD model to verify its validity. These checks are relevant to a B-Rep representation scheme of OpenCascade kernel only, though some of them can be generalized. The set of checks listed below is not complete, as there are too many. At the same time, the most frequently occurring defects are enumerated.
 </p>
 
-<h2>Consistency of representation</h2>
+<h2 id="toc-consistency-of-representation">Consistency of representation</h2>
 
 <p>
 <i>Geometric validity</i> (parameterization irregularities, curve/surface self-intersections, parametric discontinuities, etc.). The geometric validity checks are concerned with the mathematics of form. The input data here are the equations of curves and surfaces, while the verification methods usually employ some computationally expensive algorithms (intersection tests, sampling, evaluation of derivatives, etc.).
@@ -437,7 +448,7 @@ The distinguishing between pure geometric and topological invalidities makes lit
 <!---------------------------------------------------------------------------->
 </table>
 
-<h2>B-Rep health or dirtiness of representation</h2>
+<h2 id="toc-brep-health">B-Rep health or dirtiness of representation</h2>
 
 <blockquote class="quote">
 "All languages may be used to convey the wrong message, or to incorrectly convey the right message." <a href="../references.html#gonzales-2017">[González-Lluch et al, 2017]</a></blockquote>
@@ -611,7 +622,7 @@ The distinguishing between pure geometric and topological invalidities makes lit
 <!---------------------------------------------------------------------------->
 </table>
 
-<h2>Fitness to functional requirements</h2>
+<h2 id="toc-functional-fitness">Fitness to functional requirements</h2>
 
 <p>
   The function of the part and its manufacturing constraints are encoded in what’s called a “design intent.” The improperly designed models can have no geometric flaws yet remain incorrect from the engineering standpoint.
