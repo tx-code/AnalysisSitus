@@ -324,6 +324,12 @@ public:
              Handle(asiAsm_XdeHAssemblyItemIdsMap)&       leafItems,
              asiAsm_XdePartIds&                           parts) const;
 
+  //! Counts the number of occurrences for each part by visiting all the
+  //! arcs in the corresponding HAG.
+  //! \param[out] quantities id-to-quantity map.
+  asiAsm_EXPORT void
+    CountParts(NCollection_DataMap<asiAsm_XdePartId, int, asiAsm_XdePartId::Hasher>& quantities) const;
+
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications, and fills in the map of parts to their instances.
   //! Basically, this method first takes all leaf assembly items and then

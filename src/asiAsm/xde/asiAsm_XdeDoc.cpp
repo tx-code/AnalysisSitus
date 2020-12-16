@@ -33,6 +33,7 @@
 #include <asiAsm_XdeDoc.h>
 
 // asiAsm includes
+#include <asiAsm_XdeGraph.h>
 #include <asiAsm_XdeDocIterator.h>
 
 // OpenCascade includes
@@ -352,8 +353,11 @@ void asiAsm_XdeDoc::GetOriginals(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& an
   for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator iter(*anyItems); iter.More(); iter.Next() )
   {
     TDF_Label original = this->GetOriginal( iter.Value() );
-    //
-    if ( originals.Size() < originals.Add(original) )
+
+    const int numOriginals = originals.Size();
+    const int idxOriginal  = originals.Add(original);
+
+    if ( numOriginals < idxOriginal )
       originalLabels.Append(original);
   }
 }
@@ -370,8 +374,11 @@ void asiAsm_XdeDoc::GetOriginals(const asiAsm_XdeAssemblyItemIds& anyItems,
   for ( asiAsm_XdeAssemblyItemIds::Iterator iter(anyItems); iter.More(); iter.Next() )
   {
     TDF_Label original = this->GetOriginal( iter.Value() );
-    //
-    if ( originals.Size() < originals.Add(original) )
+
+    const int numOriginals = originals.Size();
+    const int idxOriginal  = originals.Add(original);
+
+    if ( numOriginals < idxOriginal )
       originalLabels.Append(original);
   }
 }
@@ -481,6 +488,29 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
   this->GetLeafAssemblyItems(anyItems, leafItems);
   //
   this->GetParts(leafItems, parts, true);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::CountParts(NCollection_DataMap<asiAsm_XdePartId, int, asiAsm_XdePartId::Hasher>& quantities) const
+{
+  // Construct HAG.
+  Handle(asiAsm_XdeGraph) hag = new asiAsm_XdeGraph(this);
+
+  // Loop over the HAG elements and collect the information for the elements
+  // of PART type. We are interested in their usage occurrences.
+  const NCollection_IndexedMap<asiAsm_XdePersistentId>& elems = hag->GetNodes();
+  //
+  for ( int nid = 1; nid <= elems.Extent(); ++nid )
+  {
+    if ( hag->GetNodeType(nid) != asiAsm_XdeGraph::NodeType_Part )
+      continue;
+
+    const asiAsm_XdePersistentId& pid      = elems(nid);
+    const int                     quantity = hag->GetUsageOccurrenceQuantity(nid);
+
+    quantities.Bind(pid, quantity);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -1146,7 +1176,10 @@ void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     pa
     asiAsm_XdeAssemblyItemId topId = m_fringe.top();
     m_fringe.pop();
 
-    if ( traversed->Size() >= traversed->Add(topId) )
+    const int numTraversed = traversed->Size();
+    const int idx          = traversed->Add(topId);
+
+    if ( numTraversed >= idx )
       continue;
 
     TDF_Label original;
@@ -1266,10 +1299,12 @@ void asiAsm_XdeDoc::getAssemblyItemsForPart(const TDF_Label&                    
   }
 
   if ( itemOriginalLab == original )
+  {
     if ( !itemsMap.IsNull() )
       itemsMap->Add(item);
     else
       items.Append(item);
+  }
 }
 
 //-----------------------------------------------------------------------------

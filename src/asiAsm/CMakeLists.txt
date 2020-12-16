@@ -4,37 +4,8 @@ project(asiAsm)
 
 set (H_FILES
   asiAsm.h
-  asiAsm_Dict.h
 )
 set (CPP_FILES
-)
-
-#------------------------------------------------------------------------------
-# Common
-#------------------------------------------------------------------------------
-
-set (common_H_FILES
-  common/asiAsm_FileFormat.h
-  common/asiAsm_Utils.h
-)
-set (common_CPP_FILES
-  common/asiAsm_FileFormat.cpp
-  common/asiAsm_Utils.cpp
-)
-
-#------------------------------------------------------------------------------
-# DAO
-#------------------------------------------------------------------------------
-
-set (dao_H_FILES
-  dao/asiAsm_DaoBase.h
-  dao/asiAsm_DaoPrototype.h
-  dao/asiAsm_DaoSceneTree.h
-)
-set (dao_CPP_FILES
-  dao/asiAsm_DaoBase.cpp
-  dao/asiAsm_DaoPrototype.cpp
-  dao/asiAsm_DaoSceneTree.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -46,24 +17,6 @@ set (entity_H_FILES
   entity/asiAsm_EntPrototype.h
 )
 set (entity_CPP_FILES
-)
-
-#------------------------------------------------------------------------------
-# Service
-#------------------------------------------------------------------------------
-
-set (service_H_FILES
-  service/asiAsm_ServiceBase.h
-  service/asiAsm_ServiceModel.h
-  service/asiAsm_ServicePopulateDatabase.h
-  service/asiAsm_ServicePrototype.h
-  service/asiAsm_ServiceSceneTree.h
-)
-set (service_CPP_FILES
-  service/asiAsm_ServiceModel.cpp
-  service/asiAsm_ServicePopulateDatabase.cpp
-  service/asiAsm_ServicePrototype.cpp
-  service/asiAsm_ServiceSceneTree.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -128,14 +81,6 @@ set (OCCT_LIB_FILES
 )
 
 #------------------------------------------------------------------------------
-# TBB libraries
-#------------------------------------------------------------------------------
-
-set (TBB_LIB_FILES
-  tbb
-)
-
-#------------------------------------------------------------------------------
 # Add sources
 #------------------------------------------------------------------------------
 
@@ -149,36 +94,12 @@ foreach (FILE ${CPP_FILES})
   source_group ("Source Files" FILES "${FILE}")
 endforeach (FILE)
 
-foreach (FILE ${common_H_FILES})
-  source_group ("Header Files\\Common" FILES "${FILE}")
-endforeach (FILE)
-
-foreach (FILE ${common_CPP_FILES})
-  source_group ("Source Files\\Common" FILES "${FILE}")
-endforeach (FILE)
-
-foreach (FILE ${dao_H_FILES})
-  source_group ("Header Files\\DAO" FILES "${FILE}")
-endforeach (FILE)
-
-foreach (FILE ${dao_CPP_FILES})
-  source_group ("Source Files\\DAO" FILES "${FILE}")
-endforeach (FILE)
-
 foreach (FILE ${entity_H_FILES})
   source_group ("Header Files\\Entity" FILES "${FILE}")
 endforeach (FILE)
 
 foreach (FILE ${entity_CPP_FILES})
   source_group ("Source Files\\Entity" FILES "${FILE}")
-endforeach (FILE)
-
-foreach (FILE ${service_H_FILES})
-  source_group ("Header Files\\Service" FILES "${FILE}")
-endforeach (FILE)
-
-foreach (FILE ${service_CPP_FILES})
-  source_group ("Source Files\\Service" FILES "${FILE}")
 endforeach (FILE)
 
 foreach (FILE ${xde_H_FILES})
@@ -195,10 +116,7 @@ endforeach (FILE)
 
 # Create include variable
 set (asiAsm_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
-  ${CMAKE_CURRENT_SOURCE_DIR}/common;\
-  ${CMAKE_CURRENT_SOURCE_DIR}/dao;\
   ${CMAKE_CURRENT_SOURCE_DIR}/entity;\
-  ${CMAKE_CURRENT_SOURCE_DIR}/service;\
   ${CMAKE_CURRENT_SOURCE_DIR}/xde;\
 ")
 #
@@ -218,12 +136,9 @@ include_directories ( ${asiAsm_include_dir_loc}
 #------------------------------------------------------------------------------
 
 add_library (asiAsm SHARED
-  ${H_FILES}         ${CPP_FILES}
-  ${common_H_FILES}  ${common_CPP_FILES}
-  ${dao_H_FILES}     ${dao_CPP_FILES}
-  ${entity_H_FILES}  ${entity_CPP_FILES}
-  ${service_H_FILES} ${service_CPP_FILES}
-  ${xde_H_FILES}     ${xde_CPP_FILES}
+  ${H_FILES}        ${CPP_FILES}
+  ${entity_H_FILES} ${entity_CPP_FILES}
+  ${xde_H_FILES}    ${xde_CPP_FILES}
 )
 
 target_link_libraries(asiAsm asiAlgo asiData)
@@ -231,8 +146,6 @@ target_link_libraries(asiAsm asiAlgo asiData)
 #------------------------------------------------------------------------------
 # Dependencies
 #------------------------------------------------------------------------------
-
-qt5_use_modules(asiAsm Core Sql)
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)
   link_directories(${3RDPARTY_tbb_LIBRARY_DIR_DEBUG})

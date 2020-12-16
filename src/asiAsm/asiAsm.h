@@ -45,9 +45,7 @@
 //-----------------------------------------------------------------------------
 //! \defgroup ASIASM Assemblies
 //!
-//! C++ middleware for communicating with Sqlite DB engine. This module
-//! provides object-oriented interfaces for dealing with the relational
-//! data representing a CAD product (assembly).
+//! Data structures and algorithms for CAD assemblies.
 //-----------------------------------------------------------------------------
 
 #endif

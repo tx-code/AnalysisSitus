@@ -33,7 +33,7 @@
 #define asiAsm_XdePersistentIds_h
 
 // asiAsm includes
-#include <asiAsm_Utils.h>
+#include <asiAsm.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
