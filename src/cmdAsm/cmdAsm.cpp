@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 26 December 2018
+// Created on: 18 December 2020
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,57 +28,33 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-// cmdRE includes
-#include <cmdRE.h>
+// cmdAsm includes
+#include <cmdAsm.h>
 
 // asiTcl includes
 #include <asiTcl_PluginMacro.h>
+//-----------------------------------------------------------------------------
+
+Handle(asiEngine_Model)        cmdAsm::model = nullptr;
+Handle(asiUI_CommonFacilities) cmdAsm::cf    = nullptr;
 
 //-----------------------------------------------------------------------------
 
-Handle(asiEngine_Model)        cmdRE::model = nullptr;
-Handle(asiUI_CommonFacilities) cmdRE::cf    = nullptr;
-
-//-----------------------------------------------------------------------------
-
-void cmdRE::ClearViewers(const bool repaint)
+void cmdAsm::Factory(const Handle(asiTcl_Interp)&      interp,
+                     const Handle(Standard_Transient)& data)
 {
-  if ( cf.IsNull() )
-    return;
+  static const char* group = "cmdAsm";
 
-  // Get all presentation managers
-  const vtkSmartPointer<asiVisu_PrsManager>& partPM   = cf->ViewerPart->PrsMgr();
-  const vtkSmartPointer<asiVisu_PrsManager>& hostPM   = cf->ViewerHost->PrsMgr();
-  const vtkSmartPointer<asiVisu_PrsManager>& domainPM = cf->ViewerDomain->PrsMgr();
-
-  // Update viewers
-  partPM  ->DeleteAllPresentations();
-  hostPM  ->DeleteAllPresentations();
-  domainPM->DeleteAllPresentations();
-
-  if ( repaint )
-  {
-    cf->ViewerPart->Repaint();
-    cf->ViewerHost->Repaint();
-    cf->ViewerDomain->Repaint();
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void cmdRE::Factory(const Handle(asiTcl_Interp)&      interp,
-                    const Handle(Standard_Transient)& data)
-{
   /* ==========================
    *  Initialize UI facilities
    * ========================== */
 
-  // Get common facilities
+  // Get common facilities.
   Handle(asiUI_CommonFacilities)
     passedCF = Handle(asiUI_CommonFacilities)::DownCast(data);
   //
   if ( passedCF.IsNull() )
-    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "[cmdRE] UI facilities are not available. GUI may not be updated.");
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "[cmdAsm] UI facilities are not available. GUI may not be updated.");
   else
     cf = passedCF;
 
@@ -90,15 +66,17 @@ void cmdRE::Factory(const Handle(asiTcl_Interp)&      interp,
   //
   if ( model.IsNull() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "[cmdRE] Data Model instance is null or not of asiEngine_Model kind.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "[cmdAsm] Data Model instance is null or not of asiEngine_Model kind.");
     return;
   }
 
+  /* =====================
+   *  Add custom commands
+   * ===================== */
+
   // Load sub-modules.
-  Commands_Data        (interp, data);
-  Commands_Interaction (interp, data);
-  Commands_Modeling    (interp, data);
+  Commands_XDE (interp, data);
 }
 
 // Declare entry point PLUGINFACTORY
-ASIPLUGIN(cmdRE)
+ASIPLUGIN(cmdAsm)

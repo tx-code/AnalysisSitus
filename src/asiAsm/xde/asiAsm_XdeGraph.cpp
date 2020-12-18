@@ -117,7 +117,7 @@ void asiAsm_XdeGraph::Dump(Standard_OStream& out) const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::DumpJSON(Standard_OStream& out) const
+void asiAsm_XdeGraph::DumpJSON(Standard_OStream&) const
 {
   // TODO: NYI
 }

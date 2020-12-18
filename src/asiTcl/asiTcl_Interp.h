@@ -34,10 +34,10 @@
 
 // asiTcl includes
 #include <asiTcl_CommandInfo.h>
+#include <asiTcl_Variable.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
-#include <asiAlgo_Variable.h>
 
 // Active Data includes
 #include <ActAPI_IModel.h>
@@ -401,6 +401,34 @@ public:
     SetVar(const char* name,
            const char* val);
 
+  //! Sets Tcl variable.
+  //! \param[in] name variable name.
+  //! \param[in] var  variable to set.
+  asiTcl_EXPORT void
+    SetVar(const char*                    name,
+           const Handle(asiTcl_Variable)& var);
+
+  //! Sets Tcl variable.
+  //! \param[in] name variable name.
+  //! \param[in] var  variable to set.
+  asiTcl_EXPORT void
+    SetVar(const std::string&             name,
+           const Handle(asiTcl_Variable)& var);
+
+  //! Accessor for a Tcl variable by its name.
+  //! \param[in] name variable name.
+  //! \return variable handle or null handle if such a
+  //!         variable does not exist.
+  asiTcl_EXPORT Handle(asiTcl_Variable)
+    GetVar(const char* name) const;
+
+  //! Accessor for a Tcl variable by its name.
+  //! \param[in] name variable name.
+  //! \return variable handle or null handle if such a
+  //!         variable does not exist.
+  asiTcl_EXPORT Handle(asiTcl_Variable)
+    GetVar(const std::string& name) const;
+
   //! Appends the passed string to the result of command execution.
   //! \param[in] str string to append.
   //! \return this for subsequent appends.
@@ -514,10 +542,9 @@ protected:
   bool                                 m_bNotifierOn; //!< Indicates whether notifier is on/off.
   Tcl_Interp*                          m_pInterp;     //!< Internal pointer to Tcl interpreter.
   std::vector<TCollection_AsciiString> m_plugins;     //!< List of loaded plugins.
-  //
-  Handle(ActAPI_IModel) m_model;    //!< Data Model instance.
-  ActAPI_ProgressEntry  m_progress; //!< Progress sentry.
-  ActAPI_PlotterEntry   m_plotter;  //!< Imperative plotter sentry.
+  Handle(ActAPI_IModel)                m_model;       //!< Data Model instance.
+  ActAPI_ProgressEntry                 m_progress;    //!< Progress sentry.
+  ActAPI_PlotterEntry                  m_plotter;     //!< Imperative plotter sentry.
 
 };
 

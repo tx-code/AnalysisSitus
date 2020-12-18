@@ -42,6 +42,41 @@
 #include <OSD_Path.hxx>
 
 //-----------------------------------------------------------------------------
+// Custom variables are stored in a static map.
+//-----------------------------------------------------------------------------
+
+namespace asiTcl
+{
+  static NCollection_Map<Handle(asiTcl_Variable)> __VARS;
+
+  static char* tracevar(ClientData  CD,
+                        Tcl_Interp* pInterp,
+                        const char* name,
+                        const char*,
+                        int)
+  {
+    if ( asiTcl::__VARS.IsEmpty() ) return nullptr;
+
+    Handle(asiTcl_Variable) V( reinterpret_cast<asiTcl_Variable*>(CD) );
+
+    if ( V.IsNull() )
+    {
+      Tcl_UntraceVar(pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                     tracevar, CD);
+      return nullptr;
+    }
+
+    // Placeholder: add whatever custom treatment for not-null variables here.
+
+    Tcl_UntraceVar(pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                   tracevar, CD);
+
+    asiTcl::__VARS.Remove(V);
+    return "ok";
+  }
+}
+
+//-----------------------------------------------------------------------------
 // Custom channel binding inspired by the code taken from tkConsole.c
 //-----------------------------------------------------------------------------
 
@@ -75,17 +110,17 @@ static const Tcl_ChannelType consoleChannelType = {
     ConsoleClose,           /* Close proc. */
     ConsoleInput,           /* Input proc. */
     ConsoleOutput,          /* Output proc. */
-    nullptr,                   /* Seek proc. */
-    nullptr,                   /* Set option proc. */
-    nullptr,                   /* Get option proc. */
+    nullptr,                /* Seek proc. */
+    nullptr,                /* Set option proc. */
+    nullptr,                /* Get option proc. */
     ConsoleWatch,           /* Watch for events on console. */
     ConsoleHandle,          /* Get a handle from the device. */
-    nullptr,                   /* close2proc. */
-    nullptr,                   /* Always non-blocking.*/
-    nullptr,                   /* flush proc. */
-    nullptr,                   /* handler proc. */
-    nullptr,                   /* wide seek proc */
-    nullptr,                   /* thread action proc */
+    nullptr,                /* close2proc. */
+    nullptr,                /* Always non-blocking.*/
+    nullptr,                /* flush proc. */
+    nullptr,                /* handler proc. */
+    nullptr,                /* wide seek proc */
+    nullptr,                /* thread action proc */
     nullptr
 };
 
@@ -179,7 +214,7 @@ static int ConsoleInput(ClientData asiTcl_NotUsed(instanceData), /* Unused. */
 {
   return 0; /* Always return EOF. */
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -212,7 +247,7 @@ static int ConsoleClose(ClientData  instanceData,
   delete data;
   return 0;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -236,7 +271,7 @@ static void ConsoleWatch(ClientData asiTcl_NotUsed(instanceData), /* Device ID f
                                                                    * TCL_WRITABLE and TCL_EXCEPTION, for the
                                                                    * events we are interested in. */
 {}
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -582,6 +617,66 @@ void asiTcl_Interp::SetVar(const char* name,
 {
   Tcl_UnsetVar (m_pInterp, name, 0);
   Tcl_SetVar   (m_pInterp, name, val, 0);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiTcl_Interp::SetVar(const char*                    name,
+                           const Handle(asiTcl_Variable)& var)
+{
+  // Check if the variable with the same name exists.
+  ClientData CD =
+    Tcl_VarTraceInfo(m_pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                     asiTcl::tracevar, NULL);
+
+  Handle(asiTcl_Variable) oldV( reinterpret_cast<asiTcl_Variable*>(CD) );
+
+  if ( !oldV.IsNull() )
+  {
+    oldV.Nullify();
+  }
+
+  Tcl_UnsetVar(m_pInterp, name, 0);
+
+  if ( !var.IsNull() )
+  {
+    asiTcl::__VARS.Add(var);
+
+    var->SetName( Tcl_SetVar(m_pInterp, name, name, 0) );
+
+    // Set the trace function.
+    Tcl_TraceVar( m_pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                  asiTcl::tracevar, reinterpret_cast<ClientData>( var.operator->() ) );
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiTcl_Interp::SetVar(const std::string&             name,
+                           const Handle(asiTcl_Variable)& var)
+{
+  this->SetVar(name.c_str(), var);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiTcl_Variable)
+  asiTcl_Interp::GetVar(const char* name) const
+{
+  ClientData CD = Tcl_VarTraceInfo(m_pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                                   asiTcl::tracevar, NULL);
+
+  Handle(asiTcl_Variable) V = reinterpret_cast<asiTcl_Variable*>(CD);
+
+  return asiTcl::__VARS.Contains(V) ? V : nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiTcl_Variable)
+  asiTcl_Interp::GetVar(const std::string& name) const
+{
+  return this->GetVar( name.c_str() );
 }
 
 //-----------------------------------------------------------------------------

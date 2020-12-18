@@ -147,6 +147,32 @@ void onUndoRedo(const Handle(ActAPI_TxRes)& txRes,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_WhatIs(const Handle(asiTcl_Interp)& interp,
+                  int                          argc,
+                  const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::string label;
+
+  Handle(asiTcl_Variable) var = interp->GetVar(argv[1]);
+  //
+  if ( var.IsNull() )
+    label = "nothing";
+  else
+    label = var->WhatIs();
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "'%1' is '%2'."
+                                                       << argv[1] << label);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_SaveAs(const Handle(asiTcl_Interp)& interp,
                   int                          argc,
                   const char**                 argv)
@@ -891,6 +917,14 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
                               const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
   static const char* group = "cmdEngine";
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("whatis",
+    //
+    "whatis <name>\n"
+    "\t Explains what is <name>.",
+    //
+    __FILE__, group, ENGINE_WhatIs);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-as",

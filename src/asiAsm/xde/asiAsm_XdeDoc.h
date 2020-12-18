@@ -108,6 +108,12 @@ public:
   asiAsm_EXPORT virtual bool
     LoadSTEP(const TCollection_AsciiString& filename);
 
+  //! Loads STEP file to populate the internal XDE Document.
+  //! \param[in] filename name of the STEP file to load.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT virtual bool
+    LoadSTEP(const std::string& filename);
+
   //! \return true if the Assembly Document is empty, i.e. the XDE Document
   //!         is either null or contains no roots.
   asiAsm_EXPORT virtual bool

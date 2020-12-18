@@ -132,6 +132,13 @@ bool asiAsm_XdeDoc::LoadSTEP(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
+bool asiAsm_XdeDoc::LoadSTEP(const std::string& filename)
+{
+  return this->LoadSTEP( TCollection_AsciiString( filename.c_str() ) );
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAsm_XdeDoc::IsEmpty() const
 {
   if ( m_doc.IsNull() )

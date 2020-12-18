@@ -35,6 +35,36 @@
 // OCCT includes
 #include <OSD_SharedLibrary.hxx>
 
+// Standard includes
+#include <algorithm>
+#include <functional>
+#include <cctype>
+#include <locale>
+
+namespace
+{
+  // trim from start (in place)
+  static inline void ltrim(std::string &s)
+  {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))));
+  }
+
+  // trim from end (in place)
+  static inline void rtrim(std::string &s)
+  {
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+  }
+
+  // trim from both ends (in place)
+  static inline void trim(std::string &s)
+  {
+    ltrim(s);
+    rtrim(s);
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 bool asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
@@ -53,6 +83,16 @@ bool asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
 
   if ( !SharedLibrary.DlOpen(OSD_RTLD_LAZY) )
   {
+    std::string dlError = SharedLibrary.DlError();
+
+    // Remove newline characters.
+    dlError.erase( std::remove(dlError.begin(), dlError.end(), '\n'), dlError.end() );
+    trim(dlError);
+
+    // Send the diagnostics message.
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot load %1: '%2'."
+                                                        << libFilename << dlError);
+
     std::cout << "Error: cannot load " << libFilename.ToCString() << std::endl;
     return false;
   }

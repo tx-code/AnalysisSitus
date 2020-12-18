@@ -1,7 +1,8 @@
 //-----------------------------------------------------------------------------
-// Created on: 26 December 2018
+// Created on: 18 December 2020
+// Created by: Sergey SLYADNEV
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,77 +29,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-// cmdRE includes
-#include <cmdRE.h>
-
-// asiTcl includes
-#include <asiTcl_PluginMacro.h>
+// Own include
+#include <asiTcl_Variable.h>
 
 //-----------------------------------------------------------------------------
 
-Handle(asiEngine_Model)        cmdRE::model = nullptr;
-Handle(asiUI_CommonFacilities) cmdRE::cf    = nullptr;
+asiTcl_Variable::asiTcl_Variable() : Standard_Transient()
+{}
 
 //-----------------------------------------------------------------------------
 
-void cmdRE::ClearViewers(const bool repaint)
+void asiTcl_Variable::SetName(const std::string& name)
 {
-  if ( cf.IsNull() )
-    return;
-
-  // Get all presentation managers
-  const vtkSmartPointer<asiVisu_PrsManager>& partPM   = cf->ViewerPart->PrsMgr();
-  const vtkSmartPointer<asiVisu_PrsManager>& hostPM   = cf->ViewerHost->PrsMgr();
-  const vtkSmartPointer<asiVisu_PrsManager>& domainPM = cf->ViewerDomain->PrsMgr();
-
-  // Update viewers
-  partPM  ->DeleteAllPresentations();
-  hostPM  ->DeleteAllPresentations();
-  domainPM->DeleteAllPresentations();
-
-  if ( repaint )
-  {
-    cf->ViewerPart->Repaint();
-    cf->ViewerHost->Repaint();
-    cf->ViewerDomain->Repaint();
-  }
+  m_name = name;
 }
 
 //-----------------------------------------------------------------------------
 
-void cmdRE::Factory(const Handle(asiTcl_Interp)&      interp,
-                    const Handle(Standard_Transient)& data)
+const std::string& asiTcl_Variable::GetName() const
 {
-  /* ==========================
-   *  Initialize UI facilities
-   * ========================== */
-
-  // Get common facilities
-  Handle(asiUI_CommonFacilities)
-    passedCF = Handle(asiUI_CommonFacilities)::DownCast(data);
-  //
-  if ( passedCF.IsNull() )
-    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "[cmdRE] UI facilities are not available. GUI may not be updated.");
-  else
-    cf = passedCF;
-
-  /* ================================
-   *  Initialize Data Model instance
-   * ================================ */
-
-  model = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
-  //
-  if ( model.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "[cmdRE] Data Model instance is null or not of asiEngine_Model kind.");
-    return;
-  }
-
-  // Load sub-modules.
-  Commands_Data        (interp, data);
-  Commands_Interaction (interp, data);
-  Commands_Modeling    (interp, data);
+  return m_name;
 }
-
-// Declare entry point PLUGINFACTORY
-ASIPLUGIN(cmdRE)

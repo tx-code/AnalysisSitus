@@ -457,6 +457,7 @@ void exe_MainWindow::createDockWindows()
   EXE_LOAD_MODULE("cmdEngine")
   EXE_LOAD_MODULE("cmdRE")
   EXE_LOAD_MODULE("cmdDDF")
+  EXE_LOAD_MODULE("cmdAsm")
   //
 #ifdef USE_MOBIUS
   EXE_LOAD_MODULE("cmdMobius")
