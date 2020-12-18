@@ -336,6 +336,11 @@ void asiUI_DialogSTEP::proceed_Write()
 void asiUI_DialogSTEP::proceed_Read()
 {
   this->Filename = asiUI_Common::selectSTEPFile(asiUI_Common::OpenSaveAction_Open);
+  //
+  TCollection_AsciiString filename = QStr2AsciiStr(this->Filename);
+  //
+  if ( filename.IsEmpty() )
+    return;
 
   // Check Geometry Node
   if ( m_part.IsNull() || !m_part->IsWellFormed() )
@@ -359,7 +364,7 @@ void asiUI_DialogSTEP::proceed_Read()
   // Load from STEP
   m_model->OpenCommand(); // tx start
   {
-    if ( !reader.Perform( QStr2AsciiStr(this->Filename) ) )
+    if ( !reader.Perform(filename) )
     {
       m_notifier.SendLogMessage(LogErr(Normal) << "STEP reader failed.");
       QApplication::restoreOverrideCursor();
@@ -373,7 +378,7 @@ void asiUI_DialogSTEP::proceed_Read()
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(m_notifier, "Load STEP file")
 
-  m_notifier.SendLogMessage( LogNotice(Normal) << "Part loaded from STEP file %1" << QStr2AsciiStr(this->Filename) );
+  m_notifier.SendLogMessage(LogNotice(Normal) << "Part loaded from STEP file %1" << filename);
   m_notifier.SetProgressStatus(Progress_Succeeded);
   QApplication::restoreOverrideCursor();
 }
