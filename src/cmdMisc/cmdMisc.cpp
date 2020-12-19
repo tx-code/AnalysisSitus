@@ -3628,10 +3628,15 @@ int MISC_FuseVertices(const Handle(asiTcl_Interp)& interp,
   double toler = Precision::Confusion();
   interp->GetKeyValue<double>(argc, argv, "toler", toler);
 
+  // Get number of iterations.
+  int numIter = 1;
+  interp->GetKeyValue<int>(argc, argv, "iter", numIter);
+
   cmdMisc_FuseVertices fuse(toler);
 
-  // Update part shape.
-  partShape = fuse(partShape);
+  // Fuse vertices with edges. Several iterations are applied.
+  for ( int i = 1; i <= numIter; ++i )
+    partShape = fuse(partShape);
 
   // Modify Data Model.
   cmdMisc::model->OpenCommand();
@@ -3898,7 +3903,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("misc-fuse-vertices",
     //
-    "misc-fuse-vertices [-toler <toler>]\n"
+    "misc-fuse-vertices [-toler <toler>] [-iter <iter>]\n"
     "\t Fuses vertices of the Part shape to the edges of the shape.",
     //
     __FILE__, group, MISC_FuseVertices);

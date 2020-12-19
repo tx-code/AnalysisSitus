@@ -20,11 +20,13 @@ endif()
 set (H_FILES
   cmdMisc.h
   cmdMisc_FuseVertices.h
+  cmdMisc_VAAG.h
 )
 set (CPP_FILES
   cmdMisc.cpp
   cmdMisc_Coons.cpp
   cmdMisc_FuseVertices.cpp
+  cmdMisc_VAAG.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -1164,10 +1164,10 @@ void asiAlgo_AAG::init(const TopoDS_Shape&               masterCAD,
 
   //---------------------------------------------------------------------------
 
-  TopTools_IndexedDataMapOfShapeListOfShape ChildParentMap;
-  TopExp::MapShapesAndAncestors(masterCAD, TopAbs_EDGE, TopAbs_FACE, ChildParentMap);
+  const TopTools_IndexedDataMapOfShapeListOfShape&
+    ChildParentMap = this->RequestMapOfEdgesFaces();
 
-  // Build adjacency graph
+  // Build adjacency graph.
   for ( TopExp_Explorer exp(masterCAD, TopAbs_EDGE); exp.More(); exp.Next() )
   {
     const TopoDS_Edge&          commonEdge    = TopoDS::Edge( exp.Current() );
@@ -1176,7 +1176,7 @@ void asiAlgo_AAG::init(const TopoDS_Shape&               masterCAD,
     this->addMates(adjacentFaces);
   }
 
-  // Set selected faces
+  // Set selected faces.
   this->SetSelectedFaces(selectedFaces);
 }
 
@@ -1187,7 +1187,7 @@ void asiAlgo_AAG::addMates(const TopTools_ListOfShape& mateFaces)
   // Prepare dihedral angle calculation.
   asiAlgo_CheckDihedralAngle checkDihAngle(nullptr, nullptr);
 
-  // Now analyze the face pairs
+  // Now analyze the face pairs.
   for ( TopTools_ListIteratorOfListOfShape lit(mateFaces); lit.More(); lit.Next() )
   {
     const t_topoId     face_idx   = m_faces.FindIndex( lit.Value() );

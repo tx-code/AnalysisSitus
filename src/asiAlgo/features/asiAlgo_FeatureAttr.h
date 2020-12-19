@@ -144,7 +144,7 @@ protected:
 
 protected:
 
-  asiAlgo_AAG* m_pAAG; //!< Back-pointer to the owner AAG.
+  asiAlgo_AAG* m_pAAG; //!< Optional back-pointer to the owner AAG.
 
 };
 

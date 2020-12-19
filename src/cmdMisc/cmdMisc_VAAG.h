@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 26 February 2016
+// Created on: 12 December 2020
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,79 +28,39 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_AAG_h
-#define asiAlgo_AAG_h
+#ifndef cmdMisc_VAAG_h
+#define cmdMisc_VAAG_h
+
+// cmdMisc includes
+#include <cmdMisc.h>
 
 // asiAlgo includes
 #include <asiAlgo_AdjacencyMx.h>
 #include <asiAlgo_FeatureAttr.h>
-#include <asiAlgo_FeatureFaces.h>
-#include <asiAlgo_Utils.h>
-
-// STL includes
-#include <stack>
-
-// OCCT includes
-#include <NCollection_IncAllocator.hxx>
-#include <Standard_OStream.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListOfShape.hxx>
-
-class asiAlgo_AAGRandomIterator;
 
 //-----------------------------------------------------------------------------
 
-//! \brief Attributed Adjacency Graph for faces of a CAD model.
+//! \brief Vertex Attributed Adjacency Graph.
 //!
-//! Attributed Adjacency Graph (AAG) is a complementary structure for
-//! B-Rep allowing for extension of geometry with semantics (features).
-//! Some details on the structure can be found in the following paper:
-//!
-//! [Joshi S., Chang T.C. Graph-based heuristics for recognition of machined
-//! features from a 3D solid model // Comput. Des. 1988. Vol. 20, N 2. P. 58-66.]
-//!
-//! AAG is a structure to store semantics of a CAD model just like TopoDS_Shape
-//! is a structure to store its geometric form. Using AAG gives the following
-//! advantages:
-//!
-//! - AAG gives a formal graph view on the CAD model. This enables using graph
-//!   algorithms such as finding connectivity components, search, etc.
-//!
-//! - AAG caches serial indices of sub-shapes. Therefore, it is not necessary
-//!   to use expensive TopExp utilities for a CAD model being unchanged as
-//!   an algorithm runs.
-//!
-//! - AAG extends B-Rep with attributes to represent semantics of the model.
-//!   Therefore, this structure is a storage for features recognized from
-//!   geometry.
-//!
-//! - AAG is a convenience structure for traversing adjacent faces. The adjacency
-//!   relation is explicit in AAG by definition.
-//!
-//! AAG is a main working structure for feature recognition. Any feature
-//! recognition algorithm accepts or constructs AAG for operation.
-class asiAlgo_AAG : public Standard_Transient
+//! This graph represents topology of wireframe models, i.e. the models composed
+//! of edges with shared vertices.
+class cmdMisc_VAAG : public Standard_Transient
 {
 public:
 
   //! Enumerates options for caching maps of shapes.
   enum CachedMap
   {
-    CachedMap_SubShapes  = 0x0001,
-    CachedMap_Faces      = 0x0002,
-    CachedMap_Edges      = 0x0004,
-    CachedMap_Vertices   = 0x0008,
-    CachedMap_EdgesFaces = 0x0010,
+    CachedMap_SubShapes     = 0x0001,
+    CachedMap_Edges         = 0x0002,
+    CachedMap_Vertices      = 0x0004,
+    CachedMap_VerticesEdges = 0x0008,
     //
-    CachedMap_Minimal = CachedMap_Faces,
-    CachedMap_All = CachedMap_Faces     |
-                    CachedMap_Edges     |
+    CachedMap_Minimal = CachedMap_Edges,
+    CachedMap_All = CachedMap_Edges     |
                     CachedMap_Vertices  |
                     CachedMap_SubShapes |
-                    CachedMap_EdgesFaces
+                    CachedMap_VerticesEdges
   };
 
   //---------------------------------------------------------------------------
@@ -112,23 +72,23 @@ public:
 
   //---------------------------------------------------------------------------
 
-  //! Arc between two nodes of AAG. The arc is the explicit representation
+  //! Arc between two nodes of VAAG. The arc is the explicit representation
   //! for adjacency relation.
   struct t_arc
   {
-    t_topoId F1; //!< First face.
-    t_topoId F2; //!< Second face.
+    t_topoId V1; //!< First vertex.
+    t_topoId V2; //!< Second vertex.
 
     //! Ctor default.
-    t_arc() : F1(0), F2(0) {}
+    t_arc() : V1(0), V2(0) {}
 
     //! Ctor with parameters.
-    t_arc(const t_topoId _F1, const t_topoId _F2) : F1(_F1), F2(_F2) {}
+    t_arc(const t_topoId _V1, const t_topoId _V2) : V1(_V1), V2(_V2) {}
 
     //! \return hash code for the arc.
     static int HashCode(const t_arc& arc, const int upper)
     {
-      int key = arc.F1 + arc.F2;
+      int key = arc.V1 + arc.V2;
       key += (key << 10);
       key ^= (key >> 6);
       key += (key << 3);
@@ -139,8 +99,8 @@ public:
     //! \return true if two arcs are equal.
     static int IsEqual(const t_arc& arc1, const t_arc& arc2)
     {
-      return ( (arc1.F1 == arc2.F1) && (arc1.F2 == arc2.F2) ) ||
-             ( (arc1.F2 == arc2.F1) && (arc1.F1 == arc2.F2) );
+      return ( (arc1.V1 == arc2.V1) && (arc1.V2 == arc2.V2) ) ||
+             ( (arc1.V2 == arc2.V1) && (arc1.V1 == arc2.V2) );
     }
   };
 
@@ -152,7 +112,7 @@ public:
   public:
 
     //! Convenience iterator for the set of attributes associated with
-    //! node or arc in AAG.
+    //! node or arc in VAAG.
     class Iterator
     {
     public:
@@ -287,123 +247,86 @@ public:
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AAG, Standard_Transient)
+  DEFINE_STANDARD_RTTI_INLINE(cmdMisc_VAAG, Standard_Transient)
 
 public:
 
   /** @name Construction and destruction
-   *  Functions to build and destroy AAG.
+   *  Functions to build and destroy VAAG.
    */
   //@{
 
-  //! Initializes AAG from the given master model and selected faces.
-  //! \param[in] masterCAD        master model (full CAD).
-  //! \param[in] selectedFaces    selected faces.
-  //! \param[in] allowSmooth      indicates whether to allow "smooth" value for
-  //!                             arc attribute. This value means that the
-  //!                             joint between faces is at least G1, so in
-  //!                             order to calculate dihedral angle, the neighborhood
-  //!                             of transition has to be analyzed. The latter
-  //!                             analysis introduces additional cost, so you
-  //!                             may disable it if you are Ok to attribute G0
-  //!                             joints only.
-  //! \param[in] smoothAngularTol angular tolerance used for recognition
-  //!                             of smooth dihedral angles. A smooth angle
-  //!                             may appear to be imperfect by construction,
-  //!                             but still smooth by the design intent. With
-  //!                             this parameter you're able to control it.
-  //! \param[in] cachedMaps       flag indicating which maps of sub-shapes to
-  //!                             cache. Since building topo maps is costly,
-  //!                             it is generally a good idea to reuse them
-  //!                             as much as possible. Using this flag you
-  //!                             can control which maps will be built.
-  asiAlgo_EXPORT
-    asiAlgo_AAG(const TopoDS_Shape&               masterCAD,
-                const TopTools_IndexedMapOfShape& selectedFaces,
-                const bool                        allowSmooth      = false,
-                const double                      smoothAngularTol = 1.e-4,
-                const int                         cachedMaps       = CachedMap_Minimal);
+  //! Initializes VAAG from the given wireframe model.
+  //! \param[in] masterCAD  master model (full CAD).
+  //! \param[in] cachedMaps flag indicating which maps of sub-shapes to
+  //!                       cache. Since building topo maps is costly,
+  //!                       it is generally a good idea to reuse them
+  //!                       as much as possible. Using this flag you
+  //!                       can control which maps will be built.
+  cmdMisc_EXPORT
+    cmdMisc_VAAG(const TopoDS_Shape& masterCAD,
+                 const int           cachedMaps = CachedMap_Minimal);
 
-  //! Constructor accepting master CAD only.
-  //! \param[in] masterCAD        master CAD.
-  //! \param[in] allowSmooth      indicates whether "smooth" attribution for arcs
-  //!                             is allowed (true) or not (false).
-  //! \param[in] smoothAngularTol angular tolerance used for recognition
-  //!                             of smooth dihedral angles. A smooth angle
-  //!                             may appear to be imperfect by construction,
-  //!                             but still smooth by the design intent. With
-  //!                             this parameter you're able to control it.
-  //! \param[in] cachedMaps       flag indicating which maps of sub-shapes to
-  //!                             cache. Since building topo maps is costly,
-  //!                             it is generally a good idea to reuse them
-  //!                             as much as possible. Using this flag you
-  //!                             can control which maps will be built.
+  //! Dtor.
   asiAlgo_EXPORT
-    asiAlgo_AAG(const TopoDS_Shape& masterCAD,
-                const bool          allowSmooth      = false,
-                const double        smoothAngularTol = 1.e-4,
-                const int           cachedMaps       = CachedMap_Minimal);
-
-  //! Destructor.
-  asiAlgo_EXPORT
-    ~asiAlgo_AAG();
+    ~cmdMisc_VAAG();
 
   //@}
 
 public:
 
   /** @name Derived graphs
-   *  Methods to construct derived graphs and sub-graphs from AAG.
+   *  Methods to construct derived graphs and sub-graphs from VAAG.
    */
   //@{
 
-  //! \brief Constructs deep copy of AAG.
-  //! \return copy of this AAG.
-  asiAlgo_EXPORT Handle(asiAlgo_AAG)
+  //! \brief Constructs deep copy of VAAG.
+  //! \return copy of this VAAG.
+  asiAlgo_EXPORT Handle(cmdMisc_VAAG)
     Copy() const;
 
   //! \brief Captures sub-graph.
   //!
-  //! Prepares a sub-graph containing the passed faces only. This sub-graph
+  //! Prepares a sub-graph containing the passed vertices only. This sub-graph
   //! is pushed to the internal stack of sub-graphs eliminating all neighborhood
   //! relations which are out of interest in the current recognition setting.
   //!
-  //! \param[in] faces2Keep indices of faces to keep in the model.
+  //! \param[in] vertices2Keep indices of vertices to keep in the model.
   //!
   //! \sa PopSubgraph() method to pop the created sub-graph from the stack.
   asiAlgo_EXPORT void
-    PushSubgraph(const asiAlgo_Feature& faces2Keep);
+    PushSubgraph(const asiAlgo_Feature& vertices2Keep);
 
   //! \brief Captures sub-graph.
   //!
-  //! Prepares a sub-graph by removing the passed faces from the lower graph
+  //! Prepares a sub-graph by removing the passed vertices from the lower graph
   //! in the stack. This sub-graph is then pushed to the internal stack of
   //! sub-graphs eliminating all neighborhood relations which are out of
   //! interest in the current recognition setting.
   //!
-  //! \param[in] faces2Exclude indices of faces to exclude from the model.
+  //! \param[in] vertices2Exclude indices of vertices to exclude from the model.
   //!
   //! \sa PopSubgraph() method to pop the created sub-graph from the stack.
   asiAlgo_EXPORT void
-    PushSubgraphX(const asiAlgo_Feature& faces2Exclude);
+    PushSubgraphX(const asiAlgo_Feature& vertices2Exclude);
 
   //! \brief Captures sub-graph.
   //!
-  //! Prepares a sub-graph by removing the passed face from the lower graph
+  //! Prepares a sub-graph by removing the passed vertex from the lower graph
   //! in the stack. This sub-graph is then pushed to the internal stack of
   //! sub-graphs eliminating all neighborhood relations which are out of
   //! interest in the current recognition setting.
   //!
-  //! \param[in] face2Exclude index of face to exclude from the model.
+  //! \param[in] vertex2Exclude index of the vertex to exclude from the model.
   //!
   //! \sa PopSubgraph() method to pop the created sub-graph from the stack.
   asiAlgo_EXPORT void
-    PushSubgraphX(const t_topoId face2Exclude);
+    PushSubgraphX(const t_topoId vertex2Exclude);
 
   //! \brief Pops the top sub-graph from the internal stack.
   //!
   //! Goes back to the parent graph from sub-graph. Use this method to
-  //! recover the previous state of AAG.
+  //! recover the previous state of VAAG.
   asiAlgo_EXPORT void
     PopSubgraph();
 
@@ -422,108 +345,55 @@ public:
   asiAlgo_EXPORT const TopoDS_Shape&
     GetMasterShape() const;
 
-  //! \deprecated Use GetMasterShape() instead.
-  //! \return master CAD shape.
-  //! \sa GetMasterShape()
-  [[deprecated("Use the GetMasterShape() method instead.")]]
-  asiAlgo_EXPORT const TopoDS_Shape&
-    GetMasterCAD() const;
-
   //! \return number of graph nodes.
   asiAlgo_EXPORT int
     GetNumberOfNodes() const;
 
-  //! Sets the collection of "selected" faces, i.e., the faces which are
-  //! of particular interest to the client code. There is no logic behind
-  //! this technique of marking some faces as selected.
-  //! \param[in] selectedFaces faces to set as "selected".
-  asiAlgo_EXPORT void
-    SetSelectedFaces(const TopTools_IndexedMapOfShape& selectedFaces);
-
-  //! Returns all selected faces.
-  //! \return collection of 1-based indices of the selected faces.
-  asiAlgo_EXPORT const asiAlgo_Feature&
-    GetSelectedFaces() const;
-
   //! Returns true if the index is in range.
-  //! \param[in] face_idx face index.
+  //! \param[in] vid vertex index.
   //! \return true/false.
   asiAlgo_EXPORT bool
-    HasFace(const t_topoId face_idx) const;
+    HasVertex(const t_topoId vid) const;
 
-  //! Returns true if the passed face is in graph.
-  //! \param[in] face face to check.
+  //! Returns true if the passed vertex is in graph.
+  //! \param[in] vertex vertex to check.
   //! \return true/false.
   asiAlgo_EXPORT bool
-    HasFace(const TopoDS_Shape& face) const;
+    HasVertex(const TopoDS_Shape& vertex) const;
 
-  //! Returns topological face by its internal index (e.g. coming from iterator).
-  //! \param[in] face_idx face index.
-  //! \return topological face.
-  asiAlgo_EXPORT const TopoDS_Face&
-    GetFace(const t_topoId face_idx) const;
+  //! Returns topological vertex by its internal index (e.g. coming from iterator).
+  //! \param[in] vid vertex index.
+  //! \return topological vertex.
+  asiAlgo_EXPORT const TopoDS_Vertex&
+    GetVertex(const t_topoId vid) const;
 
-  //! Returns face ID.
-  //! \param[in] face face of interest.
-  //! \return face ID.
+  //! Returns vertex ID.
+  //! \param[in] vertex vertex of interest.
+  //! \return vertex ID.
   asiAlgo_EXPORT t_topoId
-    GetFaceId(const TopoDS_Shape& face) const;
+    GetVertexId(const TopoDS_Shape& vertex) const;
 
-  //! Checks whether the given face has any neighbors recorded in the AAG.
-  //! Normally it has, but in some abnormal situations no neighbors could
-  //! be there.
-  //! \param[in] face_idx face index.
+  //! Checks whether the given vertex has any neighbors recorded in the VAAG.
+  //! \param[in] vid vertex index.
   //! \return true in case if at least one neighbor presents, false -- otherwise.
   asiAlgo_EXPORT bool
-    HasNeighbors(const t_topoId face_idx) const;
+    HasNeighbors(const t_topoId vid) const;
 
-  //! Returns neighbors for the face having the given internal index.
-  //! \param[in] face_idx face index.
-  //! \return indices of the neighbor faces.
+  //! Returns neighbors for the vertex having the given internal index.
+  //! \param[in] vid vertex index.
+  //! \return indices of the neighbor vertices.
   asiAlgo_EXPORT const asiAlgo_Feature&
-    GetNeighbors(const t_topoId face_idx) const;
+    GetNeighbors(const t_topoId vid) const;
 
-  //! Returns only those neighbor faces which share the given edge with the
-  //! passed face of interest.
-  //! \param[in] face_idx ID of the face of interest.
-  //! \param[in] edge     common edge.
-  //! \return indices of the neighbor faces sharing the given edge.
-  asiAlgo_EXPORT asiAlgo_Feature
-    GetNeighborsThru(const t_topoId face_idx, const TopoDS_Edge& edge);
-
-  //! Returns neighbor faces for the given face of interest with additional
-  //! filter on edges realizing the neighborhood.
-  //! \param[in] face_idx index of the face of interest.
-  //! \param[in] edge_ids indices of edges of interest.
-  //! \return indices of the neighbor faces.
-  asiAlgo_EXPORT asiAlgo_Feature
-    GetNeighborsThru(const t_topoId         face_idx,
-                     const asiAlgo_Feature& edge_ids);
-
-  //! Returns only those neighbor faces which do not share the given edges with
-  //! the passed face of interest.
-  //! \param[in] face_idx ID of the face of interest.
-  //! \param[in] xEdges   edge where neighborhood is restricted.
-  //! \return indices of the neighbor faces not sharing the given edges.
-  asiAlgo_EXPORT asiAlgo_Feature
-    GetNeighborsThruX(const t_topoId         face_idx,
-                      const asiAlgo_Feature& xEdges);
-
-  //! Returns full collection of neighbor faces.
+  //! Returns full adjacency matrix.
   //! \return neighborhood data.
   asiAlgo_EXPORT const asiAlgo_AdjacencyMx&
     GetNeighborhood() const;
 
-  //! Returns all faces of the master model.
-  //! \return all faces.
+  //! Returns all vertices of the master model.
+  //! \return all vertices.
   asiAlgo_EXPORT const TopTools_IndexedMapOfShape&
-    GetMapOfFaces() const;
-
-  //! Returns all faces of the master model having unique TShape pointers.
-  //! If the map is empty, it is constructed.
-  //! \return all faces.
-  asiAlgo_EXPORT const asiAlgo_IndexedMapOfTShape&
-    RequestTMapOfFaces();
+    GetMapOfVertices() const;
 
   //! Returns all edges of the master model.
   //! If the map is empty, it is constructed.
@@ -531,35 +401,11 @@ public:
   asiAlgo_EXPORT const TopTools_IndexedMapOfShape&
     RequestMapOfEdges();
 
-  //! Returns all edges of the master model having unique TShape pointers.
-  //! If the map is empty, it is constructed.
-  //! \return all edges.
-  asiAlgo_EXPORT const asiAlgo_IndexedMapOfTShape&
-    RequestTMapOfEdges();
-
-  //! Returns all vertices of the master model.
-  //! If the map is empty, it is constructed.
-  //! \return map of all vertices.
-  asiAlgo_EXPORT const TopTools_IndexedMapOfShape&
-    RequestMapOfVertices();
-
-  //! Returns all vertices of the master model having unique TShape pointers.
-  //! If the map is empty, it is constructed.
-  //! \return all vertices.
-  asiAlgo_EXPORT const asiAlgo_IndexedMapOfTShape&
-    RequestTMapOfVertices();
-
   //! Returns all subshapes of the master model.
   //! If the map is empty, it is constructed.
   //! \return map of all sub-shapes.
   asiAlgo_EXPORT const TopTools_IndexedMapOfShape&
     RequestMapOfSubShapes();
-
-  //! Returns all sub-shapes of the master model having unique TShape pointers.
-  //! If the map is empty, it is constructed.
-  //! \return all sub-shapes.
-  asiAlgo_EXPORT const asiAlgo_IndexedMapOfTShape&
-    RequestTMapOfSubShapes();
 
   //! \brief Returns map of indexed sub-shapes of the given type.
   //! If the map is empty, it is constructed.
@@ -570,54 +416,11 @@ public:
     RequestMapOf(const TopAbs_ShapeEnum      ssType,
                  TopTools_IndexedMapOfShape& map);
 
-  //! \brief Returns map of indexed sub-shapes with unique TShape pointers
-  //!        of the given type.
-  //!
-  //! If the map is empty, it is constructed.
-  //!
-  //! \param[in]  ssType sub-shape type (TopAbs_VERTEX, TopAbs_EDGE or TopAbs_FACE).
-  //! \param[out] map    requested map of sub-shapes.
-  asiAlgo_EXPORT void
-    RequestTMapOf(const TopAbs_ShapeEnum      ssType,
-                  asiAlgo_IndexedMapOfTShape& map);
-
   //! Returns vertices and their owner edges.
   //! If the map is empty, it is constructed.
   //! \return map of vertices and their owner edges.
   asiAlgo_EXPORT const TopTools_IndexedDataMapOfShapeListOfShape&
     RequestMapOfVerticesEdges();
-
-  //! Returns vertices with unique TShape pointers and their owner edges.
-  //! If the map is empty, it is constructed.
-  //! \return map of vertices and their owner edges.
-  asiAlgo_EXPORT const asiAlgo_IndexedDataMapOfTShapeListOfShape&
-    RequestTMapOfVerticesEdges();
-
-  //! Returns edges and their owner faces.
-  //! If the map is empty, it is constructed.
-  //! \return map of edges and their owner faces.
-  asiAlgo_EXPORT const TopTools_IndexedDataMapOfShapeListOfShape&
-    RequestMapOfEdgesFaces();
-
-  //! Returns edges with unique TShape pointers and their owner faces.
-  //! If the map is empty, it is constructed.
-  //! \return map of edges and their owner faces.
-  asiAlgo_EXPORT const asiAlgo_IndexedDataMapOfTShapeListOfShape&
-    RequestTMapOfEdgesFaces();
-
-  //! Finds a (sub-)shape among those cached in the AAG by the string
-  //! representation of its address. Use this method to access the transient
-  //! pointers to the shapes. These transient pointers can be then used
-  //! to access the persistent pointers (i.e., serial indices or topological
-  //! names).
-  //!
-  //! This method is non-const as it may build the internal map of shapes
-  //! in case this map is not yet available.
-  //!
-  //! \param[in] addr string representation of the address to seek.
-  //! \return shape (transient pointer).
-  asiAlgo_EXPORT TopoDS_Shape
-    FindSubShapeByAddr(const std::string& addr);
 
   //! Checks if the graph contains the passed arc (i.e., the referenced
   //! faces are adjacent).
@@ -686,36 +489,6 @@ public:
   asiAlgo_EXPORT bool
     SetNodeAttribute(const t_topoId                     node,
                      const Handle(asiAlgo_FeatureAttr)& attr);
-
-  //! Finds base faces, i.e., the faces having inner loops.
-  //! \param[out] resultFaceIds IDs of the found faces (if any).
-  //! \return true if anything has been found, false -- otherwise.
-  asiAlgo_EXPORT bool
-    FindBaseOnly(asiAlgo_Feature& resultFaceIds) const;
-
-  //! Searches for the faces having ALL neighbors attributed with convex links.
-  //! \param[out] resultFaceIds IDs of the found faces (if any).
-  //! \return true if anything has been found, false -- otherwise.
-  asiAlgo_EXPORT bool
-    FindConvexOnly(asiAlgo_Feature& resultFaceIds) const;
-
-  //! Searches for the faces having ALL neighbors attributed with convex links.
-  //! \param[out] resultFaces found faces (if any).
-  //! \return true if anything has been found, false -- otherwise.
-  asiAlgo_EXPORT bool
-    FindConvexOnly(TopTools_IndexedMapOfShape& resultFaces) const;
-
-  //! Searches for the faces having ALL neighbors attributed with concave links.
-  //! \param[out] resultFaceIds IDs of the found faces (if any).
-  //! \return true if anything has been found, false -- otherwise.
-  asiAlgo_EXPORT bool
-    FindConcaveOnly(asiAlgo_Feature& resultFaceIds) const;
-
-  //! Searches for the faces having ALL neighbors attributed with concave links.
-  //! \param[out] resultFaces found faces (if any).
-  //! \return true if anything has been found, false -- otherwise.
-  asiAlgo_EXPORT bool
-    FindConcaveOnly(TopTools_IndexedMapOfShape& resultFaces) const;
 
   //! Removes the passed faces with all corresponding arcs from AAG.
   //! \param[in] faces faces to remove.
@@ -801,32 +574,21 @@ public:
 
 protected:
 
-  //! Initializes graph tool with master CAD and selected faces.
-  //! \param[in] masterCAD        master model (full CAD).
-  //! \param[in] selectedFaces    selected faces.
-  //! \param[in] allowSmooth      indicates whether "smooth" attribution for
-  //!                             arcs is allowed (true) or not (false).
-  //! \param[in] smoothAngularTol angular tolerance used for recognition
-  //!                             of smooth dihedral angles. A smooth angle
-  //!                             may appear to be imperfect by construction,
-  //!                             but still smooth by the design intent. With
-  //!                             this parameter you're able to control it.
-  //! \param[in] cachedMaps       flag indicating which maps of sub-shapes to
-  //!                             cache. Since building topo maps is costly,
-  //!                             it is generally a good idea to reuse them
-  //!                             as much as possible. Using this flag you
-  //!                             can control which maps will be built.
+  //! Initializes graph tool with master CAD.
+  //! \param[in] masterCAD  master model (full CAD).
+  //! \param[in] cachedMaps flag indicating which maps of sub-shapes to
+  //!                       cache. Since building topo maps is costly,
+  //!                       it is generally a good idea to reuse them
+  //!                       as much as possible. Using this flag you
+  //!                       can control which maps will be built.
   asiAlgo_EXPORT void
-    init(const TopoDS_Shape&               masterCAD,
-         const TopTools_IndexedMapOfShape& selectedFaces,
-         const bool                        allowSmooth,
-         const double                      smoothAngularTol,
-         const int                         cachedMaps);
+    init(const TopoDS_Shape& masterCAD,
+         const int           cachedMaps);
 
-  //! Fills graph with nodes for mate faces.
-  //! \param[in] mateFaces faces to add (if not yet added).
+  //! Fills graph with nodes for mate vertices.
+  //! \param[in] mateVertices vertices to add (if not yet added).
   asiAlgo_EXPORT void
-    addMates(const TopTools_ListOfShape& mateFaces);
+    addMates(const TopTools_ListOfShape& mateVertices);
 
   //! Dumps all graph nodes with their attributes to JSON.
   //! \param[in,out] out        target output stream.
@@ -868,53 +630,24 @@ protected:
 
 protected:
 
-  asiAlgo_AAG() : m_bAllowSmooth(false), m_fSmoothAngularTol(0.0) {} //!< Default ctor.
+  cmdMisc_VAAG() {} //!< Default ctor.
 
 protected:
 
   //! Master CAD model.
   TopoDS_Shape m_master;
 
-  //! Selected faces. Selection is performed externally using any criterion
-  //! which we do not care about here. One typical scenario is to select
-  //! those faces corresponding to some feature in the model.
-  asiAlgo_Feature m_selected;
-
   //! All sub-shapes.
   TopTools_IndexedMapOfShape m_subShapes;
-
-  //! All sub-shapes with distinct TShape pointers.
-  asiAlgo_IndexedMapOfTShape m_tSubShapes;
-
-  //! All faces of the master model.
-  TopTools_IndexedMapOfShape m_faces;
-
-  //! All faces of the master model with distinct TShape pointers.
-  asiAlgo_IndexedMapOfTShape m_tFaces;
 
   //! All edges of the master model.
   TopTools_IndexedMapOfShape m_edges;
 
-  //! All edges of the master model with distinct TShape pointers.
-  asiAlgo_IndexedMapOfTShape m_tEdges;
-
   //! All vertices of the master model.
   TopTools_IndexedMapOfShape m_vertices;
 
-  //! All vertices of the master model with distinct TShape pointers.
-  asiAlgo_IndexedMapOfTShape m_tVertices;
-
   //! Map of vertices versus edges.
   TopTools_IndexedDataMapOfShapeListOfShape m_verticesEdges;
-
-  //! Map of vertices with distinct TShape pointers versus edges.
-  asiAlgo_IndexedDataMapOfTShapeListOfShape m_tVerticesEdges;
-
-  //! Map of edges versus faces.
-  TopTools_IndexedDataMapOfShapeListOfShape m_edgesFaces;
-
-  //! Map of edges with distinct TShape pointers versus faces.
-  asiAlgo_IndexedDataMapOfTShapeListOfShape m_tEdgesFaces;
 
   //! The data maps stored in this stack represent adjacency matrices. The
   //! stack is used to keep sub-graphs.
@@ -925,12 +658,6 @@ protected:
 
   //! Stores attributes associated with nodes.
   t_node_attributes m_nodeAttributes;
-
-  //! Indicates whether to allow smooth transitions or not.
-  bool m_bAllowSmooth;
-
-  //! Angular tolerance to use for attribution of "smooth" dihedral edges.
-  double m_fSmoothAngularTol;
 
   //! Experimental allocator (does it make any sense?).
   Handle(NCollection_IncAllocator) m_alloc;
