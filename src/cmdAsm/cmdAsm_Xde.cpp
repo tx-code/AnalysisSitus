@@ -34,6 +34,9 @@
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
 
+// asiUI includes
+#include <asiUI_XdeBrowser.h>
+
 //-----------------------------------------------------------------------------
 
 int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
@@ -78,6 +81,46 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_Browse(const Handle(asiTcl_Interp)& interp,
+                  int                          argc,
+                  const char**                 argv)
+{
+  if ( cmdAsm::cf.IsNull() )
+    return TCL_OK; // Contract check: this function is UI-mode only.
+
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+
+  // Open UI widget for browsing the assembly structure.
+  asiUI_XdeBrowser* pBrowser = new asiUI_XdeBrowser(xdeModel->GetDocument(), cmdAsm::cf);
+  //
+  pBrowser->Populate();
+  //
+  pBrowser->show();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -90,4 +133,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Loads assembly from file <filename> to the XDE document named <M>.",
     //
     __FILE__, group, ASMXDE_Load);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-browse",
+    //
+    "asm-xde-browse -model <M>\n"
+    "\t Opens a dialog to browse the structure of the XDE document named <M>.",
+    //
+    __FILE__, group, ASMXDE_Browse);
 }

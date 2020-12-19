@@ -45,6 +45,7 @@ set (controls_H_UI_FILES
   controls/asiUI_ParameterEditorView.h
   controls/asiUI_StatusBar.h
   controls/asiUI_StyledTextEdit.h
+  controls/asiUI_XdeBrowser.h
 )
 set (controls_CPP_FILES 
   controls/asiUI_BgColorDialog.cpp
@@ -73,6 +74,7 @@ set (controls_CPP_FILES
   controls/asiUI_StatusBarImpl.cpp
   controls/asiUI_StyledTextEdit.cpp
   controls/asiUI_WidgetFactory.cpp
+  controls/asiUI_XdeBrowser.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -627,6 +629,7 @@ include_directories ( SYSTEM
                       ${asiUI_include_dir_loc}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
+                      ${asiAsm_include_dir}
                       ${asiData_include_dir}
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
@@ -661,7 +664,7 @@ add_library (asiUI SHARED
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiUI asiTcl asiAlgo asiData asiVisu asiEngine)
+target_link_libraries(asiUI asiTcl asiAlgo asiAsm asiData asiVisu asiEngine)
 
 qt5_use_modules(asiUI Core Widgets)
 

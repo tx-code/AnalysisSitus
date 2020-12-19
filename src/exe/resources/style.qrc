@@ -7,6 +7,10 @@
     <file>asitus/asitus_undo_icon_16x16.png</file>
     <file>asitus/asitus_redo_icon_16x16.png</file>
     <file>asitus/asitus_cancel_icon_16x16.png</file>
+    <file>asitus/asm_part_icon_16x16.png</file>
+    <file>asitus/asm_part_instance_icon_16x16.png</file>
+    <file>asitus/asm_root_icon_16x16.png</file>
+    <file>asitus/asm_subassembly_icon_16x16.png</file>
   </qresource>
   <qresource prefix="qss_icons">
     <file>rc/up_arrow_disabled.png</file>

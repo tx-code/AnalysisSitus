@@ -35,20 +35,21 @@
 // asiAsm includes
 #include <asiAsm_XdePersistentIds.h>
 
-// OpenCascade includes
-#include <TDocStd_Document.hxx>
-
 // Active Data includes
 #include <ActAPI_IPlotter.h>
 #include <ActAPI_IProgressNotifier.h>
 
 // OpenCascade includes
 #include <TDF_LabelSequence.hxx>
-#include <XCAFApp_Application.hxx>
-#include <XCAFDoc_DocumentTool.hxx>
+#include <TDocStd_Document.hxx>
 
-// Forward declarations.
+// Forward declarations
+class XCAFApp_Application;
+class XCAFDoc_ShapeTool;
+class XCAFDoc_ColorTool;
 class XSControl_WorkSession;
+class Quantity_ColorRGBA;
+class asiAsm_XdePartRepr;
 
 //-----------------------------------------------------------------------------
 
@@ -160,6 +161,31 @@ public:
   //! \return name of the part.
   asiAsm_EXPORT TCollection_ExtendedString
     GetPartName(const asiAsm_XdePartId& part) const;
+
+  //! Returns all stored part's representations.
+  //! \param[in]  partId part of interest.
+  //! \param[out] reps   available part representations.
+  asiAsm_EXPORT void
+    GetPartRepresentations(const asiAsm_XdePartId&                  partId,
+                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const;
+
+  //! Returns all stored part's representations.
+  //! \param[in]  partId part of interest.
+  //! \param[out] reps   available part representations.
+  asiAsm_EXPORT void
+    GetPartRepresentations(const TDF_Label&                         label,
+                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const;
+
+  //! Returns the part's representation for the given ID.
+  //! \param[in]  partId part of interest.
+  //! \param[in]  guid   GUID of the representation of interest.
+  //! \param[out] reps   part representation or null if such a representation
+  //!                    does not exist.
+  //! \return true if the representation exists, false -- otherwise.
+  asiAsm_EXPORT bool
+    GetPartRepresentation(const asiAsm_XdePartId&     partId,
+                          const Standard_GUID&        guid,
+                          Handle(asiAsm_XdePartRepr)& rep) const;
 
   //! Checks whether the label is assembly.
   //! \return true/false.
@@ -637,6 +663,40 @@ public:
     GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
                 Handle(asiAsm_XdeHAssemblyItemIdsMap)&       partners) const;
 
+  //! Returns RGB color associated with the given part.
+  //! \param[in]  partId part ID in question.
+  //! \param[out] color  associated color.
+  //! \return true if color exists, false -- otherwise.
+  asiAsm_EXPORT bool
+    GetColor(const asiAsm_XdePartId& partId,
+             Quantity_Color&         color) const;
+
+  //! Returns RGBA color associated with the given part.
+  //! \param[in]  partId part ID in question.
+  //! \param[out] color  associated color.
+  //! \return true if color exists, false -- otherwise.
+  asiAsm_EXPORT bool
+    GetColor(const asiAsm_XdePartId& partId,
+             Quantity_ColorRGBA&     color) const;
+
+  //! Returns color associated with the given label.
+  //! \param[in]  label OCAF label of the prototype in question.
+  //! \param[out] color associated color.
+  //! \return true if color exists, false -- otherwise.
+  asiAsm_EXPORT bool
+    GetColor(const TDF_Label&    label,
+             Quantity_ColorRGBA& color) const;
+
+  //! Returns color associated with the subshape of the input part.
+  //! \param[in]  partId   part ID in question.
+  //! \param[in]  subShape subshape to get color for.
+  //! \param[out] color    associated color.
+  //! \return true if color exists, false -- otherwise.
+  asiAsm_EXPORT bool
+    GetSubShapeColor(const asiAsm_XdePartId& partId,
+                     const TopoDS_Shape&     subShape,
+                     Quantity_ColorRGBA&     color) const;
+
   //! Dumps assembly hierarchy to the passed output stream.
   //! \param[in,out] output stream where to dump.
   asiAsm_EXPORT void
@@ -646,25 +706,22 @@ public:
 
   //! Non-const accessor for the underlying OCAF Document.
   //! \return OCAF Document.
-  Handle(TDocStd_Document)& ChangeDocument()
-  {
-    return m_doc;
-  }
+  asiAsm_EXPORT Handle(TDocStd_Document)&
+    ChangeDocument();
 
   //! Accessor for the underlying OCAF Document.
   //! \return OCAF Document.
-  const Handle(TDocStd_Document)& GetDocument() const
-  {
-    return m_doc;
-  }
+  asiAsm_EXPORT const Handle(TDocStd_Document)&
+    GetDocument() const;
 
   //! \return shape tool.
-  Handle(XCAFDoc_ShapeTool) GetShapeTool() const
-  {
-    return XCAFDoc_DocumentTool::ShapeTool( m_doc->Main() );
-  }
+  asiAsm_EXPORT Handle(XCAFDoc_ShapeTool)
+    GetShapeTool() const;
 
-// Construction & initialization:
+  //! \return color tool.
+  asiAsm_EXPORT Handle(XCAFDoc_ColorTool)
+    GetColorTool() const;
+
 protected:
 
   //! Initializes Data Model with the passed CAF Document and prepares integral

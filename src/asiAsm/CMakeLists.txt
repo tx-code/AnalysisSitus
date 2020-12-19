@@ -27,6 +27,7 @@ set (xde_H_FILES
   xde/asiAsm_XdeDoc.h
   xde/asiAsm_XdeDocIterator.h
   xde/asiAsm_XdeGraph.h
+  xde/asiAsm_XdePartRepr.h
   xde/asiAsm_XdePersistentIds.h
 )
 set (xde_CPP_FILES

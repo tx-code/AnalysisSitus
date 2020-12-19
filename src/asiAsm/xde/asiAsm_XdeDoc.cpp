@@ -33,19 +33,25 @@
 #include <asiAsm_XdeDoc.h>
 
 // asiAsm includes
-#include <asiAsm_XdeGraph.h>
 #include <asiAsm_XdeDocIterator.h>
+#include <asiAsm_XdeGraph.h>
+#include <asiAsm_XdePartRepr.h>
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
+#include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <TDataStd_ChildNodeIterator.hxx>
 #include <TDataStd_Name.hxx>
 #include <TDataStd_TreeNode.hxx>
+#include <TDF_AttributeIterator.hxx>
 #include <TDF_ChildIterator.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TNaming_Tool.hxx>
+#include <XCAFApp_Application.hxx>
 #include <XCAFDoc.hxx>
+#include <XCAFDoc_ColorTool.hxx>
+#include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
@@ -235,6 +241,55 @@ TCollection_ExtendedString
 
   // Get name.
   return this->GetObjectName(label);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::GetPartRepresentations(const asiAsm_XdePartId&                  partId,
+                                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const
+{
+  this->GetPartRepresentations(this->GetLabel(partId), reps);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::GetPartRepresentations(const TDF_Label&                         label,
+                                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const
+{
+  if ( label.IsNull() ) return; // Contract check.
+
+  // Iterate over the part's attributes and use the representation factory
+  // to construct representations for the attributes that allow doing this.
+  for ( TDF_AttributeIterator itAtt(label); itAtt.More(); itAtt.Next() )
+  {
+    const Handle(TDF_Attribute)& attr = itAtt.Value();
+
+    // Construct representation.
+    Handle(asiAsm_XdePartRepr) repr = asiAsm_XdePartReprFactory::New(attr);
+    //
+    if ( !repr.IsNull() )
+      reps.push_back(repr);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::GetPartRepresentation(const asiAsm_XdePartId&     partId,
+                                          const Standard_GUID&        guid,
+                                          Handle(asiAsm_XdePartRepr)& rep) const
+{
+  TDF_Label partLab = this->GetLabel(partId);
+
+  // The representation's GUID is identical to the attribute's GUID.
+  Handle(TDF_Attribute) attr;
+  //
+  if ( !partLab.FindAttribute(guid, attr) )
+    return false;
+
+  // Construct a representation using the factory.
+  rep = asiAsm_XdePartReprFactory::New(attr);
+  //
+  return !rep.IsNull();
 }
 
 //-----------------------------------------------------------------------------
@@ -741,7 +796,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetOneShape() const
 {
   // Get all parts.
   TDF_LabelSequence labels;
-  Handle(XCAFDoc_ShapeTool) STool = XCAFDoc_DocumentTool::ShapeTool( m_doc->Main() );
+  Handle(XCAFDoc_ShapeTool) STool = this->GetShapeTool();
   STool->GetFreeShapes(labels);
   //
   if ( !labels.Length() )
@@ -784,7 +839,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetOneShape(const asiAsm_XdeAssemblyItemIds& items) 
 
 void asiAsm_XdeDoc::GetLabelsOfRoots(TDF_LabelSequence& labels) const
 {
-  Handle(XCAFDoc_ShapeTool) STool = XCAFDoc_DocumentTool::ShapeTool( m_doc->Main() );
+  Handle(XCAFDoc_ShapeTool) STool = this->GetShapeTool();
   STool->GetFreeShapes(labels);
 }
 
@@ -1091,6 +1146,101 @@ void asiAsm_XdeDoc::GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& any
 
 //-----------------------------------------------------------------------------
 
+bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
+                             Quantity_Color&         color) const
+{
+  Quantity_ColorRGBA colorRGBA;
+  const bool isOk = this->GetColor(partId, colorRGBA);
+
+  if ( isOk )
+    color = colorRGBA.GetRGB();
+
+  return isOk;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
+                             Quantity_ColorRGBA&     color) const
+{
+  TDF_Label label = this->GetLabel(partId);
+
+  return this->GetColor(label, color);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::GetColor(const TDF_Label&    label,
+                             Quantity_ColorRGBA& color) const
+{
+  bool isColorFound = false;
+
+  Handle(XCAFDoc_ColorTool) colorTool = this->GetColorTool();
+  Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
+
+  if ( !colorTool.IsNull() )
+  {
+    // Get the source label.
+    TDF_Label refLabel = label;
+    //
+    if ( shapeTool->IsReference(label) )
+      shapeTool->GetReferredShape(label, refLabel);
+
+    // Get one of the possibly available colors.
+    isColorFound = colorTool->GetColor(refLabel, XCAFDoc_ColorSurf, color);
+    //
+    if ( !isColorFound )
+      isColorFound = colorTool->GetColor(refLabel, XCAFDoc_ColorGen, color);
+    //
+    if ( !isColorFound )
+      isColorFound = colorTool->GetColor(refLabel, XCAFDoc_ColorCurv, color);
+  }
+
+  return isColorFound;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::GetSubShapeColor(const asiAsm_XdePartId& partId,
+                                     const TopoDS_Shape&     subShape,
+                                     Quantity_ColorRGBA&     color) const
+{
+  Quantity_ColorRGBA partColor;
+  //
+  if ( this->GetColor(partId, partColor) )
+    return false;
+
+  Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
+  Handle(XCAFDoc_ColorTool) colorTool = this->GetColorTool();
+
+  // Get part label.
+  TDF_Label partLab = this->GetLabel(partId);
+
+  // Find the subshape's attachment label.
+  TDF_Label subShapeL;
+  if ( !shapeTool->FindSubShape(partLab, subShape, subShapeL) )
+  {
+    return false;
+  }
+
+  // Get the color's attachment label.
+  TDF_Label subShapeColorLab;
+  if ( !colorTool->GetColor(subShapeL, XCAFDoc_ColorSurf, subShapeColorLab) &&
+       !colorTool->GetColor(subShapeL, XCAFDoc_ColorGen,  subShapeColorLab) )
+  {
+    return false;
+  }
+
+  // Get color.
+  Quantity_Color storedColor;
+  colorTool->GetColor(subShapeColorLab, storedColor);
+
+  color.SetRGB(storedColor);
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 {
   for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
@@ -1121,6 +1271,34 @@ void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 
     out << name.ToCString() << ", " << item.ToString().ToCString() << "\n";
   }
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(TDocStd_Document)& asiAsm_XdeDoc::ChangeDocument()
+{
+  return m_doc;
+}
+
+//-----------------------------------------------------------------------------
+
+const Handle(TDocStd_Document)& asiAsm_XdeDoc::GetDocument() const
+{
+  return m_doc;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(XCAFDoc_ShapeTool) asiAsm_XdeDoc::GetShapeTool() const
+{
+  return XCAFDoc_DocumentTool::ShapeTool( m_doc->Main() );
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(XCAFDoc_ColorTool) asiAsm_XdeDoc::GetColorTool() const
+{
+  return XCAFDoc_DocumentTool::ColorTool( m_doc->Main() );
 }
 
 //-----------------------------------------------------------------------------
