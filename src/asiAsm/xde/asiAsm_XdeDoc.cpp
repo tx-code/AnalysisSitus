@@ -33,12 +33,17 @@
 #include <asiAsm_XdeDoc.h>
 
 // asiAsm includes
+#include <asiAsm_XdeApp.h>
 #include <asiAsm_XdeDocIterator.h>
 #include <asiAsm_XdeGraph.h>
 #include <asiAsm_XdePartRepr.h>
 
+// asiAlgo includes
+#include <asiAlgo_FileFormat.h>
+
 // OpenCascade includes
 #include <BRep_Builder.hxx>
+#include <CDM_MetaData.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <TDataStd_ChildNodeIterator.hxx>
@@ -48,7 +53,6 @@
 #include <TDF_ChildIterator.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TNaming_Tool.hxx>
-#include <XCAFApp_Application.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
@@ -84,6 +88,117 @@ asiAsm_XdeDoc::asiAsm_XdeDoc(ActAPI_ProgressEntry progress,
 void asiAsm_XdeDoc::NewDocument()
 {
   this->init( this->newDocument() ); // Initialize internal structure.
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::Load(const TCollection_AsciiString& filename)
+{
+  // Recognize format.
+  const asiAlgo_FileFormat
+    format = asiAlgo_FileFormatTool::FormatFromFileExtension(filename);
+
+  // Load CAD data.
+  switch ( format )
+  {
+    case FileFormat_STEP:
+      return this->LoadSTEP(filename);
+    case FileFormat_XBF:
+      return this->LoadNative(filename);
+    default:
+      break;
+  }
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Unsupported file format.");
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::LoadNative(const TCollection_AsciiString& filename)
+{
+  if ( !m_doc.IsNull() )
+    this->Release();
+
+  Handle(asiAsm_XdeApp) A = this->getApplication();
+  //
+  Handle(TDocStd_Document) Doc;
+
+  /* =======================
+   *  Open the CAF Document.
+   * ======================= */
+
+  PCDM_ReaderStatus status = PCDM_RS_OpenError;
+  //
+  try
+  {
+    status = A->Open(filename, Doc);
+
+    if ( status == PCDM_RS_AlreadyRetrieved )
+    {
+      const int nb    = A->IsInSession(filename);
+      const int nbDoc = A->NbDocuments();
+
+      if ( (nb >= 1) && (nb <= nbDoc) )
+      {
+        A->GetDocument(nb, Doc);
+        status = PCDM_RS_OK;
+      }
+      else
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Already retrieved but not found.");
+        return false;
+      }
+    }
+  }
+  catch ( Standard_Failure exc )
+  {
+    m_progress.SendLogMessage( LogErr(Normal) << "OCCT exception: %1 %2."
+                                              << exc.DynamicType()->Name()
+                                              << exc.GetMessageString() );
+    return false;
+  }
+
+  // Check status.
+  if ( status != PCDM_RS_OK )
+  {
+    TCollection_AsciiString statusStr;
+
+         if ( status == PCDM_RS_NoDriver )                    statusStr = "PCDM_RS_NoDriver";
+    else if ( status == PCDM_RS_UnknownFileDriver )           statusStr = "PCDM_RS_UnknownFileDriver";
+    else if ( status == PCDM_RS_OpenError )                   statusStr = "PCDM_RS_OpenError";
+    else if ( status == PCDM_RS_NoVersion )                   statusStr = "PCDM_RS_NoVersion";
+    else if ( status == PCDM_RS_NoSchema )                    statusStr = "PCDM_RS_NoSchema";
+    else if ( status == PCDM_RS_NoDocument )                  statusStr = "PCDM_RS_NoDocument";
+    else if ( status == PCDM_RS_ExtensionFailure )            statusStr = "PCDM_RS_ExtensionFailure";
+    else if ( status == PCDM_RS_WrongStreamMode )             statusStr = "PCDM_RS_WrongStreamMode";
+    else if ( status == PCDM_RS_FormatFailure )               statusStr = "PCDM_RS_FormatFailure";
+    else if ( status == PCDM_RS_TypeFailure )                 statusStr = "PCDM_RS_TypeFailure";
+    else if ( status == PCDM_RS_TypeNotFoundInSchema )        statusStr = "PCDM_RS_TypeNotFoundInSchema";
+    else if ( status == PCDM_RS_UnrecognizedFileFormat )      statusStr = "PCDM_RS_UnrecognizedFileFormat";
+    else if ( status == PCDM_RS_MakeFailure )                 statusStr = "PCDM_RS_MakeFailure";
+    else if ( status == PCDM_RS_PermissionDenied )            statusStr = "PCDM_RS_PermissionDenied";
+    else if ( status == PCDM_RS_DriverFailure )               statusStr = "PCDM_RS_DriverFailure";
+    else if ( status == PCDM_RS_AlreadyRetrievedAndModified ) statusStr = "PCDM_RS_AlreadyRetrievedAndModified";
+    else if ( status == PCDM_RS_AlreadyRetrieved )            statusStr = "PCDM_RS_AlreadyRetrieved";
+    else if ( status == PCDM_RS_UnknownDocument )             statusStr = "PCDM_RS_UnknownDocument";
+    else if ( status == PCDM_RS_WrongResource )               statusStr = "PCDM_RS_WrongResource";
+    else if ( status == PCDM_RS_ReaderException )             statusStr = "PCDM_RS_ReaderException";
+    else if ( status == PCDM_RS_NoModel )                     statusStr = "PCDM_RS_NoModel";
+
+    m_progress.SendLogMessage(LogErr(Normal) << "Reader failed. Error code: %1." << statusStr);
+
+    return false;
+  }
+
+  // Remove flag `IsRetrieved` to allow loading one file several times in one session.
+  Doc->MetaData()->UnsetDocument();
+
+  // Initialize Data Model.
+  this->init(Doc);
+
+  // Success.
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -138,9 +253,47 @@ bool asiAsm_XdeDoc::LoadSTEP(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::LoadSTEP(const std::string& filename)
+bool asiAsm_XdeDoc::SaveAs(const TCollection_AsciiString& filename)
 {
-  return this->LoadSTEP( TCollection_AsciiString( filename.c_str() ) );
+  if ( m_doc.IsNull() )
+    return false;
+
+  Handle(asiAsm_XdeApp) A = this->getApplication();
+
+  // Write.
+  PCDM_StoreStatus status = PCDM_SS_WriteFailure;
+  //
+  try
+  {
+    status = A->SaveAs(m_doc, filename);
+  }
+  catch ( Standard_Failure exc )
+  {
+    m_progress.SendLogMessage( LogErr(Normal) << "OCCT exception: %1 %2."
+                                              << exc.DynamicType()->Name()
+                                              << exc.GetMessageString() );
+    return false;
+  }
+
+  // Check status.
+  if ( status != PCDM_SS_OK )
+  {
+    TCollection_AsciiString statusStr;
+
+         if ( status == PCDM_SS_DriverFailure )      statusStr = "PCDM_SS_DriverFailure";
+    else if ( status == PCDM_SS_WriteFailure )       statusStr = "PCDM_SS_WriteFailure";
+    else if ( status == PCDM_SS_Doc_IsNull )         statusStr = "PCDM_SS_Doc_IsNull";
+    else if ( status == PCDM_SS_No_Obj )             statusStr = "PCDM_SS_No_Obj";
+    else if ( status == PCDM_SS_Info_Section_Error ) statusStr = "PCDM_SS_Info_Section_Error";
+    else                                             statusStr = "PCDM_SS_Failure";
+
+    m_progress.SendLogMessage(LogErr(Normal) << "Writer failed. Error code: %1." << statusStr);
+
+    return false;
+  }
+
+  // Success.
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -164,7 +317,7 @@ void asiAsm_XdeDoc::Release()
     return;
 
   // Close OCAF Document.
-  Handle(XCAFApp_Application) A = this->getApplication();
+  Handle(asiAsm_XdeApp) A = this->getApplication();
   //
   if ( A->CanClose(m_doc) == CDM_CCS_OK )
     A->Close(m_doc);
@@ -1313,19 +1466,19 @@ void asiAsm_XdeDoc::init(const Handle(TDocStd_Document)& doc)
 
 Handle(TDocStd_Document) asiAsm_XdeDoc::newDocument()
 {
-  Handle(TDocStd_Document)    D;
-  Handle(XCAFApp_Application) A = this->getApplication();
+  Handle(TDocStd_Document) D;
+  Handle(asiAsm_XdeApp)    A = this->getApplication();
 
   // Create XDE Document and return.
-  A->NewDocument("BinXCAF", D);
+  A->NewDocument(BinXCAF, D);
   return D;
 }
 
 //-----------------------------------------------------------------------------
 
-Handle(XCAFApp_Application) asiAsm_XdeDoc::getApplication()
+Handle(asiAsm_XdeApp) asiAsm_XdeDoc::getApplication()
 {
-  return XCAFApp_Application::GetApplication();
+  return asiAsm_XdeApp::Instance();
 }
 
 //-----------------------------------------------------------------------------

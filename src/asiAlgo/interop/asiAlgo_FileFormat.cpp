@@ -88,6 +88,10 @@ asiAlgo_FileFormat
   {
     return FileFormat_NATIVE;
   }
+  else if ( ext == "xbf" )
+  {
+    return FileFormat_XBF;
+  }
   else if ( ext == "igs" || ext == "iges" )
   {
     return FileFormat_IGES;
@@ -172,6 +176,7 @@ asiAlgo_FileFormat
 bool asiAlgo_FileFormatTool::IsExportSupported(const asiAlgo_FileFormat& format)
 {
   if ( format == FileFormat_NATIVE
+    || format == FileFormat_XBF
     || format == FileFormat_BREP
     || format == FileFormat_STEP
     || format == FileFormat_STL)
@@ -187,6 +192,7 @@ bool asiAlgo_FileFormatTool::IsExportSupported(const asiAlgo_FileFormat& format)
 bool asiAlgo_FileFormatTool::IsImportSupported(const asiAlgo_FileFormat& format)
 {
   if ( format == FileFormat_NATIVE
+    || format == FileFormat_XBF
     || format == FileFormat_BREP
     || format == FileFormat_STEP
     || format == FileFormat_STL )

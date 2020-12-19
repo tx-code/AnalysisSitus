@@ -52,6 +52,7 @@ enum asiAlgo_FileFormat
   // Native
   //---------------------------------------------------------------------------
   FileFormat_NATIVE, //!< Native project format.
+  FileFormat_XBF,    //!< OpenCascade's native for assemblies.
 
   //---------------------------------------------------------------------------
   // CAD
@@ -131,13 +132,13 @@ public:
   //! Returns file format analyzing the file extension.
   //! \param[in] path full filename.
   //! \return file format enum.
-  asiAlgo_EXPORT asiAlgo_FileFormat
+  asiAlgo_EXPORT static asiAlgo_FileFormat
     FormatFromFileExtension(const TCollection_AsciiString& path);
 
   //! Returns file format analyzing the file contents.
   //! \param[in] path full filename.
   //! \return file format enum.
-  asiAlgo_EXPORT asiAlgo_FileFormat
+  asiAlgo_EXPORT static asiAlgo_FileFormat
     FormatFromFileContent(const TCollection_AsciiString& path);
 
 public:

@@ -179,6 +179,11 @@ int main(int argc, char** argv)
     qputenv("CSF_PluginDefaults", resDir);
     qputenv("CSF_ResourcesDefaults", resDir);
 
+    TCollection_AsciiString resDirStr = QStr2AsciiStr( QString::fromLatin1( resDir.data() ) );
+    //
+    std::cout << "CSF_PluginDefaults: " << resDirStr.ToCString() << std::endl;
+    std::cout << "CSF_ResourcesDefaults: " << resDirStr.ToCString() << std::endl;
+
     // Load data dictionary.
     QByteArray dictFilename = resDir + "/asiExeDictionary.xml";
     QString dictFilenameStr = QString::fromLatin1( dictFilename.data() );

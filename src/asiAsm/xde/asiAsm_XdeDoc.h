@@ -43,12 +43,12 @@
 #include <TDF_LabelSequence.hxx>
 #include <TDocStd_Document.hxx>
 
-// Forward declarations
-class XCAFApp_Application;
+// Forward declarations;
 class XCAFDoc_ShapeTool;
 class XCAFDoc_ColorTool;
 class XSControl_WorkSession;
 class Quantity_ColorRGBA;
+class asiAsm_XdeApp;
 class asiAsm_XdePartRepr;
 
 //-----------------------------------------------------------------------------
@@ -100,28 +100,40 @@ public:
 public:
 
   //! Creates new empty XDE Document under this Assembly Document facade.
-  asiAsm_EXPORT virtual void
+  asiAsm_EXPORT void
     NewDocument();
 
-  //! Loads STEP file to populate the internal XDE Document.
-  //! \param[in] filename name of the STEP file to load.
+  //! Loads file of any supported format.
+  //! \param[in] filename name of the file to load.
   //! \return true in case of success, false -- otherwise.
-  asiAsm_EXPORT virtual bool
-    LoadSTEP(const TCollection_AsciiString& filename);
+  asiAsm_EXPORT bool
+    Load(const TCollection_AsciiString& filename);
+
+  //! Loads the native XDE Document.
+  //! \param[in] filename name of the file containing CAF Document to open.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    LoadNative(const TCollection_AsciiString& filename);
 
   //! Loads STEP file to populate the internal XDE Document.
   //! \param[in] filename name of the STEP file to load.
   //! \return true in case of success, false -- otherwise.
-  asiAsm_EXPORT virtual bool
-    LoadSTEP(const std::string& filename);
+  asiAsm_EXPORT bool
+    LoadSTEP(const TCollection_AsciiString& filename);
+
+  //! Saves the document to file.
+  //! \param[in] filename target filename.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    SaveAs(const TCollection_AsciiString& filename);
 
   //! \return true if the Assembly Document is empty, i.e. the XDE Document
   //!         is either null or contains no roots.
-  asiAsm_EXPORT virtual bool
+  asiAsm_EXPORT bool
     IsEmpty() const;
 
   //! Releases all resources occupied by this Assembly Document instance.
-  asiAsm_EXPORT virtual void
+  asiAsm_EXPORT void
     Release();
 
 /* API */
@@ -736,7 +748,7 @@ protected:
     newDocument();
 
   //! \return instance of XDE Application which manages XDE Document.
-  asiAsm_EXPORT Handle(XCAFApp_Application)
+  asiAsm_EXPORT Handle(asiAsm_XdeApp)
     getApplication();
 
   //! Starting from the given assembly item, iterates assembly structure downwards

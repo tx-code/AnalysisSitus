@@ -66,7 +66,7 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
                                                  interp->GetPlotter() );
 
   // Load data from file.
-  if ( !doc->LoadSTEP(filename) )
+  if ( !doc->Load( filename.c_str() ) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot load XDE document from file '%1'."
                                                         << filename);
@@ -75,6 +75,54 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
 
   // Set as variable.
   interp->SetVar( name, new cmdAsm_XdeModel(doc) );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_Save(const Handle(asiTcl_Interp)& interp,
+                int                          argc,
+                const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  // Save document to file.
+  if ( !doc->SaveAs( filename.c_str() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save XDE document to file '%1'."
+                                                        << filename);
+    return TCL_ERROR;
+  }
 
   return TCL_OK;
 }
@@ -133,6 +181,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Loads assembly from file <filename> to the XDE document named <M>.",
     //
     __FILE__, group, ASMXDE_Load);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-save",
+    //
+    "asm-xde-save -model <M> -filename <filename>\n"
+    "\t Saves the XDE document named <M> to the file <filename>.",
+    //
+    __FILE__, group, ASMXDE_Save);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-browse",

@@ -1,4 +1,4 @@
-formatlist:BinOcaf|ACTBin
+formatlist:BinOcaf|ACTBin|BinXCAF
 
 !
 ! Default format
@@ -19,3 +19,11 @@ ACTBin.Description: ACT Binary Document
 ACTBin.FileExtension: situ
 ACTBin.StoragePlugin: 0ac06b28-65c5-428e-86a5-2a35fbe7c4a4
 ACTBin.RetrievalPlugin: 0ac06b28-65c5-428e-86a5-2a35fbe7c4a5
+
+!
+! BinXCAF format
+!
+BinXCAF.Description: BinXCAF Document Version 1.0
+BinXCAF.FileExtension: xbf
+BinXCAF.StoragePlugin: a78ff496-a779-11d5-aab4-0050044b1af1
+BinXCAF.RetrievalPlugin: a78ff497-a779-11d5-aab4-0050044b1af1
