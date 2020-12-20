@@ -40,6 +40,7 @@
 #include <ActAPI_IProgressNotifier.h>
 
 // OpenCascade includes
+#include <TDF_LabelDataMap.hxx>
 #include <TDF_LabelSequence.hxx>
 #include <TDocStd_Document.hxx>
 
@@ -84,6 +85,13 @@ public:
 
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdeDoc, Standard_Transient)
+
+public:
+
+  //! Auxiliary data map to support compound-parts expansion logic.
+  typedef NCollection_DataMap< TopoDS_Shape,
+                               std::pair<TDF_Label, TopLoc_Location>,
+                               TopTools_ShapeMapHasher> t_expansionMap;
 
 public:
 
@@ -709,12 +717,45 @@ public:
                      const TopoDS_Shape&     subShape,
                      Quantity_ColorRGBA&     color) const;
 
+  //! XDE-specific function to call each time you modify part's geometry.
+  //! Without calling this function, you'll end up with TopoDS compounds
+  //! nested into your assemblies having the old geometries. That's a shitty
+  //! surprise to discover once, for example, you export the document back
+  //! to STEP format.
+  //!
+  //! Find out more details here: http://quaoar.su/blog/page/step-iges-xde-opencascade
+  //!
+  //! The `asiAsm_XdeDoc` is responsible for calling this method internally in its
+  //! API functions. Be careful not to forget calling it if you prefer modifying the parts
+  //! outside this our API. Else, forget about it.
+  asiAsm_EXPORT void
+    UpdateAssemblies();
+
+  //! Turns the passed part into a subassembly in the case if this part contains
+  //! TopoDS_Compound as its boundary representation.
+  //! \param[in] partId           the part ID in question.
+  //! \param[in] updateAssemblies the Boolean flag indicating whether to call `UpdateAssemblies()`
+  //!                             method upon completion.
+  //! \return true if the part of expanded, false -- otherwise (e.g., if the part is not
+  //!         of a compound geometric type).
+  asiAsm_EXPORT bool
+    ExpandCompound(const asiAsm_XdePartId& partId,
+                   const bool              updateAssemblies = true);
+
+  //! Expands the compound parts by turning them into subassemblies. This
+  //! function does recursive processing, so that the nested compound parts
+  //! will be expanded as well. It goes like this until a non-compound part is
+  //! reached.
+  //! \param[in] items the assembly items to start expansion from.
+  asiAsm_EXPORT void
+    ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items);
+
+public:
+
   //! Dumps assembly hierarchy to the passed output stream.
   //! \param[in,out] output stream where to dump.
   asiAsm_EXPORT void
     DumpAssemblyItems(Standard_OStream& out) const;
-
-public:
 
   //! Non-const accessor for the underlying OCAF Document.
   //! \return OCAF Document.
@@ -805,6 +846,50 @@ protected:
   asiAsm_EXPORT void
     clearSession(const Handle(XSControl_WorkSession)& WS);
 
+  //! This method recursively turns the compound parts addressed by the
+  //! passed assembly items into subassemblies.
+  //! \param[in]     items     the assembly items in question.
+  //! \param[in,out] processed the processed prototypes' labels.
+  asiAsm_EXPORT void
+    expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& items,
+                               TDF_LabelMap&                    processed);
+
+  //! Internal mechanics for compounds expansion. This method works the
+  //! at TDF_Label's level.
+  asiAsm_EXPORT void
+    expand(const TDF_Label&                                      expandedLabel,
+           const TopLoc_Location&                                curLoc,
+           t_expansionMap&                                       subshapeMap,
+           std::vector< std::pair<TDF_Label, TopLoc_Location> >& newParts);
+
+  //! Propagates color attributes (of all types) from the given assembly label
+  //! down to its components recursively.
+  asiAsm_EXPORT void
+    propagateColor(const TDF_Label&          assemblyLabel,
+                   const bool                isSurfColoredAssembly,
+                   const Quantity_ColorRGBA& surfColor,
+                   const bool                isCurvColoredAssembly,
+                   const Quantity_ColorRGBA& curvColor,
+                   const bool                isGenColoredAssembly,
+                   const Quantity_ColorRGBA& genColor);
+
+  //! Copies all OCAF/XDE attributes from the `from` label to the `to` label.
+  //! \param[in] from the source label.
+  //! \param[in] to   the target label.
+  asiAsm_EXPORT void
+    copyAttributes(const TDF_Label from,
+                   TDF_Label&      to);
+
+  //! Adda a new component with the given location to the passed assembly.
+  //! \param[in] assemblyLabel the target assembly's label.
+  //! \param[in] compLabel     the component to add.
+  //! \param[in] location      the location to attach to the added instance.
+  //! \return label of the newly added component.
+  asiAsm_EXPORT TDF_Label
+    addComponent(const TDF_Label&       assemblyLabel,
+                 const TDF_Label&       compLabel,
+                 const TopLoc_Location& location);
+
 private:
 
   //! This function is a lightweight analogue of GetComponents() method of
@@ -830,6 +915,22 @@ private:
   bool __isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
                     const TDF_Label&                 itemLab,
                     TDF_Label&                       originLab) const;
+
+  //! Adds the passed shape as a part without any checks. This method does not
+  //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most
+  //! straighforward way.
+  //! \param[in] shape the shape to add as a new part.
+  //! \return the newly added label.
+  TDF_Label __addPart(const TopoDS_Shape& shape);
+
+  //! Adds a subshape's label under the passed part's label. This method does not
+  //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most
+  //! straighforward way.
+  //! \param[in] partLabel the part's label.
+  //! \param[in] subshape  the subshape to add a label for.
+  //! \return the newly created label.
+  TDF_Label __addSubShape(const TDF_Label&    partLabel,
+                          const TopoDS_Shape& subshape);
 
 protected:
 

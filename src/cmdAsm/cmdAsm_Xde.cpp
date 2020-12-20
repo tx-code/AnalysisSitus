@@ -31,6 +31,9 @@
 // cmdAsm includes
 #include <cmdAsm_XdeModel.h>
 
+// asiAlgo includes
+#include <asiAlgo_Timer.h>
+
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
 
@@ -169,6 +172,64 @@ int ASMXDE_Browse(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Get items.
+  asiAsm_XdeAssemblyItemIds items;
+  int itemsIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
+  {
+    for ( int ii = itemsIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+    }
+  }
+  else
+  {
+    xdeDoc->GetLeafAssemblyItems(items);
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Expand compounds.
+  xdeDoc->ExpandCompounds(items);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Expand XDE compounds")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -197,4 +258,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Opens a dialog to browse the structure of the XDE document named <M>.",
     //
     __FILE__, group, ASMXDE_Browse);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-xcompounds",
+    //
+    "asm-xde-xcompounds -model <M> [-items <item_1> ... <item_k>]\n"
+    "\t Expands the compound-type parts in the model <M> for the assembly\n"
+    "\t items <item_1>, ... <item_k> (if passed), or for the all leaves (if\n"
+    "\t not passed).",
+    //
+    __FILE__, group, ASMXDE_XCompounds);
 }

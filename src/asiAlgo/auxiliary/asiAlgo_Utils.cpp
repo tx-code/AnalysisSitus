@@ -944,11 +944,57 @@ bool asiAlgo_Utils::IsEmptyShape(const TopoDS_Shape& shape)
   if ( shape.ShapeType() >= TopAbs_FACE )
     return false;
 
-  int numSubShapes = 0;
-  for ( TopoDS_Iterator it(shape); it.More(); it.Next() )
-    numSubShapes++;
+  // If a shape contains just nested compounds, it's still empty. If there's at least
+  // something of non-compound type, the shape is considered as non-empty.
+  TopTools_IndexedMapOfShape map;
+  TopExp::MapShapes(shape, map);
+  //
+  for ( TopTools_IndexedMapOfShape::const_iterator it = map.cbegin(); it != map.cend(); it++ )
+  {
+    if ( (*it).ShapeType() != TopAbs_COMPOUND )
+      return false;
+  }
 
-  return numSubShapes == 0;
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsIdentity(const TopLoc_Location& loc)
+{
+  if ( loc.IsIdentity() )
+    return true;
+
+  // Nested locations.
+  if ( !loc.NextLocation().IsIdentity() )
+    return false;
+
+  /* =============================
+   *  Check transformation matrix.
+   * ============================= */
+
+  gp_Trsf T = loc.Transformation();
+
+  if ( T.Form() == gp_Identity )
+    return true;
+
+  const double prec = Precision::Confusion();
+
+  // Check translation part.
+  if ( !T.TranslationPart().IsEqual( gp_XYZ(0., 0., 0.), prec ) )
+    return false;
+
+  // Check scaling.
+  if ( Abs(T.ScaleFactor() - 1.0) > prec )
+    return false;
+
+  // Check whether the matrix components define exactly the identity.
+  if ( Abs( T.Value(1, 1) - 1.0 ) > prec || Abs( T.Value(1, 2) )       > prec || Abs( T.Value(1, 3) )       > prec ||
+       Abs( T.Value(2, 1) )       > prec || Abs( T.Value(2, 2) - 1.0 ) > prec || Abs( T.Value(2, 3) )       > prec ||
+       Abs( T.Value(3, 1) )       > prec || Abs( T.Value(3, 2) )       > prec || Abs( T.Value(3, 3) - 1.0 ) > prec )
+    return false;
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------

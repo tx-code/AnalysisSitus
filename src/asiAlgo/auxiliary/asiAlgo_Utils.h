@@ -335,9 +335,19 @@ namespace asiAlgo_Utils
     IsPlanar(const TopoDS_Face&  face,
               Handle(Geom_Plane)& plane);
 
-  //! Checks whether the passed shape is empty.
+  //! Checks whether the passed shape is empty. A series of nested
+  //! compounds is also considered an empty shape.
+  //! \param[in] shape the shape to check.
+  //! \return true for empty shape, false -- otherwise.
   asiAlgo_EXPORT bool
     IsEmptyShape(const TopoDS_Shape& shape);
+
+  //! Checks whether the passed location (a transformation matrix) is
+  //! identity (i.e., it defines no real transformation).
+  //! \param[in] loc the location to check.
+  //! \return true for the identity, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsIdentity(const TopLoc_Location& loc);
 
   //! Checks whether the curve or its basic curve is circular.
   //! \param[in] curve curve to check.

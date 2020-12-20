@@ -46,16 +46,25 @@
 #include <CDM_MetaData.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
+#include <TColStd_HSequenceOfExtendedString.hxx>
 #include <TDataStd_ChildNodeIterator.hxx>
 #include <TDataStd_Name.hxx>
 #include <TDataStd_TreeNode.hxx>
+#include <TDataStd_UAttribute.hxx>
 #include <TDF_AttributeIterator.hxx>
 #include <TDF_ChildIterator.hxx>
+#include <TDF_RelocationTable.hxx>
+#include <TNaming_Builder.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TNaming_Tool.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_GraphNode.hxx>
+#include <XCAFDoc_LayerTool.hxx>
+#include <XCAFDoc_Location.hxx>
+#include <XCAFDoc_MaterialTool.hxx>
+#include <XCAFDoc_ShapeMapTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
@@ -1394,6 +1403,146 @@ bool asiAsm_XdeDoc::GetSubShapeColor(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
+bool asiAsm_XdeDoc::ExpandCompound(const asiAsm_XdePartId& partId,
+                                   const bool              updateAssemblies)
+{
+  // Contract check 1: null or non-compound shapes are out of interest.
+  TopoDS_Shape partShape = this->GetShape(partId);
+  //
+  if ( partShape.IsNull() || (partShape.ShapeType() != TopAbs_COMPOUND) )
+  {
+    return false;
+  }
+
+  // Contract check 2: empty compounds are out of interest either.
+  if ( asiAlgo_Utils::IsEmptyShape(partShape) )
+  {
+    return false;
+  }
+
+  // Prepare working tools.
+  Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
+  Handle(XCAFDoc_ColorTool) colorTool = this->GetColorTool();
+
+  TDF_Label partLabel = this->GetLabel(partId);
+
+  // Save subshapes of expanded part.
+  t_expansionMap             oldSubshapes;
+  TDF_LabelSequence          childrenToDelete;
+  Handle(TNaming_NamedShape) nsAttribute;
+  //
+  for ( TDF_ChildIterator subIt(partLabel); subIt.More(); subIt.Next() )
+  {
+    TDF_Label curSubL = subIt.Value();
+
+    // Skip empty labels.
+    if ( !curSubL.FindAttribute(TNaming_NamedShape::GetID(), nsAttribute) )
+      continue;
+
+    TopoDS_Shape curShape = shapeTool->GetShape(curSubL);
+    std::pair<TDF_Label, TopLoc_Location> sub( curSubL, curShape.Location() );
+
+    if ( !oldSubshapes.IsBound( curShape.Located( TopLoc_Location() ) ) )
+      oldSubshapes.Bind( curShape.Located( TopLoc_Location() ), sub);
+
+    curSubL.ForgetAttribute( TNaming_NamedShape::GetID() );
+    childrenToDelete.Append(curSubL);
+  }
+
+  // Expand on label.
+  std::vector< std::pair<TDF_Label, TopLoc_Location> > newParts;
+  TopLoc_Location auxLoc;
+  //
+  this->expand(partLabel, auxLoc, oldSubshapes, newParts);
+
+  // Update attributes.
+  for ( t_expansionMap::Iterator subIt(oldSubshapes); subIt.More(); subIt.Next() )
+  {
+    // Try to find as top level shape.
+    TopoDS_Shape curShape  = subIt.Key();
+    TDF_Label    newShapeL = shapeTool->FindShape(curShape);
+
+    // Try to find as subshape.
+    if ( newShapeL.IsNull() )
+    {
+      TopLoc_Location initLoc = subIt.Value().second;
+      std::vector<std::pair<TDF_Label, TopLoc_Location>>::const_iterator partIt = newParts.cbegin();
+      //
+      for ( ; partIt != newParts.cend(); partIt++ )
+      {
+        TDF_Label       lab = (*partIt).first;
+        TopLoc_Location loc = (*partIt).second.Inverted() * initLoc;
+        //
+        if ( asiAlgo_Utils::IsIdentity(loc) )
+          loc = TopLoc_Location();
+
+        if ( shapeTool->IsSubShape( lab, curShape.Located(loc) ) )
+        {
+          // Quickly create a subshape's label without spending much time on whatever checks.
+          newShapeL = this->__addSubShape( lab, curShape.Located(loc) );
+          break;
+        }
+      }
+    }
+
+    if ( newShapeL.IsNull() )
+      continue;
+
+    // Copy attributes.
+    this->copyAttributes(subIt.Value().first, newShapeL);
+  }
+
+  // Remove old subshapes from the expanded part.
+  TDF_LabelSequence::const_iterator delIt = childrenToDelete.cbegin();
+  for ( ; delIt != childrenToDelete.cend(); delIt++ )
+    (*delIt).ForgetAllAttributes();
+
+  // Update assemblies.
+  if ( updateAssemblies )
+    this->UpdateAssemblies();
+
+  // Pass the colors to the expanded entities as the part becomes an
+  // assembly now, and we need to have colors at its ultimate sub-parts.
+  Quantity_ColorRGBA surfColor, curvColor, genColor;
+  //
+  const bool isSurf = colorTool->GetColor(partLabel, XCAFDoc_ColorSurf, surfColor),
+             isCurv = colorTool->GetColor(partLabel, XCAFDoc_ColorCurv, curvColor),
+             isGen  = colorTool->GetColor(partLabel, XCAFDoc_ColorGen, genColor);
+  //
+  this->propagateColor(partLabel,
+                       isSurf,
+                       surfColor,
+                       isCurv,
+                       curvColor,
+                       isGen,
+                       genColor);
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::UpdateAssemblies()
+{
+  // This thing is made a part of OpenCascade, so why bother?
+  this->GetShapeTool()->UpdateAssemblies();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items)
+{
+  // Continue recursively.
+  TDF_LabelMap processed;
+  //
+  this->expandCompoundsRecursively(items, processed);
+
+  // Make assemblies consistent in terms of the contained geometries.
+  this->UpdateAssemblies();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 {
   for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
@@ -1659,6 +1808,312 @@ void asiAsm_XdeDoc::clearSession(const Handle(XSControl_WorkSession)& WS)
 }
 
 //-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& items,
+                                               TDF_LabelMap&                    processed)
+{
+  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(items); aiit.More(); aiit.Next() )
+  {
+    TDF_Label original = this->GetOriginal( aiit.Value() );
+    //
+    if ( !processed.Add(original) )
+      continue; // Skip the already processed prototypes.
+
+    // Check if we're at the compound part.
+    const asiAsm_XdePartId pid = asiAsm_XdePartId::FromLabel(original);
+    //
+    if ( this->GetShape(pid).ShapeType() != TopAbs_COMPOUND )
+      continue; // Skip anything but TopoDS_Compound geometries.
+
+    // Expand a single part.
+    if ( this->ExpandCompound(pid, false) ) // Assemblies are not updated, we'll do this at one shot.
+    {
+      // Get the generated leaves and continue expansion on them.
+      asiAsm_XdeAssemblyItemIds newLeaves;
+      asiAsm_XdeAssemblyItemId  parent(pid);
+      //
+      this->GetLeafAssemblyItems(parent, newLeaves);
+
+      // Proceed recursively.
+      this->expandCompoundsRecursively(newLeaves, processed);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::expand(const TDF_Label&                                    expandedLabel,
+                           const TopLoc_Location&                              curLoc,
+                           t_expansionMap&                                     subshapeMap,
+                           std::vector<std::pair<TDF_Label, TopLoc_Location>>& newParts)
+{
+  Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
+  TopoDS_Shape              mainShape = this->GetShape(expandedLabel);
+
+  // Mark the expanded label as an assembly. This is done by means of a dedicated
+  // User Attribute in XDE.
+  TDataStd_UAttribute::Set( expandedLabel, XCAFDoc::AssemblyGUID() );
+  //
+  for ( TopoDS_Iterator compIt(mainShape); compIt.More(); compIt.Next() )
+  {
+    const TopoDS_Shape& childShape = compIt.Value();
+
+    // Try to find child shape as already existing part.
+    TDF_Label partL;
+    const bool
+      isAlreadyExist = shapeTool->FindShape( childShape.Located( TopLoc_Location() ), partL );
+    //
+    if ( !isAlreadyExist )
+    {
+      // Create new part to link child shape.
+      partL = this->__addPart( childShape.Located( TopLoc_Location() ) );
+    }
+
+    // Add a new component.
+    this->addComponent( expandedLabel, partL, childShape.Location() );
+
+    // Remove new part from subshapes map.
+    std::pair<TDF_Label, TopLoc_Location> oldLabel;
+    //
+    if ( subshapeMap.Find( childShape.Located( TopLoc_Location() ), oldLabel ) )
+    {
+      this->copyAttributes(oldLabel.first, partL);
+
+      subshapeMap.UnBind( childShape.Located( TopLoc_Location() ) );
+    }
+
+    if ( !isAlreadyExist )
+    {
+      if ( childShape.ShapeType() == TopAbs_COMPOUND )
+      {
+        this->expand(partL, curLoc * childShape.Location(), subshapeMap, newParts);
+      }
+      else
+      {
+        std::pair<TDF_Label, TopLoc_Location> newPart( partL, curLoc*childShape.Location() );
+        newParts.push_back(newPart);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::propagateColor(const TDF_Label&          assemblyLabel,
+                                   const bool                isSurfColoredAssembly,
+                                   const Quantity_ColorRGBA& surfColor,
+                                   const bool                isCurvColoredAssembly,
+                                   const Quantity_ColorRGBA& curvColor,
+                                   const bool                isGenColoredAssembly,
+                                   const Quantity_ColorRGBA& genColor)
+{
+  // Get tools.
+  Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
+  Handle(XCAFDoc_ColorTool) colorTool = this->GetColorTool();
+
+  // Get assembly components.
+  TDF_LabelSequence components;
+  shapeTool->GetComponents(assemblyLabel, components);
+
+  // For each component (which is an instance), find its original and
+  // propagate colors to there.
+  Quantity_ColorRGBA surfCompColor, curvCompColor, genCompColor;
+  //
+  for ( TDF_LabelSequence::Iterator it(components); it.More(); it.Next() )
+  {
+    TDF_Label original;
+    shapeTool->GetReferredShape(it.Value(), original);
+
+    bool isSurf = colorTool->GetColor(original, XCAFDoc_ColorSurf, surfCompColor),
+         isCurv = colorTool->GetColor(original, XCAFDoc_ColorCurv, curvCompColor),
+         isGen  = colorTool->GetColor(original, XCAFDoc_ColorGen, genCompColor);
+
+    if ( shapeTool->IsAssembly(original) )
+    {
+      /* Surface color */
+      if ( !isSurf )
+      {
+        isSurf = colorTool->GetColor(it.Value(), XCAFDoc_ColorSurf, surfCompColor);
+      }
+      if ( !isSurf )
+      {
+        isSurf        = isSurfColoredAssembly;
+        surfCompColor = surfColor;
+      }
+
+      /* Curve color */
+      if ( !isCurv )
+      {
+        isCurv = colorTool->GetColor(it.Value(), XCAFDoc_ColorCurv, curvCompColor);
+      }
+      if ( !isCurv )
+      {
+        isCurv        = isCurvColoredAssembly;
+        curvCompColor = curvColor;
+      }
+
+      /* Generic color */
+      if ( !isGen )
+      {
+        isGen = colorTool->GetColor(it.Value(), XCAFDoc_ColorGen, genCompColor);
+      }
+      if ( !isGen )
+      {
+        isGen        = isGenColoredAssembly;
+        genCompColor = genColor;
+      }
+
+      // Go down to the components recursively.
+      this->propagateColor(original,
+                           isSurf, surfCompColor,
+                           isCurv, curvCompColor,
+                           isGen,  genCompColor);
+    }
+    else
+    {
+      if ( isSurfColoredAssembly && !isSurf )
+      {
+        colorTool->SetColor(original, surfColor, XCAFDoc_ColorSurf);
+      }
+      if ( isCurvColoredAssembly && !isCurv )
+      {
+        colorTool->SetColor(original, curvColor, XCAFDoc_ColorCurv);
+      }
+      if ( isGenColoredAssembly && !isGen )
+      {
+        colorTool->SetColor(original, genColor, XCAFDoc_ColorGen);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::copyAttributes(const TDF_Label from,
+                                   TDF_Label&      to)
+{
+  // Contract check.
+  if ( from.IsNull() || to.IsNull() || from.IsEqual(to) )
+    return;
+
+  // Copy color.
+  Handle(XCAFDoc_ColorTool) newColorTool = XCAFDoc_DocumentTool::ColorTool(to);
+  Handle(XCAFDoc_ColorTool) colorTool    = XCAFDoc_DocumentTool::ColorTool(from);
+  //
+  Quantity_ColorRGBA color;
+  if ( colorTool->GetColor(from, XCAFDoc_ColorSurf, color) )
+  {
+    newColorTool->SetColor(to, color, XCAFDoc_ColorSurf);
+  }
+  if ( colorTool->GetColor(from, XCAFDoc_ColorCurv, color) )
+  {
+    newColorTool->SetColor(to, color, XCAFDoc_ColorCurv);
+  }
+  if ( colorTool->GetColor(from, XCAFDoc_ColorGen, color) )
+  {
+    newColorTool->SetColor(to, color, XCAFDoc_ColorGen);
+  }
+  if ( !colorTool->IsVisible(from) )
+  {
+    newColorTool->SetVisibility(to, false);
+  }
+
+  // Copy layers.
+  Handle(XCAFDoc_LayerTool)                 newLayerTool = XCAFDoc_DocumentTool::LayerTool(to);
+  Handle(XCAFDoc_LayerTool)                 layerTool    = XCAFDoc_DocumentTool::LayerTool(from);
+  Handle(TColStd_HSequenceOfExtendedString) layers;
+  //
+  layerTool->GetLayers(from, layers);
+  //
+  for ( int j = 1; j <= layers->Length(); ++j )
+  {
+    newLayerTool->SetLayer(to, layers->Value(j));
+  }
+
+  // Copy materials.
+  Handle(XCAFDoc_MaterialTool) newMatTool = XCAFDoc_DocumentTool::MaterialTool(to);
+  Handle(XCAFDoc_MaterialTool) matTool    = XCAFDoc_DocumentTool::MaterialTool(from);
+  Handle(TDataStd_TreeNode)    matNode;
+  //
+  if ( from.FindAttribute(XCAFDoc::MaterialRefGUID(), matNode) && matNode->HasFather() )
+  {
+    TDF_Label matL = matNode->Father()->Label();
+    Handle(TCollection_HAsciiString) name;
+    Handle(TCollection_HAsciiString) description;
+
+    double density;
+    Handle(TCollection_HAsciiString) densName;
+    Handle(TCollection_HAsciiString) densValType;
+
+    if ( matTool->GetMaterial(matL, name, description, density, densName, densValType) )
+    {
+      if ( name->Length() != 0 )
+        newMatTool->SetMaterial(to, name, description, density, densName, densValType);
+    }
+  }
+
+  // All attributes.
+  Handle(TDF_Attribute) tAtt;
+  //
+  for ( TDF_AttributeIterator attItr(from); attItr.More(); attItr.Next() )
+  {
+    const Handle(TDF_Attribute) sAtt = attItr.Value();
+
+    // Protect against color and layer coping without link to colors and layers.
+    if ( sAtt->IsKind( STANDARD_TYPE(TDataStd_TreeNode) ) || sAtt->IsKind(STANDARD_TYPE(XCAFDoc_GraphNode) ) )
+      continue;
+
+    // Do not copy shape, it is already copied.
+    if ( sAtt->IsKind( STANDARD_TYPE(TNaming_NamedShape) ) || sAtt->IsKind(STANDARD_TYPE(XCAFDoc_ShapeMapTool) ) )
+      continue;
+
+    // Do not copy location, it should be copied during shape creation.
+    if ( sAtt->IsKind( STANDARD_TYPE(XCAFDoc_Location) ) )
+      continue;
+
+    const Standard_GUID& id = sAtt->ID();
+    //
+    if ( !to.FindAttribute(id, tAtt) )
+    {
+      tAtt = sAtt->NewEmpty();
+      to.AddAttribute(tAtt);
+    }
+    Handle(TDF_RelocationTable) rt = new TDF_RelocationTable();
+    sAtt->Paste(tAtt, rt);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+TDF_Label
+  asiAsm_XdeDoc::addComponent(const TDF_Label&       assemblyLabel,
+                              const TDF_Label&       compLabel,
+                              const TopLoc_Location& location)
+{
+  TDF_Label result;
+
+  // Use the XDE's shape tool to add a new component.
+  if ( assemblyLabel.IsNull() )
+  {
+    if ( !location.IsIdentity() )
+    {
+      TopoDS_Shape locatedShape = this->GetShape(compLabel).Located(location);
+      result = this->GetShapeTool()->AddShape(locatedShape);
+    }
+    else
+    {
+      result = compLabel;
+    }
+  }
+  else
+  {
+    result = this->GetShapeTool()->AddComponent(assemblyLabel, compLabel, location);
+  }
+
+  return result;
+}
+
+//-----------------------------------------------------------------------------
 // Methods with improved efficiency
 //-----------------------------------------------------------------------------
 
@@ -1724,4 +2179,42 @@ bool asiAsm_XdeDoc::__isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
     return true;
   }
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape)
+{
+  // Add new part.
+  TDF_Label resultL;
+  TDF_TagSource tag;
+  resultL = tag.NewChild( this->GetShapeTool()->Label() );
+
+  // Set TNaming_NamedShape attribute.
+  TNaming_Builder tnBuild(resultL);
+  tnBuild.Generated(shape);
+
+  // Set name by the shape type.
+  std::stringstream stream;
+  TopAbs::Print(shape.ShapeType(), stream);
+  TCollection_AsciiString name( stream.str().c_str() );
+  //
+  TDataStd_Name::Set( resultL, TCollection_ExtendedString(name) );
+
+  return resultL;
+}
+//-----------------------------------------------------------------------------
+
+TDF_Label asiAsm_XdeDoc::__addSubShape(const TDF_Label&    partLabel,
+                                       const TopoDS_Shape& subshape)
+{
+  TDF_Label resultL;
+  TDF_TagSource tag;
+  resultL = tag.NewChild(partLabel);
+
+  // Set TNaming_NamedShape attribute.
+  TNaming_Builder tnBuild(resultL);
+  tnBuild.Generated(subshape);
+
+  return resultL;
 }
