@@ -47,7 +47,7 @@ outcome asiTest_KEV::runTestScript(const int   funcID,
   SetVarDescr("time",     res.elapsedTimeSec, ID(), funcID);
 
   // Return status.
-  return res.failure();
+  return res;
 }
 
 //-----------------------------------------------------------------------------
