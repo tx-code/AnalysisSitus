@@ -8,6 +8,6 @@ REM ===========================================================================
 REM  Configuration of Network Resources
 REM ===========================================================================
 
-set "JENKINS_3RDPARTIES_ARCHIVE_DIR=\\MASTER\projects\CADProcessor\archives\3rd-parties"
-set "JENKINS_3RDPARTIES_ARCHIVE=3rd-parties-win-2018-01-29.zip"
-set "JENKINS_LAST_BUILD_DIR=\\master\projects\CADProcessor\tools\AnalysisSitus"
+set "JENKINS_3RDPARTIES_ARCHIVE_DIR=D:\Work\AnalysisSitus-libpacks\win\msvc2019_x64"
+set "JENKINS_3RDPARTIES_ARCHIVE=msvc2019_x64.zip"
+set "JENKINS_LAST_BUILD_DIR=D:\Work\!situ"
