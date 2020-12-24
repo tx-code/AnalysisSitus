@@ -74,4 +74,4 @@ xcopy /S /Y cmake-build-dir\setup .\setup
 
 echo "*** Running installation packaging..."
 
-"%JENKINS_3RDPARTIES%\innosetup5\ISCC.exe" .\setup\setup.iss
+"%JENKINS_3RDPARTIES%\innosetup6\ISCC.exe" .\setup\setup.iss

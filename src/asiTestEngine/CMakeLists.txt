@@ -87,6 +87,10 @@ target_link_libraries(asiTestEngine asiAlgo asiData)
 # Installation
 #------------------------------------------------------------------------------
 
+if (WIN32)
+  install (TARGETS asiTestEngine RUNTIME DESTINATION bin COMPONENT Runtime)
+endif()
+
 install (TARGETS asiTestEngine
          CONFIGURATIONS Release
          RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
