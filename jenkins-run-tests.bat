@@ -10,17 +10,29 @@ call "%~dp0"jenkins-custom.bat
 
 set "JENKINS_3RDPARTIES=%~dp03rd-parties"
 
-set "ASI_TEST_DUMPING=ASI_TEST_DUMPING"
-set "ASI_TEST_DATA=@ASI_TEST_DATA@"
-set "ASI_TEST_SCRIPTS=@ASI_TEST_SCRIPTS@"
-set "ASI_TEST_DESCR=@ASI_TEST_DESCR@"
+set "ASI_TEST_DUMPING=%~dp0cmake-build-dir"
+set "ASI_TEST_DATA=%~dp0data"
+set "ASI_TEST_SCRIPTS=%~dp0scripts"
+rem set "ASI_TEST_DESCR=@ASI_TEST_DESCR@"
+
+setlocal enabledelayedexpansion
+
+set "ASI_TEST_DUMPING=!ASI_TEST_DATA:\=/!"
+echo "ASI_TEST_DUMPING=!ASI_TEST_DUMPING!"
+
+set "ASI_TEST_DATA=!ASI_TEST_DATA:\=/!"
+echo "ASI_TEST_DATA=!ASI_TEST_DATA!"
+
+set "ASI_TEST_SCRIPTS=!ASI_TEST_SCRIPTS:\=/!"
+echo "ASI_TEST_SCRIPTS=!ASI_TEST_SCRIPTS!"
 
 REM ===========================================================================
 REM Run tests
 REM ===========================================================================
 
-cd cmake-install-dir
-DRAWEXE.exe -c testgrid -overwrite -parallel 4 -outdir "results"
+cd cmake-install-dir/bin
+
+asiTest.exe
 
 REM ===========================================================================
 REM Copy test results to the network drive
