@@ -151,12 +151,6 @@ COPY_RESOURCES_TO_BINARY_DIRS(resources/asiTestDictionary.xml)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
                ${asiTest_BINARY_DIR}/asiTest.vcxproj.user @ONLY)
 
-configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/setenv_deb.bat
-               ${asiTest_BINARY_DIR}/setenv_deb.bat @ONLY)
-
-configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/setenv_rel.bat
-               ${asiTest_BINARY_DIR}/setenv_rel.bat @ONLY)
-
 #------------------------------------------------------------------------------
 # Dependencies
 #------------------------------------------------------------------------------
