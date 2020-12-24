@@ -20,6 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 
+// Modified by Quaoar 2020-12-23: added treatment of Poly_Polygon3D edges.
+
 #ifndef asiAlgo_WriteDxf_h
 #define asiAlgo_WriteDxf_h
 
@@ -28,6 +30,7 @@
 
 // Forward declarations
 class BRepAdaptor_Curve;
+class Poly_Polygon3D;
 
 //-----------------------------------------------------------------------------
 
@@ -112,47 +115,54 @@ protected:
   //! Exports the passed curve adapter as a circle.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportCircle(BRepAdaptor_Curve& c);
+    exportCircle(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as a circular arc.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportArc(BRepAdaptor_Curve& c);
+    exportArc(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as an ellipse.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportEllipse(BRepAdaptor_Curve& c);
+    exportEllipse(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as an elliptical arc.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportEllipseArc(BRepAdaptor_Curve& c);
+    exportEllipseArc(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as a B-curve.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportBSpline(BRepAdaptor_Curve& c);
+    exportBSpline(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as a Bezier curve.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportBezier(BRepAdaptor_Curve& c);
+    exportBezier(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as a straight line.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportLine(BRepAdaptor_Curve& c);
+    exportLine(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as lwpolyline entity.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportLWPoly(BRepAdaptor_Curve& c);
+    exportLWPoly(const BRepAdaptor_Curve& c);
 
   //! Exports the passed curve adapter as polyline.
   //! \param[in] c the curve to export.
   asiAlgo_EXPORT void
-    exportPolyline(BRepAdaptor_Curve& c);
+    exportPolyline(const BRepAdaptor_Curve& c);
+
+  //! Exports the passed polygon as polyline.
+  //! \param[in] c the curve to export.
+  //! \param[in] T the transformation to apply.
+  asiAlgo_EXPORT void
+    exportPolyline(const Handle(Poly_Polygon3D)& c,
+                   const gp_Trsf&                T);
 
 protected:
 

@@ -24,6 +24,7 @@
 #include <asiAlgo_WriteDXF.h>
 
 // asiAlgo includes
+#include <asiAlgo_PlaneOnPoints.h>
 #include <asiAlgo_Utils.h>
 
 // OpenCascade includes
@@ -41,6 +42,9 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 
+///
+#include <BRepTools.hxx>
+
 //-----------------------------------------------------------------------------
 
 namespace
@@ -53,7 +57,7 @@ namespace
     result[2] = p.Z();
   }
 
-  point3D gPntTopoint3D(gp_Pnt& p)
+  point3D gPntTopoint3D(const gp_Pnt& p)
   {
     point3D result;
     result.x = p.X();
@@ -159,12 +163,20 @@ bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
 {
   TopoDS_Shape input = shape; // Reassign for relocation.
 
+  // Reference plane.
+  gp_Ax3 drawingPlnAx( gp::XOY() );
+  //
+  Handle(Geom_Plane) drawingPlane = new Geom_Plane(drawingPlnAx);
+
+  // Relocation transformation.
+  gp_Trsf T;
+
   if ( m_bAutoOrient )
   {
-    gp_Ax3 drawingPlnAx( gp::XOY() );
-
     // Get the referene plane.
     gp_Ax3 fpAx3;
+    bool isPlaneFound = false;
+    //
     for ( TopExp_Explorer fexp(input, TopAbs_FACE); fexp.More(); fexp.Next() )
     {
       const TopoDS_Face& face = TopoDS::Face( fexp.Current() );
@@ -174,8 +186,37 @@ bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
       //
       if ( asiAlgo_Utils::IsPlanar(face, plane) )
       {
-        fpAx3 = plane->Position();
+        isPlaneFound = true;
+        fpAx3        = plane->Position();
         break;
+      }
+    }
+
+    if ( !isPlaneFound )
+    {
+      /* If there are no planar faces in the input, we try to derive plane
+         from the coordinates of its vertices. */
+
+      TopTools_IndexedMapOfShape allVertices;
+      TopExp::MapShapes(input, TopAbs_VERTEX, allVertices);
+
+      // Get coordinates.
+      std::vector<gp_XYZ> pts;
+      //
+      for ( int kk = 1; kk <= allVertices.Extent(); ++kk )
+      {
+        pts.push_back( BRep_Tool::Pnt( TopoDS::Vertex( allVertices(kk) ) ).XYZ() );
+      }
+
+      // Find plane.
+      gp_Pln pln;
+      //
+      asiAlgo_PlaneOnPoints findPlane;
+      //
+      if ( findPlane.Build(pts, pln) )
+      {
+        isPlaneFound = true;
+        fpAx3        = pln.Position();
       }
     }
 
@@ -189,11 +230,10 @@ bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
     T_A.Invert();
 
     // Final transformation from B to A.
-    gp_Trsf T = T_A * T_B;
+    T = T_A * T_B;
 
     // Transform.
-    BRepBuilderAPI_Transform mkTransform(input, T, true);
-    input = mkTransform.Shape();
+    input.Move(T);
   }
 
   // Export edges, no matter how they are organized (wires, compounds, etc.).
@@ -202,6 +242,35 @@ bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
   for ( int i = 1; edges.More(); edges.Next(), ++i )
   {
     const TopoDS_Edge& edge = TopoDS::Edge( edges.Current() );
+
+    double ef, el;
+
+    // Treat edges with no curves.
+    if ( BRep_Tool::Curve(edge, ef, el).IsNull() )
+    {
+      TopLoc_Location loc;
+      const Handle(Poly_Polygon3D)& polygon = BRep_Tool::Polygon3D(edge, loc);
+
+      if ( polygon.IsNull() )
+      {
+        m_progress.SendLogMessage(LogWarn(Normal) << "An edge without neither 3D curve nor polygon is skipped.");
+      }
+      else
+      {
+        if ( m_version == DxfVersion_12 )
+        {
+          // Pass the realignment transformation (if any) right here as transformation
+          // does not affect Poly_Polygon3D structures in OpenCascade.
+          this->exportPolyline(polygon, T);
+        }
+        else
+        {
+          m_progress.SendLogMessage(LogWarn(Normal) << "Polylines for Poly_Polygon3D edges are supported for R12 version only.");
+        }
+      }
+
+      continue; // Skip processing for the curved geometries.
+    }
 
     // Process different types of host geometry.
     // ...
@@ -297,7 +366,7 @@ bool asiAlgo_WriteDXF::exportShape(const TopoDS_Shape& shape)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportCircle(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportCircle(const BRepAdaptor_Curve& c)
 {
   gp_Circ       circ = c.Circle();
   const gp_Pnt& p    = circ.Location();
@@ -313,7 +382,7 @@ void asiAlgo_WriteDXF::exportCircle(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportArc(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportArc(const BRepAdaptor_Curve& c)
 {
   gp_Circ       circ = c.Circle();
   const gp_Pnt& p    = circ.Location();
@@ -345,7 +414,7 @@ void asiAlgo_WriteDXF::exportArc(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportEllipse(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportEllipse(const BRepAdaptor_Curve& c)
 {
   gp_Elips      ellp = c.Ellipse();
   const gp_Pnt& p    = ellp.Location();
@@ -368,7 +437,7 @@ void asiAlgo_WriteDXF::exportEllipse(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportEllipseArc(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportEllipseArc(const BRepAdaptor_Curve& c)
 {
   gp_Elips      ellp = c.Ellipse();
   const gp_Pnt& p    = ellp.Location();
@@ -411,7 +480,7 @@ void asiAlgo_WriteDXF::exportEllipseArc(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportBSpline(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportBSpline(const BRepAdaptor_Curve& c)
 {
   SplineDataOut sd;
   Handle(Geom_BSplineCurve) spline;
@@ -502,7 +571,7 @@ void asiAlgo_WriteDXF::exportBSpline(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportBezier(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportBezier(const BRepAdaptor_Curve& c)
 {
   (void) c;
   m_progress.SendLogMessage(LogErr(Normal) << "Bezier dxf export not yet supported.");
@@ -510,7 +579,7 @@ void asiAlgo_WriteDXF::exportBezier(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportLine(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportLine(const BRepAdaptor_Curve& c)
 {
   const double f = c.FirstParameter();
   const double l = c.LastParameter();
@@ -530,7 +599,7 @@ void asiAlgo_WriteDXF::exportLine(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportLWPoly(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportLWPoly(const BRepAdaptor_Curve& c)
 {
   LWPolyDataOut pd;
   pd.Flag   = c.IsClosed();
@@ -561,7 +630,7 @@ void asiAlgo_WriteDXF::exportLWPoly(BRepAdaptor_Curve& c)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_WriteDXF::exportPolyline(BRepAdaptor_Curve& c)
+void asiAlgo_WriteDXF::exportPolyline(const BRepAdaptor_Curve& c)
 {
   LWPolyDataOut pd;
   pd.Flag   = c.IsClosed();
@@ -588,4 +657,34 @@ void asiAlgo_WriteDXF::exportPolyline(BRepAdaptor_Curve& c)
 
     this->writePolyline(pd);
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_WriteDXF::exportPolyline(const Handle(Poly_Polygon3D)& c,
+                                      const gp_Trsf&                T)
+{
+  LWPolyDataOut pd;
+  pd.Flag   = false;
+  pd.Elev   = 0.0;
+  pd.Thick  = 0.0;
+  pd.Extr.x = 0.0;
+  pd.Extr.y = 0.0;
+  pd.Extr.z = 1.0;
+  pd.nVert  = 0;
+
+  // Populate the data structure.
+  const TColgp_Array1OfPnt& nodes    = c->Nodes();
+  const int                 nbPoints = nodes.Length();
+  //
+  for ( int i = 1; i <= nbPoints; ++i )
+  {
+    gp_Pnt p = nodes(i).Transformed(T);
+    pd.Verts.push_back( ::gPntTopoint3D(p) );
+  }
+  //
+  pd.nVert = nbPoints;
+
+  // Serialize.
+  this->writePolyline(pd);
 }

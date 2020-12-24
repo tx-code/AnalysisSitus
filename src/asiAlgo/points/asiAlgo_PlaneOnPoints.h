@@ -56,8 +56,8 @@ public:
   //! \param[in] progress progress indicator.
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_PlaneOnPoints(ActAPI_ProgressEntry progress,
-                          ActAPI_PlotterEntry  plotter);
+    asiAlgo_PlaneOnPoints(ActAPI_ProgressEntry progress = nullptr,
+                          ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
