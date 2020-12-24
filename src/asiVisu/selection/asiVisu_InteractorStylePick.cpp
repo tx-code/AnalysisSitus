@@ -205,6 +205,9 @@ void asiVisu_InteractorStylePick::OnKeyPress()
   //
   if ( this->Interactor->GetControlKey() && key == "t" )
     this->InvokeEvent(EVENT_REFINE_TESSELLATION);
+  //
+  if ( key == "h" )
+    this->InvokeEvent(EVENT_BUILD_HLR);
 }
 
 bool asiVisu_InteractorStylePick::IsControlPressed() const

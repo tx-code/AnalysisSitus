@@ -41,6 +41,7 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_BuildHLR.h>
 #include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_MeshOffset.h>
 #include <asiAlgo_Timer.h>
@@ -68,9 +69,6 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <Geom_Plane.hxx>
 #include <gp_Pln.hxx>
-#include <HLRBRep_Algo.hxx>
-#include <HLRBRep_PolyAlgo.hxx>
-#include <HLRBRep_PolyHLRToShape.hxx>
 #include <Precision.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -1297,85 +1295,6 @@ int ENGINE_MakeCylinder(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-#include <BRepLib.hxx>
-#include <HLRBRep_HLRToShape.hxx>
-
-//added by tanderson. aka blobfish.
-//projection algorithms build a 2d curve(pcurve) but no 3d curve.
-//this causes problems with meshing algorithms after save and load.
-const TopoDS_Shape& build3dCurves(const TopoDS_Shape &shape)
-{
-  TopExp_Explorer it;
-  for ( it.Init(shape, TopAbs_EDGE); it.More(); it.Next() )
-    BRepLib::BuildCurve3d( TopoDS::Edge( it.Current() ) );
-  return shape;
-}
-
-TopoDS_Shape BuildHLR(const TopoDS_Shape& input,
-                      const gp_Dir&       direction)
-{
-  Handle(HLRBRep_Algo) brep_hlr = new HLRBRep_Algo;
-  brep_hlr->Add(input);
-
-  gp_Ax2 transform(gp::Origin(), direction);
-  HLRAlgo_Projector projector(transform);
-  brep_hlr->Projector(projector);
-  brep_hlr->Update();
-  brep_hlr->Hide();
-
-  // Extract the result sets.
-  HLRBRep_HLRToShape shapes(brep_hlr);
-
-  // V -- visible
-  // H -- hidden
-  TopoDS_Shape V  = build3dCurves(shapes.VCompound       ()); // hard edge visibly
-  TopoDS_Shape V1 = build3dCurves(shapes.Rg1LineVCompound()); // smooth edges visibly
-  TopoDS_Shape VN = build3dCurves(shapes.RgNLineVCompound()); // contour edges visibly
-  TopoDS_Shape VO = build3dCurves(shapes.OutLineVCompound()); // contours apparents visibly
-  TopoDS_Shape VI = build3dCurves(shapes.IsoLineVCompound()); // isoparamtriques visibly
-  TopoDS_Shape H  = build3dCurves(shapes.HCompound       ()); // hard edge invisibly
-  TopoDS_Shape H1 = build3dCurves(shapes.Rg1LineHCompound()); // Smoth edges invisibly
-  TopoDS_Shape HN = build3dCurves(shapes.RgNLineHCompound()); // contour edges invisibly
-  TopoDS_Shape HO = build3dCurves(shapes.OutLineHCompound()); // contours apparents invisibly
-  TopoDS_Shape HI = build3dCurves(shapes.IsoLineHCompound()); // isoparamtriques invisibly
-
-  TopoDS_Compound C;
-  BRep_Builder().MakeCompound(C);
-  //
-  if ( !V.IsNull() )
-    BRep_Builder().Add(C, V);
-  //
-  if ( !V1.IsNull() )
-    BRep_Builder().Add(C, V1);
-  //
-  if ( !VN.IsNull() )
-    BRep_Builder().Add(C, VN);
-  //
-  if ( !VO.IsNull() )
-    BRep_Builder().Add(C, VO);
-  //
-  if ( !VI.IsNull() )
-    BRep_Builder().Add(C, VI);
-  ////
-  //if ( !H.IsNull() )
-  //  BRep_Builder().Add(C, H);
-  ////
-  //if ( !H1.IsNull() )
-  //  BRep_Builder().Add(C, H1);
-  ////
-  //if ( !HN.IsNull() )
-  //  BRep_Builder().Add(C, HN);
-  ////
-  /*if ( !HO.IsNull() )
-    BRep_Builder().Add(C, HO);*/
-  //
-  /*if ( !HI.IsNull() )
-    BRep_Builder().Add(C, HI);*/
-
-  return C;
-}
-
-
 int ENGINE_HLR(const Handle(asiTcl_Interp)& interp,
                int                          argc,
                const char**                 argv)
@@ -1459,46 +1378,20 @@ int ENGINE_HLR(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_SHAPE("projPlane",
                                     BRepBuilderAPI_MakeFace(projPlane, -diag, diag, -diag, diag),
                                     Color_White, 0.25, false);
-  //
-  gp_Trsf T;
-  T.SetTransformation(axes);
-  T.Invert();
 
   /* =======================
    *  Perform HLR algorithm
    * ======================= */
 
-  //// Prepare projector.
-  //HLRAlgo_Projector projector(axes);
-
-  //// Prepare polygonal HLR algorithm which is known to be more reliable than
-  //// the "curved" version of HLR.
-  //Handle(HLRBRep_PolyAlgo) polyAlgo = new HLRBRep_PolyAlgo;
-  ////
-  //polyAlgo->Projector(projector);
-  //polyAlgo->Load(partShape);
-  //polyAlgo->Update();
-
-  //// Create topological entities.
-  //HLRBRep_PolyHLRToShape HLRToShape;
-  //HLRToShape.Update(polyAlgo);
-
-  //// Prepare one compound shape to store HLR results.
-  //TopoDS_Compound hlrShape;
-  //BRep_Builder().MakeCompound(hlrShape);
-
-  //// Add visible edges.
-  //TopoDS_Shape vcompound = HLRToShape.VCompound();
-  //if ( !vcompound.IsNull() )
-  //  BRep_Builder().Add(hlrShape, vcompound);
-  ////
-  //vcompound = HLRToShape.OutLineVCompound();
-  //if ( !vcompound.IsNull() )
-  //  BRep_Builder().Add(hlrShape, vcompound);
+  asiAlgo_BuildHLR buildHLR( partShape, interp->GetProgress(), interp->GetPlotter() );
   //
-  // TopoDS_Shape result = hlrShape.Moved(T);
+  if ( !buildHLR.Perform(dir) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
+    return TCL_ERROR;
+  }
 
-  TopoDS_Shape result = BuildHLR(partShape, dir).Moved(T);
+  TopoDS_Shape result = buildHLR.GetResult();
 
   // Draw the result.
   interp->GetPlotter().REDRAW_SHAPE(argv[1], result, Color_Black);

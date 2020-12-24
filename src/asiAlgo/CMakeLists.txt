@@ -17,6 +17,7 @@ set (CPP_FILES
 
 set (aux_H_FILES
   auxiliary/asiAlgo_AttrFaceColor.h
+  auxiliary/asiAlgo_BuildHLR.h
   auxiliary/asiAlgo_BullardRNG.h
   auxiliary/asiAlgo_BVHAlgo.h
   auxiliary/asiAlgo_BVHFacets.h
@@ -49,6 +50,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_Utils.h
 )
 set (aux_CPP_FILES
+  auxiliary/asiAlgo_BuildHLR.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp
   auxiliary/asiAlgo_BVHFacets.cpp
   auxiliary/asiAlgo_BVHIterator.cpp

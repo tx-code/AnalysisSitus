@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 13 July 2016
+// Created on: 24 December 2020
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,60 +28,66 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_PartCallback_h
-#define asiUI_PartCallback_h
+#ifndef asiAlgo_BuildHLR_h
+#define asiAlgo_BuildHLR_h
 
-// asiUI includes
-#include <asiUI_ViewerCallback.h>
+// asiAlgo includes
+#include <asiAlgo.h>
 
-// VTK includes
-#pragma warning(push, 0)
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#pragma warning(pop)
+// Active Data includes
+#include <ActAPI_IAlgorithm.h>
 
-// Qt includes
-#pragma warning(push, 0)
-#include <QObject>
-#pragma warning(pop)
+//-----------------------------------------------------------------------------
 
-//! Callback for operations in Part viewer.
-class asiUI_PartCallback : public QObject,
-                           public asiUI_ViewerCallback
+//! Performs hidden line removal for the input shape. The result is returned
+//! as a compound of edges representing the extracted feature lines.
+class asiAlgo_BuildHLR : public ActAPI_IAlgorithm
 {
-  Q_OBJECT
+public:
+
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildHLR, ActAPI_IAlgorithm)
 
 public:
 
-  asiUI_EXPORT static asiUI_PartCallback*
-    New();
-
-  asiUI_EXPORT static asiUI_PartCallback*
-    New(asiUI_Viewer* pViewer);
-
-  vtkTypeMacro(asiUI_PartCallback, asiUI_ViewerCallback)
+  //! Ctor.
+  //! \param[in] shape    B-rep shape of a CAD part to analyze.
+  //! \param[in] progress progress notifier.
+  //! \param[in] plotter  imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_BuildHLR(const TopoDS_Shape&  shape,
+                     ActAPI_ProgressEntry progress = nullptr,
+                     ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
-  asiUI_EXPORT virtual void
-    Execute(vtkObject*    pCaller,
-            unsigned long eventId,
-            void*         pCallData);
+  //! Performs HLR.
+  //! \param[in] projectionDir the direction of projection to use.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    Perform(const gp_Dir& projectionDir);
 
-signals:
+  //! \return the extracted feature lines.
+  asiAlgo_EXPORT const TopoDS_Shape&
+    GetResult() const;
 
-  void findFace();
-  void findEdge();
-  void refineTessellation();
-  void buildHLR();
+protected:
 
-private:
+  //! Runs precise HLR.
+  //! \param[in] projectionDir the direction of projection to use.
+  asiAlgo_EXPORT bool
+    performPrecise(const gp_Dir& projectionDir);
 
-  asiUI_EXPORT
-    asiUI_PartCallback(asiUI_Viewer* pViewer);
+  //! Build 3Ds curves out of the 2D curves constructed by HLR.
+  //! \param[in] shape the input shape.
+  //! \return the shape with reconstructed 3D curves.
+  asiAlgo_EXPORT const TopoDS_Shape&
+    build3dCurves(const TopoDS_Shape& shape);
 
-  asiUI_EXPORT
-    ~asiUI_PartCallback();
+protected:
+
+  TopoDS_Shape m_input;  //!< Input shape.
+  TopoDS_Shape m_result; //!< Result shape.
 
 };
 

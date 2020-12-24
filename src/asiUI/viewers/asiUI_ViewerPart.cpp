@@ -31,6 +31,9 @@
 // Own include
 #include <asiUI_ViewerPart.h>
 
+// asiAlgo includes
+#include <asiAlgo_BuildHLR.h>
+
 // asiVisu includes
 #include <asiVisu_NodeInfo.h>
 #include <asiVisu_Utils.h>
@@ -42,8 +45,11 @@
 #include <asiUI_DialogRefineTessellation.h>
 
 // VTK includes
+#pragma warning(push, 0)
 #include <vtkAssembly.h>
+#include <vtkCamera.h>
 #include <vtkRenderWindow.h>
+#pragma warning(pop)
 
 // Qt-VTK includes
 #pragma warning(push, 0)
@@ -187,6 +193,10 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_REFINE_TESSELLATION) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_REFINE_TESSELLATION, m_partCallback);
 
+    // Set observer for HLR
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR, m_partCallback);
+
     // Get notified once a sub-shape is picked
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onSubShapesPicked() ) );
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onWhateverPicked() ) );
@@ -195,6 +205,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_partCallback, SIGNAL( findFace() ),           this, SLOT( onFindFace() ) );
     connect( m_partCallback, SIGNAL( findEdge() ),           this, SLOT( onFindEdge() ) );
     connect( m_partCallback, SIGNAL( refineTessellation() ), this, SLOT( onRefineTessellation() ) );
+    connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
 
     /* ===============================
      *  Setting up rotation callbacks
@@ -503,6 +514,35 @@ void asiUI_ViewerPart::onRefineTessellation()
     wRefineTessellation = new asiUI_DialogRefineTessellation(m_model, this->PrsMgr(), this);
   //
   wRefineTessellation->show();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for constructing HLR representation.
+void asiUI_ViewerPart::onBuildHLR()
+{
+  // Read part shape.
+  TopoDS_Shape partShape = m_model->GetPartNode()->GetShape();
+  //
+  if ( partShape.IsNull() )
+    return;
+
+  // Read projection direction.
+  double dX, dY, dZ;
+  //
+  this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
+
+  // Build HLR.
+  asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
+  //
+  if ( !buildHLR.Perform( gp_Dir(dX, dY, dZ) ) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
+    return;
+  }
+
+  // Draw the result with the default color.
+  m_plotter.REDRAW_SHAPE("HLR", buildHLR.GetResult(), Color_White);
 }
 
 //-----------------------------------------------------------------------------

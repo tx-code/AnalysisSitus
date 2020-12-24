@@ -80,4 +80,7 @@ void asiUI_PartCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
 
   if ( eventId == EVENT_REFINE_TESSELLATION )
     emit refineTessellation();
+
+  if ( eventId == EVENT_BUILD_HLR )
+    emit buildHLR();
 }
