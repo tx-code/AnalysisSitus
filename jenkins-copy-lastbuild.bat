@@ -6,7 +6,7 @@ REM ===========================================================================
 REM Configure environment on Jenkins machine
 REM ===========================================================================
 
-if exist %~dp0jenkins-custom.bat call %~dp0jenkins-custom.bat
+call "%~dp0"jenkins-custom.bat
 
 REM ===========================================================================
 REM Copy to shared team dir
