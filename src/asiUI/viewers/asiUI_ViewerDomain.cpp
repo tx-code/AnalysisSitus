@@ -315,6 +315,10 @@ void asiUI_ViewerDomain::onDomainPicked()
   TITLE += l2;
   TITLE += "]";
 
+  TITLE += "Location: ";
+  TITLE += asiAlgo_Utils::LocationToString( edge.Location() );
+  TITLE += "\n";
+
   m_progress.SendLogMessage(LogInfo(Normal) << "%1" << TITLE);
 
   if ( m_pPartViewer )

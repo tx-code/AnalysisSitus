@@ -204,3 +204,33 @@ endforeach()
 #------------------------------------------------------------------------------
 
 install (TARGETS asiAsm RUNTIME DESTINATION bin COMPONENT Runtime)
+
+#------------------------------------------------------------------------------
+# Installation of Analysis Situs as a framework
+#------------------------------------------------------------------------------
+
+install (TARGETS asiAsm
+         CONFIGURATIONS Release
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bin COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}lib COMPONENT Library)
+
+install (TARGETS asiAsm
+         CONFIGURATIONS RelWithDebInfo
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bini COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libi COMPONENT Library)
+
+install (TARGETS asiAsm
+         CONFIGURATIONS Debug
+         RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
+         ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
+         LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
+
+if (MSVC)
+  install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiAsm.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
+endif()
+
+install (FILES ${H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${entity_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${xde_H_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)

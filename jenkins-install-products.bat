@@ -1,5 +1,7 @@
 @echo off
 
+echo "*** Running jenkins-install-products.bat..."
+
 if "%1" == "" (
   echo This script unpacks Analysis Situs pre-requisites to the specified installation directory.
   echo

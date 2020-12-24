@@ -1,5 +1,7 @@
 @echo off
 
+echo "*** Running jenkins-custom.bat..."
+
 set "JENKINS_CMAKE_BIN=C:\Program Files\CMake\bin"
 
 REM ===========================================================================

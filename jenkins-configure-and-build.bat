@@ -1,5 +1,7 @@
 @echo off
 
+echo "*** Running jenkins-configure-and-build.bat..."
+
 REM ===========================================================================
 REM Configure environment on Jenkins machine
 REM ===========================================================================
