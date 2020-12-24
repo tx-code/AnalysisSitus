@@ -6,13 +6,15 @@ REM ===========================================================================
 REM Configure environment on Jenkins machine
 REM ===========================================================================
 
-if exist %~dp0jenkins-custom.bat call %~dp0jenkins-custom.bat
+call "%~dp0"jenkins-custom.bat
 
 REM ===========================================================================
 REM Copy and unpack 3-rd parties
 REM ===========================================================================
 
 mkdir 3rd-parties-arc
+
+echo "*** Copying the 3-rd parties %JENKINS_3RDPARTIES_ARCHIVE_DIR%\%JENKINS_3RDPARTIES_ARCHIVE%"
 
 copy %JENKINS_3RDPARTIES_ARCHIVE_DIR%\%JENKINS_3RDPARTIES_ARCHIVE% 3rd-parties-arc
 copy %JENKINS_3RDPARTIES_ARCHIVE_DIR%\%JENKINS_3RDPARTIES_FBX_ARCHIVE% 3rd-parties-arc
@@ -50,7 +52,7 @@ REM ===========================================================================
 
 cd cmake-build-dir
 
-"%JENKINS_CMAKE_BIN%\cmake.exe" -G"Visual Studio 12 2013 Win64" -DCMAKE_BUILD_TYPE=Release -DUSE_CONSOLE=false -D3RDPARTY_DIR:PATH=%JENKINS_3RDPARTIES% -DINSTALL_DIR:PATH=../cmake-install-dir ../
+"%JENKINS_CMAKE_BIN%\cmake.exe" -G"Visual Studio 16 2019 Win64" -DCMAKE_BUILD_TYPE=Release -DUSE_CONSOLE=false -DUSE_THREADING=false -D3RDPARTY_DIR:PATH=%JENKINS_3RDPARTIES% -DINSTALL_DIR:PATH=../cmake-install-dir ../
 
 REM ===========================================================================
 REM CMake build and install
