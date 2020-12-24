@@ -99,6 +99,7 @@ public slots:
   asiUI_EXPORT void onFindEdge();
   asiUI_EXPORT void onRefineTessellation();
   asiUI_EXPORT void onBuildHLR();
+  asiUI_EXPORT void onBuildHLRDiscr();
   asiUI_EXPORT void onContextMenu(const QPoint&);
   asiUI_EXPORT void onDefaultView();
   asiUI_EXPORT void onBackView();

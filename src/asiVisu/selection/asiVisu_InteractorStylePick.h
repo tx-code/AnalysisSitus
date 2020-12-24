@@ -93,6 +93,9 @@ public:
   asiVisu_EXPORT bool
     IsControlPressed() const;
 
+  asiVisu_EXPORT bool
+    IsAltPressed() const;
+
 public:
 
   void GetPickedPos(double& x, double& y) const

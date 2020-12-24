@@ -10,6 +10,11 @@ call "%~dp0"jenkins-custom.bat
 
 set "JENKINS_3RDPARTIES=%~dp03rd-parties"
 
+set "ASI_TEST_DUMPING=ASI_TEST_DUMPING"
+set "ASI_TEST_DATA=@ASI_TEST_DATA@"
+set "ASI_TEST_SCRIPTS=@ASI_TEST_SCRIPTS@"
+set "ASI_TEST_DESCR=@ASI_TEST_DESCR@"
+
 REM ===========================================================================
 REM Run tests
 REM ===========================================================================

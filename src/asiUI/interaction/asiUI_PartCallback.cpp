@@ -83,4 +83,7 @@ void asiUI_PartCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
 
   if ( eventId == EVENT_BUILD_HLR )
     emit buildHLR();
+
+  if ( eventId == EVENT_BUILD_HLR_DISCR )
+    emit buildHLRDiscr();
 }

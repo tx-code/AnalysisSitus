@@ -50,6 +50,15 @@ public:
 
 public:
 
+  //! HLR mode.
+  enum Mode
+  {
+    Mode_Precise = 0, //!< Precise.
+    Mode_Discrete     //!< Discrete.
+  };
+
+public:
+
   //! Ctor.
   //! \param[in] shape    B-rep shape of a CAD part to analyze.
   //! \param[in] progress progress notifier.
@@ -63,9 +72,11 @@ public:
 
   //! Performs HLR.
   //! \param[in] projectionDir the direction of projection to use.
+  //! \param[in] mode          the HLR computation mode (precise is the default).
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform(const gp_Dir& projectionDir);
+    Perform(const gp_Dir& projectionDir,
+            const Mode    mode = Mode_Precise);
 
   //! \return the extracted feature lines.
   asiAlgo_EXPORT const TopoDS_Shape&
@@ -75,8 +86,15 @@ protected:
 
   //! Runs precise HLR.
   //! \param[in] projectionDir the direction of projection to use.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     performPrecise(const gp_Dir& projectionDir);
+
+  //! Runs discrete HLR.
+  //! \param[in] projectionDir the direction of projection to use.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    performDiscrete(const gp_Dir& projectionDir);
 
   //! Build 3Ds curves out of the 2D curves constructed by HLR.
   //! \param[in] shape the input shape.

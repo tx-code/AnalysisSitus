@@ -207,12 +207,18 @@ void asiVisu_InteractorStylePick::OnKeyPress()
     this->InvokeEvent(EVENT_REFINE_TESSELLATION);
   //
   if ( key == "h" )
-    this->InvokeEvent(EVENT_BUILD_HLR);
+    this->Interactor->GetAltKey() ? this->InvokeEvent(EVENT_BUILD_HLR_DISCR) :
+                                    this->InvokeEvent(EVENT_BUILD_HLR);
 }
 
 bool asiVisu_InteractorStylePick::IsControlPressed() const
 {
   return this->Interactor ? this->Interactor->GetControlKey() : false;
+}
+
+bool asiVisu_InteractorStylePick::IsAltPressed() const
+{
+  return this->Interactor ? this->Interactor->GetAltKey() : false;
 }
 
 //! Callback for rotation finishing action.

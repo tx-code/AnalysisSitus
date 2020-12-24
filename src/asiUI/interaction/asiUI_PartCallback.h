@@ -74,6 +74,7 @@ signals:
   void findEdge();
   void refineTessellation();
   void buildHLR();
+  void buildHLRDiscr();
 
 private:
 

@@ -54,10 +54,19 @@ asiAlgo_BuildHLR::asiAlgo_BuildHLR(const TopoDS_Shape&  shape,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildHLR::Perform(const gp_Dir& projectionDir)
+bool asiAlgo_BuildHLR::Perform(const gp_Dir& projectionDir,
+                               const Mode    mode)
 {
-  // TODO: discrete HLR is not yet available.
-  return this->performPrecise(projectionDir);
+  switch ( mode )
+  {
+    case Mode_Precise:
+      return this->performPrecise(projectionDir);
+    case Mode_Discrete:
+      return this->performDiscrete(projectionDir);
+    default:
+      break;
+  }
+  return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -132,38 +141,45 @@ bool asiAlgo_BuildHLR::performPrecise(const gp_Dir& direction)
 
 //-----------------------------------------------------------------------------
 
-//bool asiAlgo_BuildHLR::performDiscrete(const gp_Dir& direction)
-//{
-  //// Prepare projector.
-  //HLRAlgo_Projector projector(axes);
+bool asiAlgo_BuildHLR::performDiscrete(const gp_Dir& direction)
+{
+  gp_Ax2 transform(gp::Origin(), direction);
 
-  //// Prepare polygonal HLR algorithm which is known to be more reliable than
-  //// the "curved" version of HLR.
-  //Handle(HLRBRep_PolyAlgo) polyAlgo = new HLRBRep_PolyAlgo;
-  ////
-  //polyAlgo->Projector(projector);
-  //polyAlgo->Load(partShape);
-  //polyAlgo->Update();
+  // Prepare projector.
+  HLRAlgo_Projector projector(transform);
 
-  //// Create topological entities.
-  //HLRBRep_PolyHLRToShape HLRToShape;
-  //HLRToShape.Update(polyAlgo);
-
-  //// Prepare one compound shape to store HLR results.
-  //TopoDS_Compound hlrShape;
-  //BRep_Builder().MakeCompound(hlrShape);
-
-  //// Add visible edges.
-  //TopoDS_Shape vcompound = HLRToShape.VCompound();
-  //if ( !vcompound.IsNull() )
-  //  BRep_Builder().Add(hlrShape, vcompound);
-  ////
-  //vcompound = HLRToShape.OutLineVCompound();
-  //if ( !vcompound.IsNull() )
-  //  BRep_Builder().Add(hlrShape, vcompound);
+  // Prepare polygonal HLR algorithm which is known to be more reliable than
+  // the "curved" version of HLR.
+  Handle(HLRBRep_PolyAlgo) polyAlgo = new HLRBRep_PolyAlgo;
   //
-  // TopoDS_Shape result = hlrShape.Moved(T);
-//}
+  polyAlgo->Projector(projector);
+  polyAlgo->Load(m_input);
+  polyAlgo->Update();
+
+  // Create topological entities.
+  HLRBRep_PolyHLRToShape HLRToShape;
+  HLRToShape.Update(polyAlgo);
+
+  // Prepare one compound shape to store HLR results.
+  TopoDS_Compound C;
+  BRep_Builder().MakeCompound(C);
+
+  // Add visible edges.
+  TopoDS_Shape vcompound = HLRToShape.VCompound();
+  if ( !vcompound.IsNull() )
+    BRep_Builder().Add(C, vcompound);
+  //
+  vcompound = HLRToShape.OutLineVCompound();
+  if ( !vcompound.IsNull() )
+    BRep_Builder().Add(C, vcompound);
+
+  gp_Trsf T;
+  T.SetTransformation( gp_Ax3(transform) );
+  T.Invert();
+
+  m_result = C.Moved(T);
+  return true;
+}
 
 //-----------------------------------------------------------------------------
 

@@ -197,6 +197,10 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR, m_partCallback);
 
+    // Set observer for discrete HLR
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR_DISCR) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR_DISCR, m_partCallback);
+
     // Get notified once a sub-shape is picked
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onSubShapesPicked() ) );
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onWhateverPicked() ) );
@@ -206,6 +210,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_partCallback, SIGNAL( findEdge() ),           this, SLOT( onFindEdge() ) );
     connect( m_partCallback, SIGNAL( refineTessellation() ), this, SLOT( onRefineTessellation() ) );
     connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
+    connect( m_partCallback, SIGNAL( buildHLRDiscr() ),      this, SLOT( onBuildHLRDiscr() ) );
 
     /* ===============================
      *  Setting up rotation callbacks
@@ -543,6 +548,35 @@ void asiUI_ViewerPart::onBuildHLR()
 
   // Draw the result with the default color.
   m_plotter.REDRAW_SHAPE("HLR", buildHLR.GetResult(), Color_White);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for constructing discrete HLR representation.
+void asiUI_ViewerPart::onBuildHLRDiscr()
+{
+  // Read part shape.
+  TopoDS_Shape partShape = m_model->GetPartNode()->GetShape();
+  //
+  if ( partShape.IsNull() )
+    return;
+
+  // Read projection direction.
+  double dX, dY, dZ;
+  //
+  this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
+
+  // Build HLR.
+  asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
+  //
+  if ( !buildHLR.Perform( gp_Dir(dX, dY, dZ), asiAlgo_BuildHLR::Mode_Discrete ) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build discrete HLR.");
+    return;
+  }
+
+  // Draw the result with the default color.
+  m_plotter.REDRAW_SHAPE("DHLR", buildHLR.GetResult(), Color_Blue);
 }
 
 //-----------------------------------------------------------------------------
