@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: visualization modes</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/visualization modes
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1 id="toc-modes">Visualization modes</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<p>
+  The visualization module of Analysis Situs is based on VTK (Visualization Toolkit) <a href="../references.html#schroeder-2006">[Schroeder, 2006]</a>, which is a widely-used and industrially proven open-source library. Analysis Situs adds the CAD-oriented data processing <a href="./features_visu-pipelines.html">pipelines</a> to specialize the generic VTK engine for Computer-Aided Design use cases. The main contribution of Analysis Situs in this regard is adding a set of data sources that convert precise B-rep geometries to the polygonal format of VTK. In this chapter, we give an overview of the visualization techniques available in Analysis Situs.
+</p>
+
+<h2 id="toc-modes-pm">Parameter editor</h2>
+
+<p>
+  By default, Analysis Situs comes up with a shaded display mode having edges rendering enabled.
+</p>
+
+<div align="center"><img src="../imgs/shading-dm.png"/></div>
+
+<p>
+  The display mode of the active CAD part can be tuned in the Parameter Editor.
+</p>
+
+<div align="center"><img src="../imgs/dm-parameter-editor.png"/></div>
+
+<p>
+  One important setting that is related to both visualization and interactive selection is the "Use scalars" flag. If disabled, the per-element colors are not rendered. Since the highlighting mechanism is also based on scalars, it will not show up as well. The following image illustrates the rendering view without scalars. As you can see, shape anomalies are not accented anymore with the red color.
+</p>
+
+<div align="center"><img src="../imgs/shading-dm-noscalars.png"/></div>
+
+<h2 id="toc-modes-facets">Facets</h2>
+
+<p>
+  To see the B-rep facets, press "W" key when focus is set to the viewer. The facets are rendered in hidden line removal mode.
+</p>
+
+<div align="center"><img src="../imgs/mesh-hlr.png"/></div>
+
+<h2 id="toc-modes-hlr">Hidden line removal</h2>
+
+<p>
+  Press "H" to render the hidden line image of the active Part. The "Alt + H" combination is reserved for a discrete HLR which is designed to work faster at the expense of presicion loss.
+</p>
+
+<div align="center"><img src="../imgs/brep-hlr-precise.png"/></div>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
