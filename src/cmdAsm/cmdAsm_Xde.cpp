@@ -35,7 +35,7 @@
 #include <asiAlgo_Timer.h>
 
 // asiAsm includes
-#include <asiAsm_XdeDoc.h>
+#include <asiAsm_XdeDocIterator.h>
 
 // asiUI includes
 #include <asiUI_XdeBrowser.h>
@@ -230,6 +230,49 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_PrintStructure(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Read the level of hierarchy.
+  int level = INT_MAX;
+  //
+  interp->GetKeyValue<int>(argc, argv, "level", level);
+
+  // Use assembly iterator to traverse structure.
+  for ( asiAsm_XdeDocIterator it(xdeDoc, level); it.More(); it.Next() )
+  {
+    asiAsm_XdeAssemblyItemId id = it.Current();
+    //
+    interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Next item: %1." << id.ToString() );
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -268,4 +311,13 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t not passed).",
     //
     __FILE__, group, ASMXDE_XCompounds);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-print-structure",
+    //
+    "asm-xde-print-structure -model <M> [-level <zero-based-level>]\n"
+    "\t Prints assembly hierarchy for the passed model <M> down to the\n"
+    "\t given hierarchical level <zero-based-level>.",
+    //
+    __FILE__, group, ASMXDE_PrintStructure);
 }

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: assembly XDE document</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/assembly XDE document
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1 id="toc-asm-xde-document">XDE in a nutshell</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<p>
+  XDE stands for the eXtended Data Exchange framework provided by the open-source OpenCascade kernel for representing CAD assemblies. Although XDE comes with its inherent deficiencies, such as missing assembly-level API, Analysis Situs exposes some functions for working with these structures for the sake of better compatibility with the kernel.
+</p>
+
+<p>
+  XDE is a specialization of OCAF (OpenCascade Application Framework) that is a sort of "rapid application development" engine for CAD/CAM/CAE. This XDE framework found its primary use at reading STEP files (and possibly other formats) as not just shapes but also with assembly hierarchies and metadata, such as colors, names, etc. In this chapter, we explain in a bit more detail what is XDE, how it works, and how to make use of it through the provided Analysis Situs' API functions.
+</p>
+
+<p>
+  OpenCascade, as a C++ kernel, has its own data structures for keeping and manipulating CAD geometries in boundary representation. A CAD shape's primary data structure is a C++ class named TopoDS_Shape (where TopoDS stands for "topological data structure"). When it comes to assemblies, you need something more. A good practice is to separate geometries from the product structure. Recall that at the level of geometry itself, we divorce the mathematics of form from its topology. For CAD assemblies, we need something similar, i.e., another level of indirection. XDE is an attempt to address this problem by exploiting the means of OCAF.
+</p>
+
+<div class="note">
+  The software developers familiar with the OpenCascade's geometric structures tend to avoid using OCAF as they find this framework a bit horrible. E.g., it is not apparent how to use it, and the provided functionality looks hard to exploit. That's not necessarily the case, though. Speaking about OCAF itself will bring us too far from the topic (CAD assemblies), so we leave this discussion for another chapter.
+</div>
+
+<h1 id="toc-asm-xde-api">API functions</h1>
+
+<p>
+  In this section, we cover the primary API functions exposed by Analysis Situs for the XDE documents representing CAD assemblies. The API is a set of Tcl functions available in the module <spac class="code-inline">cmdAsm</spac> loaded to the <a href="./features_active-script.html">Active Script</a> session on Analysis Situs launch.
+</p>
+
+<h2 id="toc-asm-xde-load">asm-xde-load</h2>
+
+The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
+
+<p class="code">
+asm-xde-load -model M -filename as1-oc-214.stp
+</p>
+
+<h2 id="toc-asm-xde-save">asm-xde-save</h2>
+
+The <span class="code-inline">asm-xde-save</span> function stores the XDE document in the native OpenCascade's binary format (.xbf).
+
+<p class="code">
+asm-xde-save -model M -filename as1-oc-214.xbf
+</p>
+
+<h2 id="toc-asm-xde-browse">asm-xde-browse</h2>
+
+The <span class="code-inline">asm-xde-browse</span> function opens a GUI dialog for observing the XDE document's structure. This structure is basically the scene tree for the assembly.
+
+<p class="code">
+asm-xde-browse -model M
+</p>
+
+<div align="center"><img src="../imgs/asm-xde-browse_01.png"/></div>
+
+<h2 id="toc-asm-xde-xcompounds">asm-xde-xcompounds</h2>
+
+The <span class="code-inline">asm-xde-xcompounds</span> function turns the compound-type parts into subassemblies.
+
+<p class="code">
+asm-xde-xcompounds -model M
+</p>
+
+<h2 id="toc-asm-xde-print-structure">asm-xde-print-structure</h2>
+
+The <span class="code-inline">asm-xde-print-structure</span> function prints the hierarchical structure of the CAD assembly to the Log Window. You may control the level down to which the exploration is done.
+
+<p class="code">
+asm-xde-print-structure -model M [-level &lt;level&gt;]
+</p>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
