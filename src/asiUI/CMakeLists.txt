@@ -197,6 +197,7 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogSTEP.h
   dialogs/asiUI_DialogSTEPDelegate.h
   dialogs/asiUI_DialogTopoGraphDepth.h
+  dialogs/asiUI_DialogXdeSummary.h
 )
 set (dialogs_CPP_FILES 
   dialogs/asiUI_DialogCommands.cpp
@@ -214,6 +215,7 @@ set (dialogs_CPP_FILES
   dialogs/asiUI_DialogSTEP.cpp
   dialogs/asiUI_DialogSTEPDelegate.cpp
   dialogs/asiUI_DialogTopoGraphDepth.cpp
+  dialogs/asiUI_DialogXdeSummary.cpp
 )
 
 #------------------------------------------------------------------------------

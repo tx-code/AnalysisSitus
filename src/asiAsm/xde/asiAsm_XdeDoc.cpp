@@ -666,6 +666,13 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
                              asiAsm_XdePartIds&               parts,
                              const bool                       isAlreadyLeafs) const
 {
+  if ( anyItems.IsEmpty() )
+  {
+    // Fallback to gathering parts over the entire model.
+    this->GetParts(parts);
+    return;
+  }
+
   // Get leaf assembly items.
   asiAsm_XdeAssemblyItemIds leafItems;
   if ( !isAlreadyLeafs )

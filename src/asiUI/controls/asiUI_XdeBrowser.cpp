@@ -336,7 +336,7 @@ void asiUI_XdeBrowser::onPrintPartRepresentations()
   {
     m_cf->Progress.SendLogMessage( LogInfo(Normal) << "\tNext available representation for [%1]: %2"
                                                    << partId.Entry.ToCString()
-                                                   << rep->DynamicType()->Name() );
+                                                   << rep->ToString() );
   }
 }
 

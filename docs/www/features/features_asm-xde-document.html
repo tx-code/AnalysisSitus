@@ -71,50 +71,167 @@
 <h1 id="toc-asm-xde-api">API functions</h1>
 
 <p>
-  In this section, we cover the primary API functions exposed by Analysis Situs for the XDE documents representing CAD assemblies. The API is a set of Tcl functions available in the module <spac class="code-inline">cmdAsm</spac> loaded to the <a href="./features_active-script.html">Active Script</a> session on Analysis Situs launch.
+  In this section, we cover the primary API functions exposed by Analysis Situs for the XDE documents representing CAD assemblies. The API is a set of Tcl functions available in the module <spac class="code-inline">cmdAsm</spac> loaded to the <a href="./features_active-script.html">Active Script</a> session on Analysis Situs launch. In case of any doubt on the specific function's signature, check out the hints in the dialog opened by <span class="code-inline">show-commands</span> command.
 </p>
+
+<!-- ========================================================================== -->
 
 <h2 id="toc-asm-xde-load">asm-xde-load</h2>
 
-The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
+<p>
+  The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
+</p>
 
-<p class="code">
+<pre class="code">
 asm-xde-load -model M -filename as1-oc-214.stp
+</pre>
+
+<p>
+  At this point, you should give your model a name, which is <span class="code-inline">M</span> in our example. The model becomes a Tcl variable, which you can check for existence using the provided <span class="code-inline">whatis</span> command:
+</p>
+
+<pre class="code">
+  whatis M
+</pre>
+
+<!-- ========================================================================== -->
+
+<p>
+  It is possible to work with several models as you can give them distinct names.
 </p>
 
 <h2 id="toc-asm-xde-save">asm-xde-save</h2>
 
+<p>
 The <span class="code-inline">asm-xde-save</span> function stores the XDE document in the native OpenCascade's binary format (.xbf).
-
-<p class="code">
-asm-xde-save -model M -filename as1-oc-214.xbf
 </p>
+
+<pre class="code">
+asm-xde-save -model M -filename as1-oc-214.xbf
+</pre>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-release">asm-xde-release</h2>
+
+<p>
+  The <span class="code-inline">asm-xde-release</span> function closes the XDE document with the given name and unsets the corresponding Tcl variable.
+</p>
+
+<pre class="code">
+asm-xde-release -model M
+</pre>
+
+<p>
+Use this function to clean up the memory occupied by a model. This function can be especially useful for batch processing when you deal with multiple XDE documents representing different CAD files.
+</p>
+
+<!-- ========================================================================== -->
 
 <h2 id="toc-asm-xde-browse">asm-xde-browse</h2>
 
+<p>
 The <span class="code-inline">asm-xde-browse</span> function opens a GUI dialog for observing the XDE document's structure. This structure is basically the scene tree for the assembly.
-
-<p class="code">
-asm-xde-browse -model M
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-browse_01.png"/></div>
 
+<p>
+The icons of distinct colors encode different entity types.
+</p>
+
+<table>
+    <tr>
+      <td class="code-cell" style="background-color: #FFC200; color: black;">Root</td>
+      <td class="code-cell" style="background-color: #0867DA; color: white;">Instance</td>
+    </tr>
+    <tr>
+      <td class="code-cell" style="background-color: #68C800; color: black;">Subassembly</td>
+      <td class="code-cell" style="background-color: #E2E2E2; color: black;">Part</td>
+    </tr>
+  </table>
+
+<pre class="code">
+asm-xde-browse -model M
+</pre>
+
+<p>
+You can open up as many browsers as you want. Just keep in mind that the browsers' contents are not being automatically synchronized with the assembly structure. That is, whenever you modify the assembly structure, consider opening a new browser.
+</p>
+
+<div class="note">
+The lack of synchronization is the as-designed behavior. We wanted Analysis Situs to be able to trace the modifications over the product's structure. That can be done by opening several browsers at the same time.
+</div>
+
+<!-- ========================================================================== -->
+
 <h2 id="toc-asm-xde-xcompounds">asm-xde-xcompounds</h2>
 
+<p>
 The <span class="code-inline">asm-xde-xcompounds</span> function turns the compound-type parts into subassemblies.
-
-<p class="code">
-asm-xde-xcompounds -model M
 </p>
+
+<div align="center"><img src="../imgs/asm-xde-xcompounds_01.png"/></div>
+
+<pre class="code">
+asm-xde-xcompounds -model M
+</pre>
+
+<p>
+You can optionally pass the IDs of the assembly items of interest in the case when you know which item exactly you'd like to expand.
+</p>
+
+<div align="center"><img src="../imgs/asm-xde-xcompounds-type.gif"/></div>
+
+<!-- ========================================================================== -->
 
 <h2 id="toc-asm-xde-print-structure">asm-xde-print-structure</h2>
 
+<p>
 The <span class="code-inline">asm-xde-print-structure</span> function prints the hierarchical structure of the CAD assembly to the Log Window. You may control the level down to which the exploration is done.
-
-<p class="code">
-asm-xde-print-structure -model M [-level &lt;level&gt;]
 </p>
+
+<pre class="code">
+asm-xde-print-structure -model M [-level &lt;level&gt;]
+</pre>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-show-summary">asm-xde-show-summary</h2>
+
+<p>
+The <span class="code-inline">asm-xde-show-summary</span> function counts the number of parts, subassemblies and their instances in the XDE document. A GUI dialog is shown to consult the summary.
+</p>
+
+<div align="center"><img src="../imgs/asm-xde-show-summary_01.png"/></div>
+
+<pre class="code">
+asm-xde-show-summary -model M
+</pre>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-get-parts">asm-xde-get-parts</h2>
+
+<p>
+The <span class="code-inline">asm-xde-get-parts</span> function returns the IDs of all unique parts in the model. The following code snippet illustrates how to initialize a Tcl list from the API function's outcome. The last two commands print the number of the extracted part IDs and the IDs themselves. A common practice is to use the extracted IDs later on in a pipeline for automatic assembly processing.
+</p>
+
+<pre class="code">
+set pids [asm-xde-get-parts -model M]
+puts [llength $pids]
+puts $pids
+</pre>
+
+<p>
+You can optionally pass the parent assembly items whose child parts have to be returned:
+</p>
+
+<pre class="code">
+set parts [asm-xde-get-parts -model M -items 0:1:1:1/0:1:1:1:1/0:1:1:2:1/0:1:1:3:1]
+</pre>
+
+<!-- ========================================================================== -->
 
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">

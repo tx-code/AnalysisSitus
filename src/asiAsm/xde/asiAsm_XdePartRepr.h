@@ -70,6 +70,12 @@ public:
   virtual const Standard_GUID&
     GetGUID() const = 0;
 
+  //! \return a human-readable label for this part representation.
+  virtual TCollection_AsciiString ToString() const
+  {
+    return this->DynamicType()->Name();
+  }
+
 public:
 
   //! \return the owner part's ID.
@@ -123,6 +129,15 @@ public:
   {}
 
 public:
+
+  //! \return the overriden string representation.
+  virtual TCollection_AsciiString ToString() const override
+  {
+    TCollection_AsciiString result = asiAsm_XdePartRepr::ToString();
+    result += " ";
+    result += asiAlgo_Utils::ShapeTypeStr( this->GetShape() ).c_str();
+    return result;
+  }
 
   //! \return B-rep shape.
   TopoDS_Shape GetShape() const

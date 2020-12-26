@@ -415,6 +415,16 @@ public:
     SetVar(const std::string&             name,
            const Handle(asiTcl_Variable)& var);
 
+  //! Unsets Tcl variable.
+  //! \param[in] name variable name.
+  asiTcl_EXPORT void
+    UnSetVar(const char* name);
+
+  //! Unsets Tcl variable.
+  //! \param[in] name variable name.
+  asiTcl_EXPORT void
+    UnSetVar(const std::string& name);
+
   //! Accessor for a Tcl variable by its name.
   //! \param[in] name variable name.
   //! \return variable handle or null handle if such a

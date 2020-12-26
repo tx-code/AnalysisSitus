@@ -625,19 +625,9 @@ void asiTcl_Interp::SetVar(const char*                    name,
                            const Handle(asiTcl_Variable)& var)
 {
   // Check if the variable with the same name exists.
-  ClientData CD =
-    Tcl_VarTraceInfo(m_pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
-                     asiTcl::tracevar, NULL);
+  this->UnSetVar(name);
 
-  Handle(asiTcl_Variable) oldV( reinterpret_cast<asiTcl_Variable*>(CD) );
-
-  if ( !oldV.IsNull() )
-  {
-    oldV.Nullify();
-  }
-
-  Tcl_UnsetVar(m_pInterp, name, 0);
-
+  // Add a new variable.
   if ( !var.IsNull() )
   {
     asiTcl::__VARS.Add(var);
@@ -656,6 +646,32 @@ void asiTcl_Interp::SetVar(const std::string&             name,
                            const Handle(asiTcl_Variable)& var)
 {
   this->SetVar(name.c_str(), var);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiTcl_Interp::UnSetVar(const char* name)
+{
+  // Check if the variable with the given name exists.
+  ClientData CD =
+    Tcl_VarTraceInfo(m_pInterp, name, TCL_TRACE_UNSETS | TCL_TRACE_WRITES,
+                     asiTcl::tracevar, NULL);
+
+  Handle(asiTcl_Variable) var( reinterpret_cast<asiTcl_Variable*>(CD) );
+
+  if ( !var.IsNull() )
+  {
+    var.Nullify();
+  }
+
+  Tcl_UnsetVar(m_pInterp, name, 0);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiTcl_Interp::UnSetVar(const std::string& name)
+{
+  this->UnSetVar( name.c_str() );
 }
 
 //-----------------------------------------------------------------------------
