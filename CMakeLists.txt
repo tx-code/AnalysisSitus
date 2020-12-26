@@ -4,8 +4,8 @@ cmake_minimum_required (VERSION 3.0.0 FATAL_ERROR)
 project (AnalysisSitus CXX)
 
 # Install dir of the built project
-set (INSTALL_DIR "" CACHE PATH "Where to install" )
-set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}" CACHE INTERNAL "" FORCE )
+set (INSTALL_DIR "" CACHE PATH "Path where to install Analysis Situs.")
+set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}" CACHE INTERNAL "" FORCE)
 
 # Directories for embedded unit tests.
 set (ASI_TEST_DUMPING "${CMAKE_BINARY_DIR}" CACHE PATH "Dumping directory for tests.")
@@ -156,7 +156,7 @@ if (3RDPARTY_NOT_INCLUDED)
 endif()
 
 #-------------------------------------------------------------------------------
-# Executable
+# Configure compiler
 #-------------------------------------------------------------------------------
 
 # Configure warnings level

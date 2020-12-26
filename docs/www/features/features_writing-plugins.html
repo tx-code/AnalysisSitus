@@ -17,6 +17,12 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
  </head>
 <body>
 
@@ -42,15 +48,47 @@
 </table>
 </td></tr></table>
 
-<h1>Writing plugins</h1>
+<h1 id="toc-plugin-main">Write your own plugin</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
 
 <p>
-  Analysis Situs allows for extensions via Tcl plugins. On startup, it checks the contents of <span class="code-inline">asi-plugins</span> directory located in the working installation) directory of the software. Analysis Situs attempts to load all dynamic libraries it finds in that directory. For being a valid plugin, a dynamic library should satisfy specific rules. Analysis Situs tries to call a function named <span class="code-inline">PLUGINFACTORY</span>. If no such function exists, the corresponding candidate library is skipped with an error message.
+  Analysis Situs allows for extensions via Tcl plugins. On startup, it checks the contents of <span class="code-inline">asi-plugins</span> directory located in the installation directory of the software. Analysis Situs attempts to load all dynamic libraries it finds in that directory. For being a valid plugin, a dynamic library should satisfy specific rules. Analysis Situs tries to call a function named <span class="code-inline">PLUGINFACTORY</span>. If no such function exists, the corresponding candidate library is skipped with an error message.
 </p>
 
-<h2>Troubleshooting</h2>
+<h2 id="toc-plugin-main-why">Why plugins?</h2>
 
-<h3>Plugin does not load</h3>
+<p>
+  Analysis Situs is an open-source software, but you are not obliged to release your derived works under the open source conditions (because we use the <a href="../license.html">BSD license</a>). Therefore, you might want to:
+</p>
+
+<ol>
+  <li>Purchase one of the commercial add-ons we are developing on top of Analysis Situs.</li>
+  <li>Write your own code to customize or enrich Analysis Situs to better fit your needs.</li>
+</ol>
+
+<p>
+  For both scenarios, plugins are the answer. You can use the native UI workbench but feed it with your own commands. Or you can add our native commercial addons to the workbench to unlock algorithms which are not distributed under the open source conditions.
+</p>
+
+<h2 id="toc-plugin-main-code-arch">Code architecture</h2>
+
+<p>
+  There is a best practice we encourage you to follow when extending Analysis Situs. Let's imagine you are going to develop a library of your "know-how" algorithms named <span class="code-inline">MyAlgo</span>. It is a good idea to have two libraries though:
+</p>
+
+<ol>
+  <li><span class="code-inline">MyAlgo</span> for the algorithms.</li>
+  <li><span class="code-inline">MyAlgoCmd</span> for the Tcl bindings.</li>
+</ol>
+
+<p>
+  Having Tcl bindings is not necessary, but it would allow for running your algorithms from within the UI workbench of Analysis Situs.
+</p>
+
+<h1 id="toc-plugin-troubleshooting">Troubleshooting</h1>
+
+<h2 id="toc-plugin-troubleshooting-1">Plugin does not load</h2>
 
 <p>
   If your plugin does not load, do the following:

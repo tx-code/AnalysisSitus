@@ -79,7 +79,7 @@
 <h2 id="toc-asm-xde-load">asm-xde-load</h2>
 
 <p>
-  The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
+The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
 </p>
 
 <pre class="code">
@@ -87,17 +87,17 @@ asm-xde-load -model M -filename as1-oc-214.stp
 </pre>
 
 <p>
-  At this point, you should give your model a name, which is <span class="code-inline">M</span> in our example. The model becomes a Tcl variable, which you can check for existence using the provided <span class="code-inline">whatis</span> command:
+At this point, you should give your model a name, which is <span class="code-inline">M</span> in our example. The model becomes a Tcl variable, which you can check for existence using the provided <span class="code-inline">whatis</span> command:
 </p>
 
 <pre class="code">
-  whatis M
+whatis M
 </pre>
 
 <!-- ========================================================================== -->
 
 <p>
-  It is possible to work with several models as you can give them distinct names.
+It is possible to work with several models as you can give them distinct names.
 </p>
 
 <h2 id="toc-asm-xde-save">asm-xde-save</h2>
@@ -115,7 +115,7 @@ asm-xde-save -model M -filename as1-oc-214.xbf
 <h2 id="toc-asm-xde-release">asm-xde-release</h2>
 
 <p>
-  The <span class="code-inline">asm-xde-release</span> function closes the XDE document with the given name and unsets the corresponding Tcl variable.
+The <span class="code-inline">asm-xde-release</span> function closes the XDE document with the given name and unsets the corresponding Tcl variable.
 </p>
 
 <pre class="code">
@@ -137,19 +137,23 @@ The <span class="code-inline">asm-xde-browse</span> function opens a GUI dialog 
 <div align="center"><img src="../imgs/asm-xde-browse_01.png"/></div>
 
 <p>
-The icons of distinct colors encode different entity types.
+The icons of distinct colors encode different entity types. Notice that an assembly never includes parts or subassemblies directly. The components are always nested by means of an intermediate <a href="./features_asm-code-architecture.html#toc-asm-ent-instance"><i>instance</i></a> object, which is a lightweight reference to a <a href="./features_asm-code-architecture.html#toc-asm-ent-prototype"><i>prototype</i></a> with location. The difference between the <i>assembly instances</i> and <i>part instances</i> is not captured by XDE entities, though can count these types of instances separately using the <a href="#toc-asm-xde-show-summary">asm-xde-show-summary</a> command.
 </p>
 
 <table>
-    <tr>
-      <td class="code-cell" style="background-color: #FFC200; color: black;">Root</td>
-      <td class="code-cell" style="background-color: #0867DA; color: white;">Instance</td>
-    </tr>
-    <tr>
-      <td class="code-cell" style="background-color: #68C800; color: black;">Subassembly</td>
-      <td class="code-cell" style="background-color: #E2E2E2; color: black;">Part</td>
-    </tr>
-  </table>
+<tr>
+  <td class="code-cell" style="background-color: #FFC200; color: black;">Root</td>
+  <td class="code-cell" style="background-color: #0867DA; color: white;">Instance</td>
+</tr>
+<tr>
+  <td class="code-cell" style="background-color: #68C800; color: black;">Subassembly</td>
+  <td class="code-cell" style="background-color: #E2E2E2; color: black;">Part</td>
+</tr>
+</table>
+
+<p>
+The following code snippet illustrates how to browse an XDE document named <span class="code-inline">M</span>:
+</p>
 
 <pre class="code">
 asm-xde-browse -model M
