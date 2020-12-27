@@ -148,6 +148,22 @@ int main(int argc, char** argv)
   //
   QApplication::setWindowIcon( QIcon(":icons/asitus/asitus_icon_16x16.png") );
 
+  //---------------------------------------------------------------------------
+  // Runtime path
+  //---------------------------------------------------------------------------
+
+  // Adjust PATH for loading the plugins.
+  QByteArray appRoot    = app.applicationDirPath().toUtf8();
+  QByteArray pluginsDir = appRoot + "/asi-plugins";
+  //
+  qputenv("PATH", pluginsDir);
+  //
+  std::cout << "PATH = " << QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) ).ToCString() << std::endl;
+
+  //---------------------------------------------------------------------------
+  // UI initialization
+  //---------------------------------------------------------------------------
+
   // Splash screen.
   QSplashScreen* pSplash = nullptr;
   //
@@ -168,12 +184,11 @@ int main(int argc, char** argv)
   }
 
   //---------------------------------------------------------------------------
-  // Set essential environment variables
+  // Set extra environment variables
   //---------------------------------------------------------------------------
 
-  QByteArray appRoot = app.applicationDirPath().toUtf8();
-  QByteArray resDir  = appRoot + "/resources";
-  //
+  QByteArray resDir = appRoot + "/resources";
+  
   if ( QDir(resDir).exists() )
   {
     qputenv("CSF_PluginDefaults", resDir);

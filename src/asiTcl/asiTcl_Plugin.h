@@ -43,7 +43,17 @@ class asiTcl_Plugin
 {
 public:
 
-  asiTcl_EXPORT static bool
+  //! Plugin loading status.
+  enum Status
+  {
+    Status_OK,       //!< Plugin is just fine.
+    Status_Failed,   //!< Plugin could not be loaded.
+    Status_NotPlugin //!< The loaded lib is not a plugin (missing entry point).
+  };
+
+public:
+
+  asiTcl_EXPORT static Status
     Load(const Handle(asiTcl_Interp)&      interp,
          const Handle(Standard_Transient)& data,
          const TCollection_AsciiString&    pluginName);

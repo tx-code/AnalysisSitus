@@ -59,9 +59,10 @@
 { \
   Handle(exe_CommonFacilities) __cf = exe_CommonFacilities::Instance();\
   \
-  if ( !asiTcl_Plugin::Load(__cf->Interp, __cf, name) ) \
+  asiTcl_Plugin::Status status = asiTcl_Plugin::Load(__cf->Interp, __cf, name); \
+  if ( status == asiTcl_Plugin::Status_Failed ) \
     __cf->Progress.SendLogMessage(LogErr(Normal) << "Cannot load %1 commands." << name); \
-  else \
+  else if ( status == asiTcl_Plugin::Status_OK ) \
     __cf->Progress.SendLogMessage(LogInfo(Normal) << "Loaded %1 commands." << name); \
 }
 
@@ -465,9 +466,10 @@ void exe_MainWindow::createDockWindows()
 
   // Lookup for custom plugins and try to load them.
   QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
+  TCollection_AsciiString pluginDirStr = QStr2AsciiStr( pluginDir.absolutePath() );
   //
   std::cout << "Looking for plugins at "
-            << QStr2AsciiStr( pluginDir.absolutePath() ).ToCString() << std::endl;
+            << pluginDirStr.ToCString() << std::endl;
   //
   QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
   //
@@ -475,8 +477,8 @@ void exe_MainWindow::createDockWindows()
   {
     TCollection_AsciiString cmdLibName = QStr2AsciiStr( cmdLib.section(".", 0, 0) );
     //
-    cf->Progress.SendLogMessage(LogInfo(Normal) << "Detected %1 as a custom plugin. Attempting to load it..."
-                                                << cmdLibName);
+    cf->Progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
+                                                  << cmdLibName);
 
     EXE_LOAD_MODULE(cmdLibName);
   }

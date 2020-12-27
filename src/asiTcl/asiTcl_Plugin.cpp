@@ -67,9 +67,10 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-bool asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
-                         const Handle(Standard_Transient)& data,
-                         const TCollection_AsciiString&    pluginName)
+asiTcl_Plugin::Status
+  asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
+                      const Handle(Standard_Transient)& data,
+                      const TCollection_AsciiString&    pluginName)
 {
   TCollection_AsciiString libFilename;
 
@@ -94,14 +95,18 @@ bool asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
                                                         << libFilename << dlError);
 
     std::cout << "Error: cannot load " << libFilename.ToCString() << std::endl;
-    return false;
+    return Status_Failed;
   }
 
   OSD_Function f = SharedLibrary.DlSymb("PLUGINFACTORY");
   if ( f == nullptr )
   {
-    std::cout << "Error: cannot find factory (function PLUGINFACTORY) in " << libFilename.ToCString() << std::endl;
-    return false;
+    std::cout << "Cannot find factory (function PLUGINFACTORY) in "
+              << libFilename.ToCString()
+              << ", so skipped as a non-plugin lib."
+              << std::endl;
+    //
+    return Status_NotPlugin;
   }
 
   // Cast
@@ -113,5 +118,5 @@ bool asiTcl_Plugin::Load(const Handle(asiTcl_Interp)&      interp,
 
   // Call
   (*fp) (interp, data);
-  return true;
+  return Status_OK;
 }
