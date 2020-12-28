@@ -483,9 +483,18 @@ void asiTcl_Interp::GetAvailableCommands(std::vector<asiTcl_CommandInfo>& comman
 {
   for ( size_t p = 0; p < m_plugins.size(); ++p )
   {
-    std::string
+    std::string commandsInGroupStr;
+    try
+    {
       commandsInGroupStr = Tcl_GetVar2(m_pInterp, "asi_Groups", m_plugins[p].ToCString(),
                                        TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
+    }
+    catch ( ... )
+    {
+      m_progress.SendLogMessage(LogErr(High) << "Cannot get commands list for the plugin %1."
+                                             << m_plugins[p]);
+      continue;
+    }
 
     std::vector<std::string> commandsInGroup;
     asiAlgo_Utils::Str::Split(commandsInGroupStr, " ", commandsInGroup);

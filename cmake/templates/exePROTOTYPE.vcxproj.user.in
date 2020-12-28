@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|@X_COMPILER_BITNESS@'">
-    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_PATH@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE@;%PATH%
+    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_PATH@;@ASI_PLUGINS_DIR@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE@;%PATH%
 QT_PLUGIN_PATH=@3RDPARTY_QT_DIR@/plugins
 CASROOT=@3RDPARTY_OCCT_DIR@
 ASI_TEST_DUMPING=@ASI_TEST_DUMPING@
@@ -14,7 +14,7 @@ INSTANT_MESHES_EXE=@INSTANT_MESHES_EXE@
     <LocalDebuggerWorkingDirectory>@CMAKE_BINARY_DIR@</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|@X_COMPILER_BITNESS@'">
-    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_PATH@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO@;%PATH%
+    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_PATH@;@ASI_PLUGINS_DIR@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO@;%PATH%
 QT_PLUGIN_PATH=@3RDPARTY_QT_DIR@/plugins
 CASROOT=@3RDPARTY_OCCT_DIR@
 ASI_TEST_DUMPING=@ASI_TEST_DUMPING@
@@ -27,7 +27,7 @@ INSTANT_MESHES_EXE=@INSTANT_MESHES_EXE@
     <LocalDebuggerWorkingDirectory>@CMAKE_BINARY_DIR@</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|@X_COMPILER_BITNESS@'">
-    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_DEB_PATH@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG@;%PATH%
+    <LocalDebuggerEnvironment>PATH=@3RDPARTY_DLL_DEB_PATH@;@ASI_PLUGINS_DIR@;@CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG@;%PATH%
 QT_PLUGIN_PATH=@3RDPARTY_QT_DIR@/plugins
 CASROOT=@3RDPARTY_OCCT_DIR@
 ASI_TEST_DUMPING=@ASI_TEST_DUMPING@

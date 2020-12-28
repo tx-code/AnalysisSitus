@@ -12,6 +12,7 @@ set (ASI_TEST_DUMPING "${CMAKE_BINARY_DIR}" CACHE PATH "Dumping directory for te
 set (ASI_TEST_DATA    "${CMAKE_SOURCE_DIR}/data" CACHE PATH "Directory which contains test data.")
 set (ASI_TEST_SCRIPTS "${CMAKE_SOURCE_DIR}/scripts" CACHE PATH "Directory which contains test scripts.")
 set (ASI_TEST_DESCR   "${CMAKE_SOURCE_DIR}/src/asiTest/cases" CACHE PATH "Directory which contains descriptions of tests.")
+set (ASI_PLUGINS_DIR  "${CMAKE_BINARY_DIR}/asi-plugins" CACHE PATH "The directory where to search for plugins.")
 
 # Build configurations
 set (CMAKE_CONFIGURATION_TYPES Release Debug RelWithDebInfo CACHE INTERNAL "" FORCE)

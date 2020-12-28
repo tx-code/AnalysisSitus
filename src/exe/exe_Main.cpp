@@ -28,6 +28,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+#if defined _WIN32
+  #define RuntimePathVar "PATH"
+#else
+  #define RuntimePathVar "LD_LIBRARY_PATH"
+#endif
+
 #undef VTK_TEST
 #ifndef VTK_TEST
 
@@ -152,20 +158,17 @@ int main(int argc, char** argv)
   // Runtime path
   //---------------------------------------------------------------------------
 
-  // Adjust PATH for loading the plugins.
+  // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
   QByteArray              appRoot       = app.applicationDirPath().toUtf8();
   QByteArray              pluginsDir    = appRoot + "/asi-plugins";
   TCollection_AsciiString pluginsDirStr = QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) );
   //
-#if defined _WIN32
-  qputenv("PATH", pluginsDir);
+  qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir);
   //
-  std::cout << "PATH = " << pluginsDirStr.ToCString() << std::endl;
-#else
-  qputenv("LD_LIBRARY_PATH", pluginsDir);
-  //
-  std::cout << "LD_LIBRARY_PATH = " << pluginsDirStr.ToCString() << std::endl;
-#endif
+  std::cout << RuntimePathVar
+            << " = "
+            << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
+            << std::endl;
 
   //---------------------------------------------------------------------------
   // UI initialization
