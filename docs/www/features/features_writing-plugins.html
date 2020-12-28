@@ -53,13 +53,13 @@
 <div class="toc-panel"><div id="toc"></div></div>
 
 <p>
-  Analysis Situs allows for extensions via Tcl plugins. On startup, it checks the contents of <span class="code-inline">asi-plugins</span> directory located in the installation directory of the software. Analysis Situs attempts to load all dynamic libraries it finds in that directory. For being a valid plugin, a dynamic library should satisfy specific rules. Analysis Situs tries to call a function named <span class="code-inline">PLUGINFACTORY</span>. If no such function exists, the corresponding candidate library is skipped with an error message.
+  Analysis Situs allows for extensions via Tcl plugins. On startup, it checks the contents of <span class="code-inline">asi-plugins</span> directory located in the installation directory of the software. Analysis Situs attempts to load all dynamic libraries it finds in that directory. For being a valid plugin, a dynamic library should satisfy specific rules. Analysis Situs tries to call a function named <span class="code-inline">PLUGINFACTORY</span>. If no such function exists, the corresponding candidate library is skipped with as a non-plugin library.
 </p>
 
 <h2 id="toc-plugin-main-why">Why plugins?</h2>
 
 <p>
-  Analysis Situs is an open-source software, but you are not obliged to release your derived works under the open source conditions (because we use the <a href="../license.html">BSD license</a>). Therefore, you might want to:
+  Analysis Situs is open-source software, but you are not obliged to release your derived works under the open-source conditions (because we use the <a href="../license.html">BSD license</a>). Therefore, you might want to:
 </p>
 
 <ol>
@@ -68,13 +68,13 @@
 </ol>
 
 <p>
-  For both scenarios, plugins are the answer. You can use the native UI workbench but feed it with your own commands. Or you can add our native commercial addons to the workbench to unlock algorithms which are not distributed under the open source conditions.
+  For both scenarios, plugins are the answer. You can use the native UI workbench and feed it with your commands. Or you can load our native commercial add-ons to the workbench to unlock algorithms that are not distributed under the open-source conditions.
 </p>
 
 <h2 id="toc-plugin-main-code-arch">Code architecture</h2>
 
 <p>
-  There is a best practice we encourage you to follow when extending Analysis Situs. Let's imagine you are going to develop a library of your "know-how" algorithms named <span class="code-inline">MyAlgo</span>. It is a good idea to have two libraries though:
+  There is a best practice we encourage you to follow when extending Analysis Situs. Let's imagine you are going to develop a library of your "know-how" algorithms named <span class="code-inline">MyAlgo</span>. It is a good idea to have two libraries, though:
 </p>
 
 <ol>
@@ -83,7 +83,117 @@
 </ol>
 
 <p>
-  Having Tcl bindings is not necessary, but it would allow for running your algorithms from within the UI workbench of Analysis Situs.
+  Having Tcl bindings in <span class="code-inline">MyAlgoCmd</span> would allow for running your Tcl-agnostic algorithms <span class="code-inline">MyAlgo</span> from within the UI workbench of Analysis Situs. In Analysis Situs, we put the entry points of all plugins to the binding libraries having "cmd" in their names.
+</p>
+
+<h2 id="toc-plugin-main-example">Minimal example</h2>
+
+<p>
+  We now provide listing for the minimal version of <span class="code-inline">MyAlgoCmd</span> code that can be loaded into Analysis Situs as a plugin. We mentioned above the complementary <span class="code-inline">MyAlgo</span> library, but it is not necessarily needed for test. What you need to get started is a couple C++ files (header and implementation):
+</p>
+
+<ol>
+  <li><span class="code-inline">MyAlgoCmd.h</span></li>
+  <li><span class="code-inline">MyAlgoCmd.cpp</span></li>
+</ol>
+
+<p>
+  Here is a header file <span class="code-inline">MyAlgoCmd.h</span>:
+</p>
+
+<pre class="code">
+#ifndef MyAlgoCmd_h
+#define MyAlgoCmd_h
+
+#ifdef MyAlgoCmd_EXPORTS
+  #define MyAlgoCmd_EXPORT __declspec(dllexport)
+#else
+  #define MyAlgoCmd_EXPORT __declspec(dllimport)
+#endif
+
+// asiTcl includes
+#include &lt;asiTcl_Interp.h&gt;
+
+// asiUI includes
+#include &lt;asiUI_CommonFacilities.h&gt;
+
+//! Custom commands.
+class MyAlgoCmd
+{
+public:
+
+  MyAlgoCmd_EXPORT static void
+    Factory(const Handle(asiTcl_Interp)&      interp,
+            const Handle(Standard_Transient)& data);
+
+public:
+
+  static Handle(asiUI_CommonFacilities) cf;
+
+};
+
+#endif
+</pre>
+
+<p>
+  The header file declares a class that will serve as a provider of custom Tcl commands. You need to have the <span class="code-inline">Factory()</span> method there, which will be invoked automatically on dynamic loading. Notice also the static instance of the "common facilities" handle. It contains the pointers to all UI widgets and batch data structures your plugin is given access to.
+</p>
+
+<p>
+  The minimal implementation <span class="code-inline">MyAlgoCmd.cpp</span> may look as follows:
+</p>
+
+<pre class="code">
+// Own include
+#include &lt;MyAlgoCmd.h&gt;
+
+// asiTcl includes
+#include &lt;asiTcl_PluginMacro.h&gt;
+
+Handle(asiUI_CommonFacilities) MyAlgoCmd::cf = nullptr;
+
+//-----------------------------------------------------------------------------
+
+int MYALGO_Test(const Handle(asiTcl_Interp)& interp,
+                int                          argc,
+                const char**                 argv)
+{
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) &lt;&lt; "This is a test.");
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+void MyAlgoCmd::Factory(const Handle(asiTcl_Interp)&      interp,
+                        const Handle(Standard_Transient)& data)
+{
+  static const char* group = "MyAlgoCmd";
+
+  /* Initialize common facilities. */
+  MyAlgoCmd::cf = Handle(asiUI_CommonFacilities)::DownCast(data);
+  //
+  if ( cf.IsNull() )
+  {
+    return; // Error.
+  }
+
+  /* Add custom commands. */
+  interp->AddCommand("myalgo-test",
+    //
+    "myalgo-test\n"
+    "\t Test.",
+    //
+    __FILE__, group, MYALGO_Test);
+}
+
+// Declare entry point PLUGINFACTORY.
+ASIPLUGIN(MyAlgoCmd)
+</pre>
+
+<h2 id="toc-plugin-configuration">Configuration</h2>
+
+<p>
+  We advice using CMake for plugins, because it is a native configuration system for Analysis Situs. Consider setting the Analysis Situs' <span class="code-inline">asi-plugins</span> directory as <span class="code-inline">INSTALL_DIR</span> of your plugin's project. This way you will have the runnable software customized by your commands with minimal effort.
 </p>
 
 <h1 id="toc-plugin-troubleshooting">Troubleshooting</h1>
@@ -95,8 +205,8 @@
 </p>
 
 <ol>
-  <li>Check that <span class="code-inline">asi-plugins</span> exists.</li>
-  <li>Check that you have all dependencies in your PATH variable.</li>
+  <li>Check that <span class="code-inline">asi-plugins</span> directory exists in the installation folder of Analysis Situs and contains your plugin libraries.</li>
+  <li>Check that you have all dependencies in your PATH (Windows) or LD_LIBRARY_PATH (Linux) variable.</li>
 </ol>
 
 <p>

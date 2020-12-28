@@ -153,12 +153,19 @@ int main(int argc, char** argv)
   //---------------------------------------------------------------------------
 
   // Adjust PATH for loading the plugins.
-  QByteArray appRoot    = app.applicationDirPath().toUtf8();
-  QByteArray pluginsDir = appRoot + "/asi-plugins";
+  QByteArray              appRoot       = app.applicationDirPath().toUtf8();
+  QByteArray              pluginsDir    = appRoot + "/asi-plugins";
+  TCollection_AsciiString pluginsDirStr = QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) );
   //
+#if defined _WIN32
   qputenv("PATH", pluginsDir);
   //
-  std::cout << "PATH = " << QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) ).ToCString() << std::endl;
+  std::cout << "PATH = " << pluginsDirStr.ToCString() << std::endl;
+#else
+  qputenv("LD_LIBRARY_PATH", pluginsDir);
+  //
+  std::cout << "LD_LIBRARY_PATH = " << pluginsDirStr.ToCString() << std::endl;
+#endif
 
   //---------------------------------------------------------------------------
   // UI initialization
