@@ -144,7 +144,7 @@ add_library (asiAsm SHARED
   ${xde_H_FILES}    ${xde_CPP_FILES}
 )
 
-target_link_libraries(asiAsm asiAlgo asiData)
+target_link_libraries(asiAsm asiAlgo)
 
 #------------------------------------------------------------------------------
 # Dependencies
