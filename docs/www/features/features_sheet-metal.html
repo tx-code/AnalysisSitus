@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: sheet metal features</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/sheet metal features
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<h1>Sheet metal features</h1>
+
+<p>
+  Analysis Situs provides a generic feature recognition framework that finds various applications. One of them is the recognition and unfolding of sheet metal parts. In this chapter, we cover different aspects of the sheet metal recognition algorithms. Contact us for more details and support on that matter.
+</p>
+
+<h2>Face Transition Graph</h2>
+
+<p>
+  Face Transition Graph (FTG) is a graph derived from the AAG by turning bend nodes into arcs. By definition, all nodes of the FTG represent sheet faces. This derived data structure is used for several purposes:
+</p>
+
+<ol>
+  <li>Merge aligned bends together, so that we know the minimal number of bending operations to fabricate the given sheet metal part.</li>
+  <li>Find circuits to check unfoldability of sheet metals (as a consequence, such object types as rectangular tubes can be recognized thanks to the FTG).</li>
+</ol>
+
+<p>
+  The FTG data structure might have a lot of arcs for complex models. The following image illustrates FTG constructed for a rectangular tube part with many cuts along its "bend lines."
+</p>
+
+<div align="center"><img src="../imgs/sheet-metal-ftg_01.png"/></div>
+
+<p>
+  By using wise heuristics, many excessive arcs can be pruned from the graph. Speaking about tubes, we can eliminate all transitions between the sheet faces that reside on the same geometric plane. This heuristic leaves the followed simplified version of FTG:
+</p>
+
+<div align="center"><img src="../imgs/sheet-metal-ftg_02.png"/></div>
+
+<p>
+  Closed sheet metal parts, such as tubes, will necessarily leave circuits in the corresponding FTG (given that FTG is constructed for one side of a two-sided CAD model). To find such, Johnson's algorithm for detecting elementary loops <a href="../references.html#johnson-1975">[Johnson, 1975]</a> can be applied. Johnson's algorithm is initially designed for directed graphs (digraphs). Since FTG is an undirected graph, the dual representation with mutually directed arcs has to be used.
+</p>
+
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
