@@ -102,12 +102,12 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
       return res.failure();
     }
 
-    if ( items(1) != asiAsm_XdeAssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:7") )
+    if ( items.First() != asiAsm_XdeAssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:7") )
     {
       cf->Progress.SendLogMessage(LogErr(Normal) << "Unexpected assembly item ID.");
       return res.failure();
     }
   }
 
-  return res.failure();
+  return res.success();
 }
