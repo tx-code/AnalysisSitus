@@ -283,6 +283,7 @@ void asiUI_XdeBrowser::onContextMenu(QPoint pos)
   // Complete context menu.
   // ...
 
+  menu->addAction( "Copy name",             this, SLOT( onCopyName() ) );
   menu->addAction( "Copy assembly item ID", this, SLOT( onCopyAssemblyItemId() ) );
 
   if ( nid )
@@ -298,6 +299,21 @@ void asiUI_XdeBrowser::onContextMenu(QPoint pos)
   }
 
   menu->popup( this->mapToGlobal(pos) );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_XdeBrowser::onCopyName()
+{
+  QList<QTreeWidgetItem*> items = this->selectedItems();
+  if ( !items.length() || items.length() > 1 )
+    return;
+
+  QTreeWidgetItem* item = items.at(0);
+
+  // Set to clipboard.
+  QClipboard* clipboard = QApplication::clipboard();
+  clipboard->setText( item->text(0) );
 }
 
 //-----------------------------------------------------------------------------

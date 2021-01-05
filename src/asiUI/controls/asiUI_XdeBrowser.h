@@ -108,6 +108,9 @@ protected slots:
   //! \param[in] pos position.
   void onContextMenu(QPoint pos);
 
+  //! Copies the name of the selected tree object to clipboard.
+  void onCopyName();
+
   //! Copies assembly item ID to clipboard.
   void onCopyAssemblyItemId();
 

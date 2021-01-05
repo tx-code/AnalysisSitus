@@ -50,6 +50,7 @@ class XCAFDoc_ColorTool;
 class XSControl_WorkSession;
 class Quantity_ColorRGBA;
 class asiAsm_XdeApp;
+class asiAsm_XdeGraph;
 class asiAsm_XdePartRepr;
 
 //-----------------------------------------------------------------------------
@@ -146,6 +147,14 @@ public:
 
 /* API */
 public:
+
+  //! Finds assembly items having the passed object name.
+  //! \param[in]  name  the name in question.
+  //! \param[out] items the found items.
+  //! \return true if anything was found, false -- otherwise.
+  asiAsm_EXPORT bool
+    FindItems(const std::string&         name,
+              asiAsm_XdeAssemblyItemIds& items) const;
 
   //! Returns the name which is associated directly with the given object ID.
   //! \param[in]  id   object ID.
@@ -889,6 +898,20 @@ protected:
     addComponent(const TDF_Label&       assemblyLabel,
                  const TDF_Label&       compLabel,
                  const TopLoc_Location& location);
+
+  //! Finds assembly items targeting a persistent label with the specified
+  //! name. This is a recursive DFS method.
+  //! \param[in]     asmGraph the assembly graph to iterate over.
+  //! \param[in]     parentId the parent node's ID in the assembly graph.
+  //! \param[in]     name     the name being searched for.
+  //! \param[in,out] path     the current path to the item.
+  //! \param[out]    items    the found items.
+  asiAsm_EXPORT void
+    findItemsRecursively(const Handle(asiAsm_XdeGraph)& asmGraph,
+                         const int                      parentId,
+                         const std::string&             name,
+                         std::vector<int>&              path,
+                         asiAsm_XdeAssemblyItemIds&     items) const;
 
 private:
 

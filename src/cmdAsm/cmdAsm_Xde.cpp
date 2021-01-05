@@ -455,6 +455,71 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_FindItem(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get model name.
+  std::string modelName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", modelName) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(modelName);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << modelName);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+
+  // Get item name.
+  std::string itemName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", itemName) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Assembly item's name is not provided.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  asiAsm_XdeAssemblyItemIds items;
+
+  // Find items.
+  xdeDoc->FindItems(itemName, items);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "%1 item(s) collected."
+                                                        << items.Length() );
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-find-item")
+
+  // Add items IDs to the interpreter.
+  int aiid = 1;
+  //
+  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(items); aiit.More(); aiit.Next(), ++aiid )
+  {
+    *interp << aiit.Value().ToString();
+
+    if ( aiid < items.Length() )
+      *interp << " ";
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -528,4 +593,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t the children parts of those items are returned.",
     //
     __FILE__, group, ASMXDE_GetParts);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-find-item",
+    //
+    "asm-xde-find-item -model <M> -name <name>\n"
+    "\t Finds assembly item having the passed name.",
+    //
+    __FILE__, group, ASMXDE_FindItem);
 }

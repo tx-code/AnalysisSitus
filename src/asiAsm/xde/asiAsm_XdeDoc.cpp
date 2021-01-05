@@ -339,6 +339,29 @@ void asiAsm_XdeDoc::Release()
 
 //-----------------------------------------------------------------------------
 
+bool asiAsm_XdeDoc::FindItems(const std::string&         name,
+                              asiAsm_XdeAssemblyItemIds& items) const
+{
+  // Prepare assembly graph.
+  Handle(asiAsm_XdeGraph) asmGraph = new asiAsm_XdeGraph(this);
+
+  // DFS starting from roots.
+  const TColStd_PackedMapOfInteger& roots = asmGraph->GetRoots();
+  //
+  for ( TColStd_MapIteratorOfPackedMapOfInteger rit(roots); rit.More(); rit.Next() )
+  {
+    const int rootId = rit.Key();
+
+    std::vector<int> path = {rootId};
+
+    this->findItemsRecursively(asmGraph, rootId, name, path, items);
+  }
+
+  return !items.IsEmpty();
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePersistentId& id,
                                   TCollection_ExtendedString&   name) const
 {
@@ -2118,6 +2141,65 @@ TDF_Label
   }
 
   return result;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)& asmGraph,
+                                         const int                      parentId,
+                                         const std::string&             name,
+                                         std::vector<int>&              path,
+                                         asiAsm_XdeAssemblyItemIds&     items) const
+{
+  if ( asmGraph->HasChildren(parentId) )
+  {
+    // Visit children.
+    const TColStd_PackedMapOfInteger& children = asmGraph->GetChildren(parentId);
+    //
+    for ( TColStd_MapIteratorOfPackedMapOfInteger cit(children); cit.More(); cit.Next() )
+    {
+      const int                     childId = cit.Key();
+      const asiAsm_XdePersistentId& pid     = asmGraph->GetPersistentId(childId);
+
+      path.push_back(childId);
+
+      // Get name of the currently iterated item.
+      TCollection_ExtendedString currName;
+      if ( !this->GetObjectName(pid, currName) )
+        continue;
+
+      std::string currNameStr = TCollection_AsciiString(currName).ToCString();
+      //
+      if ( currNameStr == name )
+      {
+        // Loop over the parents to gather all persistent IDs.
+        asiAsm_XdeAssemblyItemId item;
+
+        for ( std::vector<int>::reverse_iterator pit = path.rbegin(); pit != path.rend(); ++pit )
+        {
+          // Get node's type in the assembly graph.
+          const int                 nid  = *pit;
+          asiAsm_XdeGraph::NodeType type = asmGraph->GetNodeType(nid);
+
+          // The assembly item ID does not contain prototypes' IDs except
+          // the root one by convention.
+          if ( (type != asiAsm_XdeGraph::NodeType_Part) &&
+               (type != asiAsm_XdeGraph::NodeType_Subassembly) || (pit == path.rend() - 1) )
+          {
+            item.Prepend( asmGraph->GetPersistentId(nid) );
+          }
+        }
+
+        // Add to the result.
+        items.Append(item);
+      }
+
+      // Continue recursively.
+      this->findItemsRecursively(asmGraph, childId, name, path, items);
+
+      path.pop_back();
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
