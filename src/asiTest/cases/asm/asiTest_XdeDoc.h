@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 05 January 2020
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,60 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+#ifndef asiTest_XdeDoc_HeaderFile
+#define asiTest_XdeDoc_HeaderFile
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
+// asiTest includes
+#include <asiTest_CaseIDs.h>
 
 // asiTestEngine includes
-#include <asiTestEngine.h>
+#include <asiTestEngine_TestCase.h>
 
-//! IDs for Test Cases.
-enum test_CaseID
+class asiAsm_XdeDoc;
+
+//! Test functions for XDE document.
+class asiTest_XdeDoc : public asiTestEngine_TestCase
 {
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! Returns Test Case ID.
+  //! \return ID of the Test Case.
+  static int ID()
+  {
+    return CaseID_XdeDoc;
+  }
 
-  CaseID_DataDictionary,
-  CaseID_Utils,
+  //! Returns filename for the description.
+  //! \return filename for the description of the Test Case.
+  static std::string DescriptionFn()
+  {
+    return "asiTest_XdeDoc";
+  }
 
-/* ------------------------------------------------------------------------ */
+  //! Returns Test Case description directory.
+  //! \return description directory for the Test Case.
+  static std::string DescriptionDir()
+  {
+    return "asm";
+  }
 
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
+  //! Returns pointers to the Test Functions to launch.
+  //! \param[out] functions output collection of pointers.
+  static void Functions(AsiTestFunctions& functions)
+  {
+    functions << &testFindItems
+    ; // Put semicolon here for convenient adding new functions above ;)
+  }
 
-/* ------------------------------------------------------------------------ */
+private:
 
-  CaseID_XdeDoc,
+  //! Loads XDE document from file.
+  static bool loadDocument(const char*            shortFilename,
+                           Handle(asiAsm_XdeDoc)& doc);
 
-/* ------------------------------------------------------------------------ */
+private:
 
-  CaseID_LAST
+  static outcome testFindItems(const int funcID);
 
 };
 

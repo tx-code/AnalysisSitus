@@ -22,6 +22,13 @@ set (CPP_FILES
 # Test cases
 #------------------------------------------------------------------------------
 
+set (cases_asm_H_FILES
+  cases/asm/asiTest_XdeDoc.h
+)
+set (cases_asm_CPP_FILES
+  cases/asm/asiTest_XdeDoc.cpp
+)
+
 set (cases_editing_H_FILES
   cases/editing/asiTest_InvertShells.h
   cases/editing/asiTest_KEV.h
@@ -71,6 +78,16 @@ foreach (FILE ${CPP_FILES})
   source_group ("Source Files" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${cases_asm_H_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Header Files\\Cases\\Assemblies" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${cases_asm_CPP_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Source Files\\Cases\\Assemblies" FILES "${FILE}")
+endforeach (FILE)
+
 foreach (FILE ${cases_editing_H_FILES})
   set (src_files ${src_files} ${FILE})
   source_group ("Header Files\\Cases\\Editing" FILES "${FILE}")
@@ -114,6 +131,7 @@ source_group ("Resources" FILES resources/asiTestDictionary.xml)
 # Create include variable
 set (asiTest_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/cases/asm;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/editing;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/framework;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/inspection;")
@@ -123,6 +141,7 @@ set (asiTest_include_dir ${asiTest_include_dir_loc} PARENT_SCOPE)
 include_directories ( SYSTEM
                       ${asiTest_include_dir_loc}
                       ${asiAlgo_include_dir}
+                      ${asiAsm_include_dir}
                       ${asiData_include_dir}
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
@@ -155,7 +174,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiTest asiAlgo asiData asiEngine asiTestEngine asiTcl asiUI cmdEngine cmdMisc)
+target_link_libraries(asiTest asiAlgo asiAsm asiData asiEngine asiTestEngine asiTcl asiUI cmdEngine cmdMisc)
 
 #------------------------------------------------------------------------------
 # Installation

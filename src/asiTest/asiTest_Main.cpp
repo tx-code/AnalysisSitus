@@ -39,6 +39,7 @@
 #include <asiTest_RecognizeBlends.h>
 #include <asiTest_SuppressBlends.h>
 #include <asiTest_Utils.h>
+#include <asiTest_XdeDoc.h>
 
 // asiTestEngine includes
 #include <asiTestEngine_Launcher.h>
@@ -86,6 +87,7 @@ int main(int argc, char* argv[])
   // Load commands.
   TEST_LOAD_MODULE("cmdMisc")
   TEST_LOAD_MODULE("cmdEngine")
+  TEST_LOAD_MODULE("cmdAsm")
 
   // Populate launchers.
   std::cout << "asiTest : main()" << std::endl;
@@ -100,6 +102,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>      );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed> );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>           );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>          );
 
   // Launcher of entire test suite
   asiTestEngine_Launcher Launcher;
