@@ -759,6 +759,20 @@ public:
   asiAsm_EXPORT void
     ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items);
 
+  //! Creates a new part with the given shape as a primary representation.
+  //! \param[in] shape the shape to add as a part.
+  //! \param[in] name  the part's name.
+  //! \return ID of the newly added part.
+  asiAsm_EXPORT asiAsm_XdePartId
+    AddPart(const TopoDS_Shape& shape = TopoDS_Shape(),
+            const std::string&  name  = "");
+
+  //! Creates a new part with the given name.
+  //! \param[in] name the part's name.
+  //! \return ID of the newly added part.
+  asiAsm_EXPORT asiAsm_XdePartId
+    AddPart(const std::string& name);
+
 public:
 
   //! Dumps assembly hierarchy to the passed output stream.
@@ -943,8 +957,10 @@ private:
   //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most
   //! straighforward way.
   //! \param[in] shape the shape to add as a new part.
+  //! \param[in] name  the part name.
   //! \return the newly added label.
-  TDF_Label __addPart(const TopoDS_Shape& shape);
+  TDF_Label __addPart(const TopoDS_Shape& shape,
+                      const std::string&  name = "");
 
   //! Adds a subshape's label under the passed part's label. This method does not
   //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most

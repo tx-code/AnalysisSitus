@@ -73,6 +73,46 @@ bool asiTest_XdeDoc::loadDocument(const char*            shortFilename,
 
 //-----------------------------------------------------------------------------
 
+bool asiTest_XdeDoc::areEqual(const asiAsm_XdePartIds& pids1,
+                              const asiAsm_XdePartIds& pids2)
+{
+  // Get common facilities.
+  Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
+
+  if ( pids1.Length() != pids2.Length() )
+  {
+    cf->Progress.SendLogMessage(LogErr(Normal) << "Unexpected number of part IDs.");
+    return false;
+  }
+
+  for ( asiAsm_XdePartIds::Iterator pit1(pids1); pit1.More(); pit1.Next() )
+  {
+    const asiAsm_XdePartId& pid1 = pit1.Value();
+    bool isFound = false;
+
+    for ( asiAsm_XdePartIds::Iterator pit2(pids2); pit2.More(); pit2.Next() )
+    {
+      const asiAsm_XdePartId& pid2 = pit2.Value();
+      //
+      if ( pid1.IsEqual(pid2) )
+      {
+        isFound = true;
+        break;
+      }
+    }
+
+    if ( !isFound )
+    {
+      cf->Progress.SendLogMessage(LogErr(Normal) << "Part ID is not found.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 outcome asiTest_XdeDoc::testFindItems(const int funcID)
 {
   outcome res(DescriptionFn(), funcID);
@@ -108,6 +148,36 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
       return res.failure();
     }
   }
+
+  return res.success();
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_XdeDoc::testAddPart(const int funcID)
+{
+  outcome res(DescriptionFn(), funcID);
+
+  // Get common facilities.
+  Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
+
+  // Create a new empty XDE document.
+  Handle(asiAsm_XdeDoc) doc = new asiAsm_XdeDoc;
+
+  // Add parts.
+  asiAsm_XdePartIds pidsAdded;
+  {
+    pidsAdded.Append( doc->AddPart("Part 1") );
+    pidsAdded.Append( doc->AddPart("Part 2") );
+    pidsAdded.Append( doc->AddPart("Part 3") );
+  }
+
+  // Verify.
+  asiAsm_XdePartIds pidsGot;
+  doc->GetParts(pidsGot);
+  //
+  if ( !areEqual(pidsAdded, pidsGot) )
+    return res.failure();
 
   return res.success();
 }

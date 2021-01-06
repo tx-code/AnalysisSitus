@@ -37,6 +37,9 @@
 // asiTestEngine includes
 #include <asiTestEngine_TestCase.h>
 
+// asiAsm includes
+#include <asiAsm_XdePersistentIds.h>
+
 class asiAsm_XdeDoc;
 
 //! Test functions for XDE document.
@@ -70,6 +73,7 @@ public:
   static void Functions(AsiTestFunctions& functions)
   {
     functions << &testFindItems
+              << &testAddPart
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -79,9 +83,15 @@ private:
   static bool loadDocument(const char*            shortFilename,
                            Handle(asiAsm_XdeDoc)& doc);
 
+  //! Checks if the passed lists of IDs are equal. The order of items is
+  //! not important.
+  static bool areEqual(const asiAsm_XdePartIds& pids1,
+                       const asiAsm_XdePartIds& pids2);
+
 private:
 
-  static outcome testFindItems(const int funcID);
+  static outcome testFindItems (const int funcID);
+  static outcome testAddPart   (const int funcID);
 
 };
 

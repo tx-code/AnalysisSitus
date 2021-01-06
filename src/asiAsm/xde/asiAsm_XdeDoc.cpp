@@ -1573,6 +1573,26 @@ void asiAsm_XdeDoc::ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items)
 
 //-----------------------------------------------------------------------------
 
+asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const TopoDS_Shape& shape,
+                                        const std::string&  name)
+{
+  TDF_Label lab = this->__addPart(shape, name);
+
+  TCollection_AsciiString entry;
+  this->__entry(lab, entry);
+
+  return asiAsm_XdePartId(entry);
+}
+
+//-----------------------------------------------------------------------------
+
+asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const std::string& name)
+{
+  return this->AddPart(TopoDS_Shape(), name);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 {
   for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
@@ -2272,7 +2292,8 @@ bool asiAsm_XdeDoc::__isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape)
+TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape,
+                                   const std::string&  name)
 {
   // Add new part.
   TDF_Label resultL;
@@ -2283,15 +2304,32 @@ TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape)
   TNaming_Builder tnBuild(resultL);
   tnBuild.Generated(shape);
 
-  // Set name by the shape type.
-  std::stringstream stream;
-  TopAbs::Print(shape.ShapeType(), stream);
-  TCollection_AsciiString name( stream.str().c_str() );
+  TCollection_AsciiString nameStr;
   //
-  TDataStd_Name::Set( resultL, TCollection_ExtendedString(name) );
+  if ( name == "" )
+  {
+    // Set name by the shape type.
+    if ( shape.IsNull() )
+    {
+      nameStr = "Unnamed";
+    }
+    else
+    {
+      std::stringstream stream;
+      TopAbs::Print(shape.ShapeType(), stream);
+      nameStr = ( stream.str().c_str() );
+    }
+  }
+  else
+  {
+    nameStr = name.c_str();
+  }
+  //
+  TDataStd_Name::Set( resultL, TCollection_ExtendedString(nameStr) );
 
   return resultL;
 }
+
 //-----------------------------------------------------------------------------
 
 TDF_Label asiAsm_XdeDoc::__addSubShape(const TDF_Label&    partLabel,

@@ -76,6 +76,18 @@
 
 <!-- ========================================================================== -->
 
+<h2 id="toc-asm-xde-new">asm-xde-new</h2>
+
+<p>
+The <span class="code-inline">asm-xde-new</span> function constructs a new empty XDE document and sets it as a Tcl variable.
+</p>
+
+<pre class="code">
+asm-xde-new -model M
+</pre>
+
+<!-- ========================================================================== -->
+
 <h2 id="toc-asm-xde-load">asm-xde-load</h2>
 
 <p>
@@ -94,11 +106,11 @@ At this point, you should give your model a name, which is <span class="code-inl
 whatis M
 </pre>
 
-<!-- ========================================================================== -->
-
 <p>
 It is possible to work with several models as you can give them distinct names.
 </p>
+
+<!-- ========================================================================== -->
 
 <h2 id="toc-asm-xde-save">asm-xde-save</h2>
 
@@ -246,6 +258,25 @@ The <span class="code-inline">asm-xde-find-item</span> function searches for ass
 <pre class="code">
 set items [asm-xde-find-item -model M -name X473]
 </pre>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-add-part">asm-xde-add-part</h2>
+
+<p>
+The <span class="code-inline">asm-xde-add-part</span> adds the active part of Analysis Situs to the XDE document as another root. If the <span class="code-inline">-name</span> key is passed, the new part will get the specified name. If not, it will get the "Unnamed" label as its name. The function returns the persistent ID of the newly added part. The B-rep geometry of the active part is set as the part's representation within the XDE document.
+</p>
+
+<pre class="code">
+asm-xde-new -model M
+asm-xde-add-part -model M
+asm-xde-add-part -model M -name "part 2"
+asm-xde-add-part -model M -name "part 3"
+asm-xde-browse -model M
+asm-xde-release -model M
+</pre>
+
+<div align="center"><img src="../imgs/asm-xde-add-part_01.png"/></div>
 
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">

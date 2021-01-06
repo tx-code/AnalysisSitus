@@ -43,6 +43,37 @@
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_New(const Handle(asiTcl_Interp)& interp,
+               int                          argc,
+               const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Create a new empty XDE document.
+  Handle(asiAsm_XdeDoc) doc = new asiAsm_XdeDoc( interp->GetProgress(),
+                                                 interp->GetPlotter() );
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-new")
+
+  // Set as variable.
+  interp->SetVar( name, new cmdAsm_XdeModel(doc) );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
                 int                          argc,
                 const char**                 argv)
@@ -520,10 +551,79 @@ int ASMXDE_FindItem(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_AddPart(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdAsm::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape shape = partNode->GetShape();
+
+  // Get model name.
+  std::string modelName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", modelName) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(modelName);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << modelName);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+
+  // Get part name.
+  std::string partName;
+  //
+  interp->GetKeyValue(argc, argv, "name", partName);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Add part.
+  asiAsm_XdePartId pid = xdeDoc->AddPart(shape, partName);
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Part was added with id %1."
+                                                       << pid);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-add-part")
+
+  *interp << pid;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
   static const char* group = "cmdAsm";
+  
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-new",
+    //
+    "asm-xde-new -model <M>\n"
+    "\t Creates a new XDE document named <M>.",
+    //
+    __FILE__, group, ASMXDE_New);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-load",
@@ -601,4 +701,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Finds assembly item having the passed name.",
     //
     __FILE__, group, ASMXDE_FindItem);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-add-part",
+    //
+    "asm-xde-add-part -model <M> [-name <name>]\n"
+    "\t Adds the active part to the XDE document as an assembly part.",
+    //
+    __FILE__, group, ASMXDE_AddPart);
 }
