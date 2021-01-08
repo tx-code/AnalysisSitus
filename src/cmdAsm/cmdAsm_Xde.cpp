@@ -37,9 +37,17 @@
 // asiAsm includes
 #include <asiAsm_XdeDocIterator.h>
 
+// glTF includes
+#include <gltf_XdeWriter.h>
+
 // asiUI includes
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
+
+// OpenCascade includes
+#include <UnitsMethods.hxx>
+
+using namespace asiAsm;
 
 //-----------------------------------------------------------------------------
 
@@ -612,6 +620,74 @@ int ASMXDE_AddPart(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get filename.
+  std::string filenameArg;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filenameArg) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified.");
+    return TCL_ERROR;
+  }
+  //
+  TCollection_AsciiString filename( filenameArg.c_str() );
+  TCollection_AsciiString ext = filename;
+  ext.LowerCase();
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  TIMER_NEW
+  TIMER_GO
+
+  gltf_XdeWriter cafWriter( filename,
+                            ext.EndsWith(".glb"),
+                            interp->GetProgress(),
+                            interp->GetPlotter() );
+  //
+  cafWriter.SetTransformationFormat(gltf_WriterTrsfFormat_TRS);
+  cafWriter.SetForcedUVExport(false);
+  //
+  const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
+  cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
+  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(gltf_CoordinateSystem_Zup);
+
+  if ( !cafWriter.Perform( doc->GetDocument() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "glTF export failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-save-gltf")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -709,4 +785,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Adds the active part to the XDE document as an assembly part.",
     //
     __FILE__, group, ASMXDE_AddPart);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-save-gltf",
+    //
+    "asm-xde-save-gltf -model <M> -filename <filename>\n"
+    "\t Exports the passed XDE model to glTF format.",
+    //
+    __FILE__, group, ASMXDE_SaveGLTF);
 }

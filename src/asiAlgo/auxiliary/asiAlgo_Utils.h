@@ -95,6 +95,15 @@ namespace asiAlgo_Utils
   //! Functions to work with strings.
   namespace Str
   {
+    //! Derives filename and extension out of the passed full path.
+    //! \param[in]  fullPath  the input full path.
+    //! \param[out] name      the output filename.
+    //! \param[out] extension the output extension.
+    asiAlgo_EXPORT void
+      FileNameAndExtension(const TCollection_AsciiString& fullPath,
+                           TCollection_AsciiString&       name,
+                           TCollection_AsciiString&       extension);
+
     //! Splits the passed string by the given delimiter. Note that the
     //! passed output vector is not cleaned up beforehand.
     //! \param source_str [in]  input string to split.

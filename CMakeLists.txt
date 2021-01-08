@@ -64,6 +64,11 @@ endif()
 # Eigen
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Eigen.cmake)
 
+# Rapidjson
+set (USE_RAPIDJSON OFF CACHE BOOL "Rapidjson is optional 3-rd party. It enables glTF export.")
+#
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_Rapidjson.cmake)
+
 # OCCT
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_OCCT.cmake)
 

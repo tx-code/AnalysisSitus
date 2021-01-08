@@ -268,7 +268,7 @@ Since the object's name does not have to be unique, this function might return s
 <h2 id="toc-asm-xde-add-part">asm-xde-add-part</h2>
 
 <p>
-The <span class="code-inline">asm-xde-add-part</span> adds the active part of Analysis Situs to the XDE document as another root. If the <span class="code-inline">-name</span> key is passed, the new part will get the specified name. If not, it will get the "Unnamed" label as its name. The function returns the persistent ID of the newly added part. The B-rep geometry of the active part is set as the part's representation within the XDE document.
+The <span class="code-inline">asm-xde-add-part</span> function adds the active part of Analysis Situs to the XDE document as another root. If the <span class="code-inline">-name</span> key is passed, the new part will get the specified name. If not, it will get the "Unnamed" label as its name. The function returns the persistent ID of the newly added part. The B-rep geometry of the active part is set as the part's representation within the XDE document.
 </p>
 
 <pre class="code">
@@ -281,6 +281,14 @@ asm-xde-release -model M
 </pre>
 
 <div align="center"><img src="../imgs/asm-xde-add-part_01.png"/></div>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-save-gltf">asm-xde-save-gltf</h2>
+
+<p>
+The <span class="code-inline">asm-xde-save-gltf</span> function saves the specified XDE document to glTF file. The visualizaton facets should be precomputed in the stored CAD shapes.
+</p>
 
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">

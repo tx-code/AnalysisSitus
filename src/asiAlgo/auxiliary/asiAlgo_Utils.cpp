@@ -376,6 +376,35 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_Utils::Str::FileNameAndExtension(const TCollection_AsciiString& fullPath,
+                                              TCollection_AsciiString&       name,
+                                              TCollection_AsciiString&       extension)
+{
+  const int EXT_MAX_LEN = 20;
+  const int len         = fullPath.Length();
+  //
+  for ( int extLen = 1; extLen < len && extLen < EXT_MAX_LEN; ++extLen )
+  {
+    if ( fullPath.Value(len - extLen) == '.' )
+    {
+      const int nameUpper = len - extLen - 1;
+      //
+      if ( nameUpper < 1 )
+        break;
+
+      name      = fullPath.SubString(1, nameUpper);
+      extension = fullPath.SubString(len - extLen + 1, len);
+      extension.LowerCase();
+      return;
+    }
+  }
+
+  name = fullPath;
+  extension.Clear();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_Utils::Str::Split(const std::string&        source_str,
                                const std::string&        delim_str,
                                std::vector<std::string>& result)

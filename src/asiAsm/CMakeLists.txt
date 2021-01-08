@@ -39,6 +39,31 @@ set (xde_CPP_FILES
 )
 
 #------------------------------------------------------------------------------
+# Interoperability
+#------------------------------------------------------------------------------
+
+set (interop_gltf_H_FILES
+  interop/gltf/gltf_CSysConverter.h
+  interop/gltf/gltf_Entities.h
+  interop/gltf/gltf_FaceIterator.h
+  interop/gltf/gltf_JsonSerializer.h
+  interop/gltf/gltf_MaterialAttr.h
+  interop/gltf/gltf_MaterialMap.h
+  interop/gltf/gltf_MaterialMapBase.h
+  interop/gltf/gltf_XdeVisualStyle.h
+  interop/gltf/gltf_XdeWriter.h
+)
+set (interop_gltf_CPP_FILES
+  interop/gltf/gltf_CSysConverter.cpp
+  interop/gltf/gltf_FaceIterator.cpp
+  interop/gltf/gltf_MaterialAttr.cpp
+  interop/gltf/gltf_MaterialMap.cpp
+  interop/gltf/gltf_MaterialMapBase.cpp
+  interop/gltf/gltf_XdeVisualStyle.cpp
+  interop/gltf/gltf_XdeWriter.cpp
+)
+
+#------------------------------------------------------------------------------
 # Active Data libraries
 #------------------------------------------------------------------------------
 
@@ -113,6 +138,14 @@ foreach (FILE ${xde_CPP_FILES})
   source_group ("Source Files\\XDE" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${interop_gltf_H_FILES})
+  source_group ("Header Files\\Interoperability\\glTF" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${interop_gltf_CPP_FILES})
+  source_group ("Source Files\\Interoperability\\glTF" FILES "${FILE}")
+endforeach (FILE)
+
 #------------------------------------------------------------------------------
 # Configure includes
 #------------------------------------------------------------------------------
@@ -121,17 +154,21 @@ endforeach (FILE)
 set (asiAsm_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/entity;\
   ${CMAKE_CURRENT_SOURCE_DIR}/xde;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/interop;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/interop/gltf;\
 ")
 #
 set (asiAsm_include_dir ${asiAsm_include_dir_loc} PARENT_SCOPE)
 
-include_directories ( ${asiAsm_include_dir_loc}
+include_directories ( SYSTEM
+                      ${asiAsm_include_dir_loc}
                       ${asiAlgo_include_dir}
                       ${asiData_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_asitus_INCLUDE_DIR}
                       ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
+                      ${3RDPARTY_rapidjson_DIR}
                       ${3RDPARTY_tbb_INCLUDE_DIR} )
 
 #------------------------------------------------------------------------------
@@ -139,9 +176,10 @@ include_directories ( ${asiAsm_include_dir_loc}
 #------------------------------------------------------------------------------
 
 add_library (asiAsm SHARED
-  ${H_FILES}        ${CPP_FILES}
-  ${entity_H_FILES} ${entity_CPP_FILES}
-  ${xde_H_FILES}    ${xde_CPP_FILES}
+  ${H_FILES}              ${CPP_FILES}
+  ${entity_H_FILES}       ${entity_CPP_FILES}
+  ${xde_H_FILES}          ${xde_CPP_FILES}
+  ${interop_gltf_H_FILES} ${interop_gltf_CPP_FILES}
 )
 
 target_link_libraries(asiAsm asiAlgo)
@@ -231,6 +269,7 @@ if (MSVC)
   install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiAsm.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
 endif()
 
-install (FILES ${H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
-install (FILES ${entity_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
-install (FILES ${xde_H_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${H_FILES}              DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${entity_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${xde_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${interop_gltf_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
