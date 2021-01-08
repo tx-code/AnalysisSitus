@@ -486,9 +486,9 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ASMXDE_FindItem(const Handle(asiTcl_Interp)& interp,
-                    int                          argc,
-                    const char**                 argv)
+int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
 {
   // Get model name.
   std::string modelName;
@@ -524,25 +524,25 @@ int ASMXDE_FindItem(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  asiAsm_XdeAssemblyItemIds items;
-
-  // Find items.
+  // Find unique items.
+  Handle(asiAsm_XdeHAssemblyItemIdsMap) items;
+  //
   xdeDoc->FindItems(itemName, items);
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "%1 item(s) collected."
-                                                        << items.Length() );
+                                                        << items->Extent() );
 
   TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-find-item")
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-find-items")
 
   // Add items IDs to the interpreter.
   int aiid = 1;
   //
-  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(items); aiit.More(); aiit.Next(), ++aiid )
+  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator aiit(*items); aiit.More(); aiit.Next(), ++aiid )
   {
     *interp << aiit.Value().ToString();
 
-    if ( aiid < items.Length() )
+    if ( aiid < items->Extent() )
       *interp << " ";
   }
 
@@ -695,12 +695,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ASMXDE_GetParts);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("asm-xde-find-item",
+  interp->AddCommand("asm-xde-find-items",
     //
-    "asm-xde-find-item -model <M> -name <name>\n"
-    "\t Finds assembly item having the passed name.",
+    "asm-xde-find-items -model <M> -name <name>\n"
+    "\t Finds assembly items having the passed name.",
     //
-    __FILE__, group, ASMXDE_FindItem);
+    __FILE__, group, ASMXDE_FindItems);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-add-part",

@@ -128,7 +128,7 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
 
   // Find items.
   {
-    asiAsm_XdeAssemblyItemIds items;
+    Handle(asiAsm_XdeHAssemblyItemIdsMap) items;
     //
     if ( !doc->FindItems("X473", items) )
     {
@@ -136,13 +136,13 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
       return res.failure();
     }
 
-    if ( items.Length() != 1 )
+    if ( items->Extent() != 1 )
     {
       cf->Progress.SendLogMessage(LogErr(Normal) << "Unexpected number of assembly items.");
       return res.failure();
     }
 
-    if ( items.First() != asiAsm_XdeAssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:5") )
+    if ( items->FindKey(1) != asiAsm_XdeAssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:5") )
     {
       cf->Progress.SendLogMessage(LogErr(Normal) << "Unexpected assembly item ID.");
       return res.failure();

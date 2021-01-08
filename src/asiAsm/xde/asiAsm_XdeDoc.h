@@ -150,11 +150,11 @@ public:
 
   //! Finds assembly items having the passed object name.
   //! \param[in]  name  the name in question.
-  //! \param[out] items the found items.
+  //! \param[out] items the unordered collection of unique items found.
   //! \return true if anything was found, false -- otherwise.
   asiAsm_EXPORT bool
-    FindItems(const std::string&         name,
-              asiAsm_XdeAssemblyItemIds& items) const;
+    FindItems(const std::string&                     name,
+              Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
 
   //! Returns the name which is associated directly with the given object ID.
   //! \param[in]  id   object ID.
@@ -921,11 +921,11 @@ protected:
   //! \param[in,out] path     the current path to the item.
   //! \param[out]    items    the found items.
   asiAsm_EXPORT void
-    findItemsRecursively(const Handle(asiAsm_XdeGraph)& asmGraph,
-                         const int                      parentId,
-                         const std::string&             name,
-                         std::vector<int>&              path,
-                         asiAsm_XdeAssemblyItemIds&     items) const;
+    findItemsRecursively(const Handle(asiAsm_XdeGraph)&         asmGraph,
+                         const int                              parentId,
+                         const std::string&                     name,
+                         std::vector<int>&                      path,
+                         Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
 
 private:
 

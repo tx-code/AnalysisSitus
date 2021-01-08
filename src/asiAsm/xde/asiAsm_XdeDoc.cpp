@@ -339,9 +339,11 @@ void asiAsm_XdeDoc::Release()
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::FindItems(const std::string&         name,
-                              asiAsm_XdeAssemblyItemIds& items) const
+bool asiAsm_XdeDoc::FindItems(const std::string&                     name,
+                              Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
 {
+  items = new asiAsm_XdeHAssemblyItemIdsMap;
+
   // Prepare assembly graph.
   Handle(asiAsm_XdeGraph) asmGraph = new asiAsm_XdeGraph(this);
 
@@ -357,7 +359,7 @@ bool asiAsm_XdeDoc::FindItems(const std::string&         name,
     this->findItemsRecursively(asmGraph, rootId, name, path, items);
   }
 
-  return !items.IsEmpty();
+  return !items->IsEmpty();
 }
 
 //-----------------------------------------------------------------------------
@@ -2165,11 +2167,11 @@ TDF_Label
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)& asmGraph,
-                                         const int                      parentId,
-                                         const std::string&             name,
-                                         std::vector<int>&              path,
-                                         asiAsm_XdeAssemblyItemIds&     items) const
+void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         asmGraph,
+                                         const int                              parentId,
+                                         const std::string&                     name,
+                                         std::vector<int>&                      path,
+                                         Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
 {
   if ( asmGraph->HasChildren(parentId) )
   {
@@ -2211,7 +2213,7 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)& asmGraph
         }
 
         // Add to the result.
-        items.Append(item);
+        items->Add(item);
       }
 
       // Continue recursively.

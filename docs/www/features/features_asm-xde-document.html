@@ -48,7 +48,7 @@
 </table>
 </td></tr></table>
 
-<h1 id="toc-asm-xde-document">XDE in a nutshell</h1>
+<h1 id="toc-asm-xde-document">XDE in nutshell</h1>
 
 <div class="toc-panel"><div id="toc"></div></div>
 
@@ -249,15 +249,19 @@ set parts [asm-xde-get-parts -model M -items 0:1:1:1/0:1:1:1:1/0:1:1:2:1/0:1:1:3
 
 <!-- ========================================================================== -->
 
-<h2 id="toc-asm-xde-find-item">asm-xde-find-item</h2>
+<h2 id="toc-asm-xde-find-item">asm-xde-find-items</h2>
 
 <p>
-The <span class="code-inline">asm-xde-find-item</span> function searches for assembly items having the passed name. The name is taken from the OCAF label being visited on iterating the assembly graph in the depth-first manner.
+The <span class="code-inline">asm-xde-find-items</span> function searches for assembly items having the passed name. The name is taken from the OCAF label being visited on iterating the assembly graph in the depth-first manner.
 </p>
 
 <pre class="code">
-set items [asm-xde-find-item -model M -name X473]
+set items [asm-xde-find-items -model M -name "X473"]
 </pre>
+
+<p>
+Since the object's name does not have to be unique, this function might return several IDs.
+</p>
 
 <!-- ========================================================================== -->
 
