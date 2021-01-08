@@ -47,8 +47,20 @@ namespace asiAlgo_MeshGen
 {
   //! Automatically selects a linear deflection for meshing as a ratio of
   //! a diagonal of a shape's bounding box.
-  //! \param[in] shape shape to select the deflection value for.
-  //! \return autocomputed linear deflection.
+  //! \param[in]  shape   the shape to select the deflection value for.
+  //! \param[out] defl    the selected linear deflection value.
+  //! \param[in]  linPrec the coefficient to derive the deflection value from
+  //!                     the shape's AABB.
+  //! \return false if the deflection cannot be computed (e.g., empty shape).
+  asiAlgo_EXPORT bool
+    AutoSelectLinearDeflection(const TopoDS_Shape& shape,
+                               double&             defl,
+                               const double        linPrec = 0.001);
+
+  //! Automatically selects a linear deflection for meshing as a ratio of
+  //! a diagonal of a shape's bounding box.
+  //! \param[in] shape the shape to select the deflection value for.
+  //! \return the selected linear deflection.
   asiAlgo_EXPORT double
     AutoSelectLinearDeflection(const TopoDS_Shape& shape);
 

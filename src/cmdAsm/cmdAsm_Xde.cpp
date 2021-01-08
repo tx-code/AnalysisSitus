@@ -32,6 +32,8 @@
 #include <cmdAsm_XdeModel.h>
 
 // asiAlgo includes
+#include <asiAlgo_FacetQuality.h>
+#include <asiAlgo_MeshGen.h>
 #include <asiAlgo_Timer.h>
 
 // asiAsm includes
@@ -48,6 +50,40 @@
 #include <UnitsMethods.hxx>
 
 using namespace asiAsm;
+
+//-----------------------------------------------------------------------------
+
+void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
+                          const asiAsm_XdePartIds&     parts,
+                          const asiAlgo_FacetQuality   quality,
+                          double&                      linDefl,
+                          double&                      angDeflDeg)
+{
+  linDefl    = asiAlgo_LINDEFL_MIN;
+  angDeflDeg = asiAlgo_ANGDEFL_MIN;
+
+  // Select deflections for each part and then take the max values.
+  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  {
+    const asiAsm_XdePartId& pid = pit.Value();
+
+    double partLinDefl = asiAlgo_LINDEFL_MIN;
+    double partAngDefl = asiAlgo_ANGDEFL_MIN;
+    double partMinLinDefl;
+
+    // Get shape for the part.
+    TopoDS_Shape partShape = model->GetShape(pid);
+
+    if ( !asiAlgo_Utils::IsEmptyShape(partShape) &&
+          asiAlgo_MeshGen::AutoSelectLinearDeflection(partShape, partMinLinDefl, 0.01) )
+    {
+      asiAlgo_SelectFaceterOptions(quality, partMinLinDefl, partLinDefl, partAngDefl);
+    }
+
+    linDefl    = Max(linDefl,    partLinDefl);
+    angDeflDeg = Max(angDeflDeg, partAngDefl);
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -688,6 +724,128 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  // Get items (if any).
+  asiAsm_XdeAssemblyItemIds items;
+  int itemsIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
+  {
+    for ( int ii = itemsIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+    }
+  }
+
+  // Get parts (if any).
+  asiAsm_XdePartIds parts;
+  int partsIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "parts", partsIdx) )
+  {
+    for ( int ii = partsIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      parts.Append( asiAsm_XdePartId(argv[ii]) );
+    }
+  }
+
+  if ( !items.IsEmpty() )
+  {
+    asiAsm_XdeAssemblyItemIds leaves;
+    doc->GetParts(items, leaves, parts);
+  }
+
+  // If we still have no parts, let's take just them all.
+  if ( parts.IsEmpty() )
+  {
+    doc->GetParts(parts);
+  }
+
+  // Check if facet quality level is defined.
+  asiAlgo_FacetQuality fq = asiAlgo_FacetQuality::UNDEFINED;
+  //
+  if ( interp->HasKeyword(argc, argv, FQ_Name_VeryRough) )
+  {
+    fq = asiAlgo_FacetQuality::VeryRough;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Rough) )
+  {
+    fq = asiAlgo_FacetQuality::Rough;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Normal) )
+  {
+    fq = asiAlgo_FacetQuality::Normal;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Fine) )
+  {
+    fq = asiAlgo_FacetQuality::Fine;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_VeryFine) )
+  {
+    fq = asiAlgo_FacetQuality::VeryFine;
+  }
+
+  // If the quality level is not defined, let's try to find the deflection
+  // values specified explicitly.
+  double linDefl = 0., angDeflDeg = 0.;
+  //
+  if ( fq == asiAlgo_FacetQuality::UNDEFINED )
+  {
+    interp->GetKeyValue<double>(argc, argv, "lin", linDefl);
+    interp->GetKeyValue<double>(argc, argv, "ang", angDeflDeg);
+  }
+  else
+  {
+    SelectFaceterOptions(doc, parts, fq, linDefl, angDeflDeg);
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Chosen linear/angular deflection values: %1/%2"
+                                                       << linDefl << angDeflDeg);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // TODO: generate facets
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-generate-facets")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -793,4 +951,25 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Exports the passed XDE model to glTF format.",
     //
     __FILE__, group, ASMXDE_SaveGLTF);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-generate-facets",
+    //
+    "asm-xde-generate-facets -model <M> [{-parts <id> ... | -items <id> ...}]\n"
+    "\t {[-lin <val>] [-ang <deg>] | [-very-rough | -rough | -normal | -fine | -very-fine]}\n"
+    "\n"
+    "\t Generates visualization facets for all parts in the passed XDE document.\n"
+    "\t You can specify the linear and angular deflection values using the '-lin'\n"
+    "\t and '-ang' keywords. The linear deflection is specified in the model units.\n"
+    "\t The angular deflection is specified in degrees.\n"
+    "\n"
+    "\t Alternatively, you can pass one of the predefined quality levels: '-very-rough',\n"
+    "\t '-rough', etc. In such a case, the algorithm will select the linear and angular\n"
+    "\t deflections automatically.\n"
+    "\n"
+    "\t If neither assembly items nor parts are specified via the corresponding '-items' and\n"
+    "\t '-parts' keywords, the visualization facets will be generated for all B-rep shapes\n"
+    "\t available in the XDE document.",
+    //
+    __FILE__, group, ASMXDE_GenerateFacets);
 }

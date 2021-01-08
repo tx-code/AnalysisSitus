@@ -32,6 +32,7 @@
 #include <asiAlgo_MeshGen.h>
 
 // asiAlgo includes
+#include <asiAlgo_FacetQuality.h>
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
@@ -51,18 +52,33 @@
 
 //-----------------------------------------------------------------------------
 
-double asiAlgo_MeshGen::AutoSelectLinearDeflection(const TopoDS_Shape& shape)
+bool asiAlgo_MeshGen::AutoSelectLinearDeflection(const TopoDS_Shape& shape,
+                                                 double&             defl,
+                                                 const double        linPrec)
 {
+  bool isOk = true;
   double xMin, yMix, zMin, xMax, yMax, zMax;
+  //
   if ( !asiAlgo_Utils::Bounds(shape, xMin, yMix, zMin, xMax, yMax, zMax, 0.0001) )
   {
     xMin = yMix = zMin = 0.0;
     xMax = yMax = zMax = 1.0;
+    isOk = false;
   }
 
   // Use a fraction of a bounding diagonal.
   const double diag = ( gp_XYZ(xMin, yMix, zMin) - gp_XYZ(xMax, yMax, zMax) ).Modulus();
-  return 0.001*diag;
+  defl = linPrec*diag;
+  return isOk;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_MeshGen::AutoSelectLinearDeflection(const TopoDS_Shape& shape)
+{
+  double linDefl = asiAlgo_LINDEFL_MIN;
+  AutoSelectLinearDeflection(shape, linDefl);
+  return linDefl;
 }
 
 //-----------------------------------------------------------------------------
