@@ -59,7 +59,7 @@ bool asiAlgo_MeshGen::AutoSelectLinearDeflection(const TopoDS_Shape& shape,
   bool isOk = true;
   double xMin, yMix, zMin, xMax, yMax, zMax;
   //
-  if ( !asiAlgo_Utils::Bounds(shape, xMin, yMix, zMin, xMax, yMax, zMax, 0.0001) )
+  if ( !asiAlgo_Utils::Bounds(shape, xMin, yMix, zMin, xMax, yMax, zMax, 0.0001, false) )
   {
     xMin = yMix = zMin = 0.0;
     xMax = yMax = zMax = 1.0;

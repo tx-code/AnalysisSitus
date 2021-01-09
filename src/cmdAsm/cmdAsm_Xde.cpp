@@ -57,10 +57,15 @@ void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
                           const asiAsm_XdePartIds&     parts,
                           const asiAlgo_FacetQuality   quality,
                           double&                      linDefl,
-                          double&                      angDeflDeg)
+                          double&                      angDeflDeg,
+                          ActAPI_ProgressEntry         progress)
 {
   linDefl    = asiAlgo_LINDEFL_MIN;
   angDeflDeg = asiAlgo_ANGDEFL_MIN;
+
+  // Initialize progress indicator.
+  progress.Init( parts.Length() );
+  progress.SetMessageKey("Select faceter options");
 
   // Select deflections for each part and then take the max values.
   for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
@@ -82,7 +87,18 @@ void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
 
     linDefl    = Max(linDefl,    partLinDefl);
     angDeflDeg = Max(angDeflDeg, partAngDefl);
+
+    if ( progress.IsCancelling() )
+    {
+      progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
+      return;
+    }
+
+    progress.StepProgress(1);
   }
+
+  // Progress indication.
+  progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
 }
 
 //-----------------------------------------------------------------------------
@@ -825,18 +841,63 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
     interp->GetKeyValue<double>(argc, argv, "lin", linDefl);
     interp->GetKeyValue<double>(argc, argv, "ang", angDeflDeg);
   }
-  else
+
+  cmdAsm::cf->ProgressListener->SetProcessEvents(true);
+
+  if ( (fq != asiAlgo_FacetQuality::UNDEFINED) ||
+       (linDefl < asiAlgo_LINDEFL_MIN) ||
+       (angDeflDeg < asiAlgo_ANGDEFL_MIN) )
   {
-    SelectFaceterOptions(doc, parts, fq, linDefl, angDeflDeg);
+    if ( fq == asiAlgo_FacetQuality::UNDEFINED )
+      fq = asiAlgo_FacetQuality::Rough;
+
+    SelectFaceterOptions( doc, parts, fq, linDefl, angDeflDeg, interp->GetProgress() );
   }
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Chosen linear/angular deflection values: %1/%2"
                                                        << linDefl << angDeflDeg);
 
+  // Initialize progress indicator.
+  interp->GetProgress().Init( parts.Length() );
+  interp->GetProgress().SetMessageKey("Generate visualization facets");
+
   TIMER_NEW
   TIMER_GO
 
-  // TODO: generate facets
+  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  {
+    // Get part.
+    const asiAsm_XdePartId& pid       = pit.Value();
+    TopoDS_Shape            partShape = doc->GetShape(pid);
+
+    // Get name.
+    TCollection_ExtendedString partName;
+    doc->GetObjectName(pid, partName);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Processing part %1 ('%2')..."
+                                                         << pid << partName);
+
+    asiAlgo_MeshInfo meshInfo;
+    //
+    if ( !asiAlgo_MeshGen::DoNative(partShape, linDefl, angDeflDeg, meshInfo) )
+    {
+      interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Failed to generate facets for the part %1."
+                                                           << pid);
+    }
+
+    if ( interp->GetProgress().IsCancelling() )
+    {
+      interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
+      cmdAsm::cf->ProgressListener->SetProcessEvents(false);
+      return TCL_OK;
+    }
+
+    interp->GetProgress().StepProgress(1);
+  }
+
+  // Progress indication.
+  interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+  cmdAsm::cf->ProgressListener->SetProcessEvents(false);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-generate-facets")
