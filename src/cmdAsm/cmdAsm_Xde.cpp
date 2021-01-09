@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_FacetQuality.h>
+#include <asiAlgo_FindVisibleFaces.h>
 #include <asiAlgo_MeshGen.h>
 #include <asiAlgo_Timer.h>
 
@@ -47,6 +48,7 @@
 #include <asiUI_XdeBrowser.h>
 
 // OpenCascade includes
+#include <BRep_Builder.hxx>
 #include <UnitsMethods.hxx>
 
 using namespace asiAsm;
@@ -907,6 +909,120 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
+               int                          argc,
+               const char**                 argv)
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdAsm::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape shape = partNode->GetShape();
+
+  // Get model name.
+  std::string modelName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", modelName) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(modelName);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << modelName);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Prepare visibility checker. We initialize it with the entire model
+  // to check for collisions with every part of an assembly.
+  TopoDS_Shape asmShape = xdeDoc->GetOneShape();
+  //
+  asiAlgo_FindVisibleFaces FindVisible( asmShape,
+                                        interp->GetProgress(),
+                                        interp->GetPlotter() );
+
+  // Map faces to be able to derive subdomains.
+  TopTools_IndexedMapOfShape allFaces;
+  TopExp::MapShapes(asmShape, TopAbs_FACE, allFaces);
+
+  // Get all leaves of the model.
+  asiAsm_XdeAssemblyItemIds leaves;
+  xdeDoc->GetLeafAssemblyItems(leaves);
+
+  // Iterate over all parts of the model.
+  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves); aiit.More(); aiit.Next() )
+  {
+    // Get item.
+    const asiAsm_XdeAssemblyItemId& aiid = aiit.Value();
+
+    // Get shape.
+    TopoDS_Shape itemShape = xdeDoc->GetShape(aiid);
+
+    // Get all faces of the item shape to define its subdomain.
+    TopTools_IndexedMapOfShape itemFaces;
+    TopExp::MapShapes(itemShape, TopAbs_FACE, itemFaces);
+
+    // Define subdomain for analysis.
+    asiAlgo_Feature itemSubdomain;
+    //
+    for ( int kk = 1; kk <= itemFaces.Extent(); ++kk )
+    {
+      const int fid = allFaces.FindIndex( itemFaces(kk) );
+      itemSubdomain.Add(fid);
+    }
+
+    // Find visible faces.
+    FindVisible.SetSubdomain(itemSubdomain);
+    //
+    if ( !FindVisible.Perform() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find visible faces.");
+      return TCL_ERROR;
+    }
+
+    // Get visible faces.
+    asiAlgo_Feature resIndices;
+    FindVisible.GetResultFaces(resIndices);
+
+    TopoDS_Compound comp;
+    BRep_Builder().MakeCompound(comp);
+    //
+    for ( asiAlgo_Feature::Iterator rit(resIndices); rit.More(); rit.Next() )
+    {
+      const int fid = rit.Key();
+
+      BRep_Builder().Add( comp, allFaces(fid) );
+    }
+
+    interp->GetPlotter().REDRAW_SHAPE(aiid.ToString(), comp);
+
+    break;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-kea")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -1033,4 +1149,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t available in the XDE document.",
     //
     __FILE__, group, ASMXDE_GenerateFacets);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-kea",
+    //
+    "asm-xde-kea -model <M>\n"
+    "\t Performs KEA test.",
+    //
+    __FILE__, group, ASMXDE_KEA);
 }

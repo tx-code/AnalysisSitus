@@ -52,6 +52,29 @@ asiAlgo_FindVisibleFaces::asiAlgo_FindVisibleFaces(const TopoDS_Shape&  shape,
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_FindVisibleFaces::SetSubdomain(const asiAlgo_Feature& subdomain)
+{
+  m_subdomain = subdomain;
+
+  this->initRayBundles();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_FindVisibleFaces::HasSubdomain() const
+{
+  return !m_subdomain.IsEmpty();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_FindVisibleFaces::IsInSubdomain(const int fid) const
+{
+  return m_subdomain.Contains(fid);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_FindVisibleFaces::SetNumRaysInBundle(const int numRays)
 {
   m_iNumRays = numRays;
@@ -131,6 +154,16 @@ void asiAlgo_FindVisibleFaces::init(const TopoDS_Shape& shape)
   // with the corresponding triangles.
   m_bvh = new asiAlgo_BVHFacets(shape);
 
+  // Initialize rays.
+  this->initRayBundles();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_FindVisibleFaces::initRayBundles()
+{
+  m_rayBundles.clear();
+
   // Random number generator.
   math_BullardGenerator rng;
 
@@ -141,6 +174,14 @@ void asiAlgo_FindVisibleFaces::init(const TopoDS_Shape& shape)
   for ( int facetIdx = 0; facetIdx < m_bvh->Size(); ++facetIdx )
   {
     const asiAlgo_BVHFacets::t_facet& facet = m_bvh->GetFacet(facetIdx);
+
+    // Skip faces lying out of a subdomain, if any.
+    if ( this->HasSubdomain() && !this->IsInSubdomain(facet.FaceIndex) )
+      continue;
+
+    m_plotter.DRAW_TRIANGLE( gp_XYZ( facet.P0.x(), facet.P0.y(), facet.P0.z() ),
+                             gp_XYZ( facet.P1.x(), facet.P1.y(), facet.P1.z() ),
+                             gp_XYZ( facet.P2.x(), facet.P2.y(), facet.P2.z() ), Color_Green, "subdomain");
 
     BVH_Vec3d Pm = (facet.P0 + facet.P1 + facet.P2) / 3.;
 

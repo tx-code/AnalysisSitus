@@ -103,6 +103,27 @@ public:
 
 public:
 
+  //! Sets faces whose visibility should be analyzed. If a subdomain is not
+  //! defined, the entire input model is exposed to the analysis. The definition
+  //! of subdomains is helpful for checking visible faces of a CAD part in the
+  //! context of its containing assembly.
+  //!
+  //! \param[in] subdomain the faces to check for visibility. This is an unordered
+  //!                      set of 1-based indices as returned by `TopExp::MapShapes()`
+  //!                      with `TopAbs_FACE` type of element.
+  asiAlgo_EXPORT void
+    SetSubdomain(const asiAlgo_Feature& subdomain);
+
+  //! \return true if a subdomain is defined.
+  asiAlgo_EXPORT bool
+    HasSubdomain() const;
+
+  //! Checks whether the passed face is a subdomain's element.
+  //! \param[in] fid the 1-based face ID to check.
+  //! \return true if the passed face is contained in a subdomain.
+  asiAlgo_EXPORT bool
+    IsInSubdomain(const int fid) const;
+
   //! Performs ray casting to determine whether a face is visible
   //! or not. The algorithm performs the ray test for each triangle
   //! of the BVH structure. As each triangle is associated with
@@ -140,6 +161,9 @@ protected:
   //! \param[in] shape the CAD model to build BVH for.
   asiAlgo_EXPORT void
     init(const TopoDS_Shape& shape);
+
+  asiAlgo_EXPORT void
+    initRayBundles();
 
   //! Tests whether the argument ray bundle is visible or not.
   //! \param[in]  rb       the ray bundle to test.
@@ -190,6 +214,7 @@ protected:
   int                                     m_iNumRays;   //!< Number of random rays to emit.
   std::vector<t_rayBundle>                m_rayBundles; //!< Rays to test.
   NCollection_DataMap<t_topoId , t_score> m_scores;     //!< Intersection "score" for each face.
+  asiAlgo_Feature                         m_subdomain;  //!< Optional subdomain faces to analyze.
 
 };
 

@@ -3247,7 +3247,7 @@ int ENGINE_FindVisibleFaces(const Handle(asiTcl_Interp)& interp,
   //
   if ( !FindVisible.Perform() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find invisible faces.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find visible faces.");
     return TCL_ERROR;
   }
 
