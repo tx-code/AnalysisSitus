@@ -463,47 +463,105 @@ int ENGINE_GetId(const Handle(asiTcl_Interp)& interp,
                  int                          argc,
                  const char**                 argv)
 {
+  if ( (argc != 2) && (argc != 3) )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get name of the target Node as a path.
+  std::string namePath(argv[1]);
+
+  Handle(ActAPI_INode) node;
+
+  // Split by delimeter.
+  std::vector<std::string> names;
+  //
+  if ( !interp->HasKeyword(argc, argv, "nosplit") )
+  {
+    asiAlgo_Utils::Str::Split(namePath, "/", names);
+
+    // Prepare a collection of object names for Active Data.
+    std::vector<TCollection_ExtendedString> adNames;
+    //
+    for ( size_t k = 0; k < names.size(); ++k )
+    {
+      TCollection_AsciiString adName( names[k].c_str() );
+      adName.LeftAdjust();
+      adName.RightAdjust();
+      //
+      adNames.push_back(adName);
+    }
+
+    // Find Node.
+    node = cmdEngine::model->FindNodeByNames(adNames);
+  }
+  else
+  {
+    node = cmdEngine::model->FindNodeByName( namePath.c_str() );
+  }
+
+  if ( node.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name '%1'."
+                                                        << namePath);
+    return TCL_OK;
+  }
+
+  // Get ID of the object.
+  ActAPI_DataObjectId id = node->GetId();
+  //
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Object ID: %1." << id);
+
+  // Send to interpreter.
+  *interp << id;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_GetName(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  // Get name of the target Node as a path
-  std::string namePath(argv[1]);
+  ActAPI_DataObjectId id(argv[1]);
 
-  // Split by delimeter
-  std::vector<std::string> names;
-  //
-  asiAlgo_Utils::Str::Split(namePath, "/", names);
-
-  // Prepare a collection of object names for Active Data
-  std::vector<TCollection_ExtendedString> adNames;
-  //
-  for ( size_t k = 0; k < names.size(); ++k )
-  {
-    TCollection_AsciiString adName( names[k].c_str() );
-    adName.LeftAdjust();
-    adName.RightAdjust();
-    //
-    adNames.push_back(adName);
-  }
-
-  // Find Node
-  Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByNames(adNames);
+  // Find Node.
+  Handle(ActAPI_INode) node = cmdEngine::model->FindNode(id);
   //
   if ( node.IsNull() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name %1." << argv[1]);
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with ID %1." << id);
     return TCL_OK;
   }
 
-  // Get ID of the object
-  ActAPI_DataObjectId id = node->GetId();
-  //
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Object ID: %1." << id);
+  TCollection_ExtendedString name;
 
-  // Send to interpreter
-  *interp << id;
+  // Name is not necessarily a Parameter of a Data Node, so Active Data does not
+  // come with any default `GetName()/SetName()` methods for us to call here.
+  Handle(ActAPI_IParamIterator) pit = node->GetParamIterator();
+  //
+  for ( ; pit->More(); pit->Next() )
+  {
+    Handle(ActData_NameParameter) NP = ActParamTool::AsName( pit->Value() );
+    //
+    if ( NP.IsNull() )
+      continue;
+
+    name = NP->GetValue();
+    break;
+  }
+
+  // Get name of the object.
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Object name: '%1'." << name);
+
+  // Send to interpreter.
+  *interp << name;
 
   return TCL_OK;
 }
@@ -992,14 +1050,24 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("get-id",
     //
-    "get-id [<parentObjectName> / [<parentObjectName> / [...]]] <objectName>\n"
+    "get-id [<parentObjectName> / [<parentObjectName> / [...]]] <objectName> [-nosplit]\n"
     "\t Finds a data object with the given name and returns its persistent ID.\n"
     "\t If the object name is not unique, you may specify a list of parents\n"
     "\t to narrow your request. The names of the parent objects are separated\n"
     "\t by direct slash. You should always specify a direct parent of an object.\n"
-    "\t It is not allowed to leave intermediate parents unspecified.",
+    "\t It is not allowed to leave intermediate parents unspecified. If the '-nosplit'\n"
+    "\t keyword is used, the direct slashes will be treated as parts of the single\n"
+    "\t object's name.",
     //
     __FILE__, group, ENGINE_GetId);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-name",
+    //
+    "get-name <objectId>\n"
+    "\t Returns object name by its passed ID.",
+    //
+    __FILE__, group, ENGINE_GetName);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("clear",
