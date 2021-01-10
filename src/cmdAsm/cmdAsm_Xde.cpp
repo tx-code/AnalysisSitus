@@ -986,6 +986,13 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
       const int fid = allFaces.FindIndex( itemFaces(kk) );
       itemSubdomain.Add(fid);
     }
+    //
+    if ( itemSubdomain.IsEmpty() )
+    {
+      interp->GetProgress().SendLogMessage( LogWarn(Normal) << "The item %1 does not have subdomain faces."
+                                                            << aiid.ToString() );
+      continue;
+    }
 
     // Find visible faces.
     FindVisible.SetSubdomain(itemSubdomain);
@@ -1010,9 +1017,13 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
       BRep_Builder().Add( comp, allFaces(fid) );
     }
 
-    interp->GetPlotter().REDRAW_SHAPE(aiid.ToString(), comp);
+    interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Found %1 visible out of %2 subdomain faces."
+                                                          << resIndices.Extent() << itemSubdomain.Extent() );
 
-    break;
+    TCollection_AsciiString groupName("visible ");
+    groupName += aiid.ToString();
+    //
+    interp->GetPlotter().REDRAW_SHAPE(groupName, comp, Color_Red);
   }
 
   TIMER_FINISH

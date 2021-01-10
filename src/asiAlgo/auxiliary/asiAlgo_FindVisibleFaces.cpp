@@ -40,6 +40,12 @@
 #include <math_BullardGenerator.hxx>
 #include <Precision.hxx>
 
+#undef DRAW_DEBUG
+#if defined DRAW_DEBUG
+  #pragma message("===== warning: DRAW_DEBUG is enabled")
+  #include <Poly_CoherentTriangulation.hxx>
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiAlgo_FindVisibleFaces::asiAlgo_FindVisibleFaces(const TopoDS_Shape&  shape,
@@ -55,8 +61,6 @@ asiAlgo_FindVisibleFaces::asiAlgo_FindVisibleFaces(const TopoDS_Shape&  shape,
 void asiAlgo_FindVisibleFaces::SetSubdomain(const asiAlgo_Feature& subdomain)
 {
   m_subdomain = subdomain;
-
-  this->initRayBundles();
 }
 
 //-----------------------------------------------------------------------------
@@ -84,11 +88,19 @@ void asiAlgo_FindVisibleFaces::SetNumRaysInBundle(const int numRays)
 
 bool asiAlgo_FindVisibleFaces::Perform()
 {
+  // Make sure that BVH is initialized.
   if ( m_bvh.IsNull() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "BVH is not initialized.");
     return false;
   }
+
+  // Clean up any previous results as the `Perform()` method
+  // can be invoked several times for different subdomains.
+  m_scores.Clear();
+
+  // Initialize rays.
+  this->initRayBundles();
 
   for ( size_t rbIdx = 0; rbIdx < m_rayBundles.size(); ++rbIdx )
   {
@@ -153,9 +165,6 @@ void asiAlgo_FindVisibleFaces::init(const TopoDS_Shape& shape)
   // Build BVH from the shape. The indices of faces will be stored together
   // with the corresponding triangles.
   m_bvh = new asiAlgo_BVHFacets(shape);
-
-  // Initialize rays.
-  this->initRayBundles();
 }
 
 //-----------------------------------------------------------------------------
@@ -170,6 +179,10 @@ void asiAlgo_FindVisibleFaces::initRayBundles()
   // Elevation for the eta angle.
   const double etaElevDeg = 5.;
 
+#if defined DRAW_DEBUG
+  Handle(Poly_CoherentTriangulation) __tris = new Poly_CoherentTriangulation;
+#endif
+
   // Initialize ray bundles.
   for ( int facetIdx = 0; facetIdx < m_bvh->Size(); ++facetIdx )
   {
@@ -179,9 +192,13 @@ void asiAlgo_FindVisibleFaces::initRayBundles()
     if ( this->HasSubdomain() && !this->IsInSubdomain(facet.FaceIndex) )
       continue;
 
-    m_plotter.DRAW_TRIANGLE( gp_XYZ( facet.P0.x(), facet.P0.y(), facet.P0.z() ),
-                             gp_XYZ( facet.P1.x(), facet.P1.y(), facet.P1.z() ),
-                             gp_XYZ( facet.P2.x(), facet.P2.y(), facet.P2.z() ), Color_Green, "subdomain");
+#if defined DRAW_DEBUG
+    const int __n0 = __tris->SetNode( gp_XYZ( facet.P0.x(), facet.P0.y(), facet.P0.z() ) );
+    const int __n1 = __tris->SetNode( gp_XYZ( facet.P1.x(), facet.P1.y(), facet.P1.z() ) );
+    const int __n2 = __tris->SetNode( gp_XYZ( facet.P2.x(), facet.P2.y(), facet.P2.z() ) );
+    //
+    __tris->AddTriangle(__n0, __n1, __n2);
+#endif
 
     BVH_Vec3d Pm = (facet.P0 + facet.P1 + facet.P2) / 3.;
 
@@ -223,6 +240,12 @@ void asiAlgo_FindVisibleFaces::initRayBundles()
     // Add bundle.
     m_rayBundles.push_back(bundle);
   }
+
+#if defined DRAW_DEBUG
+  m_plotter.DRAW_TRIANGULATION(__tris->GetTriangulation(), Color_Violet, 1., "subdomain");
+  m_progress.SendLogMessage( LogInfo(Normal) << "Domain of %1 triangles dumped to IV. Num. of ray bundles: %2."
+                                             << __tris->NTriangles() << int( m_rayBundles.size() ) );
+#endif
 }
 
 //-----------------------------------------------------------------------------
