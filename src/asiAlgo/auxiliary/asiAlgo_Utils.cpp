@@ -3875,3 +3875,101 @@ bool asiAlgo_Utils::GetRandomPoint(const TopoDS_Face&     face,
 
   return isOk;
 }
+
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::GetLocalFrame(const TopoDS_Face& face,
+                                  const bool         alongEdges,
+                                  gp_Ax3&            axes)
+{
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+  // Get midpoint.
+  const double uMid = (uMin + uMax)*0.5;
+  const double vMid = (vMin + vMax)*0.5;
+
+  // Evaluate surface.
+  gp_Pnt P;
+  gp_Vec Du, Dv, DX, DY;
+  BRepAdaptor_Surface bas(face);
+  bas.D1(uMid, vMid, P, Du, Dv);
+
+  const double prec = 1.e-3;
+
+  if ( alongEdges )
+  {
+    // Take all straight edges.
+    TopTools_IndexedMapOfShape faceEdges;
+    TopExp::MapShapes(face, TopAbs_EDGE, faceEdges);
+    //
+    std::vector<TopoDS_Edge> straightEdges;
+    std::vector<double>      straightEdgesLen;
+    std::vector<int>         straightEdgesIds;
+    //
+    for ( int eidx = 1; eidx <= faceEdges.Extent(); ++eidx )
+    {
+      const TopoDS_Edge& faceEdge = TopoDS::Edge( faceEdges(eidx) );
+
+      // Check curve type.
+      double f, l;
+      Handle(Geom_Curve)
+        c3d = BRep_Tool::Curve(faceEdge, f, l);
+      //
+      if ( c3d.IsNull() || !c3d->IsKind( STANDARD_TYPE(Geom_Line) ) )
+        continue;
+
+      straightEdges    .push_back( faceEdge );
+      straightEdgesLen .push_back( l-f );
+      straightEdgesIds .push_back( int( straightEdgesIds.size() ) );
+    }
+
+    // Select the longest edge.
+    bool isEdgeSelected = false;
+    if ( straightEdgesIds.size() )
+    {
+      // Sort edges by descending lengths.
+      std::sort( straightEdgesIds.begin(), straightEdgesIds.end(),
+                 [&](const int a, const int b)
+                 {
+                   return straightEdgesLen[a] > straightEdgesLen[b];
+                 } );
+
+      double f, l;
+      Handle(Geom_Curve)
+        c3d = BRep_Tool::Curve(straightEdges[straightEdgesIds[0]], f, l);
+
+      c3d->D1( (f + l)*0.5, P, DX );
+
+      if ( DX.Magnitude() > prec )
+        isEdgeSelected = true;
+    }
+
+    if ( !isEdgeSelected )
+    {
+      DX = Du;
+      DY = Dv;
+    }
+    else
+    {
+      // Select the second direction to compute the vector product at the end.
+      const double ang = Abs( DX.Angle(Du) );
+      //
+      if ( ang > prec && Abs(ang - M_PI) > prec )
+        DY = Du;
+      else
+        DY = Dv;
+    }
+  }
+  else
+  {
+    DX = Du;
+    DY = Dv;
+  }
+
+  // Prepare axes.
+  axes = gp_Ax3(P, DX^DY, DX);
+
+  return true;
+}

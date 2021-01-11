@@ -1264,6 +1264,17 @@ namespace asiAlgo_Utils
                    math_BullardGenerator& RNG,
                    gp_Pnt2d&              uv);
 
+  //! Computes local reference frame for the passed face.
+  //! \param[in]  face       target face.
+  //! \param[in]  alongEdges indicates whether the X direction of the
+  //!                        reference frame should follow one of the edges.
+  //! \param[out] axes       computed axes.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    GetLocalFrame(const TopoDS_Face& face,
+                  const bool         alongEdges,
+                  gp_Ax3&            axes);
+
 } // asiAlgo_Utils namespace.
 
 #endif

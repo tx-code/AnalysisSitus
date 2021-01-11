@@ -2893,7 +2893,7 @@ int ENGINE_ResetLocation(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
 {
-  if ( argc != 1 && argc != 2 )
+  if ( argc != 1 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
@@ -2911,6 +2911,41 @@ int ENGINE_ResetLocation(const Handle(asiTcl_Interp)& interp,
 
   // Reset location.
   shape.Location( TopLoc_Location() );
+
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  {
+    // Access selected faces (if any).
+    TColStd_PackedMapOfInteger selected;
+    asiEngine_Part( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+
+    if ( !selected.IsEmpty() )
+    {
+      const int          fid  = selected.GetMinimalMapped();
+      const TopoDS_Face& face = partNode->GetAAG()->GetFace(fid);
+      //
+      if ( asiAlgo_Utils::IsPlanar(face) )
+      {
+        gp_Ax3 faceAx;
+        asiAlgo_Utils::GetLocalFrame(face, true, faceAx);
+
+        // B goes to global origin.
+        gp_Trsf T_B;
+        T_B.SetTransformation(faceAx);
+
+        // Global origin goes to A.
+        gp_Trsf T_A;
+        T_A.SetTransformation( gp::XOY() );
+        T_A.Invert();
+
+        // Final transformation from B to A.
+        gp_Trsf T = T_A * T_B;
+
+        // Transform.
+        BRepBuilderAPI_Transform mkTransform(shape, T, true);
+        shape = mkTransform.Shape();
+      }
+    }
+  }
 
   // Modify Data Model.
   cmdEngine::model->OpenCommand();
@@ -3491,7 +3526,9 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("reset-location",
     //
     "reset-location\n"
-    "\t Resets location associated with the part shape.",
+    "\t Resets location associated with the part shape. If any planar face is\n"
+    "\t selected, the part will be moved to the global origin, so that the local\n"
+    "\t axes of the selected face match the global scene's axes.",
     //
     __FILE__, group, ENGINE_ResetLocation);
 
