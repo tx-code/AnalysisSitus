@@ -54,6 +54,10 @@
   interp->PrintLastError(); \
   return TCL_ERROR;
 
+#define RETURN_TCL_ERROR_MSG(interp, msg) \
+  interp->SetResultMsg(msg); \
+  return TCL_ERROR;
+
 struct Tcl_Interp; // Forward declaration for Tcl C structure.
 
 //! Tcl interpreter interface in Analysis Situs.
@@ -192,6 +196,11 @@ public:
   //! Prints last error.
   asiTcl_EXPORT void
     PrintLastError();
+
+  //! Sets result message. This function is to be used for error reporting.
+  //! \param[in] pMsg message to set.
+  asiTcl_EXPORT void
+    SetResultMsg(char* pMsg);
 
   //! Evaluates command.
   //! \param[in] cmd command to evaluate.

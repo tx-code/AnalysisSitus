@@ -1441,7 +1441,7 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
 {
   // Test anything here.
 
-  return TCL_OK;
+  RETURN_TCL_ERROR_MSG(interp, "test function is empty");
 }
 
 //-----------------------------------------------------------------------------

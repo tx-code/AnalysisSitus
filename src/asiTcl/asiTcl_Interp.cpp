@@ -440,6 +440,13 @@ void asiTcl_Interp::PrintLastError()
 
 //-----------------------------------------------------------------------------
 
+void asiTcl_Interp::SetResultMsg(char* pMsg)
+{
+  Tcl_SetResult(m_pInterp, pMsg, nullptr);
+}
+
+//-----------------------------------------------------------------------------
+
 int asiTcl_Interp::Eval(const TCollection_AsciiString& cmd)
 {
   if ( !m_pInterp )
