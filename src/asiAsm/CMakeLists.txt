@@ -241,7 +241,7 @@ endforeach()
 # Installation
 #------------------------------------------------------------------------------
 
-install (TARGETS asiAsm RUNTIME DESTINATION bin COMPONENT Runtime)
+install (TARGETS asiAsm RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework
