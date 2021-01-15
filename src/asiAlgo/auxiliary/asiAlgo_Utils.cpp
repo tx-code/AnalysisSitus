@@ -3103,6 +3103,7 @@ bool asiAlgo_Utils::ReparametrizeBSpl(const Handle(Geom2d_Curve)&  curve,
 bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
                                            const TopoDS_Edge& edge,
                                            const double       t,
+                                           gp_Pnt2d&          UV,
                                            double&            k)
 {
   // Get host geometries
@@ -3111,7 +3112,6 @@ bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
   BRepAdaptor_Surface surf(face);
 
   // Evaluate curve
-  gp_Pnt2d UV;
   gp_Vec2d T;
   c2d->D1(t, UV, T);
 
@@ -3160,13 +3160,40 @@ bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
 
 bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
                                            const TopoDS_Edge& edge,
+                                           const double       t,
+                                           double&            k)
+{
+  gp_Pnt2d UV;
+
+  return EvaluateAlongCurvature(face, edge, t, UV, k);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
+                                           const TopoDS_Edge& edge,
+                                           double&            k)
+{
+  gp_Pnt2d UV;
+  double f, l;
+  BRep_Tool::Range(edge, f, l);
+  const double t = (f + l)*0.5;
+
+  return EvaluateAlongCurvature(face, edge, t, UV, k);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::EvaluateAlongCurvature(const TopoDS_Face& face,
+                                           const TopoDS_Edge& edge,
+                                           gp_Pnt2d&          UV,
                                            double&            k)
 {
   double f, l;
   BRep_Tool::Range(edge, f, l);
   const double t = (f + l)*0.5;
 
-  return EvaluateAlongCurvature(face, edge, t, k);
+  return EvaluateAlongCurvature(face, edge, t, UV, k);
 }
 
 //-----------------------------------------------------------------------------

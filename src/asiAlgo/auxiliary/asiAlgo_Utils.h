@@ -330,6 +330,18 @@ namespace asiAlgo_Utils
     return IsTypeOf<TSurf>(face, basesurf);
   }
 
+  //! Checks surface type.
+  //! \param[in] surface surface to check.
+  //! \return true/false.
+  template<typename TSurf>
+  static bool IsTypeOf(const Handle(Geom_Surface)& surface)
+  {
+    if ( surface->IsInstance( STANDARD_TYPE(TSurf) ) )
+      return true;
+
+    return false;
+  }
+
   //! Checks if the passed face has planar support.
   //! \param[in] face face to check.
   //! \return true/false.
@@ -965,6 +977,24 @@ namespace asiAlgo_Utils
   //! \param[in]  face face of interest.
   //! \param[in]  edge edge of interest.
   //! \param[in]  t    parameter on the edge's curve to evaluate curvature for.
+  //! \param[out] UV   parametric coordinates of the sample point on the host
+  //!                  surface.
+  //! \param[out] k    evaluated curvature.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    EvaluateAlongCurvature(const TopoDS_Face& face,
+                           const TopoDS_Edge& edge,
+                           const double       t,
+                           gp_Pnt2d&          UV,
+                           double&            k);
+
+  //! This function is designed to evaluate curvature of the surface along the
+  //! the given edge. It takes the tangency direction of the edge's curve for
+  //! the passed parameter value and calculates the normal curvature at the
+  //! corresponding point on surface.
+  //! \param[in]  face face of interest.
+  //! \param[in]  edge edge of interest.
+  //! \param[in]  t    parameter on the edge's curve to evaluate curvature for.
   //! \param[out] k    evaluated curvature.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
@@ -984,6 +1014,24 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     EvaluateAlongCurvature(const TopoDS_Face& face,
                            const TopoDS_Edge& edge,
+                           double&            k);
+
+  //! This function is designed to evaluate curvature of the surface along the
+  //! the given edge. It takes the tangency direction of the edge's curve for
+  //! the middle parameter value and calculates the normal curvature at the
+  //! corresponding point on surface.
+  //!
+  //! \param[in]  face face of interest.
+  //! \param[in]  edge edge of interest.
+  //! \param[out] UV   parametric coordinates of the sample point on the host
+  //!                  surface.
+  //! \param[out] k    evaluated curvature.
+  //!
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    EvaluateAlongCurvature(const TopoDS_Face& face,
+                           const TopoDS_Edge& edge,
+                           gp_Pnt2d&          UV,
                            double&            k);
 
   //! Calculates curvature in the middle of the passed curve.
