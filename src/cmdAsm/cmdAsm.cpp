@@ -43,7 +43,7 @@ Handle(asiUI_CommonFacilities) cmdAsm::cf    = nullptr;
 void cmdAsm::Factory(const Handle(asiTcl_Interp)&      interp,
                      const Handle(Standard_Transient)& data)
 {
-  static const char* group = "cmdAsm";
+  //static const char* group = "cmdAsm";
 
   /* ==========================
    *  Initialize UI facilities

@@ -204,8 +204,8 @@ asiAsm_XdeAssemblyItemId asiUI_XdeBrowser::GetSelectedAssemblyItemId() const
 
     // The assembly item ID does not contain prototypes' IDs except
     // the root one by convention.
-    if ( (type != asiAsm_XdeGraph::NodeType_Part) &&
-         (type != asiAsm_XdeGraph::NodeType_Subassembly) || !item->parent() )
+    if ( ( (type != asiAsm_XdeGraph::NodeType_Part) &&
+           (type != asiAsm_XdeGraph::NodeType_Subassembly) ) || !item->parent() )
     {
       result.Prepend( QStr2AsciiStr( item->text(1) ) );
     }

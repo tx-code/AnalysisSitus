@@ -76,7 +76,7 @@ bool asiAlgo_IGES::Read(const TCollection_AsciiString& filename,
   {
     aReader.TransferRoots();
   }
-  catch ( Standard_Failure )
+  catch ( Standard_Failure& )
   {
     std::cout << "Warning: exception occurred during translation" << std::endl;
   }
@@ -107,7 +107,7 @@ bool asiAlgo_IGES::Read(const TCollection_AsciiString& filename,
     {
       aFixRes = aShapeHealer->Perform();
     }
-    catch ( Standard_Failure )
+    catch ( Standard_Failure& )
     {
       aFixRes = false;
     }

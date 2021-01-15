@@ -72,7 +72,7 @@ namespace asiTcl
                    tracevar, CD);
 
     asiTcl::__VARS.Remove(V);
-    return "ok";
+    return (char*) "ok"; // Cast as C++ 11 is not Ok to return `const char*` into `char *`
   }
 }
 

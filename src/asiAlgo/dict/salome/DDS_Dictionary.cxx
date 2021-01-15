@@ -546,7 +546,7 @@ double DDS_Dictionary::ToSI( const double theValue, const Standard_CString theUn
 #endif
       aRetValue = UnitsAPI::AnyToSI( theValue, theUnits );
     }
-    catch( Standard_Failure ) {
+    catch( Standard_Failure& ) {
     }
   }
   else if ( theUnits && *theUnits )
@@ -573,7 +573,7 @@ double DDS_Dictionary::FromSI( const double theValue, const Standard_CString the
 #endif
       aRetValue = UnitsAPI::AnyFromSI( theValue, theUnits );
     }
-    catch( Standard_Failure ) {
+    catch( Standard_Failure& ) {
     }
   }
   else if ( theUnits && *theUnits )

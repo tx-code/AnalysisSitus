@@ -34,10 +34,14 @@
 
 #define asiAsm_NotUsed(x)
 
-#ifdef asiAsm_EXPORTS
-  #define asiAsm_EXPORT __declspec(dllexport)
+#ifdef _WIN32
+  #ifdef asiAsm_EXPORTS
+    #define asiAsm_EXPORT __declspec(dllexport) \
+  #else
+    #define asiAsm_EXPORT __declspec(dllimport)
+  #endif
 #else
-  #define asiAsm_EXPORT __declspec(dllimport)
+  #define asiAsm_EXPORT
 #endif
 
 //-----------------------------------------------------------------------------

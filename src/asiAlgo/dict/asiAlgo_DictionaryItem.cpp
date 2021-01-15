@@ -426,7 +426,7 @@ double asiAlgo_DictionaryItem::ToSI(const double theValue,
         hasScale  = true;
       }
     }
-    catch ( Standard_NumericError aNumericError )
+    catch ( Standard_NumericError& aNumericError )
     {
       Handle(ActAPI_IProgressNotifier) aNotifier = asiAlgo_Dictionary::GetNotifier();
       if ( aNotifier.IsNull() )
@@ -555,7 +555,7 @@ double asiAlgo_DictionaryItem::FromSI(const double theValue,
         hasScale  = true;
       }
     }
-    catch ( Standard_NumericError aNumericError )
+    catch ( Standard_NumericError& aNumericError )
     {
       Handle(ActAPI_IProgressNotifier) aNotifier = asiAlgo_Dictionary::GetNotifier();
       if ( aNotifier.IsNull() )

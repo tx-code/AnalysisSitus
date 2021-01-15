@@ -160,7 +160,7 @@ bool asiAsm_XdeDoc::LoadNative(const TCollection_AsciiString& filename)
       }
     }
   }
-  catch ( Standard_Failure exc )
+  catch ( Standard_Failure& exc )
   {
     m_progress.SendLogMessage( LogErr(Normal) << "OCCT exception: %1 %2."
                                               << exc.DynamicType()->Name()
@@ -276,7 +276,7 @@ bool asiAsm_XdeDoc::SaveAs(const TCollection_AsciiString& filename)
   {
     status = A->SaveAs(m_doc, filename);
   }
-  catch ( Standard_Failure exc )
+  catch ( Standard_Failure& exc )
   {
     m_progress.SendLogMessage( LogErr(Normal) << "OCCT exception: %1 %2."
                                               << exc.DynamicType()->Name()
@@ -2212,8 +2212,8 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         
 
           // The assembly item ID does not contain prototypes' IDs except
           // the root one by convention.
-          if ( (type != asiAsm_XdeGraph::NodeType_Part) &&
-               (type != asiAsm_XdeGraph::NodeType_Subassembly) || (pit == path.rend() - 1) )
+          if ( ( (type != asiAsm_XdeGraph::NodeType_Part) &&
+                 (type != asiAsm_XdeGraph::NodeType_Subassembly) ) || (pit == path.rend() - 1) )
           {
             item.Prepend( asmGraph->GetPersistentId(nid) );
           }
