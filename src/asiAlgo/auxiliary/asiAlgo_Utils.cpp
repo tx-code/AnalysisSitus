@@ -2697,7 +2697,8 @@ void asiAlgo_Utils::PolygonPoles(const gp_XY&        center,
 bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face,
                                          const double                       sampleRate,
                                          Handle(asiAlgo_BaseCloud<double>)& points,
-                                         Handle(asiAlgo_BaseCloud<double>)& vectors)
+                                         Handle(asiAlgo_BaseCloud<double>)& vectors,
+                                         gp_Vec&                            average)
 {
   if ( sampleRate < 1e-10 || sampleRate > 1 )
     return false;
@@ -2712,6 +2713,9 @@ bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face
   points  = new asiAlgo_BaseCloud<double>;
   vectors = new asiAlgo_BaseCloud<double>;
 
+  // Nullify average norm.
+  average = {0, 0, 0};
+
   // Take face domain
   double uMin, uMax, vMin, vMax;
   BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
@@ -2723,8 +2727,10 @@ bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face
   asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01);
 
   // Sample points
-  double u = uMin;
+  double   u = uMin;
   bool uStop = false;
+  int  nnorm = 0;
+  //
   while ( !uStop )
   {
     if ( u > uMax )
@@ -2760,6 +2766,10 @@ bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face
           //
           points->AddElement  ( P.X(), P.Y(), P.Z() );
           vectors->AddElement ( N.X(), N.Y(), N.Z() );
+
+          // Compute average.
+          average += N;
+          nnorm++;
         }
       }
 
@@ -2768,6 +2778,8 @@ bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face
 
     u += uStep;
   }
+
+  average /= nnorm;
   return true;
 }
 

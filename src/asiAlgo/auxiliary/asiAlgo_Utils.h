@@ -838,13 +838,15 @@ namespace asiAlgo_Utils
   //! \param[in]  sampleRate sampling rate from (0, 1) interval.
   //! \param[out] points     sample points (internal or lying on the boundary).
   //! \param[out] vectors    computed normal field.
+  //! \param[out] average    computed average normal.
   //!
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     CalculateFaceNormals(const TopoDS_Face&                 face,
                          const double                       sampleRate,
                          Handle(asiAlgo_BaseCloud<double>)& points,
-                         Handle(asiAlgo_BaseCloud<double>)& vectors);
+                         Handle(asiAlgo_BaseCloud<double>)& vectors,
+                         gp_Vec&                            average);
 
   //! This function takes "just any" interior point on a face.
   //!

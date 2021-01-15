@@ -62,13 +62,22 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_FaceNormalsDataProvider::GetPointsd()
   if ( face.IsNull() )
     return nullptr;
 
+  gp_Vec averageNorm;
+
   if ( !asiAlgo_Utils::CalculateFaceNormals(face,
                                             this->GetSampleRate(),
                                             m_points,
-                                            m_vectors) )
+                                            m_vectors,
+                                            averageNorm) )
     return nullptr;
 
-  // Return
+  std::cout << "Computed average normal: ("
+            << averageNorm.X() << ", "
+            << averageNorm.Y() << ", "
+            << averageNorm.Z() << ")."
+            << std::endl;
+
+  // Return points.
   return m_points;
 }
 
