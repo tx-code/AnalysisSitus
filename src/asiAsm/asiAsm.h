@@ -36,7 +36,7 @@
 
 #ifdef _WIN32
   #ifdef asiAsm_EXPORTS
-    #define asiAsm_EXPORT __declspec(dllexport) \
+    #define asiAsm_EXPORT __declspec(dllexport)
   #else
     #define asiAsm_EXPORT __declspec(dllimport)
   #endif
