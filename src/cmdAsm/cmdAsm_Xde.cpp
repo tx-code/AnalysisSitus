@@ -353,7 +353,7 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
   Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
 
   // Get items.
-  asiAsm_XdeAssemblyItemIds items;
+  asiAsm_XdeAssemblyItemIds items, leaves;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -365,17 +365,22 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
 
       items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
     }
+
+    xdeDoc->GetLeafAssemblyItems(items, leaves);
   }
   else
   {
-    xdeDoc->GetLeafAssemblyItems(items);
+    xdeDoc->GetLeafAssemblyItems(leaves);
   }
 
   TIMER_NEW
   TIMER_GO
 
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. items to expand: %1."
+                                                        << items.Length() );
+
   // Expand compounds.
-  xdeDoc->ExpandCompounds(items);
+  xdeDoc->ExpandCompounds(leaves);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-xcompounds")
@@ -540,6 +545,77 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
     *interp << pit.Value().Entry.ToCString();
 
     if ( pid < pids.Length() )
+      *interp << " ";
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_GetLeaves(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+
+  // Get items (if any).
+  asiAsm_XdeAssemblyItemIds items;
+  int itemsIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
+  {
+    for ( int ii = itemsIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+    }
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  // If the collection of items is empty, all leaves of the model will
+  // be gathered.
+  asiAsm_XdeAssemblyItemIds leaves;
+  //
+  xdeDoc->GetLeafAssemblyItems(items, leaves);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-get-leaves")
+
+  // Add items IDs to the interpreter.
+  int aiid = 1;
+  //
+  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves);
+        aiit.More();
+        aiit.Next(), ++aiid )
+  {
+    *interp << aiit.Value().ToString();
+
+    if ( aiid < leaves.Length() )
       *interp << " ";
   }
 
@@ -909,6 +985,98 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_SetAsVar(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  // Get the item in question.
+  std::string itemIdStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "item", itemIdStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Assembly item is not defined.");
+    return TCL_ERROR;
+  }
+  //
+  asiAsm_XdeAssemblyItemId aiid( itemIdStr.c_str() );
+
+  // Get variable name.
+  std::string varName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", varName) )
+    varName = aiid.ToString().ToCString();
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  ActAPI_Color            color;
+  //
+  if ( interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    // Get color components.
+    std::vector<unsigned int> colorComponents;
+    std::vector<std::string>  colorComponentsStr;
+    //
+    asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+    //
+    for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+    {
+      TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+      //
+      if ( compStr.IsIntegerValue() )
+        colorComponents.push_back( compStr.IntegerValue() );
+    }
+
+    if ( colorComponents.size() != 3 )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+      return TCL_ERROR;
+    }
+
+    color = ActAPI_Color(colorComponents[0]/255.,
+                         colorComponents[1]/255.,
+                         colorComponents[2]/255.,
+                         Quantity_TOC_RGB);
+  }
+  else
+  {
+    color = Color_Default;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  interp->GetPlotter().REDRAW_SHAPE(varName.c_str(), doc->GetShape(aiid), color);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-set-as-var")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
                int                          argc,
                const char**                 argv)
@@ -1117,6 +1285,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ASMXDE_GetParts);
 
   //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-get-leaves",
+    //
+    "asm-xde-get-leaves -model <M> [-items <item_1> ... <item_k>]\n"
+    "\t Returns leaf assembly items for the passed items.",
+    //
+    __FILE__, group, ASMXDE_GetLeaves);
+
+  //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-find-items",
     //
     "asm-xde-find-items -model <M> -name <name>\n"
@@ -1160,6 +1336,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t available in the XDE document.",
     //
     __FILE__, group, ASMXDE_GenerateFacets);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-set-as-var",
+    //
+    "asm-xde-set-as-var -model <M> -item <id> [-name <varName>] [-color rgb(<ured>, <ugreen>, <ublue>)]\n"
+    "\t Sets the passed assembly item as a project variable.",
+    //
+    __FILE__, group, ASMXDE_SetAsVar);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-kea",

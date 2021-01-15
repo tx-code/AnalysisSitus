@@ -1125,6 +1125,13 @@ void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemId& parent,
 void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds& parents,
                                          asiAsm_XdeAssemblyItemIds&       items) const
 {
+  if ( parents.IsEmpty() )
+  {
+    // Return all leaves.
+    this->GetLeafAssemblyItems(items);
+    return;
+  }
+
   Handle(asiAsm_XdeHAssemblyItemIdsMap) traversed = new asiAsm_XdeHAssemblyItemIdsMap();
 
   for ( asiAsm_XdeAssemblyItemIds::Iterator ait(parents); ait.More(); ait.Next() )
