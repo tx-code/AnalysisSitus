@@ -75,6 +75,11 @@ public:
   cmdAsm_EXPORT virtual std::string
     WhatIs() const;
 
+  //! Dumps this variable to the passed output stream.
+  //! \param[in,out] out the output stream.
+  cmdAsm_EXPORT virtual void
+    Dump(std::ostream& out) const;
+
 protected:
 
   Handle(asiAsm_XdeDoc) m_doc; //!< Owned XDE document.

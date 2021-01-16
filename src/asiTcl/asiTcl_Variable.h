@@ -70,6 +70,10 @@ public:
   //! \return brief description "what is" this object.
   virtual std::string WhatIs() const = 0;
 
+  //! Dumps this variable to the passed output stream.
+  //! \param[in,out] out the output stream.
+  virtual void Dump(std::ostream& out) const = 0;
+
 protected:
 
   std::string m_name; //!< Name of the variable.

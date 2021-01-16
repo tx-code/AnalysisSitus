@@ -173,6 +173,31 @@ int ENGINE_WhatIs(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_Dump(const Handle(asiTcl_Interp)& interp,
+                int                          argc,
+                const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::stringstream out;
+
+  Handle(asiTcl_Variable) var = interp->GetVar(argv[1]);
+  //
+  if ( !var.IsNull() )
+  {
+    var->Dump(out);
+
+    interp->GetProgress().SendLogMessage( LogInfo(Normal) << out.str() );
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_SaveAs(const Handle(asiTcl_Interp)& interp,
                   int                          argc,
                   const char**                 argv)
@@ -983,6 +1008,14 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Explains what is <name>.",
     //
     __FILE__, group, ENGINE_WhatIs);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("dump",
+    //
+    "dump <name>\n"
+    "\t Dumps variable <name> to the logger.",
+    //
+    __FILE__, group, ENGINE_Dump);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-as",

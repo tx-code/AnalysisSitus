@@ -60,3 +60,10 @@ std::string cmdAsm_XdeModel::WhatIs() const
 {
   return "XDE document";
 }
+
+//-----------------------------------------------------------------------------
+
+void cmdAsm_XdeModel::Dump(std::ostream& out) const
+{
+  (void) out; // Do nothing.
+}
