@@ -659,9 +659,6 @@ int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  TIMER_NEW
-  TIMER_GO
-
   // Find unique items.
   Handle(asiAsm_XdeHAssemblyItemIdsMap) items;
   //
@@ -669,9 +666,6 @@ int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "%1 item(s) collected."
                                                         << items->Extent() );
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-find-items")
 
   // Add items IDs to the interpreter.
   int aiid = 1;
