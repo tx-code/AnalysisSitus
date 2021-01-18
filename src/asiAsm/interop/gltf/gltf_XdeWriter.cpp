@@ -645,11 +645,11 @@ bool asiAsm::gltf_XdeWriter::writeJson(const Handle(TDocStd_Document)&          
 
   if ( m_bIsBinary )
   {
-    const char* magic = "glTF";
-    uint32_t version       = 2;
-    uint32_t length        = 0;
-    uint32_t contentLength = 0;
-    uint32_t contentType   = 0x4E4F534A;
+    const char* magic         = "glTF";
+    uint32_t    version       = 2;
+    uint32_t    length        = 0;
+    uint32_t    contentLength = 0;
+    uint32_t    contentType   = 0x4E4F534A;
 
     gltfContentFile.write( magic,                        4                     );
     gltfContentFile.write( (const char*) &version,       sizeof(version)       );
@@ -670,7 +670,33 @@ bool asiAsm::gltf_XdeWriter::writeJson(const Handle(TDocStd_Document)&          
     {
       continue;
     }
-    scNodeMap.Add(docNode);
+
+    bool hasMeshData = false;
+    if ( !docNode.IsAssembly )
+    {
+      for ( gltf_FaceIterator fit(docNode.RefLabel,
+                                  TopLoc_Location(),
+                                  true,
+                                  docNode.Style);
+            fit.More(); fit.Next() )
+      {
+        if ( !this->toSkipFaceMesh(fit) )
+        {
+          hasMeshData = true;
+          break;
+        }
+      }
+    }
+    if ( hasMeshData )
+    {
+      scNodeMap.Add(docNode);
+    }
+    else
+    {
+      // glTF does not permit empty meshes / primitive arrays.
+      m_progress.SendLogMessage( LogWarn(Normal) << "gltf_XdeWriter skips node '%1' without meshes."
+                                                 << ::readNameAttribute(docNode.RefLabel) );
+    }
   }
 
   // Prepare material map.
@@ -1325,33 +1351,35 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
   for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
   {
     const XCAFPrs_DocumentNode&   docNode  = snIt.Value();
-    const TCollection_AsciiString nodeName = readNameAttribute(docNode.RefLabel);
-    {
-      gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), false);
-      //
-      if ( !faceIter.More() )
-      {
-        m_progress.SendLogMessage(LogWarn(Normal) << "gltf_XdeWriter skipped node '%1' without triangulation data."
-                                                  << nodeName);
-        continue;
-      }
-    }
-    m_jsonWriter->StartObject();
-    m_jsonWriter->Key("name");
-    m_jsonWriter->String( nodeName.ToCString() );
-    m_jsonWriter->Key("primitives");
-    m_jsonWriter->StartArray();
+    const TCollection_AsciiString nodeName = ::readNameAttribute(docNode.RefLabel);
 
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    bool toStartPrims  = true;
+    int  nbFacesInNode = 0;
+    //
+    for ( gltf_FaceIterator fit(docNode.RefLabel,
+                                TopLoc_Location(),
+                                true,
+                                docNode.Style);
+          fit.More();
+          fit.Next(), ++nbFacesInNode)
     {
-      if ( this->toSkipFaceMesh(faceIter) )
+      if ( this->toSkipFaceMesh(fit) )
       {
         continue;
       }
 
-      const gltf_Face&              gltfFace = m_binDataMap.Find( faceIter.Face() );
-      const TCollection_AsciiString matId    = materialMap.FindMaterial( faceIter.FaceStyle() );
+      if ( toStartPrims )
+      {
+        toStartPrims = false;
+        m_jsonWriter->StartObject();
+        m_jsonWriter->Key("name");
+        m_jsonWriter->String( nodeName.ToCString() );
+        m_jsonWriter->Key("primitives");
+        m_jsonWriter->StartArray();
+      }
+
+      const gltf_Face&              gltfFace = m_binDataMap.Find( fit.Face() );
+      const TCollection_AsciiString matId    = materialMap.FindMaterial( fit.FaceStyle() );
 
       m_jsonWriter->StartObject();
       {
@@ -1387,8 +1415,12 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
       }
       m_jsonWriter->EndObject();
     }
-    m_jsonWriter->EndArray();
-    m_jsonWriter->EndObject();
+
+    if (!toStartPrims)
+    {
+      m_jsonWriter->EndArray();
+      m_jsonWriter->EndObject();
+    }
   }
   m_jsonWriter->EndArray();
 #else
@@ -1419,12 +1451,7 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
         docExp.More(); docExp.Next() )
   {
     const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    {
-      gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), false);
-      //
-      if ( !faceIter.More() )
-        continue;
-    }
+    //
     if ( (labFilter != nullptr) && !labFilter->Contains(docNode.Id) )
     {
       continue;
@@ -1559,12 +1586,11 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
     }
     if ( !docNode.IsAssembly )
     {
-      m_jsonWriter->Key("mesh");
-
       // Mesh order of current node is equal to order of this node in scene nodes map
       int meshIdx = scNodeMap.FindIndex(docNode.Id);
       if ( meshIdx > 0 )
       {
+        m_jsonWriter->Key("mesh");
         m_jsonWriter->Int(meshIdx - 1);
       }
     }
