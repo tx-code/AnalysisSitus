@@ -58,14 +58,14 @@ The following figure gives an example of AAG built for a synthetic model.
 <p>AAG is a convenient shape descriptor. It serves the following purposes:</p>
 
 <ol>
-  <li>AAG contains information on face neighborhood explicitly. The neighborhood relations are expressed as graph arcs.</li>
-  <li>Edge vexity (concave or convex property) is stored as arc attribute (hence the graph is called "attributed").
+  <li class="text-block">AAG contains information on face neighborhood explicitly. The neighborhood relations are expressed as graph arcs.</li>
+  <li class="text-block">Edge vexity (concave or convex property) is stored as arc attribute (hence the graph is called "attributed").
       Edge vexity is a fundamental geometric heuristic, especially useful for feature recognition.</li>
-  <li>AAG enables graph formalism for operating with CAD models. E.g., using AAG, it is straightforward to find
+  <li class="text-block">AAG enables graph formalism for operating with CAD models. E.g., using AAG, it is straightforward to find
       features as subgraphs by the given search pattern.</li>
-  <li>AAG serves as a natural cache for exploration maps: it stores the internal indexation of faces, edges, and vertices. Hence
+  <li class="text-block">AAG serves as a natural cache for exploration maps: it stores the internal indexation of faces, edges, and vertices. Hence
       it is not necessary to recompute indexation in algorithms.</li>
-  <li>Since a B-Rep model in OpenCascade does not contain any attributes, the question on how to bind supplementary data with
+  <li class="text-block">Since a B-Rep model in OpenCascade does not contain any attributes, the question on how to bind supplementary data with
       geometric entities often arises. AAG gives a convenient way to assign custom attributes with its nodes and arcs. For example,
       it is possible to store information on the recognized features right in the AAG. Therefore, the feature recognition process may consist
       in enriching the graph with more and more information which you were able to extract from the dumb model.</li>
@@ -130,6 +130,50 @@ To dump AAG for the active part to a JSON-file, use the following Tcl command:
 <div class="code">
   dump-aag-json &lt;filename&gt;
 </div>
+
+<h1>Q & A</h1>
+
+<h4>Why is there a dihedral angle attribute on cylindrical faces?</h4>
+
+<p>This attribute is induced by the "seam" edges of periodic faces, i.e., the edges corresponding to angles 0 and 2*PI on a cylinder (it also applies to spheres, cones, surfaces of revolution, periodic splines, etc).</p>
+
+<p><i>Concave angle:</i></p>
+<img src="../imgs/situ_aag_qa_01.png"/>
+
+<p><i>Convex angle:</i></p>
+<img src="../imgs/situ_aag_qa_02.png"/>
+
+<p>The dihedral angles of seam edges are available as <i>nodal</i> AAG attributes of the corresponding faces.</p>
+
+<h4>How do I know if an edge is an inner one on a face?</h4>
+
+<p>This information is not encoded in AAG directly. If you are looking for faces having some inner loops, you may want to try <span class="code-inline">recognize-base-faces</span> Tcl command. If you really need to enumerate the inner edges, consider doing that in C++.</p>
+
+<div class="code" style="font-size: smaller"><pre>
+void ComputeInnerEdges(const TopoDS_Face&          face,
+                       TopTools_IndexedMapOfShape& edges)
+{
+  TopoDS_Wire outerWire = BRepTools::OuterWire(face);
+  
+  // Explore wires.
+  for ( TopExp_Explorer explW(face, TopAbs_WIRE); explW.More(); explW.Next() )
+  {
+    const TopoDS_Wire& candWire = TopoDS::Wire( explW.Current() );
+    //
+    if ( candWire.IsPartner(outerWire) )
+      continue;
+  
+    // Explore edges.
+    for ( TopExp_Explorer explE(candWire, TopAbs_EDGE); explE.More(); explE.Next() )
+    {
+      const TopoDS_Edge& E = TopoDS::Edge( explE.Current() );
+  
+      // Add to the result.
+      edges.Add(E);
+    }
+  }
+}
+</pre></div>
 
 <br/>
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">

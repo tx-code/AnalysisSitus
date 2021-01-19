@@ -179,7 +179,10 @@ a.footer-href {
   font-size: 16px;
   font-family: Menlo, Monaco, "Courier New", Courier, monospace;
 }
-ul.light {
+li.text-block {
+  margin: 10px 0;
+}
+li:not(.menu-item) {
   list-style-type: circle;
 }
 h1 {
