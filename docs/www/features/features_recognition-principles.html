@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -42,7 +49,9 @@
 </table>
 </table></tr></td>
 
-<h1>Feature recognition in nutshell</h1>
+<h1 id="toc-feat-rec">Feature recognition in nutshell</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
 
 <p>
   We use two approaches to feature recognition in CAD models:
@@ -53,19 +62,19 @@
   <li><a href="./features_find-isomorphous-faces.html">Isomorphism</a>.</li>
 </ol>
 
-<div class="note">
-  We do not employ any machine learning techniques, although we do provide means to prepare data for ML, such as <a href="./features_voxelization.html">voxelization</a>.
-</div>
+<p class="note">
+  We do not employ any machine learning techniques, although we do provide means to prepare data for ML, such as <a href="./features_voxelization.html">voxelization</a>. You can find more information on the AI approaches in feature recognition, for example, in <a href="../references.html#ghadai-2018">[Ghadai et al, 2018]</a>.
+</p>
 
 <p>
   The rule-based approach is pretty fast. It can also deal with some feature interactions. At the same time, this method is not highly extendable. Still, this method is somewhat standard as it is probably the most straightforward way to get the result. The essence of the approach is to iterate all B-rep faces while attempting to compose them into groups based on some ad-hoc heuristics. We have listed some of such heuristics in our brief conference paper <a href="../references.html#malyshev-rule-based-2017">[Malyshev et al, 2017]</a>.
 </p>
 
-<p>
+<p class="note">
   There is a bit of ambiguity in referring to some feature recognition approach as "graph-based." For example, <a href="./features_find-isomorphous-faces.html">finding isomorphous faces</a> is completely abstract and graph-based as it searches for a pattern's subgraph in the entire model's <a href="./features_aag.html">AAG</a>. At the same time, the rule-based approach is also graph-based as it matches just the same AAG, though in different ways (i.e., by iteration). Therefore, we avoid using this "graph-based" naming in Analysis Situs.
 </p>
 
-<h2>More on rule-based approach</h2>
+<h2 id="toc-feat-rec-rule-based">More on rule-based approach</h2>
 
 <p>
   Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
@@ -114,7 +123,7 @@
 </tr>
 </table>
 
-<h2>Recognition workflow</h2>
+<h2 id="toc-feat-workflow">Recognition workflow</h2>
 
 <p>
   The feature recognition tools available in Analysis Situs might be combined freely. They all work on the AAG constructed out of the initial shape. You may choose to build up a new AAG each time you run a recognizer or, alternatively, reuse the same AAG and collect all recognized features as its attributes. Whatever option you prefer, the recognizers will give you a series of indices to address the detected feature faces uniquely.
@@ -124,7 +133,7 @@
   Imagine you detect all cylindrical holes in the model using the rule-based approach. Let's also assume that the applied rule does not differentiate between different types of holes, i.e., you get through, blind, countersunk, and counterbored holes all in one result set. To distinguish between various hole types, you can apply isomorphism matching. That would be a good idea since the rule-based recognizers have narrowed down the entire search space, and you have as many connected components out of the initial AAG as many features were detected. Finding isomorphous faces is a computationally expensive operation, and partitioning the initial graph will speed up the process drastically (see <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a> for more details).
 </p>
 
-<h2>Limitations</h2>
+<h2 id="toc-feat-limitations">Limitations</h2>
 
 <p>
   There are some limitations in the recognition methods that employ geometric and topological heuristics:

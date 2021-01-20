@@ -194,6 +194,16 @@ void appendSurfaceDetails(const Handle(Geom_Surface)& surf,
     msg += cylsurf->Radius();
   }
 
+  // Conical surface.
+  if ( surf->IsInstance( STANDARD_TYPE(Geom_ConicalSurface) ) )
+  {
+    Handle(Geom_ConicalSurface)
+      conesurf = Handle(Geom_ConicalSurface)::DownCast(surf);
+    //
+    msg += "\n\t Angle: ";
+    msg += ( 2*conesurf->SemiAngle() )*180./M_PI;
+  }
+
   // For trimmed surfaces, we extract the basis surface for detalisation.
   if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
   {

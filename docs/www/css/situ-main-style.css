@@ -182,9 +182,6 @@ a.footer-href {
 li.text-block {
   margin: 10px 0;
 }
-li:not(.menu-item) {
-  list-style-type: circle;
-}
 h1 {
   color: rgb(0, 0, 0);
 }
@@ -203,7 +200,6 @@ h3 {
 }
 .toc-panel
 {
-  background-color: white;
   float: right;
   padding-left: 5px;
 }
