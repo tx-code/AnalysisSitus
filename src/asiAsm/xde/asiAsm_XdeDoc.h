@@ -716,6 +716,15 @@ public:
     GetColor(const TDF_Label&    label,
              Quantity_ColorRGBA& color) const;
 
+  //! Returns the alpha color component associated with the given part.
+  //! \param[in]  partId the part in question.
+  //! \param[out] alpha  the associated alpha color component.
+  //! \return the Boolean flag indicating whether the accociated color with a
+  //!         transparency component was found or not.
+  asiAsm_EXPORT bool
+    GetColorAlpha(const asiAsm_XdePartId& partId,
+                  double&                 alpha);
+
   //! Returns color associated with the subshape of the input part.
   //! \param[in]  partId   part ID in question.
   //! \param[in]  subShape subshape to get color for.
@@ -725,6 +734,48 @@ public:
     GetSubShapeColor(const asiAsm_XdePartId& partId,
                      const TopoDS_Shape&     subShape,
                      Quantity_ColorRGBA&     color) const;
+
+  //! Sets the given color to the shape on the passed label.
+  //! \param[in] label label with shape to set the passed color for.
+  //! \param[in] color color to set.
+  asiAsm_EXPORT void
+    SetColor(const TDF_Label&      label,
+             const Quantity_Color& color);
+
+  //! Sets the given color to the shape on the passed label.
+  //! \param[in] label        label with shape to set the passed color for.
+  //! \param[in] color        color to set.
+  //! \param[in] changeTransp indicates whether to keep the transparency
+  //!                         as a distinct data chunk or make it a color's
+  //!                         transparency component.
+  asiAsm_EXPORT void
+    SetColor(const TDF_Label&          label,
+             const Quantity_ColorRGBA& color,
+             const bool                changeTransp);
+
+  //! Takes the common color from the part's faces and assigns it to the
+  //! part itself. This function works only if all faces are colorized
+  //! identically.
+  //!
+  //! \param[in] partId ID of the part in question.
+  //! \param[in] force  whether to override possibly existing part's color.
+  //! \return false if nothing was done, true -- otherwise.
+  asiAsm_EXPORT bool
+    AutoColorizePart(const asiAsm_XdePartId& partId,
+                     const bool              force = false);
+
+  //! Updates boundary representation (shape) of the given part. The passed
+  //! history is used to update the related metadata (e.g., colors of faces).
+  //! If no history is available, it is safe to pass `nullptr`.
+  //! \param[in] partLab            label of the part to update the shape for.
+  //! \param[in] newShape           new shape to set.
+  //! \param[in] history            modification history to update the related metadata.
+  //! \param[in] doUpdateAssemblies indicates whether to update assemblies at the end.
+  asiAsm_EXPORT void
+    UpdatePartShape(const TDF_Label&                 partLab,
+                    const TopoDS_Shape&              newShape,
+                    const Handle(BRepTools_History)& history,
+                    const bool                       doUpdateAssemblies = true);
 
   //! XDE-specific function to call each time you modify part's geometry.
   //! Without calling this function, you'll end up with TopoDS compounds
@@ -895,6 +946,28 @@ protected:
                    const Quantity_ColorRGBA& curvColor,
                    const bool                isGenColoredAssembly,
                    const Quantity_ColorRGBA& genColor);
+
+  //! Returns a "common" color of a part taking into account the colors of its
+  //! faces. If all faces of the part have the same color, the method
+  //! returns this unique color and sets the output argument `isOnFaces` to `true`.
+  //! If at least one face has a different color or has no color, the output
+  //! argument `isOnFaces` is set to `false`.
+  //!
+  //! \param[in]  part              ID of the part in question.
+  //! \param[out] color             resulting color.
+  //! \param[out] isOnFaces         indicates whether the method identifies
+  //!                               that all faces have the same color.
+  //! \param[in]  isIgnorePartColor determines the priority of color selection:
+  //!                               true  -- common color of faces is selected, color
+  //!                                        of the part itself is ignored;
+  //!                               false -- if the part has a color associated,
+  //!                                        that color will be returned without
+  //!                                        checking the colors of sub-shapes.
+  asiAsm_EXPORT void
+    getCommonColor(const asiAsm_XdePartId& partId,
+                   Quantity_Color&         color,
+                   bool&                   isOnFaces,
+                   const bool              isIgnorePartColor = false) const;
 
   //! Copies all OCAF/XDE attributes from the `from` label to the `to` label.
   //! \param[in] from the source label.

@@ -57,6 +57,7 @@
 #include <TNaming_Builder.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TNaming_Tool.hxx>
+#include <TopExp_Explorer.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
@@ -1402,6 +1403,41 @@ bool asiAsm_XdeDoc::GetColor(const TDF_Label&    label,
 
 //-----------------------------------------------------------------------------
 
+bool asiAsm_XdeDoc::GetColorAlpha(const asiAsm_XdePartId& partId,
+                                  double&                 alpha)
+{
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+
+  // Get color for the part itself.
+  Quantity_ColorRGBA colorRGBA;
+  bool isColorFound = this->GetColor(partId, colorRGBA);
+
+  if ( isColorFound )
+  {
+    alpha = colorRGBA.Alpha();
+  }
+  else /* Try getting color from any of the subshapes as a fallback solution */
+  {
+    TDF_LabelSequence subShapes;
+    ST->GetSubShapes(this->GetLabel(partId), subShapes);
+    //
+    if ( subShapes.IsEmpty() )
+      return isColorFound;
+
+    TDF_LabelSequence::Iterator it(subShapes);
+    //
+    if ( it.More() )
+      isColorFound = this->GetColor(it.Value(), colorRGBA);
+
+    if ( isColorFound )
+      alpha = colorRGBA.Alpha();
+  }
+
+  return isColorFound;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAsm_XdeDoc::GetSubShapeColor(const asiAsm_XdePartId& partId,
                                      const TopoDS_Shape&     subShape,
                                      Quantity_ColorRGBA&     color) const
@@ -1557,6 +1593,366 @@ bool asiAsm_XdeDoc::ExpandCompound(const asiAsm_XdePartId& partId,
                        genColor);
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::SetColor(const TDF_Label&      label,
+                             const Quantity_Color& color)
+{
+  if ( label.IsNull() )
+    return;
+
+  TCollection_AsciiString partId;
+  this->__entry(label, partId);
+
+  Quantity_ColorRGBA colorRGBA(color), oldColorRGBA;
+  //
+  if ( this->GetColor( asiAsm_XdePartId::FromEntry(partId), oldColorRGBA) )
+    colorRGBA.SetAlpha( oldColorRGBA.Alpha() );
+
+  this->SetColor(label, colorRGBA, true);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::SetColor(const TDF_Label&          label,
+                             const Quantity_ColorRGBA& color,
+                             const bool                changeTransp)
+{
+  if ( label.IsNull() )
+    return;
+
+  /*
+   * Colors should be set to parts' labels only. Assigning color to instances or
+   * subassemblies is allowed, but we avoid it to simplify the data architecture.
+   */
+
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+  //
+  if ( ST->IsReference(label) )
+  {
+    // Set color to the prototype.
+    TDF_Label protoLab;
+    ST->GetReferredShape(label, protoLab);
+    //
+    this->SetColor(protoLab, color, changeTransp);
+  }
+  else if ( ST->IsAssembly(label) )
+  {
+    // Set color to all assembly components.
+    TDF_LabelSequence components;
+    ST->GetComponents(label, components, true);
+    //
+    for ( TDF_LabelSequence::Iterator cit(components); cit.More(); cit.Next() )
+    {
+      this->SetColor(cit.Value(), color, changeTransp);
+    }
+  }
+  else /* Part */
+  {
+    TopoDS_Shape shape = ST->GetShape(label);
+    //
+    if ( shape.IsNull() )
+      return;
+
+    Quantity_ColorRGBA colorRGBA(color);
+    //
+    if ( !changeTransp )
+    {
+      double alpha = 1.0;
+      //
+      if ( this->GetColorAlpha(asiAsm_XdePartId::FromLabel(label), alpha) )
+        colorRGBA.SetAlpha( (float) alpha );
+    }
+
+    Handle(XCAFDoc_ColorTool) CT = XCAFDoc_DocumentTool::ColorTool(m_doc->Main());
+
+    Handle(TDataStd_TreeNode) colorAttr;
+    bool isGenColor = label.FindAttribute(XCAFDoc::ColorRefGUID(XCAFDoc_ColorGen), colorAttr);
+
+    if ( shape.ShapeType() == TopAbs_EDGE )
+    {
+      CT->SetColor(label, colorRGBA, XCAFDoc_ColorCurv);
+    }
+    else
+    {
+      CT->SetColor(label, colorRGBA, XCAFDoc_ColorSurf);
+      CT->SetColor(label, colorRGBA, XCAFDoc_ColorCurv);
+    }
+    if ( isGenColor )
+    {
+      CT->SetColor(label, colorRGBA, XCAFDoc_ColorGen);
+    }
+
+    TDF_LabelSequence subshapes;
+    ST->GetSubShapes(label, subshapes);
+    //
+    for ( TDF_LabelSequence::Iterator iter(subshapes); iter.More(); iter.Next() )
+    {
+      if ( this->GetShape( iter.Value() ).ShapeType() == TopAbs_EDGE )
+      {
+        CT->SetColor(iter.Value(), colorRGBA, XCAFDoc_ColorCurv);
+      }
+      else
+      {
+        CT->SetColor(iter.Value(), colorRGBA, XCAFDoc_ColorSurf);
+        CT->SetColor(iter.Value(), colorRGBA, XCAFDoc_ColorCurv);
+      }
+
+      isGenColor = iter.Value().FindAttribute(XCAFDoc::ColorRefGUID(XCAFDoc_ColorGen), colorAttr);
+      if ( isGenColor )
+      {
+        CT->SetColor(iter.Value(), colorRGBA, XCAFDoc_ColorGen);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::AutoColorizePart(const asiAsm_XdePartId& part,
+                                     const bool              force)
+{
+  Quantity_Color color;
+  bool isOnFaces = false;
+  //
+  this->getCommonColor(part, color, isOnFaces, force);
+  //
+  if ( !isOnFaces )
+    return false;
+
+  // If we are here, then all faces are colorized identically. Therefore,
+  // we can now colorize the part.
+  TDF_Label partLab = this->GetLabel(part);
+
+  // Override part's color.
+  this->SetColor(partLab, color);
+  //
+  m_progress.SendLogMessage( LogInfo(Normal) << "Automatically adjusted color for part '%1'."
+                                             << this->GetPartName(part) );
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::UpdatePartShape(const TDF_Label&                 partLab,
+                                    const TopoDS_Shape&              newShape,
+                                    const Handle(BRepTools_History)& history,
+                                    const bool                       doUpdateAssemblies)
+{
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+  Handle(XCAFDoc_ColorTool) CT = this->GetColorTool();
+
+  // If new and old shapes are equal, there's nothing to do.
+  TopoDS_Shape oldShape = ST->GetShape(partLab);
+  //
+  if ( oldShape.IsNull() || oldShape.IsEqual(newShape) )
+    return;
+
+  TDF_LabelDataMap  map;
+  TDF_LabelSequence labelsToDelete;
+  TDF_LabelSequence subshapes;
+  //
+  ST->GetSubShapes(partLab, subshapes);
+
+  // Set new shape to model.
+  TDF_Label newMainLabel = ST->FindShape(newShape);
+  if ( newMainLabel.IsNull() )
+  {
+    ST->SetShape(partLab, newShape);
+    newMainLabel = partLab;
+  }
+
+  if ( newMainLabel.IsNull() )
+  {
+    // Delete all necessary labels and return.
+    for ( int i = 1; i <= labelsToDelete.Length(); i++ )
+    {
+      labelsToDelete.Value(i).ForgetAllAttributes();
+    }
+
+    if ( doUpdateAssemblies )
+      this->UpdateAssemblies();
+
+    return;
+  }
+
+  TDF_LabelSequence unsupportedLabels;
+
+  for ( int i = 1; i <= subshapes.Length(); i++ )
+  {
+    TopoDS_Shape sub  = ST->GetShape(subshapes.Value(i));
+    TDF_Label    subL = subshapes.Value(i);
+
+    // Check if history is supported. Otherwise, an assert will be raised
+    // by OCCT and we crash.
+    const bool isHistorySupported = BRepTools_History::IsSupportedType(sub);
+    //
+    if ( !isHistorySupported && sub.ShapeType() < TopAbs_FACE )
+    {
+      unsupportedLabels.Append(subL);
+    }
+
+    // Deleted subshapes.
+    if ( history.IsNull() || ( isHistorySupported && history->IsRemoved(sub) ) )
+    {
+      // Do not forget all attributes at this step for PMI update.
+      TDF_Label nullLabel;
+      labelsToDelete.Append(subL);
+      subL.ForgetAttribute(TNaming_NamedShape::GetID());
+      subL.ForgetAttribute(XCAFDoc_ShapeMapTool::GetID());
+      map.Bind(subL, nullLabel);
+    }
+    else if ( isHistorySupported )
+    {
+      // Generated subshapes.
+      const TopTools_ListOfShape& genList = history->Generated(sub);
+      //
+      if ( genList.Size() > 0 )
+      {
+        TopTools_ListOfShape::Iterator genIt(genList);
+        for ( ; genIt.More(); genIt.Next() )
+        {
+          TDF_Label newSubL = ST->AddSubShape(partLab, genIt.Value());
+          //
+          if ( !newSubL.IsEqual(subL) )
+          {
+            Quantity_ColorRGBA color;
+            for ( int typeIt = 0; typeIt <= 2; typeIt++ )
+            {
+              if ( CT->GetColor(subL, XCAFDoc_ColorType(typeIt), color) )
+                CT->SetColor(newSubL, color, XCAFDoc_ColorType(typeIt));
+            }
+
+            if ( !CT->IsVisible(subL) )
+              CT->SetVisibility(newSubL, false);
+          }
+        }
+      }
+      // Modified subshapes.
+      const TopTools_ListOfShape& modList = history->Modified(sub);
+      if ( modList.Size() > 0 )
+      {
+        TopTools_ListOfShape::Iterator modIt(modList);
+        for ( ; modIt.More(); modIt.Next() )
+        {
+          TDF_Label newSubL = ST->AddSubShape(partLab, modIt.Value());
+          if ( !newSubL.IsEqual(subL) )
+          {
+            labelsToDelete.Append(subL);
+            map.Bind(subL, newSubL);
+            this->copyAttributes(subL, newSubL);
+          }
+        }
+      }
+    }
+  }
+
+  // Propagate colors of unsupported shapes.
+  // Subshapes compounds and shells are not supported by BRepTools_History, only faces,
+  // so iterate faces of unsupported types of subshapes and add new faces-subshapes
+  // for correct update.
+  if ( history.IsNull() )
+  {
+    labelsToDelete.Append(unsupportedLabels);
+  }
+  else
+  {
+    for ( TDF_LabelSequence::Iterator it(unsupportedLabels); it.More(); it.Next() )
+    {
+      // Iterate all faces.
+      TDF_Label subL = it.Value();
+      TDF_Label colorSurfL, colorGenL;
+      CT->GetColor(subL, XCAFDoc_ColorSurf, colorSurfL);
+      CT->GetColor(subL, XCAFDoc_ColorGen, colorGenL);
+
+      if ( colorSurfL.IsNull() && colorGenL.IsNull() )
+      {
+        labelsToDelete.Append(subL);
+        subL.ForgetAttribute(TNaming_NamedShape::GetID());
+        subL.ForgetAttribute(XCAFDoc_ShapeMapTool::GetID());
+        continue;
+      }
+
+      // Name.
+      Handle(TDataStd_Name) nameAttr;
+      TCollection_ExtendedString nameStr;
+      bool hasName = subL.FindAttribute(TDataStd_Name::GetID(), nameAttr);
+      if ( hasName )
+        nameStr = nameAttr->Get();
+
+      // Shape.
+      TopoDS_Shape sub = ST->GetShape(subL);
+
+      labelsToDelete.Append(subL);
+      subL.ForgetAttribute(TNaming_NamedShape::GetID());
+      subL.ForgetAttribute(XCAFDoc_ShapeMapTool::GetID());
+
+      TopExp_Explorer faceExp(sub, TopAbs_FACE);
+      for ( ; faceExp.More(); faceExp.Next() )
+      {
+        TopoDS_Shape face = faceExp.Current();
+        if ( history->IsRemoved(face) )
+          continue;
+
+        // Generated subshapes.
+        TopTools_ListOfShape genList = history->Generated(face);
+        if ( genList.Size() > 0 )
+        {
+          TopTools_ListOfShape::Iterator genIt(genList);
+          for ( ; genIt.More(); genIt.Next() )
+          {
+            TDF_Label newSubL;
+            newSubL = ST->AddSubShape(partLab, genIt.Value());
+            if ( !newSubL.IsNull() )
+            {
+              if ( !colorSurfL.IsNull() )
+                CT->SetColor(newSubL, colorSurfL, XCAFDoc_ColorSurf);
+              if ( !colorGenL.IsNull() )
+                CT->SetColor(newSubL, colorGenL, XCAFDoc_ColorGen);
+            }
+          }
+        }
+
+        // Modified subshapes.
+        TopTools_ListOfShape modList = history->Modified(face);
+
+        // If face was not modified, add it to model as is, it is necessary, because
+        // old compounds/shell subshape will be deleted.
+        if ( modList.Size() == 0 )
+          modList.Append(face);
+
+        TopTools_ListOfShape::Iterator modIt(modList);
+        for ( ; modIt.More(); modIt.Next() )
+        {
+          TDF_Label newSubL;
+
+          // If face is already existed as subshape, do not rewrite its color.
+          if ( ST->FindSubShape(partLab, modIt.Value(), newSubL) )
+            continue;
+
+          newSubL = ST->AddSubShape(partLab, modIt.Value());
+          if ( !newSubL.IsNull() )
+          {
+            if ( hasName )
+              TDataStd_Name::Set(newSubL, nameStr);
+            if ( !colorSurfL.IsNull() )
+              CT->SetColor(newSubL, colorSurfL, XCAFDoc_ColorSurf);
+            if ( !colorGenL.IsNull() )
+              CT->SetColor(newSubL, colorGenL, XCAFDoc_ColorGen);
+          }
+        }
+      }
+    }
+  }
+
+  for ( int i = 1; i <= labelsToDelete.Length(); i++ )
+    labelsToDelete.Value(i).ForgetAllAttributes();
+
+  if ( doUpdateAssemblies )
+    this->UpdateAssemblies();
 }
 
 //-----------------------------------------------------------------------------
@@ -2048,6 +2444,164 @@ void asiAsm_XdeDoc::propagateColor(const TDF_Label&          assemblyLabel,
 
 //-----------------------------------------------------------------------------
 
+void asiAsm_XdeDoc::getCommonColor(const asiAsm_XdePartId& part,
+                                   Quantity_Color&         color,
+                                   bool&                   isOnFaces,
+                                   const bool              isIgnorePartColor) const
+{
+  Quantity_ColorRGBA partColor;
+
+  // The Boolean flag is checked first for a slightly better performance.
+  if ( !isIgnorePartColor && this->GetColor(part, partColor) )
+  {
+    isOnFaces = false;
+    return;
+  }
+
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+  Handle(XCAFDoc_ColorTool) CT = this->GetColorTool();
+
+  // Get part label.
+  TDF_Label partLab = this->GetLabel(part);
+
+  // Get part shape.
+  TopoDS_Shape partShape = this->GetShape(part);
+  //
+  if ( partShape.IsNull() || partShape.ShapeType() >= TopAbs_FACE )
+  {
+    isOnFaces = false;
+    return;
+  }
+
+  // Get all faces of a part.
+  TopTools_IndexedMapOfShape partFaces;
+  TopExp::MapShapes(partShape, TopAbs_FACE, partFaces);
+
+  // Loop over the faces to compare their colors and find those
+  // faces having no color assigned.
+  Quantity_Color refColor;
+  bool isFailed = (partFaces.Size() == 0);
+  //
+  for ( int f = 1; f <= partFaces.Extent(); ++f )
+  {
+    const TopoDS_Shape& faceShape = partFaces(f);
+
+    // All faces should be colorized.
+    TDF_Label faceLab;
+    //
+    if ( !ST->FindSubShape(partLab, faceShape, faceLab) )
+    {
+      isFailed = true;
+      break;
+    }
+
+    // Get color associated with the face.
+    TDF_Label faceColorLab;
+    if ( !CT->GetColor(faceLab, XCAFDoc_ColorSurf, faceColorLab) &&
+         !CT->GetColor(faceLab, XCAFDoc_ColorGen, faceColorLab) )
+    {
+      m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                    "be obtained because of uncolored face(s)."
+                                                 << this->GetPartName(part) );
+      isOnFaces = false;
+      return;
+    }
+
+    // Get color.
+    Quantity_Color faceColor;
+    CT->GetColor(faceColorLab, faceColor);
+
+    if ( f == 1 )
+      refColor = faceColor;
+    else if ( refColor != faceColor )
+    {
+      m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                    "be obtained because of faces with different colors."
+                                                 << this->GetPartName(part) );
+      isOnFaces = false;
+      return;
+    }
+  }
+
+  // Another case is part-compound, all components of which is colored in one color
+  if ( isFailed && partShape.ShapeType() != TopAbs_COMPOUND )
+  {
+    m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                  "be obtained because of uncolored face(s)."
+                                               << this->GetPartName(part) );
+    isOnFaces = false;
+    return;
+  }
+
+  if ( isFailed && partShape.ShapeType() == TopAbs_COMPOUND )
+  {
+    bool isFirst = true;
+    for ( TopoDS_Iterator it(partShape); it.More(); it.Next() )
+    {
+      const TopoDS_Shape& compShape = it.Value();
+      if ( compShape.ShapeType() > TopAbs_FACE )
+        continue;
+
+      // All components should be colorized.
+      TDF_Label subShapeL;
+      if ( !ST->FindSubShape(partLab, compShape, subShapeL) )
+      {
+        m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                      "be obtained because not all subshapes are colorized; "
+                                                      "try expanding compounds first."
+                                                   << this->GetPartName(part) );
+        isOnFaces = false;
+        return;
+      }
+
+      // Get color associated with the component.
+      TDF_Label colorLab;
+      if ( !CT->GetColor(subShapeL, XCAFDoc_ColorSurf, colorLab) &&
+           !CT->GetColor(subShapeL, XCAFDoc_ColorGen, colorLab) )
+      {
+        m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                      "be obtained because not all subshapes are colorized; "
+                                                      "try expanding compounds first."
+                                                   << this->GetPartName(part) );
+        isOnFaces = false;
+        return;
+      }
+
+      // Get color.
+      Quantity_Color subColor;
+      CT->GetColor(colorLab, subColor);
+
+      if ( isFirst )
+      {
+        refColor = subColor;
+        isFirst = false;
+      }
+      else if ( refColor != subColor )
+      {
+        m_progress.SendLogMessage( LogWarn(Normal) << "Common color of subshapes of part '%1' cannot "
+                                                      "be obtained because of subshapes with different colors; "
+                                                      "try expanding compounds first."
+                                                   << this->GetPartName(part) );
+        isOnFaces = false;
+        return;
+      }
+      isFailed = false;
+    }
+  }
+
+  if ( isFailed )
+  {
+    // If we are here, then part is empty auxiliary compound for quality mesh, just return.
+    isOnFaces = false;
+    return;
+  }
+
+  color     = refColor;
+  isOnFaces = true;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::copyAttributes(const TDF_Label from,
                                    TDF_Label&      to)
 {
@@ -2144,10 +2698,9 @@ void asiAsm_XdeDoc::copyAttributes(const TDF_Label from,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label
-  asiAsm_XdeDoc::addComponent(const TDF_Label&       assemblyLabel,
-                              const TDF_Label&       compLabel,
-                              const TopLoc_Location& location)
+TDF_Label asiAsm_XdeDoc::addComponent(const TDF_Label&       assemblyLabel,
+                                      const TDF_Label&       compLabel,
+                                      const TopLoc_Location& location)
 {
   TDF_Label result;
 
@@ -2241,7 +2794,8 @@ void asiAsm_XdeDoc::__getComponents(const TDF_Label&        l,
   for ( TDF_ChildIterator lit(l); lit.More(); lit.Next() )
   {
     TDF_Label compLab = lit.Value();
-    if (compLab.HasAttribute())
+    //
+    if ( compLab.HasAttribute() )
       labels.push_back(compLab);
   }
 }
@@ -2255,6 +2809,7 @@ void asiAsm_XdeDoc::__entry(const TDF_Label&         label,
     return;
 
   const TCollection_AsciiString* pEntry = m_LECache.Seek(label);
+  //
   if ( pEntry )
   {
     entry = *pEntry;
