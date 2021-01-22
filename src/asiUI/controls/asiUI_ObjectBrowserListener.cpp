@@ -108,17 +108,31 @@ void asiUI_ObjectBrowserListener::processNode(const ActAPI_DataObjectId& nid)
 
   if ( node->IsInstance( STANDARD_TYPE(asiData_FeatureNode) ) )
   {
-    Handle(asiData_FeatureNode)
-      fn = Handle(asiData_FeatureNode)::DownCast(node);
-
-    // Get feature.
-    asiAlgo_Feature feature;
-    fn->GetMask(feature);
+    Handle(ActAPI_HNodeList)
+      selNodes = m_cf->ObjectBrowser->GetSelectedNodes();
     //
-    m_cf->Progress.SendLogMessage(LogInfo(Normal) << "Feature faces: %1." << feature);
+    if ( selNodes.IsNull() ) return;
+
+    asiAlgo_Feature allFeatures;
+    //
+    for ( ActAPI_HNodeList::Iterator nit(*selNodes); nit.More(); nit.Next() )
+    {
+      Handle(asiData_FeatureNode)
+        fn = Handle(asiData_FeatureNode)::DownCast( nit.Value() );
+      //
+      if ( fn.IsNull() ) continue;
+
+      // Get feature.
+      asiAlgo_Feature feature;
+      fn->GetMask(feature);
+      //
+      allFeatures.Unite(feature);
+    }
+
+    m_cf->Progress.SendLogMessage(LogInfo(Normal) << "Feature faces: %1." << allFeatures);
 
     // Select feature faces.
     asiEngine_Part( m_cf->Model,
-                    m_cf->ViewerPart->PrsMgr() ).HighlightFaces(feature);
+                    m_cf->ViewerPart->PrsMgr() ).HighlightFaces(allFeatures);
   }
 }
