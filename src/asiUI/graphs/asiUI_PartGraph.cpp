@@ -98,12 +98,14 @@ asiUI_PartGraph::~asiUI_PartGraph()
 //! Renders graph.
 //! \param[in] graph             VTK presentable graph.
 //! \param[in] shape             master shape.
+//! \param[in] aag               master shape's AAG (only for AAG regime).
 //! \param[in] regime            kind of graph to render.
 //! \param[in] colorizeLocations indicates whether to colorize graph nodes
 //!                              in accordance with the locations of their
 //!                              corresponding sub-shapes.
 void asiUI_PartGraph::Render(const vtkSmartPointer<vtkGraph>& graph,
                              const TopoDS_Shape&              shape,
+                             const Handle(asiAlgo_AAG)&       aag,
                              const Regime                     regime,
                              const bool                       colorizeLocations)
 {
@@ -194,6 +196,17 @@ void asiUI_PartGraph::Render(const vtkSmartPointer<vtkGraph>& graph,
   //
   TCollection_AsciiString shapeInfo;
   asiAlgo_Utils::ShapeSummary(shape, shapeInfo);
+  //
+  if ( regime == Regime_AAG )
+  {
+    if ( !aag.IsNull() )
+    {
+      shapeInfo += "- nb components: ";
+      shapeInfo += aag->GetConnectedComponentsNb();
+      shapeInfo += "\n";
+    }
+  }
+  //
   m_summaryWidget->GetTextActor()->SetInput( shapeInfo.ToCString() );
   //
   m_summaryWidget->SetInteractor      ( m_pWidget->GetInteractor() );
@@ -233,6 +246,7 @@ void asiUI_PartGraph::RenderEventCallback()
 
 //! Renders part graph in the requested regime.
 //! \param[in] shape             target shape.
+//! \param[in] aag               target shape's AAG (for AAG regime only).
 //! \param[in] selectedFaces     selected faces.
 //! \param[in] regime            regime of interest.
 //! \param[in] leafType          target leaf type for FULL regime.
@@ -240,6 +254,7 @@ void asiUI_PartGraph::RenderEventCallback()
 //!                              in accordance with the locations of their
 //!                              corresponding sub-shapes.
 void asiUI_PartGraph::Render(const TopoDS_Shape&               shape,
+                             const Handle(asiAlgo_AAG)&        aag,
                              const TopTools_IndexedMapOfShape& selectedFaces,
                              const Regime                      regime,
                              const TopAbs_ShapeEnum            leafType,
@@ -248,13 +263,13 @@ void asiUI_PartGraph::Render(const TopoDS_Shape&               shape,
   // Populate graph data from topology graph
   vtkSmartPointer<vtkGraph>
     graph = this->convertToGraph(shape,
-                                 nullptr,
+                                 aag,
                                  selectedFaces,
                                  regime,
                                  leafType);
 
   // Render VTK graph
-  this->Render(graph, shape, regime, colorizeLocations);
+  this->Render(graph, shape, aag, regime, colorizeLocations);
 }
 
 //-----------------------------------------------------------------------------
@@ -278,18 +293,20 @@ void asiUI_PartGraph::RenderTopology(const TopoDS_Shape&    shape,
                                  leafType);
 
   // Render VTK graph
-  this->Render(graph, shape, Regime_Topology, colorizeLocations);
+  this->Render(graph, shape, nullptr, Regime_Topology, colorizeLocations);
 }
 
 //-----------------------------------------------------------------------------
 
 //! Renders face adjacency graph.
 //! \param[in] shape         target shape.
+//! \param[in] aag           target shape's AAG.
 //! \param[in] selectedFaces selected faces.
 void asiUI_PartGraph::RenderAdjacency(const TopoDS_Shape&               shape,
+                                      const Handle(asiAlgo_AAG)&        aag,
                                       const TopTools_IndexedMapOfShape& selectedFaces)
 {
-  this->Render(shape, selectedFaces, Regime_AAG, TopAbs_SHAPE, false);
+  this->Render(shape, aag, selectedFaces, Regime_AAG, TopAbs_SHAPE, false);
 }
 
 //-----------------------------------------------------------------------------
@@ -309,7 +326,7 @@ void asiUI_PartGraph::RenderAdjacency(const Handle(asiAlgo_AAG)&        aag,
                                  TopAbs_SHAPE);
 
   // Render VTK graph
-  this->Render(graph, aag->GetMasterShape(), Regime_AAG, false);
+  this->Render(graph, aag->GetMasterShape(), aag, Regime_AAG, false);
 }
 
 //-----------------------------------------------------------------------------

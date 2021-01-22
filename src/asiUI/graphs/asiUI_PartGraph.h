@@ -84,11 +84,13 @@ public:
   asiUI_EXPORT void
     Render(const vtkSmartPointer<vtkGraph>& graph,
            const TopoDS_Shape&              shape,
+           const Handle(asiAlgo_AAG)&       aag,
            const Regime                     regime,
            const bool                       colorizeLocations);
 
   asiUI_EXPORT void
     Render(const TopoDS_Shape&               shape,
+           const Handle(asiAlgo_AAG)&        aag,
            const TopTools_IndexedMapOfShape& selectedFaces,
            const Regime                      regime,
            const TopAbs_ShapeEnum            leafType,
@@ -101,6 +103,7 @@ public:
 
   asiUI_EXPORT void
     RenderAdjacency(const TopoDS_Shape&               shape,
+                    const Handle(asiAlgo_AAG)&        aag,
                     const TopTools_IndexedMapOfShape& selectedFaces = TopTools_IndexedMapOfShape());
 
   asiUI_EXPORT void
