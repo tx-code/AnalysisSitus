@@ -171,7 +171,7 @@ Handle(asiAlgo_DictionaryImpl) asiAlgo_Dictionary::getImpl()
 // ----------------------------------------------------------------------------
 
 
-//! Constructor. 
+//! Constructor.
 //! Set keywords used in data dictionary.
 asiAlgo_DictionaryImpl::asiAlgo_DictionaryImpl() 
 : DDS_Dictionary(),
@@ -287,7 +287,7 @@ Handle(asiAlgo_DictionaryDimension)
   int anIdx = 1;
   for ( ; anIdx <= myGroupMap.Extent() && aDimension.IsNull(); anIdx++ )
   {
-    Handle(asiAlgo_DictionaryGroup) aGroup = 
+    Handle(asiAlgo_DictionaryGroup) aGroup =
       Handle(asiAlgo_DictionaryGroup)::DownCast(myGroupMap.FindFromIndex(anIdx));
     if ( !aGroup.IsNull() )
       aDimension = aGroup->GetDimension(theName);
@@ -308,7 +308,7 @@ Handle(asiAlgo_DictionaryDimension)
   if ( !myGroupMap.Contains(theComponent) )
     return Handle(asiAlgo_DictionaryDimension)();
 
-  Handle(asiAlgo_DictionaryGroup) aGroup = 
+  Handle(asiAlgo_DictionaryGroup) aGroup =
     Handle(asiAlgo_DictionaryGroup)::DownCast(myGroupMap.FindFromKey(theComponent));
 
   return aGroup->GetDimension(theName);
@@ -316,8 +316,7 @@ Handle(asiAlgo_DictionaryDimension)
 
 //! Set notifier for providing log messages.
 //! \param theNotifier [in] the notifier instance.
-void asiAlgo_DictionaryImpl::SetNotifier(
-  const Handle(ActAPI_IProgressNotifier)& theNotifier)
+void asiAlgo_DictionaryImpl::SetNotifier(const Handle(ActAPI_IProgressNotifier)& theNotifier)
 {
   m_Notifier = theNotifier;
 }

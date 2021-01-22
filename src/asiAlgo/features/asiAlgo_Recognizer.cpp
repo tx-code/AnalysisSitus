@@ -84,6 +84,53 @@ void asiAlgo_Recognizer::Init(const TopoDS_Shape& masterCAD)
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature)
+{
+  // Contract check.
+  if ( m_result.ids.IsEmpty() )
+  {
+    m_progress.SendLogMessage(LogWarn(Normal) << "No result to classify.");
+    return true; // Nothing to classify.
+  }
+
+  // Narrow down the search space.
+  Handle(asiAlgo_AAG) G = m_aag;
+  //
+  G->PushSubgraph(m_result.ids);
+  {
+    std::vector<asiAlgo_Feature> ccomps;
+    G->GetConnectedComponents(ccomps);
+
+    m_progress.SendLogMessage( LogInfo(Normal) << "There are %1 connected components to analyze."
+                                               << int( ccomps.size() ) );
+
+    m_progress.SetMessageKey("Searching for isomorphisms");
+    m_progress.Init( ccomps.size() == 1 ? INT_MAX : int( ccomps.size() ) );
+
+    // Iterate over the connected components.
+    for ( auto cit = ccomps.cbegin();
+          cit != ccomps.cend() && !m_progress.IsCancelling();
+          ++cit, m_progress.StepProgress(1) )
+    {
+      // Recognize features in each connected component separately.
+      G->PushSubgraph(*cit);
+      {
+        this->matchConnectedComponent(G, feature);
+      }
+      G->PopSubgraph(); // Pop connected component.
+    } // Loop for connected components.
+  }
+  G->PopSubgraph(); // Pop cylindrical holes.
+
+  m_progress.SendLogMessage( LogInfo(Normal) << "Found %1 isomorphous face(s)."
+                                             << feature.Extent() );
+
+  m_progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 const TopTools_IndexedMapOfShape& asiAlgo_Recognizer::GetResultFaces() const
 {
   return m_result.faces;
@@ -108,4 +155,12 @@ const Handle(asiAlgo_AAG)& asiAlgo_Recognizer::GetAAG() const
 void asiAlgo_Recognizer::SetAAG(const Handle(asiAlgo_AAG)& aag)
 {
   m_aag = aag;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Recognizer::matchConnectedComponent(const Handle(asiAlgo_AAG)&,
+                                                 asiAlgo_Feature&)
+{
+  // Nothing is in base implementation. Subclass to provide your matching logic.
 }

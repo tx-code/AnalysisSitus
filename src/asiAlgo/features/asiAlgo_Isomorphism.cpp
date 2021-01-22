@@ -48,7 +48,7 @@ asiAlgo_Isomorphism::asiAlgo_Isomorphism(ActAPI_ProgressEntry progress,
 : ActAPI_IAlgorithm(progress, plotter)
 {
   m_iNumTests = 0;
-  m_bMatchGeomProps = false;
+  m_iModes    = Mode_None;
 }
 
 //-----------------------------------------------------------------------------
@@ -59,9 +59,43 @@ asiAlgo_Isomorphism::asiAlgo_Isomorphism(const Handle(asiAlgo_AAG)& G,
 : ActAPI_IAlgorithm(progress, plotter)
 {
   m_iNumTests = 0;
-  m_bMatchGeomProps = false;
+  m_iModes    = Mode_None;
 
   this->InitGraph(G);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Isomorphism::SetMatchGeomProps(const bool on)
+{
+  if ( on )
+    m_iModes |= Mode_MatchGeometry;
+  else
+    m_iModes &= (~Mode_MatchGeometry);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Isomorphism::GetMatchGeomProps() const
+{
+  return (m_iModes & Mode_MatchGeometry) > 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Isomorphism::SetMatchDimensions(const bool on)
+{
+  if ( on )
+    m_iModes |= Mode_MatchDimensions;
+  else
+    m_iModes &= (~Mode_MatchDimensions);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Isomorphism::GetMatchDimensions() const
+{
+  return (m_iModes & Mode_MatchDimensions) > 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -75,15 +109,17 @@ void asiAlgo_Isomorphism::InitGraph(const Handle(asiAlgo_AAG)& G_aag)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_Isomorphism::SetMatchGeomProps(const bool on)
-{
-  m_bMatchGeomProps = on;
-}
-
-//-----------------------------------------------------------------------------
-
 bool asiAlgo_Isomorphism::Perform(const Handle(asiAlgo_AAG)& P_aag)
 {
+  if ( this->GetMatchDimensions() )
+  {
+    // If the dimensions of the graphs are requested to match, then we're
+    // in the graph isomorphism mode (i.e., not in the SUBgraph isomorphism
+    // mode).
+    if ( P_aag->GetNumberOfNodes() != m_G_aag->GetNumberOfNodes() )
+      return false;
+  }
+
   // Initialize the AAG of the pattern.
   m_P_aag = P_aag;
   //
@@ -355,7 +391,7 @@ bool asiAlgo_Isomorphism::areMatching(const int V_P_eigenIdx,
      * ================== */
 
     // Match props.
-    if ( m_bMatchGeomProps )
+    if ( this->GetMatchGeomProps() )
     {
       if ( info_G.surf->IsKind( STANDARD_TYPE(Geom_CylindricalSurface) ) )
       {

@@ -44,6 +44,16 @@ class asiAlgo_Isomorphism : public ActAPI_IAlgorithm
 {
 public:
 
+  //! Modes of matching.
+  enum Mode
+  {
+    Mode_None            = 0x00,
+    Mode_MatchDimensions = 0x01, //!< `dim(P) == dim(G)` is required.
+    Mode_MatchGeometry   = 0x02  //!< Features' geometric props should match.
+  };
+
+public:
+
   //! Default ctor.
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
@@ -63,17 +73,34 @@ public:
 
 public:
 
-  //! Initializes the algorithm with the problem graph `G`.
-  //! \param[in] G_aag attributed adjacency graph to set.
-  asiAlgo_EXPORT void
-    InitGraph(const Handle(asiAlgo_AAG)& G_aag);
-
   //! Makes the algorithm to match the geometric props of the
   //! pattern faces with the sought-for features in the problem
   //! graph.
   //! \param[in] on the matching mode to set (true/false).
   asiAlgo_EXPORT void
     SetMatchGeomProps(const bool on);
+
+  //! \return true if the geometries are requested to match.
+  asiAlgo_EXPORT bool
+    GetMatchGeomProps() const;
+
+  //! Enables/disables the graphs' dimensions matching mode. Setting
+  //! this option actually turns subgraph isomorphism to graph
+  //! isomorphism.
+  //! \param[in] on the mode to set (true/false).
+  asiAlgo_EXPORT void
+    SetMatchDimensions(const bool on);
+
+  //! \return true if the graphs' dimensions are requested to match.
+  asiAlgo_EXPORT bool
+    GetMatchDimensions() const;
+
+public:
+
+  //! Initializes the algorithm with the problem graph `G`.
+  //! \param[in] G_aag attributed adjacency graph to set.
+  asiAlgo_EXPORT void
+    InitGraph(const Handle(asiAlgo_AAG)& G_aag);
 
   //! Solves isomorphism problem for the pattern graph `P`.
   //! \param[in] P_aag subgraph to check.
@@ -196,11 +223,6 @@ protected:
   //! Face info.
   NCollection_DataMap<t_topoId, t_faceInfo> m_faceInfo_G, m_faceInfo_P;
 
-  //! Indicates whether the geometric props of the features
-  //! in G should match exactly the geometric props of the
-  //! faces in P.
-  bool m_bMatchGeomProps;
-
   //! Found isomorphisms.
   std::vector<Eigen::MatrixXd> m_Ms;
 
@@ -209,6 +231,9 @@ protected:
 
   //! The number of tests on isomorphism.
   int m_iNumTests;
+
+  //! Matching modes.
+  int m_iModes;
 
 };
 

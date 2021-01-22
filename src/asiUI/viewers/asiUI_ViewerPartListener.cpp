@@ -34,11 +34,13 @@
 // asiUI includes
 #include <asiUI_BgColorDialog.h>
 #include <asiUI_Common.h>
+#include <asiUI_DialogDump.h>
 
 // asiAlgo includes
 #include <asiAlgo_CheckDihedralAngle.h>
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
+#include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -64,6 +66,37 @@
 #include <QApplication>
 #include <QClipboard>
 #pragma warning(pop)
+
+namespace
+{
+  //! Prepares one shape out of the passed collection of faces. Is there
+  //! is only one face passed, it will be returned without any processing.
+  //! For multiple faces, a compound is constructed and returned.
+  //! \param[in] faces the faces to process.
+  //! \return one shape.
+  TopoDS_Shape FacesAsOneShape(const TopTools_IndexedMapOfShape& faces)
+  {
+    TopoDS_Shape oneShape;
+    //
+    if ( faces.Extent() == 1 )
+    {
+      oneShape = faces(1);
+    }
+    else
+    {
+      // Put faces in a compound.
+      TopoDS_Compound comp;
+      BRep_Builder().MakeCompound(comp);
+      //
+      for ( int k = 1; k <= faces.Extent(); ++k )
+        BRep_Builder().Add( comp, faces(k) );
+      //
+      oneShape = comp;
+    }
+
+    return oneShape;
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -318,6 +351,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       m_pFindIsolated      = menu.addAction("Find isolated");
       m_pCheckDihAngle     = menu.addAction("Check dihedral angle");
       m_pAddAsFeature      = menu.addAction("Add as feature");
+      m_pGetAsBLOB         = menu.addAction("Get as BLOB");
     }
 
     menu.addSeparator();
@@ -362,21 +396,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
       return;
 
     // Prepare a shape to dump
-    TopoDS_Shape shape2Save;
-    //
-    if ( selected.Extent() == 1 )
-      shape2Save = selected(1);
-    else
-    {
-      // Put selected shapes to a compound
-      TopoDS_Compound comp;
-      BRep_Builder().MakeCompound(comp);
-      //
-      for ( int k = 1; k <= selected.Extent(); ++k )
-        BRep_Builder().Add( comp, selected(k) );
-      //
-      shape2Save = comp;
-    }
+    TopoDS_Shape shape2Save = ::FacesAsOneShape(selected);
 
     // Save shape
     if ( !asiAlgo_Utils::WriteBRep( shape2Save, QStr2AsciiStr(filename) ) )
@@ -520,21 +540,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
 
     // Prepare a shape to set as a variable
-    TopoDS_Shape shape2Var;
-    //
-    if ( selected.Extent() == 1 )
-      shape2Var = selected(1);
-    else
-    {
-      // Put selected shapes to a compound
-      TopoDS_Compound comp;
-      BRep_Builder().MakeCompound(comp);
-      //
-      for ( int k = 1; k <= selected.Extent(); ++k )
-        BRep_Builder().Add( comp, selected(k) );
-      //
-      shape2Var = comp;
-    }
+    TopoDS_Shape shape2Var = ::FacesAsOneShape(selected);
 
     // Add variable via the imperative plotter
     m_plotter.DRAW_SHAPE(shape2Var, Color_Yellow, "var");
@@ -679,6 +685,34 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Update object browser.
     if ( m_wBrowser )
       m_wBrowser->Populate();
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: get as BLOB
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pGetAsBLOB )
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get highlighted sub-shapes.
+    TopTools_IndexedMapOfShape selected;
+    asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
+
+    // Get shape to serialize.
+    TopoDS_Shape shape2Serialize = ::FacesAsOneShape(selected);
+
+    // Serialize and dump.
+    std::string buff;
+    if ( asiAlgo_ShapeSerializer::Serialize(shape2Serialize, buff) )
+    {
+      asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump("Shape BLOB (base64-encoded)", m_progress);
+      pDumpDlg->Populate(buff);
+      pDumpDlg->show();
+    }
+    else
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Cannot dump the shape.");
+    }
   }
 
   //---------------------------------------------------------------------------

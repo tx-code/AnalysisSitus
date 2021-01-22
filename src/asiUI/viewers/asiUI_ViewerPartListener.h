@@ -118,6 +118,7 @@ protected:
   QAction* m_pFindIsolated;
   QAction* m_pCheckDihAngle;
   QAction* m_pAddAsFeature;
+  QAction* m_pGetAsBLOB;
   QAction* m_pMeasureLength;
 
 };

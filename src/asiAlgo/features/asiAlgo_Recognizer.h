@@ -94,6 +94,12 @@ public:
   asiAlgo_EXPORT void
     Init(const TopoDS_Shape& masterCAD);
 
+  //! Classifies the detected features using graph isomorphism matching.
+  //! \param[out] feature found features.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT virtual bool
+    Classify(asiAlgo_Feature& feature);
+
 public:
 
   //! \return result collection of detected faces as transient shapes.
@@ -112,6 +118,17 @@ public:
   //! \param[in] aag AAG instance to set.
   asiAlgo_EXPORT void
     SetAAG(const Handle(asiAlgo_AAG)& aag);
+
+protected:
+
+  //! Extension point for derived classes to provide their feature
+  //! matching logic.
+  //! \param[in]  cc      the connected component representing the reduced
+  //!                     problem graph to apply matching on.
+  //! \param[out] feature the found features.
+  asiAlgo_EXPORT virtual void
+    matchConnectedComponent(const Handle(asiAlgo_AAG)& cc,
+                            asiAlgo_Feature&           feature);
 
 protected:
 
