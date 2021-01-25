@@ -36,12 +36,13 @@
 #include <asiEngine_BuildOctreeFunc.h>
 #include <asiEngine_BuildPatchFunc.h>
 #include <asiEngine_CheckThicknessFunc.h>
-#include <asiEngine_SmoothenCornersFunc.h>
-#include <asiEngine_SmoothenPatchesFunc.h>
 #include <asiEngine_Curve.h>
+#include <asiEngine_Features.h>
 #include <asiEngine_IV.h>
 #include <asiEngine_Part.h>
 #include <asiEngine_RE.h>
+#include <asiEngine_SmoothenCornersFunc.h>
+#include <asiEngine_SmoothenPatchesFunc.h>
 #include <asiEngine_Tessellation.h>
 #include <asiEngine_TolerantShapes.h>
 #include <asiEngine_Triangulation.h>
@@ -182,6 +183,11 @@ void asiEngine_Model::Clear()
 
     // Delete all topology-defining Nodes for reverse engineering.
     asiEngine_RE(this).Clean_All();
+
+    // Delete all metadata and persistent features.
+    asiEngine_Part partApi(this);
+    partApi.CleanMetadata();
+    partApi.CleanFeatures();
 
     // Let sub-classes do some job
     this->clearCustom();

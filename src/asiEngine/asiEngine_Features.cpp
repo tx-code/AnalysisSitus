@@ -56,3 +56,11 @@ asiAlgo_Feature
 
   return algo.GetResultIndices();
 }
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Features::Clean_All()
+{
+  this->_cleanChildren( m_model->GetTriangulationNode() );
+}
+

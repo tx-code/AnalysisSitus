@@ -63,6 +63,10 @@ public:
   asiEngine_EXPORT asiAlgo_Feature
     FindIsolated(const asiAlgo_Feature& baseFaces) const;
 
+  //! Cleans up all persistent features.
+  asiEngine_EXPORT void
+    Clean_All();
+
 };
 
 #endif
