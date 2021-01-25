@@ -84,7 +84,8 @@ void asiAlgo_Recognizer::Init(const TopoDS_Shape& masterCAD)
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature)
+bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature,
+                                  const bool       indicateProgress)
 {
   // Contract check.
   if ( m_result.ids.IsEmpty() )
@@ -104,13 +105,16 @@ bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature)
     m_progress.SendLogMessage( LogInfo(Normal) << "There are %1 connected components to analyze."
                                                << int( ccomps.size() ) );
 
-    m_progress.SetMessageKey("Searching for isomorphisms");
-    m_progress.Init( ccomps.size() == 1 ? INT_MAX : int( ccomps.size() ) );
+    if ( indicateProgress )
+    {
+      m_progress.SetMessageKey("Searching for isomorphisms");
+      m_progress.Init( ccomps.size() == 1 ? INT_MAX : int( ccomps.size() ) );
+    }
 
     // Iterate over the connected components.
     for ( auto cit = ccomps.cbegin();
           cit != ccomps.cend() && !m_progress.IsCancelling();
-          ++cit, m_progress.StepProgress(1) )
+          ++cit )
     {
       // Recognize features in each connected component separately.
       G->PushSubgraph(*cit);
@@ -118,6 +122,9 @@ bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature)
         this->matchConnectedComponent(G, feature);
       }
       G->PopSubgraph(); // Pop connected component.
+
+      if ( indicateProgress )
+        m_progress.StepProgress(1);
     } // Loop for connected components.
   }
   G->PopSubgraph(); // Pop cylindrical holes.
@@ -125,7 +132,9 @@ bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature)
   m_progress.SendLogMessage( LogInfo(Normal) << "Found %1 isomorphous face(s)."
                                              << feature.Extent() );
 
-  m_progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+  if ( indicateProgress )
+    m_progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+
   return true;
 }
 

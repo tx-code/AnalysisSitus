@@ -95,10 +95,12 @@ public:
     Init(const TopoDS_Shape& masterCAD);
 
   //! Classifies the detected features using graph isomorphism matching.
-  //! \param[out] feature found features.
+  //! \param[out] feature          found features.
+  //! \param[in]  indicateProgress whether to run progress indication.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT virtual bool
-    Classify(asiAlgo_Feature& feature);
+    Classify(asiAlgo_Feature& feature,
+             const bool       indicateProgress = true);
 
 public:
 
