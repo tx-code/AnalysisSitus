@@ -49,7 +49,8 @@ public:
   {
     Mode_None            = 0x00,
     Mode_MatchDimensions = 0x01, //!< `dim(P) == dim(G)` is required.
-    Mode_MatchGeometry   = 0x02  //!< Features' geometric props should match.
+    Mode_MatchGeometry   = 0x02, //!< Features' geometric props should match.
+    Mode_MatchCardinals  = 0x04  //!< Numbers of edges and verices should match.
   };
 
 public:
@@ -60,16 +61,6 @@ public:
   asiAlgo_EXPORT
     asiAlgo_Isomorphism(ActAPI_ProgressEntry progress = nullptr,
                         ActAPI_PlotterEntry  plotter  = nullptr);
-
-  //! Ctor accepting the attributed adjacency graph `G` (the
-  //! one where to look for subgraphs).
-  //! \param[in] G_aag    main graph.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
-  asiAlgo_EXPORT
-    asiAlgo_Isomorphism(const Handle(asiAlgo_AAG)& G_aag,
-                        ActAPI_ProgressEntry       progress = nullptr,
-                        ActAPI_PlotterEntry        plotter  = nullptr);
 
 public:
 
@@ -94,6 +85,15 @@ public:
   //! \return true if the graphs' dimensions are requested to match.
   asiAlgo_EXPORT bool
     GetMatchDimensions() const;
+
+  //! Enables/disables the cardinality numbers matching mode.
+  //! \param[in] on the mode to set (true/false).
+  asiAlgo_EXPORT void
+    SetMatchCardinals(const bool on);
+
+  //! \return true if the cardinality numbers are requested to match.
+  asiAlgo_EXPORT bool
+    GetMatchCardinals() const;
 
 public:
 

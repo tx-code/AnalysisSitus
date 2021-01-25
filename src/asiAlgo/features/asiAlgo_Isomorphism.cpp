@@ -48,20 +48,7 @@ asiAlgo_Isomorphism::asiAlgo_Isomorphism(ActAPI_ProgressEntry progress,
 : ActAPI_IAlgorithm(progress, plotter)
 {
   m_iNumTests = 0;
-  m_iModes    = Mode_None;
-}
-
-//-----------------------------------------------------------------------------
-
-asiAlgo_Isomorphism::asiAlgo_Isomorphism(const Handle(asiAlgo_AAG)& G,
-                                         ActAPI_ProgressEntry       progress,
-                                         ActAPI_PlotterEntry        plotter)
-: ActAPI_IAlgorithm(progress, plotter)
-{
-  m_iNumTests = 0;
-  m_iModes    = Mode_None;
-
-  this->InitGraph(G);
+  m_iModes    = Mode_MatchCardinals;
 }
 
 //-----------------------------------------------------------------------------
@@ -96,6 +83,23 @@ void asiAlgo_Isomorphism::SetMatchDimensions(const bool on)
 bool asiAlgo_Isomorphism::GetMatchDimensions() const
 {
   return (m_iModes & Mode_MatchDimensions) > 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Isomorphism::SetMatchCardinals(const bool on)
+{
+  if ( on )
+    m_iModes |= Mode_MatchCardinals;
+  else
+    m_iModes &= (~Mode_MatchCardinals);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Isomorphism::GetMatchCardinals() const
+{
+  return (m_iModes & Mode_MatchCardinals) > 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -240,14 +244,16 @@ void asiAlgo_Isomorphism::fillFacesInfo(const Handle(asiAlgo_AAG)&            aa
     const t_topoId     fid = it->GetFaceId();
     const TopoDS_Face& F   = aag->GetFace(fid);
 
-    TopTools_IndexedMapOfShape verts;
-    TopExp::MapShapes(F, TopAbs_VERTEX, verts);
-
-    TopTools_IndexedMapOfShape edges;
-    TopExp::MapShapes(F, TopAbs_EDGE, edges);
-
-    TopTools_IndexedMapOfShape wires;
-    TopExp::MapShapes(F, TopAbs_WIRE, wires);
+    // Do not collect topologies if cardinal numbers are not requested
+    // to match.
+    TopTools_IndexedMapOfShape verts, edges, wires;
+    //
+    if ( this->GetMatchCardinals() )
+    {
+      TopExp::MapShapes(F, TopAbs_VERTEX, verts);
+      TopExp::MapShapes(F, TopAbs_EDGE,   edges);
+      TopExp::MapShapes(F, TopAbs_WIRE,   wires);
+    }
 
     t_faceInfo info;
     info.surf   = BRep_Tool::Surface(F);

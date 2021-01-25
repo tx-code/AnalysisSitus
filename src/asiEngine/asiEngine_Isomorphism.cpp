@@ -144,7 +144,9 @@ bool asiEngine_Isomorphism::Compute(const TCollection_AsciiString& featureName,
       }
 
       // Prepare isomorphism algo.
-      asiAlgo_Isomorphism isomorphism(G, m_progress, m_plotter);
+      asiAlgo_Isomorphism isomorphism(m_progress, m_plotter);
+      //
+      isomorphism.InitGraph(G);
 
       // Find isomorphisms.
       if ( !isomorphism.Perform(P) )
