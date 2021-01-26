@@ -1196,6 +1196,123 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_SetName(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  // Get the item in question.
+  std::string itemIdStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "item", itemIdStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Assembly item is not defined.");
+    return TCL_ERROR;
+  }
+  //
+  asiAsm_XdeAssemblyItemId aiid( itemIdStr.c_str() );
+
+  // Get new name.
+  std::string itemName;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", itemName) )
+    itemName = aiid.ToString().ToCString();
+
+  TDF_Label original = doc->GetOriginal(aiid);
+  doc->SetObjectName( original, itemName.c_str() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Get items.
+  asiAsm_XdeAssemblyItemIds items, leaves;
+  int itemsIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
+  {
+    for ( int ii = itemsIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+    }
+
+    xdeDoc->GetLeafAssemblyItems(items, leaves);
+  }
+  else
+  {
+    xdeDoc->GetLeafAssemblyItems(leaves);
+  }
+
+  // Get parts.
+  asiAsm_XdePartIds parts;
+  xdeDoc->GetParts(leaves, parts, true);
+
+  TIMER_NEW
+  TIMER_GO
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. parts to remove: %1."
+                                                        << parts.Length() );
+
+  xdeDoc->RemoveParts(parts, true);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-remove-parts")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -1346,4 +1463,21 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Performs KEA test.",
     //
     __FILE__, group, ASMXDE_KEA);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-set-name",
+    //
+    "asm-xde-set-as-var -model <M> -item <id> -name <name>\n"
+    "\t Sets new name for the passed assembly item.",
+    //
+    __FILE__, group, ASMXDE_SetName);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-remove-parts",
+    //
+    "asm-xde-remove-parts -model <M> [-items <item_1> ... <item_k>]\n"
+    "\t Removes parts corresponding to the passed assembly items with all\n"
+    "\t their occurrences in the model.",
+    //
+    __FILE__, group, ASMXDE_RemoveParts);
 }

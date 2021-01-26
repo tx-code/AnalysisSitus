@@ -365,6 +365,14 @@ bool asiAsm_XdeDoc::FindItems(const std::string&                     name,
 
 //-----------------------------------------------------------------------------
 
+void asiAsm_XdeDoc::SetObjectName(const TDF_Label&                  label,
+                                  const TCollection_ExtendedString& name)
+{
+  TDataStd_Name::Set(label, name);
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePersistentId& id,
                                   TCollection_ExtendedString&   name) const
 {
@@ -1994,6 +2002,58 @@ asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const TopoDS_Shape& shape,
 asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const std::string& name)
 {
   return this->AddPart(TopoDS_Shape(), name);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::RemoveParts(const asiAsm_XdePartIds& parts,
+                                const bool               doUpdateAssemblies)
+{
+  Handle(XCAFDoc_ShapeTool) ShapeTool = this->GetShapeTool();
+
+  // Get labels to clean up.
+  TDF_LabelSequence list2Delete;
+  //
+  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  {
+    const asiAsm_XdePartId& part      = pit.Value();
+    TDF_Label               partLabel = this->GetLabel(part);
+
+    if ( partLabel.IsNull() )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "No persistent part can be found for ID %1."
+                                                << part.ToString() );
+      return false;
+    }
+
+    // Instances.
+    TDF_LabelSequence curList2Delete;
+    this->GetLabelsOfReplicas(partLabel, curList2Delete);
+    //
+    list2Delete.Append(curList2Delete);
+    list2Delete.Append(partLabel);
+  }
+
+  // Remove data.
+  for ( TDF_LabelSequence::Iterator lit(list2Delete); lit.More(); lit.Next() )
+  {
+    const TDF_Label& label = lit.Value();
+
+    if ( ShapeTool->IsSimpleShape(label) )
+    {
+      ShapeTool->RemoveShape(label);
+    }
+    else
+    {
+      label.ForgetAllAttributes();
+    }
+  }
+
+  // Update assemblies.
+  if ( doUpdateAssemblies )
+    this->UpdateAssemblies();
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------

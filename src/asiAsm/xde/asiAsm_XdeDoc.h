@@ -156,6 +156,13 @@ public:
     FindItems(const std::string&                     name,
               Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
 
+  //! Sets name for the label.
+  //! \param[in] label label.
+  //! \param[in] name  name to set.
+  asiAsm_EXPORT void
+    SetObjectName(const TDF_Label&                  label,
+                  const TCollection_ExtendedString& name);
+
   //! Returns the name which is associated directly with the given object ID.
   //! \param[in]  id   object ID.
   //! \param[out] name object name (empty string if no name is available).
@@ -823,6 +830,15 @@ public:
   //! \return ID of the newly added part.
   asiAsm_EXPORT asiAsm_XdePartId
     AddPart(const std::string& name);
+
+  //! Removes all given parts with their instances from the document.
+  //! \param[in] parts              parts to remove.
+  //! \param[in] doUpdateAssemblies indicates whether to update assemblies
+  //!                               upon removal of parts.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    RemoveParts(const asiAsm_XdePartIds& parts,
+                const bool               doUpdateAssemblies = true);
 
 public:
 
