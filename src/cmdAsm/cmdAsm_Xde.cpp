@@ -1467,7 +1467,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-set-name",
     //
-    "asm-xde-set-as-var -model <M> -item <id> -name <name>\n"
+    "asm-xde-set-name -model <M> -item <id> -name <name>\n"
     "\t Sets new name for the passed assembly item.",
     //
     __FILE__, group, ASMXDE_SetName);
