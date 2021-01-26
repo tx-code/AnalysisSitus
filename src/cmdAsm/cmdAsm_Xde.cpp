@@ -1451,7 +1451,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-set-as-var",
     //
-    "asm-xde-set-as-var -model <M> -item <id> [-name <varName>] [-color rgb(<ured>, <ugreen>, <ublue>)]\n"
+    "asm-xde-set-as-var -model <M> -item <id> [-name <varName>] [-color rgb(<ured>,<ugreen>,<ublue>)]\n"
     "\t Sets the passed assembly item as a project variable.",
     //
     __FILE__, group, ASMXDE_SetAsVar);
