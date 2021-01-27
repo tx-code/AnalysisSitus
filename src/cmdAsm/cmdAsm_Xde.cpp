@@ -154,7 +154,8 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
   //
   if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified. "
+                                                           "Did you forget the '-filename' key?");
     return TCL_ERROR;
   }
 
@@ -202,7 +203,8 @@ int ASMXDE_Save(const Handle(asiTcl_Interp)& interp,
   //
   if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified. "
+                                                           "Did you forget the '-filename' key?");
     return TCL_ERROR;
   }
 
@@ -762,7 +764,8 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   //
   if ( !interp->GetKeyValue(argc, argv, "filename", filenameArg) )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified. "
+                                                           "Did you forget the '-filename' key?");
     return TCL_ERROR;
   }
   //
@@ -1293,17 +1296,52 @@ int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
     xdeDoc->GetLeafAssemblyItems(leaves);
   }
 
-  // Get parts.
-  asiAsm_XdePartIds parts;
-  xdeDoc->GetParts(leaves, parts, true);
+  // Get parts to remove.
+  asiAsm_XdePartIds partsPassed, parts2Remove;
+  xdeDoc->GetParts(leaves, partsPassed, true);
+
+  // Check whether the selection of parts to remove should be inverted.
+  if ( interp->HasKeyword(argc, argv, "invert") )
+  {
+    // Get all parts in the model.
+    asiAsm_XdePartIds allParts;
+    xdeDoc->GetParts(allParts);
+
+    // Keep only those parts that have not been passed.
+    for ( asiAsm_XdePartIds::Iterator allPartsIt(allParts); allPartsIt.More(); allPartsIt.Next() )
+    {
+      const asiAsm_XdePartId& pid1 = allPartsIt.Value();
+
+      // Check if the part is passed as an input.
+      bool isPassed = false;
+      for ( asiAsm_XdePartIds::Iterator passedPartsIt(partsPassed); passedPartsIt.More(); passedPartsIt.Next() )
+      {
+        const asiAsm_XdePartId& pid2 = passedPartsIt.Value();
+        //
+        if ( pid1.IsEqual(pid2) )
+        {
+          isPassed = true;
+          break;
+        }
+      }
+
+      if ( !isPassed )
+        parts2Remove.Append(pid1);
+    }
+  }
+  else
+  {
+    parts2Remove = partsPassed;
+  }
 
   TIMER_NEW
   TIMER_GO
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. parts to remove: %1."
-                                                        << parts.Length() );
+                                                        << parts2Remove.Length() );
 
-  xdeDoc->RemoveParts(parts, true);
+  xdeDoc->RemoveParts(parts2Remove, false);
+  xdeDoc->RemoveAllEmptyAssemblies();
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-remove-parts")
@@ -1475,9 +1513,11 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-remove-parts",
     //
-    "asm-xde-remove-parts -model <M> [-items <item_1> ... <item_k>]\n"
+    "asm-xde-remove-parts -model <M> [-items <item_1> ... <item_k>] [-invert]\n"
     "\t Removes parts corresponding to the passed assembly items with all\n"
-    "\t their occurrences in the model.",
+    "\t their occurrences in the model. If the '-invert' flag is passed, the\n"
+    "\t passed items along with all their children will remain in the model,\n"
+    "\t while all other parts will be removed instead.",
     //
     __FILE__, group, ASMXDE_RemoveParts);
 }

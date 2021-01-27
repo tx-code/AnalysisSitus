@@ -2058,6 +2058,28 @@ bool asiAsm_XdeDoc::RemoveParts(const asiAsm_XdePartIds& parts,
 
 //-----------------------------------------------------------------------------
 
+void asiAsm_XdeDoc::RemoveAllEmptyAssemblies()
+{
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+
+  // Remove subassemblies for each top-level "shape".
+  TDF_LabelSequence topShapes;
+  ST->GetShapes(topShapes);
+  //
+  for ( TDF_LabelSequence::Iterator it(topShapes); it.More(); it.Next() )
+  {
+    TDF_Label label = it.Value();
+    //
+    if ( ST->IsAssembly(label) || ST->IsReference(label) )
+      this->removeEmptySubAssemblies(label);
+  }
+
+  // Update necessary structures.
+  this->UpdateAssemblies();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 {
   for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
@@ -2842,6 +2864,64 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         
       path.pop_back();
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAsm_XdeDoc::removeEmptyAssembly(const TDF_Label& assembly,
+                                        const bool       isUpdate)
+{
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+  //
+  if ( !ST->IsAssembly(assembly) )
+    return false;
+  //
+  if ( ST->NbComponents(assembly) > 0 )
+    return false;
+
+  TDF_LabelSequence users;
+  const int nbUsers = ST->GetUsers(assembly, users);
+  //
+  for ( int i = 1; i <= nbUsers; ++i )
+  {
+    users.Value(i).ForgetAllAttributes();
+  }
+
+  const bool isOk = ST->RemoveShape(assembly);
+
+  if ( isUpdate )
+    this->UpdateAssemblies();
+
+  return isOk;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_XdeDoc::removeEmptySubAssemblies(const TDF_Label& assembly)
+{
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+
+  TDF_Label asmLab = assembly;
+  //
+  if ( ST->IsReference(assembly) )
+    ST->GetReferredShape(assembly, asmLab);
+
+  TDF_LabelSequence components;
+  ST->GetComponents(asmLab, components);
+  //
+  for ( int i = 1; i <= components.Length(); ++i )
+  {
+    TDF_Label compLab = components.Value(i);
+
+    if ( ST->IsReference(compLab) )
+      ST->GetReferredShape(compLab, compLab);
+
+    if ( ST->IsAssembly(compLab) )
+      this->removeEmptySubAssemblies(compLab);
+  }
+
+  if ( ST->NbComponents(asmLab) == 0 )
+    this->removeEmptyAssembly(asmLab, false);
 }
 
 //-----------------------------------------------------------------------------

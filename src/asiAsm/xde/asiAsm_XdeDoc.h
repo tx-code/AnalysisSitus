@@ -840,6 +840,10 @@ public:
     RemoveParts(const asiAsm_XdePartIds& parts,
                 const bool               doUpdateAssemblies = true);
 
+  //! Removes all empty assemblies and their components.
+  asiAsm_EXPORT void
+    RemoveAllEmptyAssemblies();
+
 public:
 
   //! Dumps assembly hierarchy to the passed output stream.
@@ -1015,6 +1019,21 @@ protected:
                          const std::string&                     name,
                          std::vector<int>&                      path,
                          Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+
+  //! Removes the given assembly in the case it's empty.
+  //! \param[in] assembly the assembly label to remove.
+  //! \param[in] isUpdate the Boolean flag indicating whether to perform update.
+  //! \return true in case of success, false otherwise.
+  asiAsm_EXPORT bool
+    removeEmptyAssembly(const TDF_Label& assembly,
+                        const bool       isUpdate = true);
+
+  //! Removes the passed (sub)assembly together with all its hierarchically
+  //! nested components in the case its hierarchy is orphan (i.e., it contains
+  //! no real product data).
+  //! \param[in] assembly the target assembly label.
+  asiAsm_EXPORT void
+    removeEmptySubAssemblies(const TDF_Label& assembly);
 
 private:
 
