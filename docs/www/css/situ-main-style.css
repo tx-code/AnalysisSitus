@@ -7,6 +7,13 @@ body {
   line-height: 1.5;
   max-width: 1000px;
 }
+p {
+  margin-bottom: 30px;
+}
+.content-body {
+  margin-left: 4%;
+  margin-right: 4%;
+}
 a {
   color: #447790;
 }
@@ -76,12 +83,11 @@ a:visited:hover {
   padding-bottom: 15px;
   background-color: rgb(60, 60, 60);
   color: rgb(230, 230, 230);
-  font-size: 16pt;
   font-family: Menlo, Monaco, "Courier New", Courier, monospace;
 }
 .header-logo {
   color: rgb(230, 230, 230);
-  font-size: 38px;
+  font-size: 38pt;
   font-family: medium-content-serif-font, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 .footer {
@@ -180,7 +186,7 @@ a.footer-href {
   font-family: Menlo, Monaco, "Courier New", Courier, monospace;
 }
 li.text-block {
-  margin: 10px 0;
+  margin: 30px 0;
 }
 h1 {
   color: rgb(0, 0, 0);
