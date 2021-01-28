@@ -114,15 +114,17 @@ asiUI_DialogFindFace::asiUI_DialogFindFace(const Handle(asiEngine_Model)&       
   QGridLayout* pGrid = new QGridLayout(pGroup);
   pGrid->setSpacing(5);
   //
-  pGrid->addWidget(new QLabel("Face ID type:"),         0, 0);
-  pGrid->addWidget(new QLabel("Face index (1-based):"), 1, 0);
-  pGrid->addWidget(new QLabel("Face address:"),         2, 0);
-  pGrid->addWidget(new QLabel("Face name:"),            3, 0);
+  pGrid->addWidget(new QLabel("Face ID type:"),           0, 0);
+  pGrid->addWidget(new QLabel("Face indices (1-based):"), 1, 0);
+  pGrid->addWidget(new QLabel("Face address:"),           2, 0);
+  pGrid->addWidget(new QLabel("Face name:"),              3, 0);
   //
   pGrid->addWidget(m_widgets.pFaceIdSel,   0, 1);
   pGrid->addWidget(m_widgets.pIdSerial,    1, 1);
   pGrid->addWidget(m_widgets.pIdTransient, 2, 1);
   pGrid->addWidget(m_widgets.pIdName,      3, 1);
+  //
+  m_widgets.pIdSerial->setToolTip("Ex: \"10 15 42\" or \"10, 15, 42\"");
   //
   pGrid->setColumnStretch(0, 0);
   pGrid->setColumnStretch(1, 1);
@@ -185,17 +187,22 @@ void asiUI_DialogFindFace::onFind()
 
   if ( typeIdx == FaceIdType_Serial )
   {
-    const int face_id = m_widgets.pIdSerial->text().toInt();
+    QStringList fidList = m_widgets.pIdSerial->text().split(QRegExp("[\\s,]+"), QString::SkipEmptyParts);
 
-    if ( face_id > 0 && face_id <= faces.Extent() )
+    for ( const auto& fidStr : fidList )
     {
-      const TopoDS_Shape& face = faces.FindKey(face_id);
-      found.Add(face);
-    }
-    else
-    {
-      m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
-                                                << face_id << faces.Extent() );
+      const int fid = fidStr.toInt();
+
+      if ( fid > 0 && fid <= faces.Extent() )
+      {
+        const TopoDS_Shape& face = faces.FindKey(fid);
+        found.Add(face);
+      }
+      else
+      {
+        m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
+                                                  << fid << faces.Extent() );
+      }
     }
   }
 
