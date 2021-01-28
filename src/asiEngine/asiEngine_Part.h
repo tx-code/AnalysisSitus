@@ -449,7 +449,10 @@ public:
       if ( fid == maxVotedFid )
       {
         distance = probe.second.second.Magnitude();
-        norm     = probe.second.second.Normalized();
+
+        if ( Abs(distance) > Precision::Confusion() )
+          norm = probe.second.second.Normalized();
+
         break; // Let's take just the first distance for now.
       }
     }

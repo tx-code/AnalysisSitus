@@ -40,6 +40,9 @@
 // asiAsm includes
 #include <asiAsm_XdeDocIterator.h>
 
+// asiEngine includes
+#include <asiEngine_Part.h>
+
 // glTF includes
 #include <gltf_XdeWriter.h>
 
@@ -49,6 +52,7 @@
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
 #include <UnitsMethods.hxx>
 
 using namespace asiAsm;
@@ -1074,21 +1078,61 @@ int ASMXDE_SetAsVar(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+TopoDS_Shape BuildToolPrism(const Handle(asiAlgo_AAG)& aag,
+                            const int                  fidFrom,
+                            ActAPI_ProgressEntry       progress)
+{
+  const TopoDS_Face& faceFrom = aag->GetFace(fidFrom);
+  //
+  if ( !asiAlgo_Utils::IsPlanar(faceFrom) )
+    return TopoDS_Shape();
+
+  int    fidTo = 0;
+  double dist  = 0.;
+  gp_Vec norm;
+
+  // Measure the distance between 'from' and 'to'.
+  if ( !asiEngine_Part::ComputeMateFace<Geom_Plane>(aag,
+                                                    fidFrom,
+                                                    asiAlgo_Feature(),
+                                                    3,
+                                                    false,
+                                                    fidTo,
+                                                    dist,
+                                                    norm) )
+  {
+    progress.SendLogMessage(LogErr(Normal) << "Cannot find a mate face for the face %1."
+                                           << fidFrom);
+    return TopoDS_Shape();
+  }
+
+  if ( norm.Magnitude() < Precision::Confusion() || Abs(dist) < Precision::Confusion() )
+    return TopoDS_Shape();
+
+  // Make a tool object.
+  TopoDS_Shape result;
+  try
+  {
+    BRepPrimAPI_MakePrism mkPrism(faceFrom,
+                                  norm.Normalized()*dist,
+                                  true);
+    //
+    result = mkPrism.Shape();
+  }
+  catch ( ... )
+  {
+    progress.SendLogMessage(LogErr(Normal) << "Failed to build prism from face %1."
+                                           << fidFrom);
+    return TopoDS_Shape();
+  }
+
+  return result;
+}
+
 int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
                int                          argc,
                const char**                 argv)
 {
-  // Get Part Node.
-  Handle(asiData_PartNode) partNode = cmdAsm::model->GetPartNode();
-  //
-  if ( partNode.IsNull() || !partNode->IsWellFormed() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
-    return TCL_ERROR;
-  }
-  //
-  TopoDS_Shape shape = partNode->GetShape();
-
   // Get model name.
   std::string modelName;
   //
@@ -1114,6 +1158,10 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
+  /* ======================
+   *  Find invisible faces.
+   * ====================== */
+
   // Prepare visibility checker. We initialize it with the entire model
   // to check for collisions with every part of an assembly.
   TopoDS_Shape asmShape = xdeDoc->GetOneShape();
@@ -1122,13 +1170,17 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
                                         interp->GetProgress(),
                                         interp->GetPlotter() );
 
+  Handle(asiAlgo_AAG) asmAag = new asiAlgo_AAG(asmShape);
+
   // Map faces to be able to derive subdomains.
-  TopTools_IndexedMapOfShape allFaces;
-  TopExp::MapShapes(asmShape, TopAbs_FACE, allFaces);
+  const TopTools_IndexedMapOfShape& allFaces = asmAag->GetMapOfFaces();
 
   // Get all leaves of the model.
   asiAsm_XdeAssemblyItemIds leaves;
   xdeDoc->GetLeafAssemblyItems(leaves);
+
+  TopoDS_Compound allTools;
+  BRep_Builder().MakeCompound(allTools);
 
   // Iterate over all parts of the model.
   for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves); aiit.More(); aiit.Next() )
@@ -1169,27 +1221,43 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
     }
 
     // Get visible faces.
-    asiAlgo_Feature resIndices;
-    FindVisible.GetResultFaces(resIndices);
+    asiAlgo_Feature visibleIndices;
+    FindVisible.GetResultFaces(visibleIndices);
 
-    TopoDS_Compound comp;
+    // Invert to get the invisible faces.
+    asiAlgo_Feature resIndices = itemSubdomain;
+    resIndices.Subtract(visibleIndices);
+
+    TopoDS_Compound comp, tools;
     BRep_Builder().MakeCompound(comp);
+    BRep_Builder().MakeCompound(tools);
     //
     for ( asiAlgo_Feature::Iterator rit(resIndices); rit.More(); rit.Next() )
     {
       const int fid = rit.Key();
 
       BRep_Builder().Add( comp, allFaces(fid) );
+
+      TopoDS_Shape prism = BuildToolPrism( asmAag, fid, interp->GetProgress() );
+      //
+      if ( !prism.IsNull() )
+        BRep_Builder().Add( tools, prism );
     }
 
-    interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Found %1 visible out of %2 subdomain faces."
+    interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Found %1 invisible out of %2 subdomain faces."
                                                           << resIndices.Extent() << itemSubdomain.Extent() );
 
-    TCollection_AsciiString groupName("visible ");
+    TCollection_AsciiString groupName("invisible "), toolName("tools ");
     groupName += aiid.ToString();
+    toolName  += aiid.ToString();
     //
-    interp->GetPlotter().REDRAW_SHAPE(groupName, comp, Color_Red);
+    interp->GetPlotter().REDRAW_SHAPE(groupName, comp,  Color_Red);
+    interp->GetPlotter().REDRAW_SHAPE(toolName,  tools, Color_White);
+
+    BRep_Builder().Add(allTools, tools);
   }
+
+  interp->GetPlotter().REDRAW_SHAPE("allTools", allTools, Color_White);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-kea")
