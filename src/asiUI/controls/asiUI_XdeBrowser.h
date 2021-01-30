@@ -59,9 +59,9 @@ class asiUI_EXPORT asiUI_XdeBrowser : public QTreeWidget
 public:
 
   //! Creates a new instance of tree view.
-  //! \param[in] model    XDE document to browse.
-  //! \param[in] cf       common facilities.
-  //! \param[in] parent   parent widget (if any).
+  //! \param[in] model  XDE document to browse.
+  //! \param[in] cf     common facilities.
+  //! \param[in] parent parent widget (if any).
   asiUI_XdeBrowser(const Handle(asiAsm_XdeDoc)&          doc,
                    const Handle(asiUI_CommonFacilities)& cf,
                    QWidget*                              parent = nullptr);

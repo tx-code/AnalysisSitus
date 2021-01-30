@@ -39,6 +39,7 @@
 
 // Forward declarations from the global namespace.
 class TDocStd_Document;
+class XCAFDoc_ShapeTool;
 
 //-----------------------------------------------------------------------------
 
@@ -393,21 +394,22 @@ protected:
 
   typedef std::shared_ptr<gltf_JsonSerializer> gltf_JsonSerializerPtr;
 
-  TCollection_AsciiString m_filename;          //!< Output glTF file.
-  TCollection_AsciiString m_binFilenameFull;   //!< Output file with binary data (full path).
-  TCollection_AsciiString m_binFilenameShort;  //!< Output file with binary data (short path).
-  gltf_WriterTrsfFormat   m_trsfFormat;        //!< Transformation format to use in glTF file.
-  bool                    m_bIsBinary;         //!< Flag to write into binary glTF format (.glb).
-  bool                    m_bIsForcedUVExport; //!< Export UV coordinates even if there are no mapped texture.
-  gltf_CSysConverter      m_CSTrsf;            //!< Transformation from OCCT to glTF coordinate system.
-  gltf_XdeVisualStyle     m_defaultStyle;      //!< Default material definition to be used for nodes with only color defined.
-  gltf_JsonSerializerPtr  m_jsonWriter;        //!< JSON writer.
-  gltf_BufferView         m_buffViewPos;       //!< Current buffer view with nodes positions.
-  gltf_BufferView         m_buffViewNorm;      //!< Current buffer view with nodes normals.
-  gltf_BufferView         m_buffViewTextCoord; //!< Current buffer view with nodes UV coordinates.
-  gltf_BufferView         m_buffViewInd;       //!< Current buffer view with triangulation indexes.
-  t_shapeFacetsMap        m_binDataMap;        //!< Map for TopoDS_Face to glTF face (merging duplicates).
-  int64_t                 m_binDataLen64;      //!< Length of binary file.
+  Handle(XCAFDoc_ShapeTool) m_shapeTool;         //!< Shape Tool of XCAF.
+  TCollection_AsciiString   m_filename;          //!< Output glTF file.
+  TCollection_AsciiString   m_binFilenameFull;   //!< Output file with binary data (full path).
+  TCollection_AsciiString   m_binFilenameShort;  //!< Output file with binary data (short path).
+  gltf_WriterTrsfFormat     m_trsfFormat;        //!< Transformation format to use in glTF file.
+  bool                      m_bIsBinary;         //!< Flag to write into binary glTF format (.glb).
+  bool                      m_bIsForcedUVExport; //!< Export UV coordinates even if there are no mapped texture.
+  gltf_CSysConverter        m_CSTrsf;            //!< Transformation from OCCT to glTF coordinate system.
+  gltf_XdeVisualStyle       m_defaultStyle;      //!< Default material definition to be used for nodes with only color defined.
+  gltf_JsonSerializerPtr    m_jsonWriter;        //!< JSON writer.
+  gltf_BufferView           m_buffViewPos;       //!< Current buffer view with nodes positions.
+  gltf_BufferView           m_buffViewNorm;      //!< Current buffer view with nodes normals.
+  gltf_BufferView           m_buffViewTextCoord; //!< Current buffer view with nodes UV coordinates.
+  gltf_BufferView           m_buffViewInd;       //!< Current buffer view with triangulation indexes.
+  t_shapeFacetsMap          m_binDataMap;        //!< Map for TopoDS_Face to glTF face (merging duplicates).
+  int64_t                   m_binDataLen64;      //!< Length of binary file.
 
 };
 

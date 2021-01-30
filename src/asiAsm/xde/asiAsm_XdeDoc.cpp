@@ -1149,11 +1149,11 @@ void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds& parent
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLabelsOfReplicas(const TDF_Label&   partLabel,
+void asiAsm_XdeDoc::GetLabelsOfReplicas(const TDF_Label&   label,
                                         TDF_LabelSequence& replicas)
 {
   Handle(TDataStd_TreeNode) TN;
-  if ( !partLabel.FindAttribute(XCAFDoc::ShapeRefGUID(), TN) )
+  if ( !label.FindAttribute(XCAFDoc::ShapeRefGUID(), TN) )
     return;
 
   for ( TDataStd_ChildNodeIterator nit(TN); nit.More(); nit.Next() )

@@ -326,7 +326,7 @@ The <span class="code-inline">asm-xde-set-as-var</span> function sets the passed
 <h2 id="toc-asm-xde-set-name">asm-xde-set-name</h2>
 
 <p>
-The <span class="code-inline">asm-xde-set-name</span> function assigns the passed name to a prototype referenced by given assembly item. The prototype to rename is either a part or a subassembly. It is currently not allowed to rename instances.
+The <span class="code-inline">asm-xde-set-name</span> function assigns the passed name to a part/subassembly or its instance referenced by given assembly item ID. By default, the name is set for a prototype (i.e., the object being referenced). To name an instance, pass <span class="code-inline">-instance</span> key.
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-set-name_01.png"/></div>

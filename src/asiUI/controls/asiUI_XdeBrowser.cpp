@@ -127,9 +127,6 @@ asiUI_XdeBrowser::asiUI_XdeBrowser(const Handle(asiAsm_XdeDoc)&          doc,
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   //
   connect( this, SIGNAL( customContextMenuRequested(QPoint) ), this, SLOT( onContextMenu(QPoint) ) );
-
-  // Title.
-  this->setWindowTitle("XDE hierarchy (visited HAG)");
 }
 
 //-----------------------------------------------------------------------------

@@ -55,6 +55,12 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <UnitsMethods.hxx>
 
+// Qt includes
+#pragma warning(push, 0)
+#include <QDialog>
+#include <QMainWindow>
+#pragma warning(pop)
+
 using namespace asiAsm;
 
 //-----------------------------------------------------------------------------
@@ -315,15 +321,35 @@ int ASMXDE_Browse(const Handle(asiTcl_Interp)& interp,
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
 
+  // Get optional title.
+  std::string title;
+  //
+  interp->GetKeyValue(argc, argv, "title", title);
+
   TIMER_NEW
   TIMER_GO
 
-  // Open UI widget for browsing the assembly structure.
-  asiUI_XdeBrowser* pBrowser = new asiUI_XdeBrowser(xdeModel->GetDocument(), cmdAsm::cf);
+  // Prepare browser.
+  asiUI_XdeBrowser*
+    pBrowser = new asiUI_XdeBrowser( xdeModel->GetDocument(),
+                                     cmdAsm::cf,
+                                     nullptr );
   //
   pBrowser->Populate();
+
+  // Open UI dialog.
+  QWidget* pDlg = new QDialog(cmdAsm::cf->MainWindow);
   //
-  pBrowser->show();
+  pDlg->setWindowTitle( title.empty() ? "XDE Browser" : title.c_str() );
+  //
+  QVBoxLayout* pDlgLayout = new QVBoxLayout;
+  pDlgLayout->setAlignment(Qt::AlignTop);
+  pDlgLayout->setContentsMargins(10, 10, 10, 10);
+  //
+  pDlgLayout->addWidget(pBrowser);
+  pDlg->setLayout(pDlgLayout);
+  //
+  pDlg->show();
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-browse")
@@ -1293,6 +1319,9 @@ int ASMXDE_SetName(const Handle(asiTcl_Interp)& interp,
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
   Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
 
+  // Whether to set names for instances.
+  const bool is4Instance = interp->HasKeyword(argc, argv, "instance");
+
   // Get the item in question.
   std::string itemIdStr;
   //
@@ -1310,8 +1339,18 @@ int ASMXDE_SetName(const Handle(asiTcl_Interp)& interp,
   if ( !interp->GetKeyValue(argc, argv, "name", itemName) )
     itemName = aiid.ToString().ToCString();
 
-  TDF_Label original = doc->GetOriginal(aiid);
-  doc->SetObjectName( original, itemName.c_str() );
+  TDF_Label targetLabel;
+  //
+  if ( is4Instance )
+  {
+    targetLabel = doc->GetLabel(aiid);
+  }
+  else
+  {
+    targetLabel = doc->GetOriginal(aiid);
+  }
+
+  doc->SetObjectName( targetLabel, itemName.c_str() );
 
   return TCL_OK;
 }
@@ -1459,8 +1498,10 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-browse",
     //
-    "asm-xde-browse -model <M>\n"
-    "\t Opens a dialog to browse the structure of the XDE document named <M>.",
+    "asm-xde-browse -model <M> [-title <title>]\n"
+    "\t Opens a dialog to browse the structure of the XDE document named <M>.\n"
+    "\t If the '-title' argument is passed, the browser gets the specified title\n"
+    "\t in its window.",
     //
     __FILE__, group, ASMXDE_Browse);
 
@@ -1573,8 +1614,9 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-set-name",
     //
-    "asm-xde-set-name -model <M> -item <id> -name <name>\n"
-    "\t Sets new name for the passed assembly item.",
+    "asm-xde-set-name -model <M> -item <id> -name <name> [-instance]\n"
+    "\t Sets new name for the passed assembly item. If the '-instance' flag is\n"
+    "\t specified, the name will be set for the instances of the given prototype.",
     //
     __FILE__, group, ASMXDE_SetName);
 

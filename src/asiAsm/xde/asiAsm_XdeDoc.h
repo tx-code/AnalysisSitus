@@ -609,8 +609,8 @@ public:
                          asiAsm_XdeAssemblyItemIds&      items) const;
 
   //! Collects all replicas for the given list.
-  //! \param[in]  partLabel part label.
-  //! \param[out] replicas  labels of replicas.
+  //! \param[in]  label    original's label.
+  //! \param[out] replicas labels of replicas.
   asiAsm_EXPORT void
     GetLabelsOfReplicas(const TDF_Label&   partLabel,
                         TDF_LabelSequence& replicas);

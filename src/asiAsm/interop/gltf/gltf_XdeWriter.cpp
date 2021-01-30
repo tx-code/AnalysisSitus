@@ -90,11 +90,31 @@ namespace
 
 #if defined USE_RAPIDJSON
   //! Reads name attribute.
-  static TCollection_AsciiString readNameAttribute(const TDF_Label& refLabel)
+  static TCollection_AsciiString readNameAttribute(const Handle(XCAFDoc_ShapeTool)& ST,
+                                                   const TDF_Label&                 refLabel,
+                                                   const bool                       usePrototypeNames = false)
   {
+    TDF_Label lab;
+
+    if ( usePrototypeNames )
+    {
+      if ( ST->IsReference(refLabel) )
+      {
+        ST->GetReferredShape(refLabel, lab);
+      }
+      else
+      {
+        lab = refLabel;
+      }
+    }
+    else
+    {
+      lab = refLabel;
+    }
+
     Handle(TDataStd_Name) nodeName;
     //
-    if ( !refLabel.FindAttribute( TDataStd_Name::GetID(), nodeName) )
+    if ( !lab.FindAttribute(TDataStd_Name::GetID(), nodeName) )
     {
       return TCollection_AsciiString();
     }
@@ -294,8 +314,9 @@ bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&            
                                      const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
   TDF_LabelSequence rootLabs;
-  Handle(XCAFDoc_ShapeTool) ST = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
-  ST->GetFreeShapes(rootLabs);
+  m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
+  m_shapeTool->GetFreeShapes(rootLabs);
+
   return this->Perform(doc, rootLabs, nullptr, fileInfo);
 }
 
@@ -306,6 +327,9 @@ bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&            
                                      const TColStd_MapOfAsciiString*             labFilter,
                                      const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
+  if ( m_shapeTool.IsNull() )
+    m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
+
   if ( !this->writeBinData(doc, rootLabs, labFilter) )
     return false;
 
@@ -695,7 +719,7 @@ bool asiAsm::gltf_XdeWriter::writeJson(const Handle(TDocStd_Document)&          
     {
       // glTF does not permit empty meshes / primitive arrays.
       m_progress.SendLogMessage( LogWarn(Normal) << "gltf_XdeWriter skips node '%1' without meshes."
-                                                 << ::readNameAttribute(docNode.RefLabel) );
+                                                 << ::readNameAttribute(m_shapeTool, docNode.RefLabel) );
     }
   }
 
@@ -1351,7 +1375,7 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
   for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
   {
     const XCAFPrs_DocumentNode&   docNode  = snIt.Value();
-    const TCollection_AsciiString nodeName = ::readNameAttribute(docNode.RefLabel);
+    const TCollection_AsciiString nodeName = ::readNameAttribute(m_shapeTool, docNode.RefLabel);
 
     bool toStartPrims  = true;
     int  nbFacesInNode = 0;
@@ -1533,7 +1557,7 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
         {
           // write full matrix
           Graphic3d_Mat4 mat4;
-          trsf.GetMat4 (mat4);
+          trsf.GetMat4(mat4);
           //
           if ( !mat4.IsIdentity() )
           {
@@ -1595,10 +1619,10 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
       }
     }
     {
-      TCollection_AsciiString nodeName = readNameAttribute(docNode.Label);
+      TCollection_AsciiString nodeName = readNameAttribute(m_shapeTool, docNode.Label);
       if ( nodeName.IsEmpty() )
       {
-        nodeName = readNameAttribute (docNode.RefLabel);
+        nodeName = readNameAttribute(m_shapeTool, docNode.RefLabel);
       }
       m_jsonWriter->Key("name");
       m_jsonWriter->String( nodeName.ToCString() );
