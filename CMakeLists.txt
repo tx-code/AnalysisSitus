@@ -218,6 +218,7 @@ if (NOT BUILD_ALGO_ONLY)
 
   if (WIN32)
     if (MSVC)
+      add_subdirectory(${CMAKE_SOURCE_DIR}/src/exeCli)
       add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTest)
     endif()
   endif()
@@ -253,7 +254,8 @@ if (NOT BUILD_ALGO_ONLY)
 
   if (WIN32)
     if (MSVC)
-      set_property(TARGET asiTest PROPERTY FOLDER Executables)
+      set_property(TARGET asiExeCli PROPERTY FOLDER Executables)
+      set_property(TARGET asiTest   PROPERTY FOLDER Executables)
     endif()
   endif()
 

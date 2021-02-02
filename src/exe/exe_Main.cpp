@@ -198,7 +198,7 @@ int main(int argc, char** argv)
   //---------------------------------------------------------------------------
 
   QByteArray resDir = appRoot + "/resources";
-  
+
   if ( QDir(resDir).exists() )
   {
     qputenv("CSF_PluginDefaults", resDir);

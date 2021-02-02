@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 13 October 2018
+// Created on: 02 February 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,73 +28,5 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_Keywords_h
-#define exe_Keywords_h
-
-//-----------------------------------------------------------------------------
-
-#define ASITUS_KW_runscript "runscript"
-
-//-----------------------------------------------------------------------------
-
-// asiAlgo includes
-#include <asiAlgo_Utils.h>
-
-// Standard includes
-#include <string>
-
-//-----------------------------------------------------------------------------
-
-class asiExe
-{
-public:
-
-  static bool IsKeyword(const std::string& opt,
-                        const std::string& key)
-  {
-    std::string slashedKey = "/"; slashedKey += key;
-    size_t      found      = opt.find(slashedKey);
-    //
-    if ( found == std::string::npos )
-      return false;
-
-    return true;
-  }
-
-  static bool HasKeyword(const int          argc,
-                         char**             argv,
-                         const std::string& key)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-        return true;
-    }
-    return false;
-  }
-
-  static bool GetKeyValue(const int          argc,
-                          char**             argv,
-                          const std::string& key,
-                          std::string&       value)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-      {
-        std::vector<std::string> chunks;
-        asiAlgo_Utils::Str::Split(argv[k], "=", chunks);
-
-        if ( chunks.size() != 2 )
-          return false;
-
-        value = chunks[1];
-        return true;
-      }
-    }
-    return false;
-  }
-
-};
-
-#endif
+// Own include
+#include <exe_BaseCmd.h>

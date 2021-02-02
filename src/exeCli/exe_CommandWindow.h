@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 13 October 2018
+// Created on: 02 February 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,72 +28,47 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_Keywords_h
-#define exe_Keywords_h
+#ifndef exe_CommandWindow_HeaderFile
+#define exe_CommandWindow_HeaderFile
 
-//-----------------------------------------------------------------------------
+// Win API
+#include <windows.h>
 
-#define ASITUS_KW_runscript "runscript"
+// asiExe includes
+#include <exe_CommandQueue.h>
 
-//-----------------------------------------------------------------------------
+// asiUI includes
+#include <asiUI_BatchFacilities.h>
 
-// asiAlgo includes
-#include <asiAlgo_Utils.h>
-
-// Standard includes
-#include <string>
-
-//-----------------------------------------------------------------------------
-
-class asiExe
+//! Class representing command window.
+class exe_CommandWindow
 {
 public:
 
-  static bool IsKeyword(const std::string& opt,
-                        const std::string& key)
-  {
-    std::string slashedKey = "/"; slashedKey += key;
-    size_t      found      = opt.find(slashedKey);
-    //
-    if ( found == std::string::npos )
-      return false;
+  exe_CommandWindow(const Handle(exe_CommandQueue)&      queue,
+                    const Handle(asiUI_BatchFacilities)& cf);
 
-    return true;
-  }
+  virtual ~exe_CommandWindow();
 
-  static bool HasKeyword(const int          argc,
-                         char**             argv,
-                         const std::string& key)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-        return true;
-    }
-    return false;
-  }
+public:
 
-  static bool GetKeyValue(const int          argc,
-                          char**             argv,
-                          const std::string& key,
-                          std::string&       value)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-      {
-        std::vector<std::string> chunks;
-        asiAlgo_Utils::Str::Split(argv[k], "=", chunks);
+  virtual bool
+    Create();
 
-        if ( chunks.size() != 2 )
-          return false;
+  virtual void
+    StartMessageLoop();
 
-        value = chunks[1];
-        return true;
-      }
-    }
-    return false;
-  }
+public:
+
+  static void
+    DisplayMessage(const std::string& From,
+                   const std::string& Message,
+                   const bool         newPrompt = true);
+
+private:
+
+  Handle(exe_CommandQueue)      m_queue; //!< Command queue.
+  Handle(asiUI_BatchFacilities) m_cf;    //!< Common facilities.
 
 };
 
