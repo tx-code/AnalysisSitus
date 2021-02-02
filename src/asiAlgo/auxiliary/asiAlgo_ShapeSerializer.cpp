@@ -217,8 +217,15 @@ bool asiAlgo_ShapeSerializer::convertBinToShape(const std::string& binStrShape,
   std::stringbuf buffer(binStrShape, std::ios::in | std::ios::binary);
   std::istream stream(&buffer);
   //
-  BinTools::Read(shape, stream);
-  //
+  try
+  {
+    BinTools::Read(shape, stream);
+  }
+  catch ( ... )
+  {
+    return false; // Bad buffer.
+  }
+
   return stream.good();
 }
 

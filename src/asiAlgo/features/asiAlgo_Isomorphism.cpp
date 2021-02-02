@@ -232,6 +232,20 @@ TColStd_PackedMapOfInteger asiAlgo_Isomorphism::GetAllFeatures() const
 
 //-----------------------------------------------------------------------------
 
+void
+  asiAlgo_Isomorphism::GetDomainImages(const int                   V_P,
+                                       TColStd_PackedMapOfInteger& images) const
+{
+  // Loop over the found isomorphisms.
+  for ( const auto& M : m_Ms )
+  {
+    const t_topoId im = this->getDomainImage(m_P_eigenMapping.Find2(V_P), M);
+    images.Add(im);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_Isomorphism::fillFacesInfo(const Handle(asiAlgo_AAG)&            aag,
                                         NCollection_DataMap<int, t_faceInfo>& map)
 {

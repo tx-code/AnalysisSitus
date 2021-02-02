@@ -90,10 +90,10 @@
   </td>
   <td class="table-content-block">
     <p>
-      The C++ class, which is the entry point to the recognition routine. The Recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
+      The Recognizer is a C++ class, which is the entry point to the recognition routine. The Recognizer accepts a CAD model (or its <a href="./features_aag.html">AAG</a>) and returns the set of faces (and their indices) corresponding to the detected features. There's always an option to store the corresponding attributes in AAG to make the extracted features persistent.
     </p>
     <p>
-      The Recognizer contains the main loop of iterating over the B-rep faces. It may also search for the seed faces that look promising to start actual recognition from. Actually, it can just iterate over all faces of the model and let the Rules (see below) decide whether they can start recognition from the current face or not.
+      The Recognizer contains the main loop of iterating over the B-rep faces. It may also search for the seed faces that look promising to start recognition from. In fact, it can just iterate over all faces of the model and let the Rules (see below) decide whether they can start recognition from the current face or not. In that sense, the Recognizer handles a recognition "cursor" by moving it over the AAG and letting the Rules do some real job.
     </p>
     <p>
       The Recognizer manages the Rules. It may apply several Rules if necessary.
@@ -106,7 +106,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited notes can be recorded to avoid checking them twice in the main loop.
+      For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited nodes can be recorded to avoid checking them twice in the main loop.
     </p>
     <div class="note">
       One of the fundamental heuristics is the <a href="./features_check-dih-angles.html">dihedral angle</a> between feature faces.
@@ -136,7 +136,34 @@
   Imagine you detect all cylindrical holes in the model using the rule-based approach. Let's also assume that the applied rule does not differentiate between different types of holes, i.e., you get through, blind, countersunk, and counterbored holes all in one result set. To distinguish between various hole types, you can apply isomorphism matching. That would be a good idea since the rule-based recognizers have narrowed down the entire search space, and you have as many connected components out of the initial AAG as many features were detected. Finding isomorphous faces is a computationally expensive operation, and partitioning the initial graph will speed up the process drastically (see <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a> for more details).
 </p>
 
-<h2 id="toc-feat-limitations">Limitations</h2>
+<h1 id="toc-feat-isomorphism">Isomorphism</h1>
+
+<p>
+  Finding isomorphous faces is a straightforward way for feature matching. The entire process can be broken down to the following steps:
+</p>
+
+<ol>
+  <li class="text-block">Decompose the initial AAG onto as many connected component subgraphs as you can. This would allow for running the isomorphism algorithm independently and on the reduced search space. One best practice is to use the rule-based recognition for the broad-phase decomposition, and then apply series of isomorphism matches over the decomposed subgraphs.</li>
+  <li class="text-block">Prepare the dictionary of features you want to recognize. By "dictionary" we mean a domain-specific storage of feature descriptors that are going to be matched over the CAD part in question. This can be anything, starting from a text file to a remote database holding all feature patterns relevant to your application, machnining process or organization.</li>
+</ol>
+
+<p>
+  The following image illustrates a "stress test" CAD model for the feature recognizer. The model contains three types of holes: countersunk, counterbored, and simple cylindrical holes, in many possible variations.
+</p>
+
+<div align="center"><img src="../imgs/situ_fr_many-holes.png"/></div>
+
+<p>
+  Recognizing a hole with a rule-based approach may end up with a bunch of hole features, separated from each other. Running the isomorphism matching on each component would allow for extracting such properties as bore's diameter, sink angle, etc. The job of isomorphism is to match the pattern's faces that have some semantics attached to the faces with unknown semantics.
+</p>
+
+<div align="center"><img src="../imgs/situ_fr_many-holes-recognized.png"/></div>
+
+<p>
+  The base class for all rule-based recognizers, which is <span class="code-inline">asiAlgo_Recognizer</span> provides a virtual method named <span class="code-inline">matchConnectedComponent()</span> that is supposed to be overriden by the subclasses. This method accepts a single connected component (e.g., a generic hole) and lets the derived logic to extract all missing properties, such as bore or sink holes' faces using the isomorphism technique.
+</p>
+
+<h1 id="toc-feat-limitations">Limitations</h1>
 
 <p>
   There are some limitations in the recognition methods that employ geometric and topological heuristics:

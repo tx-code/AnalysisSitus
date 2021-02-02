@@ -657,7 +657,29 @@ bool asiAlgo_AAG::RemoveNodeAttribute(const t_topoId       node,
 
 void asiAlgo_AAG::RemoveNodeAttributes()
 {
-  m_nodeAttributes.Clear();
+  t_node_attributes newNodeAttrs;
+
+  // Make sure that feature angle attributes created at AAG construction
+  // time resist clean up. For that, we do not just clear the contents of
+  // the AAG, but assemble a new AAG with the attributes that have to
+  // remain.
+  for ( t_node_attributes::Iterator it(m_nodeAttributes); it.More(); it.Next() )
+  {
+    const t_topoId    nid   = it.Key();
+    const t_attr_set& attrs = it.Value();
+    t_attr_set        newAttrs;
+    //
+    for ( t_attr_set::Iterator ait(attrs); ait.More(); ait.Next() )
+    {
+      if ( ait.GetGUID() == asiAlgo_FeatureAttrAngle::GUID() )
+        newAttrs.Add( ait.GetAttr() );
+    }
+
+    if ( !newAttrs.GetMap().IsEmpty() )
+      newNodeAttrs.Bind(nid, newAttrs);
+  }
+
+  m_nodeAttributes = newNodeAttrs;
 }
 
 //-----------------------------------------------------------------------------

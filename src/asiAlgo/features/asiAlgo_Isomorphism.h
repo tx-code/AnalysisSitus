@@ -121,6 +121,15 @@ public:
   asiAlgo_EXPORT asiAlgo_Feature
     GetAllFeatures() const;
 
+  //! Returns the domain images (1-based face IDs) of the passed `V_P`
+  //! vertex of the pattern graph.
+  //!
+  //! \param[in]  V_P    the 1-based index of a vertex in the pattern graph.
+  //! \param[out] images the collected images. The passed set is not cleared.
+  asiAlgo_EXPORT void
+    GetDomainImages(const int                   V_P,
+                    TColStd_PackedMapOfInteger& images) const;
+
 protected:
 
   struct t_faceInfo
