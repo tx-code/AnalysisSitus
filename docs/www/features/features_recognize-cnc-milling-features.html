@@ -48,13 +48,13 @@
 <h1>Recognize CNC milling features</h1>
 
 <p>
-  The recognition of general CNC features is challenging. In this article, we provide a brief overview of some useful techniques that can help in engineering use cases, such as automating quotation (MaaS) and design for manufacturing (DFM). It is required to match the low-level geometric information encoded in B-rep with some stages of the corresponding manufacturing process in both scenarios.
+  The recognition of general CNC features is a challenging topic. In this article, we provide a brief overview of some useful techniques that can help in engineering use cases, such as automating quotation (MaaS = Manufacturing as a Service) and design for manufacturing (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with some machining operations.
 </p>
 
-<h2>Front and side faces</h2>
+<h2>Face and side milling</h2>
 
 <p>
-  It is possible to define the base, and the side milling faces from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
+  It is possible to define the face, and the side milling faces from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
 </p>
 
 <div class="note">

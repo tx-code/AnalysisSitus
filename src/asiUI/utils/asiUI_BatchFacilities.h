@@ -69,11 +69,14 @@ public:
 
   //! \return single instance of facilities.
   asiUI_EXPORT static Handle(asiUI_BatchFacilities)
-    Instance();
+    Instance(const bool initBatch = true,
+             const bool overrideTclChannels = false);
 
 protected:
 
-  asiUI_BatchFacilities(const bool initBatch = true) //!< Ctor.
+  //! Ctor.
+  asiUI_BatchFacilities(const bool initBatch = true,
+                        const bool overrideTclChannels = false)
   //
   : Standard_Transient()
   {
@@ -113,7 +116,7 @@ protected:
 
       // Construct the interpreter
       this->Interp = new asiTcl_Interp;
-      this->Interp->Init(false);
+      this->Interp->Init(overrideTclChannels);
       this->Interp->SetModel(this->Model);
       this->Interp->SetProgress(this->Progress);
       this->Interp->SetPlotter(this->Plotter);

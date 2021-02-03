@@ -48,7 +48,124 @@
 <h1>Recognize drilled holes</h1>
 
 <p>
-  
+The following three types of drilled holes are the most common in industry:
+</p>
+
+<ol>
+  <li>Simple cylindrical holes.</li>
+  <li>Countersunk holes.</li>
+  <li>Counterbored holes.</li>
+</ol>
+
+<p>
+The recognition of these types is important for manufacturing planning, cost estimations, defeaturing, and other computational flows that employ CAD geometry as a data source. In this chapter, we describe the principles grounding the drilled hole recognition.
+</p>
+
+<h2>Parametric domain</h2>
+
+<p>
+Since all B-rep faces have their attached UV spaces where all trimming contours are defined, why not take advantage of this data? A quick observation that a cylindrical cutting tool leaves a circular contour on a flat face gives the cue to the possible recognition approach. We first find all the circular loops in the parametric space and then take their diameters as the recognized properties.
+</p>
+
+<div align="center"><img src="../imgs/situ_drill-holes-uv.png"/></div>
+
+<p>Seemingly simple, this approach requires a lot of care to be implemented correctly. Just a couple of things to consider:</p>
+
+<ol>
+  <li class="text-block">The circles imprinted into the parametric space are constructed by a surface-surface intersection algorithm. Sometimes, depending on whatever reasons, a modeler might prefer creating a spline curve instead of a clean circle. As a result, the recognition attempt based on checking the analytical type of geometry is doomed to fail. To solve that, you should employ a sort of canonical geometry recognition.</li>
+  <li class="text-block">Even with canonical recognition plugged in, you are not secured because:
+    <ul>
+      <li class="text-block">Circle fitting is the approximation problem with its inherent inaccuracy. As a result, you will not be able to extract perfect diameters in round numbers. The effects like 6.1 [mm] diameters start to show up.</li>
+      <li class="text-block">Well, sometimes you do not even have circles. For example, the intersection curve between two cylinders (imagine you drill a hole in a round tube) is a <a href='https://mathcurve.com/courbes3d.gb/bicylindric/bicylindric.shtml'>Steinmetz curve</a>, not a circle at all. Not to mention other types of objects you drill.</li>
+    </ul>
+  </li>
+  <li class="text-block">Composite features like countersunk or counterbored holes could not be captured this way.</li>
+</ol>
+
+<div class="note">
+  The following animation shows a Steinmetz curve unrolled from the drill hole's edge on a round tube. This curve is neither a circle nor an ellipse, and the larger the hole's diameter is, the more distored shape it takes.
+<br/><br/>
+<div align="center"><img src="../imgs/situ_drill-holes-pdomain.gif"/></div>
+</div>
+
+<p>
+  Therefore, a more complete and reliable approach would be surface-based feature recognition. While the parametric curves are constructed from scratch by a modeler and are prone to all sorts of dirty surprises, things get much better if you consider higher-dimensional entities, i.e., the faces. When cutting a drilling tool shape from an object shape, the modelers leave the surfaces intact. I.e., if you had a cylindrical cutting tool, you'll get the corresponding cylindrical hole having all analytical properties equal to those of the tool.
+</p>
+
+<p>
+  The recognition based on parametric curves still has its niche. For example, in sheet metal fabrication, one might classify all cut features as holes and cutouts based on the imprinted curves alone. Once we know that a feature is a cutout, we do not have to process it further as a drilled hole candidate.
+</p>
+
+<h2>Surface-based recognition</h2>
+
+<p>
+  The reasons outlined above should have left you confident that a better recognition approach exists for the drilled holes. Indeed, the pragmatic feature recognition approaches rather start from the CAD model's surfaces and not from the edges.
+</p>
+
+<p>
+  We approach the problem of drilled holes recognition in <a href="./features_recognition-principles.html">two stages</a>:
+</p>
+
+<ol>
+  <li class="text-block">Extract all isolated groups of faces that look like holes. These faces should have some specific symmetries, such as coaxial cylinders (for counterbored holes) or coaxial cones and cylinders (for countersunk holes).</li>
+  <li class="text-block">Deduce the type of a drilled hole by matching its faces over one of the predefined patterns.</li>
+</ol>
+
+<p>
+  To extract the hole's type together with its properties, we use a dictionary of predefined feature patterns. The following snippet illustrates the dictionary specified via a JSON file, although there could be various ways to organize such a dictionary:
+</p>
+
+<pre class="code">
+  {
+    "patterns": [
+      {
+        "type": "countersunk-hole",
+        "key": "countersunk_01",
+        "binbrep": "Ck9wZW4gQ0FTQ0FER...",
+        "sinkFaces": [1],
+        "holeFaces": [2],
+        "blind": true
+      },
+      {
+        "type": "countersunk-hole",
+        "key": "countersunk_02",
+        "binbrep": "Ck9wZW4gQ0FTQ0FER...","
+        "sinkFaces": [1],
+        "holeFaces": [2],
+        "blind": false
+      },
+      {
+        "type": "counterbored-hole",
+        "key": "counterbored_01",
+        "binbrep": "Ck9wZW4gQ0FTQ0FER...",
+        "boreFaces": [1],
+        "holeFaces": [3],
+        "blind": true
+      },
+      {
+        "type": "counterbored-hole",
+        "key": "counterbored_02",
+        "binbrep": "Ck9wZW4gQ0FTQ0FER...",
+        "boreFaces": [1],
+        "holeFaces": [4],
+        "blind": true
+      }
+    ]
+  }
+</pre>
+
+<p>
+  The <span class="code-inline">binbrep</span> property contains the base64-encoded representation of a binary shape. It is essentially a real piece of a CAD model captured by the user (e.g., interactively) and declared as a feature pattern. The recognizer's job then is to derive the pattern's AAG and match it with the AAG of the entire model.
+</p>
+
+<p>
+  The following image illustrates the anatomy of a complex counterbored feature.
+</p>
+
+<div align="center"><img src="../imgs/situ_drill-holes-pattern-anatomy.png"/></div>
+
+<p>
+  Since all the faces of a pattern feature are labeled a priori, the very possibility to match them with a subset of a CAD model's faces is a key to property extraction.
 </p>
 
 <!-- [END] contents -->

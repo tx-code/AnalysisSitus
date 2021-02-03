@@ -31,9 +31,12 @@
 // Own include
 #include <asiUI_BatchFacilities.h>
 
-Handle(asiUI_BatchFacilities) asiUI_BatchFacilities::Instance()
+Handle(asiUI_BatchFacilities)
+  asiUI_BatchFacilities::Instance(const bool initBatch,
+                                  const bool overrideTclChannels)
 {
-  static Handle(asiUI_BatchFacilities) ref = new asiUI_BatchFacilities;
+  static Handle(asiUI_BatchFacilities)
+    ref = new asiUI_BatchFacilities(initBatch, overrideTclChannels);
 
   return ref;
 }

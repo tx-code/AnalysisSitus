@@ -73,7 +73,19 @@ namespace CliUtils
 //! Working routine for console thread.
 DWORD WINAPI Thread_Console(LPVOID)
 {
-  Handle(asiUI_BatchFacilities) cf = asiUI_BatchFacilities::Instance();
+  Handle(asiUI_BatchFacilities)
+    cf = asiUI_BatchFacilities::Instance(true, true);
+
+  // Load default commands.
+  EXE_LOAD_MODULE("cmdMisc")
+  EXE_LOAD_MODULE("cmdEngine")
+  EXE_LOAD_MODULE("cmdRE")
+  EXE_LOAD_MODULE("cmdDDF")
+  EXE_LOAD_MODULE("cmdAsm")
+  //
+#ifdef USE_MOBIUS
+  EXE_LOAD_MODULE("cmdMobius")
+#endif
 
   // Create terminal.
   exe_CommandWindow ConsoleWindow(CliUtils::Queue, cf);
@@ -99,17 +111,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
   // Create command queue in the main thread
   if ( CliUtils::Queue.IsNull() )
     CliUtils::Queue = new exe_CommandQueue;
-
-  // Load default commands.
-  EXE_LOAD_MODULE("cmdMisc")
-  EXE_LOAD_MODULE("cmdEngine")
-  EXE_LOAD_MODULE("cmdRE")
-  EXE_LOAD_MODULE("cmdDDF")
-  EXE_LOAD_MODULE("cmdAsm")
-  //
-#ifdef USE_MOBIUS
-  EXE_LOAD_MODULE("cmdMobius")
-#endif
 
   // Create thread for Console
   HANDLE hConsoleThread = CreateThread(NULL, 0, Thread_Console, NULL, 0, NULL);
