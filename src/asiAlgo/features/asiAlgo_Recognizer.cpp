@@ -140,9 +140,23 @@ bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature,
 
 //-----------------------------------------------------------------------------
 
+TopTools_IndexedMapOfShape& asiAlgo_Recognizer::ChangeResultFaces()
+{
+  return m_result.faces;
+}
+
+//-----------------------------------------------------------------------------
+
 const TopTools_IndexedMapOfShape& asiAlgo_Recognizer::GetResultFaces() const
 {
   return m_result.faces;
+}
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_Feature& asiAlgo_Recognizer::ChangeResultIndices()
+{
+  return m_result.ids;
 }
 
 //-----------------------------------------------------------------------------

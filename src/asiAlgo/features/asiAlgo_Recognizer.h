@@ -104,9 +104,17 @@ public:
 
 public:
 
+  //! \return non-const reference to the detected faces.
+  asiAlgo_EXPORT TopTools_IndexedMapOfShape&
+    ChangeResultFaces();
+
   //! \return result collection of detected faces as transient shapes.
   asiAlgo_EXPORT const TopTools_IndexedMapOfShape&
     GetResultFaces() const;
+
+  //! \return non-const reference to the detected faces IDs.
+  asiAlgo_EXPORT asiAlgo_Feature&
+    ChangeResultIndices();
 
   //! \return result collection of detected faces as integer ids.
   asiAlgo_EXPORT const asiAlgo_Feature&
