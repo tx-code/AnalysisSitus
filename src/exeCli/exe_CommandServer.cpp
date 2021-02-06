@@ -32,8 +32,10 @@
 #include <exe_CommandServer.h>
 
 // Qt includes
+#pragma warning(push, 0)
 #include <QNetworkDatagram>
 #include <QUdpSocket>
+#pragma warning(pop)
 
 //! Ctor.
 //! \param[in] queue command queue.

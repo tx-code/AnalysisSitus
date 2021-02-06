@@ -42,7 +42,9 @@
 #include <vtkAutoInit.h>
 
 // Qt includes
+#pragma warning(push, 0)
 #include <QDir>
+#pragma warning(pop)
 
 // Activate object factories
 VTK_MODULE_INIT(vtkRenderingContextOpenGL2)
