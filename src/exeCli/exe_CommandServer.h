@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 02 February 2021
+// Created on: 06 February 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,22 +28,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_BaseCmd_HeaderFile
-#define exe_BaseCmd_HeaderFile
+#ifndef exe_CommandServer_HeaderFile
+#define exe_CommandServer_HeaderFile
 
-// OpenCascade includes
-#include <TCollection_AsciiString.hxx>
+// asiExe includes
+#include <exe_CommandQueue.h>
 
-//! Base class for commands.
-class exe_BaseCmd : public Standard_Transient
+// asiUI includes
+#include <asiUI_BatchFacilities.h>
+
+class QUdpSocket;
+
+//! Class representing command server.
+class exe_CommandServer : public QObject
 {
 public:
 
-  exe_BaseCmd(const TCollection_AsciiString& _cmd) : Cmd(_cmd) {}
+  exe_CommandServer(const Handle(exe_CommandQueue)& queue);
+
+  virtual ~exe_CommandServer();
 
 public:
 
-  TCollection_AsciiString Cmd;
+  virtual void
+    StartMessageLoop();
+
+protected:
+
+  void initSocket();
+
+private:
+
+  QUdpSocket* m_pSocket;
+
+  Handle(exe_CommandQueue) m_queue; //!< Command queue.
 
 };
 

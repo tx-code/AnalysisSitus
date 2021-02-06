@@ -40,13 +40,18 @@
 // asiUI includes
 #include <asiUI_BatchFacilities.h>
 
+//-----------------------------------------------------------------------------
+
+#define AS_CMD_PROMPT "AnalysisSitus> "
+
+//-----------------------------------------------------------------------------
+
 //! Class representing command window.
 class exe_CommandWindow
 {
 public:
 
-  exe_CommandWindow(const Handle(exe_CommandQueue)&      queue,
-                    const Handle(asiUI_BatchFacilities)& cf);
+  exe_CommandWindow(const Handle(exe_CommandQueue)& queue);
 
   virtual ~exe_CommandWindow();
 
@@ -58,17 +63,9 @@ public:
   virtual void
     StartMessageLoop();
 
-public:
-
-  static void
-    DisplayMessage(const std::string& From,
-                   const std::string& Message,
-                   const bool         newPrompt = true);
-
 private:
 
-  Handle(exe_CommandQueue)      m_queue; //!< Command queue.
-  Handle(asiUI_BatchFacilities) m_cf;    //!< Common facilities.
+  Handle(exe_CommandQueue) m_queue; //!< Command queue.
 
 };
 

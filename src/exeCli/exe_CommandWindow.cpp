@@ -31,18 +31,6 @@
 // Own include
 #include <exe_CommandWindow.h>
 
-// STD includes
-#include <strsafe.h>
-#include <stdio.h>
-#include <string>
-
-//-----------------------------------------------------------------------------
-// Some predefined commands
-//-----------------------------------------------------------------------------
-
-#define QR_CMD_PROMPT   "AnalysisSitus> "
-#define QR_CMD_BUF_SIZE 255
-
 //-----------------------------------------------------------------------------
 // Construction and destruction
 //-----------------------------------------------------------------------------
@@ -50,9 +38,8 @@
 //! Ctor.
 //! \param[in] queue command queue.
 //! \param[in] cf    common facilities.
-exe_CommandWindow::exe_CommandWindow(const Handle(exe_CommandQueue)&      queue,
-                                     const Handle(asiUI_BatchFacilities)& cf)
-: m_queue(queue), m_cf(cf)
+exe_CommandWindow::exe_CommandWindow(const Handle(exe_CommandQueue)& queue)
+: m_queue(queue)
 {}
 
 //! Destructor.
@@ -83,66 +70,19 @@ void exe_CommandWindow::StartMessageLoop()
   bool stopPrompt = false;
   do
   {
-    Handle(exe_BaseCmd) LastCommand = m_queue->Last();
-    //bool canProceed = false;
-    //do
-    //{
-    //  LastCommand = m_queue->Last();
-    //  if ( LastCommand.IsNull() )
-    //    canProceed = true;
-    //  else
-    //  {
-    //    // Check command type: we can proceed only with console ones
-    //    visu_ConsoleCmd* CmdPtr = dynamic_cast<visu_ConsoleCmd*>( LastCommand.Access() );
-    //    if ( CmdPtr )
-    //      canProceed = true;
-    //  }
-    //}
-    //while ( !canProceed );
-
-    // If there is something to proceed, let us do it
-    if ( !LastCommand.IsNull() )
-    {
-      // Check if it is a standard 'exit' command
-      /*visu_ExitCmd* ExitPtr = dynamic_cast<visu_ExitCmd*>( LastCommand.Access() );
-      if ( ExitPtr )
-        stopPrompt = true;*/
-
-      // Remove command from queue and execute it.
-      m_queue->Pop();
-      //
-      if ( m_cf->Interp->Eval(LastCommand->Cmd) == TCL_ERROR )
-        DisplayMessage("Console", "Command failed!", false);
-
-      // Has 'exit' command been pushed?
-      if ( stopPrompt )
-        continue;
-    }
-
-    // Get next command from user
-    std::cout << QR_CMD_PROMPT;
+    // Get next command from user.
     std::string inputStr;
     std::getline(std::cin, inputStr);
 
-    Handle(exe_BaseCmd) newCommand = new exe_BaseCmd;
-    newCommand->Cmd = inputStr.c_str();
+    // Remains empty after timeout.
+    if ( !inputStr.empty() )
+    {
+      Handle(exe_BaseCmd)
+        newCommand = new exe_BaseCmd( inputStr.c_str() );
 
-    // Push command to the shared queue
-    m_queue->Push(newCommand);
+      // Push command to the shared queue.
+      m_queue->Push(newCommand);
+    }
   }
   while ( !stopPrompt );
-}
-
-//! Prints message from the given client (its user-friendly name should be
-//! provided).
-//! \param From [in] client name.
-//! \param Message [in] message to display.
-//! \param newPrompt [in] indicates whether to ask for a new prompt.
-void exe_CommandWindow::DisplayMessage(const std::string& From,
-                                       const std::string& Message,
-                                       const bool         newPrompt)
-{
-  std::cout << "`" << From.c_str() << "` says: \"" << Message.c_str() << "\"" << std::endl;
-  if ( newPrompt )
-    std::cout << QR_CMD_PROMPT;
 }

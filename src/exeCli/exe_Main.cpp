@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // exe includes
+#include <exe_CommandServer.h>
 #include <exe_CommandWindow.h>
 
 // asiTcl includes
@@ -67,14 +68,55 @@ namespace CliUtils
 }
 
 //-----------------------------------------------------------------------------
+// Server thread
+//-----------------------------------------------------------------------------
+
+//! Working routine for server side.
+DWORD WINAPI Thread_Server(LPVOID)
+{
+  // Create Server
+  exe_CommandServer Server(CliUtils::Queue);
+
+  // Message loop
+  Server.StartMessageLoop();
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 // Console thread
 //-----------------------------------------------------------------------------
 
 //! Working routine for console thread.
 DWORD WINAPI Thread_Console(LPVOID)
 {
+  // Create terminal.
+  exe_CommandWindow ConsoleWindow(CliUtils::Queue);
+  //
+  if ( !ConsoleWindow.Create() )
+    return 1;
+
+  // Start message loop.
+  ConsoleWindow.StartMessageLoop();
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+// Interpreter's thread
+//-----------------------------------------------------------------------------
+
+//! Working routine for Tcl interpreter thread.
+DWORD WINAPI Thread_Interp(LPVOID)
+{
   Handle(asiUI_BatchFacilities)
-    cf = asiUI_BatchFacilities::Instance(true, true);
+    cf = asiUI_BatchFacilities::Instance();
+
+  cf->Interp = new asiTcl_Interp;
+  cf->Interp->Init(true);
+  cf->Interp->SetModel(cf->Model);
+  cf->Interp->SetProgress(cf->Progress);
+  cf->Interp->SetPlotter(cf->Plotter);
 
   // Load default commands.
   EXE_LOAD_MODULE("cmdMisc")
@@ -87,23 +129,29 @@ DWORD WINAPI Thread_Console(LPVOID)
   EXE_LOAD_MODULE("cmdMobius")
 #endif
 
-  // Create terminal.
-  exe_CommandWindow ConsoleWindow(CliUtils::Queue, cf);
-  if ( !ConsoleWindow.Create() )
-    return 1;
+  Sleep(100);
+  std::cout << AS_CMD_PROMPT;
 
-  // Register console commands in global repository
-  //RegisterConsoleCommands();
+  while ( 1 )
+  {
+    Handle(exe_BaseCmd) LastCommand = CliUtils::Queue->Last();
 
-  // Start message loop.
-  ConsoleWindow.StartMessageLoop();
+    // If there is something to proceed, let us do it
+    if ( !LastCommand.IsNull() )
+    {
+      // Remove command from queue and execute it.
+      CliUtils::Queue->Pop();
+      //
+      if ( !cf->Interp.IsNull() )
+      {
+        cf->Interp->Eval(LastCommand->Cmd);
+        std::cout << AS_CMD_PROMPT;
+      }
+    }
+  }
 
   return 0;
 }
-
-//-----------------------------------------------------------------------------
-// Entry point
-//-----------------------------------------------------------------------------
 
 //! main().
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -112,23 +160,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
   if ( CliUtils::Queue.IsNull() )
     CliUtils::Queue = new exe_CommandQueue;
 
+  // Create common facilities out of threads.
+  Handle(asiUI_BatchFacilities)
+    cf = asiUI_BatchFacilities::Instance(true, false, false);
+
   // Create thread for Console
   HANDLE hConsoleThread = CreateThread(NULL, 0, Thread_Console, NULL, 0, NULL);
   if ( !hConsoleThread )
     ExitProcess(NULL);
 
-  // Aray to store thread handles
-  HANDLE hThreads[] = {/*hViewerThread,*/ hConsoleThread};
+  // Create thread for Interpreter
+  HANDLE hInterpThread = CreateThread(NULL, 0, Thread_Interp, NULL, 0, NULL);
+  if ( !hInterpThread)
+    ExitProcess(NULL);
 
-  // NOTICE: we pass FALSE here as we do not want to have the Viewer opened
-  //         while the Console is closed and vice versa. Once such behaviour
-  //         becomes acceptable, change the bWaitAll to TRUE, so this
-  //         barrier will be passed only then ALL threads are signaling
-  WaitForMultipleObjects(1, hThreads, FALSE, INFINITE);
+  // Create thread for Server
+  HANDLE hServerThread = CreateThread(NULL, 0, Thread_Server, NULL, 0, NULL);
+  if ( !hServerThread)
+    ExitProcess(NULL);
+
+  // Aray to store thread handles
+  HANDLE hThreads[] = {hConsoleThread, hInterpThread, hServerThread};
+
+  /*  NOTICE: we pass FALSE here as we do not want to have the Viewer opened
+            while the Console is closed and vice versa. Once such behaviour
+            becomes acceptable, change the bWaitAll to TRUE, so this
+            barrier will be passed only then ALL threads are signaling*/
+  WaitForMultipleObjects(3, hThreads, TRUE, INFINITE);
 
   // Close all thread handles upon completion
-  //CloseHandle(hViewerThread);
   CloseHandle(hConsoleThread);
+  CloseHandle(hInterpThread);
+  CloseHandle(hServerThread);
 
   return 0; // Success.
 }

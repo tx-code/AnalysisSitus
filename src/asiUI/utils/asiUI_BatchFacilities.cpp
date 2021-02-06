@@ -33,10 +33,11 @@
 
 Handle(asiUI_BatchFacilities)
   asiUI_BatchFacilities::Instance(const bool initBatch,
+                                  const bool initInterp,
                                   const bool overrideTclChannels)
 {
   static Handle(asiUI_BatchFacilities)
-    ref = new asiUI_BatchFacilities(initBatch, overrideTclChannels);
+    ref = new asiUI_BatchFacilities(initBatch, initInterp, overrideTclChannels);
 
   return ref;
 }

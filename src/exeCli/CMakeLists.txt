@@ -11,8 +11,12 @@ set (H_FILES
   exe_Keywords.h
   exe_SharedQueue.h
 )
+set (H_QT_FILES
+  exe_CommandServer.h
+)
 set (CPP_FILES
   exe_BaseCmd.cpp
+  exe_CommandServer.cpp
   exe_CommandWindow.cpp
   exe_Main.cpp
   exe_SharedQueue.cpp
@@ -100,6 +104,18 @@ foreach (FILE ${H_FILES})
   source_group ("Header Files" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${H_QT_FILES})
+  set (src_files ${src_files} ${FILE})
+  #
+  unset (MOC_FILE)
+  qt5_wrap_cpp(MOC_FILE ${FILE})
+  message (STATUS "... Info: next MOC file ${MOC_FILE}")
+  set (ui_moc_files ${ui_moc_files} ${MOC_FILE})
+  #
+  source_group ("Generated" FILES "${MOC_FILE}")
+  source_group ("Header Files" FILES "${FILE}")
+endforeach (FILE)
+
 foreach (FILE ${CPP_FILES})
   set (src_files ${src_files} ${FILE})
   source_group ("Source Files" FILES "${FILE}")
@@ -122,6 +138,7 @@ include_directories ( SYSTEM
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
+                      ${3RDPARTY_tcl_INCLUDE_DIR}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
@@ -153,6 +170,8 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
 #------------------------------------------------------------------------------
 # Dependencies
 #------------------------------------------------------------------------------
+
+qt5_use_modules(asiExeCli Core Network)
 
 target_link_libraries(asiExeCli asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
 

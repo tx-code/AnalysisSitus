@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 02 February 2021
+// Created on: 06 February 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,23 +28,47 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_BaseCmd_HeaderFile
-#define exe_BaseCmd_HeaderFile
+// Own include
+#include <exe_CommandServer.h>
 
-// OpenCascade includes
-#include <TCollection_AsciiString.hxx>
+// Qt includes
+#include <QNetworkDatagram>
+#include <QUdpSocket>
 
-//! Base class for commands.
-class exe_BaseCmd : public Standard_Transient
+//! Ctor.
+//! \param[in] queue command queue.
+exe_CommandServer::exe_CommandServer(const Handle(exe_CommandQueue)& queue)
+: m_queue(queue)
 {
-public:
+  this->initSocket();
+}
 
-  exe_BaseCmd(const TCollection_AsciiString& _cmd) : Cmd(_cmd) {}
+//! Destructor.
+exe_CommandServer::~exe_CommandServer()
+{
+}
 
-public:
+//! Starts message loop.
+void exe_CommandServer::StartMessageLoop()
+{
+  while ( 1 )
+  {
+    if ( m_pSocket->hasPendingDatagrams() )
+    {
+      QNetworkDatagram datagram = m_pSocket->receiveDatagram();
 
-  TCollection_AsciiString Cmd;
+      QByteArray data = datagram.data();
+      TCollection_AsciiString cmdString = QStr2AsciiStr( QString::fromLatin1(data) );
 
-};
+      std::cout << "Received datagram: " << cmdString.ToCString() << std::endl;
 
-#endif
+      m_queue->Push( new exe_BaseCmd(cmdString) );
+    }
+  }
+}
+
+void exe_CommandServer::initSocket()
+{
+  m_pSocket = new QUdpSocket(this);
+  m_pSocket->bind(QHostAddress::LocalHost, 7755);
+}
