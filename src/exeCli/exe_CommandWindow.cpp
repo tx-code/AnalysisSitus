@@ -74,7 +74,7 @@ void exe_CommandWindow::StartMessageLoop()
     std::string inputStr;
     std::getline(std::cin, inputStr);
 
-    // Remains empty after timeout.
+    // Put to the queue.
     if ( !inputStr.empty() )
     {
       Handle(exe_BaseCmd)
@@ -83,6 +83,8 @@ void exe_CommandWindow::StartMessageLoop()
       // Push command to the shared queue.
       m_queue->Push(newCommand);
     }
+    else
+      std::cout << AS_CMD_PROMPT;
   }
   while ( !stopPrompt );
 }

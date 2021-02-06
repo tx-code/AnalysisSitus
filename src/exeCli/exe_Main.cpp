@@ -35,8 +35,14 @@
 // asiTcl includes
 #include <asiTcl_Plugin.h>
 
+// OpenCascade includes
+#include <OSD_Process.hxx>
+
 // VTK init
 #include <vtkAutoInit.h>
+
+// Qt includes
+#include <QDir>
 
 // Activate object factories
 VTK_MODULE_INIT(vtkRenderingContextOpenGL2)
@@ -45,6 +51,12 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 VTK_MODULE_INIT(vtkRenderingFreeType)
 VTK_MODULE_INIT(vtkIOExportOpenGL2)
 VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
+
+#if defined _WIN32
+  #define RuntimePathVar "PATH"
+#else
+  #define RuntimePathVar "LD_LIBRARY_PATH"
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -74,6 +86,8 @@ namespace CliUtils
 //! Working routine for server side.
 DWORD WINAPI Thread_Server(LPVOID)
 {
+  Sleep(100);
+
   // Create Server
   exe_CommandServer Server(CliUtils::Queue);
 
@@ -112,6 +126,9 @@ DWORD WINAPI Thread_Interp(LPVOID)
   Handle(asiUI_BatchFacilities)
     cf = asiUI_BatchFacilities::Instance();
 
+  // Give the console window time to appear.
+  Sleep(100);
+
   cf->Interp = new asiTcl_Interp;
   cf->Interp->Init(true);
   cf->Interp->SetModel(cf->Model);
@@ -129,7 +146,25 @@ DWORD WINAPI Thread_Interp(LPVOID)
   EXE_LOAD_MODULE("cmdMobius")
 #endif
 
-  Sleep(100);
+  // Lookup for custom plugins and try to load them.
+  QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
+  TCollection_AsciiString pluginDirStr = QStr2AsciiStr( pluginDir.absolutePath() );
+  //
+  std::cout << "Looking for plugins at "
+            << pluginDirStr.ToCString() << std::endl;
+  //
+  QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+  //
+  foreach ( QString cmdLib, cmdLibs )
+  {
+    TCollection_AsciiString cmdLibName = QStr2AsciiStr( cmdLib.section(".", 0, 0) );
+    //
+    cf->Progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
+                                                  << cmdLibName);
+
+    EXE_LOAD_MODULE(cmdLibName);
+  }
+
   std::cout << AS_CMD_PROMPT;
 
   while ( 1 )
@@ -156,6 +191,29 @@ DWORD WINAPI Thread_Interp(LPVOID)
 //! main().
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+  //---------------------------------------------------------------------------
+  // Set extra environment variables
+  //---------------------------------------------------------------------------
+
+  std::string workdir = OSD_Process::ExecutableFolder().ToCString();
+  //
+  asiAlgo_Utils::Str::ReplaceAll(workdir, "\\", "/");
+  std::string
+    resDir = asiAlgo_Utils::Str::Slashed(workdir) + "resources";
+
+  qputenv( "CSF_PluginDefaults",    resDir.c_str() );
+  qputenv( "CSF_ResourcesDefaults", resDir.c_str() );
+
+  // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
+  std::string
+    pluginsDir = asiAlgo_Utils::Str::Slashed(workdir) + "asi-plugins";
+  //
+  qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir.c_str());
+
+  //---------------------------------------------------------------------------
+  // Create CLI threads
+  //---------------------------------------------------------------------------
+
   // Create command queue in the main thread
   if ( CliUtils::Queue.IsNull() )
     CliUtils::Queue = new exe_CommandQueue;

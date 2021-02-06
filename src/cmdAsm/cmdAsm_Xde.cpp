@@ -696,9 +696,6 @@ int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
   //
   xdeDoc->FindItems(itemName, items);
 
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "%1 item(s) collected."
-                                                        << items->Extent() );
-
   // Add items IDs to the interpreter.
   int aiid = 1;
   //
@@ -947,7 +944,8 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
     interp->GetKeyValue<double>(argc, argv, "ang", angDeflDeg);
   }
 
-  cmdAsm::cf->ProgressListener->SetProcessEvents(true);
+  if ( !cmdAsm::cf.IsNull() )
+    cmdAsm::cf->ProgressListener->SetProcessEvents(true);
 
   if ( (fq != asiAlgo_FacetQuality::UNDEFINED) ||
        (linDefl < asiAlgo_LINDEFL_MIN) ||
@@ -993,7 +991,10 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
     if ( interp->GetProgress().IsCancelling() )
     {
       interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
-      cmdAsm::cf->ProgressListener->SetProcessEvents(false);
+
+      if ( !cmdAsm::cf.IsNull() )
+        cmdAsm::cf->ProgressListener->SetProcessEvents(false);
+
       return TCL_OK;
     }
 
@@ -1002,7 +1003,9 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
 
   // Progress indication.
   interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
-  cmdAsm::cf->ProgressListener->SetProcessEvents(false);
+
+  if ( !cmdAsm::cf.IsNull() )
+    cmdAsm::cf->ProgressListener->SetProcessEvents(false);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-generate-facets")
