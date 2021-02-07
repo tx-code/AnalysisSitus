@@ -46,7 +46,7 @@
 
 //-----------------------------------------------------------------------------
 
-class asiExe
+class asiExeCli
 {
 public:
 
@@ -62,36 +62,16 @@ public:
     return true;
   }
 
-  static bool HasKeyword(const int          argc,
-                         char**             argv,
+  static bool HasKeyword(const std::string& argLine,
                          const std::string& key)
   {
-    for ( int k = 1; k < argc; ++k )
+    std::vector<std::string> args;
+    asiAlgo_Utils::Str::Split(argLine, " ", args);
+
+    for ( const auto& arg : args )
     {
-      if ( IsKeyword(argv[k], key) )
+      if ( IsKeyword(arg, key) )
         return true;
-    }
-    return false;
-  }
-
-  static bool GetKeyValue(const int          argc,
-                          char**             argv,
-                          const std::string& key,
-                          std::string&       value)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-      {
-        std::vector<std::string> chunks;
-        asiAlgo_Utils::Str::Split(argv[k], "=", chunks);
-
-        if ( chunks.size() != 2 )
-          return false;
-
-        value = chunks[1];
-        return true;
-      }
     }
     return false;
   }

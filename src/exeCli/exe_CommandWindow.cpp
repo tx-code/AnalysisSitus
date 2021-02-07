@@ -48,16 +48,22 @@ exe_CommandWindow::~exe_CommandWindow()
 }
 
 //! Creates new Console Window.
+//! \param[in] overrideStreams indicates whether to override standard streams.
 //! \return true in case of success, false -- otherwise.
-bool exe_CommandWindow::Create()
+bool exe_CommandWindow::Create(const bool overrideStreams)
 {
   if ( AllocConsole() )
   {
     FILE *stream;
     SetConsoleTitleA("Analysis Situs >>> Terminal");
-    freopen_s(&stream, "CONIN$", "r", stdin);
-    freopen_s(&stream, "CONOUT$", "wb", stdout);
-    freopen_s(&stream, "CONOUT$", "wb", stderr);
+
+    if ( overrideStreams )
+    {
+      freopen_s(&stream, "CONIN$", "r", stdin);
+      freopen_s(&stream, "CONOUT$", "wb", stdout);
+      freopen_s(&stream, "CONOUT$", "wb", stderr);
+    }
+
     return true;
   }
 

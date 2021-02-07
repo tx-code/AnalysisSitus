@@ -31,6 +31,7 @@
 // exe includes
 #include <exe_CommandServer.h>
 #include <exe_CommandWindow.h>
+#include <exe_Keywords.h>
 
 // asiTcl includes
 #include <asiTcl_Plugin.h>
@@ -95,25 +96,6 @@ DWORD WINAPI Thread_Server(LPVOID)
 
   // Message loop
   Server.StartMessageLoop();
-
-  return 0;
-}
-
-//-----------------------------------------------------------------------------
-// Console thread
-//-----------------------------------------------------------------------------
-
-//! Working routine for console thread.
-DWORD WINAPI Thread_Console(LPVOID)
-{
-  // Create terminal.
-  exe_CommandWindow ConsoleWindow(CliUtils::Queue);
-  //
-  if ( !ConsoleWindow.Create() )
-    return 1;
-
-  // Start message loop.
-  ConsoleWindow.StartMessageLoop();
 
   return 0;
 }
@@ -191,8 +173,10 @@ DWORD WINAPI Thread_Interp(LPVOID)
 }
 
 //! main().
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 {
+  const bool noPrompt = asiExeCli::HasKeyword(cmdLine, "no-prompt");
+
   //---------------------------------------------------------------------------
   // Set extra environment variables
   //---------------------------------------------------------------------------
@@ -224,11 +208,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
   Handle(asiUI_BatchFacilities)
     cf = asiUI_BatchFacilities::Instance(true, false, false);
 
-  // Create thread for Console
-  HANDLE hConsoleThread = CreateThread(NULL, 0, Thread_Console, NULL, 0, NULL);
-  if ( !hConsoleThread )
-    ExitProcess(NULL);
-
   // Create thread for Interpreter
   HANDLE hInterpThread = CreateThread(NULL, 0, Thread_Interp, NULL, 0, NULL);
   if ( !hInterpThread)
@@ -240,16 +219,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ExitProcess(NULL);
 
   // Aray to store thread handles
-  HANDLE hThreads[] = {hConsoleThread, hInterpThread, hServerThread};
+  HANDLE hThreads[] = {/*hConsoleThread, */hInterpThread, hServerThread};
 
-  /*  NOTICE: we pass FALSE here as we do not want to have the Viewer opened
-            while the Console is closed and vice versa. Once such behaviour
-            becomes acceptable, change the bWaitAll to TRUE, so this
-            barrier will be passed only then ALL threads are signaling*/
-  WaitForMultipleObjects(3, hThreads, TRUE, INFINITE);
+  // Create terminal.
+  exe_CommandWindow ConsoleWindow(CliUtils::Queue);
+  //
+  if ( !ConsoleWindow.Create(!noPrompt) )
+    return 1;
+
+  // Start message loop.
+  ConsoleWindow.StartMessageLoop();
 
   // Close all thread handles upon completion
-  CloseHandle(hConsoleThread);
   CloseHandle(hInterpThread);
   CloseHandle(hServerThread);
 

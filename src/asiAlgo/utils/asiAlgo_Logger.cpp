@@ -304,8 +304,8 @@ void asiAlgo_Logger::appendMessage(const TCollection_AsciiString&    theMessage,
     // Put in all appender streams.
     for ( int k = 0; k < m_appenders.Length(); ++k )
     {
-
       *m_appenders[k] << msg.ToCString() << "\n";
+      *m_appenders[k] << std::flush;
     }
   }
 }
