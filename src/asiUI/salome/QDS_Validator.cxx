@@ -200,9 +200,9 @@ QDS_StringValidator::QDS_StringValidator( QObject* p )
   \param p parent object
 */
 QDS_StringValidator::QDS_StringValidator( const QString& f, QObject* p ) 
-: QValidator( p ), 
-  myFlags( f ), 
-  myLen( -1 ) 
+: QValidator( p ),
+  myLen( -1 ),
+  myFlags( f )
 {
 }
 
@@ -216,9 +216,9 @@ QDS_StringValidator::QDS_StringValidator( const QString& f, QObject* p )
 */
 QDS_StringValidator::QDS_StringValidator( const QString& ft, const QString& fg, QObject* p ) 
 : QValidator( p ), 
-  myLen( -1 ), 
-  myFilter( ft ), 
-  myFlags( fg ) 
+  myLen( -1 ),
+  myFlags( fg ),
+  myFilter( ft )
 {
 }
 

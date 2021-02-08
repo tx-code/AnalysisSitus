@@ -387,10 +387,10 @@ protected:
 
 private:
 
-  int                   m_type;        //!< data type
+  int                  m_type;        //!< data type
   asiUI_DatumFormatPtr m_fmt;         //!< formatter for short representation
-  QString               m_prvString;   //!< previous value to be stored for reference
-  QString               m_shortString; //!< short string representation to be displayed
+  QString              m_prvString;   //!< previous value to be stored for reference
+  QString              m_shortString; //!< short string representation to be displayed
 };
 
 #endif

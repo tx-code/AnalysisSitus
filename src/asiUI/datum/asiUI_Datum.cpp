@@ -915,8 +915,9 @@ asiUI_Datum::FormattedLineEdit::FormattedLineEdit(const asiUI_DatumFormatPtr& th
                                                    const int theType,
                                                    QWidget* theParent)
 : QDS_LineEdit::Editor(theParent),
-  m_fmt(theFmt),
-  m_type(theType) {}
+  m_type(theType),
+  m_fmt(theFmt)
+  {}
 
 //! Override painting to show short formatted text string
 //! if editor has no selection and edit focus.
