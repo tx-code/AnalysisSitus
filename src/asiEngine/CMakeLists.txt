@@ -106,23 +106,23 @@ set (OCCT_LIB_FILES
 )
 #------------------------------------------------------------------------------
 set (VTK_LIB_FILES
-  vtkCommonCore-8.2
-  vtkCommonDataModel-8.2
-  vtkCommonExecutionModel-8.2
-  vtkCommonMath-8.2
-  vtkCommonTransforms-8.2
-  vtkCommonMisc-8.2
-  vtkFiltersCore-8.2
-  vtkFiltersGeneral-8.2
-  vtkFiltersSources-8.2
-  vtkFiltersGeometry-8.2
-  vtkFiltersParallel-8.2
-  vtkFiltersExtraction-8.2
-  vtkFiltersModeling-8.2
-  vtkIOCore-8.2
-  vtkIOImage-8.2
-  vtkImagingCore-8.2
-  vtkInteractionStyle-8.2
+  vtkCommonCore
+  vtkCommonDataModel
+  vtkCommonExecutionModel
+  vtkCommonMath
+  vtkCommonTransforms
+  vtkCommonMisc
+  vtkFiltersCore
+  vtkFiltersGeneral
+  vtkFiltersSources
+  vtkFiltersGeometry
+  vtkFiltersParallel
+  vtkFiltersExtraction
+  vtkFiltersModeling
+  vtkIOCore
+  vtkIOImage
+  vtkImagingCore
+  vtkInteractionStyle
 )
 
 #------------------------------------------------------------------------------
