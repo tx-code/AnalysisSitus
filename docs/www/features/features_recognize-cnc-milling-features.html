@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+   Quick navigation script. Use a div with "toc-panel" class having a
+   nested div with "toc" id to place the navigation panel.
+  -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -45,21 +52,27 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Recognize CNC milling features</h1>
+<h1 id="toc-recognize-cnc-features">Recognize CNC milling features</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
 
 <p>
   The recognition of general CNC features is a challenging topic. In this article, we provide a brief overview of some useful techniques that can help in engineering use cases, such as automating quotation (MaaS = Manufacturing as a Service) and design for manufacturing (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with some machining operations.
 </p>
 
-<h2>Face and side milling</h2>
-
 <p>
-  It is possible to define the face, and the side milling faces from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
+  The problem can be formulated as follows. Given a 3D representation of an object to manufacture, automatically detect all machined surface types. Some basic volume features, such as <a href="./features_recognize-drill-holes.html">drilled holes</a> are to be extracted as well. In professional software packages, volume features, such as bosses and pockets are also recognized.
 </p>
 
-<div class="note">
-  In our paper <a href="../references.html#malyshev-rule-based-2017">[Malyshev et al, 2017]</a>, we rather define base faces as just any faces having inner loops. But let's stick to the Muniappan's formulation as it is manufacturing-wise. To avoid ambiguity, we redefine such faces as "front" ones.
-</div>
+<p>
+  Feature recognition can be done in a fully automatic way (AFR = Automatic Feature Recognition). The recognition algorithm scans your 3D model and attempts to identify all the features you might want to select for manufacturing. In contrast, manual or interactive feature recognition (IFR) gives the operator more control over the identification process. The user starts from an interactively selected faces and lets a program extract feature type and its properties, such as dimensions, tooling, etc. Only geometric information can be used for the imported CAD model, so such information as threads is normally skipped.
+</p>
+
+<h2 id="toc-face-side">Face and side milled surfaces</h2>
+
+<p>
+  It is possible to define the <i>face milled surface</i>, and the <i>side milled surface</i> from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
+</p>
 
 <!-- [END] contents -->
 </div>

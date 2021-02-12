@@ -58,7 +58,7 @@ public:
 public:
 
   virtual bool
-    Create(const bool overrideStreams);
+    Create(const bool allocConsole);
 
   virtual void
     StartMessageLoop();

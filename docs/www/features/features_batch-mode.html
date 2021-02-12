@@ -17,6 +17,13 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
+
  </head>
 <body>
 
@@ -45,7 +52,15 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Batch processing</h1>
+<h1 id="toc-batch">Batch processing</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<p>
+  Analysis Situs is not necessarily an interactive tool. We have designed it in a way to be also used as an SDK and batch processing application. You might prefer using the batch mode for running your fully automated CAD processing workflows. The batch mode, by definition, assumes that there is no user interaction to happen to get the job done. However, there is also a CLI (Command Line Interface) thing that can be used for batch processing and is, in fact, designed for that. In this chapter, we cover all means that Analysis Situs exposes for batch processing and similar scenarios.
+</p>
+
+<h2>Run single script</h2>
 
 <p>You can run Analysis Situs without GUI to execute a Tcl script.</p>
 
@@ -68,8 +83,20 @@ Make sure to use forward slashes in the path to your script. To redirect output 
 </div>
 
 <p>
-In the batch mode, the Tcl standard channels are not overridden, so all messages and errors will be printed to the standard output.
+  In this mode, the Tcl standard channels are not overridden, so all messages and errors will be printed to the standard output.
 </p>
+
+<h2>CLI</h2>
+
+<p>
+  The Command Line Interface of Analysis Situs provides you with a traditional terminal-like experience, where you are prompted for a single command at a time. To run CLI, launch the <span class="code-inline">asiExeCli</span> executable. There are several things to keep in mind about CLI:
+</p>
+
+<ol>
+  <li class="text-block">The CLI terminal allows you to run all the same commands that are accessible from UI. However, those commands that require UI widgets will do nothing.</li>
+  <li class="text-block">The standard output is redirected to the terminal window, so you will see the application messages right in the console.</li>
+  <li class="text-block">Together with the standard console, the CLI application runs a shadow thread for a socket connection. Any external application could connect to the specific port as a UDP client and send datagrams for execution in the console. To shut down the Terminal window on the server side, run <span class="code-inline">asiExeCli.exe</span> with the <span class="code-inline">/no-prompt</span> key.</li>
+</ol>
 
 <!-- [END] contents -->
 </div>
