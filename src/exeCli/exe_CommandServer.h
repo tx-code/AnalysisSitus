@@ -59,9 +59,8 @@ protected:
 
 private:
 
-  QUdpSocket* m_pSocket;
-
-  Handle(exe_CommandQueue) m_queue; //!< Command queue.
+  QUdpSocket*              m_pSocket; //!< Socket connection.
+  Handle(exe_CommandQueue) m_queue;   //!< Shared command queue.
 
 };
 
