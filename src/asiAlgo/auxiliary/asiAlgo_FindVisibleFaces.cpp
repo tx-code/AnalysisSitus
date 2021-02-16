@@ -139,7 +139,7 @@ const NCollection_DataMap<t_topoId , asiAlgo_FindVisibleFaces::t_score>&
 
 void
   asiAlgo_FindVisibleFaces::GetResultFaces(TColStd_PackedMapOfInteger& faces,
-                                           const double                visiblePercent) const
+                                           const double                visibilityPerc) const
 {
   for ( NCollection_DataMap<int, t_score>::Iterator it(m_scores);
         it.More(); it.Next() )
@@ -151,7 +151,7 @@ void
     //
     //std::cout << "fid / perc " << fid << " / " << perc << std::endl;
     //
-    if ( perc >= visiblePercent )
+    if ( perc >= visibilityPerc )
     {
       faces.Add(fid);
     }

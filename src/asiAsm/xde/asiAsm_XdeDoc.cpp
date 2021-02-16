@@ -601,6 +601,22 @@ TDF_Label asiAsm_XdeDoc::GetOriginal(const asiAsm_XdeAssemblyItemId& item) const
 
 //-----------------------------------------------------------------------------
 
+asiAsm_XdePartId
+  asiAsm_XdeDoc::GetPart(const asiAsm_XdeAssemblyItemId& item) const
+{
+  TDF_Label prototypeLab = this->GetOriginal(item);
+  //
+  if ( prototypeLab.IsNull() )
+    return asiAsm_XdePartId();
+
+  TCollection_AsciiString entry;
+  __entry(prototypeLab, entry);
+
+  return asiAsm_XdePartId::FromEntry(entry);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAsm_XdeDoc::GetOriginals(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
                                  TDF_LabelSequence&                           originalLabels) const
 {

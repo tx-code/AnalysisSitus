@@ -280,6 +280,12 @@ public:
   asiAsm_EXPORT TDF_Label
     GetOriginal(const asiAsm_XdeAssemblyItemId& item) const;
 
+  //! Returns part ID for the given assembly item.
+  //! \param[in] item the assembly item of interest.
+  //! \return original part.
+  asiAsm_EXPORT asiAsm_XdePartId
+    GetPart(const asiAsm_XdeAssemblyItemId& item) const;
+
   //! For the given list of assembly items, this method extracts originals
   //! without duplications. Use this method if you wish to work on originals,
   //! but be aware that any modification there will affect all the instances.

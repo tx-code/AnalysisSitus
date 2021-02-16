@@ -146,13 +146,16 @@ public:
 
   //! Gathers all visible faces. The second argument is used to
   //! control how many intersections we allow for a single face.
-  //! It is enough to have `visiblePercent` of non-intersecting rays
-  //! to deduce that a face is visible.
+  //! Imagine you made 100 tests and 90 of them reveal that a face
+  //! is visible (no hits), while the remaining 10 did find some
+  //! obstacles. We deduce that visibility score for a face is
+  //! 90% then.
+  //!
   //! \param[out] faces          the collected visible faces.
-  //! \param[in]  visiblePercent the min allowed percentage of non-intersecting rays.
+  //! \param[in]  visibilityPerc the min allowed visibility percentage.
   asiAlgo_EXPORT void
     GetResultFaces(asiAlgo_Feature& faces,
-                   const double     visiblePercent = 0.1) const;
+                   const double     visibilityPerc = 0.1) const;
 
 protected:
 

@@ -53,6 +53,7 @@
 // OpenCascade includes
 #include <BRep_Builder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <TopExp_Explorer.hxx>
 #include <UnitsMethods.hxx>
 
 // Qt includes
@@ -1202,7 +1203,7 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   Handle(asiAlgo_AAG) asmAag = new asiAlgo_AAG(asmShape);
 
   // Map faces to be able to derive subdomains.
-  const TopTools_IndexedMapOfShape& allFaces = asmAag->GetMapOfFaces();
+  TopTools_IndexedMapOfShape allFaces = asmAag->GetMapOfFaces();
 
   // Get all leaves of the model.
   asiAsm_XdeAssemblyItemIds leaves;
@@ -1211,14 +1212,43 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   TopoDS_Compound allTools;
   BRep_Builder().MakeCompound(allTools);
 
+  // Tool prisms grouped by their originating parts.
+  NCollection_DataMap<asiAsm_XdePartId,
+                      TopoDS_Compound,
+                      asiAsm_XdePartId::Hasher> partTools;
+
+  // AAGs of the part shapes.
+  NCollection_DataMap<asiAsm_XdePartId,
+                      Handle(asiAlgo_AAG),
+                      asiAsm_XdePartId::Hasher> partAAGs;
+
   // Iterate over all parts of the model.
   for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves); aiit.More(); aiit.Next() )
   {
     // Get item.
     const asiAsm_XdeAssemblyItemId& aiid = aiit.Value();
 
+    // Get part.
+    asiAsm_XdePartId pid = xdeDoc->GetPart(aiid);
+
     // Get shape.
     TopoDS_Shape itemShape = xdeDoc->GetShape(aiid);
+
+    // Part shape.
+    TopoDS_Shape partShape = xdeDoc->GetShape(pid);
+
+    // Check if AAG for a part is available.
+    Handle(asiAlgo_AAG) partAAG;
+    //
+    if ( partAAGs.IsBound(pid) )
+    {
+      partAAG = partAAGs(pid);
+    }
+    else
+    {
+      partAAG = new asiAlgo_AAG(partShape, true);
+      partAAGs.Bind(pid, partAAG);
+    }
 
     // Get all faces of the item shape to define its subdomain.
     TopTools_IndexedMapOfShape itemFaces;
@@ -1263,30 +1293,203 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
     //
     for ( asiAlgo_Feature::Iterator rit(resIndices); rit.More(); rit.Next() )
     {
-      const int fid = rit.Key();
+      const int   fid      = rit.Key();
+      TopoDS_Face faceFrom = TopoDS::Face( allFaces(fid).Located( TopLoc_Location() ) );
 
-      BRep_Builder().Add( comp, allFaces(fid) );
+      BRep_Builder().Add(comp, faceFrom);
 
-      TopoDS_Shape prism = BuildToolPrism( asmAag, fid, interp->GetProgress() );
+      TopoDS_Shape prism = BuildToolPrism( partAAG,
+                                           partAAG->GetFaceId(faceFrom),
+                                           interp->GetProgress() ).Located( itemShape.Location() );
       //
       if ( !prism.IsNull() )
         BRep_Builder().Add( tools, prism );
     }
 
+    // Add to the result.
+    TopoDS_Compound* pPartToolsComp = partTools.ChangeSeek(pid);
+    //
+    if ( pPartToolsComp == nullptr )
+    {
+      partTools.Bind(pid, tools);
+    }
+    else
+    {
+      pPartToolsComp->TShape()->Free(true);
+
+      for ( TopExp_Explorer solExp(tools, TopAbs_SOLID); solExp.More(); solExp.Next() )
+      {
+        BRep_Builder().Add( *pPartToolsComp, solExp.Current() );
+      }
+    }
+
     interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Found %1 invisible out of %2 subdomain faces."
                                                           << resIndices.Extent() << itemSubdomain.Extent() );
 
-    TCollection_AsciiString groupName("invisible "), toolName("tools ");
-    groupName += aiid.ToString();
-    toolName  += aiid.ToString();
-    //
-    interp->GetPlotter().REDRAW_SHAPE(groupName, comp,  Color_Red);
-    interp->GetPlotter().REDRAW_SHAPE(toolName,  tools, Color_White);
+    //TCollection_AsciiString groupName("invisible "), toolName("tools ");
+    //groupName += aiid.ToString();
+    //toolName  += aiid.ToString();
+    ////
+    //interp->GetPlotter().REDRAW_SHAPE(groupName, comp,  Color_Red);
+    //interp->GetPlotter().REDRAW_SHAPE(toolName,  tools, Color_White);
 
     BRep_Builder().Add(allTools, tools);
   }
 
-  interp->GetPlotter().REDRAW_SHAPE("allTools", allTools, Color_White);
+  //interp->GetPlotter().REDRAW_SHAPE("allTools", allTools, Color_White);
+
+  // Output the results.
+  for ( NCollection_DataMap<asiAsm_XdePartId,
+                            TopoDS_Compound,
+                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+        resIt.More(); resIt.Next() )
+  {
+    TCollection_AsciiString groupName("tools_");
+    groupName += resIt.Key().ToString();
+    //
+    interp->GetPlotter().REDRAW_SHAPE(groupName, resIt.Value(), Color_White);
+  }
+
+  /* ==========================================
+   *  Classify tools: keep only invisible ones.
+   * ========================================== */
+
+  // Construct one shape with all tools and parts.
+  TopoDS_Compound asmShapeWithTools;
+  //
+  BRep_Builder().MakeCompound(asmShapeWithTools);
+  BRep_Builder().Add(asmShapeWithTools, asmShape);
+  //
+  for ( NCollection_DataMap<asiAsm_XdePartId,
+                            TopoDS_Compound,
+                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+        resIt.More(); resIt.Next() )
+  {
+    BRep_Builder().Add( asmShapeWithTools, resIt.Value() );
+  }
+
+  // Compose another map with invisible prisms only.
+  NCollection_DataMap<asiAsm_XdePartId,
+                      TopoDS_Compound,
+                      asiAsm_XdePartId::Hasher> invisibleTools;
+
+  asiAlgo_FindVisibleFaces FindVisible2( asmShapeWithTools,
+                                         interp->GetProgress(),
+                                         interp->GetPlotter() );
+
+  Handle(asiAlgo_AAG) asmShapeWithToolsAag = new asiAlgo_AAG(asmShapeWithTools);
+
+  // Map faces to be able to derive subdomains.
+  allFaces = asmShapeWithToolsAag->GetMapOfFaces();
+
+  for ( NCollection_DataMap<asiAsm_XdePartId,
+                            TopoDS_Compound,
+                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+        resIt.More(); resIt.Next() )
+  {
+    const asiAsm_XdePartId& pid            = resIt.Key();
+    const TopoDS_Shape&     subdomainShape = resIt.Value();
+
+    for ( TopExp_Explorer exp(subdomainShape, TopAbs_SOLID); exp.More(); exp.Next() )
+    {
+      const TopoDS_Shape& subdomainSolid = exp.Current();
+
+      // Get all faces of the item shape to define its subdomain.
+      TopTools_IndexedMapOfShape itemFaces;
+      TopExp::MapShapes(subdomainSolid, TopAbs_FACE, itemFaces);
+
+      // Define subdomain for analysis.
+      asiAlgo_Feature itemSubdomain;
+      //
+      for ( int kk = 1; kk <= itemFaces.Extent(); ++kk )
+      {
+        const int fid = allFaces.FindIndex( itemFaces(kk) );
+        itemSubdomain.Add(fid);
+      }
+      //
+      if ( itemSubdomain.IsEmpty() )
+      {
+        continue;
+      }
+
+      // Find visible faces.
+      FindVisible2.SetSubdomain(itemSubdomain);
+      //
+      if ( !FindVisible2.Perform() )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find visible faces.");
+        return TCL_ERROR;
+      }
+
+      // Get visible faces.
+      asiAlgo_Feature visibleIndices;
+      FindVisible2.GetResultFaces(visibleIndices, 0.01);
+
+      if ( visibleIndices.Extent() )
+        continue;
+
+      // Add to the result.
+      TopoDS_Compound* pPartToolsComp = invisibleTools.ChangeSeek(pid);
+      //
+      if ( pPartToolsComp == nullptr )
+      {
+        TopoDS_Compound tools;
+        BRep_Builder().MakeCompound(tools);
+        BRep_Builder().Add(tools, subdomainSolid);
+        //
+        invisibleTools.Bind(pid, tools);
+      }
+      else
+      {
+        pPartToolsComp->TShape()->Free(true);
+
+        BRep_Builder().Add( *pPartToolsComp, subdomainSolid );
+      }
+    }
+  }
+
+  // Output the results.
+  for ( NCollection_DataMap<asiAsm_XdePartId,
+                            TopoDS_Compound,
+                            asiAsm_XdePartId::Hasher>::Iterator resIt(invisibleTools);
+        resIt.More(); resIt.Next() )
+  {
+    TCollection_AsciiString groupName("invtools_");
+    groupName += resIt.Key().ToString();
+    //
+    interp->GetPlotter().REDRAW_SHAPE(groupName, resIt.Value(), Color_Green);
+  }
+
+  /* ==============================================
+   *  Fuse remaining tools with their owning parts.
+   * ============================================== */
+
+  for ( NCollection_DataMap<asiAsm_XdePartId,
+                            TopoDS_Compound,
+                            asiAsm_XdePartId::Hasher>::Iterator resIt(invisibleTools);
+        resIt.More(); resIt.Next() )
+  {
+    TopTools_ListOfShape args;
+    //
+    for ( TopExp_Explorer exp(resIt.Value(), TopAbs_SOLID); exp.More(); exp.Next() )
+    {
+      args.Append( exp.Current().Located( TopLoc_Location() ) );
+    }
+    //
+    args.Append( xdeDoc->GetShape( resIt.Key() ) );
+
+    Handle(BRepTools_History) history;
+    TopoDS_Shape res = asiAlgo_Utils::BooleanFuse(args, history);
+
+    //TCollection_AsciiString groupName("res_");
+    //groupName += resIt.Key().ToString();
+    ////
+    //interp->GetPlotter().REDRAW_SHAPE(groupName, res, Color_White);
+
+    xdeDoc->UpdatePartShape( xdeDoc->GetLabel( resIt.Key() ), res, history, false );
+  }
+
+  xdeDoc->UpdateAssemblies();
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-kea")
