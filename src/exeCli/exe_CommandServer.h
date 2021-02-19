@@ -37,30 +37,58 @@
 // asiUI includes
 #include <asiUI_BatchFacilities.h>
 
+// Qt includes
+#pragma warning(push, 0)
+#include <QHostAddress>
+#pragma warning(pop)
+
+//-----------------------------------------------------------------------------
+
 class QUdpSocket;
 
-//! Class representing command server.
+//-----------------------------------------------------------------------------
+
+#define CLI_HostDefault QHostAddress::LocalHost
+#define CLI_PortDefault 7755
+
+//-----------------------------------------------------------------------------
+
+//! Command server for getting UDP datagrams and putting them into the
+//! shared command queue.
 class exe_CommandServer : public QObject
 {
 public:
 
-  exe_CommandServer(const Handle(exe_CommandQueue)& queue);
+  //! Ctor.
+  //! \param[in] queue       the shared command queue.
+  //! \param[in] hostAddress the host address to use.
+  //! \param[in] port        the port number to use.
+  exe_CommandServer(const Handle(exe_CommandQueue)& queue,
+                    const QHostAddress&             hostAddress = CLI_HostDefault,
+                    const int                       port        = CLI_PortDefault);
 
+  //! Dtor.
   virtual ~exe_CommandServer();
 
 public:
 
+  //! Starts message loop to get datagrams and put them as Tcl commands
+  //! to the managed shared queue.
   virtual void
     StartMessageLoop();
 
 protected:
 
+  //! Initializes UPD socket connection.
   void initSocket();
 
 private:
 
-  QUdpSocket*              m_pSocket; //!< Socket connection.
-  Handle(exe_CommandQueue) m_queue;   //!< Shared command queue.
+  QUdpSocket*              m_pSocket;  //!< Socket connection.
+  Handle(exe_CommandQueue) m_queue;    //!< Shared command queue.
+  QHostAddress             m_hostAddr; //!< Host address.
+  int                      m_iPort;    //!< Port number.
+  bool                     m_bReady;   //!< Whether socket is ready or not.
 
 };
 

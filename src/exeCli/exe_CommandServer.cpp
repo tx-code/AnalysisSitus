@@ -37,23 +37,29 @@
 #include <QUdpSocket>
 #pragma warning(pop)
 
-//! Ctor.
-//! \param[in] queue command queue.
-exe_CommandServer::exe_CommandServer(const Handle(exe_CommandQueue)& queue)
-: m_queue(queue)
+//-----------------------------------------------------------------------------
+
+exe_CommandServer::exe_CommandServer(const Handle(exe_CommandQueue)& queue,
+                                     const QHostAddress&             hostAddress,
+                                     const int                       port)
+: m_queue    (queue),
+  m_hostAddr (hostAddress),
+  m_iPort    (port),
+  m_bReady   (false)
 {
   this->initSocket();
 }
 
-//! Destructor.
-exe_CommandServer::~exe_CommandServer()
-{
-}
+//-----------------------------------------------------------------------------
 
-//! Starts message loop.
+exe_CommandServer::~exe_CommandServer()
+{}
+
+//-----------------------------------------------------------------------------
+
 void exe_CommandServer::StartMessageLoop()
 {
-  while ( 1 )
+  while ( m_bReady )
   {
     if ( m_pSocket->hasPendingDatagrams() )
     {
@@ -67,10 +73,15 @@ void exe_CommandServer::StartMessageLoop()
       m_queue->Push( new exe_BaseCmd(cmdString) );
     }
   }
+
+  if ( !m_bReady )
+    std::cout << "Socket was not bound." << std::endl;
 }
+
+//-----------------------------------------------------------------------------
 
 void exe_CommandServer::initSocket()
 {
   m_pSocket = new QUdpSocket(this);
-  m_pSocket->bind(QHostAddress::LocalHost, 7755);
+  m_bReady = m_pSocket->bind(m_hostAddr, m_iPort);
 }

@@ -76,6 +76,30 @@ public:
     return false;
   }
 
+  static bool GetKeyValue(const std::string& argLine,
+                          const std::string& key,
+                          std::string&       value)
+  {
+    std::vector<std::string> args;
+    asiAlgo_Utils::Str::Split(argLine, " ", args);
+
+    for ( const auto& arg : args )
+    {
+      if ( IsKeyword(arg, key) )
+      {
+        std::vector<std::string> chunks;
+        asiAlgo_Utils::Str::Split(arg, "=", chunks);
+
+        if ( chunks.size() != 2 )
+          return false;
+
+        value = chunks[1];
+        return true;
+      }
+    }
+    return false;
+  }
+
 };
 
 #endif

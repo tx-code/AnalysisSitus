@@ -45,6 +45,7 @@
 // Qt includes
 #pragma warning(push, 0)
 #include <QDir>
+#include <QHostAddress>
 #pragma warning(pop)
 
 // Activate object factories
@@ -79,7 +80,9 @@ VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
 //! Application utilities.
 namespace CliUtils
 {
-  Handle(exe_CommandQueue) Queue; //!< Command queue.
+  Handle(exe_CommandQueue) Queue;   //!< Command queue.
+  QHostAddress             Host;    //!< CLI host.
+  int                      PortNum; //!< Port number.
 }
 
 //-----------------------------------------------------------------------------
@@ -92,7 +95,7 @@ DWORD WINAPI Thread_Server(LPVOID)
   Sleep(100);
 
   // Create Server
-  exe_CommandServer Server(CliUtils::Queue);
+  exe_CommandServer Server(CliUtils::Queue, CliUtils::Host, CliUtils::PortNum);
 
   // Message loop
   Server.StartMessageLoop();
@@ -177,6 +180,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 {
   const bool noPrompt = asiExeCli::HasKeyword(cmdLine, "no-prompt");
 
+  // Read host and port for the server.
+  CliUtils::Host    = CLI_HostDefault;
+  CliUtils::PortNum = CLI_PortDefault;
+  std::string addrStr, portStr;
+  //
+  if ( asiExeCli::GetKeyValue(cmdLine, "host", addrStr) )
+  {
+    CliUtils::Host.setAddress( addrStr.c_str() );
+  }
+  //
+  if ( asiExeCli::GetKeyValue(cmdLine, "port", portStr) )
+  {
+    CliUtils::PortNum = asiAlgo_Utils::Str::ToNumber<int>(portStr);
+  }
+
   //---------------------------------------------------------------------------
   // Set extra environment variables
   //---------------------------------------------------------------------------
@@ -219,7 +237,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
     ExitProcess(NULL);
 
   // Aray to store thread handles
-  HANDLE hThreads[] = {/*hConsoleThread, */hInterpThread, hServerThread};
+  HANDLE hThreads[] = {hInterpThread, hServerThread};
 
   // Create terminal.
   exe_CommandWindow ConsoleWindow(CliUtils::Queue);
