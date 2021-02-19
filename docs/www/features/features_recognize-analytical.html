@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: recognize analytical shapes</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/recognize analytical shapes
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-canrec">Recognize analytical shapes</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-canrec-overview">Overview</h2>
+
+<p>
+  One of the often occurring design problems is the presence of non-analytical geometries in your CAD model. The analytical (or canonical) representation of shape has many vital advantages over the conventional NURBS representation, even though the latter one gives a genuinely universal way to represent a shape. Although NURBS can define the canonical shapes precisely, it remains a kind of lossy way of communicating the design intent. For instance, a NURBSy cylinder cannot be asked for such fundamental properties as the radius or axis. At the same time, the modeling algorithms, such as <a href="./features_sheet-metal.html">sheet metal unfolding</a> or defeaturing often rely on such properties. That is not to mention other advantages of the analytical representation, such as compactness and efficiency of computation (just think of the complexity of projecting a point to a NURBS surface and to a plane).
+</p>
+
+<p>
+  To understand whether your shape is of analytical or freeform type, you could take advantage of the basic inspection tools in Analysis Situs. One thing to keep in mind is that the actual conversion is not really necessary in the <a href="./features_recognition-principles.html">feature recognition</a> scenarios. As long as you're not editing your shape, it is perfectly enough to convert freeform entities to their analytical counterparts on-fly. Therefore, we can save some efforts by avoiding recomposing the B-rep structures.
+</p>
+
+<div align="center">
+  <img src="../imgs/situ_cr-cylinder.gif"/>
+</div>
+
+<h2 id="toc-canrec-planes">Recognize planes</h2>
+
+<p>
+  
+</p>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
