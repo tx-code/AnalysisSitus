@@ -72,6 +72,8 @@ void exe_CommandServer::StartMessageLoop()
 
       m_queue->Push( new exe_BaseCmd(cmdString) );
     }
+    else
+      Sleep(100);
   }
 
   if ( !m_bReady )
