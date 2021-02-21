@@ -2022,6 +2022,14 @@ asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const std::string& name)
 
 //-----------------------------------------------------------------------------
 
+TDF_Label asiAsm_XdeDoc::AddSubShape(const asiAsm_XdePartId& partId,
+                                     const TopoDS_Shape&     subshape)
+{
+  return this->__addSubShape( this->GetLabel(partId), subshape );
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAsm_XdeDoc::RemoveParts(const asiAsm_XdePartIds& parts,
                                 const bool               doUpdateAssemblies)
 {

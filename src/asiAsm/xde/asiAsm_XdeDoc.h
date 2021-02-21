@@ -837,6 +837,14 @@ public:
   asiAsm_EXPORT asiAsm_XdePartId
     AddPart(const std::string& name);
 
+  //! Adds subshape label under the given part.
+  //! \param[in] partId   the target part's ID.
+  //! \param[in] subshape the subshape to add.
+  //! \return the newly created OCAF label.
+  asiAsm_EXPORT TDF_Label
+    AddSubShape(const asiAsm_XdePartId& partId,
+                const TopoDS_Shape&     subshape);
+
   //! Removes all given parts with their instances from the document.
   //! \param[in] parts              parts to remove.
   //! \param[in] doUpdateAssemblies indicates whether to update assemblies
