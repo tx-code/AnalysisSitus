@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BuildHLR.h>
+#include <asiAlgo_Timer.h>
 
 // asiVisu includes
 #include <asiVisu_NodeInfo.h>
@@ -537,6 +538,9 @@ void asiUI_ViewerPart::onBuildHLR()
   //
   this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
 
+  TIMER_NEW
+  TIMER_GO
+
   // Build HLR.
   asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
   //
@@ -545,6 +549,9 @@ void asiUI_ViewerPart::onBuildHLR()
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
     return;
   }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(m_progress, "HLR projection")
 
   // Draw the result with the default color.
   m_plotter.REDRAW_SHAPE("HLR", buildHLR.GetResult(), Color_White);
@@ -566,6 +573,9 @@ void asiUI_ViewerPart::onBuildHLRDiscr()
   //
   this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
 
+  TIMER_NEW
+  TIMER_GO
+
   // Build HLR.
   asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
   //
@@ -574,6 +584,9 @@ void asiUI_ViewerPart::onBuildHLRDiscr()
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot build discrete HLR.");
     return;
   }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(m_progress, "HLR discrete projection")
 
   // Draw the result with the default color.
   m_plotter.REDRAW_SHAPE("DHLR", buildHLR.GetResult(), Color_Blue);
