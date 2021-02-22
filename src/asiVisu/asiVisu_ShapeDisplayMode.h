@@ -45,10 +45,11 @@ enum asiVisu_ShapeDisplayMode
   ShapeDisplayMode_Undefined            = 0x0000, //!< Undefined display mode.
   ShapeDisplayMode_Shaded               = 0x0001, //!< Shaded.
   ShapeDisplayMode_ShadedFacets         = 0x0002, //!< Shaded with facets only (no isolines of broken faces).
-  ShapeDisplayMode_Wireframe            = 0x0004, //!< Wireframe.
-  ShapeDisplayMode_Vertices             = 0x0008, //!< Vertices.
-  ShapeDisplayMode_WireframeAndVertices = 0x0010, //!< Wireframe with vertices.
-  ShapeDisplayMode_ShadedAndWireframe   = 0x0020  //!< Shaded and wireframe.
+  ShapeDisplayMode_WireframeNoVertices  = 0x0004, //!< Wireframe without even anomaly vertices.
+  ShapeDisplayMode_Wireframe            = 0x0008, //!< Wireframe.
+  ShapeDisplayMode_Vertices             = 0x0010, //!< Vertices.
+  ShapeDisplayMode_WireframeAndVertices = 0x0020, //!< Wireframe with vertices.
+  ShapeDisplayMode_ShadedAndWireframe   = 0x0040  //!< Shaded and wireframe.
 };
 
 //-----------------------------------------------------------------------------
@@ -83,14 +84,10 @@ public:
     return mode;
   }
 
-  //! \return collection of shape primitives employed in WIREFRAME mode.
-  static TColStd_PackedMapOfInteger WIREFRAME()
+  //! \return collection of shape primitives employed in WIREFRAME_NO_VERTICES mode.
+  static TColStd_PackedMapOfInteger WIREFRAME_NO_VERTICES()
   {
     TColStd_PackedMapOfInteger mode;
-
-    // Add anomaly vertex types
-    mode.Add(ShapePrimitive_FreeVertex);
-    mode.Add(ShapePrimitive_BorderVertex);
 
     // Add all types of edges
     mode.Add(ShapePrimitive_FreeEdge);
@@ -98,6 +95,18 @@ public:
     mode.Add(ShapePrimitive_BorderEdge);
     mode.Add(ShapePrimitive_ManifoldEdge);
     mode.Add(ShapePrimitive_NonManifoldEdge);
+
+    return mode;
+  }
+
+  //! \return collection of shape primitives employed in WIREFRAME mode.
+  static TColStd_PackedMapOfInteger WIREFRAME()
+  {
+    TColStd_PackedMapOfInteger mode = WIREFRAME_NO_VERTICES();
+
+    // Add anomaly vertex types
+    mode.Add(ShapePrimitive_FreeVertex);
+    mode.Add(ShapePrimitive_BorderVertex);
 
     return mode;
   }
@@ -143,6 +152,7 @@ public:
     {
       case ShapeDisplayMode_Shaded:               return SHADED();
       case ShapeDisplayMode_ShadedFacets:         return SHADED_FACETS();
+      case ShapeDisplayMode_WireframeNoVertices:  return WIREFRAME_NO_VERTICES();
       case ShapeDisplayMode_Wireframe:            return WIREFRAME();
       case ShapeDisplayMode_Vertices:             return VERTICES();
       case ShapeDisplayMode_WireframeAndVertices: return WIREFRAME_AND_VERTICES();

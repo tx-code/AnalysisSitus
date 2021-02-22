@@ -56,8 +56,6 @@ asiVisu_IVTopoItemPrs::asiVisu_IVTopoItemPrs(const Handle(ActAPI_INode)& N)
 
   // Main pipeline
   Handle(asiVisu_ShapePipeline) pl = new asiVisu_ShapePipeline(false);
-  //
-  pl->GetDisplayModeFilter()->SetDisplayMode(ShapeDisplayMode_ShadedAndWireframe);
 
   // Pipeline for contours
   this->addPipeline        ( Pipeline_Main, pl );
@@ -94,6 +92,35 @@ void asiVisu_IVTopoItemPrs::Colorize(const QColor& color) const
   pl->Actor()->GetProperty()->SetColor( color.redF(),
                                         color.greenF(),
                                         color.blueF() );
+}
+
+//-----------------------------------------------------------------------------
+
+//! Enables the passed display mode.
+//! \param[in] dm the display mode to enable.
+void asiVisu_IVTopoItemPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode) const
+{
+  Handle(asiVisu_ShapePipeline)
+    pl = Handle(asiVisu_ShapePipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
+
+  if ( pl.IsNull() )
+    return;
+
+  pl->GetDisplayModeFilter()->SetDisplayMode(displayMode);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for updating of Presentation pipelines invoked before the
+//! kernel update routine starts.
+void asiVisu_IVTopoItemPrs::beforeUpdatePipelines() const
+{
+  Handle(asiData_IVTopoItemNode)
+    N = Handle(asiData_IVTopoItemNode)::DownCast( this->GetNode() );
+
+  /* Actualize display mode */
+
+  this->SetDisplayMode( (asiVisu_ShapeDisplayMode) N->GetDisplayMode() );
 }
 
 //-----------------------------------------------------------------------------

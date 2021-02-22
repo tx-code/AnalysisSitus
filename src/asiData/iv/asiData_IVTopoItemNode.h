@@ -77,6 +77,7 @@ public:
   // Presentation     //
   //------------------//
     PID_GroupPrs,     //!< Presentation group.
+    PID_DisplayMode,  //!< Display mode.
     PID_HasColor,     //!< Indicates whether the Color Parameter is active.
     PID_Color,        //!< Color.
   //------------------//
@@ -123,6 +124,12 @@ public:
 
   asiData_EXPORT double
     GetAngularDeflection() const;
+
+  asiData_EXPORT void
+    SetDisplayMode(const int);
+
+  asiData_EXPORT int
+    GetDisplayMode() const;
 
   asiData_EXPORT void
     SetHasColor(const bool);

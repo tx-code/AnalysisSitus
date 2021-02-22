@@ -274,6 +274,19 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
     plBackside ->Actor() -> SetVisibility(0);
     plContour  ->Actor() -> SetVisibility(0);
   }
+
+  // Wireframe.
+  if ( displayMode == ShapeDisplayMode_WireframeNoVertices )
+  {
+    // Configure filter.
+    plMain->GetDisplayModeFilter()->SetDisplayMode(ShapeDisplayMode_WireframeNoVertices);
+    plMain->GetDisplayModeFilter()->SetAllowExtraScalars(false);
+
+    // Configure actors.
+    plMain     ->Actor() -> SetPickable(0);
+    plBackside ->Actor() -> SetVisibility(0);
+    plContour  ->Actor() -> SetVisibility(0);
+  }
 }
 
 //-----------------------------------------------------------------------------

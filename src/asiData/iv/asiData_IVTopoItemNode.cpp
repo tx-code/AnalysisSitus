@@ -48,6 +48,7 @@ asiData_IVTopoItemNode::asiData_IVTopoItemNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,  PID_TessLinDefl);
   REGISTER_PARAMETER(Real,  PID_TessAngDefl);
   REGISTER_PARAMETER(Group, PID_GroupPrs);
+  REGISTER_PARAMETER(Int,   PID_DisplayMode);
   REGISTER_PARAMETER(Bool,  PID_HasColor);
   REGISTER_PARAMETER(Int,   PID_Color);
 
@@ -74,6 +75,7 @@ void asiData_IVTopoItemNode::Init()
   this->SetShape             ( TopoDS_Shape() );
   this->SetLinearDeflection  ( 0.0 );
   this->SetAngularDeflection ( 0.0 );
+  this->SetDisplayMode       ( 0x040 ); // Shading with edges.
   this->SetHasColor          ( true );
   this->SetColor             ( 150 << 16 | 150 << 8 | 150 );
   this->SetBVH               ( nullptr );
@@ -84,9 +86,10 @@ void asiData_IVTopoItemNode::Init()
   this->InitParameter(PID_TessLinDefl, "Linear deflection",  "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TessAngDefl, "Angular deflection", "", ParameterFlag_IsVisible, true);
   //
-  this->InitParameter(PID_GroupPrs, "Presentation", "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasColor, "Colorized",    "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Color,    "Color",        "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupPrs,    "Presentation",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DisplayMode, "Display mode",  "PrsDisplayMode", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasColor,    "Colorized",     "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,       "Color",         "PrsCustomColor", ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -173,6 +176,24 @@ void asiData_IVTopoItemNode::SetAngularDeflection(const double defl)
 double asiData_IVTopoItemNode::GetAngularDeflection() const
 {
   return ActParamTool::AsReal( this->Parameter(PID_TessAngDefl) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Sets display mode.
+//! \param[in] mode display mode value to set.
+void asiData_IVTopoItemNode::SetDisplayMode(const int mode)
+{
+  ActParamTool::AsInt( this->Parameter(PID_DisplayMode) )->SetValue(mode);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Accessor for the stored display mode value.
+//! \return display mode value.
+int asiData_IVTopoItemNode::GetDisplayMode() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_DisplayMode) )->GetValue();
 }
 
 //-----------------------------------------------------------------------------

@@ -33,6 +33,7 @@
 
 // asiVisu includes
 #include <asiVisu_DefaultPrs.h>
+#include <asiVisu_ShapeDisplayMode.h>
 
 // asiData includes
 #include <asiData_IVTopoItemNode.h>
@@ -66,8 +67,19 @@ public:
   asiVisu_EXPORT void
     Colorize(const QColor& color) const;
 
+  asiVisu_EXPORT void
+    SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode) const;
+
+  asiVisu_EXPORT void
+    VerticesOn() const;
+
+  asiVisu_EXPORT void
+    VerticesOff() const;
 
 protected:
+
+  virtual void
+    beforeUpdatePipelines() const;
 
   virtual void
     afterUpdatePipelines() const;
