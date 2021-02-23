@@ -45,11 +45,11 @@ enum asiVisu_ShapeDisplayMode
   ShapeDisplayMode_Undefined            = 0x0000, //!< Undefined display mode.
   ShapeDisplayMode_Shaded               = 0x0001, //!< Shaded.
   ShapeDisplayMode_ShadedFacets         = 0x0002, //!< Shaded with facets only (no isolines of broken faces).
-  ShapeDisplayMode_WireframeNoVertices  = 0x0004, //!< Wireframe without even anomaly vertices.
-  ShapeDisplayMode_Wireframe            = 0x0008, //!< Wireframe.
-  ShapeDisplayMode_Vertices             = 0x0010, //!< Vertices.
-  ShapeDisplayMode_WireframeAndVertices = 0x0020, //!< Wireframe with vertices.
-  ShapeDisplayMode_ShadedAndWireframe   = 0x0040  //!< Shaded and wireframe.
+  ShapeDisplayMode_Wireframe            = 0x0004, //!< Wireframe.
+  ShapeDisplayMode_Vertices             = 0x0008, //!< Vertices.
+  ShapeDisplayMode_WireframeAndVertices = 0x0010, //!< Wireframe with vertices.
+  ShapeDisplayMode_ShadedAndWireframe   = 0x0020, //!< Shaded and wireframe.
+  ShapeDisplayMode_WireframeNoVertices  = 0x0040  //!< Wireframe without even anomaly vertices.
 };
 
 //-----------------------------------------------------------------------------

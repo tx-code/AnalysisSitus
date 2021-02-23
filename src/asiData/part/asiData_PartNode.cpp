@@ -106,7 +106,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->SetKeepTessParams        (false);
   this->SetUseScalars            (true);
   this->SetColor                 (180 << 16 | 180 << 8 | 180); // Initial color.
-  this->SetDisplayMode           (0x040);                      // Shading with edges.
+  this->SetDisplayMode           (0x020);                      // Shading with edges.
   this->SetHasVertices           (false);
   this->SetHasBackface           (true);
   this->SetShowFaultyFaces       (true);

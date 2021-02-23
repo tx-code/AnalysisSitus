@@ -12,9 +12,15 @@
 
   <valueList id="List-ShapeDisplayMode" name="Display mode">
     <value id="1">Shading</value>
-    <value id="4">Pure wireframe</value>
-    <value id="8">Wireframe</value>
-    <value id="64">Shading with edges</value>
+    <value id="4">Wireframe</value>
+    <value id="32">Shading with edges</value>
+  </valueList>
+
+  <valueList id="List-IVShapeDisplayMode" name="Display mode">
+    <value id="1">Shading</value>
+    <value id="4">Wireframe</value>
+    <value id="32">Shading with edges</value>
+    <value id="64">Pure wireframe</value>
   </valueList>
 
   <valueList id="List-MeshDisplayMode" name="Display mode">
@@ -64,6 +70,13 @@
   <!-- Display mode for shape presentation -->
   <datum id="PrsDisplayMode" format="" label="Display mode">
     <domain type="List" list="List-ShapeDisplayMode" />
+    <ui widget="ComboBox" />
+    <description>Display mode</description>
+  </datum>
+
+  <!-- Display mode for shape presentation -->
+  <datum id="IVPrsDisplayMode" format="" label="Display mode">
+    <domain type="List" list="List-IVShapeDisplayMode" />
     <ui widget="ComboBox" />
     <description>Display mode</description>
   </datum>

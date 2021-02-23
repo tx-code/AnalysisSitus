@@ -75,7 +75,7 @@ void asiData_IVTopoItemNode::Init()
   this->SetShape             ( TopoDS_Shape() );
   this->SetLinearDeflection  ( 0.0 );
   this->SetAngularDeflection ( 0.0 );
-  this->SetDisplayMode       ( 0x040 ); // Shading with edges.
+  this->SetDisplayMode       ( 0x020 ); // Shading with edges.
   this->SetHasColor          ( true );
   this->SetColor             ( 150 << 16 | 150 << 8 | 150 );
   this->SetBVH               ( nullptr );
@@ -86,10 +86,10 @@ void asiData_IVTopoItemNode::Init()
   this->InitParameter(PID_TessLinDefl, "Linear deflection",  "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TessAngDefl, "Angular deflection", "", ParameterFlag_IsVisible, true);
   //
-  this->InitParameter(PID_GroupPrs,    "Presentation",  "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_DisplayMode, "Display mode",  "PrsDisplayMode", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasColor,    "Colorized",     "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Color,       "Color",         "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupPrs,    "Presentation",  "",                 ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DisplayMode, "Display mode",  "IVPrsDisplayMode", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasColor,    "Colorized",     "",                 ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,       "Color",         "PrsCustomColor",   ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
