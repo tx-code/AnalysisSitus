@@ -63,6 +63,28 @@ int ENGINE_EnableNotifier(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_Notifier(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( interp->HasKeyword(argc, argv, "init") )
+  {
+    interp->GetProgress().Init();
+    interp->GetProgress().SetMessageKey("Running...");
+  }
+
+  if ( interp->HasKeyword(argc, argv, "step") )
+    interp->GetProgress().StepProgress(1);
+
+  if ( interp->HasKeyword(argc, argv, "finish") )
+    interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 int ENGINE_DisableNotifier(const Handle(asiTcl_Interp)& interp,
@@ -297,6 +319,13 @@ void cmdEngine::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Enables notification messages.",
     //
     __FILE__, group, ENGINE_EnableNotifier);
+
+  interp->AddCommand("notifier",
+    //
+    "notifier {-init, -step, -finish}\n"
+    "\t Manages notifier.",
+    //
+    __FILE__, group, ENGINE_Notifier);
 
   interp->AddCommand("disable-notifier",
     //
