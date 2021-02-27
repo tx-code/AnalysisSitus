@@ -209,9 +209,10 @@ void asiVisu_ShapeRobustTessellator::internalInit(const double                  
   m_progress.SendLogMessage(LogInfo(Normal) << "Faceter angular deflection is %1 deg." << m_fAngDeflectionDeg);
 
   // Calculate global bounding box which will be used for calibration of
-  // auxiliary visualization primitives
+  // auxiliary visualization primitives. Make sure to use non-optimal AABB
+  // computation here as otherwise it takes forever to compute.
   double xmin, ymin, zmin, xmax, ymax, zmax;
-  asiAlgo_Utils::Bounds(m_shape, xmin, ymin, zmin, xmax, ymax, zmax);
+  asiAlgo_Utils::Bounds(m_shape, xmin, ymin, zmin, xmax, ymax, zmax, 0., false);
   //
   m_fGlobalBndDiag = asiVisu_Utils::TrimInf( gp_Pnt(xmax, ymax, zmax).Distance( gp_Pnt(xmin, ymin, zmin) ) );
 }
