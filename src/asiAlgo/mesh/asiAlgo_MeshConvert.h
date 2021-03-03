@@ -78,6 +78,10 @@ namespace asiAlgo_MeshConvert
     ToVTK(const Handle(Poly_Triangulation)& source,
           vtkSmartPointer<vtkPolyData>&     result);
 
+  asiAlgo_EXPORT bool
+    ToBRep(const Handle(Poly_Triangulation)& source,
+           TopoDS_Shape&                     result);
+
   //! Translates the passed mesh element to VTK polygonal cell.
   //! \param[in]      source   source mesh.
   //! \param[in]      elem     mesh element to translate.

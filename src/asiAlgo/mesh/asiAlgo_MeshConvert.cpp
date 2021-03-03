@@ -39,6 +39,19 @@
 #include <ActData_Mesh_Quadrangle.h>
 #include <ActData_Mesh_Triangle.h>
 
+// OpenCascade includes
+#include <BRep_Builder.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shell.hxx>
+#include <TopoDS_Vertex.hxx>
+#include <TopoDS_Wire.hxx>
+
 #if defined USE_VTK
   // VTK includes
   #pragma warning(push, 0)
@@ -311,6 +324,150 @@ bool asiAlgo_MeshConvert::ToVTK(const Handle(Poly_Triangulation)& source,
   for ( int i = aTriangles.Lower(); i <= aTriangles.Upper(); ++i)
     __translateElement(source, aTriangles(i), result, nodeRepo);
 
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_MeshConvert::ToBRep(const Handle(Poly_Triangulation)& source,
+                                 TopoDS_Shape&                     result)
+{
+  if ( source.IsNull() )
+    return false;
+
+  NCollection_DataMap<int, TopoDS_Vertex>                         mapNumVertex;
+  NCollection_DataMap<int, NCollection_DataMap<int, TopoDS_Edge>> mapNumEdge;
+  //
+  TopoDS_Vertex triVertexes[3];
+  TopoDS_Edge   edges[3];
+  TopoDS_Face   face;
+  TopoDS_Wire   wire;
+  TopoDS_Shell  shell;
+  //
+  BRep_Builder bbuilder;
+  bbuilder.MakeShell(shell);
+  //
+  const TColgp_Array1OfPnt&    nodes     = source->Nodes();
+  const Poly_Array1OfTriangle& triangles = source->Triangles();
+  //
+  for ( int triIdx  = triangles.Lower();
+            triIdx <= triangles.Upper();
+          ++triIdx )
+  {
+    const Poly_Triangle& triangle = triangles(triIdx);
+    //
+    int id[3];
+    triangle.Get(id[0], id[1], id[2]);
+    //
+    const gp_Pnt pnt[] = { nodes(id[0]), nodes(id[1]), nodes(id[2]) };
+    //
+    if ( ( !( pnt[0].IsEqual(pnt[1], 0.0) ) ) &&
+         ( !( pnt[0].IsEqual(pnt[2], 0.0) ) ) )
+    {
+      // Make vertices.
+      for ( int i = 0; i < 3; ++i )
+      {
+        if ( !mapNumVertex.IsBound(id[i]) )
+        {
+          try
+          {
+            triVertexes[i] = BRepBuilderAPI_MakeVertex(pnt[i]);
+          }
+          catch ( ... )
+          {
+            return false;
+          }
+          //
+          mapNumVertex.Bind(id[i], triVertexes[i]);
+        }
+        else
+        {
+          triVertexes[i] = mapNumVertex.Find(id[i]);
+        }
+      }
+
+      // Make edges.
+      for ( int i = 0; i < 3; ++i )
+      {
+        int first  = id[i] < id[(i + 1) % 3 ] ? id[i] : id[(i + 1) % 3 ];
+        int second = id[i] > id[(i + 1) % 3 ] ? id[i] : id[(i + 1) % 3 ];
+        //
+        bool isFirstBound = mapNumEdge.IsBound(first);
+        //
+        if ( isFirstBound && !mapNumEdge.Find(first).IsBound(second) )
+        {
+          try
+          {
+            edges[i] = BRepBuilderAPI_MakeEdge(triVertexes[i], triVertexes[(i + 1) % 3]);
+          }
+          catch ( ... )
+          {
+            return false;
+          }
+          //
+          mapNumEdge.ChangeFind(first).Bind(second, edges[i]);
+        }
+        else if ( !isFirstBound )
+        {
+          try
+          {
+            edges[i] = BRepBuilderAPI_MakeEdge(triVertexes[i], triVertexes[(i + 1) % 3]);
+          }
+          catch ( ... )
+          {
+            return false;
+          }
+          //
+          NCollection_DataMap<int, TopoDS_Edge> map;
+          map.Bind(second, edges[i]);
+          mapNumEdge.Bind(first, map);
+        }
+        else
+        {
+          edges[i] = mapNumEdge.Find(first).Find(second);
+          edges[i].Reverse();
+        }
+      }
+
+      // Make wire.
+      try
+      {
+        wire = BRepBuilderAPI_MakeWire(edges[0], edges[1], edges[2]);
+      }
+      catch ( ... )
+      {
+        return false;
+      }
+
+      // Make face.
+      if ( !wire.IsNull() )
+      {
+        try
+        {
+          face = BRepBuilderAPI_MakeFace(wire);
+        }
+        catch ( ... )
+        {
+          return false;
+        }
+        //
+        if (!face.IsNull())
+        {
+          bbuilder.Add(shell, face);
+        }
+      }
+    }
+  }
+  //
+  try
+  {
+    result = BRepBuilderAPI_MakeSolid(shell);
+  }
+  catch ( ... )
+  {
+    return false;
+  }
+  //
   return true;
 }
 

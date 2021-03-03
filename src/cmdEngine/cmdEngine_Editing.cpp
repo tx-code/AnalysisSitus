@@ -45,6 +45,7 @@
 #include <asiAlgo_EulerKFMV.h>
 #include <asiAlgo_InterpolateSurfMesh.h>
 #include <asiAlgo_InvertShells.h>
+#include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_PlateOnEdges.h>
 #include <asiAlgo_PlateOnPoints.h>
@@ -1558,8 +1559,8 @@ int ENGINE_SplitByContinuity(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_SplitClosed(const Handle(asiTcl_Interp)& interp,
-                       int                          argc,
-                       const char**                 argv)
+                       int,
+                       const char**)
 {
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
@@ -3136,6 +3137,56 @@ int ENGINE_MaximizeFaces(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get mesh from the Triangulation Node.
+  Handle(Poly_Triangulation)
+    poly = cmdEngine::model->GetTriangulationNode()->GetTriangulation();
+  //
+  if ( poly.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Convert.
+  TopoDS_Shape result;
+  //
+  if ( !asiAlgo_MeshConvert::ToBRep(poly, result) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Conversion failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Mesh to B-rep")
+
+  // Modify shape.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part(cmdEngine::model).Update(result);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3557,4 +3608,13 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Maximizes canonical faces.",
     //
     __FILE__, group, ENGINE_MaximizeFaces);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("convert-to-brep",
+    //
+    "convert-to-brep\n"
+    "\t Converts triangulation to B-rep. The triangles are mapped one-by-one\n"
+    "\t to the faces of the resulting model.",
+    //
+    __FILE__, group, ENGINE_ConvertToBRep);
 }
