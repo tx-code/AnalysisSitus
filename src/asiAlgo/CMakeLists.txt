@@ -9,6 +9,7 @@ set (H_FILES
   asiAlgo_Version.h
 )
 set (CPP_FILES
+  asiAlgo_Version.cpp
 )
 
 #------------------------------------------------------------------------------

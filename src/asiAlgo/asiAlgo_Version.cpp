@@ -28,38 +28,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_Version_h
-#define asiAlgo_Version_h
-
-// asiAlgo includes
-#include <asiAlgo.h>
+// Own include
+#include <asiAlgo_Version.h>
 
 // Standard includes
-#include <string>
-
-//-----------------------------------------------------------------------------
-// Analysis Situs version
-//-----------------------------------------------------------------------------
-
-#define ASITUS_VERSION_MAJOR 0 // Major: incremented by major releases
-#define ASITUS_VERSION_MINOR 4 // Minor: incremented by minor releases
-#define ASITUS_VERSION_PATCH 1 // Patch: incremented with bug-fix releases
+#include <iomanip>
+#include <sstream>
 
 //-----------------------------------------------------------------------------
 
-// Cumulative version: 8 bits for each version number
-#define ASITUS_VERSION_HEX \
-( (ASITUS_VERSION_MAJOR << 16) | (ASITUS_VERSION_MINOR << 8) | ASITUS_VERSION_PATCH )
-
-#define ASITUS_VERSION_STRING "0.4.1dev"
-#define ASITUS_APP_NAME "Analysis Situs"
-
-namespace asiAlgo
+std::string asiAlgo::GetBuildNumber()
 {
-  //! Returns build number as the compilation timestamp.
-  //! \return build number as string.
-  asiAlgo_EXPORT std::string
-    GetBuildNumber();
-}
+  struct tm tm;
 
-#endif
+  std::istringstream ss(__DATE__);
+  ss >> std::get_time(&tm, "%B %d %Y");
+
+  char buffer[64];
+  std::strftime(buffer, sizeof(buffer), "%d%m%Y", &tm);
+
+  return buffer;
+}
