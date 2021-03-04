@@ -104,9 +104,15 @@ void asiVisu_CurvePipeline::SetInput(const Handle(asiVisu_DataProvider)& DP)
       double tipSize;
       //
       if ( dp->GetDrawOrientationTip() )
-        tipSize = (curve->Value(l).XYZ() - curve->Value(f).XYZ() ).Modulus()*0.1;
+      {
+        // Derive the tip size not using endings because it won't work
+        // for closed curved. Therefore, let's take the midpoint instead.
+        tipSize = (curve->Value(l).XYZ() - curve->Value( (f + l)*0.5 ).XYZ() ).Modulus()*0.1;
+      }
       else
+      {
         tipSize = 0.;
+      }
       //
       src->SetTipSize(tipSize);
     }
