@@ -294,22 +294,20 @@ void asiData_PartNode::SetTransformationMx(const double a11,
   Handle(ActData_RealArrayParameter)
     param = ActParamTool::AsRealArray( this->Parameter(PID_TrsfMx) );
 
-  Handle(HRealArray) arr = param->GetArray();
-  //
-  arr->ChangeValue(0)  = a11;
-  arr->ChangeValue(1)  = a12;
-  arr->ChangeValue(2)  = a13;
-  arr->ChangeValue(3)  = a14;
-  arr->ChangeValue(4)  = a21;
-  arr->ChangeValue(5)  = a22;
-  arr->ChangeValue(6)  = a23;
-  arr->ChangeValue(7)  = a24;
-  arr->ChangeValue(8)  = a31;
-  arr->ChangeValue(9)  = a32;
-  arr->ChangeValue(10) = a33;
-  arr->ChangeValue(11) = a34;
+  param->SetElement(0,  a11);
+  param->SetElement(1,  a12);
+  param->SetElement(2,  a13);
+  param->SetElement(3,  a14);
+  param->SetElement(4,  a21);
+  param->SetElement(5,  a22);
+  param->SetElement(6,  a23);
+  param->SetElement(7,  a24);
+  param->SetElement(8,  a31);
+  param->SetElement(9,  a32);
+  param->SetElement(10, a33);
+  param->SetElement(11, a34);
 
-  param->SetArray(arr);
+  param->SetModified();
 }
 
 //! Returns the stored transformation matrix by its components.
