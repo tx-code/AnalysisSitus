@@ -40,7 +40,7 @@
 // OCCT includes
 #include <Poly_CoherentTriangulation.hxx>
 #include <TColStd_PackedMapOfInteger.hxx>
-#include <TopoDS_Shape.hxx>
+#include <TopoDS_Face.hxx>
 
 // Standard includes
 #include <vector>
@@ -55,6 +55,8 @@ class asiAlgo_MeshMerge
 {
 public:
 
+  typedef NCollection_DataMap< TopoDS_Face, NCollection_Vector<int> > t_faceElems;
+
   //! Conversion mode.
   enum Mode
   {
@@ -66,8 +68,7 @@ public:
 
   asiAlgo_EXPORT
     asiAlgo_MeshMerge(const TopoDS_Shape& body,
-                      const Mode          mode            = Mode_PolyCoherentTriangulation,
-                      const bool          collectBoundary = true);
+                      const Mode          mode = Mode_PolyCoherentTriangulation);
 
   asiAlgo_EXPORT
     asiAlgo_MeshMerge(const std::vector<Handle(Poly_Triangulation)>& triangulations,
@@ -93,22 +94,10 @@ public:
     return m_resultMesh;
   }
 
-  //! \return free links (those corresponding to non-shared edges).
-  const asiAlgo_MeshLinkSet& GetFreeLinks() const
+  //! \return map of indices of mesh triagnles for face.
+  const t_faceElems& GetFaceElems() const
   {
-    return m_freeLinks;
-  }
-
-  //! \return manifold links (those corresponding to the shared manifold edges).
-  const asiAlgo_MeshLinkSet& GetManifoldLinks() const
-  {
-    return m_manifoldLinks;
-  }
-
-  //! \return non-manifold links (those corresponding to the shared non-manifold edges).
-  const asiAlgo_MeshLinkSet& GetNonManifoldLinks() const
-  {
-    return m_nonManifoldLinks;
+  	return m_faceElems;
   }
 
   //! Converts merging tool to triangulation object.
@@ -121,24 +110,17 @@ public:
 protected:
 
   void build(const TopoDS_Shape& body,
-             const Mode          mode,
-             const bool          collectBoundary);
-  //
+             const Mode          mode);
+
   void build(const std::vector<Handle(Poly_Triangulation)>& triangulations,
              const Mode                                     mode);
-  //
-  void addFreeLink(const asiAlgo_MeshLink& link);
-  void addManifoldLink(const asiAlgo_MeshLink& link);
-  void addNonManifoldLink(const asiAlgo_MeshLink& link);
 
 // OUTPUTS:
 protected:
 
-  Handle(Poly_CoherentTriangulation) m_resultPoly;       //!< Result tessellation.
-  Handle(ActData_Mesh)               m_resultMesh;       //!< Result mesh.
-  asiAlgo_MeshLinkSet                m_freeLinks;        //!< Free links.
-  asiAlgo_MeshLinkSet                m_manifoldLinks;    //!< Manifold links.
-  asiAlgo_MeshLinkSet                m_nonManifoldLinks; //!< Non-manifold links.
+  Handle(Poly_CoherentTriangulation) m_resultPoly; //!< Result tessellation.
+  Handle(ActData_Mesh)               m_resultMesh; //!< Result mesh.
+  t_faceElems                        m_faceElems;  //!< Map to store indices of mesh triagnles for face.
 
 };
 

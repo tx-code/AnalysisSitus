@@ -46,6 +46,9 @@
 // glTF includes
 #include <gltf_XdeWriter.h>
 
+// FBX includes
+#include <fbx_XdeWriter.h>
+
 // asiUI includes
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
@@ -837,6 +840,67 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-save-gltf")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_SaveFBX(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get filename.
+  std::string filenameArg;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filenameArg) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified. "
+                                                           "Did you forget the '-filename' key?");
+    return TCL_ERROR;
+  }
+  //
+  TCollection_AsciiString filename( filenameArg.c_str() );
+  TCollection_AsciiString ext = filename;
+  ext.LowerCase();
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  TIMER_NEW
+  TIMER_GO
+
+  fbx_XdeWriter cafWriter( filename,
+                           interp->GetProgress(),
+                           interp->GetPlotter() );
+
+  if ( !cafWriter.Perform(doc) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "FBX export failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-save-fbx")
 
   return TCL_OK;
 }
@@ -1779,6 +1843,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Exports the passed XDE model to glTF format.",
     //
     __FILE__, group, ASMXDE_SaveGLTF);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-save-fbx",
+    //
+    "asm-xde-save-fbx -model <M> -filename <filename>\n"
+    "\t Exports the passed XDE model to Autodesk FBX format.",
+    //
+    __FILE__, group, ASMXDE_SaveFBX);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-generate-facets",

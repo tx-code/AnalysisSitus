@@ -42,6 +42,17 @@ set (xde_CPP_FILES
 # Interoperability
 #------------------------------------------------------------------------------
 
+set (interop_H_FILES
+  interop/fbx_XdeWriter.h
+)
+set (interop_CPP_FILES
+  interop/fbx_XdeWriter.cpp
+)
+
+#------------------------------------------------------------------------------
+# Interoperability
+#------------------------------------------------------------------------------
+
 set (interop_gltf_H_FILES
   interop/gltf/gltf_CSysConverter.h
   interop/gltf/gltf_Entities.h
@@ -109,6 +120,20 @@ set (OCCT_LIB_FILES
 )
 
 #------------------------------------------------------------------------------
+# FBX SDK libraries
+#------------------------------------------------------------------------------
+
+if (WIN32)
+  set (FBX_SDK_LIB_FILES
+    libfbxsdk
+  )
+else()
+  set (FBX_SDK_LIB_FILES
+    libfbxsdk.a
+  )
+endif()
+
+#------------------------------------------------------------------------------
 # Add sources
 #------------------------------------------------------------------------------
 
@@ -136,6 +161,14 @@ endforeach (FILE)
 
 foreach (FILE ${xde_CPP_FILES})
   source_group ("Source Files\\XDE" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${interop_H_FILES})
+  source_group ("Header Files\\Interoperability" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${interop_CPP_FILES})
+  source_group ("Source Files\\Interoperability" FILES "${FILE}")
 endforeach (FILE)
 
 foreach (FILE ${interop_gltf_H_FILES})
@@ -169,6 +202,7 @@ include_directories ( SYSTEM
                       ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_rapidjson_DIR}
+                      ${3RDPARTY_FBX_SDK_INCLUDE_DIR}
                       ${3RDPARTY_tbb_INCLUDE_DIR} )
 
 #------------------------------------------------------------------------------
@@ -179,6 +213,7 @@ add_library (asiAsm SHARED
   ${H_FILES}              ${CPP_FILES}
   ${entity_H_FILES}       ${entity_CPP_FILES}
   ${xde_H_FILES}          ${xde_CPP_FILES}
+  ${interop_H_FILES}      ${interop_CPP_FILES}
   ${interop_gltf_H_FILES} ${interop_gltf_CPP_FILES}
 )
 
@@ -237,6 +272,21 @@ foreach (LIB_FILE ${TBB_LIB_FILES})
   target_link_libraries (asiAsm optimized ${3RDPARTY_tbb_LIBRARY_DIR}/${LIB_FILENAME})
 endforeach()
 
+if (USE_FBX_SDK)
+  foreach (LIB_FILE ${FBX_SDK_LIB_FILES})
+    if (WIN32)
+      set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+      set (LIB_FILENAME_DEBUG "${LIB_FILE}_debug${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set (LIB_FILENAME_DEBUG "lib${LIB_FILE}_debug${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
+
+    target_link_libraries (asiAsm debug ${3RDPARTY_FBX_SDK_LIBRARY_DIR}/${LIB_FILENAME_DEBUG})
+    target_link_libraries (asiAsm optimized ${3RDPARTY_FBX_SDK_LIBRARY_DIR}/${LIB_FILENAME})
+  endforeach()
+endif()
+
 #------------------------------------------------------------------------------
 # Installation
 #------------------------------------------------------------------------------
@@ -272,4 +322,5 @@ endif()
 install (FILES ${H_FILES}              DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${entity_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${xde_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${interop_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${interop_gltf_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)

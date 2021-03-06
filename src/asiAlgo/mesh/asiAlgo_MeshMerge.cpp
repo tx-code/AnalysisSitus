@@ -161,14 +161,12 @@ namespace
 //-----------------------------------------------------------------------------
 
 //! Constructor.
-//! \param body            [in] CAD model to extract triangulation patches from.
-//! \param mode            [in] conversion mode.
-//! \param collectBoundary [in] indicates whether to preserve boundary links.
+//! \param body [in] CAD model to extract triangulation patches from.
+//! \param mode [in] conversion mode.
 asiAlgo_MeshMerge::asiAlgo_MeshMerge(const TopoDS_Shape& body,
-                                     const Mode          mode,
-                                     const bool          collectBoundary)
+                                     const Mode          mode)
 {
-  this->build(body, mode, collectBoundary);
+  this->build(body, mode);
 }
 
 //-----------------------------------------------------------------------------
@@ -185,20 +183,13 @@ asiAlgo_MeshMerge::asiAlgo_MeshMerge(const std::vector<Handle(Poly_Triangulation
 //-----------------------------------------------------------------------------
 
 //! Assembles many triangulations into a single one.
-//! \param body            [in] CAD model to extract triangulation patches from.
-//! \param mode            [in] conversion mode.
-//! \param collectBoundary [in] indicates whether to preserve boundary links.
+//! \param body [in] CAD model to extract triangulation patches from.
+//! \param mode [in] conversion mode.
 void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
-                              const Mode          mode,
-                              const bool          collectBoundary)
+                              const Mode          mode)
 {
   // Create result as coherent triangulation
   m_resultPoly = new Poly_CoherentTriangulation;
-
-  // Prepare map of edges and their parent faces
-  TopTools_IndexedDataMapOfShapeListOfShape edgesOnFaces;
-  if ( collectBoundary )
-    TopExp::MapShapesAndAncestors(body, TopAbs_EDGE, TopAbs_FACE, edgesOnFaces);
 
   // Working tools and variables
   int globalNodeId = 0;
@@ -206,6 +197,8 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
 
   //###########################################################################
   // [BEGIN] Iterate over the faces
+  int triangleIndex = 1;
+  //
   for ( TopExp_Explorer exp(body, TopAbs_FACE); exp.More(); exp.Next() )
   {
     const TopoDS_Face& F = TopoDS::Face( exp.Current() );
@@ -239,51 +232,6 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
                               FaceNodeIds_ToGlobalNodeIds); // [in,out] face-conglomerate map of node IDs
     }
 
-    // Collect local indices of the boundary nodes
-    if ( collectBoundary )
-    {
-      for ( TopExp_Explorer eexp(F, TopAbs_EDGE); eexp.More(); eexp.Next() )
-      {
-        const TopoDS_Edge& E = TopoDS::Edge( eexp.Current() );
-
-        // Get discrete analogue of p-curve
-        const Handle(Poly_PolygonOnTriangulation)&
-          polygonOnTri = BRep_Tool::PolygonOnTriangulation(E, LocalTri, Loc);
-        //
-        if ( polygonOnTri.IsNull() )
-          continue;
-
-        // Get owner faces to decide the type of sharing
-        const TopTools_ListOfShape& ownerFaces = edgesOnFaces.FindFromKey(E);
-        const int nFaces = ownerFaces.Extent();
-
-        // Add node indices to the collection of boundary nodes
-        const TColStd_Array1OfInteger& polygonOnTriNodes = polygonOnTri->Nodes();
-        int prevBndNode = 0;
-        //
-        for ( int k = polygonOnTriNodes.Lower(); k <= polygonOnTriNodes.Upper(); ++k )
-        {
-          const int localBndIndex  = polygonOnTriNodes(k);
-          const int globalBndIndex = FaceNodeIds_ToGlobalNodeIds(localBndIndex);
-
-          if ( k > polygonOnTriNodes.Lower() )
-          {
-            asiAlgo_MeshLink bndLink(prevBndNode, globalBndIndex);
-
-            // Depending on the sharing type choose one or another collection
-            if ( nFaces == 1 )
-              this->addFreeLink(bndLink);
-            else if ( nFaces > 2 )
-              this->addNonManifoldLink(bndLink);
-            else
-              this->addManifoldLink(bndLink);
-          }
-          //
-          prevBndNode = globalBndIndex;
-        }
-      }
-    }
-
     // Add triangles taking into account face orientations
     for ( int i = 1; i <= nLocalTriangles; ++i )
     {
@@ -305,6 +253,14 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
         continue;
 
       m_resultPoly->AddTriangle(m[0], m[1], m[2]);
+
+      // Add mapping of indices.
+      NCollection_Vector<int>* mapPtr = m_faceElems.ChangeSeek(F);
+      if ( mapPtr == nullptr )
+        mapPtr = m_faceElems.Bound(F, NCollection_Vector<int>());
+      //
+      (*mapPtr).Append(triangleIndex);
+      ++triangleIndex;
     }
   }
   // [END] Iterate over the faces
@@ -378,25 +334,4 @@ void asiAlgo_MeshMerge::build(const std::vector<Handle(Poly_Triangulation)>& tri
   if ( mode == Mode_Mesh )
     if ( !m_resultPoly->GetTriangulation().IsNull() )
       m_resultMesh = new ActData_Mesh( m_resultPoly->GetTriangulation() );
-}
-
-//-----------------------------------------------------------------------------
-
-void asiAlgo_MeshMerge::addFreeLink(const asiAlgo_MeshLink& link)
-{
-  m_freeLinks.Add(link);
-}
-
-//-----------------------------------------------------------------------------
-
-void asiAlgo_MeshMerge::addManifoldLink(const asiAlgo_MeshLink& link)
-{
-  m_manifoldLinks.Add(link);
-}
-
-//-----------------------------------------------------------------------------
-
-void asiAlgo_MeshMerge::addNonManifoldLink(const asiAlgo_MeshLink& link)
-{
-  m_nonManifoldLinks.Add(link);
 }

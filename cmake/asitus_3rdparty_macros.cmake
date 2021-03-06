@@ -219,3 +219,116 @@ macro (ASITUS_UNSET_3RDPARTY VARNAME)
   ASITUS_UNSET ("3RDPARTY_${VARNAME}_LIBRARY_DIR")
   ASITUS_UNSET ("3RDPARTY_${VARNAME}_DLL_DIR")
 endmacro()
+
+#---------------------------------------------------------------------------------------------------
+# Name:    ASITUS_INSTALL_3RDPARTY
+# Purpose: Installs 3rd-party libraries to INSTALL_DIR
+#---------------------------------------------------------------------------------------------------
+macro (ASITUS_INSTALL_3RDPARTY LIBRARIES_LIST_NAME 3RDPARTY_NAME)
+  set (LIBRARY_NAME_DEBUG_SUFFIX "")
+  if ( ${ARGC} EQUAL 3 )
+    set (LIBRARY_NAME_DEBUG_SUFFIX "${ARGV2}")
+  endif()
+
+  set (LINUX_LIBRARY_VERSION_SUFFIX "")
+  if ( ${ARGC} EQUAL 4 )
+    set (LIBRARY_NAME_DEBUG_SUFFIX "${ARGV2}")
+    set (LINUX_LIBRARY_VERSION_SUFFIX "${ARGV3}")
+  endif()
+
+  set (IS_USE_RELEASE_LIB FALSE)
+  if ( ${ARGC} EQUAL 5 )
+    set (LIBRARY_NAME_DEBUG_SUFFIX "${ARGV2}")
+    set (LINUX_LIBRARY_VERSION_SUFFIX "${ARGV3}")
+    set (IS_USE_RELEASE_LIB ${ARGV4})
+  endif()
+
+  # Fill auxiliary lists
+  if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}")
+    list (APPEND 3RDPARTY_LIBRARY_PATH "$<$<CONFIG:RELEASE>:${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}>")
+  endif()
+  if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR_DEBUG}")
+    list (APPEND 3RDPARTY_LIBRARY_PATH "$<$<NOT:$<CONFIG:RELEASE>>:${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR_DEBUG}>")
+  endif()
+
+  if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}")
+    list (APPEND 3RDPARTY_DLL_PATH       "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}")
+  endif()
+  if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}")
+    list (APPEND 3RDPARTY_DLL_PATH_DEBUG "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}")
+  endif()
+
+  # Install includes for SDK
+  get_filename_component(3RDPARTY_DIR_NAME "${3RDPARTY_${3RDPARTY_NAME}_DIR}" NAME)
+  if (DISTRIBUTION_SDK_WITH_3RDPARTIES)
+    install (DIRECTORY "${3RDPARTY_${3RDPARTY_NAME}_INCLUDE_DIR}/" DESTINATION ${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/include)
+  endif()
+
+  if (WIN32)
+    foreach (LIB IN LISTS ${LIBRARIES_LIST_NAME})
+      # As a software
+      if (NOT BUILD_SDK_ONLY)
+        # Release
+        install (FILES "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}/${LIB}.dll" DESTINATION bin CONFIGURATIONS Release RelWithDebInfo OPTIONAL)
+
+        # Debug
+        install (FILES "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.dll" DESTINATION bin CONFIGURATIONS Debug RelWithDebInfo OPTIONAL)
+        install (FILES "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.pdb" DESTINATION bin CONFIGURATIONS Debug RelWithDebInfo OPTIONAL)
+      endif()
+
+      # As a framework
+      if (DISTRIBUTION_SDK_WITH_3RDPARTIES)
+        foreach (TYPE IN ITEMS "DLL" "LIBRARY")
+          set (DEST_DIR "bin")
+          set (ext "dll")
+          set (isBin TRUE)
+          if ("x${TYPE}" STREQUAL "xLIBRARY")
+            set (DEST_DIR "lib")
+            set (ext "lib")
+            set (isBin FALSE)
+          endif()
+
+          # Release
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_${TYPE}_DIR}/${LIB}.${ext}" DESTINATION "${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/${DEST_DIR}" CONFIGURATIONS Release OPTIONAL)
+
+          # Debug
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_${TYPE}_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.${ext}" DESTINATION "${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/${DEST_DIR}d" CONFIGURATIONS Debug OPTIONAL)
+          if (isBin)
+            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_${TYPE}_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.pdb" DESTINATION "${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/${DEST_DIR}d" CONFIGURATIONS Debug OPTIONAL)
+          endif()
+
+          # RelWithDebInfo
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_${TYPE}_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.${ext}" DESTINATION "${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/${DEST_DIR}i" CONFIGURATIONS RelWithDebInfo OPTIONAL)
+          if (isBin)
+            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_${TYPE}_DIR_DEBUG}/${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.pdb" DESTINATION "${SDK_INSTALL_SUBDIR}3rd-parties/${3RDPARTY_DIR_NAME}/${DEST_DIR}i" CONFIGURATIONS RelWithDebInfo OPTIONAL)
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+  else()
+    foreach (LIB IN LISTS ${LIBRARIES_LIST_NAME})
+      if (LINUX_LIBRARY_VERSION_SUFFIX)
+        string(REPLACE "." ";" SUF_PARTS "${LINUX_LIBRARY_VERSION_SUFFIX}")
+        set (SUF_CONCAT "")
+        foreach (SUF_PART IN LISTS SUF_PARTS)
+          if (NOT "x${SUF_PART}" STREQUAL "x")
+            set (SUF_CONCAT "${SUF_CONCAT}.${SUF_PART}")
+          endif()
+          if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so${SUF_CONCAT}" DESTINATION bin OPTIONAL)
+          endif()
+          if ( (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug") OR IS_USE_RELEASE_LIB )
+            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}.so${SUF_CONCAT}" DESTINATION bin OPTIONAL)
+          endif()
+        endforeach()
+      else()
+        if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so" DESTINATION bin)
+        endif()
+        if ( (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug") OR IS_USE_RELEASE_LIB )
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}.so" DESTINATION bin)
+        endif()
+      endif()
+    endforeach()
+  endif()
+endmacro()

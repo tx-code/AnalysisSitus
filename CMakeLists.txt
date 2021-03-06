@@ -83,6 +83,12 @@ set (USE_MOBIUS OFF CACHE BOOL "Mobius is optional 3-rd party. It gives alternat
 #
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Mobius.cmake)
 
+# FBX SDK is optional
+set (USE_FBX_SDK OFF CACHE BOOL "FBX SDK is optional 3-rd party. Building with FBX SDK will allow to export assemblies into FBX file format.")
+
+# FBX SDK for processing *.fbx files
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_FBX_SDK.cmake)
+
 # 3-rd parties for complete distribution of Analysis Situs.
 if (NOT BUILD_ALGO_ONLY)
   # Qt
@@ -146,6 +152,14 @@ if (USE_MOBIUS)
   endif()
 
   set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};${3RDPARTY_mobius_DLL_DIR}")
+endif()
+
+if (USE_FBX_SDK)
+  if (3RDPARTY_FBX_SDK_DLL_DIR_DEBUG AND EXISTS "${3RDPARTY_FBX_SDK_DLL_DIR_DEBUG}")
+    set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_DEB_PATH};${3RDPARTY_FBX_SDK_DLL_DIR_DEBUG}")
+  endif()
+
+  set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};${3RDPARTY_FBX_SDK_DLL_DIR}")
 endif()
 
 set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};\
