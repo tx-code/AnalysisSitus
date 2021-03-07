@@ -48,8 +48,10 @@
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 
-// FBX SDK includes
-#include <fbxsdk.h>
+#if defined FBXSDK_SHARED
+  // FBX SDK includes
+  #include <fbxsdk.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -59,6 +61,7 @@ using namespace asiAsm;
 
 struct t_fbxState
 {
+#if defined FBXSDK_SHARED
   typedef NCollection_DataMap<FbxMesh*, NCollection_Vector<FbxSurfacePhong*> > FbxMeshFbxSurfacePhongMap;
   typedef NCollection_DataMap<TopoDS_Shape, FbxMesh*>                          ShapeFbxMeshMap;
   typedef NCollection_DataMap<TDF_Label, FbxMesh*, TDF_LabelMapHasher>         LabelFbxMeshMap;
@@ -80,10 +83,12 @@ struct t_fbxState
     labelFbxSurfacePhongMap.Clear();
     fbxMeshFbxSurfacePhongMap.Clear();
   }
+#endif
 };
 
 //-----------------------------------------------------------------------------
 
+#if defined FBXSDK_SHARED
 namespace
 {
   TCollection_AsciiString getNameFromLabel(const TDF_Label& label)
@@ -495,6 +500,7 @@ namespace
     fbxParentNode->AddChild(fbxChildNode);
   }
 }
+#endif // FBXSDK_SHARED
 
 //-----------------------------------------------------------------------------
 
@@ -518,6 +524,7 @@ fbx_XdeWriter::~fbx_XdeWriter()
 
 bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
 {
+#if defined FBXSDK_SHARED
   m_progress.Reset();
 
   if ( doc.IsNull() )
@@ -696,11 +703,18 @@ bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
   m_progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
 
   return true;
+#else
+  (void) doc;
+  m_progress.SendLogMessage(LogErr(Normal) << "FBX SDK is not available.");
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void fbx_XdeWriter::clearState()
 {
+#if defined FBXSDK_SHARED
   m_pFbxState->ClearState();
+#endif
 }
