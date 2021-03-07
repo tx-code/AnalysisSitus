@@ -258,7 +258,7 @@ gp_Dir asiAsm::gltf_FaceIterator::normal(int N)
   }
   else if ( m_bHasNormals && m_pNodeUVs != NULL )
   {
-    const gp_XY& anUV = m_pNodeUVs->Value (N).XY();
+    const gp_XY& anUV = m_pNodeUVs->Value(N).XY();
     m_SLTool.SetParameters( anUV.X(), anUV.Y() );
     //
     if ( m_SLTool.IsNormalDefined() )
@@ -300,7 +300,7 @@ void asiAsm::gltf_FaceIterator::readStyles(const TDF_Label&           label,
       const TopoDS_Shape&    keyShape     = sit.Key();
       const TopAbs_ShapeEnum keyShapeType = keyShape.ShapeType();
 
-      if (tit == TopAbs_FACE)
+      if ( tit == TopAbs_FACE )
       {
         ++nbTypes[keyShapeType];
       }

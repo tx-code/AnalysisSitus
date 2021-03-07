@@ -315,6 +315,16 @@ The <span class="code-inline">asm-xde-save-fbx</span> function saves the specifi
 
 <div align="center"><img src="../imgs/xde-fbx-unity_01.png"/></div>
 
+<p>
+  Example:
+</p>
+
+<pre class="code">
+asm-xde-load -model M -filename "box-colored.stp"
+asm-xde-generate-facets -model M -fine
+asm-xde-save-fbx -model M -filename box-colored.fbx
+</pre>
+
 <!-- ========================================================================== -->
 
 <h2 id="toc-asm-xde-generate-facets">asm-xde-generate-facets</h2>

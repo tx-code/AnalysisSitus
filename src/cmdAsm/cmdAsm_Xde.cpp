@@ -53,6 +53,9 @@
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
 
+// DF Browser includes
+#include <DFBrowser.hxx>
+
 // OpenCascade includes
 #include <BRep_Builder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
@@ -115,6 +118,39 @@ void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
 
   // Progress indication.
   progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_DFBrowse(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+
+  DFBrowser::DFBrowserCall( doc->GetDocument() );
+
+  return TCL_OK;
 }
 
 //-----------------------------------------------------------------------------
@@ -1732,7 +1768,16 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
   static const char* group = "cmdAsm";
-  
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-dfbrowse",
+    //
+    "asm-xde-dfbrowse -model <M>\n"
+    "\t Opens up a DF Browser to inspect the internals of the OCAF document\n"
+    "\t for the model <M>.",
+    //
+    __FILE__, group, ASMXDE_DFBrowse);
+
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-new",
     //

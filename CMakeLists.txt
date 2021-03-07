@@ -229,6 +229,7 @@ if (NOT BUILD_ALGO_ONLY)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiEngine)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiUI)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTestEngine)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/src/caf_browser)
 
   if (WIN32)
     if (MSVC)
@@ -275,6 +276,7 @@ if (NOT BUILD_ALGO_ONLY)
 
   if (NOT "${INNOSETUP_EXE}" STREQUAL "" AND EXISTS "${INNOSETUP_EXE}")
     set_property(TARGET setup PROPERTY FOLDER Utilities)
+    set_property(TARGET caf_browser PROPERTY FOLDER Utilities)
   endif()
 
   set_property(TARGET asiTcl    PROPERTY FOLDER Batch)

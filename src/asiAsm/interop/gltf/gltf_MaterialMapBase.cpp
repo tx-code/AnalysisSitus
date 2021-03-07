@@ -55,11 +55,11 @@ asiAsm::gltf_MaterialMapBase::~gltf_MaterialMapBase()
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
-  asiAsm::gltf_MaterialMapBase::AddMaterial(const gltf_XdeVisualStyle& theStyle)
+  asiAsm::gltf_MaterialMapBase::AddMaterial(const gltf_XdeVisualStyle& style)
 {
-  if (myStyles.IsBound1 (theStyle))
+  if ( myStyles.IsBound1(style) )
   {
-    return myStyles.Find1 (theStyle);
+    return myStyles.Find1(style);
   }
 
   TCollection_AsciiString aMatKey, aMatName, aMatNameSuffix;
@@ -67,13 +67,12 @@ TCollection_AsciiString
   int* aCounterPtr = &myNbMaterials;
   if (myMatNameAsKey)
   {
-    if (!theStyle.GetMaterial().IsNull()
-     && !theStyle.GetMaterial()->IsEmpty())
+    if ( !style.GetMaterial().IsNull() && !style.GetMaterial()->IsEmpty() )
     {
       aCounterPtr = &aCounter;
       Handle(TDataStd_Name) aNodeName;
-      if (!theStyle.GetMaterial()->Label().IsNull()
-       &&  theStyle.GetMaterial()->Label().FindAttribute (TDataStd_Name::GetID(), aNodeName))
+      if ( !style.GetMaterial()->Label().IsNull()
+        &&  style.GetMaterial()->Label().FindAttribute(TDataStd_Name::GetID(), aNodeName) )
       {
         aMatName = aNodeName->Get();
       }
@@ -117,8 +116,8 @@ TCollection_AsciiString
     break;
   }
 
-  myStyles.Bind (theStyle, aMatKey);
-  DefineMaterial (theStyle, aMatKey, aMatName);
+  myStyles.Bind(style, aMatKey);
+  DefineMaterial(style, aMatKey, aMatName);
   return aMatKey;
 }
 
@@ -127,8 +126,7 @@ TCollection_AsciiString
 bool asiAsm::gltf_MaterialMapBase::copyFileTo(const TCollection_AsciiString& theFileSrc,
                                               const TCollection_AsciiString& theFileDst)
 {
-  if (theFileSrc.IsEmpty()
-   || theFileDst.IsEmpty())
+  if ( theFileSrc.IsEmpty() || theFileDst.IsEmpty() )
   {
     return false;
   }

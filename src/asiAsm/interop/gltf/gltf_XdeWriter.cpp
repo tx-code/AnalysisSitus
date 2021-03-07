@@ -1432,7 +1432,7 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
         if ( !matId.IsEmpty() )
         {
           m_jsonWriter->Key("material");
-          m_jsonWriter->Int(matId.IntegerValue());
+          m_jsonWriter->Int( matId.IntegerValue() );
         }
         m_jsonWriter->Key("mode");
         m_jsonWriter->Int(gltf_PrimitiveMode_Triangles);
@@ -1440,7 +1440,7 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
       m_jsonWriter->EndObject();
     }
 
-    if (!toStartPrims)
+    if ( !toStartPrims )
     {
       m_jsonWriter->EndArray();
       m_jsonWriter->EndObject();
@@ -1645,7 +1645,7 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeSamplers (const gltf_MaterialMap& materialMap)
+void asiAsm::gltf_XdeWriter::writeSamplers(const gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeSamplers()");

@@ -26,33 +26,35 @@
 //-----------------------------------------------------------------------------
 
 const Handle(Image_Texture)&
-  asiAsm::gltf_MaterialMap::baseColorTexture(const Handle(gltf_MaterialAttr)& theMat)
+  asiAsm::gltf_MaterialMap::baseColorTexture(const Handle(gltf_MaterialAttr)& mat)
 {
-  static const Handle(Image_Texture) THE_NULL_TEXTURE;
-  if (theMat.IsNull())
+  static const Handle(Image_Texture) NullTexture;
+
+  if ( mat.IsNull() )
   {
-    return THE_NULL_TEXTURE;
+    return NullTexture;
   }
-  else if (theMat->HasPbrMaterial()
-       && !theMat->PbrMaterial().BaseColorTexture.IsNull())
+
+  if ( mat->HasPbrMaterial() && !mat->PbrMaterial().BaseColorTexture.IsNull() )
   {
-    return theMat->PbrMaterial().BaseColorTexture;
+    return mat->PbrMaterial().BaseColorTexture;
   }
-  else if (theMat->HasCommonMaterial()
-       && !theMat->CommonMaterial().DiffuseTexture.IsNull())
+
+  if ( mat->HasCommonMaterial() && !mat->CommonMaterial().DiffuseTexture.IsNull() )
   {
-    return theMat->CommonMaterial().DiffuseTexture;
+    return mat->CommonMaterial().DiffuseTexture;
   }
-  return THE_NULL_TEXTURE;
+
+  return NullTexture;
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& theFile,
-                                           const int                      theDefSamplerId)
-: gltf_MaterialMapBase (theFile),
-  myWriter             (NULL),
-  myDefSamplerId       (theDefSamplerId),
+asiAsm::gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& filename,
+                                           const int                      defSamplerId)
+: gltf_MaterialMapBase (filename),
+  myWriter             (nullptr),
+  myDefSamplerId       (defSamplerId),
   myNbImages           (0)
 {
   myMatNameAsKey = false;
@@ -61,40 +63,34 @@ asiAsm::gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& theFil
 //-----------------------------------------------------------------------------
 
 asiAsm::gltf_MaterialMap::~gltf_MaterialMap()
-{
-  //
-}
+{}
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::AddImages(gltf_JsonSerializer*       theWriter,
-                                         const gltf_XdeVisualStyle& theStyle,
-                                         bool&                      theIsStarted)
+void asiAsm::gltf_MaterialMap::AddImages(gltf_JsonSerializer*       writer,
+                                         const gltf_XdeVisualStyle& style,
+                                         bool&                      isStarted)
 {
-  if (theWriter == NULL
-   || theStyle.GetMaterial().IsNull()
-   || theStyle.GetMaterial()->IsEmpty())
+  if ( writer == nullptr || style.GetMaterial().IsNull()|| style.GetMaterial()->IsEmpty() )
   {
     return;
   }
 
-  addImage (theWriter, baseColorTexture (theStyle.GetMaterial()), theIsStarted);
-  addImage (theWriter, theStyle.GetMaterial()->PbrMaterial().MetallicRoughnessTexture, theIsStarted);
-  addImage (theWriter, theStyle.GetMaterial()->PbrMaterial().NormalTexture,    theIsStarted);
-  addImage (theWriter, theStyle.GetMaterial()->PbrMaterial().EmissiveTexture,  theIsStarted);
-  addImage (theWriter, theStyle.GetMaterial()->PbrMaterial().OcclusionTexture, theIsStarted);
+  this->addImage(writer, this->baseColorTexture( style.GetMaterial() ),               isStarted);
+  this->addImage(writer, style.GetMaterial()->PbrMaterial().MetallicRoughnessTexture, isStarted);
+  this->addImage(writer, style.GetMaterial()->PbrMaterial().NormalTexture,            isStarted);
+  this->addImage(writer, style.GetMaterial()->PbrMaterial().EmissiveTexture,          isStarted);
+  this->addImage(writer, style.GetMaterial()->PbrMaterial().OcclusionTexture,         isStarted);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::addImage(gltf_JsonSerializer*         theWriter,
-                                        const Handle(Image_Texture)& theTexture,
-                                        bool&                        theIsStarted)
+void asiAsm::gltf_MaterialMap::addImage(gltf_JsonSerializer*         writer,
+                                        const Handle(Image_Texture)& texture,
+                                        bool&                        isStarted)
 {
 #if defined USE_RAPIDJSON
-  if (theTexture.IsNull()
-   || myImageMap.IsBound1 (theTexture)
-   || myImageFailMap.Contains (theTexture))
+  if ( texture.IsNull() || myImageMap.IsBound1(texture) || myImageFailMap.Contains(texture) )
   {
     return;
   }
@@ -107,32 +103,32 @@ void asiAsm::gltf_MaterialMap::addImage(gltf_JsonSerializer*         theWriter,
   }
 
   TCollection_AsciiString aTextureUri;
-  if (!CopyTexture (aTextureUri, theTexture, aGltfImgKey))
+  if (!CopyTexture (aTextureUri, texture, aGltfImgKey))
   {
-    myImageFailMap.Add (theTexture);
+    myImageFailMap.Add (texture);
     return;
   }
 
-  myImageMap.Bind (theTexture, aGltfImgKey);
+  myImageMap.Bind (texture, aGltfImgKey);
 
-  if (!theIsStarted)
+  if (!isStarted)
   {
-    theWriter->Key (gltf_RootElementName (gltf_RootElement_Images));
-    theWriter->StartArray();
-    theIsStarted = true;
+    writer->Key (gltf_RootElementName (gltf_RootElement_Images));
+    writer->StartArray();
+    isStarted = true;
   }
 
-  theWriter->StartObject();
+  writer->StartObject();
   {
-    theWriter->Key ("uri");
-    theWriter->String (aTextureUri.ToCString());
+    writer->Key ("uri");
+    writer->String (aTextureUri.ToCString());
   }
-  theWriter->EndObject();
+  writer->EndObject();
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) theWriter;
-  (void) theTexture;
-  (void) theIsStarted;
+  (void) writer;
+  (void) texture;
+  (void) isStarted;
 #endif
 }
 
@@ -243,7 +239,7 @@ void asiAsm::gltf_MaterialMap::addTexture(gltf_JsonSerializer*         theWriter
 TCollection_AsciiString
   asiAsm::gltf_MaterialMap::AddMaterial(const gltf_XdeVisualStyle& theStyle)
 {
-  return gltf_MaterialMapBase::AddMaterial (theStyle);
+  return gltf_MaterialMapBase::AddMaterial(theStyle);
 }
 
 //-----------------------------------------------------------------------------
