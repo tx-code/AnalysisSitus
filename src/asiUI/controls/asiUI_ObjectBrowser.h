@@ -150,6 +150,7 @@ protected slots:
   void onCopyAsJSON            ();
   void onSaveToBREP            ();
   void onSetAsPart             ();
+  void onExploreShape          ();
   //
   void onSaveToXYZ             ();
   //

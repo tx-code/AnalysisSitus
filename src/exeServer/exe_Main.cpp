@@ -29,11 +29,8 @@
 //-----------------------------------------------------------------------------
 
 // exe includes
-#include <exe_CommandWindow.h>
+#include <exe_CommandServer.h>
 #include <exe_Keywords.h>
-
-// asiTcl includes
-#include <asiTcl_Plugin.h>
 
 // OpenCascade includes
 #include <OSD_Process.hxx>
@@ -43,7 +40,8 @@
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QDir>
+#include <QCoreApplication>
+#include <QHostAddress>
 #pragma warning(pop)
 
 // Activate object factories
@@ -62,100 +60,33 @@ VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
 
 //-----------------------------------------------------------------------------
 
-#define EXE_LOAD_MODULE(name) \
-{ \
-  Handle(asiUI_BatchFacilities) __cf = asiUI_BatchFacilities::Instance();\
-  \
-  asiTcl_Plugin::Status status = asiTcl_Plugin::Load(__cf->Interp, __cf, name); \
-  if ( status == asiTcl_Plugin::Status_Failed ) \
-    __cf->Progress.SendLogMessage(LogErr(Normal) << "Cannot load %1 commands." << name); \
-  else if ( status == asiTcl_Plugin::Status_OK ) \
-    __cf->Progress.SendLogMessage(LogInfo(Normal) << "Loaded %1 commands." << name); \
-}
-
-//-----------------------------------------------------------------------------
-
 //! Application utilities.
 namespace CliUtils
 {
-  Handle(exe_CommandQueue) Queue; //!< Command queue.
+  QHostAddress Host;    //!< CLI host.
+  int          PortNum; //!< Port number.
 }
 
 //-----------------------------------------------------------------------------
-// Interpreter's thread
-//-----------------------------------------------------------------------------
-
-//! Working routine for Tcl interpreter thread.
-DWORD WINAPI Thread_Interp(LPVOID)
-{
-  Handle(asiUI_BatchFacilities)
-    cf = asiUI_BatchFacilities::Instance();
-
-  // Give the console window time to appear.
-  Sleep(100);
-
-  cf->Interp = new asiTcl_Interp;
-  cf->Interp->Init(true);
-  cf->Interp->SetModel(cf->Model);
-  cf->Interp->SetProgress(cf->Progress);
-  cf->Interp->SetPlotter(cf->Plotter);
-
-  // Load default commands.
-  EXE_LOAD_MODULE("cmdMisc")
-  EXE_LOAD_MODULE("cmdEngine")
-  EXE_LOAD_MODULE("cmdRE")
-  EXE_LOAD_MODULE("cmdDDF")
-  EXE_LOAD_MODULE("cmdAsm")
-  //
-#ifdef USE_MOBIUS
-  EXE_LOAD_MODULE("cmdMobius")
-#endif
-
-  // Lookup for custom plugins and try to load them.
-  QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
-  TCollection_AsciiString pluginDirStr = QStr2AsciiStr( pluginDir.absolutePath() );
-  //
-  std::cout << "Looking for plugins at "
-            << pluginDirStr.ToCString() << std::endl;
-  //
-  QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
-  //
-  foreach ( QString cmdLib, cmdLibs )
-  {
-    TCollection_AsciiString cmdLibName = QStr2AsciiStr( cmdLib.section(".", 0, 0) );
-    //
-    cf->Progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
-                                                  << cmdLibName);
-
-    EXE_LOAD_MODULE(cmdLibName);
-  }
-
-  std::cout << AS_CMD_PROMPT;
-
-  while ( 1 )
-  {
-    Handle(exe_BaseCmd) LastCommand = CliUtils::Queue->Last();
-
-    // If there is something to proceed, let us do it
-    if ( !LastCommand.IsNull() )
-    {
-      // Remove command from queue and execute it.
-      CliUtils::Queue->Pop();
-      //
-      if ( !cf->Interp.IsNull() )
-      {
-        cf->Interp->Eval(LastCommand->Cmd);
-        std::cout << AS_CMD_PROMPT;
-      }
-    }
-  }
-
-  return 0;
-}
 
 //! main().
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int main(int argc, char** argv)
 {
+  // Read host and port for the server.
+  CliUtils::Host    = CLI_HostDefault;
+  CliUtils::PortNum = CLI_PortDefault;
+  std::string addrStr, portStr;
+  //
+  if ( asiExeCli::GetKeyValue(argc, argv, "host", addrStr) )
+  {
+    CliUtils::Host.setAddress( addrStr.c_str() );
+  }
+  //
+  if ( asiExeCli::GetKeyValue(argc, argv, "port", portStr) )
+  {
+    CliUtils::PortNum = asiAlgo_Utils::Str::ToNumber<int>(portStr);
+  }
+
   //---------------------------------------------------------------------------
   // Set extra environment variables
   //---------------------------------------------------------------------------
@@ -176,33 +107,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
   qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir.c_str());
 
   //---------------------------------------------------------------------------
-  // Create CLI threads
+  // Prepare common facilities and interpretor
   //---------------------------------------------------------------------------
-
-  // Create command queue in the main thread
-  if ( CliUtils::Queue.IsNull() )
-    CliUtils::Queue = new exe_CommandQueue;
 
   // Create common facilities out of threads.
   Handle(asiUI_BatchFacilities)
     cf = asiUI_BatchFacilities::Instance(true, false, false);
 
-  // Create thread for Interpreter
-  HANDLE hInterpThread = CreateThread(NULL, 0, Thread_Interp, NULL, 0, NULL);
-  if ( !hInterpThread)
-    ExitProcess(NULL);
+  //---------------------------------------------------------------------------
+  // Create server thread
+  //---------------------------------------------------------------------------
 
-  // Create terminal.
-  exe_CommandWindow ConsoleWindow(CliUtils::Queue);
+  QCoreApplication app(argc, argv);
+
+  // Create Server
+  exe_CommandServer*
+    pServer = new exe_CommandServer(cf->Model,
+                                    cf->Progress,
+                                    cf->Plotter,
+                                    CliUtils::Host,
+                                    CliUtils::PortNum);
   //
-  if ( !ConsoleWindow.Create(true) )
-    return 1;
+  pServer->Run();
 
-  // Start message loop.
-  ConsoleWindow.StartMessageLoop();
-
-  // Close all thread handles upon completion
-  CloseHandle(hInterpThread);
-
-  return 0; // Success.
+  return app.exec();
 }

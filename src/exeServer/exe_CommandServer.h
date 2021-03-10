@@ -28,62 +28,84 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-// Own include
-#include <exe_CommandServer.h>
+#ifndef exe_CommandServer_HeaderFile
+#define exe_CommandServer_HeaderFile
+
+// asiUI includes
+#include <asiUI_BatchFacilities.h>
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QNetworkDatagram>
-#include <QUdpSocket>
+#include <QHostAddress>
+#include <QThread>
 #pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 
-exe_CommandServer::exe_CommandServer(const Handle(exe_CommandQueue)& queue,
-                                     const QHostAddress&             hostAddress,
-                                     const int                       port)
-: m_queue    (queue),
-  m_hostAddr (hostAddress),
-  m_iPort    (port),
-  m_bReady   (false)
-{
-  this->initSocket();
-}
+class QUdpSocket;
+class QNetworkDatagram;
 
 //-----------------------------------------------------------------------------
 
-exe_CommandServer::~exe_CommandServer()
-{}
+#define CLI_HostDefault QHostAddress::LocalHost
+#define CLI_PortDefault 7755
 
 //-----------------------------------------------------------------------------
 
-void exe_CommandServer::StartMessageLoop()
+//! Command server for getting UDP datagrams and putting them into the
+//! shared command queue.
+class exe_CommandServer : public QObject
 {
-  while ( m_bReady )
-  {
-    if ( m_pSocket->hasPendingDatagrams() )
-    {
-      QNetworkDatagram datagram = m_pSocket->receiveDatagram();
+  Q_OBJECT
 
-      QByteArray data = datagram.data();
-      TCollection_AsciiString cmdString = QStr2AsciiStr( QString::fromLatin1(data) );
+public:
 
-      std::cout << "Received datagram: " << cmdString.ToCString() << std::endl;
+  //! Ctor.
+  //! \param[in] model       the Data Model instance.
+  //! \param[in] progress    the progress notifier.
+  //! \param[in] plotter     the imperative plotter.
+  //! \param[in] hostAddress the host address to use.
+  //! \param[in] port        the port number to use.
+  exe_CommandServer(const Handle(asiEngine_Model)& model,
+                    ActAPI_ProgressEntry           progress,
+                    ActAPI_PlotterEntry            plotter,
+                    const QHostAddress&            hostAddress = CLI_HostDefault,
+                    const int                      port        = CLI_PortDefault);
 
-      m_queue->Push( new exe_BaseCmd(cmdString) );
-    }
-    else
-      Sleep(100);
-  }
+  //! Dtor.
+  virtual ~exe_CommandServer();
 
-  if ( !m_bReady )
-    std::cout << "Socket was not bound." << std::endl;
-}
+public:
 
-//-----------------------------------------------------------------------------
+  void Run();
 
-void exe_CommandServer::initSocket()
-{
-  m_pSocket = new QUdpSocket(this);
-  m_bReady = m_pSocket->bind(m_hostAddr, m_iPort);
-}
+protected slots:
+
+  void readPendingDatagrams();
+  void onStarted();
+
+protected:
+
+  //! Initializes UPD socket connection.
+  void initSocket();
+
+  //! Processes the passed datagram.
+  void processDatagram(QNetworkDatagram* pDatagram);
+
+private:
+
+  QUdpSocket*             m_pSocket;  //!< Socket connection.
+  Handle(asiEngine_Model) m_model;    //!< Data Model instance.
+  ActAPI_ProgressEntry    m_progress; //!< Progress entry.
+  ActAPI_PlotterEntry     m_plotter;  //!< Imperative plotter.
+  Handle(asiTcl_Interp)   m_interp;   //!< Shared command queue.
+  QHostAddress            m_hostAddr; //!< Host address.
+  int                     m_iPort;    //!< Port number.
+  bool                    m_bReady;   //!< Whether socket is ready or not.
+
+  // Thread.
+  QThread* m_pThread;
+
+};
+
+#endif

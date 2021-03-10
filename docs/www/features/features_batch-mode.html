@@ -103,12 +103,16 @@ Make sure to use forward slashes in the path to your script. To redirect output 
   <li class="text-block">The standard output is redirected to the terminal window, so you will see the application messages right in the console.</li>
 </ol>
 
-<p>
-  Together with the standard console, the CLI application runs a shadow thread for a socket connection. Any external application could connect to the specific port as a UDP client and send datagrams for execution in the console. To avoid showing the console window on the server side, run <span class="code-inline">asiExeCli.exe</span> with the <span class="code-inline">/no-prompt</span> key.
-</p>
+<h2>Server</h2>
 
 <p>
-  The terminal window and the server thread listening to the datagrams both share the concurrent queue of commands. The Tcl interpretor is spinning in yet another thread and asks the queue for the execution-pending commands. Therefore, by design, an interprocess communication is realizable by sending commands to the queue. The following animation shows a C#-written client communicating by UDP with Analysis Situs CLI which is implicitly launched by this client (thanks to Alexis for providing this tool).
+  To run UDP server, launch the <span class="code-inline">asiExeServer</span> executable. Any external application could connect to the specific port as a UDP client and send datagrams for execution. The server is ready once the "socket is ready" message is printed to the standard output.
+</p>
+
+<div align="center"><img src="../imgs/situ_server-console-window.png"/></div>
+
+<p>
+   The following animation shows a C#-written client communicating by UDP with Analysis Situs Server which is implicitly launched by this client (thanks to Alexis for providing this tool).
 </p>
 
 <div align="center"><img src="../imgs/situ_cli-client-udp.gif"/></div>
@@ -118,7 +122,7 @@ Make sure to use forward slashes in the path to your script. To redirect output 
 </p>
 
 <div class="code">
-  asiExeCli.exe /no-prompt /host=127.0.0.1 /port=62001
+  asiExeServer.exe /host=127.0.0.1 /port=62001
 </div>
 
 <!-- [END] contents -->

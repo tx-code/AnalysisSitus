@@ -125,11 +125,8 @@ endif()
 
 # Set paths to dynamically linked libs
 set (3RDPARTY_DLL_PATH "${3RDPARTY_tcl_DLL_DIR};\
-${3RDPARTY_tk_DLL_DIR};\
 ${3RDPARTY_tbb_DLL_DIR};\
 ${3RDPARTY_freetype_DLL_DIR};\
-${3RDPARTY_freeimage_DLL_DIR};\
-${3RDPARTY_gl2ps_DLL_DIR};\
 ${3RDPARTY_QT_DIR}/bin;")
 
 set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_PATH}")
@@ -234,6 +231,7 @@ if (NOT BUILD_ALGO_ONLY)
   if (WIN32)
     if (MSVC)
       add_subdirectory(${CMAKE_SOURCE_DIR}/src/exeCli)
+      add_subdirectory(${CMAKE_SOURCE_DIR}/src/exeServer)
       add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTest)
     endif()
   endif()
@@ -269,8 +267,9 @@ if (NOT BUILD_ALGO_ONLY)
 
   if (WIN32)
     if (MSVC)
-      set_property(TARGET asiExeCli PROPERTY FOLDER Executables)
-      set_property(TARGET asiTest   PROPERTY FOLDER Executables)
+      set_property(TARGET asiExeCli    PROPERTY FOLDER Executables)
+      set_property(TARGET asiExeServer PROPERTY FOLDER Executables)
+      set_property(TARGET asiTest      PROPERTY FOLDER Executables)
     endif()
   endif()
 

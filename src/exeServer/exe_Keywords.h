@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 06 February 2021
+// Created on: 13 October 2018
 //-----------------------------------------------------------------------------
-// Copyright (c) 2021-present, Sergey Slyadnev
+// Copyright (c) 2018-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,67 +28,73 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_CommandServer_HeaderFile
-#define exe_CommandServer_HeaderFile
-
-// asiExe includes
-#include <exe_CommandQueue.h>
-
-// asiUI includes
-#include <asiUI_BatchFacilities.h>
-
-// Qt includes
-#pragma warning(push, 0)
-#include <QHostAddress>
-#pragma warning(pop)
+#ifndef exe_Keywords_h
+#define exe_Keywords_h
 
 //-----------------------------------------------------------------------------
 
-class QUdpSocket;
+#define ASITUS_KW_runscript "runscript"
+#define ASITUS_KW_cli       "cli"
 
 //-----------------------------------------------------------------------------
 
-#define CLI_HostDefault QHostAddress::LocalHost
-#define CLI_PortDefault 7755
+// asiAlgo includes
+#include <asiAlgo_Utils.h>
+
+// Standard includes
+#include <string>
 
 //-----------------------------------------------------------------------------
 
-//! Command server for getting UDP datagrams and putting them into the
-//! shared command queue.
-class exe_CommandServer : public QObject
+class asiExeCli
 {
 public:
 
-  //! Ctor.
-  //! \param[in] queue       the shared command queue.
-  //! \param[in] hostAddress the host address to use.
-  //! \param[in] port        the port number to use.
-  exe_CommandServer(const Handle(exe_CommandQueue)& queue,
-                    const QHostAddress&             hostAddress = CLI_HostDefault,
-                    const int                       port        = CLI_PortDefault);
+  static bool IsKeyword(const std::string& opt,
+                        const std::string& key)
+  {
+    std::string slashedKey = "/"; slashedKey += key;
+    size_t      found      = opt.find(slashedKey);
+    //
+    if ( found == std::string::npos )
+      return false;
 
-  //! Dtor.
-  virtual ~exe_CommandServer();
+    return true;
+  }
 
-public:
+  static bool HasKeyword(const int          argc,
+                         char**             argv,
+                         const std::string& key)
+  {
+    for ( int k = 1; k < argc; ++k )
+    {
+      if ( IsKeyword(argv[k], key) )
+        return true;
+    }
+    return false;
+  }
 
-  //! Starts message loop to get datagrams and put them as Tcl commands
-  //! to the managed shared queue.
-  virtual void
-    StartMessageLoop();
+  static bool GetKeyValue(const int          argc,
+                          char**             argv,
+                          const std::string& key,
+                          std::string&       value)
+  {
+    for ( int k = 1; k < argc; ++k )
+    {
+      if ( IsKeyword(argv[k], key) )
+      {
+        std::vector<std::string> chunks;
+        asiAlgo_Utils::Str::Split(argv[k], "=", chunks);
 
-protected:
+        if ( chunks.size() != 2 )
+          return false;
 
-  //! Initializes UPD socket connection.
-  void initSocket();
-
-private:
-
-  QUdpSocket*              m_pSocket;  //!< Socket connection.
-  Handle(exe_CommandQueue) m_queue;    //!< Shared command queue.
-  QHostAddress             m_hostAddr; //!< Host address.
-  int                      m_iPort;    //!< Port number.
-  bool                     m_bReady;   //!< Whether socket is ready or not.
+        value = chunks[1];
+        return true;
+      }
+    }
+    return false;
+  }
 
 };
 

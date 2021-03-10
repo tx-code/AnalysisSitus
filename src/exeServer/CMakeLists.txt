@@ -1,21 +1,18 @@
-project(asiExeCli)
+project(asiExeServer)
 
 #------------------------------------------------------------------------------
 # Common
 #------------------------------------------------------------------------------
 
 set (H_FILES
-  exe_BaseCmd.h
-  exe_CommandQueue.h
-  exe_CommandWindow.h
   exe_Keywords.h
-  exe_SharedQueue.h
+)
+set (H_QT_FILES
+  exe_CommandServer.h
 )
 set (CPP_FILES
-  exe_BaseCmd.cpp
-  exe_CommandWindow.cpp
+  exe_CommandServer.cpp
   exe_Main.cpp
-  exe_SharedQueue.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -149,10 +146,10 @@ endif()
 # Create executable
 #------------------------------------------------------------------------------
 
-add_executable(asiExeCli ${src_files})
+add_executable(asiExeServer ${src_files} ${ui_moc_files})
 
 # Set WinMain() as an entry point as we need a non-console app.
-set_target_properties(asiExeCli PROPERTIES WIN32_EXECUTABLE TRUE)
+#set_target_properties(asiExeServer PROPERTIES WIN32_EXECUTABLE TRUE)
 
 #------------------------------------------------------------------------------
 # Configure template
@@ -161,15 +158,15 @@ set_target_properties(asiExeCli PROPERTIES WIN32_EXECUTABLE TRUE)
 set (X_COMPILER_BITNESS "x${COMPILER_BITNESS}")
 
 configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
-               ${asiExeCli_BINARY_DIR}/asiExeCli.vcxproj.user @ONLY)
+               ${asiExeServer_BINARY_DIR}/asiExeServer.vcxproj.user @ONLY)
 
 #------------------------------------------------------------------------------
 # Dependencies
 #------------------------------------------------------------------------------
 
-qt5_use_modules(asiExeCli Core)
+qt5_use_modules(asiExeServer Core Network)
 
-target_link_libraries(asiExeCli asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
+target_link_libraries(asiExeServer asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)
   link_directories(${3RDPARTY_tbb_LIBRARY_DIR_DEBUG})
@@ -185,10 +182,10 @@ foreach (LIB_FILE ${OCCT_LIB_FILES})
   endif()
 
   if (3RDPARTY_OCCT_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiExeCli debug ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiExeCli optimized ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer debug ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer optimized ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
   else()
-    target_link_libraries (asiExeCli ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
   endif()
 endforeach()
 
@@ -200,10 +197,10 @@ foreach (LIB_FILE ${AD_LIB_FILES})
   endif()
 
   if (3RDPARTY_active_data_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_active_data_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiExeCli debug ${3RDPARTY_active_data_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiExeCli optimized ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer debug ${3RDPARTY_active_data_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer optimized ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
   else()
-    target_link_libraries (asiExeCli ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
   endif()
 endforeach()
 
@@ -215,10 +212,10 @@ foreach (LIB_FILE ${VTK_LIB_FILES})
   endif()
 
   if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiExeCli debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiExeCli optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
   else()
-    target_link_libraries (asiExeCli ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    target_link_libraries (asiExeServer ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
   endif()
 endforeach()
 
@@ -227,27 +224,27 @@ endforeach()
 #------------------------------------------------------------------------------
 
 if (WIN32)
-  install (TARGETS asiExeCli RUNTIME DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiExeServer RUNTIME DESTINATION bin COMPONENT Runtime)
 else()
-  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin/asiExeCli DESTINATION bin
+  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin/asiExeServer DESTINATION bin
            CONFIGURATIONS Release
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
-  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bind/asiExeCli DESTINATION bin
+  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bind/asiExeServer DESTINATION bin
            CONFIGURATIONS Debug
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
-  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bini/asiExeCli DESTINATION bin
+  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bini/asiExeServer DESTINATION bin
            CONFIGURATIONS RelWithDebInfo
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
-  install (FILES ${CMAKE_SOURCE_DIR}/asiExeCli.sh DESTINATION bin
+  install (FILES ${CMAKE_SOURCE_DIR}/asiExeServer.sh DESTINATION bin
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)

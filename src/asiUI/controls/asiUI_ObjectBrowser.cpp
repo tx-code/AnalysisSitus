@@ -36,6 +36,7 @@
 #include <asiUI_DependencyGraph.h>
 #include <asiUI_DialogOCAFDump.h>
 #include <asiUI_DialogPipelines.h>
+#include <asiUI_ShapeBrowser.h>
 #include <asiUI_ViewerPart.h>
 
 // asiEngine includes
@@ -654,6 +655,44 @@ void asiUI_ObjectBrowser::onSetAsPart()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onExploreShape()
+{
+  Handle(ActAPI_INode) selected_n;
+  if ( !this->selectedNode(selected_n) ) return;
+
+  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
+    return;
+
+  // Convert to the only supported type.
+  Handle(asiData_IVTopoItemNode)
+    topoNode = Handle(asiData_IVTopoItemNode)::DownCast(selected_n);
+
+  // Get shape to explore.
+  TopoDS_Shape shape = topoNode->GetShape();
+
+  // Prepare browser.
+  asiUI_ShapeBrowser*
+    pBrowser = new asiUI_ShapeBrowser(shape, m_model, m_progress, nullptr);
+  //
+  pBrowser->Populate();
+
+  // Open UI dialog.
+  QWidget* pDlg = new QDialog(this);
+  //
+  pDlg->setWindowTitle("Shape browser");
+  //
+  QVBoxLayout* pDlgLayout = new QVBoxLayout;
+  pDlgLayout->setAlignment(Qt::AlignTop);
+  pDlgLayout->setContentsMargins(10, 10, 10, 10);
+  //
+  pDlgLayout->addWidget(pBrowser);
+  pDlg->setLayout(pDlgLayout);
+  //
+  pDlg->show();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_ObjectBrowser::onSaveToXYZ()
 {
   Handle(ActAPI_INode) selected_n;
@@ -1129,8 +1168,9 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
       if ( node->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
       {
         pMenu->addSeparator();
-        pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP () ) );
-        pMenu->addAction( "Set as part",     this, SLOT( onSetAsPart  () ) );
+        pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP   () ) );
+        pMenu->addAction( "Set as part",     this, SLOT( onSetAsPart    () ) );
+        pMenu->addAction( "Explore...",      this, SLOT( onExploreShape () ) );
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVPointSetNode) ) )

@@ -11,6 +11,14 @@
     <file>asitus/asm_part_instance_icon_16x16.png</file>
     <file>asitus/asm_root_icon_16x16.png</file>
     <file>asitus/asm_subassembly_icon_16x16.png</file>
+    <file>asitus/shape_compound_icon_16x16.png</file>
+    <file>asitus/shape_solid_icon_16x16.png</file>
+    <file>asitus/shape_shell_icon_16x16.png</file>
+    <file>asitus/shape_face_icon_16x16.png</file>
+    <file>asitus/shape_wire_icon_16x16.png</file>
+    <file>asitus/shape_edge_icon_16x16.png</file>
+    <file>asitus/shape_vertex_icon_16x16.png</file>
+    <file>asitus/shape_other_icon_16x16.png</file>
   </qresource>
   <qresource prefix="qss_icons">
     <file>rc/up_arrow_disabled.png</file>

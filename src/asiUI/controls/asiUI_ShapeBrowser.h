@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 19 December 2020
+// Created on: 09 March 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_XdeBrowser_h
-#define asiUI_XdeBrowser_h
+#ifndef asiUI_ShapeBrowser_h
+#define asiUI_ShapeBrowser_h
 
 // asiUI includes
 #include <asiUI_CommonFacilities.h>
-
-// asiAsm includes
-#include <asiAsm_XdeGraph.h>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -46,52 +43,54 @@
 
 //-----------------------------------------------------------------------------
 
-// Qt role to store node ID near the tree item.
-#define BrowserRoleNodeId Qt::UserRole
+// Custom Qt role for the global shape index in an indexed map.
+#define BrowserRoleShapeId Qt::UserRole
 
 //-----------------------------------------------------------------------------
 
-//! Tree view for browsing XDE assembly structure.
-class asiUI_EXPORT asiUI_XdeBrowser : public QTreeWidget
+//! Tree view for browsing shapes.
+class asiUI_EXPORT asiUI_ShapeBrowser : public QTreeWidget
 {
   Q_OBJECT
 
 public:
 
   //! Creates a new instance of tree view.
-  //! \param[in] model  XDE document to browse.
-  //! \param[in] cf     common facilities.
-  //! \param[in] parent parent widget (if any).
-  asiUI_XdeBrowser(const Handle(asiAsm_XdeDoc)&          doc,
-                   const Handle(asiUI_CommonFacilities)& cf,
-                   QWidget*                              parent = nullptr);
+  //! \param[in] shape    shape to browse.
+  //! \param[in] model    data model instance.
+  //! \param[in] progress progress notifier.
+  //! \param[in] parent   parent widget (if any).
+  asiUI_ShapeBrowser(const TopoDS_Shape&            shape,
+                     const Handle(asiEngine_Model)& model,
+                     ActAPI_ProgressEntry           progress = nullptr,
+                     QWidget*                       parent   = nullptr);
 
   //! Dtor.
-  virtual ~asiUI_XdeBrowser();
+  virtual ~asiUI_ShapeBrowser();
 
 public:
 
-  //! Populates tree view from the Data Model.
+  //! Populates tree view.
   void Populate();
 
-  //! Searches for an item with the given index and set that item selected.
-  //! \param[in] nodeId target Node ID.
-  void SetSelectedAssemblyItemId(const asiAsm_XdeAssemblyItemId& nodeId);
+  ////! Searches for an item with the given index and set that item selected.
+  ////! \param[in] nodeId target Node ID.
+  //void SetSelectedAssemblyItemId(const asiAsm_XdeAssemblyItemId& nodeId);
 
-  //! Returns selected item.
-  //! \return selected assembly item ID.
-  asiAsm_XdeAssemblyItemId GetSelectedAssemblyItemId() const;
+  ////! Returns selected item.
+  ////! \return selected assembly item ID.
+  //asiAsm_XdeAssemblyItemId GetSelectedAssemblyItemId() const;
 
-  //! \return ID of the selected node in the graph.
-  int GetSelectedNodeId() const;
+  ////! \return ID of the selected node in the graph.
+  //int GetSelectedNodeId() const;
 
 protected:
 
-  //! Adds all child items under the given root.
-  //! \param[in] rootId root item in a Data Model.
-  //! \param[in] rootUi root item in a tree view.
-  void addChildren(const int        rootId,
-                   QTreeWidgetItem* rootUi);
+  //! Adds all child items under the given shape.
+  //! \param[in] shape   the shape to add children for.
+  //! \param[in] shapeUi the corresponding UI item.
+  void addChildren(const TopoDS_Shape& shape,
+                   QTreeWidgetItem*    shapeUi);
 
 //-----------------------------------------------------------------------------
 signals:
@@ -111,26 +110,27 @@ protected slots:
   //! Copies the name of the selected tree object to clipboard.
   void onCopyName();
 
-  //! Copies assembly item ID to clipboard.
-  void onCopyAssemblyItemId();
+  //! Copies the global subshape's ID to the clipboard.
+  void onCopyGlobalId();
 
-  //! Prints available part representations.
-  void onPrintPartRepresentations();
+  ////! Prints available part representations.
+  //void onPrintPartRepresentations();
 
-  //! Shows part in the part view.
-  void onShowPart();
+  ////! Shows part in the part view.
+  //void onShowPart();
 
-  //! Shows subassembly in the assembly view.
-  void onShowSubassembly();
+  ////! Shows subassembly in the assembly view.
+  //void onShowSubassembly();
 
-  //! Sets active part.
-  void onSetActivePart();
+  ////! Sets active part.
+  //void onSetActivePart();
 
 protected:
 
-  Handle(asiAsm_XdeDoc)          m_doc;      //!< XDE document instance.
-  Handle(asiAsm_XdeGraph)        m_asmGraph; //!< Assembly graph.
-  Handle(asiUI_CommonFacilities) m_cf;       //!< Common UI facilities.
+  TopoDS_Shape               m_shape;        //!< Shape to expand for browsing.
+  Handle(asiEngine_Model)    m_model;        //!< Data model instance.
+  ActAPI_ProgressEntry       m_progress;     //!< Progress notifier.
+  TopTools_IndexedMapOfShape m_subShapesMap; //!< Indexed map of subshapes.
 
 };
 
