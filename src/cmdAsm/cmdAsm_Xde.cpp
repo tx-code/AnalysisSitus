@@ -53,8 +53,10 @@
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
 
+#ifdef _WIN32
 // DF Browser includes
 #include <DFBrowser.hxx>
+#endif
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
@@ -126,6 +128,7 @@ int ASMXDE_DFBrowse(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
+#ifdef _WIN32
   // Get model name.
   std::string name;
   //
@@ -151,6 +154,13 @@ int ASMXDE_DFBrowse(const Handle(asiTcl_Interp)& interp,
   DFBrowser::DFBrowserCall( doc->GetDocument() );
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "DFBrowser is currently available on Windows only.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------

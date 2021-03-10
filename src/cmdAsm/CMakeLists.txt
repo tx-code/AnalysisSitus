@@ -68,7 +68,11 @@ add_library (cmdAsm SHARED
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(cmdAsm asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI caf_browser)
+target_link_libraries(cmdAsm asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
+
+if (WIN32)
+  target_link_libraries(cmdAsm caf_browser)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software

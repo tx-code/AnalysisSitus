@@ -20,10 +20,14 @@
 
 #define CAFBrowser_NotUsed(x)
 
-#ifdef caf_browser_EXPORTS
-  #define CAFBrowser_EXPORT __declspec(dllexport)
+#ifdef _WIN32
+  #ifdef caf_browser_EXPORTS
+    #define CAFBrowser_EXPORT __declspec(dllexport)
+  #else
+    #define CAFBrowser_EXPORT __declspec(dllimport)
+  #endif
 #else
-  #define CAFBrowser_EXPORT __declspec(dllimport)
+  #define CAFBrowser_EXPORT
 #endif
 
 #endif
