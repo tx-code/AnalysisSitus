@@ -59,10 +59,12 @@ public:
   //! \param[in] shape    shape to browse.
   //! \param[in] model    data model instance.
   //! \param[in] progress progress notifier.
+  //! \param[in] plotter  imperative plotter.
   //! \param[in] parent   parent widget (if any).
   asiUI_ShapeBrowser(const TopoDS_Shape&            shape,
                      const Handle(asiEngine_Model)& model,
                      ActAPI_ProgressEntry           progress = nullptr,
+                     ActAPI_PlotterEntry            plotter  = nullptr,
                      QWidget*                       parent   = nullptr);
 
   //! Dtor.
@@ -73,16 +75,9 @@ public:
   //! Populates tree view.
   void Populate();
 
-  ////! Searches for an item with the given index and set that item selected.
-  ////! \param[in] nodeId target Node ID.
-  //void SetSelectedAssemblyItemId(const asiAsm_XdeAssemblyItemId& nodeId);
-
-  ////! Returns selected item.
-  ////! \return selected assembly item ID.
-  //asiAsm_XdeAssemblyItemId GetSelectedAssemblyItemId() const;
-
-  ////! \return ID of the selected node in the graph.
-  //int GetSelectedNodeId() const;
+  //! Returns the subshape IDs for the currently selected tree items.
+  //! \param[out] ids the output collection of IDs.
+  void GetSelectedIds(std::vector<int>& ids) const;
 
 protected:
 
@@ -107,29 +102,21 @@ protected slots:
   //! \param[in] pos position.
   void onContextMenu(QPoint pos);
 
-  //! Copies the name of the selected tree object to clipboard.
-  void onCopyName();
+  //! Copies the names of the selected tree objects to clipboard.
+  void onCopyNames();
 
-  //! Copies the global subshape's ID to the clipboard.
-  void onCopyGlobalId();
+  //! Copies the global subshape IDs to the clipboard.
+  void onCopyGlobalIds();
 
-  ////! Prints available part representations.
-  //void onPrintPartRepresentations();
-
-  ////! Shows part in the part view.
-  //void onShowPart();
-
-  ////! Shows subassembly in the assembly view.
-  //void onShowSubassembly();
-
-  ////! Sets active part.
-  //void onSetActivePart();
+  //! Shows the selected shapes.
+  void onDisplay();
 
 protected:
 
   TopoDS_Shape               m_shape;        //!< Shape to expand for browsing.
   Handle(asiEngine_Model)    m_model;        //!< Data model instance.
   ActAPI_ProgressEntry       m_progress;     //!< Progress notifier.
+  ActAPI_PlotterEntry        m_plotter;      //!< Imperative plotter.
   TopTools_IndexedMapOfShape m_subShapesMap; //!< Indexed map of subshapes.
 
 };

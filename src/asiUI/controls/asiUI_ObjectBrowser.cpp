@@ -672,7 +672,7 @@ void asiUI_ObjectBrowser::onExploreShape()
 
   // Prepare browser.
   asiUI_ShapeBrowser*
-    pBrowser = new asiUI_ShapeBrowser(shape, m_model, m_progress, nullptr);
+    pBrowser = new asiUI_ShapeBrowser(shape, m_model, m_progress, m_plotter, nullptr);
   //
   pBrowser->Populate();
 
