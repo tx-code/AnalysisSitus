@@ -63,7 +63,7 @@ public:
 
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
-  static void Functions(AsiTestFunctions& functions)
+  static void Functions(asiTestFunctions& functions)
   {
     functions << &testKEV001
               << &testKEV002

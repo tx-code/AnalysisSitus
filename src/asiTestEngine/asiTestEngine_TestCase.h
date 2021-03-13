@@ -54,12 +54,12 @@
 typedef outcome (*AsiTestFunction)(const int funcID);
 
 //! Collection of pointers to Test Functions
-class AsiTestFunctions
+class asiTestFunctions
 {
 public:
 
   //! Default constructor.
-  AsiTestFunctions() {}
+  asiTestFunctions() {}
 
 public:
 
@@ -67,7 +67,7 @@ public:
   //! Test Functions.
   //! \param funcPtr [in] function pointer to add.
   //! \return this reference for subsequent streaming.
-  AsiTestFunctions& operator<<(const AsiTestFunction& funcPtr)
+  asiTestFunctions& operator<<(const AsiTestFunction& funcPtr)
   {
     m_testFunctions.push_back(funcPtr);
     return*this;

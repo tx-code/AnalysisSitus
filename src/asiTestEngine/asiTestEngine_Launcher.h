@@ -98,7 +98,7 @@ public:
   virtual bool Launch()
   {
     // Collect Test Functions to run
-    AsiTestFunctions functions;
+    asiTestFunctions functions;
     CaseType::Functions(functions);
 
     // Run functions one by one
@@ -164,7 +164,7 @@ public:
   virtual AsiTestFunction TestFunction(const int idx) const
   {
     // Collect Test Functions to run
-    AsiTestFunctions functions;
+    asiTestFunctions functions;
     CaseType::Functions(functions);
 
     // Access Test Function by index
