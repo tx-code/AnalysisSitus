@@ -31,6 +31,9 @@
 // Own include
 #include <asiAlgo_MeshMerge.h>
 
+// asiAlgo includes
+#include <asiAlgo_MeshComputeShapeNorms.h>
+
 // OCCT includes
 #include <BRep_Tool.hxx>
 #include <NCollection_CellFilter.hxx>
@@ -154,6 +157,147 @@ namespace
     }
   }
 
+  Handle(Poly_Triangulation) TriangulationFromFace(const TopoDS_Face& F)
+  {
+    // Extract triangulation of a patch
+    TopLoc_Location Loc;
+    const Handle(Poly_Triangulation)& LocalTri = BRep_Tool::Triangulation(F, Loc);
+    //
+    if ( LocalTri.IsNull() )
+      return nullptr;
+    //
+    const int nNodes     = LocalTri->NbNodes();
+    const int nTriangles = LocalTri->NbTriangles();
+
+    Handle(Poly_Triangulation)
+      result = new Poly_Triangulation(nNodes, nTriangles, false);
+
+    // Add nodes with the applied transformation.
+    for ( int localNodeId = 1; localNodeId <= nNodes; ++localNodeId )
+    {
+      gp_XYZ xyz;
+      if ( Loc.IsIdentity() )
+        xyz = LocalTri->Nodes()(localNodeId).XYZ();
+      else
+        xyz = LocalTri->Nodes()(localNodeId).Transformed( Loc.Transformation() ).XYZ();
+
+      result->ChangeNode(localNodeId) = xyz;
+    }
+
+    // Add triangles taking into account face orientation.
+    for ( int i = 1; i <= nTriangles; ++i )
+    {
+      int n1, n2, n3;
+      LocalTri->Triangles()(i).Get(n1, n2, n3);
+      int m[3] = {n1, n2, n3};
+
+      if ( F.Orientation() == TopAbs_REVERSED )
+      {
+        m[1] = n3;
+        m[2] = n2;
+      }
+
+      result->ChangeTriangle(i) = Poly_Triangle(m[0], m[1], m[2]);
+    }
+
+    // Build normals.
+    asiAlgo_MeshComputeShapeNorms::ComputeNormals(F, result);
+
+    return result;
+  }
+
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Poly_Triangulation)
+  asiAlgo_MeshMerge::PutTogether(const std::vector<Handle(Poly_Triangulation)>& tris)
+{
+  // The first pass is to check how many nodes and triangles it's going to be.
+  int nodeCount = 0;
+  int triCount  = 0;
+  //
+  for ( const auto& T : tris )
+  {
+    nodeCount += T->NbNodes();
+    triCount  += T->NbTriangles();
+  }
+  //
+  if ( !nodeCount || !triCount )
+    return nullptr;
+
+  Handle(Poly_Triangulation)
+    result = new Poly_Triangulation(nodeCount, triCount, false);
+  //
+  result->SetNormals( new TShort_HArray1OfShortReal(1, 3*nodeCount) );
+
+  // The second pass is to compose the united triangulation.
+  int globalNodeIdx = 1;
+  int globalTriangleIdx = 1;
+  //
+  for ( const auto& T : tris )
+  {
+    NCollection_DataMap<int, int> nodeMapping;
+
+    // Pass nodes.
+    const TColgp_Array1OfPnt& nodes = T->Nodes();
+    //
+    for ( int pidx = nodes.Lower(); pidx <= nodes.Upper(); ++pidx )
+    {
+      result->ChangeNode(globalNodeIdx) = nodes(pidx);
+
+      if ( T->HasNormals() )
+        result->SetNormal( globalNodeIdx, T->Normal(pidx) );
+
+      nodeMapping.Bind(pidx, globalNodeIdx++);
+    }
+
+    // Pass triangles.
+    const Poly_Array1OfTriangle& TT = T->Triangles();
+    //
+    for ( int tidx = TT.Lower(); tidx <= TT.Upper(); ++tidx )
+    {
+      int nids[3];
+      TT(tidx).Get(nids[0], nids[1], nids[2]);
+      int nnids[3] = {nodeMapping(nids[0]), nodeMapping(nids[1]), nodeMapping(nids[2])};
+
+      result->ChangeTriangle(globalTriangleIdx++) = Poly_Triangle(nnids[0], nnids[1], nnids[2]);
+    }
+  }
+
+  return result;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Poly_Triangulation)
+  asiAlgo_MeshMerge::PutTogether(const TopoDS_Shape& shape,
+                                 t_faceElems&        history)
+{
+  std::vector<Handle(Poly_Triangulation)> tris;
+  int triangleIndex = 1;
+
+  for ( TopExp_Explorer exp(shape, TopAbs_FACE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Face& F = TopoDS::Face( exp.Current() );
+
+    // Add for processing.
+    tris.push_back( ::TriangulationFromFace(F) );
+
+    // Add mapping of indices.
+    NCollection_Vector<int>* mapPtr = history.ChangeSeek(F);
+    if ( mapPtr == nullptr )
+      mapPtr = history.Bound(F, NCollection_Vector<int>());
+    //
+    for ( int tidx = triangleIndex; tidx <= int( tris.size() ); ++tidx )
+    {
+      (*mapPtr).Append(tidx);
+    }
+
+    triangleIndex = int( tris.size() );
+  }
+
+  return PutTogether(tris);
 }
 
 //-----------------------------------------------------------------------------

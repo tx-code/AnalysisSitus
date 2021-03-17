@@ -66,6 +66,24 @@ public:
 
 public:
 
+  //! Puts all the passed triangulations into a single data structure
+  //! with duplicated nodes.
+  //! \param[in] tris the triangulations to put together.
+  //! \return the united triangulation.
+  asiAlgo_EXPORT static Handle(Poly_Triangulation)
+    PutTogether(const std::vector<Handle(Poly_Triangulation)>& tris);
+
+  //! Puts all triangulations from the passed shape into a single data structure
+  //! with duplicated nodes.
+  //! \param[in]  shape   the shape whose triangulations are to be put together.
+  //! \param[out] history the mapping for face indices vs facet indices.
+  //! \return the united triangulation.
+  asiAlgo_EXPORT static Handle(Poly_Triangulation)
+    PutTogether(const TopoDS_Shape& shape,
+                t_faceElems&        history);
+
+public:
+
   asiAlgo_EXPORT
     asiAlgo_MeshMerge(const TopoDS_Shape& body,
                       const Mode          mode = Mode_PolyCoherentTriangulation);

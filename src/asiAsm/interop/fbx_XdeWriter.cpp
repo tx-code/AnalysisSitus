@@ -372,11 +372,11 @@ namespace
     }
     else
     {
+      asiAlgo_MeshMerge::t_faceElems faces2facets;
+
       // Generate mesh from facets.
-      Handle(Poly_Triangulation) triangulation;
-      //
-      asiAlgo_MeshMerge meshMerge(shape);
-      triangulation = meshMerge.GetResultPoly()->GetTriangulation();
+      Handle(Poly_Triangulation)
+        triangulation = asiAlgo_MeshMerge::PutTogether(shape, faces2facets);
       //
       if ( triangulation.IsNull() )
         return false;
@@ -392,13 +392,13 @@ namespace
 
       // Set colors to mesh.
       // Firstly append color to whole shape.
-      appendColor(doc, fbxParentNode, fbxMesh, label, meshMerge.GetFaceElems(), pState);
+      appendColor(doc, fbxParentNode, fbxMesh, label, faces2facets, pState);
 
       // Append colors for subshapes.
       for ( TDF_ChildIterator childIter(label); childIter.More(); childIter.Next() )
       {
         TDF_Label childLabel = childIter.Value();
-        appendColor(doc, fbxParentNode, fbxMesh, childLabel, meshMerge.GetFaceElems(), pState);
+        appendColor(doc, fbxParentNode, fbxMesh, childLabel, faces2facets, pState);
       }
 
       // Cache converted mesh.
@@ -602,7 +602,7 @@ bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
   const char* asciiStr = "ascii";
   int formatCount = fbxManager->GetIOPluginRegistry()->GetWriterFormatCount();
   //
-  for ( int formatIndex = 0; formatIndex< formatCount; ++formatIndex )
+  for ( int formatIndex = 0; formatIndex < formatCount; ++formatIndex )
   {
     if ( !fbxManager->GetIOPluginRegistry()->WriterIsFBX(formatIndex) )
     {
