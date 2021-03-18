@@ -745,8 +745,13 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
 
       for ( int isol = 1; isol <= extSS.NbSolution(); ++isol )
       {
-        const gp_Pnt& P1 = extSS.PointOnShape1(isol);
-        const gp_Pnt& P2 = extSS.PointOnShape2(isol);
+        gp_Pnt P1 = extSS.PointOnShape1(isol);
+        gp_Pnt P2 = extSS.PointOnShape2(isol);
+
+        gp_Trsf T = partApi.GetPart()->GetTransformationMx();
+
+        P1.Transform(T);
+        P2.Transform(T);
 
         TCollection_AsciiString distName("distance");
         distName += isol;

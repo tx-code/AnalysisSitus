@@ -76,6 +76,10 @@ public:
 
 public:
 
+  //! \return Part Node.
+  asiEngine_EXPORT Handle(asiData_PartNode)
+    GetPart();
+
   //! \return newly created Part Node.
   asiEngine_EXPORT Handle(asiData_PartNode)
     CreatePart();

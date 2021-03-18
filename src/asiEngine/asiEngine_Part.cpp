@@ -61,6 +61,13 @@
 
 //-----------------------------------------------------------------------------
 
+Handle(asiData_PartNode) asiEngine_Part::GetPart()
+{
+  return m_model->GetPartNode();
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_PartNode) asiEngine_Part::CreatePart()
 {
   // Add Part Node to Partition
