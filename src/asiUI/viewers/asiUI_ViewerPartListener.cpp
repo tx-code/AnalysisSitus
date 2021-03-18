@@ -54,6 +54,7 @@
 
 // OCCT includes
 #include <BRep_Builder.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
 // VTK includes
@@ -366,9 +367,11 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     }
 
     // Selected items are vertices.
-    if ( vertIndices.Extent() == 2 )
+    if ( (vertIndices.Extent() == 2) ||
+         (edgeIndices.Extent() == 2) ||
+         (faceIndices.Extent() == 2) )
     {
-      m_pMeasureLength = menu.addAction("Measure length");
+      m_pMeasureLength = menu.addAction("Measure distance");
     }
   }
 }
@@ -716,40 +719,42 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   }
 
   //---------------------------------------------------------------------------
-  // ACTION: measure length
+  // ACTION: measure distance
   //---------------------------------------------------------------------------
   else if ( pAction == m_pMeasureLength )
   {
     asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
-    // Get AAG to access vertices by indices.
-    Handle(asiAlgo_AAG) aag = partApi.GetAAG();
-    //
-    if ( aag.IsNull() )
-    {
-      m_progress.SendLogMessage(LogErr(Normal) << "AAG is null.");
-      return;
-    }
+    // Get highlighted subshapes.
+    TopTools_IndexedMapOfShape ssIndices;
+    partApi.GetHighlightedSubShapes(ssIndices);
 
-    // Get highlighted vertices.
-    TColStd_PackedMapOfInteger vertIndices;
-    partApi.GetHighlightedVertices(vertIndices);
-
-    // Distance between two vertices.
-    if ( vertIndices.Extent() == 2 )
+    // Distance between two subshapes.
+    if ( ssIndices.Extent() == 2 )
     {
-      const int iV1 = vertIndices.GetMinimalMapped();
-      const int iV2 = vertIndices.GetMaximalMapped();
+      const TopoDS_Shape& S1 = ssIndices(1);
+      const TopoDS_Shape& S2 = ssIndices(2);
+
+      BRepExtrema_DistShapeShape extSS(S1, S2);
       //
-      TopoDS_Vertex V1 = TopoDS::Vertex( aag->RequestMapOfVertices()(iV1) );
-      TopoDS_Vertex V2 = TopoDS::Vertex( aag->RequestMapOfVertices()(iV2) );
+      if ( !extSS.IsDone() )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Distance computation is not done.");
+        return;
+      }
 
-      gp_Pnt P1 = BRep_Tool::Pnt(V1);
-      gp_Pnt P2 = BRep_Tool::Pnt(V2);
+      for ( int isol = 1; isol <= extSS.NbSolution(); ++isol )
+      {
+        const gp_Pnt& P1 = extSS.PointOnShape1(isol);
+        const gp_Pnt& P2 = extSS.PointOnShape2(isol);
 
-      m_plotter.REDRAW_LINK("length", P1, P2, Color_White);
-      m_progress.SendLogMessage( LogInfo(Normal) << "Length between vertices: %1."
-                                                 << P1.Distance(P2) );
+        TCollection_AsciiString distName("distance");
+        distName += isol;
+
+        m_plotter.REDRAW_LINK(distName, P1, P2, Color_White);
+        m_progress.SendLogMessage( LogInfo(Normal) << "Distance between shapes: %1."
+                                                   << P1.Distance(P2) );
+      }
     }
   }
 }
