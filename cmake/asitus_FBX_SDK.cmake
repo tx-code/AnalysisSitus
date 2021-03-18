@@ -9,7 +9,7 @@ if (NOT WIN32)
   set (SubPathLib lib/gcc4/x64/release)
 endif()
 
-ASITUS_THIRDPARTY_PRODUCT("FBX_SDK" "include" "fbxsdk.h" "libfbxsdk" "${SubPathLib}")
+ASITUS_THIRDPARTY_PRODUCT("FBX_SDK" "" "fbxsdk.h" "libfbxsdk" "${SubPathLib}")
 
 message (STATUS "... FBX_SDK Include dirs: ${3RDPARTY_FBX_SDK_INCLUDE_DIR}")
 message (STATUS "... FBX_SDK Library dirs: ${3RDPARTY_FBX_SDK_LIBRARY_DIR}")
