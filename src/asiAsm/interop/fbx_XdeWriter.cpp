@@ -175,7 +175,7 @@ namespace
     }
 
     // Store UV Nodes.
-    if ( triangulation->HasUVNodes())
+    if ( triangulation->HasUVNodes() )
     {
       const TColgp_Array1OfPnt2d& uvNodes = triangulation->UVNodes();
 

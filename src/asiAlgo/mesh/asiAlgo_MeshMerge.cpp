@@ -275,26 +275,25 @@ Handle(Poly_Triangulation)
                                  t_faceElems&        history)
 {
   std::vector<Handle(Poly_Triangulation)> tris;
-  int triangleIndex = 1;
+  int triangleIndex = 0;
 
   for ( TopExp_Explorer exp(shape, TopAbs_FACE); exp.More(); exp.Next() )
   {
     const TopoDS_Face& F = TopoDS::Face( exp.Current() );
 
     // Add for processing.
-    tris.push_back( ::TriangulationFromFace(F) );
+    Handle(Poly_Triangulation) FT = ::TriangulationFromFace(F);
+    tris.push_back(FT);
 
     // Add mapping of indices.
     NCollection_Vector<int>* mapPtr = history.ChangeSeek(F);
     if ( mapPtr == nullptr )
-      mapPtr = history.Bound(F, NCollection_Vector<int>());
+      mapPtr = history.Bound( F, NCollection_Vector<int>() );
     //
-    for ( int tidx = triangleIndex; tidx <= int( tris.size() ); ++tidx )
+    for ( int tidx = 0; tidx < FT->NbTriangles(); ++tidx )
     {
-      (*mapPtr).Append(tidx);
+      (*mapPtr).Append(++triangleIndex);
     }
-
-    triangleIndex = int( tris.size() );
   }
 
   return PutTogether(tris);
