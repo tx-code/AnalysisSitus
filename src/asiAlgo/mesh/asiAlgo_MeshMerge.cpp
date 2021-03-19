@@ -283,6 +283,10 @@ Handle(Poly_Triangulation)
 
     // Add for processing.
     Handle(Poly_Triangulation) FT = ::TriangulationFromFace(F);
+    //
+    if ( FT.IsNull() )
+      continue;
+
     tris.push_back(FT);
 
     // Add mapping of indices.
