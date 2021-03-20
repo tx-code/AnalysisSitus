@@ -63,8 +63,8 @@ public:
   //! \param[in] plotter  the imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_WriteDXF(const char*          filepath,
-                     ActAPI_ProgressEntry progress,
-                     ActAPI_PlotterEntry  plotter);
+                     ActAPI_ProgressEntry progress = nullptr,
+                     ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
