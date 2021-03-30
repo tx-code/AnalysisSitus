@@ -266,6 +266,12 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 
 <div align="center"><img src="../imgs/ddf_11.png"/></div>
 
+<p>
+  The precision of approximation is specified as the algorithm's input.
+</p>
+
+<div align="center"><img src="../imgs/ddf_18.png"/></div>
+
 <h2 id="voxel-ddf-domain">Function domain</h2>
 
 <p>
@@ -363,6 +369,24 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 
 <p>
   Computing Boolean operations on implicit surfaces corresponds to an appropriate application of min/max operations on the input distance fields. The authors of <a href="../references.html#pavic-2010">[Pavic et al, 2010]</a> use the adaptive octrees to gain finer resolution in the spatial zones where the operands of a Boolean algorithm interfere. Therefore, the voxelization in this context is driven not by the distance function but by another property of the input (the customization of the DDF framework is related to the implicit function $f$).
+</p>
+
+<h1 id="voxel-strategies">Voxelization strategies</h1>
+
+<p>
+  Although this article is mainly devoted to DDF, we should not forget that some applications do not really require the adaptively sampled distance fields. Instead, you might want to have just an adaptive voxelization, which is not obliged to capture all the features of the spatially varying distance field. Although the underlying sparse voxel octree (SVO) data structure remains largely the same, there are several questions you might want to think about to get the most efficient yet practical voxelization approach.
+</p>
+
+<ol>
+  <li>Do you really need to capture some "potential function" (like distance) in the ambient space, or do you rather want to voxelize the existing Lagrangian shape representation?</li>
+  <li>Would you like to sacrifice some extra memory to store custom attributes in your voxels, such as pre-evaluation function values?</li>
+  <li>What would be the voxel splitting criterion? We have outlined one above, but it might be something completely custom.</li>
+</ol>
+
+<div align="center"><img src="../imgs/ddf_19.png"/></div>
+
+<p>
+  One broadly used voxelization strategy consists is splitting up those spatial cells that contain real geometry, while leaving the outer and inner voxels intact. This way, we do not try to approximate the varying isosurfaces of the implicit distance fields and just discretize the existing shape's boundary.
 </p>
 
 <h1 id="voxel-use">Use in Analysis Situs</h1>
