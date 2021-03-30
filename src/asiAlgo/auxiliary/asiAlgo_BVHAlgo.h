@@ -103,18 +103,18 @@ public:
   //! \param[in] start leading point of the segment.
   //! \param[in] end   ending point of the segment.
   //! \return projected point.
-  static gp_Pnt projectPointSegment(const gp_Pnt& P,
-                                    const gp_Pnt& start,
-                                    const gp_Pnt& end);
-
-  ///
+  asiAlgo_EXPORT static gp_Pnt
+    projectPointSegment(const gp_Pnt& P,
+                        const gp_Pnt& start,
+                        const gp_Pnt& end);
 
   //! \brief Calculate distance from a point to a segment
   //! \param[in] thePoint point
   //! \param[in] theStart start point of the segment
   //! \param[in] theEnd   end point of the segment
   //! \return distance from the point to the segment
-  static double distancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd);
+  asiAlgo_EXPORT static double
+    distancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd);
 
   //! \brief Calculate distance from a point to a segment and return the nearest point
   //! \param[in]  thePoint point
@@ -122,7 +122,8 @@ public:
   //! \param[in]  theEnd   end point of the segment
   //! \param[out] theProj  nearest point on the segment
   //! \return distance from the point to the segment
-  static double distancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    distancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd, gp_Pnt& theProj);
 
   //! \brief Calculate distance from a point to a triangle
   //! \param[in]  thePoint     point
@@ -131,7 +132,8 @@ public:
   //! \param[in]  theTriPoint3 third point of the triangle
   //! \param[out] theProj      nearest point on the segment
   //! \return distance from the point to the triangle
-  static double distancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    distancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, gp_Pnt& theProj);
 
   //! \brief Calculate distance from a point to a triangle
   //! \param[in]  thePoint     point
@@ -141,14 +143,16 @@ public:
   //! \param[in]  theNormal    normal vector of the triangle
   //! \param[out] theProj      nearest point on the segment
   //! \return distance from the point to the triangle
-  static double distancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    distancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal, gp_Pnt& theProj);
 
   //! \brief Calculate squared distance from a point to a segment
   //! \param[in] thePoint point
   //! \param[in] theStart start point of the segment
   //! \param[in] theEnd   end point of the segment
   //! \return squared distance from the point to the segment
-  static double squaredDistancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd);
+  asiAlgo_EXPORT static double
+    squaredDistancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd);
 
   //! \brief Calculate squared distance from a point to a segment and return the nearest point
   //! \param[in]  thePoint point
@@ -156,7 +160,8 @@ public:
   //! \param[in]  theEnd   end point of the segment
   //! \param[out] theProj  nearest point on the segment
   //! \return squared distance from the point to the segment
-  static double squaredDistancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    squaredDistancePointSegment(const gp_Pnt& thePoint, const gp_Pnt& theStart, const gp_Pnt& theEnd, gp_Pnt& theProj);
 
   //! \brief Squared distance from a point to a triangle
   //! \param[in]  thePoint     point
@@ -165,7 +170,8 @@ public:
   //! \param[in]  theTriPoint3 third point of the triangle
   //! \param[out] theProj      nearest point on the segment
   //! \return squared distance from the point to the triangle
-  static double squaredDistancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    squaredDistancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, gp_Pnt& theProj);
 
   //! \brief Squared distance from a point to a triangle
   //! \param[in]  thePoint     point
@@ -175,7 +181,8 @@ public:
   //! \param[in]  theNormal    normal vector of the triangle
   //! \param[out] theProj      nearest point on the segment
   //! \return squared distance from the point to the triangle
-  static double squaredDistancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal, gp_Pnt& theProj);
+  asiAlgo_EXPORT static double
+    squaredDistancePointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal, gp_Pnt& theProj);
 
   //! \brief Project a point to a triangle
   //! \param[in] thePoint     point
@@ -183,7 +190,8 @@ public:
   //! \param[in] theTriPoint2 second point of the triangle
   //! \param[in] theTriPoint3 third point of the triangle
   //! \return projected point to the triangle
-  static gp_Pnt projectPointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3);
+  asiAlgo_EXPORT static gp_Pnt
+    projectPointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3);
 
   //! \brief Project a point to a triangle with precalculated normal
   //! \param[in] thePoint     point
@@ -192,7 +200,8 @@ public:
   //! \param[in] theTriPoint3 third point of the triangle
   //! \param[in] theNormal    normal vector of the triangle
   //! \return projected point to the triangle
-  static gp_Pnt projectPointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal);
+  asiAlgo_EXPORT static gp_Pnt
+    projectPointTriangle(const gp_Pnt& thePoint, const gp_Pnt& theTriPoint1, const gp_Pnt& theTriPoint2, const gp_Pnt& theTriPoint3, const gp_Vec& theNormal);
 
   //! Conducts basic intersection test of the given point with respect to the
   //! bounding box defined by its corner points.
@@ -201,37 +210,43 @@ public:
   //! \param[in] P      point to test.
   //! \param[in] prec   precision.
   //! \return true/false.
-  static bool isOut(const BVH_Vec3d& boxMin,
-                    const BVH_Vec3d& boxMax,
-                    const gp_Pnt&    P,
-                    const double     prec);
+  asiAlgo_EXPORT static bool
+    isOut(const BVH_Vec3d& boxMin,
+          const BVH_Vec3d& boxMax,
+          const gp_Pnt&    P,
+          const double     prec);
 
   //! Intersects triangle with a ray.
-  static double intersectTriangle(const t_ray&     ray,
-                                  const BVH_Vec3d& P0,
-                                  const BVH_Vec3d& P1,
-                                  const BVH_Vec3d& P2);
+  asiAlgo_EXPORT static double
+    intersectTriangle(const t_ray&     ray,
+                      const BVH_Vec3d& P0,
+                      const BVH_Vec3d& P1,
+                      const BVH_Vec3d& P2);
 
   //! Computes number of ray-mesh intersections.
-  static int rayMeshHitCount(asiAlgo_BVHFacets* pMesh,
-                             const t_ray&       ray);
+  asiAlgo_EXPORT static int
+    rayMeshHitCount(asiAlgo_BVHFacets* pMesh,
+                    const t_ray&       ray);
 
   //! Computes squared distance from the given point to the axis-aligned
   //! bounding boxes specified with its corners.
-  static double squaredDistanceToBox(const BVH_Vec3d& P,
-                                     const BVH_Vec3d& boxMin,
-                                     const BVH_Vec3d& boxMax);
+  asiAlgo_EXPORT static double
+    squaredDistanceToBox(const BVH_Vec3d& P,
+                         const BVH_Vec3d& boxMin,
+                         const BVH_Vec3d& boxMax);
 
   //! Computes squared distance to nearest triangle point.
-  static double squaredDistanceToTriangle(const BVH_Vec3d& P,
-                                          const BVH_Vec3d& A,
-                                          const BVH_Vec3d& B,
-                                          const BVH_Vec3d& C);
+  asiAlgo_EXPORT static double
+    squaredDistanceToTriangle(const BVH_Vec3d& P,
+                              const BVH_Vec3d& A,
+                              const BVH_Vec3d& B,
+                              const BVH_Vec3d& C);
 
   //! Computes squared distance from the given point to mesh.
-  static double squaredDistanceToMesh(asiAlgo_BVHFacets* pMesh,
-                                      const BVH_Vec3d&   P,
-                                      const double       upperDist = REAL_MAX);
+  asiAlgo_EXPORT static double
+    squaredDistanceToMesh(asiAlgo_BVHFacets* pMesh,
+                          const BVH_Vec3d&   P,
+                          const double       upperDist = REAL_MAX);
 
 protected:
 

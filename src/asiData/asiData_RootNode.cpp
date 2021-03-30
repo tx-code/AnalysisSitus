@@ -36,41 +36,54 @@
 
 //-----------------------------------------------------------------------------
 
-//! Default constructor. Registers all involved Parameters.
 asiData_RootNode::asiData_RootNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name, PID_Name);
+  REGISTER_PARAMETER(Bool, PID_PrsHlr);
 }
 
-//! Returns new DETACHED instance of the Node ensuring its correct
-//! allocation in a heap.
-//! \return new instance of the Node.
+//-----------------------------------------------------------------------------
+
 Handle(ActAPI_INode) asiData_RootNode::Instance()
 {
   return new asiData_RootNode();
 }
 
-//! Performs initial actions required to make Mesh Node WELL-FORMED.
+//-----------------------------------------------------------------------------
+
 void asiData_RootNode::Init()
 {
-  // Initialize name Parameter
-  this->InitParameter(PID_Name, "Name");
+  this->InitParameter(PID_Name,   "Name",         "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PrsHlr, "Hidden lines", "", ParameterFlag_IsVisible, true);
+
+  // Set defaults.
+  this->SetHlr(false);
 }
 
 //-----------------------------------------------------------------------------
-// Generic naming
-//-----------------------------------------------------------------------------
 
-//! Accessor for the Node's name.
-//! \return name of the Node.
 TCollection_ExtendedString asiData_RootNode::GetName()
 {
   return ActParamTool::AsName( this->Parameter(PID_Name) )->GetValue();
 }
 
-//! Sets name for the Node.
-//! \param theName [in] name to set.
-void asiData_RootNode::SetName(const TCollection_ExtendedString& theName)
+//-----------------------------------------------------------------------------
+
+void asiData_RootNode::SetName(const TCollection_ExtendedString& name)
 {
-  ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(theName);
+  ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(name);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_RootNode::IsHlr() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_PrsHlr) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_RootNode::SetHlr(const bool isHlr)
+{
+  ActParamTool::AsBool( this->Parameter(PID_PrsHlr) )->SetValue(isHlr);
 }

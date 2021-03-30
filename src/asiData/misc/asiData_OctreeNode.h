@@ -76,6 +76,7 @@ public:
     PID_MinCellSize,      //!< Min cell size.
     PID_MaxCellSize,      //!< Max cell size.
     PID_Precision,        //!< Precision.
+    PID_DepthLimit,       //!< Limit for the splitting depth.
     PID_IsUniform,        //!< Indicates whether the voxelization is uniform.
     PID_NumRaysSign,      //!< Number of rays to use for sign resolution.
   //----------------------//
@@ -274,6 +275,15 @@ public:
   //! \param[in] value value to set.
   asiData_EXPORT void
     SetPrecision(const double value);
+
+  //! \return max splitting depth.
+  asiData_EXPORT int
+    GetDepthLimit() const;
+
+  //! Sets max splitting depth.
+  //! \param[in] value value to set.
+  asiData_EXPORT void
+    SetDepthLimit(const int value);
 
   //! \return true if the uniform voxelization mode is enabled.
   asiData_EXPORT bool

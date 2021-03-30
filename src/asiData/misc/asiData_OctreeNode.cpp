@@ -55,6 +55,7 @@ asiData_OctreeNode::asiData_OctreeNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,         PID_MinCellSize);
   REGISTER_PARAMETER(Real,         PID_MaxCellSize);
   REGISTER_PARAMETER(Real,         PID_Precision);
+  REGISTER_PARAMETER(Int,          PID_DepthLimit);
   REGISTER_PARAMETER(Bool,         PID_IsUniform);
   REGISTER_PARAMETER(Int,          PID_NumRaysSign);
   //
@@ -99,6 +100,7 @@ void asiData_OctreeNode::Init()
   this->SetMinCellSize      (1.);
   this->SetMaxCellSize      (100.);
   this->SetPrecision        (1.);
+  this->SetDepthLimit       (0); // No limit.
   this->SetUniform          (false);
   this->SetNumRaysSign      (3);
   this->SetDomainMinCorner  (0., 0., 0.);
@@ -117,6 +119,7 @@ void asiData_OctreeNode::Init()
   this->InitParameter(PID_MinCellSize,      "Min cell size",     "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_MaxCellSize,      "Max cell size",     "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_Precision,        "Precision",         "",                ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DepthLimit,       "Depth limit",       "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_IsUniform,        "Is uniform",        "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_NumRaysSign,      "Num. rays (sign)",  "",                ParameterFlag_IsVisible, true);
   //
@@ -375,6 +378,20 @@ double asiData_OctreeNode::GetPrecision() const
 void asiData_OctreeNode::SetPrecision(const double value)
 {
   return ActParamTool::AsReal( this->Parameter(PID_Precision) )->SetValue(value);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_OctreeNode::GetDepthLimit() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_DepthLimit) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_OctreeNode::SetDepthLimit(const int value)
+{
+  return ActParamTool::AsInt( this->Parameter(PID_DepthLimit) )->SetValue(value);
 }
 
 //-----------------------------------------------------------------------------

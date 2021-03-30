@@ -433,11 +433,9 @@ void asiVisu_PartPrs::unHighlight(vtkRenderer*                  asiVisu_NotUsed(
 
 //! Callback for rendering.
 //! \param[in] renderer renderer.
-void asiVisu_PartPrs::renderPipelines(vtkRenderer* renderer) const
+void asiVisu_PartPrs::renderPipelines(vtkRenderer* asiVisu_NotUsed(renderer)) const
 {
-  // Enable HLR for VTK facets (it's not a B-rep HLR).
-  if ( !renderer->GetUseHiddenLineRemoval() )
-    renderer->UseHiddenLineRemovalOn();
+  // Do nothing...
 }
 
 //-----------------------------------------------------------------------------

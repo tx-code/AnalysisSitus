@@ -129,25 +129,26 @@ asiEngine_Model::asiEngine_Model() : ActData_BaseModel(true)
 //! Populates Data Model.
 void asiEngine_Model::Populate()
 {
-  // Add root Node
+  // Add root Node.
   Handle(asiData_RootNode)
     root_n = Handle(asiData_RootNode)::DownCast( asiData_RootNode::Instance() );
   //
   this->GetRootPartition()->AddNode(root_n);
 
-  // Set name
+  // Initialize the root Node.
+  root_n->Init();
   root_n->SetName("Analysis Situs");
 
-  // Add Part Node
+  // Add Part Node.
   root_n->AddChildNode( asiEngine_Part(this).CreatePart() );
 
-  // Add Triangulation Node
+  // Add Triangulation Node.
   root_n->AddChildNode( asiEngine_Triangulation(this).CreateTriangulation() );
 
-  // Add Tessellation Node
+  // Add Tessellation Node.
   root_n->AddChildNode( asiEngine_Tessellation(this).CreateTessellation() );
 
-  // Add Imperative Viewer Node
+  // Add Imperative Viewer Node.
   root_n->AddChildNode( asiEngine_IV(this).Create_IV() );
 }
 
@@ -193,6 +194,13 @@ void asiEngine_Model::Clear()
     this->clearCustom();
   }
   this->CommitCommand(); // tx end
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Model::RegisterTreeFunction(const Handle(ActAPI_ITreeFunction)& TF)
+{
+  this->registerTreeFunction(TF);
 }
 
 //-----------------------------------------------------------------------------

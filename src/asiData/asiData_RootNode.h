@@ -40,12 +40,8 @@
 #include <ActData_Utils.h>
 
 //-----------------------------------------------------------------------------
-// Mesh Node
-//-----------------------------------------------------------------------------
 
-DEFINE_STANDARD_HANDLE(asiData_RootNode, ActData_BaseNode)
-
-//! Root Node in the hierarchy.
+//! Root Node in the project hierarchy. This Node contains global properties.
 class asiData_RootNode : public ActData_BaseNode
 {
 public:
@@ -62,35 +58,52 @@ public:
   enum ParamId
   {
   //-----------------//
-  // Common          //
-  //-----------------//
     PID_Name,        //!< Name of the Node.
+    PID_PrsHlr,      //!< Indicates whether HLR is enabled in the active renderer.
   //-----------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
 public:
 
+  //! Returns new DETACHED instance of the Node ensuring its correct
+  //! allocation in a heap.
+  //! \return new instance of the Node.
   asiData_EXPORT static Handle(ActAPI_INode)
     Instance();
 
 // Generic naming support:
 public:
 
+  //! Accessor for the Node's name.
+  //! \return name of the Node.
   asiData_EXPORT virtual TCollection_ExtendedString
     GetName();
 
+  //! Sets name for the Node.
+  //! \param[in] name name to set.
   asiData_EXPORT virtual void
     SetName(const TCollection_ExtendedString& name);
+
+  //! \return true if real-time HLR is enabled.
+  asiData_EXPORT bool
+    IsHlr() const;
+
+  //! Sets real-time HLR mode for the active renderer.
+  //! \param[in] isHlr the Boolean value to set.
+  asiData_EXPORT void
+    SetHlr(const bool isHlr);
 
 // Initialization:
 public:
 
+  //! Performs initializations required to make this Node WELL-FORMED.
   asiData_EXPORT void
     Init();
 
 protected:
 
+  //! Default constructor. Registers all involved Parameters.
   //! Allocation is allowed only via Instance() method.
   asiData_EXPORT
     asiData_RootNode();

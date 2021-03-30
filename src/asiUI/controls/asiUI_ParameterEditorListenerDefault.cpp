@@ -178,4 +178,28 @@ void asiUI_ParameterEditorListenerDefault::afterParameterChanged(const Handle(Ac
       part_n->UpdateTransformationMx();
     }
   }
+
+  /* =============================
+   *  Customization for Root Node
+   * ============================= */
+
+  else if ( N->IsKind( STANDARD_TYPE(asiData_RootNode) ) )
+  {
+    Handle(asiData_RootNode) root_n = Handle(asiData_RootNode)::DownCast(N);
+
+    if ( pid == asiData_RootNode::PID_PrsHlr )
+    {
+      if ( m_cf->ViewerPart )
+      {
+        vtkRenderer* renderer = m_cf->ViewerPart->PrsMgr()->GetRenderer();
+
+        // Read Parameter after change.
+        const bool
+          isHlrOn = ActParamTool::AsBool( root_n->Parameter(pid) )->GetValue();
+
+        // Enable HLR for VTK facets (it's not a B-rep HLR).
+        renderer->SetUseHiddenLineRemoval(isHlrOn);
+      }
+    }
+  }
 }

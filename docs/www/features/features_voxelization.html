@@ -6,6 +6,17 @@
   <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
   <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
 
+  <!-- [begin] MathJax -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.0/es5/tex-mml-chtml.js"></script>
+  <!-- [end] MathJax -->
+
   <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
   <script>
@@ -17,6 +28,12 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
  </head>
 <body>
 
@@ -45,15 +62,324 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Voxelization</h1>
+<h1 id="voxel">F-rep and voxels</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="voxel-intro">Introduction</h2>
 
 <p>
-Analysis Situs can be used to construct voxel representations of CAD models and meshes.
+  The traditional technology for exact modeling in the computer-aided design (CAD) field is boundary representation (B-rep). This industrially proven technique gives an efficient way of handling geometric shapes with non-compromised accuracy. In many engineering applications, however, it is not necessary to maintain the explicit equations of the surface boundaries. Therefore other approaches can be employed to represent a shape. One of the alternative approaches is functional representation (F-rep) or functional modeling.
+</p>
+
+<p>
+  In this article, we overview the basics of functional modeling and describe the data framework serving as an alternative to the traditional B-rep. The employed data framework is named DDF (Discrete Distance Field). One can find the theoretical foundation of this approach with the corresponding bibliography in the seminal paper <a href="../references.html#frisken-2000">[Frisken et al, 2000]</a>.
+</p>
+
+<p>
+  The fundamental question of geometric modeling is whether a random point selected in the ambient (modeling) space belongs to a solid body or not. A software system capable of answering this (and many more) questions is called a geometric modeling kernel. The geometric kernels use different representation schemes <a href="../references.html#requicha-1980">[Requicha, 1980]</a>, such as constructive solid geometry, implicit, boundary representation, voxels, etc. Here we describe a relatively fresh look at modeling, which is a part of the emerging <i>field-driven design</i> paradigm. This approach employs two representation schemes: the functional shape representation, and the space decomposition (voxels).
+</p>
+
+<div class="note">
+  As practice shows, voxels usually get more attention than distance fields and functional representations. That's likely because voxels are clear and simple, while their application areas are somewhat complementary to the traditional B-rep. In contrast, F-rep lends itself as an alternative approach to modeling, which would require a brand new commercial-grade geometric modeling kernel that does not exist yet in the open-source.
+</div>
+
+<p>
+  The field-driven design extends the idea of implicit modeling. The latter assumes that a shape corresponds to an implicit scalar function $f(x)=0$, where $x \in R^3$ (this formalism can be generalized though). The function $f$ (that might be called a "potential function") allows evaluation at any point in the ambient space, thus defining a continuous scalar field.
+</p>
+
+<div class="note">
+  In functional modeling, a shape to design is a "field" in the modeling space. Setting up a set of functions to describe that field is the purpose of a modeling system.
+</div>
+
+<p>
+  Before going into the details of the field-driven design, it is worth comparing this approach with the widely used boundary representation. It appears that only two general modeling principles embrace different representation schemes. These principles are the Eulerian and Lagrangian approaches to modeling <a href="../references.html#0fps-blog-shapes-coords">[0FPS blog]</a>.
+</p>
+
+<div align="center"><img src="../imgs/ddf_01.png"/></div>
+
+<h2 id="voxel-eulerian">Eulerian definition</h2>
+
+<p>
+  An implicit shape representation is a type of Eulerian representation which describes the modeled shape in terms of space it is embedded to. Formally, we define a map $f(x) = s$ where $f$ is a scalar function, and $s \in S$.
+</p>
+
+<div align="center">
+$f$ : Ambient space $R^3$ $\to$ Classifying space $S \subset R$
+</div>
+
+<p>
+  The shape being designed is then defined as the inverse map $f^{-1}$. For example, having $S_0=[-\infty,0] \subset S$, we can formalize shape $X$ as follows:
+</p>
+
+<div align="center">
+$X = f^{-1} (S_0) = \{ x \in R^3 : f(x) \leq 0 \}$
+</div>
+
+<p>
+  In functional modeling, the choice of $f$ and $S_0$ is somewhat arbitrary. The idea of this approach is to define the shape as a field in the ambient space. Selecting $f$ as a distance function induces the distance field in the ambient space. Similarly, one can define an "index field" for a set of solid bodies $B_0, B_1, ... ,B_N$ to attribute each point in the space with the object it belongs to: $f_i = i, x \in B_i$ and $f_i = 0$, otherwise.
+</p>
+
+<p>
+  The function $f$ does not have to be expressed with an analytic equation and can be defined procedurally, e.g., with a point-membership-classification (PMC) test. We will build upon this consideration later on, when expressing the potential function $f$ using voxelization of the ambient space.
+</p>
+
+<h2 id="voxel-lagrangian">Lagrangian definition</h2>
+
+<p>
+  The Eulerian approach is contrasted to the Lagrangian representations such as precise B-rep or meshes. Instead of representing shape as a map from the ambient space to some set of labels, a map from a parametric space to the ambient space is used.
+</p>
+
+<div align="center">
+$p$ : Parameter space $\to$ Ambient space
+</div>
+
+<p>
+  One significant advantage of the Lagrangian shape definition is the straightforward way of sampling the boundary $\partial X$ (one has to traverse the parameter space, which usually has lower dimensionality than the ambient space). At the same time, solving the PMC problem is more complicated compared to the implicit schemes and generally requires the use of iterative methods. Another advantage of the Lagrangian definition is its compactness. While the implicit modeling technique seeks to describe the continuous space, the Lagrangian approach describes not space but an object.
+</p>
+
+<h1 id="voxel-ddf">Discrete distance fields</h1>
+
+<h2 id="voxel-ddf-overview">Overview</h2>
+
+<p>
+  A fundamental graphical data structure that allows for representing the scalar fields in the ambient space is an octree. An octree serves as a carrier for the continuous scalar field whose values are associated with the vertices of the corresponding voxels. Introducing hierarchy allows models to take advantage of spatial locality: filled regions are clustered near each other, not randomly spread out in space.
+</p>
+
+<p>
+  The regularly sampled distance fields are computationally inefficient because of their significant size and consequently limited resolution. In contrast, the adaptively sampled distance fields (ADFs) allow for a detail-wise sampling with higher sampling rates in the curved areas and less dense sampling where the field varies smoothly.
+</p>
+
+<p>
+  In general, DDF is a tuple
+</p>
+
+<div align="center">
+$\langle f, H, r \rangle$
+</div>
+
+<p>
+Here $f$ is the distance function (signed or unsigned), $H$ is a spatial hierarchy (e.g., octree), and $r$ is an optional reconstruction operator that allows converting the level set $f(x)=s$ to Lagrangian form. The most popular way of isosurface reconstruction is the Marching Cubes algorithm <a href="../references.html#bourke-1994">[Bourke, 1994]</a> (see also the relevant overview and its following discussion at <a href="../references.html#0fps-blog-shapes-coords">[0FPS blog]</a>). If the gradient of the potential function is known, a manifold mesh representation can be generated with the more advanced Dual Contouring algorithm <a href="../references.html#ju-2002">[Ju et al, 2002]</a>. The following image illustrates an adaptively sampled distance function whose values are stored as the signed scalar values at voxel grid. Do you see a geometry of a bolt in there?
+</p>
+
+<div align="center"><img src="../imgs/ddf_02.png"/></div>
+
+<h2 id="voxel-ddf-indexation">Voxel indexation in C++</h2>
+
+<p>
+  The voxelization is stored in the data structure named SVO (Sparse Voxel Octree), which is a hierarchy of parallelepiped cells. Each corner of a cell is numbered according to the rule (C++ notations).
+</p>
+
+<pre>
+ID = nx | (ny << 1) | (nz << 2)
+</pre>
+
+Here nx, ny, nz variables get the values of 0 and 1 depending on whether they represent min or max coordinate (the 3-tuple of these numbers is called a "corner location"). There is also a scalar value representing the distance to the shape from the corresponding cell vertex. The explicit coordinates of the corner points are not required, though they can be stored for convenience or maintenance needs. In Analysis Situs, we store them to be able to easily dump to VTU (VTK unstructured) format. The following picture gives a schematic view of an octree and the corner indexation in a cell.
+</p>
+
+<div align="center"><img src="../imgs/ddf_03.png"/></div>
+
+<p>
+  The construction of the octree starts from the root node, which corresponds to the axis-aligned bounding box (AABB) of the object. The eight vertices of the root cells are supplemented with the distance values evaluated through the abstract interface of implicit function $f$. Depending on the distance field’s behavior in these eight vertices, a cell can be recursively split to octants. The following picture is the illustration of the splitting process. The numbering of octants follows the same rule as the numbering of vertices within one cell.
+</p>
+
+<div align="center"><img src="../imgs/ddf_04.png"/></div>
+
+<p>
+  To switch back from the cell ID (in range [0,7]) to the corner location tuple, the following rule is used:
+</p>
+
+<pre>
+nx = (ID >> 0) & 1,
+ny = (ID >> 1) & 1,
+nz = (ID >> 2) & 1.
+</pre>
+
+<p>
+This rule gives the following correspondence:
+</p>
+
+<pre>
+ID | nx | ny | nz
+ 0 |  0 |  0 |  0
+ 1 |  1 |  0 |  0
+ 2 |  0 |  1 |  0
+ 3 |  1 |  1 |  0
+ 4 |  0 |  0 |  1
+ 5 |  1 |  0 |  1
+ 6 |  0 |  1 |  1
+ 7 |  1 |  1 |  1
+</pre>
+
+<p>
+An SVO sub-hierarchy can be found in the octree by specifying its address as a sequence of cell IDs. The following picture illustrates SVO subhierarchy with IDs 0 $\to$ 0 for the bolt model. The inner space is shown in blue color. The outer space is shown in red color.
+</p>
+
+<div align="center"><img src="../imgs/ddf_05.png"/></div>
+
+<p>
+  Instead of using bounding boxes, you might prefer using bounding cubes:
+</p>
+
+<div align="center"><img src="../imgs/ddf_06.png"/></div>
+
+<h2 id="voxel-ddf-evaluation">Function evaluation</h2>
+
+<p>
+  The key feature of the SVO data structure is its ability to evaluate the hosted potential function. I.e., the voxelization behaves like a function itself. For the given point $\textbf{P} \in R^3$ and the voxel $V$, the evaluation of the field is done as follows. First, the point $\textbf{P}^*$ is derived by snapping the coordinates of the point $\textbf{P}$ with the voxel dimensions (if $\textbf{P} \in V$, then $\textbf{P}^* = \textbf{P}$). The following image illustrates the processing of finding a point $\textbf{P}^*$ nearest to the given input point $\textbf{P}$.
+</p>
+
+<div align="center"><img src="../imgs/ddf_07.png"/></div>
+
+<p>
+  The point $\textbf{P}^*$ is classified w.r.t. the voxel $V$ and its octants recursively until the algorithm reaches the ultimate leaf $V^*$ containing $\textbf{P}^*$. The value of the potential function within the located voxel is computed by trilinear interpolation of the corner values as shown in the figure below.
+</p>
+
+<div align="center"><img src="../imgs/ddf_08.png"/></div>
+
+<p>
+  The distance values at the voxel’s corners are computed by projection of the corresponding points to the initial shape. The distance function being evaluated is represented with an abstract C++ class which allows for various implementations. For the sake of efficiency, the initial shape is tessellated and represented with a bounding volume hierarchy (BVH). The BVH allows for the fast intersection tests by quick filtering out the blocks that could not contain the result. The following image illustrates BVH for the sample ANC101 part.
+</p>
+
+<div align="center"><img src="../imgs/ddf_09.png"/></div>
+
+<h2 id="voxel-ddf-splitting">Voxel splitting</h2>
+
+<p>
+  The voxelization process starts by constructing the root octree node initialized with the bounds of the distance function’s domain $D$. The domain $D$ is usually selected as the axis-aligned bounding box (or cube) of the shape being voxelized. The splitting procedure is based on function evaluation in 27 sample points corresponding to the corners of the current voxel and its potential splitting points. The following figure illustrates the sample points for testing the potential function on splitting. The $d$ value corresponds to the voxel's diagonal that can be used to control the grain size.
+</p>
+
+<div align="center"><img src="../imgs/ddf_10.png"/></div>
+
+<div class="note">
+  Here we give one example of the possible splitting rule. A voxel is NOT split if ANY of the following conditions hold:
+  <ol>
+    <li>The cell size of the current voxel (measured as the voxel’s max side) is less than the user-specified cell size.</li>
+    <li>The voxel does not contain geometry. One simplified check here is $f_{min} > d/2,$ where $f_{min}$ is chosen from the existing corners, i.e., from the set $\{ f_{000}, f_{200}, f_{020}, f_{220}, f_{002}, f_{202}, f_{022}, f_{222} \}$.</li>
+  </ol>
+  If the conditions above do not hold (i.e., the voxel is not too small and contains geometry), the intermediate scalar values are evaluated from the potential function. At this stage, the algorithm obtains the real distances at the intermediate nodes. The obtained precise scalars are compared to the linearly interpolated (average) scalars deduced from the corner nodes. If these values deviate significantly, the algorithm eventually splits the current voxel to octants. The procedure continues recursively for the child voxels until they cannot be split.
+</div>
+
+<p>
+  In DDF, the splitting process is driven by the idea to capture the distance field's features. This means that even empty space might get fine voxelization if the distance field varies significantly there (see the following sketch).
+</p>
+
+<div align="center"><img src="../imgs/ddf_11.png"/></div>
+
+<h2 id="voxel-ddf-domain">Function domain</h2>
+
+<p>
+  The domain of the potential function is a parallelepiped where the function is defined. Although the distance function is defined everywhere in the modeling space, it is instrumental to have a notion of the domain to explicitly outline the volume which is considered as the object. Once this object volume (the domain) is defined, the distance field can be attached either to the cells of this volume or to some extended volume. E.g., to produce anisotropic voxels (cubes), the voxelization should start from a bigger box which will surround the initial domain located in the center of this box.
+</p>
+
+<h2 id="voxel-ddf-polygonising">Polygonising scalar fields</h2>
+
+<p>
+  It is worth mentioning that the functional modeling techniques per se do not require any polygonising, even for visualization (to render the F-rep model one can apply ray tracing techniques). Still, to communicate the modeling results to the downstream engineering applications, there is a need to convert the functional representation of a shape to something more conventional. As the conversion from F-rep to B-rep is a challenging problem, the discrete representations should be considered at the first place.
+</p>
+
+<p>
+  The most popular and simple algorithm for polygonising scalar fields is marching cubes dated at 1987 <a href="../references.html#lorensen-1987">[Lorensen et al, 1987]</a>. A review of some other techniques, including spatial decomposition, surface tracking, and shrink-wrapping can be found in <a href="../references.html#araujo-2015">[Araujo et al, 2015]</a>.
+</p>
+
+<p>
+  The naive application of the marching cubes technique to an adaptive grid leads to the emergency of "cracks" (this effect is clearly explained in pp. 7-8 of <a href="../references.html#shu-1995">[Shu et al, 1995]</a>). Therefore, the marching cubes algorithm is usually applied to a regular grid obtained by discretization of the function's domain $D$. The finer discretization of the function domain yields a more precise reconstruction result. At the same time, since the initial data for the polygonising algorithm is the adaptive voxelization, it is highly desirable to produce the effectively decimated mesh. In the thesis <a href="../references.html#keeter-2013">[Keeter, 2013]</a>, the author uses the marching tetrahedrons algorithm that produces the adaptive triangulation that is not watertight. The author of this thesis argues that the non-watertight triangulation is enough for the rendering purposes. However, if the resulting mesh is intended for the further processing (e.g. numerical simulation or morphing), it is necessary to keep the mesh watertight and adaptive at the same time.
+</p>
+
+<p>
+  The following picture illustrates cracks (red color) in the mesh obtained by polygonising each cell of an adaptive octree independently.
+</p>
+
+<div align="center"><img src="../imgs/ddf_12.png"/></div>
+
+<p>
+  And here is a closer look:
+</p>
+
+<div align="center"><img src="../imgs/ddf_13.png"/></div>
+
+<p>
+  As the alternative to the naive marching cubes approach, the adaptive dual contouring algorithm proposed by <a href="../references.html#ju-2002">[Ju et al, 2002]</a> can be considered.
+</p>
+
+<h1 id="voxel-pc">Derived point clouds</h1>
+
+<h2 id="voxel-pc-principle">Principle</h2>
+
+<p>
+  A point cloud with a feature-wise distribution of points can be naturally obtained from the adaptive voxelization. The density of a point cloud will be higher in the spatial zones where the input CAD model possesses its features. The easiest way to derive a point cloud is to sample each inner voxel in its center point. Take a voxelization of a turbine blade as an example:
+</p>
+
+<div align="center"><img src="../imgs/ddf_14.png"/></div>
+
+<p>
+  And here is the derived point cloud:
+</p>
+
+<div align="center"><img src="../imgs/ddf_15.png"/></div>
+
+<p>
+  A point cloud derived by the naive sampling has insufficient accuracy near the boundary of a shape. Adding the voxels that intersect the boundary of the initial shape produces outliers as their center points unlikely belong to the surface. The following picture illustrates a DDF-derived point cloud composed of inner points (white) and quasi-boundary points (green).
+</p>
+
+<div align="center"><img src="../imgs/ddf_16.png"/></div>
+
+<h2 id="voxel-pc-proj">Boundary projection</h2>
+
+<p>
+  The points sampled in the boundary-crossing voxels do not lie on the boundary of the shape. To snap these points to the boundary, two techniques can be proposed:
+</p>
+
+<ol>
+  <li>Since the distance field is completely defined in a voxel, the corresponding piece of surface can be reconstructed locally in that voxel. Such a local polygonising can be achieved with the marching cubes method. Then, a point can be projected to the locally reconstructed piece of surface.</li>
+  <li>The points can be projected directly to the faceted representation of the initial shape. To speed up the projection routine, the bounding volume hierarchy structure (BVH) can be used.</li>
+</ol>
+
+<p>
+  Although the local polygonising looks like a natural completion of the entire method, it appears that the voxel-to-surface mapping suffers from the following deficiencies. First, the marching cubes algorithm may sometimes end up with non-manifold or even disconnected surfaces. Second, the polygonised surface $s_1$ is only an approximation to the original boundary $s_0,$ thus the membership classification of the projected point $\textbf{P}_i^*$ remains undefined (the PMC test may return different results for the two surfaces).
+</p>
+
+<div align="center">
+  $PMC(\textbf{P}_i^*, s_0) \neq PMC(\textbf{P}_i^*, s_1)$
+</div>
+
+<p>
+  To avoid the undefined PMC status, the initial surface $s_0$ should be used for the global projection (as opposed to the local projection on marching cubes’ result). The fast global projection is done with the help of BVH decomposition of the initial shape. It should be noted that the BVH decomposition is already available as it was used as a backbone of the distance function. Therefore, there is no extra overhead for the BVH construction.
+</p>
+
+<h1 id="voxel-apps">Applications</h1>
+
+<p>
+  The voxelization apparatus used in the field-based design can be adapted to cover different application needs, such as:
+</p>
+
+<ol>
+<li>Modeling and Boolean operations.</li>
+<li>Material removal simulation <a href="../references.html#sullivan-2012">[Sullivan et al, 2012]</a>.</li>
+<li>Mesh repair, including shrink wrapping techniques.</li>
+<li>Constructing the derived part representations, such as adaptive point clouds, unstructured grids, etc. Such customizations concern the $r$ (reconstruction/polygonizing) operator of the DDF framework.</li>
+<li>Filling parts with lattices <a href="../references.html#pasko-2011">[Pasko et al, 2011]</a>.</li>
+</ol>
+
+<p>
+  Computing Boolean operations on implicit surfaces corresponds to an appropriate application of min/max operations on the input distance fields. The authors of <a href="../references.html#pavic-2010">[Pavic et al, 2010]</a> use the adaptive octrees to gain finer resolution in the spatial zones where the operands of a Boolean algorithm interfere. Therefore, the voxelization in this context is driven not by the distance function but by another property of the input (the customization of the DDF framework is related to the implicit function $f$).
+</p>
+
+<h1 id="voxel-use">Use in Analysis Situs</h1>
+
+<p>
+  To build voxelization for the given CAD or mesh geometry, use the following Tcl command:
 </p>
 
 <div class="code">
   ddf-build-svo -min &lt;minCellSize&gt; [-owner &lt;parentNodeId&gt;]
 </div>
+
+<p>
+  This function creates a new octree Node in the project tree, where you can then configure different aspects of voxelization.
+</p>
+
+<div align="center"><img src="../imgs/ddf_17.png"/></div>
 
 <!-- [END] contents -->
 </div>
