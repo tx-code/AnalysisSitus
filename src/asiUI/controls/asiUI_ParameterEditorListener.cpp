@@ -77,11 +77,14 @@ void asiUI_ParameterEditorListener::onParameterChanged(const int       pid,
   }
 
   // Perform transactional modification.
-  m_cf->Model->OpenCommand();
+  if ( !m_cf->Model->HasOpenCommand() )
+    m_cf->Model->OpenCommand();
+  //
   {
     if ( !this->applyParameter(pid, value) )
     {
-      m_cf->Model->AbortCommand();
+      if ( m_cf->Model->HasOpenCommand() )
+        m_cf->Model->AbortCommand();
       return;
     }
 
@@ -97,7 +100,9 @@ void asiUI_ParameterEditorListener::onParameterChanged(const int       pid,
     if ( execStatus & ActAPI_IModel::Execution_Failed )
       m_cf->Progress.SendLogMessage(LogErr(Normal) << "Tree function execution failed.");
   }
-  m_cf->Model->CommitCommand();
+  //
+  if ( m_cf->Model->HasOpenCommand() )
+    m_cf->Model->CommitCommand();
 
   // Set default update type.
   if ( m_obUpdateType == OB_UpdateType_Undefined )

@@ -374,7 +374,9 @@ void asiUI_ViewerPart::onSubShapesPicked()
     // Store active selection in the Data Model
     //-------------------------------------------------------------------------
 
-    m_model->OpenCommand(); // tx start
+    if ( !m_model->HasOpenCommand() )
+      m_model->OpenCommand(); // tx start
+    //
     {
       // Store index of the active face
       if ( picked_face_IDs.size() )
@@ -396,7 +398,8 @@ void asiUI_ViewerPart::onSubShapesPicked()
         std::cout << "Active face has been reset..." << std::endl;
       }
     }
-    m_model->CommitCommand(); // tx commit
+    if ( m_model->HasOpenCommand() )
+      m_model->CommitCommand(); // tx commit
 
     //-------------------------------------------------------------------------
     // Notify
