@@ -127,7 +127,7 @@ $X = f^{-1} (S_0) = \{ x \in R^3 : f(x) \leq 0 \}$
 <h2 id="voxel-lagrangian">Lagrangian definition</h2>
 
 <p>
-  The Eulerian approach is contrasted to the Lagrangian representations such as precise B-rep or meshes. Instead of representing shape as a map from the ambient space to some set of labels, a map from a parametric space to the ambient space is used.
+  The Eulerian approach is contrasted to the Lagrangian representations such as precise B-rep or meshes. Instead of representing a shape as a map from the ambient space to some set of labels, a map from a parametric space to the ambient space is used.
 </p>
 
 <div align="center">
@@ -135,7 +135,7 @@ $p$ : Parameter space $\to$ Ambient space
 </div>
 
 <p>
-  One significant advantage of the Lagrangian shape definition is the straightforward way of sampling the boundary $\partial X$ (one has to traverse the parameter space, which usually has lower dimensionality than the ambient space). At the same time, solving the PMC problem is more complicated compared to the implicit schemes and generally requires the use of iterative methods. Another advantage of the Lagrangian definition is its compactness. While the implicit modeling technique seeks to describe the continuous space, the Lagrangian approach describes not space but an object.
+  One significant advantage of the Lagrangian shape definition is the straightforward way of sampling the boundary $\partial X$ (one has to traverse the parameter space, which usually has lower dimensionality than the ambient space). At the same time, solving the PMC problem is more complicated compared to the implicit schemes and generally requires the use of iterative methods. Another advantage of the Lagrangian definition is its compactness. While the implicit modeling technique seeks to describe the continuous space, the Lagrangian approach describes not space but an object embedded into the space.
 </p>
 
 <h1 id="voxel-ddf">Discrete distance fields</h1>
@@ -167,7 +167,7 @@ Here $f$ is the distance function (signed or unsigned), $H$ is a spatial hierarc
 <h2 id="voxel-ddf-indexation">Voxel indexation in C++</h2>
 
 <p>
-  The voxelization is stored in the data structure named SVO (Sparse Voxel Octree), which is a hierarchy of parallelepiped cells. Each corner of a cell is numbered according to the rule (C++ notations).
+  The voxelization is stored in the data structure named SVO (Sparse Voxel Octree), which is a hierarchy of parallelepiped cells. Each corner of a cell is numbered according to the following rule (C++ notations for bitwise shifts are used):
 </p>
 
 <pre>
@@ -212,13 +212,13 @@ ID | nx | ny | nz
 </pre>
 
 <p>
-An SVO sub-hierarchy can be found in the octree by specifying its address as a sequence of cell IDs. The following picture illustrates SVO subhierarchy with IDs 0 $\to$ 0 for the bolt model. The inner space is shown in blue color. The outer space is shown in red color.
+An SVO sub-hierarchy can be found in the octree by specifying its address as a sequence of cell IDs. The following picture illustrates SVO sub-hierarchy with IDs 0 $\to$ 0 for the bolt model. The inner space is shown in blue color. The outer space is shown in red color.
 </p>
 
 <div align="center"><img src="../imgs/ddf_05.png"/></div>
 
 <p>
-  Instead of using bounding boxes, you might prefer using bounding cubes:
+  Instead of using bounding boxes, you might prefer using bounding cubes. The following picture illustrates a projection view of a clipped CNC model. You can notice that the model's inside get a less dense voxelization than its boundary.
 </p>
 
 <div align="center"><img src="../imgs/ddf_06.png"/></div>
@@ -226,7 +226,11 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <h2 id="voxel-ddf-evaluation">Function evaluation</h2>
 
 <p>
-  The key feature of the SVO data structure is its ability to evaluate the hosted potential function. I.e., the voxelization behaves like a function itself. For the given point $\textbf{P} \in R^3$ and the voxel $V$, the evaluation of the field is done as follows. First, the point $\textbf{P}^*$ is derived by snapping the coordinates of the point $\textbf{P}$ with the voxel dimensions (if $\textbf{P} \in V$, then $\textbf{P}^* = \textbf{P}$). The following image illustrates the processing of finding a point $\textbf{P}^*$ nearest to the given input point $\textbf{P}$.
+  The key feature of the SVO data structure is its ability to evaluate the hosted potential function. I.e., the <i>DDF voxelization behaves like a function itself.</i>
+</p>
+
+<p>
+  For the given point $\textbf{P} \in R^3$ and the voxel $V$, the evaluation of the field is done as follows. First, the point $\textbf{P}^*$ is derived by snapping the coordinates of the point $\textbf{P}$ to the voxel extents (if $\textbf{P} \in V$, then $\textbf{P}^* = \textbf{P}$). The following image illustrates snapping for a point $\textbf{P}$ resulted in the point $\textbf{P}^*$ nearest to the given input point.
 </p>
 
 <div align="center"><img src="../imgs/ddf_07.png"/></div>
@@ -261,13 +265,13 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 </div>
 
 <p>
-  In DDF, the splitting process is driven by the idea to capture the distance field's features. This means that even empty space might get fine voxelization if the distance field varies significantly there (see the following sketch).
+  In DDF, the splitting process is driven by the idea to <i>capture the distance field's features.</i> This means that even empty space might get fine voxelization if the distance field varies significantly there (see the following sketch). Recall than DDF is the Eulerian representation, so its aim is to represent a spatial field, not just a boundary, that is nothing but a level set $f = 0$.
 </p>
 
 <div align="center"><img src="../imgs/ddf_11.png"/></div>
 
 <p>
-  The precision of approximation is specified as the algorithm's input.
+  The precision of approximation is specified as the algorithm's input. Therefore, you can control the accuracy of the distance field approximation. Less accuracy means coarser voxelization.
 </p>
 
 <div align="center"><img src="../imgs/ddf_18.png"/></div>
@@ -275,17 +279,19 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <h2 id="voxel-ddf-domain">Function domain</h2>
 
 <p>
-  The domain of the potential function is a parallelepiped where the function is defined. Although the distance function is defined everywhere in the modeling space, it is instrumental to have a notion of the domain to explicitly outline the volume which is considered as the object. Once this object volume (the domain) is defined, the distance field can be attached either to the cells of this volume or to some extended volume. E.g., to produce anisotropic voxels (cubes), the voxelization should start from a bigger box which will surround the initial domain located in the center of this box.
+  The domain of the potential function is a parallelepiped where the function $f$ is defined. Although the distance function is defined everywhere in the modeling space, it is more practical to have a notion of the domain to explicitly outline the volume which is considered as the object. Once this object volume (the domain) is defined, the distance field can be attached to the cells of this volume's decomposition structure $H$. To produce anisotropic voxels (cubes), the voxelization should start from a bigger box which will surround the initial domain located in the center of this box.
 </p>
 
 <h2 id="voxel-ddf-polygonising">Polygonising scalar fields</h2>
 
 <p>
-  It is worth mentioning that the functional modeling techniques per se do not require any polygonising, even for visualization (to render the F-rep model one can apply ray tracing techniques). Still, to communicate the modeling results to the downstream engineering applications, there is a need to convert the functional representation of a shape to something more conventional. As the conversion from F-rep to B-rep is a challenging problem, the discrete representations should be considered at the first place.
+  It is worth mentioning that the functional modeling techniques per se do not require any polygonising, even for visualization (to render the F-rep model one can apply ray tracing techniques). Still, to communicate the modeling results to the downstream engineering applications, there is a need to convert the functional representation of a shape to something more conventional. Here we might want to switch from the Eulerian representation to Lagrangian one.
 </p>
 
+<div align="center"><img src="../imgs/geometry-in-fields-offsets.gif"/></div>
+
 <p>
-  The most popular and simple algorithm for polygonising scalar fields is marching cubes dated at 1987 <a href="../references.html#lorensen-1987">[Lorensen et al, 1987]</a>. A review of some other techniques, including spatial decomposition, surface tracking, and shrink-wrapping can be found in <a href="../references.html#araujo-2015">[Araujo et al, 2015]</a>.
+  The most popular and simple algorithm for polygonising scalar fields is marching cubes dated at 1987 <a href="../references.html#lorensen-1987">[Lorensen et al, 1987]</a>. A review of some other techniques, including spatial decomposition, surface tracking, and shrink-wrapping can be found in <a href="../references.html#araujo-2015">[De Araujo et al, 2015]</a>.
 </p>
 
 <p>
@@ -299,13 +305,13 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <div align="center"><img src="../imgs/ddf_12.png"/></div>
 
 <p>
-  And here is a closer look:
+  And here is a closer look together with the voxelization cells:
 </p>
 
 <div align="center"><img src="../imgs/ddf_13.png"/></div>
 
 <p>
-  As the alternative to the naive marching cubes approach, the adaptive dual contouring algorithm proposed by <a href="../references.html#ju-2002">[Ju et al, 2002]</a> can be considered.
+  As the alternative to the naive marching cubes approach, the adaptive dual contouring algorithm proposed by <a href="../references.html#ju-2002">[Ju et al, 2002]</a> can be considered (not available in Analysis Situs at the moment).
 </p>
 
 <h1 id="voxel-pc">Derived point clouds</h1>
@@ -330,6 +336,10 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 
 <div align="center"><img src="../imgs/ddf_16.png"/></div>
 
+<p>
+  Point cloud shape representation can be useful in machine learning applications as a compact shape descriptor.
+</p>
+
 <h2 id="voxel-pc-proj">Boundary projection</h2>
 
 <p>
@@ -342,7 +352,7 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 </ol>
 
 <p>
-  Although the local polygonising looks like a natural completion of the entire method, it appears that the voxel-to-surface mapping suffers from the following deficiencies. First, the marching cubes algorithm may sometimes end up with non-manifold or even disconnected surfaces. Second, the polygonised surface $s_1$ is only an approximation to the original boundary $s_0,$ thus the membership classification of the projected point $\textbf{P}_i^*$ remains undefined (the PMC test may return different results for the two surfaces).
+  Although the local polygonising looks like a natural completion to the entire method, it appears that the voxel-to-surface mapping suffers from the following deficiencies. First, the marching cubes algorithm may sometimes end up with non-manifold or even disconnected surfaces. Second, the polygonised surface $s_1$ is only an approximation to the original boundary $s_0,$ thus the membership classification of the projected point $\textbf{P}_i^*$ remains undefined (the PMC test may return different results for the two surfaces).
 </p>
 
 <div align="center">
@@ -350,7 +360,7 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 </div>
 
 <p>
-  To avoid the undefined PMC status, the initial surface $s_0$ should be used for the global projection (as opposed to the local projection on marching cubes’ result). The fast global projection is done with the help of BVH decomposition of the initial shape. It should be noted that the BVH decomposition is already available as it was used as a backbone of the distance function. Therefore, there is no extra overhead for the BVH construction.
+  To avoid the undefined PMC status, the initial surface $s_0$ should be used for the global projection (as opposed to the local projection on marching cubes’ result). The fast global projection is done with the help of BVH decomposition of the initial shape. It should be noted that the BVH decomposition is already available at this stage of computation as it is used as a backbone of the distance function. Therefore, there is no extra overhead for the BVH construction.
 </p>
 
 <h1 id="voxel-apps">Applications</h1>
@@ -360,7 +370,7 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 </p>
 
 <ol>
-<li>Modeling and Boolean operations.</li>
+<li>General-purpose modeling and Boolean operations. People tend to attribute the distance field approaches as much more reliable than traditional B-rep. However, we think that F-rep is still a boutique business.</li>
 <li>Material removal simulation <a href="../references.html#sullivan-2012">[Sullivan et al, 2012]</a>.</li>
 <li>Mesh repair, including shrink wrapping techniques.</li>
 <li>Constructing the derived part representations, such as adaptive point clouds, unstructured grids, etc. Such customizations concern the $r$ (reconstruction/polygonizing) operator of the DDF framework.</li>
@@ -371,6 +381,8 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
   Computing Boolean operations on implicit surfaces corresponds to an appropriate application of min/max operations on the input distance fields. The authors of <a href="../references.html#pavic-2010">[Pavic et al, 2010]</a> use the adaptive octrees to gain finer resolution in the spatial zones where the operands of a Boolean algorithm interfere. Therefore, the voxelization in this context is driven not by the distance function but by another property of the input (the customization of the DDF framework is related to the implicit function $f$).
 </p>
 
+<div align="center"><img src="../imgs/geometry-in-fields-bops.gif"/></div>
+
 <h1 id="voxel-strategies">Voxelization strategies</h1>
 
 <p>
@@ -379,7 +391,7 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 
 <ol>
   <li>Do you really need to capture some "potential function" (like distance) in the ambient space, or do you rather want to voxelize the existing Lagrangian shape representation?</li>
-  <li>Would you like to sacrifice some extra memory to store custom attributes in your voxels, such as pre-evaluation function values?</li>
+  <li>Would you like to sacrifice some extra memory to store custom attributes in your voxels, such as pre-evaluated function values (the scalars)?</li>
   <li>What would be the voxel splitting criterion? We have outlined one above, but it might be something completely custom.</li>
 </ol>
 
@@ -392,7 +404,7 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <h1 id="voxel-use">Use in Analysis Situs</h1>
 
 <p>
-  To build voxelization for the given CAD or mesh geometry, use the following Tcl command:
+  To build voxelization for the given CAD or mesh geometry, use the following Tcl command of Analysis Situs:
 </p>
 
 <div class="code">
