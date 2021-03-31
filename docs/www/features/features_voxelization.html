@@ -377,13 +377,15 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <li>Filling parts with lattices <a href="../references.html#pasko-2011">[Pasko et al, 2011]</a>.</li>
 </ol>
 
+<div align="center"><img src="../imgs/geometry-in-fields-bops.gif"/></div>
+
 <p>
   Computing Boolean operations on implicit surfaces corresponds to an appropriate application of min/max operations on the input distance fields. The authors of <a href="../references.html#pavic-2010">[Pavic et al, 2010]</a> use the adaptive octrees to gain finer resolution in the spatial zones where the operands of a Boolean algorithm interfere. Therefore, the voxelization in this context is driven not by the distance function but by another property of the input (the customization of the DDF framework is related to the implicit function $f$).
 </p>
 
-<div align="center"><img src="../imgs/geometry-in-fields-bops.gif"/></div>
+<div align="center"><img src="../imgs/geometry-in-fields-bop-expl.png"/></div>
 
-<h1 id="voxel-strategies">Voxelization strategies</h1>
+<h1 id="voxel-strategies">Splitting strategies</h1>
 
 <p>
   Although this article is mainly devoted to DDF, we should not forget that some applications do not really require the adaptively sampled distance fields. Instead, you might want to have just an adaptive voxelization, which is not obliged to capture all the features of the spatially varying distance field. Although the underlying sparse voxel octree (SVO) data structure remains largely the same, there are several questions you might want to think about to get the most efficient yet practical voxelization approach.
@@ -398,8 +400,16 @@ An SVO sub-hierarchy can be found in the octree by specifying its address as a s
 <div align="center"><img src="../imgs/ddf_19.png"/></div>
 
 <p>
-  One broadly used voxelization strategy consists is splitting up those spatial cells that contain real geometry, while leaving the outer and inner voxels intact. This way, we do not try to approximate the varying isosurfaces of the implicit distance fields and just discretize the existing shape's boundary.
+  One broadly used voxelization strategy consists is splitting up those spatial cells that contain real geometry, while leaving the outer and inner voxels intact. This way, we do not try to approximate the varying isosurfaces of the implicit distance fields and just discretize the existing shape's boundary. If the voxelization is done not taking into account the distance field approximation criterion, it could lead to very dense decompositions, like the one shown in the following figure (more than 1 million voxels):
 </p>
+
+<div align="center"><img src="../imgs/ddf_21.png"/></div>
+
+<p>
+  However, it might make little sense to decompose the planar regions where curvature is close to zero. This is where you might want to control the accuracy of the distance field approximation again (~35k voxels for the precision of 0.5 [mm]):
+</p>
+
+<div align="center"><img src="../imgs/ddf_20.png"/></div>
 
 <h1 id="voxel-use">Use in Analysis Situs</h1>
 
