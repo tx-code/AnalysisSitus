@@ -76,6 +76,7 @@ public:
     PID_MinCellSize,      //!< Min cell size.
     PID_MaxCellSize,      //!< Max cell size.
     PID_Precision,        //!< Precision.
+    PID_DistThreshold,    //!< Threshold for splitting up too large boundary voxels.
     PID_DepthLimit,       //!< Limit for the splitting depth.
     PID_IsUniform,        //!< Indicates whether the voxelization is uniform.
     PID_NumRaysSign,      //!< Number of rays to use for sign resolution.
@@ -275,6 +276,15 @@ public:
   //! \param[in] value value to set.
   asiData_EXPORT void
     SetPrecision(const double value);
+
+  //! \return distance threshold.
+  asiData_EXPORT double
+    GetDistThreshold() const;
+
+  //! Sets distance threshold.
+  //! \param[in] value value to set.
+  asiData_EXPORT void
+    SetDistThreshold(const double value);
 
   //! \return max splitting depth.
   asiData_EXPORT int
