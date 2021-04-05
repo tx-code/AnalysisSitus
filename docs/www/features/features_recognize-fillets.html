@@ -48,6 +48,18 @@
 <h1>Recognize fillets</h1>
 
 <p>
+  A chamfer/fillet is a feature in a CAD model that is applied to remove sharp edges from a part by replacing a sharp corner intersection of two faces with an angled (chamfer) or blending (fillet) face. Chamfers/fillets are very commonly used as finishing features on a model, and maintaining their definition is desirable when making edits to the part geometry.
+</p>
+
+<div align="center"><img src="../imgs/featrec_tools.png"/></div>
+
+<p>
+  The recognition procedure for fillets and chamfers should take into account neighborhood of each candidate face. Otherwise, the cases like a chamfered cube (see below) become problematic as there is no history information to rely on:
+</p>
+
+<div align="center"><img src="../imgs/featrec_chamfered-cube.png"/></div>
+
+<p>
   Use the following command to recognize fillet chains in the active part:
 </p>
 

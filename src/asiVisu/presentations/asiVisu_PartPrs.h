@@ -103,7 +103,8 @@ public:
     SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
                    const bool                     showBackface,
                    const bool                     showFaulty,
-                   const bool                     resolveCoincidentTopo) const;
+                   const bool                     resolveCoincidentTopo,
+                   const bool                     edgesAsTubes) const;
 
 public:
 

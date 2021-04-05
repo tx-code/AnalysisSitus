@@ -112,13 +112,6 @@ asiVisu_PartPrs::asiVisu_PartPrs(const Handle(ActAPI_INode)& N) : asiVisu_Prs(N)
   contour_pl->Actor()->GetProperty()->SetLineWidth(1.25f);
   contour_pl->Actor()->GetProperty()->SetColor(0.1, 0.1, 0.1); // Default color for edges w/o scalars.
   contour_pl->Actor()->SetPickable(0);
-  //
-  if ( partNode->GetRenderEdgesAsTubes() ) // Do not remove this if-statement
-                                           // to avoid troubles with tubes
-                                           // in headless mode.
-  {
-    contour_pl->Actor()->GetProperty()->RenderLinesAsTubesOn();
-  }
   contour_pl->Actor()->GetProperty()->LightingOff();
   //
   this->addPipeline        ( Pipeline_Contour, contour_pl );
@@ -219,10 +212,12 @@ void asiVisu_PartPrs::Colorize(const QColor& color) const
 //!                                  requested.
 //! \param[in] showFaulty            indicates whether to show faulty faces.
 //! \param[in] resolveCoincidentTopo indicates whether to resolve coincident topology.
+//! \param[in] edgesAsTubes          indicates whether to render edges as tubes.
 void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
                                      const bool                     showBackface,
                                      const bool                     showFaulty,
-                                     const bool                     resolveCoincidentTopo) const
+                                     const bool                     resolveCoincidentTopo,
+                                     const bool                     edgesAsTubes) const
 {
   Handle(asiVisu_PartPipeline)
     plMain = Handle(asiVisu_PartPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
@@ -244,6 +239,16 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
   else
   {
     plContour->Mapper()->SetResolveCoincidentTopologyToOff();
+  }
+
+  // Render edges as tubes or not.
+  if ( edgesAsTubes )
+  {
+    plContour->Actor()->GetProperty()->RenderLinesAsTubesOn();
+  }
+  else
+  {
+    plContour->Actor()->GetProperty()->RenderLinesAsTubesOff();
   }
 
   // Shading.
@@ -342,7 +347,8 @@ void asiVisu_PartPrs::beforeUpdatePipelines() const
   this->SetDisplayMode( (asiVisu_ShapeDisplayMode) N->GetDisplayMode(),
                          N->HasBackface(),
                          N->IsShowFaultyFaces(),
-                         N->IsResolveCoincidentTopo() );
+                         N->IsResolveCoincidentTopo(),
+                         N->GetRenderEdgesAsTubes() );
 }
 
 //-----------------------------------------------------------------------------

@@ -119,30 +119,31 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->SetTransformation(0., 0., 0., 0., 0., 0.);
 
   // Initialize Parameter flags.
-  this->InitParameter(PID_Name,             "Name",               "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_AutoAAG,          "Auto-construct AAG", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,               "Name",               "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_AutoAAG,            "Auto-construct AAG", "",               ParameterFlag_IsVisible, true);
   //
-  this->InitParameter(PID_GroupTrsf,        "Transformation",     "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTx,           "Tx",                 "Part_TX",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTy,           "Ty",                 "Part_TY",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTz,           "Tz",                 "Part_TZ",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRx,           "Rx",                 "Part_RX",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRy,           "Ry",                 "Part_RY",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRz,           "Rz",                 "Part_RZ",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupTrsf,          "Transformation",     "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTx,             "Tx",                 "Part_TX",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTy,             "Ty",                 "Part_TY",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTz,             "Tz",                 "Part_TZ",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRx,             "Rx",                 "Part_RX",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRy,             "Ry",                 "Part_RY",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRz,             "Rz",                 "Part_RZ",        ParameterFlag_IsVisible, true);
   //
-  this->InitParameter(PID_GroupTess,        "Tessellation",       "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TessLinDefl,      "Linear deflection",  "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TessAngDefl,      "Angular deflection", "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_KeepTessParams,   "Keep parameters",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupTess,          "Tessellation",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TessLinDefl,        "Linear deflection",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TessAngDefl,        "Angular deflection", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_KeepTessParams,     "Keep parameters",    "",               ParameterFlag_IsVisible, true);
   //
-  this->InitParameter(PID_GroupPrs,         "Presentation",       "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_DisplayMode,      "Display mode",       "PrsDisplayMode", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_UseScalars,       "Use scalars",        "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Color,            "Color",              "PrsCustomColor", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasVertices,      "Show vertices",      "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasBackface,      "Show backface",      "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_ShowFaultyFaces,  "Show faulty faces",  "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCoincidentTopo, "Resolve coin. topo", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupPrs,           "Presentation",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DisplayMode,        "Display mode",       "PrsDisplayMode", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_UseScalars,         "Use scalars",        "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,              "Color",              "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasVertices,        "Show vertices",      "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasBackface,        "Show backface",      "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ShowFaultyFaces,    "Show faulty faces",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCoincidentTopo,   "Resolve coin. topo", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_RenderEdgesAsTubes, "Edges as tubes",     "",               ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
