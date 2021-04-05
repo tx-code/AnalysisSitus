@@ -52,9 +52,23 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1 id="toc-feat-rec">Feature recognition in nutshell</h1>
+<h1 id="toc-feat-rec">CAD feature recognition in nutshell</h1>
 
 <div class="toc-panel"><div id="toc"></div></div>
+
+<p>
+  Compared to B-rep faces, features are higher level entities that model the correspondence between design information and manufacturing activities. For example, while CAD data encompasses a model's shape, features communicate how a specific artifact might be manufactured or assembled <a href="../references.html#regli-1995">[Regli, 1995]</a>.
+</p>
+
+<p>
+  Feature recognition provides a communication medium between CAD and manufacturing applications. Sometimes, feature recognition comes up as an integral part of solid modeling systems and kernels. However, even after decades of research, there is no any conventional systematic approach to feature recognition, because it remains largely application-dependent. We are mainly interested in the material removal features that are common for subtractive technologies, such as milling. At the same time, as practice reveals, a feature recognition framework that serves as a backbone for application-specific feature recognition tends to be abstract enough to stay independent from any particular application.
+</p>
+
+<p>
+  This section covers the principal CAD feature recognition approaches available in Analysis Situs. Read more on the recognition of specific features in the follow up sections.
+</p>
+
+<h2 id="toc-feat-rec-methods">Feature recognition approaches</h2>
 
 <p>
   We use two approaches to feature recognition in CAD models:
