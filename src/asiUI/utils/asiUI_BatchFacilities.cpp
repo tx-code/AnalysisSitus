@@ -31,6 +31,66 @@
 // Own include
 #include <asiUI_BatchFacilities.h>
 
+// asiUI includes
+#include <asiUI_IV.h>
+#include <asiUI_Logger.h>
+
+//-----------------------------------------------------------------------------
+
+asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initBatch,
+                                             const bool initInterp,
+                                             const bool overrideTclChannels)
+//
+: Standard_Transient()
+{
+  // Create Data Model.
+  this->Model = new asiEngine_Model;
+  if ( !Model->NewEmpty() )
+  {
+    Standard_ProgramError::Raise("Cannot create Data Model");
+  }
+  //
+  this->Model->DisableTransactions();
+  {
+    this->Model->Populate();
+  }
+  this->Model->EnableTransactions();
+
+  if ( initBatch )
+  {
+    // Initialize logger.
+    this->Logger = new asiAlgo_Logger;
+    this->Logger->AppendStream(&std::cout);
+
+    // Initialize progress notifier.
+    this->Progress = ActAPI_ProgressEntry( new asiUI_BatchNotifier(this->Logger) );
+
+    // Prepare presentation manager for offscreen rendering.
+    vtkSmartPointer<asiVisu_PrsManager>
+            prsMgr3d = vtkSmartPointer<asiVisu_PrsManager>::New();
+    //
+    prsMgr3d->Initialize(nullptr, true); // Offscreen rendering mode.
+
+    // Resize.
+    prsMgr3d->GetRenderWindow()->SetSize(1024, 1024);
+
+    // Initialize imperative plotter.
+    this->Plotter = new asiUI_IV(this->Model, prsMgr3d, nullptr, nullptr);
+
+    // Construct the interpreter
+    if ( initInterp )
+    {
+      this->Interp = new asiTcl_Interp;
+      this->Interp->Init(overrideTclChannels);
+      this->Interp->SetModel(this->Model);
+      this->Interp->SetProgress(this->Progress);
+      this->Interp->SetPlotter(this->Plotter);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiUI_BatchFacilities)
   asiUI_BatchFacilities::Instance(const bool initBatch,
                                   const bool initInterp,

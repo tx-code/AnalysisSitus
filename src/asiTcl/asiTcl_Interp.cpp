@@ -493,6 +493,7 @@ void asiTcl_Interp::GetAvailableCommands(std::vector<asiTcl_CommandInfo>& comman
     std::string commandsInGroupStr;
     try
     {
+      OCC_CATCH_SIGNALS
       commandsInGroupStr = Tcl_GetVar2(m_pInterp, "asi_Groups", m_plugins[p].ToCString(),
                                        TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
     }

@@ -94,6 +94,7 @@
 #include <vtkAutoInit.h>
 
 // OCCT includes
+#include <OSD.hxx>
 #include <OSD_Environment.hxx>
 
 // Qt includes
@@ -148,6 +149,8 @@ int main(int argc, char** argv)
     QSurfaceFormat::setDefaultFormat(fmt);
   }
 #endif
+
+  OSD::SetSignal();
 
   // Construct Qt application.
   QApplication app(argc, argv);
@@ -384,24 +387,24 @@ int main(int, char *[])
   std::cout << "Hello, offscreen rendering!" << std::endl;
 
    // Create a sphere
-   vtkSmartPointer<vtkSphereSource> sphereSource = 
+   vtkSmartPointer<vtkSphereSource> sphereSource =
      vtkSmartPointer<vtkSphereSource>::New();
 
   // Create a mapper and actor
-  vtkSmartPointer<vtkPolyDataMapper> mapper = 
+  vtkSmartPointer<vtkPolyDataMapper> mapper =
     vtkSmartPointer<vtkPolyDataMapper>::New();
   mapper->SetInputConnection(sphereSource->GetOutputPort());
 
-  vtkSmartPointer<vtkActor> actor = 
+  vtkSmartPointer<vtkActor> actor =
     vtkSmartPointer<vtkActor>::New();
   actor->SetMapper(mapper);
 
   // A renderer and render window
-  vtkSmartPointer<vtkRenderer> renderer = 
+  vtkSmartPointer<vtkRenderer> renderer =
     vtkSmartPointer<vtkRenderer>::New();
-  vtkSmartPointer<vtkRenderWindow> renderWindow = 
+  vtkSmartPointer<vtkRenderWindow> renderWindow =
     vtkSmartPointer<vtkRenderWindow>::New();
-  renderWindow->SetOffScreenRendering( 1 ); 
+  renderWindow->SetOffScreenRendering( 1 );
   renderWindow->AddRenderer(renderer);
 
   // Add the actors to the scene
@@ -410,12 +413,12 @@ int main(int, char *[])
 
   renderWindow->Render();
 
-  vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter = 
+  vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter =
     vtkSmartPointer<vtkWindowToImageFilter>::New();
   windowToImageFilter->SetInput(renderWindow);
   windowToImageFilter->Update();
 
-  vtkSmartPointer<vtkPNGWriter> writer = 
+  vtkSmartPointer<vtkPNGWriter> writer =
     vtkSmartPointer<vtkPNGWriter>::New();
   writer->SetFileName("screenshot.png");
   writer->SetInputConnection(windowToImageFilter->GetOutputPort());

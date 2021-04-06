@@ -472,7 +472,7 @@ void exe_MainWindow::createDockWindows()
   std::cout << "Looking for plugins at "
             << pluginDirStr.ToCString() << std::endl;
   //
-  QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+  QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll" << "*.so", QDir::Files);
   //
   foreach ( QString cmdLib, cmdLibs )
   {

@@ -77,7 +77,10 @@ asiTcl_Plugin::Status
 #ifdef _WIN32
   libFilename = pluginName;
 #else
-  libFilename = "lib"; libFilename += pluginName; libFilename += ".so";
+  if ( !pluginName.StartsWith("lib") )
+    libFilename = "lib";
+
+  libFilename += pluginName; libFilename += ".so";
 #endif
 
   OSD_SharedLibrary SharedLibrary( libFilename.ToCString() );
@@ -95,6 +98,7 @@ asiTcl_Plugin::Status
                                                         << libFilename << dlError);
 
     std::cout << "Error: cannot load " << libFilename.ToCString() << std::endl;
+    std::cout << "dlError: " << dlError.c_str() << std::endl;
     return Status_Failed;
   }
 
@@ -113,10 +117,22 @@ asiTcl_Plugin::Status
   void (*fp) (const Handle(asiTcl_Interp)&, const Handle(Standard_Transient)& ) = nullptr;
   fp = (void (*)(const Handle(asiTcl_Interp)&, const Handle(Standard_Transient)&)) f;
 
+  // Call
+  try
+  {
+    (*fp) (interp, data);
+  }
+  catch ( ... )
+  {
+    std::cout << "Failed to invoke entry-point function PLUGINFACTORY in "
+              << libFilename.ToCString()
+              << ", so skipped as a non-plugin lib."
+              << std::endl;
+    //
+    return Status_Failed;
+  }
+
   // Let interpreter store all loaded plugins
   interp->m_plugins.push_back(pluginName);
-
-  // Call
-  (*fp) (interp, data);
   return Status_OK;
 }

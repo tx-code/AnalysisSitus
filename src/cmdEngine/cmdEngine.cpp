@@ -36,6 +36,7 @@
 
 // asiUI includes
 #include <asiUI_DialogCommands.h>
+#include <asiUI_IV.h>
 
 //-----------------------------------------------------------------------------
 
