@@ -113,7 +113,7 @@ void exe_CommandServer::onStarted()
 
   // Lookup for custom plugins and try to load them.
   QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
-  TCollection_AsciiString pluginDirStr = QStr2AsciiStr( pluginDir.absolutePath() );
+  TCollection_AsciiString pluginDirStr = pluginDir.absolutePath().toLatin1().data();
   //
   std::cout << "Looking for plugins at "
             << pluginDirStr.ToCString() << "..." << std::endl;
@@ -122,7 +122,7 @@ void exe_CommandServer::onStarted()
   //
   foreach ( QString cmdLib, cmdLibs )
   {
-    TCollection_AsciiString cmdLibName = QStr2AsciiStr( cmdLib.section(".", 0, 0) );
+    TCollection_AsciiString cmdLibName = cmdLib.section(".", 0, 0).toLatin1().data();
     //
     m_progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
                                                 << cmdLibName);
@@ -167,7 +167,7 @@ void exe_CommandServer::initSocket()
 void exe_CommandServer::processDatagram(QNetworkDatagram* pDatagram)
 {
   QByteArray data = pDatagram->data();
-  TCollection_AsciiString cmdString = QStr2AsciiStr( QString::fromLatin1(data) );
+  TCollection_AsciiString cmdString = QString::fromLatin1(data).toLatin1().data();
 
   std::cout << "Received datagram: " << cmdString.ToCString() << std::endl;
 

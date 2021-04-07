@@ -113,7 +113,7 @@ DWORD WINAPI Thread_Interp(LPVOID)
 
   // Lookup for custom plugins and try to load them.
   QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
-  TCollection_AsciiString pluginDirStr = QStr2AsciiStr( pluginDir.absolutePath() );
+  TCollection_AsciiString pluginDirStr = pluginDir.absolutePath().toLatin1().data();
   //
   std::cout << "Looking for plugins at "
             << pluginDirStr.ToCString() << std::endl;
@@ -122,7 +122,7 @@ DWORD WINAPI Thread_Interp(LPVOID)
   //
   foreach ( QString cmdLib, cmdLibs )
   {
-    TCollection_AsciiString cmdLibName = QStr2AsciiStr( cmdLib.section(".", 0, 0) );
+    TCollection_AsciiString cmdLibName = cmdLib.section(".", 0, 0).toLatin1().data();
     //
     cf->Progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
                                                   << cmdLibName);
