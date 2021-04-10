@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: anatomy of CAD feature</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/anatomy of CAD feature
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="../references.html">References</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-anatomy-of-feature">Anatomy of CAD feature</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-anatomy-of-feature-pmoi">Packed map of integers</h2>
+
+<p>
+    Analysis Situs expresses all CAD features with unordered sets of indices addressing the corresponding B-rep faces. The 1-based index is a king in that software. Putting the indices together, we can reference a group of boundary elements in a persistent (serializable) way. While there is a standard collection in C++ for exactly that matter (std::set), we have not used it from the very beginning and preferred what OpenCascade provided. Basically, the kernel comes up with all kinds of collections you might want to have in your code, and some of these data structures are surprisingly good. One such is TColStd_PackedMapOfInteger (PMOI). This data structure provides a memory-efficient way of managing integer sets encoded in a bitwise manner.
+</p>
+
+<p>
+    The PMOI data structure utilizes the old idea of turning a single integer value (its 32 bits) into a bitmask that can be seen as a set of 32 potential integers. All you need is to enumerate all bits from right to left, starting from zero and provide the necessary bitwise operations. Like this, if the N-th bit is turned on, then your set is said to contain an integer value N.
+</p>
+
+<div align="center"><img src="../imgs/pmoi_01.png"/></div>
+
+<p>
+    Let MASK_LOW encode the decimal 31 value which is the max shift we can take in the range of 32 bits available for a single integer value. Each value that’s gonna be stored in the packed map is low-masked first so that we are sure not to violate the boundary constraint.
+</p>
+
+<pre class="code">
+1 & MASK_LOW = 1
+2 & MASK_LOW = 2
+...
+31 & MASK_LOW = 31
+32 & MASK_LOW = 0
+33 & MASK_LOW = 1
+...
+</pre>
+
+<p>
+  It's pretty obvious that one integer is not enough. Actually, with low-masking alone, we won’t be able to distinguish 1 from 32, 2 from 33 and so on. Therefore, this whole principle should be extended somehow dynamically, and that is something we can easily do. Take the number 33 as an example in its binary representation:
+</p>
+
+<pre class="code">
+1 0 0 0 0 1
+</pre>
+
+<p>
+  If we right-shift this value by 5 bitwise positions (and 5 is the length of our low mask), we get the value of 1 in the decimal system. The same applies to all numbers up to 1 1 1 1 1 1 which is the decimal 63. So this shifting by 5 bitwise positions gives as the index of a <i>bucket</i> in the map. And we can have as many buckets as we want, because they are all going to be allocated from the heap memory.
+</p>
+
+<p>
+  But memory is less of a problem for the feature recognition scenarios. Why we use PMOI is basically because it provides set theory logical operators: unite, difference and intersection.
+</p>
+
+<h2 id="toc-anatomy-of-feature-debug">Debugging considerations</h2>
+
+<p>
+    There are pros and cons to using non-standard collections, of course. One advantage exploited by Analysis Situs is the compatibility of PMOI with the OCAF framework. The packed map has got a standard attribute in there, so we don't have to extend the OCAF framework of OpenCascade, which is good news by itself. The drawback, however, is that such a custom type is clearly a foreigner to your IDE and debugger. As a result, you could not benefit from handy embedded "watchers" in debugging sessions. How would you know which indices are held within your packed map while standing on a breakpoint in a tedious debugging session?
+</p>
+
+<p class="note">
+    In what follows, asiAlgo_Feature is the type definition alias for TColStd_PackedMapOfInteger.
+</p>
+
+<p>
+    The utilization of conventional watching toolkit, such as .natvis files is hopeless since we have to decode the bitmask, and that does not look manageable with declarative XML-ish approaches proposed by Visual Studio.
+</p>
+
+<p>
+    What we can do, though, is we can develop a specific function to dump the contents of a packed map in the debugging console and then invoke that function right from within the debugging session. Consider the following chunk of code:
+</p>
+
+<pre class="code">
+class asiAlgo
+{
+  inline void Dump(const asiAlgo_Feature& feature)
+  {
+    for ( asiAlgo_Feature::Iterator fit(feature); fit.More(); fit.Next() )
+      std::cout << fit.Key() << " ";
+    std::cout << std::endl;
+  }
+}
+</pre>
+
+<p>
+  This code is a bit problematic though. Since we have an inline function, the chances are the compiler is going to "optimize" that function simply by wiping it out from the built library. To not allow the compiler doing that, we have to expose symbols in the corresponding dynamic library, so that this function becomes part of our module's API. We can use printing to OutputDebugStringW to see the diagnostic dump right in the Command Window of Visual Studio:
+</p>
+
+<pre class="code">
+void asiAlgo::Dump(const asiAlgo_Feature& feature)
+{
+  std::wostringstream sstream;
+  
+  for ( asiAlgo_Feature::Iterator fit(feature); fit.More(); fit.Next() )
+    sstream << fit.Key() << " ";
+  
+  sstream << std::endl;
+  
+  // Dump the debug (Windows-only) and standard outputs.
+#ifdef _WIN32
+  OutputDebugStringW( sstream.str().c_str() );
+#endif
+  std::cout << sstream.str().c_str();
+}
+</pre>
+
+<p>
+    To take advantage of this function, call the following line from your debugging terminal while standing on a breakpoint (we assume that there is a variable named <span class="code-inline">feature</span> of PMOI type that you want to inspect):
+</p>
+
+<pre class="code">
+> ? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)
+</pre>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

@@ -249,6 +249,7 @@ set (features_CPP_FILES
   features/asiAlgo_CheckDihedralAngle.cpp
   features/asiAlgo_ExtractFeatures.cpp
   features/asiAlgo_ExtractFeaturesResult.cpp
+  features/asiAlgo_FeatureFaces.cpp
   features/asiAlgo_Isomorphism.cpp
   features/asiAlgo_RecognizeIsolated.cpp
   features/asiAlgo_Recognizer.cpp
