@@ -1824,7 +1824,7 @@ int RE_Topologize(const Handle(asiTcl_Interp)& interp,
                                                        << numFaces);
 
   // Tolerance for projection.
-  const double projTol = ( (argc == 2) ? 0.001 : atof( argv[2] ) );
+  const double projTol = ( (argc <= 2) ? 0.001 : atof( argv[2] ) );
 
   // Get triangulation.
   Handle(Poly_Triangulation)
@@ -1850,8 +1850,8 @@ int RE_Topologize(const Handle(asiTcl_Interp)& interp,
                                                         << QStr2AsciiStr(qimEnv) );
 
   // Save triangulation to feed Instant Meshes.
-  TCollection_AsciiString imInput  = "C:/users/ssv/desktop/imInput.ply";
-  TCollection_AsciiString imOutput = "C:/users/ssv/desktop/imOutput.obj";
+  TCollection_AsciiString imInput  = "C:/users/user/desktop/imInput.ply";
+  TCollection_AsciiString imOutput = "C:/users/user/desktop/imOutput.obj";
   //
   if ( !asiAlgo_Utils::WritePly( tris, imInput, interp->GetProgress() ) )
   {

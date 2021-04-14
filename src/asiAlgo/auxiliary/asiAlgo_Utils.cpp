@@ -3419,7 +3419,7 @@ TopoDS_Vertex asiAlgo_Utils::GetCommonVertex(const TopoDS_Shape& F,
 {
   TopoDS_Vertex commonVertex;
 
-  // Extract vertices for faces.
+  // Extract vertices.
   TopTools_IndexedMapOfShape VerticesF, VerticesG, VerticesH;
   TopExp::MapShapes(F, TopAbs_VERTEX, VerticesF);
   TopExp::MapShapes(G, TopAbs_VERTEX, VerticesG);
@@ -3442,6 +3442,41 @@ TopoDS_Vertex asiAlgo_Utils::GetCommonVertex(const TopoDS_Shape& F,
             isDone = true;
             break;
           }
+        }
+      }
+      if ( isDone ) break;
+    }
+    if ( isDone ) break;
+  }
+  return commonVertex;
+}
+
+//-----------------------------------------------------------------------------
+
+TopoDS_Vertex
+  asiAlgo_Utils::GetCommonVertex(const TopoDS_Shape& F,
+                                 const TopoDS_Shape& G)
+{
+  TopoDS_Vertex commonVertex;
+
+  // Extract vertices.
+  TopTools_IndexedMapOfShape VerticesF, VerticesG;
+  TopExp::MapShapes(F, TopAbs_VERTEX, VerticesF);
+  TopExp::MapShapes(G, TopAbs_VERTEX, VerticesG);
+
+  // Collect common vertices.
+  bool isDone = false;
+  for ( int vf = 1; vf <= VerticesF.Extent(); ++vf )
+  {
+    for ( int vg = 1; vg <= VerticesG.Extent(); ++vg )
+    {
+      if ( VerticesF(vf).IsSame( VerticesG(vg) ) )
+      {
+        if ( commonVertex.IsNull() ) // A single common vertex is returned.
+        {
+          commonVertex = TopoDS::Vertex( VerticesF(vf) );
+          isDone = true;
+          break;
         }
       }
       if ( isDone ) break;

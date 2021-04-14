@@ -3325,6 +3325,88 @@ int ENGINE_FindIsomorphisms(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_PrintAttrs(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  // Get part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::cf->Model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  Handle(asiAlgo_AAG) G = partNode->GetAAG();
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( cmdEngine::cf->IsKind( STANDARD_TYPE(asiUI_CommonFacilities) ) )
+  {
+    Handle(asiUI_CommonFacilities)
+      uicf = Handle(asiUI_CommonFacilities)::DownCast(cmdEngine::cf);
+
+    asiEngine_Part( uicf->Model,
+                    uicf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
+
+  // Dump attributes for each face.
+  TCollection_AsciiString lbl;
+  //
+  for ( asiAlgo_Feature::Iterator fit(selected); fit.More(); fit.Next() )
+  {
+    const int f = fit.Key();
+
+    if ( !f || !G->HasFace(f) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Face %1 looks invalid."
+                                                          << f);
+      return TCL_ERROR;
+    }
+
+    // Dump all nodal attributes associated with the face in question.
+    if ( !G->HasNodeAttributes(f) )
+      continue;
+    //
+    const asiAlgo_AAG::t_attr_set& attrs = G->GetNodeAttributes(f);
+    //
+    lbl += "\n";
+    lbl += "Face ";
+    lbl += f;
+    //
+    for ( asiAlgo_AAG::t_attr_set::Iterator ait(attrs); ait.More(); ait.Next() )
+    {
+      const Handle(asiAlgo_FeatureAttr)& attr = ait.GetAttr();
+
+      lbl += "\n + ";
+      lbl += attr->DynamicType()->Name();
+
+      TCollection_AsciiString inlineDump = attr->DumpInline();
+
+      if ( !inlineDump.IsEmpty() )
+      {
+        lbl += " // ";
+        lbl += inlineDump;
+      }
+    }
+  }
+  //
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << lbl);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3679,4 +3761,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     //
     __FILE__, group, ENGINE_FindIsomorphisms);
 
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("print-attrs",
+    //
+    "print-attrs -fid <faceId>\n"
+    "\t Prints all AAG attributes available for the face with the given ID\n"
+    "\t or the interactively selected faces.",
+    //
+    __FILE__, group, ENGINE_PrintAttrs);
 }

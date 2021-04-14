@@ -1129,15 +1129,23 @@ namespace asiAlgo_Utils
                    const TopoDS_Vertex&        V,
                    TopTools_IndexedMapOfShape& edges);
 
-  //! Gets common (shared) vertex between the three passed faces.
-  //! \param[in] F first face.
-  //! \param[in] G second face.
-  //! \param[in] H third face.
-  //! \return first common edge.
+  //! Gets common (shared) vertex between the three passed shapes.
+  //! \param[in] F first shape.
+  //! \param[in] G second shape.
+  //! \param[in] H third shape.
+  //! \return first common vertex.
   asiAlgo_EXPORT TopoDS_Vertex
     GetCommonVertex(const TopoDS_Shape& F,
                     const TopoDS_Shape& G,
                     const TopoDS_Shape& H);
+
+  //! Gets common (shared) vertex between the two passed shapes.
+  //! \param[in] F first shape.
+  //! \param[in] G second shape.
+  //! \return first common vertex.
+  asiAlgo_EXPORT TopoDS_Vertex
+    GetCommonVertex(const TopoDS_Shape& F,
+                    const TopoDS_Shape& G);
 
   //! Gathers all faces which are neighbors to `F` through the edge `E`.
   //! \param[in]  shape master shape.
