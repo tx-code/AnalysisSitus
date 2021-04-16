@@ -80,7 +80,7 @@ asiUI_DialogFindFace::asiUI_DialogFindFace(const Handle(asiEngine_Model)&       
   // Editors.
   m_widgets.pFaceIdSel = new QComboBox();
   //
-  m_widgets.pFaceIdSel->addItem("Serial index",   FaceIdType_Serial);
+  m_widgets.pFaceIdSel->addItem("Serial indices", FaceIdType_Serial);
   m_widgets.pFaceIdSel->addItem("Memory address", FaceIdType_Transient);
   m_widgets.pFaceIdSel->addItem("Name",           FaceIdType_Persistent);
   //

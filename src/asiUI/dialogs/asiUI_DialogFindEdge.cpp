@@ -110,13 +110,15 @@ asiUI_DialogFindEdge::asiUI_DialogFindEdge(const Handle(asiEngine_Model)&       
   QGridLayout* pGrid = new QGridLayout(pGroup);
   pGrid->setSpacing(5);
   //
-  pGrid->addWidget(new QLabel("Use edge address:"),     0, 0);
-  pGrid->addWidget(new QLabel("Edge index (1-based):"), 1, 0);
-  pGrid->addWidget(new QLabel("Edge address:"),         2, 0);
+  pGrid->addWidget(new QLabel("Use edge address:"),       0, 0);
+  pGrid->addWidget(new QLabel("Edge indices (1-based):"), 1, 0);
+  pGrid->addWidget(new QLabel("Edge address:"),           2, 0);
   //
   pGrid->addWidget(m_widgets.pUseAddress, 0, 1);
   pGrid->addWidget(m_widgets.pIndex,      1, 1);
   pGrid->addWidget(m_widgets.pAddress,    2, 1);
+  //
+  m_widgets.pIndex->setToolTip("Ex: \"10 15 42\" or \"10, 15, 42\"");
   //
   pGrid->setColumnStretch(0, 0);
   pGrid->setColumnStretch(1, 1);
@@ -194,17 +196,22 @@ void asiUI_DialogFindEdge::onFind()
   }
   else
   {
-    // Read user inputs
-    const int edge_id = m_widgets.pIndex->text().toInt();
+    QStringList eidList = m_widgets.pIndex->text().split(QRegExp("[\\s,]+"), QString::SkipEmptyParts);
 
-    if ( edge_id > 0 && edge_id <= edges.Extent() )
+    for ( const auto& eidStr : eidList )
     {
-      const TopoDS_Shape& edge = edges.FindKey(edge_id);
-      found.Add(edge);
-    }
-    else
-    {
-      std::cout << "Error: input index is out of range" << std::endl;
+      // Read user inputs
+      const int edge_id = eidStr.toInt();
+
+      if ( edge_id > 0 && edge_id <= edges.Extent() )
+      {
+        const TopoDS_Shape& edge = edges.FindKey(edge_id);
+        found.Add(edge);
+      }
+      else
+      {
+        std::cout << "Error: input index is out of range" << std::endl;
+      }
     }
   }
 

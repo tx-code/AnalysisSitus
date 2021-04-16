@@ -206,7 +206,30 @@ namespace asiAlgo_AAGIterationRule
 
   public:
 
+    //! Iteration rule starting from a seed face. This rule
+    //! is used at iterator initialization.
     bool IsBlocking(const t_topoId asiAlgo_NotUsed(seed)) { return false; }
+
+    //! Iteration rule with two cursors: the `current` cursor moves
+    //! slowly and points to a current seed face, while the `next`
+    //! cursor iterates all the neighbors of the `current`. Once all
+    //! the neighbors are visited, the `current` cursors moves to
+    //! the next unvisited face.
+    //!
+    //! The iteration is done without repetitions, so if a face `X`
+    //! was iterated as a neighbor of a face `Y`, it's not going to
+    //! be iterated again for another face `Z` even if `X` and
+    //! `Z` faces are topological neighbors.
+    //!
+    //! Each `next` face is guaranteed to be visited as a `current`
+    //! at some earlier stage. If you'd like just to scan your model
+    //! without much care of the iteration order, do not use the `current`
+    //! cursor and check the `next` cursor only.
+    //!
+    //! \param[in] current 1-based ID of the current face.
+    //! \param[in] next    1-based ID of the next current's unvisited
+    //!                    neighbor face.
+    //! \return true if further iteration should be stopped.
     bool IsBlocking(const t_topoId asiAlgo_NotUsed(current),
                     const t_topoId asiAlgo_NotUsed(next)) { return false; }
   };

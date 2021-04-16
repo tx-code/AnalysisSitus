@@ -124,8 +124,7 @@ int asiVisu_PDomainSource::RequestData(vtkInformation*        request,
 {
   if ( m_face.IsNull() )
   {
-    vtkErrorMacro( << "Invalid domain: nullptr face" );
-    return 0;
+    return 1;
   }
 
   /* ==============================
