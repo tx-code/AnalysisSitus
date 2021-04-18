@@ -60,6 +60,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepOffset.hxx>
 #include <BRepOffset_MakeOffset.hxx>
@@ -1473,6 +1474,78 @@ int ENGINE_MakeFillet(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_MakeChamfer(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get size.
+  const double s = atof(argv[1]);
+
+  // Get part.
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+  TopoDS_Shape             partSh   = partNode->GetShape();
+
+  // Attempt to get the highlighted sub-shapes.
+  TColStd_PackedMapOfInteger edgeIds;
+  //
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  {
+    asiEngine_Part PartAPI( M,
+                            cmdEngine::cf->ViewerPart->PrsMgr(),
+                            interp->GetProgress(),
+                            interp->GetPlotter() );
+    //
+    PartAPI.GetHighlightedEdges(edgeIds);
+  }
+
+  // Initialize blending operator.
+  BRepFilletAPI_MakeChamfer mkChamfer(partSh);
+  //
+  for ( TColStd_MapIteratorOfPackedMapOfInteger eit(edgeIds); eit.More(); eit.Next() )
+  {
+    const int edgeId = eit.Key();
+
+    // Get edge to blend.
+    const TopoDS_Edge&
+      edge = TopoDS::Edge( partNode->GetAAG()->RequestMapOfEdges()(edgeId) );
+
+    // Add edge to the blending operator.
+    mkChamfer.Add(s, edge);
+  }
+
+  // Perform blending.
+  mkChamfer.Build();
+  //
+  if ( !mkChamfer.IsDone() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Chamfering not done.");
+    return TCL_OK;
+  }
+
+  // Get result and update part.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part(cmdEngine::model).Update( mkChamfer.Shape() );
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
                                  int                          argc,
                                  const char**                 argv)
@@ -1931,6 +2004,14 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t Blends the selected edges with the given radius.",
     //
     __FILE__, group, ENGINE_MakeFillet);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("make-chamfer",
+    //
+    "make-chamfer <size>\n"
+    "\t Chamfers the selected edges with the given size.",
+    //
+    __FILE__, group, ENGINE_MakeChamfer);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-triangulation-obb",

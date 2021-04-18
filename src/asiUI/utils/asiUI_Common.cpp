@@ -160,11 +160,18 @@ QString asiUI_Common::selectFile(const QString&       filter,
   QString dir;
   QString filename;
 
-  // Open or save
-  if ( action == OpenSaveAction_Open )
-    filename = QFileDialog::getOpenFileName(nullptr, openTitle, dir, filter, nullptr);
-  else
-    filename = QFileDialog::getSaveFileName(nullptr, saveTitle, dir, filter, nullptr);
+  try
+  {
+    // Open or save
+    if ( action == OpenSaveAction_Open )
+      filename = QFileDialog::getOpenFileName(nullptr, openTitle, dir, filter, nullptr);
+    else
+      filename = QFileDialog::getSaveFileName(nullptr, saveTitle, dir, filter, nullptr);
+  }
+  catch ( ... )
+  {
+    return "";
+  }
 
   return filename;
 }
