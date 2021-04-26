@@ -315,7 +315,7 @@ void asiUI_ViewerDomain::onDomainPicked()
   TITLE += l2;
   TITLE += "]";
 
-  TITLE += "Location: ";
+  TITLE += "\nLocation: ";
   TITLE += asiAlgo_Utils::LocationToString( edge.Location() );
   TITLE += "\n";
 
