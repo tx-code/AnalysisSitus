@@ -613,7 +613,7 @@ void asiAlgo_Utils::Json::ReadFeatures(void*                         pJsonBlock,
   for ( t_jsonValue::ValueIterator it = pJsonObj->Begin();
         it != pJsonObj->End(); it++ )
   {
-    fraAlgo_Feature feature;
+    asiAlgo_Feature feature;
     t_jsonArray arr = it->GetArray();
     ReadFeature(&arr, feature);
     features.push_back(feature);
