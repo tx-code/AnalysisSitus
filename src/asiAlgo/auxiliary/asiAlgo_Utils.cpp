@@ -39,6 +39,7 @@
 // asiAlgo includes
 #include <asiAlgo_BuildCoonsSurf.h>
 #include <asiAlgo_ClassifyPointFace.h>
+#include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_Timer.h>
 
@@ -130,6 +131,15 @@
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+
+// Rapidjson includes (should be hidden in cpp)
+#if defined USE_RAPIDJSON
+  #include <rapidjson/document.h>
+
+  typedef rapidjson::Document::Array     t_jsonArray;
+  typedef rapidjson::Document::ValueType t_jsonValue;
+  typedef rapidjson::Document::Object    t_jsonObject;
+#endif
 
 // Eigen includes
 #ifdef _WIN32
@@ -569,6 +579,86 @@ std::string asiAlgo_Utils::Env::AsiTestDescr()
 std::string asiAlgo_Utils::Env::GetVariable(const char* varName)
 {
   return OSD_Environment(varName).Value().ToCString();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::Json::ReadFeature(void*            pJsonBlock,
+                                      asiAlgo_Feature& feature)
+{
+#if defined USE_RAPIDJSON
+  t_jsonArray*
+    jsonBlock = reinterpret_cast<t_jsonArray*>(pJsonBlock);
+
+  for ( t_jsonValue::ValueIterator vit = jsonBlock->Begin();
+        vit != jsonBlock->End(); vit++ )
+  {
+    feature.Add( vit->GetInt() );
+  }
+#else
+  (void) pJsonBlock;
+  (void) feature;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::Json::ReadFeatures(void*                         pJsonBlock,
+                                       std::vector<asiAlgo_Feature>& features)
+{
+#if defined USE_RAPIDJSON
+  t_jsonValue*
+    pJsonObj = reinterpret_cast<t_jsonValue*>(pJsonBlock);
+
+  for ( t_jsonValue::ValueIterator it = pJsonObj->Begin();
+        it != pJsonObj->End(); it++ )
+  {
+    fraAlgo_Feature feature;
+    t_jsonArray arr = it->GetArray();
+    ReadFeature(&arr, feature);
+    features.push_back(feature);
+  }
+#else
+  (void) pJsonBlock;
+  (void) features;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+std::string
+  asiAlgo_Utils::Json::FromFeature(const asiAlgo_Feature& feature)
+{
+  std::stringstream out;
+
+  out << "[";
+  int i = 0;
+  for ( asiAlgo_Feature::Iterator fit(feature); fit.More(); fit.Next(), ++i )
+  {
+    out << fit.Key();
+    if ( i != feature.Extent() - 1 )
+    {
+      out << ", ";
+    }
+  }
+  out << "]";
+
+  return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
+std::string asiAlgo_Utils::Json::FromDirAsTuple(const gp_Dir& dir)
+{
+  std::stringstream out;
+
+  out << "[";
+  out << dir.X();
+  out << ", " << dir.Y();
+  out << ", " << dir.Z();
+  out << "]";
+
+  return out.str();
 }
 
 //-----------------------------------------------------------------------------

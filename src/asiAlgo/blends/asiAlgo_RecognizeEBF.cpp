@@ -39,6 +39,10 @@
 #include <asiAlgo_FindSpringEdges.h>
 #include <asiAlgo_FindTermEdges.h>
 
+// OpenCascade includes
+#include <BRepGProp.hxx>
+#include <GProp_GProps.hxx>
+
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
@@ -57,6 +61,13 @@ asiAlgo_RecognizeEBF::asiAlgo_RecognizeEBF(const Handle(asiAlgo_AAG)& aag,
 : ActAPI_IAlgorithm (progress, plotter),
   m_aag             (aag)
 {}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeEBF::SetEdgeLengthsCache(std::unordered_map<int, double>* ptr)
+{
+  m_pEdgeLengthMap = ptr;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -154,6 +165,9 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   if ( candidateRadius > maxRadius )
     return false;
 
+  const TopTools_IndexedMapOfShape& springEdges       = findSpringEdges.GetResultEdges();
+  const TColStd_PackedMapOfInteger& springEdgeIndices = findSpringEdges.GetResultIndices();
+
   // Prepare face attribute.
   Handle(asiAlgo_AttrBlendCandidate)
     blendAttr = new asiAlgo_AttrBlendCandidate(0);
@@ -165,9 +179,6 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
     this->GetProgress().SendLogMessage( LogErr(Normal) << "Weird iteration: blend attribute is already there." );
     return false;
   }
-
-  const TopTools_IndexedMapOfShape& springEdges       = findSpringEdges.GetResultEdges();
-  const TColStd_PackedMapOfInteger& springEdgeIndices = findSpringEdges.GetResultIndices();
 
   // Get number of spring edges and decide the blend type.
   const int nSpringEdges = springEdges.Extent();
@@ -282,5 +293,61 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   // Populate blend candidate attribute with terminating edges.
   blendAttr->TerminatingEdgeIndices = terminatingEdgeIndices;
 
+  // Compute length of a EBF element.
+  blendAttr->Length = this->computeBlendLength(springEdgeIndices);
+
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_RecognizeEBF::testLength(const int eid) const
+{
+  double len     = 0.;
+  bool   compute = true;
+
+  // Check cache.
+  if ( m_pEdgeLengthMap )
+  {
+    auto cacheIt = m_pEdgeLengthMap->find(eid);
+    //
+    if ( cacheIt != m_pEdgeLengthMap->end() )
+    {
+      len     = cacheIt->second;
+      compute = false;
+    }
+  }
+
+  if ( compute )
+  {
+    GProp_GProps props;
+    BRepGProp::LinearProperties(m_aag->RequestMapOfEdges()(eid), props);
+    len = props.Mass();
+
+    if ( m_pEdgeLengthMap ) m_pEdgeLengthMap->insert( {eid, len} );
+  }
+
+  return len;
+}
+
+//-----------------------------------------------------------------------------
+
+double
+  asiAlgo_RecognizeEBF::testLength(const TColStd_PackedMapOfInteger& eids) const
+{
+  double len = 0.;
+
+  for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
+  {
+    len += this->testLength( eit.Key() );
+  }
+
+  return len;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_RecognizeEBF::computeBlendLength(const TColStd_PackedMapOfInteger& eids) const
+{
+  return this->testLength(eids)*0.5;
 }

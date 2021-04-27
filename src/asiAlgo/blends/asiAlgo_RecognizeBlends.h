@@ -32,7 +32,10 @@
 #define asiAlgo_RecognizeBlends_h
 
 // asiAlgo includes
+#include <asiAlgo_BlendChain.h>
 #include <asiAlgo_Recognizer.h>
+
+//-----------------------------------------------------------------------------
 
 //! Utility to recognize blends.
 class asiAlgo_RecognizeBlends : public asiAlgo_Recognizer
@@ -88,6 +91,14 @@ public:
   asiAlgo_EXPORT virtual bool
     Perform(const int    faceId,
             const double radius = 1e100);
+
+  //! Extracts fillet chains with their properties.
+  //! This method should be called after `Perform()`, i.e.,
+  //! when the recognition result gets available.
+  //! \param[out] chains the extracted fillet chains
+  //!                    with their props.
+  asiAlgo_EXPORT void
+    GetChains(std::vector<asiAlgo_BlendChain>& chains) const;
 
 };
 

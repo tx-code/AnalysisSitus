@@ -85,6 +85,8 @@ set (aux_CPP_FILES
 set (blends_H_FILES
   blends/asiAlgo_AttrBlendCandidate.h
   blends/asiAlgo_AttrBlendSupport.h
+  blends/asiAlgo_BlendChain.h
+  blends/asiAlgo_BlendChainProps.h
   blends/asiAlgo_BlendTopoCondition.h
   blends/asiAlgo_BlendTopoConditionFF.h
   blends/asiAlgo_BlendTopoConditionFFIsolated.h

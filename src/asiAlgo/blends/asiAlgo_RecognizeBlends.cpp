@@ -44,6 +44,48 @@
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
 
+
+//-----------------------------------------------------------------------------
+
+namespace
+{
+  //! Rounds the passed double value. E.g., to round a value to 3 points
+  //! decimal, use the following trick:
+  //!
+  //! value = ::RoundDouble(value*1000.)/1000.
+  //!
+  //! \param[in] val the value to round.
+  //! \return the rounded value.
+  double RoundDouble(const double val)
+  {
+    if ( val < 0 ) return ceil(val - 0.5);
+    return floor(val + 0.5);
+  }
+
+  //! Computes the total length of a blend chain passed as a feature.
+  //! \param[in] feature the blend chain in question.
+  //! \param[in] aag     the AAG instance.
+  //! \return the computed total length.
+  double BlendChainLength(const asiAlgo_Feature&     feature,
+                          const Handle(asiAlgo_AAG)& aag)
+  {
+    double len = 0.;
+    for ( asiAlgo_Feature::Iterator fit(feature); fit.More(); fit.Next() )
+    {
+      const int fid = fit.Key();
+
+      Handle(asiAlgo_AttrBlendCandidate)
+        bcAttr = aag->ATTR_NODE<asiAlgo_AttrBlendCandidate>(fid);
+      //
+      if ( bcAttr.IsNull() )
+        return false;
+
+      len += bcAttr->Length;
+    }
+    return len;
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 //! \brief Function to filter the extracted blend candidates by radius.
@@ -553,9 +595,9 @@ bool asiAlgo_RecognizeBlends::Perform(const int    faceId,
     vbfIt.Next();
   }
 
-  /* ===========================================================
-   *  Stage 4: Reconsider some terminating edges as cross edges
-   * =========================================================== */
+  /* =========================================================
+   *  Stage 4: override some terminating edges as cross edges
+   * ========================================================= */
 
   // Propagation rule.
   Handle(asiAlgo_AAGIterationRule::TerminatingEdges2CrossEdges)
@@ -596,4 +638,78 @@ bool asiAlgo_RecognizeBlends::Perform(const int    faceId,
   // Set result.
   featureRes->GetFaceIndices(m_result.ids);
   return true;
+}
+
+//----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains) const
+{
+  std::vector<asiAlgo_Feature> ccomps;
+
+  // Prepare connected components out of the recognition result.
+  m_aag->PushSubgraph(m_result.ids);
+  {
+    m_aag->GetConnectedComponents(ccomps);
+  }
+  m_aag->PopSubgraph();
+
+  // Split each connected component onto the series of chains, i.e.,
+  // subcomponents all having the same radius.
+  for ( const auto& ccomp : ccomps )
+  {
+    std::unordered_map<double, asiAlgo_Feature> byRadii;
+
+    // Distribute feature faces by fillet radii.
+    for ( asiAlgo_Feature::Iterator fit(ccomp); fit.More(); fit.Next() )
+    {
+      const int fid = fit.Key();
+
+      // Get attribute.
+      Handle(asiAlgo_AttrBlendCandidate)
+        bc = m_aag->ATTR_NODE<asiAlgo_AttrBlendCandidate>(fid);
+      //
+      if ( bc.IsNull() )
+        continue;
+
+      const double r     = ::RoundDouble(bc->Radius*1000.)/1000.;
+      auto         tuple = byRadii.find(r);
+
+      if ( tuple == byRadii.end() )
+      {
+        asiAlgo_Feature feat;
+        feat.Add(fid);
+        //
+        byRadii.insert({r, feat});
+      }
+      else
+      {
+        tuple->second.Add(fid);
+      }
+    }
+
+    // Now that we have all feature faces distributed by radii, we should
+    // split them up by connectivity once again.
+    for ( const auto& tuple : byRadii )
+    {
+      const double           r    = tuple.first;
+      const asiAlgo_Feature& fids = tuple.second;
+
+      // Prepare connected components out of the recognition result.
+      std::vector<asiAlgo_Feature> localChains;
+      //
+      m_aag->PushSubgraph(fids);
+      {
+        m_aag->GetConnectedComponents(localChains);
+      }
+      m_aag->PopSubgraph();
+
+      // Add to the result.
+      for ( const auto& localChain : localChains )
+      {
+        const double len = ::BlendChainLength(localChain, m_aag);
+
+        chains.push_back( {localChain, {len, r}} );
+      }
+    }
+  }
 }

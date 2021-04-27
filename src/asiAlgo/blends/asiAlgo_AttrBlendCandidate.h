@@ -55,6 +55,7 @@ public:
   : asiAlgo_FeatureAttrFace (featureId),
     Kind                    (BlendType_Uncertain),
     Radius                  (0.),
+    Length                  (0.),
     Confirmed               (false)
   {}
 
@@ -79,13 +80,11 @@ public:
     return "blend candidate";
   }
 
-  //! \return brief dump.
-  virtual TCollection_AsciiString DumpInline() const
-  {
-    return (this->Kind == BlendType_Vertex) ? "vertex blend" : "";
-  }
-
 public:
+
+  //! \return brief dump.
+  asiAlgo_EXPORT virtual TCollection_AsciiString
+    DumpInline() const;
 
   //! Dumps this attribute to the passed output stream.
   //! \param[in, out] target stream.
@@ -137,6 +136,7 @@ public:
 
   asiAlgo_BlendType          Kind;                   //!< Blend type.
   double                     Radius;                 //!< Actual radius.
+  double                     Length;                 //!< Blend length.
   bool                       Confirmed;              //!< Confirmed/Unconfirmed blend.
   TColStd_PackedMapOfInteger SmoothEdgeIndices;      //!< Smooth edges.
   TColStd_PackedMapOfInteger SpringEdgeIndices;      //!< Spring edges.

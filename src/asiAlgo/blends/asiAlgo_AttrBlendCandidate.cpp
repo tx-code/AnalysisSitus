@@ -33,9 +33,52 @@
 
 // asiAlgo includes
 #include <asiAlgo_AAG.h>
+#include <asiAlgo_Utils.h>
 
 // OCCT includes
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString asiAlgo_AttrBlendCandidate::DumpInline() const
+{
+  TCollection_AsciiString lbl;
+
+  // Compose a label.
+  lbl += "confirmed: "; lbl += (this->Confirmed ? "true" : "false");
+  //
+  if ( Kind == BlendType_Uncertain )
+    lbl += " / uncertain";
+  else if ( Kind == BlendType_Ordinary )
+    lbl += " / ordinary";
+  else if ( Kind == BlendType_Vertex )
+    lbl += " / vertex";
+  else if ( Kind == BlendType_Cliff )
+    lbl += " / cliff";
+  //
+  if ( this->SpringEdgeIndices.Extent() )
+  {
+    lbl += " / spring edges: ";
+    lbl += asiAlgo_Utils::Json::FromFeature(this->SpringEdgeIndices).c_str();
+  }
+  //
+  if ( this->CrossEdgeIndices.Extent() )
+  {
+    lbl += " / cross edges: ";
+    lbl += asiAlgo_Utils::Json::FromFeature(this->CrossEdgeIndices).c_str();
+  }
+  //
+  if ( this->TerminatingEdgeIndices.Extent() )
+  {
+    lbl += " / term edges: ";
+    lbl += asiAlgo_Utils::Json::FromFeature(this->TerminatingEdgeIndices).c_str();
+  }
+  //
+  lbl += " / radius: "; lbl += this->Radius;
+  lbl += " / length: "; lbl += this->Length;
+
+  return lbl;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -45,20 +88,20 @@ void asiAlgo_AttrBlendCandidate::Dump(Standard_OStream& out) const
   out << "\n\tFeature ID: " << this->GetFeatureId();
   out << "\n\tType: ";
   //
-  if ( Kind == BlendType_Uncertain )
+  if ( this->Kind == BlendType_Uncertain )
     out << "uncertain";
-  else if ( Kind == BlendType_Ordinary )
+  else if ( this->Kind == BlendType_Ordinary )
     out << "ordinary";
-  else if ( Kind == BlendType_Vertex )
+  else if ( this->Kind == BlendType_Vertex )
     out << "vertex";
-  else if ( Kind == BlendType_Cliff )
+  else if ( this->Kind == BlendType_Cliff )
     out << "cliff";
 
-  out << "\n\tConfirmed: "              << (Confirmed ? "true" : "false");
-  out << "\n\tNum. smooth edges: "      << SmoothEdgeIndices.Extent();
-  out << "\n\tNum. spring edges: "      << SpringEdgeIndices.Extent();
-  out << "\n\tNum. cross edges: "       << CrossEdgeIndices.Extent();
-  out << "\n\tNum. terminating edges: " << TerminatingEdgeIndices.Extent();
+  out << "\n\tConfirmed: "              << (this->Confirmed ? "true" : "false");
+  out << "\n\tNum. smooth edges: "      <<  this->SmoothEdgeIndices.Extent();
+  out << "\n\tNum. spring edges: "      <<  this->SpringEdgeIndices.Extent();
+  out << "\n\tNum. cross edges: "       <<  this->CrossEdgeIndices.Extent();
+  out << "\n\tNum. terminating edges: " <<  this->TerminatingEdgeIndices.Extent();
 }
 
 //-----------------------------------------------------------------------------

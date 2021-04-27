@@ -35,6 +35,7 @@
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Collections.h>
 #include <asiAlgo_FeatureAngleType.h>
+#include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_Naming.h>
 
 // Active Data (API) includes
@@ -81,6 +82,7 @@
 
 // Standard includes
 #include <limits>
+#include <unordered_set>
 
 //-----------------------------------------------------------------------------
 
@@ -199,6 +201,83 @@ namespace asiAlgo_Utils
     asiAlgo_EXPORT
       std::string GetVariable(const char* varName);
   } // Env namespace.
+
+  //! Functions to work with JSON-formatted strings.
+  namespace Json
+  {
+    //! Dumps an iterable to JSON.
+    //! \param[in] iterable the iterable to dump
+    //! \return a JSON representation of the given iterable, e.g. [1, 2, 3].
+    template <typename T>
+    std::string FromIterable(const T& iterable)
+    {
+      std::stringstream out;
+
+      out << "[";
+      if ( !iterable.empty() )
+      {
+        auto it = iterable.begin();
+        out << *it++;
+
+        for ( auto end = iterable.end(); it != end; ++it )
+        {
+          out << ", " << *it;
+        }
+      }
+      out << "]";
+
+      return out.str();
+    }
+
+    //! Dumps the passed elements as a set in JSON.
+    //! \param[in] elements the elements to dump.
+    //! \return the outcome string representation of the elements.
+    template <class T>
+    std::string FromUnorderedSet(const std::unordered_set<T>& elements)
+    {
+      std::ostringstream result;
+
+      result << "{ ";
+      bool first = true;
+      for ( const auto& elem : elements )
+      {
+        if (first) first = false;
+        else       result << ", ";
+        result << elem;
+      }
+      result << " }";
+
+      return result.str();
+    }
+
+    //! Reads the passed JSON block as an array of integers and
+    //! populates the second argument to compose a feature out
+    //! of that array.
+    //! \param[in]  jsonBlock the JSON block to interpret.
+    //! \param[out] feature   the feature to compose.
+    asiAlgo_EXPORT void
+      ReadFeature(void*            pJsonBlock,
+                  asiAlgo_Feature& feature);
+
+    //! Reads the passed JSON block as an array of integer arrays.
+    //! \param[in]  pJsonBlock the JSON block to interpret.
+    //! \param[out] features   the container of features to compose.
+    asiAlgo_EXPORT void
+      ReadFeatures(void*                         pJsonBlock,
+                   std::vector<asiAlgo_Feature>& features);
+
+    //! Dumps the passed feature as a JSON array.
+    //! \param[in] map the map to dump.
+    //! \return a JSON array containing the elements of the map.
+    asiAlgo_EXPORT std::string
+      FromFeature(const asiAlgo_Feature& map);
+
+    //! Dumps the passed direction as a JSON array.
+    //! \param[in] gp_Dir the direction to dump.
+    //! \return `[X(), Y(), Z()]`.
+    asiAlgo_EXPORT std::string
+      FromDirAsTuple(const gp_Dir& dir);
+  }
 
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.

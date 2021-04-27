@@ -218,6 +218,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   // Modify the attribute.
   blendAttr->Radius = maxRadius;
   blendAttr->Kind   = BlendType_Vertex;
+  blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
 
   return true;
 }

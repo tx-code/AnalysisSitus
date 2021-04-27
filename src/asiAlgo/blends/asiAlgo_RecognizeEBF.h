@@ -37,6 +37,9 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+// Standard includes
+#include <unordered_map>
+
 //-----------------------------------------------------------------------------
 
 //! Utility to recognize blend faces of EBF type (edge-blend face).
@@ -62,6 +65,13 @@ public:
 
 public:
 
+  //! Sets the cache to use for computing edge lengths.
+  //! \param[in] ptr the raw pointer to the cache to use.
+  asiAlgo_EXPORT void
+    SetEdgeLengthsCache(std::unordered_map<int, double>* ptr);
+
+public:
+
   //! Performs recognition for the given face.
   //! \param[in] fid       ID of the face in question.
   //! \param[in] maxRadius max allowed radius.
@@ -72,7 +82,28 @@ public:
 
 protected:
 
-  Handle(asiAlgo_AAG) m_aag; //!< Attributed Adjacency Graph instance.
+  //! Computes the length of the edge passed by its 1-based ID.
+  //! \param[in] eid the edge in question.
+  //! \return the computed edge's length.
+  asiAlgo_EXPORT double
+    testLength(const int eid) const;
+
+  //! Computes the length of the passed train of edges.
+  //! \param[in] eids the edges in question.
+  //! \return the computed train's length.
+  asiAlgo_EXPORT double
+    testLength(const TColStd_PackedMapOfInteger& eids) const;
+
+  //! Computes the length of a blend.
+  //! \param[in] springEdges the detected spring edges.
+  //! \return blend length.
+  asiAlgo_EXPORT double
+    computeBlendLength(const TColStd_PackedMapOfInteger& springEdges) const;
+
+protected:
+
+  Handle(asiAlgo_AAG)              m_aag;            //!< Attributed Adjacency Graph instance.
+  std::unordered_map<int, double>* m_pEdgeLengthMap; //!< Cached edge lengths.
 
 };
 
