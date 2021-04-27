@@ -1063,6 +1063,95 @@ bool asiAlgo_Utils::IsPlanar(const TopoDS_Face&  face,
   return true;
 }
 
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face)
+{
+  gp_Ax1 ax;
+  double radius, angle_min, angle_max, h_min, h_max;
+  return IsCylindrical(face, radius, ax, false, angle_min, angle_max, h_min, h_max);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
+                                  gp_Ax1&            ax)
+{
+  double radius, angle_min, angle_max, h_min, h_max;
+  return IsCylindrical(face, radius, ax, false, angle_min, angle_max, h_min, h_max);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
+                                  double&            radius)
+{
+  gp_Ax1 ax;
+  double angle_min, angle_max, h_min, h_max;
+  return IsCylindrical(face, radius, ax, false, angle_min, angle_max, h_min, h_max);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
+                                  double&            radius,
+                                  gp_Ax1&            ax,
+                                  double&            angle_min,
+                                  double&            angle_max)
+{
+  double h_min, h_max;
+  return IsCylindrical(face, radius, ax, true, angle_min, angle_max, h_min, h_max);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
+                                  double&            radius,
+                                  gp_Ax1&            ax,
+                                  const bool         computeBounds,
+                                  double&            angle_min,
+                                  double&            angle_max,
+                                  double&            h_min,
+                                  double&            h_max)
+{
+  bool isCylindrical = false;
+  Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
+  Handle(Geom_CylindricalSurface) cylsurf;
+  //
+  if ( surf->IsInstance( STANDARD_TYPE(Geom_CylindricalSurface) ) )
+  {
+    isCylindrical = true;
+
+    // Get host surface.
+    cylsurf = Handle(Geom_CylindricalSurface)::DownCast(surf);
+  }
+  else if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
+  {
+    Handle(Geom_RectangularTrimmedSurface)
+      RT = Handle(Geom_RectangularTrimmedSurface)::DownCast(surf);
+
+    if ( RT->BasisSurface()->IsInstance( STANDARD_TYPE(Geom_CylindricalSurface) ) )
+    {
+      isCylindrical = true;
+
+      // Get host surface.
+      cylsurf = Handle(Geom_CylindricalSurface)::DownCast( RT->BasisSurface() );
+    }
+  }
+
+  if ( isCylindrical && !cylsurf.IsNull() )
+  {
+    radius = cylsurf->Radius();
+    ax     = cylsurf->Axis();
+
+    if ( computeBounds )
+      BRepTools::UVBounds(face, angle_min, angle_max, h_min, h_max);
+  }
+
+  return isCylindrical;
+}
+
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::IsEmptyShape(const TopoDS_Shape& shape)

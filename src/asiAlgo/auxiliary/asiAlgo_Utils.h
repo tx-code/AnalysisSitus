@@ -433,7 +433,71 @@ namespace asiAlgo_Utils
   //! \return true/false.
   asiAlgo_EXPORT bool
     IsPlanar(const TopoDS_Face&  face,
-              Handle(Geom_Plane)& plane);
+             Handle(Geom_Plane)& plane);
+
+  //! Checks if the passed face has cylindrical support.
+  //! \param[in] face face to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face);
+
+  //! Checks if the passed face has cylindrical support.
+  //! \param[in]  face face to check.
+  //! \param[out] ax   axis of the cylindrical surface.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face,
+                  gp_Ax1&            ax);
+
+  //! Checks if the passed face has cylindrical support and returns the
+  //! cylinder's radius.
+  //! \param[in]  face   face to check.
+  //! \param[out] radius radius of the underlying cylinder.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face,
+                  double&            radius);
+
+  //! Checks if the passed face has cylindrical support and returns the
+  //! basic properties of a cylinder.
+  //! \param[in]  face      face to check.
+  //! \param[out] radius    radius of the underlying cylinder.
+  //! \param[out] ax        axis of the cylinder.
+  //! \param[out] angle_min min angle.
+  //! \param[out] angle_max max angle.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face,
+                  double&            radius,
+                  gp_Ax1&            ax,
+                  double&            angle_min,
+                  double&            angle_max);
+
+  //! Checks if the passed face has cylindrical support and returns the
+  //! basic properties of a cylinder.
+  //! \param[in]  face          face to check.
+  //! \param[out] radius        radius of the underlying cylinder.
+  //! \param[out] ax            axis of the cylinder.
+  //! \param[in]  computeBounds indicates whether to compute UV bounds of the cylindrical face.
+  //!                           This parameter should be `true` in most cases. When it is `false`,
+  //!                           the props `angle_min`, `angle_max`, `h_min`, and `h_max` remain
+  //!                           uninitialized, but the computations get faster (as not bounding
+  //!                           box is computed). Set this argument `false` if you are only
+  //!                           interested in the radius and axis of the cylinder.
+  //! \param[out] angle_min     min angle.
+  //! \param[out] angle_max     max angle.
+  //! \param[out] h_min         min longitudal parameter value.
+  //! \param[out] h_max         max longitudal parameter value.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face,
+                  double&            radius,
+                  gp_Ax1&            ax,
+                  const bool         computeBounds,
+                  double&            angle_min,
+                  double&            angle_max,
+                  double&            h_min,
+                  double&            h_max);
 
   //! Checks whether the passed shape is empty. A series of nested
   //! compounds is also considered an empty shape.

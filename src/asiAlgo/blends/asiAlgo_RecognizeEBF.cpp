@@ -188,7 +188,13 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   else if ( nSpringEdges == 1)
     blendAttr->Kind = BlendType_Cliff;
   else
+  {
+    blendAttr->Kind = BlendType_Uncertain;
+
+    // Initialize length as a fallback solution.
+    blendAttr->Length = this->computeBlendLengthFallback(fid);
     return false;
+  }
 
   this->GetPlotter().DRAW_SHAPE(face, Color_Blue, "Candidate blend after spring edge detection");
   //
@@ -293,7 +299,7 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   // Populate blend candidate attribute with terminating edges.
   blendAttr->TerminatingEdgeIndices = terminatingEdgeIndices;
 
-  // Compute length of a EBF element.
+  // Compute length of a EBF element based on the spring edges.
   blendAttr->Length = this->computeBlendLength(springEdgeIndices);
 
   return true;
@@ -350,4 +356,22 @@ double
 double asiAlgo_RecognizeEBF::computeBlendLength(const TColStd_PackedMapOfInteger& eids) const
 {
   return this->testLength(eids)*0.5;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_RecognizeEBF::computeBlendLengthFallback(const int fid) const
+{
+  const TopoDS_Face& face = m_aag->GetFace(fid);
+
+  // Currently supported are cylindrical faces only.
+  double r, angMin, angMax, hMin, hMax;
+  gp_Ax1 ax;
+  //
+  if ( !asiAlgo_Utils::IsCylindrical(face, r, ax, true, angMin, angMax, hMin, hMax) )
+  {
+    return 0.;
+  }
+
+  return Abs(hMax - hMin);
 }

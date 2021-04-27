@@ -100,6 +100,12 @@ protected:
   asiAlgo_EXPORT double
     computeBlendLength(const TColStd_PackedMapOfInteger& springEdges) const;
 
+  //! Computes the length of a blend using a fallback UV-based bounds method.
+  //! \param[in] fid the 1-based ID of a blend face in question.
+  //! \return blend length.
+  asiAlgo_EXPORT double
+    computeBlendLengthFallback(const int fid) const;
+
 protected:
 
   Handle(asiAlgo_AAG)              m_aag;            //!< Attributed Adjacency Graph instance.
