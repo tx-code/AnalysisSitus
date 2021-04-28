@@ -111,7 +111,7 @@ public:
       return false;
 
     // Filter by radius.
-    if ( bcAttr->Radius > m_fMaxR )
+    if ( bcAttr->GetMaxRadius() > m_fMaxR )
       return false;
 
     return true;
@@ -671,7 +671,7 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains)
       if ( bc.IsNull() )
         continue;
 
-      const double r     = ::RoundDouble(bc->Radius*1000.)/1000.;
+      const double r     = ::RoundDouble(bc->GetMaxRadius()*1000.)/1000.;
       auto         tuple = byRadii.find(r);
 
       if ( tuple == byRadii.end() )

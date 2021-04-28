@@ -172,7 +172,7 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   Handle(asiAlgo_AttrBlendCandidate)
     blendAttr = new asiAlgo_AttrBlendCandidate(0);
   //
-  blendAttr->Radius = candidateRadius;
+  blendAttr->SetRadius(candidateRadius);
   //
   if ( !m_aag->SetNodeAttribute(fid, blendAttr) )
   {

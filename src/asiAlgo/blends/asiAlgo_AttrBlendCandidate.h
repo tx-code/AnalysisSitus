@@ -38,6 +38,9 @@
 // Active Data includes
 #include <ActAPI_IPlotter.h>
 
+// Standard includes
+#include <set>
+
 //-----------------------------------------------------------------------------
 
 //! Attribute to mark a face as a blend candidate.
@@ -52,9 +55,9 @@ public:
   //! Creates attribute with feature ID.
   //! \param[in] featureId 1-based feature ID.
   asiAlgo_AttrBlendCandidate(const int featureId)
+  //
   : asiAlgo_FeatureAttrFace (featureId),
     Kind                    (BlendType_Uncertain),
-    Radius                  (0.),
     Length                  (0.),
     Confirmed               (false)
   {}
@@ -79,6 +82,17 @@ public:
   {
     return "blend candidate";
   }
+
+public:
+
+  //! Sets the only radius to store.
+  //! \param[in] r the value to store.
+  asiAlgo_EXPORT void
+    SetRadius(const double r);
+
+  //! \return max radius among the stored radii.
+  asiAlgo_EXPORT double
+    GetMaxRadius() const;
 
 public:
 
@@ -135,7 +149,7 @@ protected:
 public:
 
   asiAlgo_BlendType          Kind;                   //!< Blend type.
-  double                     Radius;                 //!< Actual radius.
+  std::set<double>           Radii;                  //!< Blend radius or perhaps seveal radii for VBFs.
   double                     Length;                 //!< Blend length.
   bool                       Confirmed;              //!< Confirmed/Unconfirmed blend.
   TColStd_PackedMapOfInteger SmoothEdgeIndices;      //!< Smooth edges.

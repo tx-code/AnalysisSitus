@@ -40,6 +40,21 @@
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AttrBlendCandidate::SetRadius(const double r)
+{
+  this->Radii.clear();
+  this->Radii.insert(r);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_AttrBlendCandidate::GetMaxRadius() const
+{
+  return *std::max_element( this->Radii.cbegin(), this->Radii.cend() );
+}
+
+//-----------------------------------------------------------------------------
+
 TCollection_AsciiString asiAlgo_AttrBlendCandidate::DumpInline() const
 {
   TCollection_AsciiString lbl;
@@ -74,7 +89,25 @@ TCollection_AsciiString asiAlgo_AttrBlendCandidate::DumpInline() const
     lbl += asiAlgo_Utils::Json::FromFeature(this->TerminatingEdgeIndices).c_str();
   }
   //
-  lbl += " / radius: "; lbl += this->Radius;
+  if ( this->Radii.size() == 1 )
+  {
+    lbl += " / radius: "; lbl += *this->Radii.begin();
+  }
+  else if ( this->Radii.size() > 1 )
+  {
+    lbl += " / radii: [";
+
+    int ii = 0;
+    for ( auto r : this->Radii )
+    {
+      lbl += r;
+
+      if ( ++ii < this->Radii.size() ) lbl += ", ";
+    }
+
+    lbl += "]";
+  }
+  //
   lbl += " / length: "; lbl += this->Length;
 
   return lbl;

@@ -146,8 +146,10 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     numEBFs++;
 
     // Update max radius.
-    if ( neighborBcAttr->Radius > maxRadius )
-      maxRadius = neighborBcAttr->Radius;
+    const double nr = neighborBcAttr->GetMaxRadius();
+    //
+    if ( nr > maxRadius )
+      maxRadius = nr;
   }
   //
   if ( numEBFs < 3 )
@@ -216,7 +218,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   }
 
   // Modify the attribute.
-  blendAttr->Radius = maxRadius;
+  blendAttr->Radii.insert(maxRadius);
   blendAttr->Kind   = BlendType_Vertex;
   blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
 
