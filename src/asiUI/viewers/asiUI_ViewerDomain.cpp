@@ -296,13 +296,16 @@ void asiUI_ViewerDomain::onDomainPicked()
   double f, l;
   Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, f, l);
   //
-  TITLE += "3D: ";
-  TITLE += c3d->DynamicType()->Name();
-  TITLE += " [";
-  TITLE += f;
-  TITLE += ", ";
-  TITLE += l;
-  TITLE += "]\n";
+  if ( !c3d.IsNull() )
+  {
+    TITLE += "3D: ";
+    TITLE += c3d->DynamicType()->Name();
+    TITLE += " [";
+    TITLE += f;
+    TITLE += ", ";
+    TITLE += l;
+    TITLE += "]\n";
+  }
 
   double f2, l2;
   Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(edge, F, f2, l2);
