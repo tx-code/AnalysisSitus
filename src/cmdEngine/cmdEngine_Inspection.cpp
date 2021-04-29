@@ -2570,6 +2570,7 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
 
     // Extract features.
     Handle(asiAlgo_ExtractFeaturesResult) featureRes;
+    //
     if ( !extractor.Perform(partAAG, featureRes, filter) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Feature extraction failed.");
@@ -2588,16 +2589,29 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
 
   if ( isStore )
   {
+    // Extract chains.
+    std::vector<asiAlgo_BlendChain> chains;
+    //
+    recognizer.GetChains(chains);
+
+    // Perform data model modification.
     cmdEngine::model->OpenCommand();
     {
-      const int numFeatures = partApi.GetNumOfFeatures();
+      int chainId = 0;
+      //
+      for ( const auto& chain : chains )
+      {
+        const int numFeatures = partApi.GetNumOfFeatures();
 
-      // Get feature to store the recognition result.
-      Handle(asiData_FeatureNode)
-        featureNode = partApi.FindFeature(numFeatures + 1, true);
+        // Get feature to store the recognition result.
+        Handle(asiData_FeatureNode)
+          featureNode = partApi.FindFeature(numFeatures + 1, true);
+        //
+        featureNode->SetName( TCollection_AsciiString("Blend chain ") + (++chainId) );
 
-      // Store indices.
-      featureNode->SetMask(resIndices);
+        // Store indices.
+        featureNode->SetMask(chain.first);
+      }
     }
     cmdEngine::model->CommitCommand();
 
@@ -2931,8 +2945,8 @@ int ENGINE_InvertPointSurf(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdEngine_NotUsed(argc);
-  cmdEngine_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
@@ -3344,13 +3358,10 @@ int ENGINE_PrintAttrs(const Handle(asiTcl_Interp)& interp,
   // Access selected faces (if any).
   asiAlgo_Feature selected;
   //
-  if ( cmdEngine::cf->IsKind( STANDARD_TYPE(asiUI_CommonFacilities) ) )
+  if ( !cmdEngine::cf.IsNull() )
   {
-    Handle(asiUI_CommonFacilities)
-      uicf = Handle(asiUI_CommonFacilities)::DownCast(cmdEngine::cf);
-
-    asiEngine_Part( uicf->Model,
-                    uicf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
   }
 
   // Get the face in question.
@@ -3655,8 +3666,8 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t The optional '-radius' key allows to limit the recognized radius.\n"
     "\t The optional '-ebf|-vbf' keys allows you to find the blend faces of\n"
     "\t a certain type (EBF = edge-blend face, VBF = vertex-blend face).\n"
-    "\t If the '-store' key is passed, the recognized faces will be stored\n"
-    "\t as a feature under the Part Node.",
+    "\t If the '-store' key is passed, the recognized blend chains will be stored\n"
+    "\t as series of features under the Part Node.",
     //
     __FILE__, group, ENGINE_RecognizeBlends);
 

@@ -45,7 +45,9 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Recognize fillets</h1>
+<h1>Recognize fillets and chamfers</h1>
+
+<h2>Introduction</h2>
 
 <p>
   A chamfer/fillet is a feature in a CAD model that is applied to remove sharp edges from a part by replacing a sharp corner intersection of two faces with an angled (chamfer) or blending (fillet) face. Chamfers/fillets are very commonly used as finishing features on a model, and maintaining their definition is desirable when making edits to the part geometry.
@@ -53,23 +55,73 @@
 
 <div align="center"><img src="../imgs/featrec_tools.png"/></div>
 
+<h2>Some details</h2>
+
 <p>
-  The recognition procedure for fillets and chamfers should take into account neighborhood of each candidate face. Otherwise, the cases like a chamfered cube (see below) become problematic as there is no history information to rely on:
+  The recognition of fillets is available as open-source algorithm of Analysis Situs. The approach is largely based on the work by <a href="../references.html#venkataraman-2001">[Venkataraman et al, 2001]</a> and continues to evolve. You can find more details on this algorithm in our paper <a href="../references.html#slyadnev-2020">[Slyadnev et al, 2020]</a>.
+</p>
+
+<p>
+  The recognition procedure for fillets and chamfers takes into account neighborhood of each candidate face. Otherwise, the cases like a chamfered cube (see below) become problematic as there is no history information to rely on:
 </p>
 
 <div align="center"><img src="../imgs/featrec_chamfered-cube.png"/></div>
+
+<p>
+  There are the following common principles of recognition of fillet and chamfer chains:
+</p>
+
+<ol>
+  <li>The first pass of the algorithm is the loxal recognition. At this stage, all the feature candidate faces are detected and marked in the <a href="./features_aag.html">AAG</a> with a specific attribute.</li>
+  <li>The second and subsequent recognition passes are aimed to precise the local recognition result by taking into account the neighborhoods of the candidate faces.</li>
+</ol>
+
+<p>
+  At the end, the recognition result can be extracted as a series of chains. At this stage, the feature faces can be filtered out by size criterion, e.g., radius for blends and width for chamfers.
+</p>
+
+<h2>Run the algorithm</h2>
+
+<h3>Recognition</h3>
 
 <p>
   Use the following command to recognize fillet chains in the active part:
 </p>
 
 <div class="code">
-  recognize-blends [-radius &lt;r&gt;] [-fid &lt;id&gt;] [{-ebf | -vbf}]
+  recognize-blends [-radius &lt;r&gt;] [-fid &lt;id&gt;] [{-ebf | -vbf}] [-store]
 </div>
 
-<p>
-  You can find more details on this algorithm in our paper <a href="../references.html#slyadnev-2020">[Slyadnev et al, 2020]</a>.
+<p class="note">
+  Consult <span class="code-inline">show-commands</span> hints for the details on the accepted arguments.
 </p>
+
+<p>
+  As a result, all detected blends are selected in the viewer.
+</p>
+
+<div align="center"><img src="../imgs/situ_recognize-blends.png"/></div>
+
+<p>
+  You can analyze the extracted properties by running <span class="code-inline">print-attrs</span> command while keeping the fillet faces of interest selected. This command will print all the AAG attributes with their inline properties to the Logger window.
+</p>
+
+<h3>Returned results</h3>
+
+<p>
+  All indices of the recognized faces are returned in the Tcl interpretor, so you can use the recognizer in batch mode.
+</p>
+
+<pre class="code">
+> set ids [recognize-blends]
+> puts $ids
+</pre>
+
+<p>
+  If the <span class="code-inline">-store</span> key is passed, the algorithm will extract blend chains that group all the detected blend faces by their topological connectivity and radius.
+</p>
+
+<div align="center"><img src="../imgs/situ_recognize-blends-chains.gif"/></div>
 
 <!-- [END] contents -->
 </div>

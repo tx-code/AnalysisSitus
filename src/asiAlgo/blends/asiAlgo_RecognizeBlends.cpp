@@ -671,19 +671,22 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains)
       if ( bc.IsNull() )
         continue;
 
-      const double r     = ::RoundDouble(bc->GetMaxRadius()*1000.)/1000.;
-      auto         tuple = byRadii.find(r);
+      for ( auto r : bc->Radii )
+      {
+        const double rr    = ::RoundDouble(r*1000.)/1000.;
+        auto         tuple = byRadii.find(rr);
 
-      if ( tuple == byRadii.end() )
-      {
-        asiAlgo_Feature feat;
-        feat.Add(fid);
-        //
-        byRadii.insert({r, feat});
-      }
-      else
-      {
-        tuple->second.Add(fid);
+        if ( tuple == byRadii.end() )
+        {
+          asiAlgo_Feature feat;
+          feat.Add(fid);
+          //
+          byRadii.insert({rr, feat});
+        }
+        else
+        {
+          tuple->second.Add(fid);
+        }
       }
     }
 
