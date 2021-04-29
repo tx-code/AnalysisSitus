@@ -54,24 +54,22 @@
 
 <h1 id="toc-recognize-cnc-features">Recognize CNC milling features</h1>
 
-<div class="toc-panel"><div id="toc"></div></div>
-
 <p>
-  The recognition of general CNC features is a challenging topic. In this article, we provide a brief overview of some useful techniques that can help in engineering use cases, such as automating quotation (MaaS = Manufacturing as a Service) and design for manufacturing (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with some machining operations.
+  The recognition of general CNC features is a challenging area. CNC feature recognition can help in such engineering workflows as automating quotation (MaaS = Manufacturing as a Service) and design for manufacturing (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with some machining operations.
 </p>
 
 <p>
-  The problem can be formulated as follows. Given a 3D representation of an object to manufacture, automatically detect all machined surface types. Some basic volume features, such as <a href="./features_recognize-drill-holes.html">drilled holes</a> are to be extracted as well. In professional software packages, volume features, such as bosses and pockets are also recognized.
+  The problem can be formulated as follows. Given a 3D representation of an object to manufacture, automatically detect all machined features, including rough milling features, finishing milling features and possibly some post-processing operations, such as deburred edges. Some basic volume features, such as <a href="./features_recognize-drill-holes.html">drilled holes</a> are to be extracted explicitly, while other volume features, such as bosses and pockets are often application-dependent and are not always necessary to extract. It is to be noted that feature recognition is quite dependent on the setup (from which direction a tool approaches a stock) and available tooling (e.g., holes with a too large diameter could not be drilled and should be milled).
 </p>
 
 <p>
-  Feature recognition can be done in a fully automatic way (AFR = Automatic Feature Recognition). The recognition algorithm scans your 3D model and attempts to identify all the features you might want to select for manufacturing. In contrast, manual or interactive feature recognition (IFR) gives the operator more control over the identification process. The user starts from an interactively selected faces and lets a program extract feature type and its properties, such as dimensions, tooling, etc. Only geometric information can be used for the imported CAD model, so such information as threads is normally skipped.
+  Generally speaking, feature recognition can be done in a fully automatic way (AFR = Automatic Feature Recognition) or manually. The automatic recognition algorithm scans your 3D model and attempts to identify all the features you might want to select for manufacturing. In contrast, manual or interactive feature recognition (IFR) gives the operator more control over the setup and feature identification process. The user starts from an interactively selected faces and lets a program extract feature type and its properties, such as dimensions, tooling, etc. Only geometric information can be used for the imported CAD model, so such information as threads is normally skipped.
 </p>
 
-<h2 id="toc-face-side">Face and side milled surfaces</h2>
+<div align="center"><img src="../imgs/situ_cnc-role-of-as.png"/></div>
 
 <p>
-  It is possible to define the <i>face milled surface</i>, and the <i>side milled surface</i> from a machining perspective. A face that is perpendicular or inclined at an angle less than 90 degrees to the tool axis is defined as a base face by <a href="../references.html#muniappan-2012">[Muniappan, 2012, p.51]</a>. The side faces are those that lie parallel to the tool axis and can be reached by the tool's edge.
+  Analysis Situs does not offer a complete solution for CNC feature recognition, but it provides a generic framework for solving this and related problems, such as manufacturability analysis. If you need support or custom development services in this area, feel free <a href="http://quaoar.su/blog/contact">to contact us</a>.
 </p>
 
 <!-- [END] contents -->

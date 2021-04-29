@@ -2525,6 +2525,9 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
   // Whether to store the recognition result.
   const bool isStore = interp->HasKeyword(argc, argv, "store");
 
+  double rDevPerc = 1.0;
+  interp->GetKeyValue<double>(argc, argv, "cdev", rDevPerc);
+
   // Get part.
   Handle(asiData_PartNode)
     partNode = cmdEngine::model->GetPartNode();
@@ -2592,7 +2595,7 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
     // Extract chains.
     std::vector<asiAlgo_BlendChain> chains;
     //
-    recognizer.GetChains(chains);
+    recognizer.GetChains(chains, rDevPerc);
 
     // Perform data model modification.
     cmdEngine::model->OpenCommand();
@@ -2837,9 +2840,12 @@ int ENGINE_CheckAlongCurvature(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
 
+    // Radius of curvature.
+    const double r = ( Abs(k) > 1.e-4 ? 1/Abs(k) : Precision::Infinite() );
+
     interp->GetProgress().SendLogMessage(LogInfo(Normal) << "On-surface curvature for the edge %1 on face %2 "
-                                                            "in the midpoint is %3."
-                                                         << edgeId << faceId << k);
+                                                            "in the midpoint is %3 (radius: %4)."
+                                                         << edgeId << faceId << k << r);
   }
 
   return TCL_OK;
@@ -3660,14 +3666,16 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("recognize-blends",
     //
-    "recognize-blends [-radius <r>] [-fid <id>] [{-ebf | -vbf}] [-store]\n"
+    "recognize-blends [-radius <r>] [-fid <id>] [{-ebf | -vbf}] [-store [-cdev <perc>]]\n"
     "\t Recognizes all blend faces in AAG representing the part. The optional\n"
     "\t '-fid' key allows to specify the face ID to start recognition from.\n"
     "\t The optional '-radius' key allows to limit the recognized radius.\n"
     "\t The optional '-ebf|-vbf' keys allows you to find the blend faces of\n"
     "\t a certain type (EBF = edge-blend face, VBF = vertex-blend face).\n"
     "\t If the '-store' key is passed, the recognized blend chains will be stored\n"
-    "\t as series of features under the Part Node.",
+    "\t as series of features under the Part Node. If this flag is supplemented\n"
+    "\t with '-cdev' (chain deviation) flag, then the following <perc> value is used\n"
+    "\t to join the fillet faces into chains.",
     //
     __FILE__, group, ENGINE_RecognizeBlends);
 

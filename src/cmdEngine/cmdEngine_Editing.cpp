@@ -2805,8 +2805,8 @@ int ENGINE_ConvertPlaneToBSurf(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdEngine_NotUsed(argc);
-  cmdEngine_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
@@ -2880,8 +2880,8 @@ int ENGINE_RotateQn(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdEngine_NotUsed(argc);
-  cmdEngine_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;

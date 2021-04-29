@@ -95,10 +95,13 @@ public:
   //! Extracts fillet chains with their properties.
   //! This method should be called after `Perform()`, i.e.,
   //! when the recognition result gets available.
-  //! \param[out] chains the extracted fillet chains
-  //!                    with their props.
+  //! \param[out] chains   the extracted fillet chains with their props.
+  //! \param[in]  rDevPerc the max allowed deviation (in percents) between the consequent
+  //!                      blend faces that would allow joining them into chains and compensate
+  //!                      for possible slight deviations in their fillet radii.
   asiAlgo_EXPORT void
-    GetChains(std::vector<asiAlgo_BlendChain>& chains) const;
+    GetChains(std::vector<asiAlgo_BlendChain>& chains,
+              const double                     rDevPerc = 1.) const;
 
 };
 

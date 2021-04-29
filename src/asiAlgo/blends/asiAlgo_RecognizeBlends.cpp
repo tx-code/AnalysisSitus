@@ -430,8 +430,9 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
   // by neighbors.
   ebfRule->SetBlockingOff();
 
-  // Select seed face.
-  int seedFaceId = 1;
+  // Select seed face from those existing on the stack.
+  asiAlgo_AdjacencyMx::t_mx::Iterator mxIt(m_aag->GetNeighborhood().mx);
+  const int seedFaceId = mxIt.Key();
 
   // Prepare neighborhood iterator with customized propagation rule.
   asiAlgo_AAGNeighborsIterator<asiAlgo_AAGIterationRule::RecognizeEdgeBlends>
@@ -456,9 +457,6 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
   // by neighbors.
   vbfRule->SetBlockingOff();
 
-  // Select seed face.
-  seedFaceId = 1;
-
   // Prepare neighborhood iterator with customized propagation rule.
   asiAlgo_AAGNeighborsIterator<asiAlgo_AAGIterationRule::RecognizeVertexBlends>
     vbfIt(m_aag, seedFaceId, vbfRule);
@@ -477,9 +475,6 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
     t2cRule = new asiAlgo_AAGIterationRule::TerminatingEdges2CrossEdges(m_aag,
                                                                         m_progress,
                                                                         m_plotter);
-
-  // Select seed face.
-  seedFaceId = 1;
 
   // Prepare neighborhood iterator with customized propagation rule.
   asiAlgo_AAGNeighborsIterator<asiAlgo_AAGIterationRule::TerminatingEdges2CrossEdges>
@@ -642,7 +637,8 @@ bool asiAlgo_RecognizeBlends::Perform(const int    faceId,
 
 //----------------------------------------------------------------------------
 
-void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains) const
+void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
+                                        const double                     rDevPerc) const
 {
   std::vector<asiAlgo_Feature> ccomps;
 
@@ -673,8 +669,13 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains)
 
       for ( auto r : bc->Radii )
       {
-        const double rr    = ::RoundDouble(r*1000.)/1000.;
-        auto         tuple = byRadii.find(rr);
+        const double rr = ::RoundDouble(r*1000.)/1000.;
+
+        // Find with tolerance.
+        auto tuple =
+          std::find_if(byRadii.begin(), byRadii.end(), [&](const std::pair<double, asiAlgo_Feature>& t) {
+            return ( Abs(t.first - rr)*100/rr < rDevPerc );
+          });
 
         if ( tuple == byRadii.end() )
         {
@@ -692,6 +693,8 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains)
 
     // Now that we have all feature faces distributed by radii, we should
     // split them up by connectivity once again.
+    std::vector<asiAlgo_BlendChain> rawChains;
+    //
     for ( const auto& tuple : byRadii )
     {
       const double           r    = tuple.first;
@@ -711,8 +714,30 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains)
       {
         const double len = ::BlendChainLength(localChain, m_aag);
 
-        chains.push_back( {localChain, {len, r}} );
+        rawChains.push_back( {localChain, {len, r}} );
       }
+    }
+
+    // Do post-processing to filter out degenerated or impossible chains.
+    for ( const auto& chain : rawChains )
+    {
+      // Degenerated chain.
+      if ( chain.first.Extent() == 1 )
+      {
+        const int fid = chain.first.GetMinimalMapped();
+
+        // Get attribute.
+        Handle(asiAlgo_AttrBlendCandidate)
+          bc = m_aag->ATTR_NODE<asiAlgo_AttrBlendCandidate>(fid);
+        //
+        if ( bc.IsNull() )
+          continue;
+
+        if ( bc->Kind == BlendType_Vertex )
+          continue; // Skip isolated vertex blends.
+      }
+
+      chains.push_back(chain);
     }
   }
 }

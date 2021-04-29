@@ -99,10 +99,12 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   //
   std::vector<t_crossEdge> extraCrossEdges;
 
+    // The map to inherit radii from the neighboring EBFs.
+  std::set<double> neighborsRadii;
+
   // Among the neighbor faces, there should be some EBFs. At least three
   // EBFs are expected.
-  int    numEBFs   = 0;
-  double maxRadius = 0.; // Max radius of EBFs meeting at VBF will be assigned to VBF attribute.
+  int numEBFs = 0;
   //
   for ( TColStd_MapIteratorOfPackedMapOfInteger nit(nids); nit.More(); nit.Next() )
   {
@@ -148,8 +150,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     // Update max radius.
     const double nr = neighborBcAttr->GetMaxRadius();
     //
-    if ( nr > maxRadius )
-      maxRadius = nr;
+    neighborsRadii.insert(nr);
   }
   //
   if ( numEBFs < 3 )
@@ -218,7 +219,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   }
 
   // Modify the attribute.
-  blendAttr->Radii.insert(maxRadius);
+  blendAttr->Radii  = neighborsRadii;
   blendAttr->Kind   = BlendType_Vertex;
   blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
 
