@@ -42,8 +42,14 @@
 </table>
 </td></tr></table>
 
-<div align="right">
-  <iframe src="https://duckduckgo.com/search.html?site=analysissitus.org&prefill=Search...&bgcolor=#DCDCDC&focus=yes" style="overflow:hidden;margin:5px;padding:0;width:300px;height:40px;" frameborder="0"></iframe>
+<!-- Search form -->
+<div align="left">
+  <form action="https://duckduckgo.com/" id="searchform" role="search" method="get" target="google_window">
+    <fieldset style="border: none; margin-left: 0px; padding-left: 3px;">
+        <input type="text" class="form-control" placeholder="Search" name="q" maxlength="255" title="Search">
+        <input type="hidden" name="sites" value="analysissitus.org" checked="checked">
+    </button></fieldset>
+  </form>
 </div>
 
 <div class="content-body">
