@@ -43,12 +43,17 @@
 </td></tr></table>
 
 <!-- Search form -->
-<div align="left">
+<script>
+  function setFocusToTextBox(){
+      document.getElementById("searchfield").focus();
+  }
+</script>
+<div align="left" onload='setFocusToTextBox()'>
   <form action="https://duckduckgo.com/" id="searchform" role="search" method="get" target="google_window">
     <fieldset style="border: none; margin-left: 0px; padding-left: 3px;">
-        <input type="text" class="form-control" placeholder="Search" name="q" maxlength="255" title="Search">
-        <input type="hidden" name="sites" value="analysissitus.org" checked="checked">
-    </button></fieldset>
+      <input type="text" class="form-control" id="searchfield" placeholder="Search" name="q" maxlength="255" title="Search">
+      <input type="hidden" name="sites" value="analysissitus.org" checked="checked">
+    </fieldset>
   </form>
 </div>
 

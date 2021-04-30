@@ -97,7 +97,7 @@ TCollection_AsciiString asiAlgo_AttrBlendCandidate::DumpInline() const
   {
     lbl += " / radii: [";
 
-    int ii = 0;
+    size_t ii = 0;
     for ( auto r : this->Radii )
     {
       lbl += r;
