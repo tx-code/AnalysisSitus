@@ -118,6 +118,17 @@ set (blends_CPP_FILES
 )
 
 #------------------------------------------------------------------------------
+# Canonical recognition
+#------------------------------------------------------------------------------
+
+set (canrec_H_FILES
+  canrec/asiAlgo_CanRecTools.h
+)
+set (canrec_CPP_FILES
+  canrec/asiAlgo_CanRecTools.cpp
+)
+
+#------------------------------------------------------------------------------
 # Dictionary
 #------------------------------------------------------------------------------
 
@@ -535,6 +546,14 @@ foreach (FILE ${blends_CPP_FILES})
   source_group ("Source Files\\Blends" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${canrec_H_FILES})
+  source_group ("Header Files\\Canonical" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${canrec_CPP_FILES})
+  source_group ("Source Files\\Canonical" FILES "${FILE}")
+endforeach (FILE)
+
 foreach (FILE ${dict_H_FILES})
   source_group ("Header Files\\Dictionary" FILES "${FILE}")
 endforeach (FILE)
@@ -623,6 +642,7 @@ endforeach (FILE)
 set (asiAlgo_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/auxiliary;\
   ${CMAKE_CURRENT_SOURCE_DIR}/blends;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/canrec;\
   ${CMAKE_CURRENT_SOURCE_DIR}/dict;\
   ${CMAKE_CURRENT_SOURCE_DIR}/dict/salome;\
   ${CMAKE_CURRENT_SOURCE_DIR}/editing;\
@@ -665,6 +685,7 @@ add_library (asiAlgo SHARED
   ${H_FILES}             ${CPP_FILES}
   ${aux_H_FILES}         ${aux_CPP_FILES}
   ${blends_H_FILES}      ${blends_CPP_FILES}
+  ${canrec_H_FILES}      ${canrec_CPP_FILES}
   ${dict_H_FILES}        ${dict_CPP_FILES}
   ${dict_salome_H_FILES} ${dict_salome_CPP_FILES}
   ${editing_H_FILES}     ${editing_CPP_FILES}
@@ -780,6 +801,7 @@ endif()
 install (FILES ${H_FILES}             DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${aux_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${blends_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${canrec_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${dict_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${dict_salome_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${editing_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)

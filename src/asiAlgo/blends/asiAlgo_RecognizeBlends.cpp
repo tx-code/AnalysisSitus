@@ -649,6 +649,8 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
   }
   m_aag->PopSubgraph();
 
+  std::unordered_map<int, Handle(asiAlgo_AttrBlendCandidate)> removedVbfs;
+
   // Split each connected component onto the series of chains, i.e.,
   // subcomponents all having the same radius.
   for ( const auto& ccomp : ccomps )
@@ -718,26 +720,72 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
       }
     }
 
-    // Do post-processing to filter out degenerated or impossible chains.
+    // Do post-processing to "normalize" chains.
     for ( const auto& chain : rawChains )
     {
-      // Degenerated chain.
-      if ( chain.first.Extent() == 1 )
+      // Get rid of dangling vertex blends.
+      asiAlgo_BlendChain refinedChain;
+      //
+      m_aag->PushSubgraph(chain.first);
       {
-        const int fid = chain.first.GetMinimalMapped();
+        for ( asiAlgo_Feature::Iterator fit(chain.first); fit.More(); fit.Next() )
+        {
+          const int fid = fit.Key();
 
-        // Get attribute.
-        Handle(asiAlgo_AttrBlendCandidate)
-          bc = m_aag->ATTR_NODE<asiAlgo_AttrBlendCandidate>(fid);
-        //
-        if ( bc.IsNull() )
-          continue;
+          // Get attribute.
+          Handle(asiAlgo_AttrBlendCandidate)
+            bc = m_aag->ATTR_NODE<asiAlgo_AttrBlendCandidate>(fid);
+          //
+          if ( bc.IsNull() )
+            continue;
 
-        if ( bc->Kind == BlendType_Vertex )
-          continue; // Skip isolated vertex blends.
+          if ( bc->Kind == BlendType_Vertex )
+          {
+            // Check the number of neighbors.
+            if ( m_aag->GetNeighbors(fid).Extent() == 1 )
+            {
+              // This VBF is going to get removed from the chain, so let's store
+              // it in the dedicated list to come back to it in the future. We want
+              // to store the removed blends to see if they are not getting removed
+              // completely from the result. If they are, we'll add them back specifically.
+              removedVbfs.insert({fid, bc});
+
+              continue;
+            }
+          }
+
+          refinedChain.first.Add(fid);
+        }
       }
+      m_aag->PopSubgraph();
+      //
+      refinedChain.second = chain.second; // Copy the props.
 
-      chains.push_back(chain);
+      // Add to the result.
+      chains.push_back(refinedChain);
+    }
+  }
+
+  // Collect all face IDs that we have in the resulting chains.
+  asiAlgo_Feature chainedFids;
+  //
+  for ( const auto& chain : chains )
+  {
+    chainedFids.Unite(chain.first);
+  }
+
+  // Add hunted down vertex blends (if any).
+  for ( const auto& tuple : removedVbfs )
+  {
+    if ( !chainedFids.Contains(tuple.first) )
+    {
+      asiAlgo_BlendChainProps props( tuple.second->Length,
+                                     tuple.second->GetMaxRadius() );
+
+      asiAlgo_Feature oneFaceFeature;
+      oneFaceFeature.Add(tuple.first);
+
+      chains.push_back( asiAlgo_BlendChain(oneFaceFeature, props) );
     }
   }
 }

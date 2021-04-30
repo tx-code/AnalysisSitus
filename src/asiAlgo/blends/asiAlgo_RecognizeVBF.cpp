@@ -34,10 +34,19 @@
 // asiAlgo includes
 #include <asiAlgo_AttrBlendCandidate.h>
 #include <asiAlgo_AttrBlendSupport.h>
+#include <asiAlgo_CanRecTools.h>
 #include <asiAlgo_FeatureAttrAdjacency.h>
 
 // OpenCascade includes
+#include <BRepGProp.hxx>
 #include <BRepTools.hxx>
+#include <Geom2d_BSplineCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <gp_Lin2d.hxx>
+#include <GProp_GProps.hxx>
+
+// Standard includes
+#include <unordered_map>
 
 //-----------------------------------------------------------------------------
 
@@ -102,7 +111,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   //
   std::vector<t_crossEdge> extraCrossEdges;
 
-    // The map to inherit radii from the neighboring EBFs.
+  // The map to inherit radii from the neighboring EBFs.
   std::set<double> neighborsRadii;
 
   // Among the neighbor faces, there should be some EBFs. At least three
@@ -225,9 +234,10 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   if ( !this->treatSpecialCases(blendAttr) )
   {
     blendAttr->Radii  = neighborsRadii;
-    blendAttr->Kind   = BlendType_Vertex;
     blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
   }
+  //
+  blendAttr->Kind = BlendType_Vertex;
 
   return true;
 }
@@ -264,8 +274,89 @@ bool asiAlgo_RecognizeVBF::treatToroidalCase(const Handle(asiAlgo_AttrBlendCandi
   // Compute UV bounds to derive the length.
   double uMin, uMax, vMin, vMax;
   BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+  // Lengths distributed by V levels. There can be several edges at both sides
+  // of a vertex blend, so we have to accumulate their lengths separately
+  // to compute average later on.
+  std::unordered_map<double, double> lengths3d;
+
+  // Get all edges of a VBF.
+  TopTools_IndexedMapOfShape edgesMap;
+  TopExp::MapShapes(face, TopAbs_EDGE, edgesMap);
   //
-  attr->Length = Abs(uMax - uMin)*( surf->MajorRadius() + surf->MinorRadius() );
+  for ( int k = 1; k <= edgesMap.Extent(); ++k )
+  {
+    const TopoDS_Edge& E = TopoDS::Edge( edgesMap(k) );
+
+    // Get pcurve.
+    double f, l;
+    Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(E, face, f, l);
+    //
+    if ( c2d.IsNull() )
+      continue;
+
+    Geom2dAdaptor_Curve GAC(c2d, f, l);
+    gp_Dir2d            DU(1, 0);
+    GeomAbs_CurveType   c2dType = GAC.GetType();
+
+    /* Treat special cases of lines parallel to the U, V axes.
+       In such cases, we do not need to approximate. */
+
+    gp_Lin2d lin;
+    //
+    if ( c2dType == GeomAbs_Line )
+    {
+      lin = GAC.Line();
+    }
+    else if ( c2dType == GeomAbs_BSplineCurve )
+    {
+      Handle(Geom2d_BSplineCurve) spl = GAC.BSpline();
+
+      double dev = 0.;
+      if ( !asiAlgo_CanRecTools::IsLinear(spl->Poles(), Precision::Confusion(), dev, lin) )
+        continue;
+    }
+    else
+      continue; // Not a line.
+
+    // Test if the line is aligned with OU axis.
+    gp_Dir2d DL = lin.Direction();
+    //
+    if ( DL.IsParallel( DU, 1*M_PI/180. ) ) // 1 degree tolerance.
+    {
+      GProp_GProps props;
+      BRepGProp::LinearProperties(E, props);
+      const double edgeLen = props.Mass();
+
+      const double v     = lin.Location().Y();
+      auto         tuple = lengths3d.find(v);
+
+      if ( tuple == lengths3d.end() )
+      {
+        lengths3d.insert( {v, edgeLen} );
+      }
+      else
+      {
+        tuple->second += edgeLen;
+      }
+    }
+  }
+
+  // Compute the average length.
+  double vbfLen = 0.;
+  //
+  if ( !lengths3d.empty() )
+  {
+    for ( auto l : lengths3d )
+    {
+      vbfLen += l.second;
+    }
+
+    vbfLen /= int( lengths3d.size() );
+  }
+
+  // Set the length.
+  attr->Length = vbfLen;
 
   // Use the minor radius.
   attr->Radii.clear();
