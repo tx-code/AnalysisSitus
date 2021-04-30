@@ -71,6 +71,7 @@
 #include <Geom_Plane.hxx>
 #include <gp_Pln.hxx>
 #include <Precision.hxx>
+#include <ShapeCustom.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
@@ -783,50 +784,44 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 2 && argc != 3 )
+  if ( argc < 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
   TopoDS_Shape faceShape;
 
-  if ( argc == 2 )
+  // Get Part Node to access the selected face.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
   {
-    // Get Part Node to access the selected face.
-    Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
-    //
-    if ( partNode.IsNull() || !partNode->IsWellFormed() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
-      return TCL_OK;
-    }
-    //
-    const TopTools_IndexedMapOfShape&
-      subShapes = partNode->GetAAG()->RequestMapOfSubShapes();
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  const TopTools_IndexedMapOfShape&
+    subShapes = partNode->GetAAG()->RequestMapOfSubShapes();
 
-    // Surface Node is expected.
-    Handle(asiData_SurfNode) surfNode = partNode->GetSurfaceRepresentation();
-    //
-    if ( surfNode.IsNull() || !surfNode->IsWellFormed() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface Node is null or ill-defined.");
-      return TCL_OK;
-    }
+  // Surface Node is expected.
+  Handle(asiData_SurfNode) surfNode = partNode->GetSurfaceRepresentation();
+  //
+  if ( surfNode.IsNull() || !surfNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
 
-    // Get ID of the selected face.
-    const int faceIdx = surfNode->GetAnySelectedFace();
-    //
-    if ( faceIdx <= 0 )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select face first.");
-      return TCL_OK;
-    }
-
+  // Get ID of the selected face.
+  const int faceIdx = surfNode->GetAnySelectedFace();
+  //
+  if ( faceIdx > 0 )
+  {
     faceShape = subShapes(faceIdx);
   }
-  else
+  else if ( argc >= 3 )
   {
-    /* The face has been passed by name */
+    /* The face might have been passed by name */
 
     // Find Node by name.
     Handle(ActAPI_INode)
@@ -845,6 +840,11 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
     // Get shape.
     faceShape = topoN->GetShape();
   }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The target face is not specified.");
+    return TCL_ERROR;
+  }
 
   // Check type.
   if ( faceShape.ShapeType() != TopAbs_FACE )
@@ -852,7 +852,13 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected face.");
     return TCL_OK;
   }
-  //
+
+  if ( interp->HasKeyword(argc, argv, "spl") )
+  {
+    faceShape = ShapeCustom::ConvertToRevolution(faceShape);
+    faceShape = ShapeCustom::ConvertToBSpline(faceShape, true, true, true, true);
+  }
+
   Handle(Geom_Surface) surf = BRep_Tool::Surface( TopoDS::Face(faceShape) );
 
   // Set result.
@@ -1904,8 +1910,9 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-surf",
     //
-    "make-surf <surfName> [<faceName>]\n"
-    "\t Creates a surface from the selected face or a face with the given name.",
+    "make-surf <surfName> [<faceName>] [-spl]\n"
+    "\t Creates a surface from the selected face or a face with the given name.\n"
+    "\t If the '-spl' flag is passed, the surface will be converted to spline.",
     //
     __FILE__, group, ENGINE_MakeSurf);
 

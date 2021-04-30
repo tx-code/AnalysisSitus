@@ -36,6 +36,9 @@
 #include <asiAlgo_AttrBlendSupport.h>
 #include <asiAlgo_FeatureAttrAdjacency.h>
 
+// OpenCascade includes
+#include <BRepTools.hxx>
+
 //-----------------------------------------------------------------------------
 
 asiAlgo_RecognizeVBF::asiAlgo_RecognizeVBF(const Handle(asiAlgo_AAG)& aag,
@@ -219,9 +222,53 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   }
 
   // Modify the attribute.
-  blendAttr->Radii  = neighborsRadii;
-  blendAttr->Kind   = BlendType_Vertex;
-  blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
+  if ( !this->treatSpecialCases(blendAttr) )
+  {
+    blendAttr->Radii  = neighborsRadii;
+    blendAttr->Kind   = BlendType_Vertex;
+    blendAttr->Length = 0.; // Nullify as the length does not make sense for vertex blends.
+  }
 
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeVBF::treatSpecialCases(const Handle(asiAlgo_AttrBlendCandidate)& attr)
+{
+  if ( this->treatToroidalCase(attr) )
+    return true;
+
+  // ... More special cases to add here
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeVBF::treatToroidalCase(const Handle(asiAlgo_AttrBlendCandidate)& attr)
+{
+  if ( attr.IsNull() )
+    return false;
+
+  // Get the VBF face.
+  const int          fid  = attr->GetFaceId();
+  const TopoDS_Face& face = m_aag->GetFace(fid);
+
+  // Special case of a toroidal surface.
+  Handle(Geom_ToroidalSurface) surf;
+  //
+  if ( !asiAlgo_Utils::IsTypeOf<Geom_ToroidalSurface>(face, surf) )
+    return false;
+
+  // Compute UV bounds to derive the length.
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+  //
+  attr->Length = Abs(uMax - uMin)*( surf->MajorRadius() + surf->MinorRadius() );
+
+  // Use the minor radius.
+  attr->Radii.clear();
+  attr->Radii.insert( surf->MinorRadius() );
   return true;
 }

@@ -37,6 +37,8 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+class asiAlgo_AttrBlendCandidate;
+
 //-----------------------------------------------------------------------------
 
 //! Utility to recognize blend faces of VBF (vertex-blend face) type.
@@ -67,6 +69,28 @@ public:
   //! \return true if the face was recognized as a blend face.
   asiAlgo_EXPORT virtual bool
     Perform(const int fid);
+
+protected:
+
+  //! Provides treatment for special cases.
+  //! \param[in] attr the blend candidate attribute.
+  //! \return true if the special treatment was provided.
+  asiAlgo_EXPORT bool
+    treatSpecialCases(const Handle(asiAlgo_AttrBlendCandidate)& attr);
+
+  //! Provides special treatment for toroidal vertex blends. These
+  //! blends stand out in terms of machining as they look pretty
+  //! much the same as edge blends. The difference here is that
+  //! these VBFs connect cylindrical and planar faces, and not
+  //! just planar faces as an ordinary edge blend.
+  //!
+  //! The idea of this treatment is to force using the minor radius
+  //! of a toroidal surface and also to compute the length.
+  //!
+  //! \param[in] attr the blend candidate attribute.
+  //! \return true if the special treatment was provided.
+  asiAlgo_EXPORT bool
+    treatToroidalCase(const Handle(asiAlgo_AttrBlendCandidate)& attr);
 
 protected:
 
