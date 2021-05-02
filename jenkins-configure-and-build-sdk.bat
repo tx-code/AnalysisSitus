@@ -54,7 +54,7 @@ cd cmake-build-dir
 
 echo "*** Running CMake configuration..."
 
-"%JENKINS_CMAKE_BIN%\cmake.exe" -G"Visual Studio 16 2019" -A x64^
+"%JENKINS_CMAKE_BIN%\cmake.exe" -G"Visual Studio 16 2019" -A x64 ^
 -DUSE_THREADING=false -DUSE_RAPIDJSON=true -DUSE_FBX_SDK=false -DUSE_MOBIUS=false ^
 -DDISTRIBUTION_TYPE=Algo -D3RDPARTY_DIR:PATH=%JENKINS_3RDPARTIES% -DINSTALL_DIR:PATH=../cmake-install-dir ../
 
