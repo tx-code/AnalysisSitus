@@ -28,10 +28,4 @@ echo timestamp=%timestamp%
 
 set "TEAMDIR=%JENKINS_LAST_BUILD_DIR%\%timestamp%-sdk"
 if not exist %TEAMDIR% md %TEAMDIR%
-xcopy /Y cmake-install-dir\setup %TEAMDIR%
-
-REM ===========================================================================
-REM Copy to shared public dir
-REM ===========================================================================
-
-xcopy /Y cmake-install-dir\setup %JENKINS_PUBLIC_DIR%
+xcopy /Y cmake-install-dir %TEAMDIR%
