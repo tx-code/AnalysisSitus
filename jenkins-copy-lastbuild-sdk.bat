@@ -1,6 +1,6 @@
 @echo off
 
-echo "*** Running jenkins-copy-lastbuild.bat..."
+echo "*** Running jenkins-copy-lastbuild-sdk.bat..."
 
 REM ===========================================================================
 REM Configure environment on Jenkins machine
@@ -26,7 +26,7 @@ REM timestamp with time
 for /F "usebackq tokens=1,2,3 delims=: " %%i in (`time /T`) do set timestamp=%da_nospaces_noslashes%-T%%i%%j
 echo timestamp=%timestamp%
 
-set "TEAMDIR=%JENKINS_LAST_BUILD_DIR%\%timestamp%"
+set "TEAMDIR=%JENKINS_LAST_BUILD_DIR%\%timestamp%-sdk"
 if not exist %TEAMDIR% md %TEAMDIR%
 xcopy /Y cmake-install-dir\setup %TEAMDIR%
 
