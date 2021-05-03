@@ -59,6 +59,14 @@ a:visited:hover {
 .alert {
   background-color: rgb(250, 200, 200);
 }
+.open-source {
+  background-color: rgb(150, 250, 150);
+  padding: 5px;
+}
+.commercial {
+  background-color: rgb(150, 250, 250);
+  padding: 5px;
+}
 .faq {
   padding-left: 15px;
   padding-right: 15px;

@@ -42,7 +42,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon";   Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "flagFileAssoc"; Description: "&Associate files of supported formats (BREP) with Analysis Situs"; GroupDescription: "File associations";
+Name: "flagFileAssoc"; Description: "&Associate files of supported formats (BREP, STEP) with Analysis Situs"; GroupDescription: "File associations";
 
 [Files]
 Source: {#BIN_INPUT}\{#MyAppExeName};        DestDir: {app}; Flags: ignoreversion
@@ -56,6 +56,10 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppDesktopIcoName}"; Tasks: desktopicon
 
 [Registry]
+Root: HKCR; Subkey: ".stp";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
+Root: HKCR; Subkey: ".STP";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
+Root: HKCR; Subkey: ".step";                                    ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
+Root: HKCR; Subkey: ".STEP";                                    ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: ".brep";                                    ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: ".rle";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: ".bin";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
