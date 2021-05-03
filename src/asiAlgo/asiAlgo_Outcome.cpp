@@ -34,7 +34,7 @@
 // OpenCascade includes
 #include <OSD_Timer.hxx>
 
-using namespace asiAlgo;
+using namespace AnalysisSitus;
 
 //-----------------------------------------------------------------------------
 
