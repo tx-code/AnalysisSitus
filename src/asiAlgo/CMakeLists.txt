@@ -6,9 +6,11 @@ project(asiAlgo)
 
 set (H_FILES
   asiAlgo.h
+  asiAlgo_Outcome.h
   asiAlgo_Version.h
 )
 set (CPP_FILES
+  asiAlgo_Outcome.cpp
   asiAlgo_Version.cpp
 )
 
