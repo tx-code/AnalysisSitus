@@ -31,7 +31,11 @@
 // Own include
 #include <asiAlgo_STEP.h>
 
+// asiAlgo includes
+#include <asiAlgo_Version.h>
+
 // OCCT includes
+#include <APIHeaderSection_MakeHeader.hxx>
 #include <BRep_Tool.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <NCollection_CellFilter.hxx>
@@ -55,6 +59,29 @@
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
 
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_STEP::SetHeaders(STEPControl_Writer& writer)
+{
+  /* Change header in the STEP file to indicate the originating system */
+  Handle(StepData_StepModel) stepModel = writer.Model();
+  //
+  if ( stepModel.IsNull() )
+    return false;
+
+  TCollection_AsciiString appName(ASITUS_APP_NAME);
+  appName += " "; appName += ASITUS_VERSION_STRING;
+
+  APIHeaderSection_MakeHeader headerMaker(stepModel);
+  //
+  Handle(TCollection_HAsciiString) author            = new TCollection_HAsciiString(ASITUS_APP_NAME);
+  Handle(TCollection_HAsciiString) originatingSystem = new TCollection_HAsciiString(appName);
+  Handle(TCollection_HAsciiString) organization      = new TCollection_HAsciiString(ASITUS_APP_NAME);
+  //
+  headerMaker.SetAuthorValue       (1, author);
+  headerMaker.SetOriginatingSystem (originatingSystem);
+  headerMaker.SetOrganizationValue (1, organization);
+}
 
 //-----------------------------------------------------------------------------
 
@@ -149,19 +176,19 @@ bool asiAlgo_STEP::Read(const TCollection_AsciiString& filename,
   // Apply shape healing.
   if ( doHealing )
   {
-    Handle(ShapeFix_Shape) aShapeHealer = new ShapeFix_Shape(result);
-    bool aFixRes = false;
+    Handle(ShapeFix_Shape) shapeHealer = new ShapeFix_Shape(result);
+    bool fixRes = false;
     try
     {
-      aFixRes = aShapeHealer->Perform();
+      fixRes = shapeHealer->Perform();
     }
     catch ( Standard_Failure& )
     {
-      aFixRes = false;
+      fixRes = false;
     }
-    if ( aFixRes )
+    if ( fixRes )
     {
-      result = aShapeHealer->Shape();
+      result = shapeHealer->Shape();
     }
   }
 
@@ -177,19 +204,21 @@ bool asiAlgo_STEP::Write(const TopoDS_Shape&            shape,
    *  Prepare OCCT translation toolkit
    * ================================== */
 
-  STEPControl_Writer aWriter;
+  STEPControl_Writer writer;
+
+  SetHeaders(writer);
 
   /* ========================
    *  Transfer shape to STEP
    * ======================== */
 
-  if ( aWriter.Transfer( shape, STEPControl_AsIs ) != IFSelect_RetDone )
+  if ( writer.Transfer( shape, STEPControl_AsIs ) != IFSelect_RetDone )
   {
     std::cout << "Failed to transfer shape to STEP" << std::endl;
     return false;
   }
 
-  if ( aWriter.Write( filename.ToCString() ) != IFSelect_RetDone )
+  if ( writer.Write( filename.ToCString() ) != IFSelect_RetDone )
   {
     std::cout << "Failed to write shape into the file " << filename.ToCString() << std::endl;
     return false;

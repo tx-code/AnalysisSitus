@@ -31,6 +31,9 @@
 // Own include
 #include <asiAlgo_WriteSTEPWithMeta.h>
 
+// asiAlgo includes
+#include <asiAlgo_STEP.h>
+
 // OCCT includes
 #include <Interface_EntityIterator.hxx>
 #include <Interface_Static.hxx>
@@ -89,6 +92,9 @@ void asiAlgo_WriteSTEPWithMeta::Init(const Handle(XSControl_WorkSession)& WS,
 {
   WS->SelectNorm("STEP");
   m_writer.SetWS(WS, scratch);
+
+  /* Change header in the STEP file to indicate the originating system */
+  asiAlgo_STEP::SetHeaders(m_writer);
 }
 
 //-----------------------------------------------------------------------------

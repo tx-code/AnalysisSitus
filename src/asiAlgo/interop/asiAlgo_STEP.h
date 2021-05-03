@@ -37,6 +37,8 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+class STEPControl_Writer;
+
 //-----------------------------------------------------------------------------
 
 //! STEP interoperability tool.
@@ -46,6 +48,14 @@ public:
 
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_STEP, ActAPI_IAlgorithm)
+
+public:
+
+  //! Sets header info to the STEP model.
+  //! \param[in] writer the STEP writer to customize.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT static bool
+    SetHeaders(STEPControl_Writer& writer);
 
 public:
 
