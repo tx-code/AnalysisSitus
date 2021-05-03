@@ -81,6 +81,8 @@ bool asiAlgo_STEP::SetHeaders(STEPControl_Writer& writer)
   headerMaker.SetAuthorValue       (1, author);
   headerMaker.SetOriginatingSystem (originatingSystem);
   headerMaker.SetOrganizationValue (1, organization);
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------
