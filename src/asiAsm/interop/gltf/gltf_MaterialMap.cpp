@@ -23,10 +23,12 @@
   #include <gltf_JsonSerializer.h>
 #endif
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
 const Handle(Image_Texture)&
-  asiAsm::gltf_MaterialMap::baseColorTexture(const Handle(gltf_MaterialAttr)& mat)
+  gltf_MaterialMap::baseColorTexture(const Handle(gltf_MaterialAttr)& mat)
 {
   static const Handle(Image_Texture) NullTexture;
 
@@ -50,8 +52,8 @@ const Handle(Image_Texture)&
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& filename,
-                                           const int                      defSamplerId)
+gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& filename,
+                                   const int                      defSamplerId)
 : gltf_MaterialMapBase (filename),
   myWriter             (nullptr),
   myDefSamplerId       (defSamplerId),
@@ -62,14 +64,14 @@ asiAsm::gltf_MaterialMap::gltf_MaterialMap(const TCollection_AsciiString& filena
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialMap::~gltf_MaterialMap()
+gltf_MaterialMap::~gltf_MaterialMap()
 {}
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::AddImages(gltf_JsonSerializer*       writer,
-                                         const gltf_XdeVisualStyle& style,
-                                         bool&                      isStarted)
+void gltf_MaterialMap::AddImages(gltf_JsonSerializer*       writer,
+                                 const gltf_XdeVisualStyle& style,
+                                 bool&                      isStarted)
 {
   if ( writer == nullptr || style.GetMaterial().IsNull()|| style.GetMaterial()->IsEmpty() )
   {
@@ -85,9 +87,9 @@ void asiAsm::gltf_MaterialMap::AddImages(gltf_JsonSerializer*       writer,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::addImage(gltf_JsonSerializer*         writer,
-                                        const Handle(Image_Texture)& texture,
-                                        bool&                        isStarted)
+void gltf_MaterialMap::addImage(gltf_JsonSerializer*         writer,
+                                const Handle(Image_Texture)& texture,
+                                bool&                        isStarted)
 {
 #if defined USE_RAPIDJSON
   if ( texture.IsNull() || myImageMap.IsBound1(texture) || myImageFailMap.Contains(texture) )
@@ -134,9 +136,9 @@ void asiAsm::gltf_MaterialMap::addImage(gltf_JsonSerializer*         writer,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::AddMaterial(gltf_JsonSerializer*       theWriter,
-                                           const gltf_XdeVisualStyle& theStyle,
-                                           bool&                      theIsStarted)
+void gltf_MaterialMap::AddMaterial(gltf_JsonSerializer*       theWriter,
+                                   const gltf_XdeVisualStyle& theStyle,
+                                   bool&                      theIsStarted)
 {
 #if defined USE_RAPIDJSON
   if (theWriter == NULL
@@ -165,9 +167,9 @@ void asiAsm::gltf_MaterialMap::AddMaterial(gltf_JsonSerializer*       theWriter,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::AddTextures(gltf_JsonSerializer*       theWriter,
-                                           const gltf_XdeVisualStyle& theStyle,
-                                           bool&                      theIsStarted)
+void gltf_MaterialMap::AddTextures(gltf_JsonSerializer*       theWriter,
+                                   const gltf_XdeVisualStyle& theStyle,
+                                   bool&                      theIsStarted)
 {
 #if defined USE_RAPIDJSON
   if (theWriter == NULL
@@ -192,9 +194,9 @@ void asiAsm::gltf_MaterialMap::AddTextures(gltf_JsonSerializer*       theWriter,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::addTexture(gltf_JsonSerializer*         theWriter,
-                                          const Handle(Image_Texture)& theTexture,
-                                          bool&                        theIsStarted)
+void gltf_MaterialMap::addTexture(gltf_JsonSerializer*         theWriter,
+                                  const Handle(Image_Texture)& theTexture,
+                                  bool&                        theIsStarted)
 {
 #if defined USE_RAPIDJSON
   if (theTexture.IsNull()
@@ -237,16 +239,16 @@ void asiAsm::gltf_MaterialMap::addTexture(gltf_JsonSerializer*         theWriter
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
-  asiAsm::gltf_MaterialMap::AddMaterial(const gltf_XdeVisualStyle& theStyle)
+  gltf_MaterialMap::AddMaterial(const gltf_XdeVisualStyle& theStyle)
 {
   return gltf_MaterialMapBase::AddMaterial(theStyle);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialMap::DefineMaterial(const gltf_XdeVisualStyle& theStyle,
-                                              const TCollection_AsciiString& /*theKey*/,
-                                              const TCollection_AsciiString& theName)
+void gltf_MaterialMap::DefineMaterial(const gltf_XdeVisualStyle& theStyle,
+                                      const TCollection_AsciiString& /*theKey*/,
+                                      const TCollection_AsciiString& theName)
 {
 #if defined USE_RAPIDJSON
   if (myWriter == NULL)

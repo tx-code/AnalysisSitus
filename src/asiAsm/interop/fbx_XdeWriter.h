@@ -49,21 +49,21 @@
 // STL include
 #include <map>
 
-class asiAsm_XdeDoc;
-struct t_fbxState;
-
 //-----------------------------------------------------------------------------
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
+
+struct t_fbxState;
+class Doc;
 
 //! Writes the passed XDE document to FBX format.
-class fbx_XdeWriter: public ActAPI_IAlgorithm
+class fbxWriter: public ActAPI_IAlgorithm
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(fbx_XdeWriter, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(fbxWriter, ActAPI_IAlgorithm)
 
 public:
 
@@ -72,13 +72,13 @@ public:
   //! \param[in] notifier the progress notifier.
   //! \param[in] plotter  the imperative plotter.
   asiAsm_EXPORT
-    fbx_XdeWriter(const TCollection_AsciiString& filename,
-                  ActAPI_ProgressEntry           notifier = nullptr,
-                  ActAPI_PlotterEntry            plotter  = nullptr);
+    fbxWriter(const TCollection_AsciiString& filename,
+              ActAPI_ProgressEntry           notifier = nullptr,
+              ActAPI_PlotterEntry            plotter  = nullptr);
 
   //! Dtor.
   asiAsm_EXPORT virtual
-    ~fbx_XdeWriter();
+    ~fbxWriter();
 
 public:
 
@@ -86,7 +86,7 @@ public:
   //! \param[in] doc the XDE document to save.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
-    Perform(const Handle(asiAsm_XdeDoc)& doc);
+    Perform(const Handle(Doc)& doc);
 
 protected:
 
@@ -100,6 +100,7 @@ protected:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

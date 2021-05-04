@@ -40,11 +40,14 @@
 
 //-----------------------------------------------------------------------------
 
+namespace asiAsm {
+namespace xde {
+
 //! \ingroup ASIASM
 //!
 //! Depth-first iterator for assembly tree. Depth-first manner of iteration
 //! answers the user needs to observe the assembly contents.
-class asiAsm_XdeDocIterator
+class DocIterator
 {
 public:
 
@@ -52,17 +55,17 @@ public:
   //! \param[in] asmDoc Assembly Document to iterate.
   //! \param[in] level  max level of hierarchy to reach (INT_MAX is for no limit).
   asiAsm_EXPORT
-    asiAsm_XdeDocIterator(const Handle(asiAsm_XdeDoc)& asmDoc,
-                          const int                    level = INT_MAX);
+    DocIterator(const Handle(Doc)& asmDoc,
+                const int          level = INT_MAX);
 
   //! Initializes iterator with Data Model and a chosen item to iterate.
   //! \param[in] root   assembly item to start iterating from.
   //! \param[in] asmDoc Assembly Document to iterate.
   //! \param[in] level  max level of hierarchy to reach (INT_MAX is for no limit).
   asiAsm_EXPORT
-    asiAsm_XdeDocIterator(const asiAsm_XdeAssemblyItemId& root,
-                          const Handle(asiAsm_XdeDoc)&    asmDoc,
-                          const int                       level = INT_MAX);
+    DocIterator(const AssemblyItemId& root,
+                const Handle(Doc)&    asmDoc,
+                const int             level = INT_MAX);
 
 public:
 
@@ -75,7 +78,7 @@ public:
     Next();
 
   //! \return current item.
-  asiAsm_EXPORT asiAsm_XdeAssemblyItemId
+  asiAsm_EXPORT AssemblyItemId
     Current() const;
 
 protected:
@@ -83,15 +86,18 @@ protected:
   //! Creates an item and fills it with data.
   //! \param[in] L OCAF label for item.
   //! \return just created item.
-  asiAsm_EXPORT asiAsm_XdeAssemblyItemId
+  asiAsm_EXPORT AssemblyItemId
     createItem(const TDF_Label& L) const;
 
 protected:
 
-  Handle(asiAsm_XdeDoc)                m_asmDoc;    //!< Assembly Document to iterate.
-  std::stack<asiAsm_XdeAssemblyItemId> m_fringe;    //!< Items pending for iteration.
-  int                                  m_iMaxLevel; //!< Limit on max depth of iteration.
+  Handle(Doc)                m_asmDoc;    //!< Assembly Document to iterate.
+  std::stack<AssemblyItemId> m_fringe;    //!< Items pending for iteration.
+  int                        m_iMaxLevel; //!< Limit on max depth of iteration.
 
 };
+
+} // xde
+} // asiAsm
 
 #endif

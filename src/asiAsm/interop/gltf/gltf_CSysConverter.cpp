@@ -21,11 +21,11 @@
 // OpenCascade includes
 #include <gp_Quaternion.hxx>
 
-// ================================================================
-// Function : gltf_CSysConverter
-// Purpose  :
-// ================================================================
-asiAsm::gltf_CSysConverter::gltf_CSysConverter()
+using namespace asiAsm::xde;
+
+//-----------------------------------------------------------------------------
+
+gltf_CSysConverter::gltf_CSysConverter()
 : myInputLengthUnit (-1.0),
   myOutputLengthUnit(-1.0),
   myHasInputAx3 (false),
@@ -38,14 +38,12 @@ asiAsm::gltf_CSysConverter::gltf_CSysConverter()
   //
 }
 
-// ================================================================
-// Function : Init
-// Purpose  :
-// ================================================================
-void asiAsm::gltf_CSysConverter::Init(const gp_Ax3& theInputSystem,
-                                      double theInputLengthUnit,
-                                      const gp_Ax3& theOutputSystem,
-                                      double theOutputLengthUnit)
+//-----------------------------------------------------------------------------
+
+void gltf_CSysConverter::Init(const gp_Ax3& theInputSystem,
+                              double        theInputLengthUnit,
+                              const gp_Ax3& theOutputSystem,
+                              double        theOutputLengthUnit)
 {
   myInputLengthUnit  = theInputLengthUnit;
   myOutputLengthUnit = theOutputLengthUnit;

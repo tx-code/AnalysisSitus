@@ -37,8 +37,8 @@
 
 //-----------------------------------------------------------------------------
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Root elements within glTF JSON document.
 enum gltf_RootElement
@@ -422,6 +422,7 @@ struct gltf_MaterialPbr
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

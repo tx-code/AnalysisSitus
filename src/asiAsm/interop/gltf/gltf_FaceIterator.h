@@ -37,8 +37,8 @@
 
 class TDF_Label;
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Auxiliary class to iterate over triangulated faces.
 class gltf_FaceIterator
@@ -213,6 +213,7 @@ private:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

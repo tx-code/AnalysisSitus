@@ -49,20 +49,23 @@
 
 //-----------------------------------------------------------------------------
 
+namespace asiAsm {
+namespace xde {
+
 //! \ingroup ASIASM
 //!
 //! Persistent object ID which is an entry from an XDE Document.
-typedef TCollection_AsciiString asiAsm_XdePersistentId;
+typedef TCollection_AsciiString PersistentId;
 
 //! \ingroup ASIASM
 //!
 //! Convenience type for a collection of persistent IDs.
-typedef NCollection_Vector<asiAsm_XdePersistentId> asiAsm_XdePersistentIds;
+typedef NCollection_Vector<PersistentId> PersistentIds;
 
 //! \ingroup ASIASM
 //!
 //! List of persistent IDs.
-typedef NCollection_List<asiAsm_XdePersistentId> asiAsm_XdePersistentIdList;
+typedef NCollection_List<PersistentId> PersistentIdList;
 
 //! \ingroup ASIASM
 //!
@@ -80,35 +83,35 @@ typedef NCollection_List<asiAsm_XdePersistentId> asiAsm_XdePersistentIdList;
 //! through the nodes of a HAG. We use a string representation of this complex
 //! identifier which works quite well on hashing for data maps. The key here
 //! is to avoid dynamic allocation/deallocation of memory.
-class asiAsm_XdeAssemblyItemId
+class AssemblyItemId
 {
-friend class asiAsm_XdeDoc;
-friend class asiAsm_XdeDocIterator;
+friend class Doc;
+friend class DocIterator;
 
 public:
 
   //! Constructs assembly item ID from the passed shared string.
   //! \param[in] path string to construct an assembly item ID from.
   //! \return newly created assembly item ID.
-  static asiAsm_XdeAssemblyItemId FromPath(const Handle(TCollection_HAsciiString)& path)
+  static AssemblyItemId FromPath(const Handle(TCollection_HAsciiString)& path)
   {
-    return asiAsm_XdeAssemblyItemId(path);
+    return AssemblyItemId(path);
   }
 
   //! Constructs assembly item ID from the passed string.
   //! \param[in] path string to construct an assembly item ID from.
   //! \return newly created assembly item ID.
-  static asiAsm_XdeAssemblyItemId FromPath(const TCollection_AsciiString& path)
+  static AssemblyItemId FromPath(const TCollection_AsciiString& path)
   {
-    return asiAsm_XdeAssemblyItemId(path);
+    return AssemblyItemId(path);
   }
 
   //! Constructs assembly item ID from the passed path.
   //! \param[in] path path vector to construct an assembly item ID from.
   //! \return newly created assembly item ID.
-  static asiAsm_XdeAssemblyItemId FromPath(const NCollection_Sequence<asiAsm_XdePersistentId>& path)
+  static AssemblyItemId FromPath(const NCollection_Sequence<PersistentId>& path)
   {
-    return asiAsm_XdeAssemblyItemId(path);
+    return AssemblyItemId(path);
   }
 
 public:
@@ -120,8 +123,8 @@ public:
     //! \param[in] item  item to calculate a hash code for.
     //! \param[in] upper upper index.
     //! \return hash code.
-    static int HashCode(const asiAsm_XdeAssemblyItemId& item,
-                        const int                       upper)
+    static int HashCode(const AssemblyItemId& item,
+                        const int             upper)
     {
       return ::HashCode( item.ToString(), upper );
     }
@@ -130,8 +133,8 @@ public:
     //! \param[in] item1 first item.
     //! \param[in] item2 second item.
     //! \return true in case of equality, false -- otherwise.
-    static int IsEqual(const asiAsm_XdeAssemblyItemId& item1,
-                       const asiAsm_XdeAssemblyItemId& item2)
+    static int IsEqual(const AssemblyItemId& item1,
+                       const AssemblyItemId& item2)
     {
       return ::IsEqual( item1.ToString(), item2.ToString() );
     }
@@ -140,35 +143,35 @@ public:
 public:
 
   //! Default ctor.
-  asiAsm_XdeAssemblyItemId()
+  AssemblyItemId()
   {
     this->m_pathStr = new TCollection_HAsciiString;
   }
 
   //! Ctor accepting path as a shared string.
   //! \param[in] path string representation of a path.
-  asiAsm_XdeAssemblyItemId(const Handle(TCollection_HAsciiString)& path)
+  AssemblyItemId(const Handle(TCollection_HAsciiString)& path)
   {
     this->m_pathStr = path;
   }
 
   //! Ctor accepting path as a string.
   //! \param[in] path string representation of a path.
-  asiAsm_XdeAssemblyItemId(const TCollection_AsciiString& path)
+  AssemblyItemId(const TCollection_AsciiString& path)
   {
     this->m_pathStr = new TCollection_HAsciiString(path);
   }
 
   //! Ctor accepting path as an ordered collection of entries.
   //! \param[in] path path vector to construct an assembly item ID from.
-  asiAsm_XdeAssemblyItemId(const NCollection_Sequence<asiAsm_XdePersistentId>& path)
+  AssemblyItemId(const NCollection_Sequence<PersistentId>& path)
   {
     if ( this->m_pathStr.IsNull() )
       this->m_pathStr = new TCollection_HAsciiString;
 
     int numEntries = path.Length();
     int idx = 1;
-    for ( NCollection_Sequence<asiAsm_XdePersistentId>::Iterator it(path); it.More(); it.Next(), ++idx )
+    for ( NCollection_Sequence<PersistentId>::Iterator it(path); it.More(); it.Next(), ++idx )
     {
       this->m_pathStr = this->m_pathStr->Cat( it.Value().ToCString() );
 
@@ -179,7 +182,7 @@ public:
 
   //! Ctor accepting path as an vector of entries.
   //! \param[in] path path vector to construct an assembly item ID from.
-  asiAsm_XdeAssemblyItemId(const std::vector<asiAsm_XdePersistentId>& path)
+  AssemblyItemId(const std::vector<PersistentId>& path)
   {
     if ( this->m_pathStr.IsNull() )
       this->m_pathStr = new TCollection_HAsciiString;
@@ -197,7 +200,7 @@ public:
 
   //! Copy ctor.
   //! \param[in] aiid assembly item ID to copy.
-  asiAsm_XdeAssemblyItemId(const asiAsm_XdeAssemblyItemId& aiid)
+  AssemblyItemId(const AssemblyItemId& aiid)
   {
     this->operator=(aiid);
   }
@@ -218,7 +221,7 @@ public:
 
   //! \param[in] item item to check.
   //! \return true if this item is equal to the passed item.
-  bool IsEqual(const asiAsm_XdeAssemblyItemId& item) const
+  bool IsEqual(const AssemblyItemId& item) const
   {
     if ( this->m_pathStr->Length() != item.m_pathStr->Length() )
       return false;
@@ -248,7 +251,7 @@ public:
   //! Prepends persistent ID to the assembly item ID.
   //! \param[in] persistentId ID (entry) to prepend.
   //! \return non-const reference to this instance.
-  asiAsm_XdeAssemblyItemId& Prepend(const asiAsm_XdePersistentId& persistentId)
+  AssemblyItemId& Prepend(const PersistentId& persistentId)
   {
     return this->append(persistentId, true);
   }
@@ -258,7 +261,7 @@ public:
   //! Appends persistent ID to the assembly item ID.
   //! \param[in] persistentId ID (entry) to append.
   //! \return non-const reference to this instance.
-  asiAsm_XdeAssemblyItemId& operator<<(const asiAsm_XdePersistentId& persistentId)
+  AssemblyItemId& operator<<(const PersistentId& persistentId)
   {
     return this->append(persistentId);
   }
@@ -266,7 +269,7 @@ public:
   //! Checks if this assembly item ID is equal to the passed one.
   //! \param[in] otherId other assembly item ID.
   //! \return true/false.
-  bool operator==(const asiAsm_XdeAssemblyItemId& otherId) const
+  bool operator==(const AssemblyItemId& otherId) const
   {
     return this->ToString() == otherId.ToString();
   }
@@ -274,7 +277,7 @@ public:
   //! Checks if this assembly item ID is not equal to the passed one.
   //! \param[in] otherId other assembly item ID.
   //! \return true/false.
-  bool operator!=(const asiAsm_XdeAssemblyItemId& otherId) const
+  bool operator!=(const AssemblyItemId& otherId) const
   {
     return !this->operator==(otherId);
   }
@@ -291,7 +294,7 @@ public:
 
   //! Assignment operator.
   //! \param[in] aaid item to copy.
-  void operator=(const asiAsm_XdeAssemblyItemId& aiid)
+  void operator=(const AssemblyItemId& aiid)
   {
     this->m_pathStr   = aiid.m_pathStr;
     this->m_label     = aiid.m_label;
@@ -360,7 +363,7 @@ public:
 
   //! \param[in] item ID of the assembly item to check.
   //! \return true if this item is a child of the given item.
-  bool IsChild(const asiAsm_XdeAssemblyItemId& item) const
+  bool IsChild(const AssemblyItemId& item) const
   {
     if ( this->m_pathStr->Length() <= item.m_pathStr->Length() )
       return false;
@@ -392,8 +395,8 @@ private:
   }
 
   //! Appends passed id to the corresponding place according to passed flag.
-  asiAsm_XdeAssemblyItemId& append(const asiAsm_XdePersistentId& persistentId,
-                                   const bool                    atTheBegining = false)
+  AssemblyItemId& append(const PersistentId& persistentId,
+                         const bool          atTheBegining = false)
   {
     this->clearPath();
 
@@ -428,9 +431,9 @@ protected:
 
 protected:
 
-  TDF_Label              m_label;     //!< OCAF label for the assembly item.
-  asiAsm_XdePersistentId m_entry;     //!< Entry.
-  TDF_Label              m_jumpLabel; //!< OCAF label to jump for origin.
+  TDF_Label    m_label;     //!< OCAF label for the assembly item.
+  PersistentId m_entry;     //!< Entry.
+  TDF_Label    m_jumpLabel; //!< OCAF label to jump for origin.
 
 };
 
@@ -439,28 +442,28 @@ protected:
 //! \ingroup ASIASM
 //!
 //! Convenience type for a collection of assembly items.
-typedef NCollection_Vector<asiAsm_XdeAssemblyItemId> asiAsm_XdeAssemblyItemIds;
+typedef NCollection_Vector<AssemblyItemId> AssemblyItemIds;
 
 //! \ingroup ASIASM
 //!
 //! List of assembly items.
-typedef NCollection_List<asiAsm_XdeAssemblyItemId> asiAsm_XdeAssemblyItemIdList;
+typedef NCollection_List<AssemblyItemId> AssemblyItemIdList;
 
 //! \ingroup ASIASM
 //!
 //! Convenience type for a collection of unique assembly items.
-typedef NCollection_IndexedMap<asiAsm_XdeAssemblyItemId,
-                               asiAsm_XdeAssemblyItemId::Hasher> asiAsm_XdeAssemblyItemIdMap;
+typedef NCollection_IndexedMap<AssemblyItemId,
+                               AssemblyItemId::Hasher> AssemblyItemIdMap;
 
 //! \ingroup ASIASM
 //!
 //! Shared collection of assembly items.
-typedef NCollection_Shared<asiAsm_XdeAssemblyItemIds> asiAsm_XdeHAssemblyItemIdss;
+typedef NCollection_Shared<AssemblyItemIds> HAssemblyItemIdss;
 
 //! \ingroup ASIASM
 //!
 //! Shared map of assembly items.
-typedef NCollection_Shared<asiAsm_XdeAssemblyItemIdMap> asiAsm_XdeHAssemblyItemIdsMap;
+typedef NCollection_Shared<AssemblyItemIdMap> HAssemblyItemIdsMap;
 
 //-----------------------------------------------------------------------------
 
@@ -469,33 +472,33 @@ typedef NCollection_Shared<asiAsm_XdeAssemblyItemIdMap> asiAsm_XdeHAssemblyItemI
 //! Part ID. There is one-to-one correspondence between parts and OCAF
 //! labels in the assembly structure, so part ID is actually an entry,
 //! e.g. "0:1:1:5".
-struct asiAsm_XdePartId
+struct PartId
 {
-  asiAsm_XdePersistentId Entry;
+  PersistentId Entry;
 
-  static asiAsm_XdePartId FromEntry(const asiAsm_XdePersistentId& entry)
+  static PartId FromEntry(const PersistentId& entry)
   {
-    asiAsm_XdePartId result;
+    PartId result;
     result.Entry = entry;
     return result;
   }
 
-  static asiAsm_XdePartId FromLabel(const TDF_Label& label)
+  static PartId FromLabel(const TDF_Label& label)
   {
-    asiAsm_XdePartId result;
+    PartId result;
     TDF_Tool::Entry(label, result.Entry);
     return result;
   }
 
   //! Default ctor.
-  asiAsm_XdePartId() {}
+  PartId() {}
 
   //! Conversion constructor.
-  asiAsm_XdePartId(const asiAsm_XdePersistentId& objectId) { Entry = objectId; }
+  PartId(const PersistentId& objectId) { Entry = objectId; }
 
   //! \param[in] other entry to check.
   //! \return true, if entry is is equal to theOther
-  bool IsEqual(const asiAsm_XdePartId& other) const
+  bool IsEqual(const PartId& other) const
   {
     return Entry.IsEqual(other.Entry);
   }
@@ -520,7 +523,7 @@ struct asiAsm_XdePartId
 
   //! Conversion operator to core object ID which is essentially the same kind
   //! of string as part ID.
-  operator asiAsm_XdePersistentId() const
+  operator PersistentId() const
   {
     return this->ToString();
   }
@@ -545,18 +548,18 @@ struct asiAsm_XdePartId
     //! \param[in] entry to calculate a hash code for.
     //! \param[in] upper upper index.
     //! \return hash code.
-    static int HashCode(const asiAsm_XdePartId& entry,
-                        const int               upper)
+    static int HashCode(const PartId& entry,
+                        const int     upper)
     {
       return ::HashCode(entry.Entry, upper);
     }
 
     //! IsEqual() function for entries to be used in OCCT Data Maps.
-    //! \param entry1 [in] first entry.
-    //! \param entry2 [in] second entry.
+    //! \param[in] entry1 first entry.
+    //! \param[in] entry2 second entry.
     //! \return true in case of equality, false -- otherwise.
-    static bool IsEqual(const asiAsm_XdePartId& entry1,
-                        const asiAsm_XdePartId& entry2)
+    static bool IsEqual(const PartId& entry1,
+                        const PartId& entry2)
     {
       return ::IsEqual(entry1.Entry, entry2.Entry);
     }
@@ -567,21 +570,38 @@ struct asiAsm_XdePartId
 //! \ingroup ASIASM
 //!
 //! Convenience type for a collection of part IDs.
-typedef NCollection_Vector<asiAsm_XdePartId> asiAsm_XdePartIds;
+typedef NCollection_Vector<PartId> PartIds;
 
 //! \ingroup ASIASM
 //!
 //! Shared collection of parts.
-typedef NCollection_Shared<asiAsm_XdePartIds> asiAsm_XdeHPartIds;
+typedef NCollection_Shared<PartIds> HPartIds;
 
 //! \ingroup ASIASM
 //!
 //! Convenience type for a collection of unique parts.
-typedef NCollection_IndexedMap<asiAsm_XdePartId, asiAsm_XdePartId::Hasher> asiAsm_XdePartIdMap;
+typedef NCollection_IndexedMap<PartId, PartId::Hasher> PartIdMap;
 
 //! \ingroup ASIASM
 //!
 //! Shared map of parts.
-typedef NCollection_Shared<asiAsm_XdePartIdMap> asiAsm_XdeHPartIdMap;
+typedef NCollection_Shared<PartIdMap> HPartIdMap;
+
+//! \ingroup ASIASM
+//!
+//! Map of parts to instances.
+typedef NCollection_IndexedDataMap<PartId,
+                                   AssemblyItemIdList,
+                                   PartId::Hasher> PartsToInstancesMap;
+
+//! \ingroup ASIASM
+//!
+//! Map of labels to instances.
+typedef NCollection_IndexedDataMap<TDF_Label,
+                                   AssemblyItemIdList,
+                                   TDF_LabelMapHasher> LabelsToInstancesMap;
+
+} // xde
+} // asiAsm
 
 #endif

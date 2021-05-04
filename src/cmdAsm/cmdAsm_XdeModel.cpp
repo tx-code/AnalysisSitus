@@ -34,7 +34,7 @@
 
 //-----------------------------------------------------------------------------
 
-cmdAsm_XdeModel::cmdAsm_XdeModel(const Handle(asiAsm_XdeDoc)& doc)
+cmdAsm_XdeModel::cmdAsm_XdeModel(const Handle(asiAsm::xde::Doc)& doc)
 : asiTcl_Variable()
 {
   this->SetDocument(doc);
@@ -42,14 +42,14 @@ cmdAsm_XdeModel::cmdAsm_XdeModel(const Handle(asiAsm_XdeDoc)& doc)
 
 //-----------------------------------------------------------------------------
 
-void cmdAsm_XdeModel::SetDocument(const Handle(asiAsm_XdeDoc)& doc)
+void cmdAsm_XdeModel::SetDocument(const Handle(asiAsm::xde::Doc)& doc)
 {
   m_doc = doc;
 }
 
 //-----------------------------------------------------------------------------
 
-const Handle(asiAsm_XdeDoc)& cmdAsm_XdeModel::GetDocument() const
+const Handle(asiAsm::xde::Doc)& cmdAsm_XdeModel::GetDocument() const
 {
   return m_doc;
 }

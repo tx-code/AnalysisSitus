@@ -37,10 +37,12 @@
 #include <TDF_Tool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeDocIterator::asiAsm_XdeDocIterator(const Handle(asiAsm_XdeDoc)& asmDoc,
-                                             const int                    level)
+DocIterator::DocIterator(const Handle(Doc)& asmDoc,
+                         const int          level)
 : m_asmDoc(asmDoc), m_iMaxLevel(level)
 {
   // We start from those shapes which are "free" in terms of XDE.
@@ -54,13 +56,13 @@ asiAsm_XdeDocIterator::asiAsm_XdeDocIterator(const Handle(asiAsm_XdeDoc)& asmDoc
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeDocIterator::asiAsm_XdeDocIterator(const asiAsm_XdeAssemblyItemId& root,
-                                             const Handle(asiAsm_XdeDoc)&    asmDoc,
-                                             const int                       level)
+DocIterator::DocIterator(const AssemblyItemId& root,
+                         const Handle(Doc)&    asmDoc,
+                         const int             level)
 : m_asmDoc(asmDoc), m_iMaxLevel(level)
 {
   TDF_Label original;
-  asiAsm_XdeAssemblyItemId seed(root);
+  AssemblyItemId seed(root);
   seed.m_label = m_asmDoc->GetLabel(root);
 
   if ( seed.m_label.IsNull() )
@@ -85,21 +87,21 @@ asiAsm_XdeDocIterator::asiAsm_XdeDocIterator(const asiAsm_XdeAssemblyItemId& roo
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDocIterator::More() const
+bool DocIterator::More() const
 {
   return !m_fringe.empty();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDocIterator::Next()
+void DocIterator::Next()
 {
   // Let's throw an exception if there is nothing else to iterate.
   if ( !this->More() )
     Standard_ProgramError::Raise("No next item");
 
   // Take current.
-  asiAsm_XdeAssemblyItemId current = this->Current();
+  AssemblyItemId current = this->Current();
   m_fringe.pop(); // Top item is done.
 
   // Check current depth of iteration (root level is 0-level by convention).
@@ -122,8 +124,8 @@ void asiAsm_XdeDocIterator::Next()
     // Put all labels pending for iteration to the fringe.
     for ( int l = components.Length(); l >= 1; --l )
     {
-      TDF_Label                IL    = components(l); // Insertion-level label.
-      asiAsm_XdeAssemblyItemId IItem = this->createItem(IL);
+      TDF_Label      IL    = components(l); // Insertion-level label.
+      AssemblyItemId IItem = this->createItem(IL);
       //
       for ( int k = current.GetPathLength(); k >= 1; --k )
         IItem.Prepend( current(k) );
@@ -136,17 +138,17 @@ void asiAsm_XdeDocIterator::Next()
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeAssemblyItemId asiAsm_XdeDocIterator::Current() const
+AssemblyItemId DocIterator::Current() const
 {
   return m_fringe.top();
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeAssemblyItemId
-  asiAsm_XdeDocIterator::createItem(const TDF_Label& L) const
+AssemblyItemId
+  DocIterator::createItem(const TDF_Label& L) const
 {
-  asiAsm_XdeAssemblyItemId result;
+  AssemblyItemId result;
 
   // Populate label and entry.
   result.m_label = L;

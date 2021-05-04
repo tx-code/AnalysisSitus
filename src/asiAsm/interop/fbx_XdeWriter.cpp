@@ -55,11 +55,11 @@
 
 //-----------------------------------------------------------------------------
 
-using namespace asiAsm;
+using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-struct t_fbxState
+struct asiAsm::xde::t_fbxState
 {
 #if defined FBXSDK_SHARED
   typedef NCollection_DataMap<FbxMesh*, NCollection_Vector<FbxSurfacePhong*> > FbxMeshFbxSurfacePhongMap;
@@ -195,10 +195,10 @@ namespace
     return fbxMesh != nullptr;
   }
 
-  bool getMaterialForShape(const Handle(asiAsm_XdeDoc)& doc,
-                           FbxSurfacePhong*&            fbxSurfacePhong,
-                           const TDF_Label&             shapeLabel,
-                           t_fbxState*                  pState)
+  bool getMaterialForShape(const Handle(Doc)& doc,
+                           FbxSurfacePhong*&  fbxSurfacePhong,
+                           const TDF_Label&   shapeLabel,
+                           t_fbxState*        pState)
   {
     TDF_Label colorLabel;
     Handle(XCAFDoc_ColorTool) colorTool = doc->GetColorTool();
@@ -243,7 +243,7 @@ namespace
     return fbxSurfacePhong != nullptr;
   }
 
-  void appendColor(const Handle(asiAsm_XdeDoc)&          doc,
+  void appendColor(const Handle(Doc)&                    doc,
                    FbxNode*                              fbxNode,
                    FbxMesh*                              fbxMesh,
                    const TDF_Label&                      label,
@@ -312,11 +312,11 @@ namespace
     }
   }
 
-  bool exportFacets(const Handle(asiAsm_XdeDoc)& doc,
-                    FbxNode*                     fbxParentNode,
-                    const TDF_Label&             label,
-                    const TopoDS_Shape&          shape,
-                    t_fbxState*                  pState)
+  bool exportFacets(const Handle(Doc)&  doc,
+                    FbxNode*            fbxParentNode,
+                    const TDF_Label&    label,
+                    const TopoDS_Shape& shape,
+                    t_fbxState*         pState)
   {
     bool isOk = false;
 
@@ -413,11 +413,11 @@ namespace
     return true;
   }
 
-  void appendNode(const Handle(asiAsm_XdeDoc)& doc,
-                  FbxNode*                     fbxParentNode,
-                  const TDF_Label&             label,
-                  t_fbxState*                  pState,
-                  ActAPI_ProgressEntry         progress)
+  void appendNode(const Handle(Doc)&   doc,
+                  FbxNode*             fbxParentNode,
+                  const TDF_Label&     label,
+                  t_fbxState*          pState,
+                  ActAPI_ProgressEntry progress)
   {
     if ( !fbxParentNode || label.IsNull() )
       return;
@@ -504,9 +504,9 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-fbx_XdeWriter::fbx_XdeWriter(const TCollection_AsciiString& filename,
-                             ActAPI_ProgressEntry           notifier,
-                             ActAPI_PlotterEntry            plotter)
+fbxWriter::fbxWriter(const TCollection_AsciiString& filename,
+                     ActAPI_ProgressEntry           notifier,
+                     ActAPI_PlotterEntry            plotter)
 //
 : ActAPI_IAlgorithm (notifier, plotter),
   m_filename        (filename),
@@ -515,14 +515,14 @@ fbx_XdeWriter::fbx_XdeWriter(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
-fbx_XdeWriter::~fbx_XdeWriter()
+fbxWriter::~fbxWriter()
 {
   delete m_pFbxState;
 }
 
 //-----------------------------------------------------------------------------
 
-bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
+bool fbxWriter::Perform(const Handle(Doc)& doc)
 {
 #if defined FBXSDK_SHARED
   m_progress.Reset();
@@ -569,7 +569,7 @@ bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
   FbxNode* fbxRootNode = m_pFbxState->fbxScene->GetRootNode();
 
   // Init progress.
-  asiAsm_XdeAssemblyItemIds items;
+  AssemblyItemIds items;
   doc->GetLeafAssemblyItems(items);
   //
   int progressCapacity = (int) (items.Size() / 3.0 * 4.0);
@@ -712,7 +712,7 @@ bool fbx_XdeWriter::Perform(const Handle(asiAsm_XdeDoc)& doc)
 
 //-----------------------------------------------------------------------------
 
-void fbx_XdeWriter::clearState()
+void fbxWriter::clearState()
 {
 #if defined FBXSDK_SHARED
   m_pFbxState->ClearState();

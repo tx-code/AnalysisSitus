@@ -40,6 +40,9 @@
 
 //-----------------------------------------------------------------------------
 
+namespace asiAsm {
+namespace xde {
+
 //! \ingroup ASIASM
 //!
 //! \brief Assembly graph.
@@ -61,7 +64,7 @@
 //! by Ari Rappoport in "Modeling in Computer Graphics", 1993.
 //!
 //! \sa core_ObjectId
-class asiAsm_XdeGraph : public Standard_Transient
+class Graph : public Standard_Transient
 {
 public:
 
@@ -82,7 +85,7 @@ public:
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdeGraph, Standard_Transient)
+  DEFINE_STANDARD_RTTI_INLINE(Graph, Standard_Transient)
 
 public:
 
@@ -96,7 +99,7 @@ public:
 
     //! ctor accepting the assembly graph to iterate.
     //! \param[in] asmGraph assembly graph to iterate.
-    Iterator(const Handle(asiAsm_XdeGraph)& asmGraph)
+    Iterator(const Handle(Graph)& asmGraph)
     {
       this->Init(asmGraph);
     }
@@ -105,7 +108,7 @@ public:
 
     //! Initializes iterator with assembly graph.
     //! \param[in] asmGraph assembly graph to iterate.
-    void Init(const Handle(asiAsm_XdeGraph)& asmGraph)
+    void Init(const Handle(Graph)& asmGraph)
     {
       m_graph         = asmGraph;
       m_iCurrentIndex = 1;
@@ -132,8 +135,8 @@ public:
 
   protected:
 
-    Handle(asiAsm_XdeGraph) m_graph;         //!< Assembly graph to iterate.
-    int                     m_iCurrentIndex; //!< Current 1-based node ID.
+    Handle(Graph) m_graph;         //!< Assembly graph to iterate.
+    int           m_iCurrentIndex; //!< Current 1-based node ID.
 
   };
 
@@ -151,7 +154,7 @@ public:
   //!
   //! \param[in] M Data Model to iterate.
   asiAsm_EXPORT
-    asiAsm_XdeGraph(const Handle(asiAsm_XdeDoc)& M);
+    Graph(const Handle(Doc)& M);
 
 public:
 
@@ -238,14 +241,14 @@ public:
   //! \brief Returns object ID by node ID.
   //! \param[in] oneBasedNodeId one-based node ID.
   //! \return persistent ID.
-  const asiAsm_XdePersistentId& GetPersistentId(const int oneBasedNodeId) const
+  const PersistentId& GetPersistentId(const int oneBasedNodeId) const
   {
     return m_nodes(oneBasedNodeId);
   }
 
   //! \brief Returns the unordered set of graph nodes.
   //! \return graph nodes.
-  const NCollection_IndexedMap<asiAsm_XdePersistentId>& GetNodes() const
+  const NCollection_IndexedMap<PersistentId>& GetNodes() const
   {
     return m_nodes;
   }
@@ -321,15 +324,18 @@ protected:
 protected:
 
   // INPUTS
-  Handle(asiAsm_XdeDoc) m_model; //!< Data Model instance.
+  Handle(Doc) m_model; //!< Data Model instance.
 
   // OUTPUTS
-  TColStd_PackedMapOfInteger                     m_roots;     //!< IDs of the root nodes.
-  NCollection_IndexedMap<asiAsm_XdePersistentId> m_nodes;     //!< Graph nodes.
-  t_adjacency                                    m_arcs;      //!< "Part-of" relations.
-  NCollection_DataMap<int, NodeType>             m_nodeTypes; //!< Node types (cached for efficiency).
-  NCollection_DataMap<int, int>                  m_usages;    //!< Prototype usage occurrences.
+  TColStd_PackedMapOfInteger           m_roots;     //!< IDs of the root nodes.
+  NCollection_IndexedMap<PersistentId> m_nodes;     //!< Graph nodes.
+  t_adjacency                          m_arcs;      //!< "Part-of" relations.
+  NCollection_DataMap<int, NodeType>   m_nodeTypes; //!< Node types (cached for efficiency).
+  NCollection_DataMap<int, int>        m_usages;    //!< Prototype usage occurrences.
 
 };
+
+} // xde
+} // asiAsm
 
 #endif

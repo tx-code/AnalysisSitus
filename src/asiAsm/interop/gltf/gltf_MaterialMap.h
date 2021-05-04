@@ -22,8 +22,8 @@
 #include <gltf_Entities.h>
 #include <gltf_MaterialMapBase.h>
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Material manager for exporting into glTF format.
 class gltf_MaterialMap : public gltf_MaterialMapBase
@@ -108,6 +108,7 @@ protected:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

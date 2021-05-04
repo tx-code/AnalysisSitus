@@ -26,12 +26,14 @@
 #include <XCAFDoc_ShapeTool.hxx>
 #include <XCAFPrs.hxx>
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_FaceIterator::gltf_FaceIterator(const TDF_Label&           label,
-                                             const TopLoc_Location&     location,
-                                             const bool                 toMapColors,
-                                             const gltf_XdeVisualStyle& style)
+gltf_FaceIterator::gltf_FaceIterator(const TDF_Label&           label,
+                                     const TopLoc_Location&     location,
+                                     const bool                 toMapColors,
+                                     const gltf_XdeVisualStyle& style)
 : m_defStyle      (style),
   m_bMapColors    (toMapColors),
   m_SLTool        (1, 1e-12),
@@ -63,14 +65,14 @@ asiAsm::gltf_FaceIterator::gltf_FaceIterator(const TDF_Label&           label,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_FaceIterator::More() const
+bool gltf_FaceIterator::More() const
 {
   return !m_polyTriang.IsNull();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_FaceIterator::Next()
+void gltf_FaceIterator::Next()
 {
   for ( ; m_faceExp.More(); m_faceExp.Next() )
   {
@@ -96,14 +98,14 @@ void asiAsm::gltf_FaceIterator::Next()
 
 //-----------------------------------------------------------------------------
 
-const TopoDS_Face& asiAsm::gltf_FaceIterator::Face() const
+const TopoDS_Face& gltf_FaceIterator::Face() const
 {
   return m_face;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_FaceIterator::IsEmptyMesh() const
+bool gltf_FaceIterator::IsEmptyMesh() const
 {
   return m_polyTriang.IsNull()
      || (m_polyTriang->NbNodes() < 1 && m_polyTriang->NbTriangles() < 1);
@@ -111,49 +113,49 @@ bool asiAsm::gltf_FaceIterator::IsEmptyMesh() const
 
 //-----------------------------------------------------------------------------
 
-const asiAsm::gltf_XdeVisualStyle& asiAsm::gltf_FaceIterator::FaceStyle() const
+const gltf_XdeVisualStyle& gltf_FaceIterator::FaceStyle() const
 {
   return m_faceStyle;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_FaceIterator::HasFaceColor() const
+bool gltf_FaceIterator::HasFaceColor() const
 {
   return m_bHasFaceColor;
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_ColorRGBA& asiAsm::gltf_FaceIterator::FaceColor() const
+const Quantity_ColorRGBA& gltf_FaceIterator::FaceColor() const
 {
   return m_faceColor;
 }
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::NbTriangles() const
+int gltf_FaceIterator::NbTriangles() const
 {
   return m_polyTriang->NbTriangles();
 }
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::ElemLower() const
+int gltf_FaceIterator::ElemLower() const
 {
   return m_polyTriang->Triangles().Lower();
 }
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::ElemUpper() const
+int gltf_FaceIterator::ElemUpper() const
 {
   return m_polyTriang->Triangles().Upper();
 }
 
 //-----------------------------------------------------------------------------
 
-Poly_Triangle asiAsm::gltf_FaceIterator::TriangleOriented(int elemIndex) const
+Poly_Triangle gltf_FaceIterator::TriangleOriented(int elemIndex) const
 {
   Poly_Triangle tri = triangle(elemIndex);
 
@@ -166,21 +168,21 @@ Poly_Triangle asiAsm::gltf_FaceIterator::TriangleOriented(int elemIndex) const
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_FaceIterator::HasNormals() const
+bool gltf_FaceIterator::HasNormals() const
 {
   return m_bHasNormals;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_FaceIterator::HasTexCoords() const
+bool gltf_FaceIterator::HasTexCoords() const
 {
   return m_pNodeUVs != NULL;
 }
 
 //-----------------------------------------------------------------------------
 
-gp_Dir asiAsm::gltf_FaceIterator::NormalTransformed(int theNode)
+gp_Dir gltf_FaceIterator::NormalTransformed(int theNode)
 {
   gp_Dir aNorm = normal (theNode);
   if ( m_trsf.Form() != gp_Identity )
@@ -196,7 +198,7 @@ gp_Dir asiAsm::gltf_FaceIterator::NormalTransformed(int theNode)
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::NbNodes() const
+int gltf_FaceIterator::NbNodes() const
 {
   return !m_polyTriang.IsNull()
         ? m_polyTriang->Nodes().Length()
@@ -205,21 +207,21 @@ int asiAsm::gltf_FaceIterator::NbNodes() const
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::NodeLower() const
+int gltf_FaceIterator::NodeLower() const
 {
   return m_polyTriang->Nodes().Lower();
 }
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_FaceIterator::NodeUpper() const
+int gltf_FaceIterator::NodeUpper() const
 {
   return m_polyTriang->Nodes().Upper();
 }
 
 //-----------------------------------------------------------------------------
 
-gp_Pnt asiAsm::gltf_FaceIterator::NodeTransformed(const int N) const
+gp_Pnt gltf_FaceIterator::NodeTransformed(const int N) const
 {
   gp_Pnt NP = node(N);
   NP.Transform(m_trsf);
@@ -228,24 +230,25 @@ gp_Pnt asiAsm::gltf_FaceIterator::NodeTransformed(const int N) const
 
 //-----------------------------------------------------------------------------
 
-gp_Pnt2d asiAsm::gltf_FaceIterator::NodeTexCoord(const int N) const
+gp_Pnt2d gltf_FaceIterator::NodeTexCoord(const int N) const
 {
   return m_pNodeUVs != NULL ? m_pNodeUVs->Value(N) : gp_Pnt2d();
 }
 
 //-----------------------------------------------------------------------------
 
-gp_Pnt asiAsm::gltf_FaceIterator::node(const int N) const
+gp_Pnt gltf_FaceIterator::node(const int N) const
 {
   return m_polyTriang->Nodes().Value(N);
 }
 
 //-----------------------------------------------------------------------------
 
-gp_Dir asiAsm::gltf_FaceIterator::normal(int N)
+gp_Dir gltf_FaceIterator::normal(int N)
 {
   gp_Dir norm( gp::DZ() );
-  if (m_pNormals != NULL)
+
+  if ( m_pNormals != NULL )
   {
     const int nodeIdx = N - m_pNodes->Lower();
     const Graphic3d_Vec3 normVec3( m_pNormals->Value(m_pNormals->Lower() + nodeIdx * 3),
@@ -271,16 +274,16 @@ gp_Dir asiAsm::gltf_FaceIterator::normal(int N)
 
 //-----------------------------------------------------------------------------
 
-Poly_Triangle asiAsm::gltf_FaceIterator::triangle(int elemIndex) const
+Poly_Triangle gltf_FaceIterator::triangle(int elemIndex) const
 {
   return m_polyTriang->Triangles().Value(elemIndex);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_FaceIterator::readStyles(const TDF_Label&           label,
-                                           const TopLoc_Location&     location,
-                                           const gltf_XdeVisualStyle& style)
+void gltf_FaceIterator::readStyles(const TDF_Label&           label,
+                                   const TopLoc_Location&     location,
+                                   const gltf_XdeVisualStyle& style)
 {
   // Get styles out of OCAF.
   TopLoc_Location dummyLoc;
@@ -345,7 +348,7 @@ void asiAsm::gltf_FaceIterator::readStyles(const TDF_Label&           label,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_FaceIterator::resetFace()
+void gltf_FaceIterator::resetFace()
 {
   m_polyTriang.Nullify();
   m_face.Nullify();
@@ -361,7 +364,7 @@ void asiAsm::gltf_FaceIterator::resetFace()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_FaceIterator::initFace()
+void gltf_FaceIterator::initFace()
 {
   m_bHasNormals   = false;
   m_bHasFaceColor = false;

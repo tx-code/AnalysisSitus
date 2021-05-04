@@ -24,9 +24,11 @@
 #include <Standard_GUID.hxx>
 #include <TDF_Label.hxx>
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
-const Standard_GUID& asiAsm::gltf_MaterialAttr::GetID()
+const Standard_GUID& gltf_MaterialAttr::GetID()
 {
   static Standard_GUID THE_VIS_MAT_ID ("EBB00255-03A0-4845-BD3B-A70EEDEEFA78");
   return THE_VIS_MAT_ID;
@@ -34,7 +36,7 @@ const Standard_GUID& asiAsm::gltf_MaterialAttr::GetID()
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialAttr::gltf_MaterialAttr()
+gltf_MaterialAttr::gltf_MaterialAttr()
 : myAlphaMode (Graphic3d_AlphaMode_BlendAuto),
   myAlphaCutOff (0.5f),
   myIsDoubleSided (true)
@@ -44,7 +46,7 @@ asiAsm::gltf_MaterialAttr::gltf_MaterialAttr()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::SetPbrMaterial(const gltf_MaterialPbr& theMaterial)
+void gltf_MaterialAttr::SetPbrMaterial(const gltf_MaterialPbr& theMaterial)
 {
   Backup();
   myPbrMat = theMaterial;
@@ -52,7 +54,7 @@ void asiAsm::gltf_MaterialAttr::SetPbrMaterial(const gltf_MaterialPbr& theMateri
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::SetCommonMaterial(const gltf_MaterialCommon& theMaterial)
+void gltf_MaterialAttr::SetCommonMaterial(const gltf_MaterialCommon& theMaterial)
 {
   Backup();
   myCommonMat = theMaterial;
@@ -60,8 +62,8 @@ void asiAsm::gltf_MaterialAttr::SetCommonMaterial(const gltf_MaterialCommon& the
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::SetAlphaMode(Graphic3d_AlphaMode theMode,
-                                             float               theCutOff)
+void gltf_MaterialAttr::SetAlphaMode(Graphic3d_AlphaMode theMode,
+                                     float               theCutOff)
 {
   Backup();
   myAlphaMode   = theMode;
@@ -70,7 +72,7 @@ void asiAsm::gltf_MaterialAttr::SetAlphaMode(Graphic3d_AlphaMode theMode,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::SetDoubleSided (bool theIsDoubleSided)
+void gltf_MaterialAttr::SetDoubleSided(bool theIsDoubleSided)
 {
   Backup();
   myIsDoubleSided = theIsDoubleSided;
@@ -78,7 +80,7 @@ void asiAsm::gltf_MaterialAttr::SetDoubleSided (bool theIsDoubleSided)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::Restore (const Handle(TDF_Attribute)& theWith)
+void gltf_MaterialAttr::Restore(const Handle(TDF_Attribute)& theWith)
 {
   gltf_MaterialAttr* anOther = dynamic_cast<gltf_MaterialAttr* >(theWith.get());
   myPbrMat        = anOther->myPbrMat;
@@ -90,15 +92,15 @@ void asiAsm::gltf_MaterialAttr::Restore (const Handle(TDF_Attribute)& theWith)
 
 //-----------------------------------------------------------------------------
 
-Handle(TDF_Attribute) asiAsm::gltf_MaterialAttr::NewEmpty() const
+Handle(TDF_Attribute) gltf_MaterialAttr::NewEmpty() const
 {
   return new gltf_MaterialAttr();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_MaterialAttr::Paste(const Handle(TDF_Attribute)& theInto,
-                                      const Handle(TDF_RelocationTable)& ) const
+void gltf_MaterialAttr::Paste(const Handle(TDF_Attribute)& theInto,
+                              const Handle(TDF_RelocationTable)& ) const
 {
   gltf_MaterialAttr* anOther = dynamic_cast<gltf_MaterialAttr* >(theInto.get());
   anOther->Backup();
@@ -111,7 +113,7 @@ void asiAsm::gltf_MaterialAttr::Paste(const Handle(TDF_Attribute)& theInto,
 
 //-----------------------------------------------------------------------------
 
-Quantity_ColorRGBA asiAsm::gltf_MaterialAttr::BaseColor() const
+Quantity_ColorRGBA gltf_MaterialAttr::BaseColor() const
 {
   if (myPbrMat.IsDefined)
   {
@@ -126,7 +128,7 @@ Quantity_ColorRGBA asiAsm::gltf_MaterialAttr::BaseColor() const
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialCommon asiAsm::gltf_MaterialAttr::ConvertToCommonMaterial()
+gltf_MaterialCommon gltf_MaterialAttr::ConvertToCommonMaterial()
 {
   if (myCommonMat.IsDefined)
   {
@@ -150,7 +152,7 @@ asiAsm::gltf_MaterialCommon asiAsm::gltf_MaterialAttr::ConvertToCommonMaterial()
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_MaterialPbr asiAsm::gltf_MaterialAttr::ConvertToPbrMaterial()
+gltf_MaterialPbr gltf_MaterialAttr::ConvertToPbrMaterial()
 {
   if (myPbrMat.IsDefined)
   {

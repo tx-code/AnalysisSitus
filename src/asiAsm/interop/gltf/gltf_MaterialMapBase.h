@@ -18,12 +18,15 @@
 #ifndef gltf_MaterialMapBase_HeaderFile
 #define gltf_MaterialMapBase_HeaderFile
 
-#include <NCollection_DoubleMap.hxx>
-#include <NCollection_Map.hxx>
+// glTF includes
 #include <gltf_XdeVisualStyle.h>
 
-namespace asiAsm
-{
+// OpenCascade includes
+#include <NCollection_DoubleMap.hxx>
+#include <NCollection_Map.hxx>
+
+namespace asiAsm {
+namespace xde {
 
 //! Material manager.
 //! Provides an interface for collecting all materials within the document before writing it into file,
@@ -105,6 +108,7 @@ protected:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

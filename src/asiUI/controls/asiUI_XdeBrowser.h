@@ -62,7 +62,7 @@ public:
   //! \param[in] model  XDE document to browse.
   //! \param[in] cf     common facilities.
   //! \param[in] parent parent widget (if any).
-  asiUI_XdeBrowser(const Handle(asiAsm_XdeDoc)&          doc,
+  asiUI_XdeBrowser(const Handle(asiAsm::xde::Doc)&       doc,
                    const Handle(asiUI_CommonFacilities)& cf,
                    QWidget*                              parent = nullptr);
 
@@ -76,11 +76,11 @@ public:
 
   //! Searches for an item with the given index and set that item selected.
   //! \param[in] nodeId target Node ID.
-  void SetSelectedAssemblyItemId(const asiAsm_XdeAssemblyItemId& nodeId);
+  void SetSelectedAssemblyItemId(const asiAsm::xde::AssemblyItemId& nodeId);
 
   //! Returns selected item.
   //! \return selected assembly item ID.
-  asiAsm_XdeAssemblyItemId GetSelectedAssemblyItemId() const;
+  asiAsm::xde::AssemblyItemId GetSelectedAssemblyItemId() const;
 
   //! \return ID of the selected node in the graph.
   int GetSelectedNodeId() const;
@@ -128,8 +128,8 @@ protected slots:
 
 protected:
 
-  Handle(asiAsm_XdeDoc)          m_doc;      //!< XDE document instance.
-  Handle(asiAsm_XdeGraph)        m_asmGraph; //!< Assembly graph.
+  Handle(asiAsm::xde::Doc)       m_doc;      //!< XDE document instance.
+  Handle(asiAsm::xde::Graph)     m_asmGraph; //!< Assembly graph.
   Handle(asiUI_CommonFacilities) m_cf;       //!< Common UI facilities.
 
 };

@@ -41,6 +41,9 @@
 
 //-----------------------------------------------------------------------------
 
+namespace asiAsm {
+namespace xde {
+
 //! \ingroup ASIASM
 //!
 //! In the XDE framework, there is no such thing as "part representation," so
@@ -53,12 +56,12 @@
 //! mess in the data hierarchy (the representations are mixed up with other
 //! "housekeeping" attributes, such as TDataStd_TreeNode). Still, we do not change
 //! the storage scheme to stay compatible with the XDE native format.
-class asiAsm_XdePartRepr : public Standard_Transient
+class PartRepr : public Standard_Transient
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdePartRepr, Standard_Transient)
+  DEFINE_STANDARD_RTTI_INLINE(PartRepr, Standard_Transient)
 
 public:
 
@@ -79,7 +82,7 @@ public:
 public:
 
   //! \return the owner part's ID.
-  const asiAsm_XdePartId& GetPartId() const
+  const PartId& GetPartId() const
   {
     return m_partId;
   }
@@ -88,11 +91,11 @@ protected:
 
   //! Default ctor is protected as the base class cannot be
   //! instantiated directly.
-  asiAsm_XdePartRepr() = default;
+  PartRepr() = default;
 
 protected:
 
-  asiAsm_XdePartId m_partId; //!< ID of the part.
+  PartId m_partId; //!< ID of the part.
 
 };
 
@@ -103,12 +106,12 @@ protected:
 //! The primary representation of a part which is supported natively in the XDE
 //! framework is the precise (curved) boundary representation. This representation
 //! corresponds to the TNaming_NamedShape attribute of OCAF.
-class asiAsm_XdePartBoundaryRepr : public asiAsm_XdePartRepr
+class PartBoundaryRepr : public PartRepr
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdePartBoundaryRepr, asiAsm_XdePartRepr)
+  DEFINE_STANDARD_RTTI_INLINE(PartBoundaryRepr, PartRepr)
 
 public:
 
@@ -122,10 +125,10 @@ public:
 
   //! Ctor accepting the corresponding OCAF attribute.
   //! \param[in] attr TNaming_NamedShape attribute.
-  asiAsm_XdePartBoundaryRepr(const Handle(TNaming_NamedShape)& attr)
+  PartBoundaryRepr(const Handle(TNaming_NamedShape)& attr)
   //
-  : asiAsm_XdePartRepr (),
-    m_attr             (attr)
+  : PartRepr (),
+    m_attr   (attr)
   {}
 
 public:
@@ -133,7 +136,7 @@ public:
   //! \return the overriden string representation.
   virtual TCollection_AsciiString ToString() const override
   {
-    TCollection_AsciiString result = asiAsm_XdePartRepr::ToString();
+    TCollection_AsciiString result = PartRepr::ToString();
     result += " ";
     result += asiAlgo_Utils::ShapeTypeStr( this->GetShape() ).c_str();
     return result;
@@ -181,12 +184,12 @@ protected:
 //! in the triangulation for the sake of attaching any metadata there. That's a
 //! limitation of the XDE framework itself that, among with some others, motivates
 //! us to develop another data model for CAD assemblies.
-class asiAsm_XdePartTriangulationRepr : public asiAsm_XdePartRepr
+class PartTriangulationRepr : public PartRepr
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdePartTriangulationRepr, asiAsm_XdePartRepr)
+  DEFINE_STANDARD_RTTI_INLINE(PartTriangulationRepr, PartRepr)
 
 public:
 
@@ -200,10 +203,10 @@ public:
 
   //! Ctor accepting the TDataXtd_Triangulation OCAF attribute.
   //! \param[in] attr the corresponding TDataXtd_Triangulation attribute.
-  asiAsm_XdePartTriangulationRepr(const Handle(TDataXtd_Triangulation)& attr)
+  PartTriangulationRepr(const Handle(TDataXtd_Triangulation)& attr)
   //
-  : asiAsm_XdePartRepr (),
-    m_attr             (attr)
+  : PartRepr (),
+    m_attr   (attr)
   {}
 
 public:
@@ -237,8 +240,9 @@ protected:
 //! \ingroup ASIASM
 //!
 //! Factory for part representations. Use this class to construct the representation
-//! interfaces and also to check that the attributes you're passing are supported.
-class asiAsm_XdePartReprFactory
+//! interfaces and also to check that the attributes you're passing are supported
+//! as part representation holders.
+class PartReprFactory
 {
 public:
 
@@ -246,23 +250,26 @@ public:
   //! \param[in] attr the OCAF attribute in question.
   //! \return new part representation or null handle if the passed attribute's
   //!         type is not supported.
-  static Handle(asiAsm_XdePartRepr) New(const Handle(TDF_Attribute)& attr)
+  static Handle(PartRepr) New(const Handle(TDF_Attribute)& attr)
   {
     const Handle(Standard_Type)& type = attr->DynamicType();
 
     if ( type == STANDARD_TYPE(TNaming_NamedShape) )
     {
-      return new asiAsm_XdePartBoundaryRepr( Handle(TNaming_NamedShape)::DownCast(attr) );
+      return new PartBoundaryRepr( Handle(TNaming_NamedShape)::DownCast(attr) );
     }
 
     if ( type == STANDARD_TYPE(TDataXtd_Triangulation) )
     {
-      return new asiAsm_XdePartTriangulationRepr( Handle(TDataXtd_Triangulation)::DownCast(attr) );
+      return new PartTriangulationRepr( Handle(TDataXtd_Triangulation)::DownCast(attr) );
     }
 
     return nullptr;
   }
 
 };
+
+} // xde
+} // asiAsm
 
 #endif

@@ -32,15 +32,17 @@
 // Own include
 #include <asiAsm_XdeApp.h>
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
-Handle(asiAsm_XdeApp) asiAsm_XdeApp::Instance()
+Handle(App) App::Instance()
 {
-  static Handle(asiAsm_XdeApp) A; // Singleton.
+  static Handle(App) A; // Singleton.
   //
   if ( A.IsNull() )
   {
-    A = new asiAsm_XdeApp();
+    A = new App();
   }
 
   return A;
@@ -48,12 +50,12 @@ Handle(asiAsm_XdeApp) asiAsm_XdeApp::Instance()
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeApp::asiAsm_XdeApp() : XCAFApp_Application()
+App::App() : XCAFApp_Application()
 {}
 
 //-----------------------------------------------------------------------------
 
-const char* asiAsm_XdeApp::ResourcesName()
+const char* App::ResourcesName()
 {
   return "Resources";
 }

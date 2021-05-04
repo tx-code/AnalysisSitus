@@ -51,9 +51,9 @@
 
 //-----------------------------------------------------------------------------
 
-asiUI_DialogXdeSummary::asiUI_DialogXdeSummary(const Handle(asiAsm_XdeDoc)& xdeDoc,
-                                               ActAPI_ProgressEntry         progress,
-                                               QWidget*                     parent)
+asiUI_DialogXdeSummary::asiUI_DialogXdeSummary(const Handle(asiAsm::xde::Doc)& xdeDoc,
+                                               ActAPI_ProgressEntry            progress,
+                                               QWidget*                        parent)
 : QDialog(parent), m_asmModel(xdeDoc), m_progress(progress)
 {
   // Main layout.
@@ -119,7 +119,8 @@ void asiUI_DialogXdeSummary::initialize()
   TIMER_GO
 
   // Prepare assembly graph.
-  Handle(asiAsm_XdeGraph) asmGraph = new asiAsm_XdeGraph(m_asmModel);
+  Handle(asiAsm::xde::Graph)
+    asmGraph = new asiAsm::xde::Graph(m_asmModel);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(m_progress, "Build assembly graph")
@@ -141,7 +142,9 @@ void asiUI_DialogXdeSummary::initialize()
                              numParts);
 
   // Calculate number of scene objects.
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) items = new asiAsm_XdeHAssemblyItemIdsMap;
+  Handle(asiAsm::xde::HAssemblyItemIdsMap)
+    items = new asiAsm::xde::HAssemblyItemIdsMap;
+  //
   m_asmModel->GetLeafAssemblyItems(items);
   //
   const int numObjects = items->Extent();

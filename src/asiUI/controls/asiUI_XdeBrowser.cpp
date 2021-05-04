@@ -61,9 +61,9 @@
 
 //-----------------------------------------------------------------------------
 
-TCollection_AsciiString GetItemLabel(const int                      id,
-                                     const Handle(asiAsm_XdeGraph)& asmGraph,
-                                     const Handle(asiAsm_XdeDoc)&   asmModel)
+TCollection_AsciiString GetItemLabel(const int                         id,
+                                     const Handle(asiAsm::xde::Graph)& asmGraph,
+                                     const Handle(asiAsm::xde::Doc)&   asmModel)
 {
   // Get name of the persistent object.
   TCollection_ExtendedString name;
@@ -76,27 +76,27 @@ TCollection_AsciiString GetItemLabel(const int                      id,
 //-----------------------------------------------------------------------------
 
 QIcon
-  GetItemIcon(const int                      id,
-              const Handle(asiAsm_XdeGraph)& asmGraph)
+  GetItemIcon(const int                         id,
+              const Handle(asiAsm::xde::Graph)& asmGraph)
 {
   static QIcon icoRoot         (":icons/asitus/asm_root_icon_16x16");
   static QIcon icoSubassembly  (":icons/asitus/asm_subassembly_icon_16x16");
   static QIcon icoPartInstance (":icons/asitus/asm_part_instance_icon_16x16");
   static QIcon icoPart         (":icons/asitus/asm_part_icon_16x16");
 
-  asiAsm_XdeGraph::NodeType nodeType = asmGraph->GetNodeType(id);
+  asiAsm::xde::Graph::NodeType nodeType = asmGraph->GetNodeType(id);
 
   if ( asmGraph->GetRoots().Contains(id) )
     return icoRoot;
 
-  if ( nodeType == asiAsm_XdeGraph::NodeType_Subassembly )
+  if ( nodeType == asiAsm::xde::Graph::NodeType_Subassembly )
     return icoSubassembly;
 
-  if ( (nodeType == asiAsm_XdeGraph::NodeType_PartOccurrence) ||
-       (nodeType == asiAsm_XdeGraph::NodeType_SubassemblyOccurrence) )
+  if ( (nodeType == asiAsm::xde::Graph::NodeType_PartOccurrence) ||
+       (nodeType == asiAsm::xde::Graph::NodeType_SubassemblyOccurrence) )
     return icoPartInstance;
 
-  if ( nodeType == asiAsm_XdeGraph::NodeType_Part )
+  if ( nodeType == asiAsm::xde::Graph::NodeType_Part )
     return icoPart;
 
   return QIcon();
@@ -104,7 +104,7 @@ QIcon
 
 //-----------------------------------------------------------------------------
 
-asiUI_XdeBrowser::asiUI_XdeBrowser(const Handle(asiAsm_XdeDoc)&          doc,
+asiUI_XdeBrowser::asiUI_XdeBrowser(const Handle(asiAsm::xde::Doc)&       doc,
                                    const Handle(asiUI_CommonFacilities)& cf,
                                    QWidget*                              parent)
 : QTreeWidget (parent),
@@ -146,7 +146,7 @@ void asiUI_XdeBrowser::Populate()
   }
 
   // Prepare assembly graph.
-  m_asmGraph = new asiAsm_XdeGraph(m_doc);
+  m_asmGraph = new asiAsm::xde::Graph(m_doc);
 
   // Clean up the existing contents.
   this->clear();
@@ -177,32 +177,32 @@ void asiUI_XdeBrowser::Populate()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_XdeBrowser::SetSelectedAssemblyItemId(const asiAsm_XdeAssemblyItemId& asiUI_NotUsed(nodeId))
+void asiUI_XdeBrowser::SetSelectedAssemblyItemId(const asiAsm::xde::AssemblyItemId& asiUI_NotUsed(nodeId))
 {
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeAssemblyItemId asiUI_XdeBrowser::GetSelectedAssemblyItemId() const
+asiAsm::xde::AssemblyItemId asiUI_XdeBrowser::GetSelectedAssemblyItemId() const
 {
   QList<QTreeWidgetItem*> items = this->selectedItems();
   if ( !items.length() || items.length() > 1 )
-    return asiAsm_XdeAssemblyItemId();
+    return asiAsm::xde::AssemblyItemId();
 
   QTreeWidgetItem* item = items.at(0);
 
   // Loop over the parents to gather all persistent IDs.
-  asiAsm_XdeAssemblyItemId result;
+  asiAsm::xde::AssemblyItemId result;
   do
   {
     // Get ID and type of the node in the assembly graph.
-    const int                 nid  = item->data(0, BrowserRoleNodeId).toInt();
-    asiAsm_XdeGraph::NodeType type = m_asmGraph->GetNodeType(nid);
+    const int                    nid  = item->data(0, BrowserRoleNodeId).toInt();
+    asiAsm::xde::Graph::NodeType type = m_asmGraph->GetNodeType(nid);
 
     // The assembly item ID does not contain prototypes' IDs except
     // the root one by convention.
-    if ( ( (type != asiAsm_XdeGraph::NodeType_Part) &&
-           (type != asiAsm_XdeGraph::NodeType_Subassembly) ) || !item->parent() )
+    if ( ( (type != asiAsm::xde::Graph::NodeType_Part) &&
+           (type != asiAsm::xde::Graph::NodeType_Subassembly) ) || !item->parent() )
     {
       result.Prepend( QStr2AsciiStr( item->text(1) ) );
     }
@@ -285,7 +285,7 @@ void asiUI_XdeBrowser::onContextMenu(QPoint pos)
 
   if ( nid )
   {
-    if ( m_asmGraph->GetNodeType(nid) == asiAsm_XdeGraph::NodeType_Part )
+    if ( m_asmGraph->GetNodeType(nid) == asiAsm::xde::Graph::NodeType_Part )
     {
       menu->addAction( "Print representations", this, SLOT( onPrintPartRepresentations() ) );
       menu->addAction( "Show part",             this, SLOT( onShowPart() ) );
@@ -318,7 +318,7 @@ void asiUI_XdeBrowser::onCopyName()
 void asiUI_XdeBrowser::onCopyAssemblyItemId()
 {
   // Get the selected assembly item ID.
-  asiAsm_XdeAssemblyItemId aiid = this->GetSelectedAssemblyItemId();
+  asiAsm::xde::AssemblyItemId aiid = this->GetSelectedAssemblyItemId();
 
   // Set to clipboard.
   QClipboard* clipboard = QApplication::clipboard();
@@ -337,10 +337,10 @@ void asiUI_XdeBrowser::onPrintPartRepresentations()
   const int nid = this->GetSelectedNodeId();
 
   // Get the corresponding part ID.
-  asiAsm_XdePartId partId = m_asmGraph->GetPersistentId(nid);
+  asiAsm::xde::PartId partId = m_asmGraph->GetPersistentId(nid);
 
   // Get available representations.
-  std::vector<Handle(asiAsm_XdePartRepr)> reps;
+  std::vector<Handle(asiAsm::xde::PartRepr)> reps;
   //
   m_doc->GetPartRepresentations(partId, reps);
 
@@ -361,12 +361,12 @@ void asiUI_XdeBrowser::onShowPart()
   const int nid = this->GetSelectedNodeId();
 
   // Get the corresponding part ID.
-  asiAsm_XdePartId partId = m_asmGraph->GetPersistentId(nid);
+  asiAsm::xde::PartId partId = m_asmGraph->GetPersistentId(nid);
 
   // Get boundary representation.
-  Handle(asiAsm_XdePartBoundaryRepr) rep;
+  Handle(asiAsm::xde::PartBoundaryRepr) rep;
   //
-  if ( !m_doc->GetPartRepresentation(partId, asiAsm_XdePartBoundaryRepr::GUID(), rep) )
+  if ( !m_doc->GetPartRepresentation(partId, asiAsm::xde::PartBoundaryRepr::GUID(), rep) )
   {
     m_cf->Progress.SendLogMessage(LogErr(Normal) << "The part %1 does not have a boundary representation.");
     return;
@@ -389,23 +389,24 @@ void asiUI_XdeBrowser::onShowPart()
 void asiUI_XdeBrowser::onShowSubassembly()
 {
   // Get the selected node ID.
-  const asiAsm_XdeAssemblyItemId& parentId = this->GetSelectedAssemblyItemId();
+  const asiAsm::xde::AssemblyItemId& parentId = this->GetSelectedAssemblyItemId();
 
   TIMER_NEW
   TIMER_GO
 
   // Get leafs.
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) leafs = new asiAsm_XdeHAssemblyItemIdsMap;
+  Handle(asiAsm::xde::HAssemblyItemIdsMap)
+    leafs = new asiAsm::xde::HAssemblyItemIdsMap;
   //
   m_doc->GetLeafAssemblyItems(parentId, leafs);
 
   // Draw each item individually.
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator it(*leafs); it.More(); it.Next() )
+  for ( asiAsm::xde::HAssemblyItemIdsMap::Iterator it(*leafs); it.More(); it.Next() )
   {
-    const asiAsm_XdeAssemblyItemId& aiid = it.Value();
+    const asiAsm::xde::AssemblyItemId& aiid = it.Value();
 
     // Get part.
-    asiAsm_XdePartId part;
+    asiAsm::xde::PartId part;
     m_doc->GetAsPartId(aiid, part);
 
     // Get color.
@@ -433,12 +434,12 @@ void asiUI_XdeBrowser::onSetActivePart()
   const int nid = this->GetSelectedNodeId();
 
   // Get the corresponding part ID.
-  asiAsm_XdePartId partId = m_asmGraph->GetPersistentId(nid);
+  asiAsm::xde::PartId partId = m_asmGraph->GetPersistentId(nid);
 
   // Get boundary representation.
-  Handle(asiAsm_XdePartBoundaryRepr) rep;
+  Handle(asiAsm::xde::PartBoundaryRepr) rep;
   //
-  if ( !m_doc->GetPartRepresentation(partId, asiAsm_XdePartBoundaryRepr::GUID(), rep) )
+  if ( !m_doc->GetPartRepresentation(partId, asiAsm::xde::PartBoundaryRepr::GUID(), rep) )
   {
     m_cf->Progress.SendLogMessage(LogErr(Normal) << "The part %1 does not have a boundary representation.");
     return;

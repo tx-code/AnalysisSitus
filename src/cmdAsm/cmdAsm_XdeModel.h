@@ -56,17 +56,17 @@ public:
   //! Ctor.
   //! \param[in] doc the document to set.
   cmdAsm_EXPORT
-    cmdAsm_XdeModel(const Handle(asiAsm_XdeDoc)& doc = nullptr);
+    cmdAsm_XdeModel(const Handle(asiAsm::xde::Doc)& doc = nullptr);
 
 public:
 
   //! Sets XDE document.
   //! \param[in] doc the document to set.
   cmdAsm_EXPORT void
-    SetDocument(const Handle(asiAsm_XdeDoc)& doc);
+    SetDocument(const Handle(asiAsm::xde::Doc)& doc);
 
   //! \return XDE document.
-  cmdAsm_EXPORT const Handle(asiAsm_XdeDoc)&
+  cmdAsm_EXPORT const Handle(asiAsm::xde::Doc)&
     GetDocument() const;
 
 public:
@@ -82,7 +82,7 @@ public:
 
 protected:
 
-  Handle(asiAsm_XdeDoc) m_doc; //!< Owned XDE document.
+  Handle(asiAsm::xde::Doc) m_doc; //!< Owned XDE document.
 
 };
 

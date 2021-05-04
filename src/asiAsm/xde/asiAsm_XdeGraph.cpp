@@ -45,6 +45,8 @@
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
 #define NodeLetter "N"
@@ -52,7 +54,7 @@
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeGraph::asiAsm_XdeGraph(const Handle(asiAsm_XdeDoc)& M)
+Graph::Graph(const Handle(Doc)& M)
 : Standard_Transient (),
   m_model            (M)
 {
@@ -68,14 +70,14 @@ asiAsm_XdeGraph::asiAsm_XdeGraph(const Handle(asiAsm_XdeDoc)& M)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::Dump(Standard_OStream& out) const
+void Graph::Dump(Standard_OStream& out) const
 {
   // Directed graph header.
   out << "digraph asiAsm_XdeGraph {\n";
   out << "\n";
 
   // Dump nodes with attributes.
-  const NCollection_IndexedMap<asiAsm_XdePersistentId>& nodes = this->GetNodes();
+  const NCollection_IndexedMap<PersistentId>& nodes = this->GetNodes();
   //
   for ( int n = 1; n <= nodes.Extent(); ++n )
   {
@@ -117,18 +119,18 @@ void asiAsm_XdeGraph::Dump(Standard_OStream& out) const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::DumpJSON(Standard_OStream&) const
+void Graph::DumpJSON(Standard_OStream&) const
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::CalculateSummary(int& numRoots,
-                                       int& numSubassemblyOccurrences,
-                                       int& numSubassemblies,
-                                       int& numPartOccurrences,
-                                       int& numParts) const
+void Graph::CalculateSummary(int& numRoots,
+                             int& numSubassemblyOccurrences,
+                             int& numSubassemblies,
+                             int& numPartOccurrences,
+                             int& numParts) const
 {
   numRoots                  = m_roots.Extent();
   numSubassemblyOccurrences = 0;
@@ -155,7 +157,7 @@ void asiAsm_XdeGraph::CalculateSummary(int& numRoots,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::buildGraph()
+void Graph::buildGraph()
 {
   // We start from those shapes which are "free" in terms of XDE.
   TDF_LabelSequence roots;
@@ -190,8 +192,8 @@ void asiAsm_XdeGraph::buildGraph()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeGraph::addComponents(const TDF_Label& parent,
-                                    const int        iParentId)
+void Graph::addComponents(const TDF_Label& parent,
+                          const int        iParentId)
 {
   const bool isSubassembly = m_model->GetShapeTool()->IsAssembly(parent);
   //
@@ -243,9 +245,9 @@ void asiAsm_XdeGraph::addComponents(const TDF_Label& parent,
 
 //-----------------------------------------------------------------------------
 
-int asiAsm_XdeGraph::addNode(const TDF_Label& insertionLevelLabel,
-                             const TDF_Label& declarationLevelLabel,
-                             int&             nextLeaf)
+int Graph::addNode(const TDF_Label& insertionLevelLabel,
+                   const TDF_Label& declarationLevelLabel,
+                   int&             nextLeaf)
 {
   // Check if the current object is (sub)assembly. Root assembly will give 'true'.
   const bool isSubassembly = m_model->GetShapeTool()->IsAssembly(declarationLevelLabel);
@@ -254,7 +256,7 @@ int asiAsm_XdeGraph::addNode(const TDF_Label& insertionLevelLabel,
   const bool isInstance = (insertionLevelLabel != declarationLevelLabel);
 
   // Get entry of the insertion-level label (sub-label in assembly hierarchy).
-  asiAsm_XdePersistentId insertionLevelId;
+  PersistentId insertionLevelId;
   TDF_Tool::Entry(insertionLevelLabel, insertionLevelId);
 
   // Get ID of the insertion-level node in the abstract assembly graph.
@@ -268,7 +270,7 @@ int asiAsm_XdeGraph::addNode(const TDF_Label& insertionLevelLabel,
   if ( isInstance )
   {
     // Get entry of the original label.
-    asiAsm_XdePersistentId partId;
+    PersistentId partId;
     TDF_Tool::Entry(declarationLevelLabel, partId);
 
     // Add part node. If such part has been added already, old ID is returned.

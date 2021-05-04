@@ -44,20 +44,23 @@
 
 //-----------------------------------------------------------------------------
 
+namespace asiAsm {
+namespace xde {
+
 //! \ingroup ASIASM
 //!
-//! XCAF Application.
-class asiAsm_XdeApp : public XCAFApp_Application
+//! XCAF Application to manage XDE Documents.
+class App : public XCAFApp_Application
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdeApp, XCAFApp_Application)
+  DEFINE_STANDARD_RTTI_INLINE(App, XCAFApp_Application)
 
 public:
 
   //! \return the static instance of XCAF Application.
-  asiAsm_EXPORT static Handle(asiAsm_XdeApp)
+  asiAsm_EXPORT static Handle(App)
     Instance();
 
   //! \return name of resources file.
@@ -68,8 +71,11 @@ protected:
 
   //! Ctor.
   asiAsm_EXPORT
-    asiAsm_XdeApp();
+    App();
 
 };
+
+} // xde
+} // asiAsm
 
 #endif

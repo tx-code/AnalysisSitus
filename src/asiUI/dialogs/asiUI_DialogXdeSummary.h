@@ -60,9 +60,9 @@ public:
   //! \param[in] xdeDoc   assembly model.
   //! \param[in] progress progress notifier.
   //! \param[in] parent   parent widget.
-  asiUI_DialogXdeSummary(const Handle(asiAsm_XdeDoc)& xdeDoc,
-                         ActAPI_ProgressEntry         progress,
-                         QWidget*                     parent = nullptr);
+  asiUI_DialogXdeSummary(const Handle(asiAsm::xde::Doc)& xdeDoc,
+                         ActAPI_ProgressEntry            progress,
+                         QWidget*                        parent = nullptr);
 
   //! Dtor.
   virtual
@@ -99,9 +99,9 @@ protected:
     }
   };
 
-  t_widgets             m_widgets;  //!< Involved widgets.
-  Handle(asiAsm_XdeDoc) m_asmModel; //!< Assembly model.
-  ActAPI_ProgressEntry  m_progress; //!< Progress notifier.
+  t_widgets                m_widgets;  //!< Involved widgets.
+  Handle(asiAsm::xde::Doc) m_asmModel; //!< Assembly model.
+  ActAPI_ProgressEntry     m_progress; //!< Progress notifier.
 
 };
 

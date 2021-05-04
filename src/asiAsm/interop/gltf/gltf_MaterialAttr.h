@@ -15,8 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef _fraXCAFDoc_VisMaterial_HeaderFile
-#define _fraXCAFDoc_VisMaterial_HeaderFile
+#ifndef gltf_MaterialAttr_HeaderFile
+#define gltf_MaterialAttr_HeaderFile
 
 // glTF includes
 #include <gltf_Entities.h>
@@ -28,8 +28,8 @@
 class Graphic3d_Aspects;
 class Graphic3d_MaterialAspect;
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Attribute storing Material definition for visualization purposes.
 //!
@@ -157,6 +157,7 @@ private:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

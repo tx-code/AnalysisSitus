@@ -46,8 +46,8 @@
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_XdeDoc::loadDocument(const char*            shortFilename,
-                                  Handle(asiAsm_XdeDoc)& doc)
+bool asiTest_XdeDoc::loadDocument(const char*               shortFilename,
+                                  Handle(asiAsm::xde::Doc)& doc)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -58,7 +58,7 @@ bool asiTest_XdeDoc::loadDocument(const char*            shortFilename,
              + shortFilename;
 
   // Create a new empty XDE document.
-  doc = new asiAsm_XdeDoc;
+  doc = new asiAsm::xde::Doc;
 
   // Load data from file.
   if ( !doc->Load( filename.c_str() ) )
@@ -73,8 +73,8 @@ bool asiTest_XdeDoc::loadDocument(const char*            shortFilename,
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_XdeDoc::areEqual(const asiAsm_XdePartIds& pids1,
-                              const asiAsm_XdePartIds& pids2)
+bool asiTest_XdeDoc::areEqual(const asiAsm::xde::PartIds& pids1,
+                              const asiAsm::xde::PartIds& pids2)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -85,14 +85,14 @@ bool asiTest_XdeDoc::areEqual(const asiAsm_XdePartIds& pids1,
     return false;
   }
 
-  for ( asiAsm_XdePartIds::Iterator pit1(pids1); pit1.More(); pit1.Next() )
+  for ( asiAsm::xde::PartIds::Iterator pit1(pids1); pit1.More(); pit1.Next() )
   {
-    const asiAsm_XdePartId& pid1 = pit1.Value();
+    const asiAsm::xde::PartId& pid1 = pit1.Value();
     bool isFound = false;
 
-    for ( asiAsm_XdePartIds::Iterator pit2(pids2); pit2.More(); pit2.Next() )
+    for ( asiAsm::xde::PartIds::Iterator pit2(pids2); pit2.More(); pit2.Next() )
     {
-      const asiAsm_XdePartId& pid2 = pit2.Value();
+      const asiAsm::xde::PartId& pid2 = pit2.Value();
       //
       if ( pid1.IsEqual(pid2) )
       {
@@ -121,14 +121,14 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
 
   // Load XDE document.
-  Handle(asiAsm_XdeDoc) doc;
+  Handle(asiAsm::xde::Doc) doc;
   //
   if ( !loadDocument(filename_asm_001, doc) )
     return res.failure();
 
   // Find items.
   {
-    Handle(asiAsm_XdeHAssemblyItemIdsMap) items;
+    Handle(asiAsm::xde::HAssemblyItemIdsMap) items;
     //
     if ( !doc->FindItems("X473", items) )
     {
@@ -142,7 +142,7 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
       return res.failure();
     }
 
-    if ( items->FindKey(1) != asiAsm_XdeAssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:5") )
+    if ( items->FindKey(1) != asiAsm::xde::AssemblyItemId("0:1:1:1/0:1:1:1:1/0:1:1:2:5") )
     {
       cf->Progress.SendLogMessage(LogErr(Normal) << "Unexpected assembly item ID.");
       return res.failure();
@@ -162,10 +162,10 @@ outcome asiTest_XdeDoc::testAddPart(const int funcID)
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
 
   // Create a new empty XDE document.
-  Handle(asiAsm_XdeDoc) doc = new asiAsm_XdeDoc;
+  Handle(asiAsm::xde::Doc) doc = new asiAsm::xde::Doc;
 
   // Add parts.
-  asiAsm_XdePartIds pidsAdded;
+  asiAsm::xde::PartIds pidsAdded;
   {
     pidsAdded.Append( doc->AddPart("Part 1") );
     pidsAdded.Append( doc->AddPart("Part 2") );
@@ -173,7 +173,7 @@ outcome asiTest_XdeDoc::testAddPart(const int funcID)
   }
 
   // Verify.
-  asiAsm_XdePartIds pidsGot;
+  asiAsm::xde::PartIds pidsGot;
   doc->GetParts(pidsGot);
   //
   if ( !areEqual(pidsAdded, pidsGot) )

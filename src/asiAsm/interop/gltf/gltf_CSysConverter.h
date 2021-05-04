@@ -29,8 +29,8 @@
 #include <Graphic3d_Mat4.hxx>
 #include <Graphic3d_Vec.hxx>
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Coordinate system converter defining the following tools:
 //! - Initialization for commonly used coordinate systems Z-up and Y-up.
@@ -58,7 +58,7 @@ class gltf_CSysConverter
 public:
 
   //! Return a standard coordinate system definition.
-  static gp_Ax3 StandardCoordinateSystem (gltf_CoordinateSystem theSys)
+  static gp_Ax3 StandardCoordinateSystem(gltf_CoordinateSystem theSys)
   {
     switch (theSys)
     {
@@ -185,22 +185,23 @@ public:
 
 private:
 
-  gp_Ax3           myInputAx3;         //!< source      coordinate system
-  gp_Ax3           myOutputAx3;        //!< destination coordinate system
-  double    myInputLengthUnit;  //!< source      length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
-  double    myOutputLengthUnit; //!< destination length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
-  bool myHasInputAx3;      //!< flag indicating if source coordinate system is defined or not
-  bool myHasOutputAx3;     //!< flag indicating if destination coordinate system is defined or not
+  gp_Ax3 myInputAx3;         //!< source      coordinate system
+  gp_Ax3 myOutputAx3;        //!< destination coordinate system
+  double myInputLengthUnit;  //!< source      length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
+  double myOutputLengthUnit; //!< destination length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
+  bool   myHasInputAx3;      //!< flag indicating if source coordinate system is defined or not
+  bool   myHasOutputAx3;     //!< flag indicating if destination coordinate system is defined or not
 
-  gp_Trsf          myTrsf;             //!< transformation from input Ax3 to output Ax3
-  gp_Trsf          myTrsfInv;          //!< inversed transformation from input Ax3 to output Ax3
-  Graphic3d_Mat4   myNormTrsf;         //!< transformation 4x4 matrix from input Ax3 to output Ax3
-  double    myUnitFactor;       //!< unit scale factor
-  bool myHasScale;         //!< flag indicating that length unit transformation should be performed
-  bool myIsEmpty;          //!< flag indicating that transformation is empty
+  gp_Trsf        myTrsf;       //!< transformation from input Ax3 to output Ax3
+  gp_Trsf        myTrsfInv;    //!< inversed transformation from input Ax3 to output Ax3
+  Graphic3d_Mat4 myNormTrsf;   //!< transformation 4x4 matrix from input Ax3 to output Ax3
+  double         myUnitFactor; //!< unit scale factor
+  bool           myHasScale;   //!< flag indicating that length unit transformation should be performed
+  bool           myIsEmpty;    //!< flag indicating that transformation is empty
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

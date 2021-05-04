@@ -45,9 +45,11 @@
 
 // Rapidjson includes
 #if defined USE_RAPIDJSON
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/ostreamwrapper.h>
+  #include <rapidjson/prettywriter.h>
+  #include <rapidjson/ostreamwrapper.h>
 #endif
+
+using namespace asiAsm::xde;
 
 namespace
 {
@@ -125,10 +127,10 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_XdeWriter::gltf_XdeWriter(const TCollection_AsciiString& filename,
-                                       const bool                     isBinary,
-                                       ActAPI_ProgressEntry           progress,
-                                       ActAPI_PlotterEntry            plotter)
+gltfWriter::gltfWriter(const TCollection_AsciiString& filename,
+                       const bool                     isBinary,
+                       ActAPI_ProgressEntry           progress,
+                       ActAPI_PlotterEntry            plotter)
 //
 : ActAPI_IAlgorithm (progress, plotter),
   m_filename        (filename),
@@ -149,24 +151,24 @@ asiAsm::gltf_XdeWriter::gltf_XdeWriter(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_XdeWriter::~gltf_XdeWriter()
+gltfWriter::~gltfWriter()
 {
   m_jsonWriter.reset();
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::toSkipFaceMesh(const gltf_FaceIterator& faceIter)
+bool gltfWriter::toSkipFaceMesh(const gltf_FaceIterator& faceIter)
 {
   return faceIter.IsEmptyMesh();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::saveNodes(gltf_Face&               gltfFace,
-                                       std::ostream&            binFile,
-                                       const gltf_FaceIterator& faceIter,
-                                       int&                     accessorNb) const
+void gltfWriter::saveNodes(gltf_Face&               gltfFace,
+                           std::ostream&            binFile,
+                           const gltf_FaceIterator& faceIter,
+                           int&                     accessorNb) const
 {
   gltfFace.NodePos.Id            = accessorNb++;
   gltfFace.NodePos.Count         = faceIter.NbNodes();
@@ -187,10 +189,10 @@ void asiAsm::gltf_XdeWriter::saveNodes(gltf_Face&               gltfFace,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::saveNormals(gltf_Face&         gltfFace,
-                                         std::ostream&      binFile,
-                                         gltf_FaceIterator& faceIter,
-                                         int&               accessorNb) const
+void gltfWriter::saveNormals(gltf_Face&         gltfFace,
+                             std::ostream&      binFile,
+                             gltf_FaceIterator& faceIter,
+                             int&               accessorNb) const
 {
   if ( !faceIter.HasNormals() )
   {
@@ -216,10 +218,10 @@ void asiAsm::gltf_XdeWriter::saveNormals(gltf_Face&         gltfFace,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::saveTextCoords(gltf_Face&               gltfFace,
-                                            std::ostream&            binFile,
-                                            const gltf_FaceIterator& faceIter,
-                                            int&                     accessorNb) const
+void gltfWriter::saveTextCoords(gltf_Face&               gltfFace,
+                                std::ostream&            binFile,
+                                const gltf_FaceIterator& faceIter,
+                                int&                     accessorNb) const
 {
   if ( !faceIter.HasTexCoords() )
   {
@@ -260,10 +262,10 @@ void asiAsm::gltf_XdeWriter::saveTextCoords(gltf_Face&               gltfFace,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::saveIndices(gltf_Face&               gltfFace,
-                                         std::ostream&            binFile,
-                                         const gltf_FaceIterator& faceIter,
-                                         int&                     accessorNb)
+void gltfWriter::saveIndices(gltf_Face&               gltfFace,
+                             std::ostream&            binFile,
+                             const gltf_FaceIterator& faceIter,
+                             int&                     accessorNb)
 {
   gltfFace.Indices.Id            = accessorNb++;
   gltfFace.Indices.Count         = faceIter.NbTriangles() * 3;
@@ -310,8 +312,8 @@ void asiAsm::gltf_XdeWriter::saveIndices(gltf_Face&               gltfFace,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&             doc,
-                                     const TColStd_IndexedDataMapOfStringString& fileInfo)
+bool gltfWriter::Perform(const Handle(TDocStd_Document)&             doc,
+                         const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
   TDF_LabelSequence rootLabs;
   m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
@@ -322,10 +324,10 @@ bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&            
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&             doc,
-                                     const TDF_LabelSequence&                    rootLabs,
-                                     const TColStd_MapOfAsciiString*             labFilter,
-                                     const TColStd_IndexedDataMapOfStringString& fileInfo)
+bool gltfWriter::Perform(const Handle(TDocStd_Document)&             doc,
+                         const TDF_LabelSequence&                    rootLabs,
+                         const TColStd_MapOfAsciiString*             labFilter,
+                         const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
   if ( m_shapeTool.IsNull() )
     m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
@@ -338,83 +340,83 @@ bool asiAsm::gltf_XdeWriter::Perform(const Handle(TDocStd_Document)&            
 
 //-----------------------------------------------------------------------------
 
-const asiAsm::gltf_CSysConverter&
-  asiAsm::gltf_XdeWriter::CoordinateSystemConverter() const
+const gltf_CSysConverter&
+  gltfWriter::CoordinateSystemConverter() const
 {
   return m_CSTrsf;
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_CSysConverter&
-  asiAsm::gltf_XdeWriter::ChangeCoordinateSystemConverter()
+gltf_CSysConverter&
+  gltfWriter::ChangeCoordinateSystemConverter()
 {
   return m_CSTrsf;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::SetCoordinateSystemConverter(const gltf_CSysConverter& converter)
+void gltfWriter::SetCoordinateSystemConverter(const gltf_CSysConverter& converter)
 {
   m_CSTrsf = converter;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::IsBinary() const
+bool gltfWriter::IsBinary() const
 {
   return m_bIsBinary;
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_WriterTrsfFormat
-  asiAsm::gltf_XdeWriter::TransformationFormat() const
+gltf_WriterTrsfFormat
+  gltfWriter::TransformationFormat() const
 {
   return m_trsfFormat;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::SetTransformationFormat(const gltf_WriterTrsfFormat fmt)
+void gltfWriter::SetTransformationFormat(const gltf_WriterTrsfFormat fmt)
 {
   m_trsfFormat = fmt;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::IsForcedUVExport() const
+bool gltfWriter::IsForcedUVExport() const
 {
   return m_bIsForcedUVExport;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::SetForcedUVExport(const bool toForce)
+void gltfWriter::SetForcedUVExport(const bool toForce)
 {
   m_bIsForcedUVExport = toForce;
 }
 
 //-----------------------------------------------------------------------------
 
-const asiAsm::gltf_XdeVisualStyle&
-  asiAsm::gltf_XdeWriter::DefaultStyle() const
+const gltf_XdeVisualStyle&
+  gltfWriter::DefaultStyle() const
 {
   return m_defaultStyle;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::SetDefaultStyle(const gltf_XdeVisualStyle& style)
+void gltfWriter::SetDefaultStyle(const gltf_XdeVisualStyle& style)
 {
   m_defaultStyle = style;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::writeBinData(const Handle(TDocStd_Document)& doc,
-                                          const TDF_LabelSequence&        rootLabs,
-                                          const TColStd_MapOfAsciiString* labFilter)
+bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
+                              const TDF_LabelSequence&        rootLabs,
+                              const TColStd_MapOfAsciiString* labFilter)
 {
   m_buffViewPos.ByteOffset       = 0;
   m_buffViewPos.ByteLength       = 0;
@@ -645,10 +647,10 @@ bool asiAsm::gltf_XdeWriter::writeBinData(const Handle(TDocStd_Document)& doc,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeWriter::writeJson(const Handle(TDocStd_Document)&             doc,
-                                       const TDF_LabelSequence&                    rootLabs,
-                                       const TColStd_MapOfAsciiString*             labFilter,
-                                       const TColStd_IndexedDataMapOfStringString& fileInfo)
+bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
+                           const TDF_LabelSequence&                    rootLabs,
+                           const TColStd_MapOfAsciiString*             labFilter,
+                           const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   m_jsonWriter.reset();
@@ -850,7 +852,7 @@ bool asiAsm::gltf_XdeWriter::writeJson(const Handle(TDocStd_Document)&          
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
+void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAccessors()");
@@ -970,7 +972,7 @@ void asiAsm::gltf_XdeWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writePositions(const gltf_Face& gltfFace)
+void gltfWriter::writePositions(const gltf_Face& gltfFace)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writePositions()");
@@ -1021,7 +1023,7 @@ void asiAsm::gltf_XdeWriter::writePositions(const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeNormals(const gltf_Face& gltfFace)
+void gltfWriter::writeNormals(const gltf_Face& gltfFace)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNormals()");
@@ -1058,7 +1060,7 @@ void asiAsm::gltf_XdeWriter::writeNormals(const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeTextCoords (const gltf_Face& gltfFace)
+void gltfWriter::writeTextCoords(const gltf_Face& gltfFace)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextCoords()");
@@ -1095,7 +1097,7 @@ void asiAsm::gltf_XdeWriter::writeTextCoords (const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeIndices (const gltf_Face& gltfFace)
+void gltfWriter::writeIndices (const gltf_Face& gltfFace)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeIndices()");
@@ -1130,14 +1132,14 @@ void asiAsm::gltf_XdeWriter::writeIndices (const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeAnimations()
+void gltfWriter::writeAnimations()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeAsset (const TColStd_IndexedDataMapOfStringString& fileInfo)
+void gltfWriter::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if (m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAsset()");
@@ -1178,7 +1180,7 @@ void asiAsm::gltf_XdeWriter::writeAsset (const TColStd_IndexedDataMapOfStringStr
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeBufferViews(const int binDataBufferId)
+void gltfWriter::writeBufferViews(const int binDataBufferId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBufferViews()");
@@ -1256,7 +1258,7 @@ void asiAsm::gltf_XdeWriter::writeBufferViews(const int binDataBufferId)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeBuffers()
+void gltfWriter::writeBuffers()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBuffers()");
@@ -1286,15 +1288,15 @@ void asiAsm::gltf_XdeWriter::writeBuffers()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeExtensions()
+void gltfWriter::writeExtensions()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
-                                         gltf_MaterialMap&        materialMap)
+void gltfWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
+                             gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeImages()");
@@ -1328,8 +1330,8 @@ void asiAsm::gltf_XdeWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeMaterials(const gltf_SceneNodeMap& scNodeMap,
-                                            gltf_MaterialMap&        materialMap)
+void gltfWriter::writeMaterials(const gltf_SceneNodeMap& scNodeMap,
+                                gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMaterials()");
@@ -1363,8 +1365,8 @@ void asiAsm::gltf_XdeWriter::writeMaterials(const gltf_SceneNodeMap& scNodeMap,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
-                                         const gltf_MaterialMap&  materialMap)
+void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
+                             const gltf_MaterialMap&  materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMeshes()");
@@ -1459,11 +1461,11 @@ void asiAsm::gltf_XdeWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
-                                        const TDF_LabelSequence&        rootLabs,
-                                        const TColStd_MapOfAsciiString* labFilter,
-                                        const gltf_SceneNodeMap&        scNodeMap,
-                                        NCollection_Sequence<int>&      scRootIds)
+void gltfWriter::writeNodes(const Handle(TDocStd_Document)& doc,
+                            const TDF_LabelSequence&        rootLabs,
+                            const TColStd_MapOfAsciiString* labFilter,
+                            const gltf_SceneNodeMap&        scNodeMap,
+                            NCollection_Sequence<int>&      scRootIds)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodes()");
@@ -1645,7 +1647,7 @@ void asiAsm::gltf_XdeWriter::writeNodes(const Handle(TDocStd_Document)& doc,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeSamplers(const gltf_MaterialMap& materialMap)
+void gltfWriter::writeSamplers(const gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeSamplers()");
@@ -1677,7 +1679,7 @@ void asiAsm::gltf_XdeWriter::writeSamplers(const gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeScene(const int defSceneId)
+void gltfWriter::writeScene(const int defSceneId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScene()");
@@ -1695,7 +1697,7 @@ void asiAsm::gltf_XdeWriter::writeScene(const int defSceneId)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
+void gltfWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScenes()");
@@ -1727,15 +1729,15 @@ void asiAsm::gltf_XdeWriter::writeScenes(const NCollection_Sequence<int>& scRoot
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeSkins()
+void gltfWriter::writeSkins()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeWriter::writeTextures(const gltf_SceneNodeMap& scNodeMap,
-                                           gltf_MaterialMap&        materialMap)
+void gltfWriter::writeTextures(const gltf_SceneNodeMap& scNodeMap,
+                               gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextures()");

@@ -40,7 +40,7 @@
 // asiAsm includes
 #include <asiAsm_XdePersistentIds.h>
 
-class asiAsm_XdeDoc;
+class asiAsm::xde::Doc;
 
 //! Test functions for XDE document.
 class asiTest_XdeDoc : public asiTestEngine_TestCase
@@ -80,13 +80,13 @@ public:
 private:
 
   //! Loads XDE document from file.
-  static bool loadDocument(const char*            shortFilename,
-                           Handle(asiAsm_XdeDoc)& doc);
+  static bool loadDocument(const char*               shortFilename,
+                           Handle(asiAsm::xde::Doc)& doc);
 
   //! Checks if the passed lists of IDs are equal. The order of items is
   //! not important.
-  static bool areEqual(const asiAsm_XdePartIds& pids1,
-                       const asiAsm_XdePartIds& pids2);
+  static bool areEqual(const asiAsm::xde::PartIds& pids1,
+                       const asiAsm::xde::PartIds& pids2);
 
 private:
 

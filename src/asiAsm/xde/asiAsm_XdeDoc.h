@@ -49,27 +49,15 @@ class XCAFDoc_ShapeTool;
 class XCAFDoc_ColorTool;
 class XSControl_WorkSession;
 class Quantity_ColorRGBA;
-class asiAsm_XdeApp;
-class asiAsm_XdeGraph;
-class asiAsm_XdePartRepr;
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup ASIASM
-//!
-//! Map of parts to instances.
-typedef NCollection_IndexedDataMap<asiAsm_XdePartId,
-                                   asiAsm_XdeAssemblyItemIdList,
-                                   asiAsm_XdePartId::Hasher> asiAsm_XdePartsToInstancesMap;
+namespace asiAsm {
+namespace xde {
 
-//! \ingroup ASIASM
-//!
-//! Map of labels to instances.
-typedef NCollection_IndexedDataMap<TDF_Label,
-                                   asiAsm_XdeAssemblyItemIdList,
-                                   TDF_LabelMapHasher> asiAsm_XdeLabelsToInstancesMap;
-
-//-----------------------------------------------------------------------------
+class App;
+class Graph;
+class PartRepr;
 
 //! \ingroup ASIASM
 //!
@@ -80,12 +68,12 @@ typedef NCollection_IndexedDataMap<TDF_Label,
 //! This class gives read-only access to XDE Document. It is assumed here that
 //! XDE Document serves as a data transfer object for subsequent processing
 //! from within application.
-class asiAsm_XdeDoc : public Standard_Transient
+class Doc : public Standard_Transient
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAsm_XdeDoc, Standard_Transient)
+  DEFINE_STANDARD_RTTI_INLINE(Doc, Standard_Transient)
 
 public:
 
@@ -102,8 +90,8 @@ public:
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
   asiAsm_EXPORT
-    asiAsm_XdeDoc(ActAPI_ProgressEntry progress = nullptr,
-                  ActAPI_PlotterEntry  plotter  = nullptr);
+    Doc(ActAPI_ProgressEntry progress = nullptr,
+        ActAPI_PlotterEntry  plotter  = nullptr);
 
 /* Construction and initialization */
 public:
@@ -153,8 +141,8 @@ public:
   //! \param[out] items the unordered collection of unique items found.
   //! \return true if anything was found, false -- otherwise.
   asiAsm_EXPORT bool
-    FindItems(const std::string&                     name,
-              Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    FindItems(const std::string&           name,
+              Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Sets name for the label.
   //! \param[in] label label.
@@ -168,49 +156,49 @@ public:
   //! \param[out] name object name (empty string if no name is available).
   //! \return true if name is available, false -- otherwise.
   asiAsm_EXPORT bool
-    GetObjectName(const asiAsm_XdePersistentId& id,
-                  TCollection_ExtendedString&   name) const;
+    GetObjectName(const PersistentId&         id,
+                  TCollection_ExtendedString& name) const;
 
   //! Returns the name which is associated directly with the given part ID.
   //! \param[in]  id   part ID.
   //! \param[out] name object name (empty string if no name is available).
   //! \return true if name is available, false -- otherwise.
   asiAsm_EXPORT bool
-    GetObjectName(const asiAsm_XdePartId&     id,
+    GetObjectName(const PartId&               id,
                   TCollection_ExtendedString& name) const;
 
   //! Returns the name which is associated with the given assembly item.
   //! \param[in]  id   assembly item ID.
   //! \param[out] name extracted object name.
   asiAsm_EXPORT bool
-    GetObjectName(const asiAsm_XdeAssemblyItemId& id,
-                  TCollection_ExtendedString&     name) const;
+    GetObjectName(const AssemblyItemId&       id,
+                  TCollection_ExtendedString& name) const;
 
   //! Returns objects's name.
-  //! \param label [in] label.
+  //! \param[in] label label.
   //! \return name of the object.
   asiAsm_EXPORT TCollection_ExtendedString
     GetObjectName(const TDF_Label& label) const;
 
   //! Returns part's name.
-  //! \param part [in] part ID.
+  //! \param[in] part part ID.
   //! \return name of the part.
   asiAsm_EXPORT TCollection_ExtendedString
-    GetPartName(const asiAsm_XdePartId& part) const;
+    GetPartName(const PartId& part) const;
 
   //! Returns all stored part's representations.
   //! \param[in]  partId part of interest.
   //! \param[out] reps   available part representations.
   asiAsm_EXPORT void
-    GetPartRepresentations(const asiAsm_XdePartId&                  partId,
-                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const;
+    GetPartRepresentations(const PartId&                  partId,
+                           std::vector<Handle(PartRepr)>& reps) const;
 
   //! Returns all stored part's representations.
   //! \param[in]  partId part of interest.
   //! \param[out] reps   available part representations.
   asiAsm_EXPORT void
-    GetPartRepresentations(const TDF_Label&                         label,
-                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const;
+    GetPartRepresentations(const TDF_Label&               label,
+                           std::vector<Handle(PartRepr)>& reps) const;
 
   //! Returns the part's representation for the given ID.
   //! \param[in]  partId part of interest.
@@ -219,9 +207,9 @@ public:
   //!                    does not exist.
   //! \return true if the representation exists, false -- otherwise.
   asiAsm_EXPORT bool
-    GetPartRepresentation(const asiAsm_XdePartId&     partId,
-                          const Standard_GUID&        guid,
-                          Handle(asiAsm_XdePartRepr)& rep) const;
+    GetPartRepresentation(const PartId&        partId,
+                          const Standard_GUID& guid,
+                          Handle(PartRepr)&    rep) const;
 
   //! Checks whether the label is assembly.
   //! \return true/false.
@@ -232,7 +220,7 @@ public:
   //! \param[in] item assembly item in question.
   //! \return true/false.
   asiAsm_EXPORT bool
-    IsAssembly(const asiAsm_XdeAssemblyItemId& item) const;
+    IsAssembly(const AssemblyItemId& item) const;
 
   //! Checks whether the passed label represents an instance or not.
   //! \param[in] itemLab label to check.
@@ -247,8 +235,8 @@ public:
   //! \param[in] origin label of simple (origin) shape.
   //! \return true/false.
   asiAsm_EXPORT bool
-    IsInstance(const asiAsm_XdeAssemblyItemId& item,
-               TDF_Label&                      origin) const;
+    IsInstance(const AssemblyItemId& item,
+               TDF_Label&            origin) const;
 
   //! Checks whether the given label is a label of a part.
   //! \param[in] label label to check.
@@ -260,7 +248,7 @@ public:
   //! \param[in] item assembly item to check.
   //! \return true/false.
   asiAsm_EXPORT bool
-    IsPart(const asiAsm_XdeAssemblyItemId& item) const;
+    IsPart(const AssemblyItemId& item) const;
 
   //! Checks whether the passed label represents an original or not.
   //! \param[in] itemLab label to check.
@@ -278,13 +266,13 @@ public:
   //! \param[in] item assembly item of interest.
   //! \return original label.
   asiAsm_EXPORT TDF_Label
-    GetOriginal(const asiAsm_XdeAssemblyItemId& item) const;
+    GetOriginal(const AssemblyItemId& item) const;
 
   //! Returns part ID for the given assembly item.
   //! \param[in] item the assembly item of interest.
   //! \return original part.
-  asiAsm_EXPORT asiAsm_XdePartId
-    GetPart(const asiAsm_XdeAssemblyItemId& item) const;
+  asiAsm_EXPORT PartId
+    GetPart(const AssemblyItemId& item) const;
 
   //! For the given list of assembly items, this method extracts originals
   //! without duplications. Use this method if you wish to work on originals,
@@ -293,8 +281,8 @@ public:
   //! \param[in]  anyItems       your items of interest.
   //! \param[out] originalLabels extracted originals.
   asiAsm_EXPORT void
-    GetOriginals(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                 TDF_LabelSequence&                           originalLabels) const;
+    GetOriginals(const Handle(HAssemblyItemIdsMap)& anyItems,
+                 TDF_LabelSequence&                 originalLabels) const;
 
   //! For the given list of assembly items, this method extracts originals
   //! without duplications. Use this method if you wish to work on originals,
@@ -303,8 +291,8 @@ public:
   //! \param[in]  anyItems       your items of interest.
   //! \param[out] originalLabels extracted originals.
   asiAsm_EXPORT void
-    GetOriginals(const asiAsm_XdeAssemblyItemIds& anyItems,
-                 TDF_LabelSequence&               originalLabels) const;
+    GetOriginals(const AssemblyItemIds& anyItems,
+                 TDF_LabelSequence&     originalLabels) const;
 
   //! For the given list of assembly items, this method extracts originals
   //! without duplications, and fills in the map of originals to their instances.
@@ -314,8 +302,8 @@ public:
   //! \param[in]  anyItems      your items of interest.
   //! \param[out] origInstances map original -> instances.
   asiAsm_EXPORT void
-    GetOriginalsWithInstances(const asiAsm_XdeAssemblyItemIds& anyItems,
-                              asiAsm_XdeLabelsToInstancesMap&  origInstances) const;
+    GetOriginalsWithInstances(const AssemblyItemIds& anyItems,
+                              LabelsToInstancesMap&  origInstances) const;
 
   //! For the given list of assembly items, this method extracts originals
   //! without duplications, and fills in the map of originals to their instances.
@@ -325,8 +313,8 @@ public:
   //! \param[in]  anyItems      your items of interest.
   //! \param[out] origInstances map original -> instances.
   asiAsm_EXPORT void
-    GetOriginalsWithInstances(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                              asiAsm_XdeLabelsToInstancesMap&              origInstances) const;
+    GetOriginalsWithInstances(const Handle(HAssemblyItemIdsMap)& anyItems,
+                              LabelsToInstancesMap&              origInstances) const;
 
   //! This method extracts all parts without duplications.
   //! Basically, this method first takes all leaf assembly
@@ -334,7 +322,7 @@ public:
   //!
   //! \param[out] parts extracted parts.
   asiAsm_EXPORT void
-    GetParts(asiAsm_XdePartIds& parts) const;
+    GetParts(PartIds& parts) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications. Basically, this method first takes all leaf assembly
@@ -345,9 +333,9 @@ public:
   //! \param[in]  isAlreadyLeafs disable leafs searching for passed items
   //!                            in case of true value
   asiAsm_EXPORT void
-    GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-             asiAsm_XdePartIds&                           parts,
-             const bool                                   isAlreadyLeafs = false) const;
+    GetParts(const Handle(HAssemblyItemIdsMap)& anyItems,
+             PartIds&                           parts,
+             const bool                         isAlreadyLeafs = false) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications. Basically, this method first takes all leaf assembly
@@ -358,9 +346,9 @@ public:
   //! \param[in]  isAlreadyLeafs disable leafs searching for passed items
   //!                            in case of true value
   asiAsm_EXPORT void
-    GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
-             asiAsm_XdePartIds&               parts,
-             const bool                       isAlreadyLeafs = false) const;
+    GetParts(const AssemblyItemIds& anyItems,
+             PartIds&               parts,
+             const bool             isAlreadyLeafs = false) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications. Basically, this method first takes all leaf assembly
@@ -370,9 +358,9 @@ public:
   //! \param[out] leafItems leaf assembly items extracted down the road.
   //! \param[out] parts     extracted parts.
   asiAsm_EXPORT void
-    GetParts(const asiAsm_XdeAssemblyItemIds&       anyItems,
-             Handle(asiAsm_XdeHAssemblyItemIdsMap)& leafItems,
-             asiAsm_XdePartIds&                     parts) const;
+    GetParts(const AssemblyItemIds&       anyItems,
+             Handle(HAssemblyItemIdsMap)& leafItems,
+             PartIds&                     parts) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications. Basically, this method first takes all leaf assembly
@@ -382,9 +370,9 @@ public:
   //! \param[out] leafItems leaf assembly items extracted down the road.
   //! \param[out] parts     extracted parts.
   asiAsm_EXPORT void
-    GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
-             asiAsm_XdeAssemblyItemIds&       leafItems,
-             asiAsm_XdePartIds&               parts) const;
+    GetParts(const AssemblyItemIds& anyItems,
+             AssemblyItemIds&       leafItems,
+             PartIds&               parts) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications. Basically, this method first takes all leaf assembly
@@ -394,15 +382,15 @@ public:
   //! \param[out] leafItems leaf assembly items extracted down the road.
   //! \param[out] parts     extracted parts.
   asiAsm_EXPORT void
-    GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-             Handle(asiAsm_XdeHAssemblyItemIdsMap)&       leafItems,
-             asiAsm_XdePartIds&                           parts) const;
+    GetParts(const Handle(HAssemblyItemIdsMap)& anyItems,
+             Handle(HAssemblyItemIdsMap)&       leafItems,
+             PartIds&                           parts) const;
 
   //! Counts the number of occurrences for each part by visiting all the
   //! arcs in the corresponding HAG.
   //! \param[out] quantities id-to-quantity map.
   asiAsm_EXPORT void
-    CountParts(NCollection_DataMap<asiAsm_XdePartId, int, asiAsm_XdePartId::Hasher>& quantities) const;
+    CountParts(NCollection_DataMap<PartId, int, PartId::Hasher>& quantities) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications, and fills in the map of parts to their instances.
@@ -414,9 +402,9 @@ public:
   //! \param[in]  isAlreadyLeafs disable leafs searching for passed items
   //!                            in case of true value
   asiAsm_EXPORT void
-    GetPartsWithInstances(const asiAsm_XdeAssemblyItemIds& anyItems,
-                          asiAsm_XdePartsToInstancesMap&   partsToInstances,
-                          const bool                       isAlreadyLeafs = false) const;
+    GetPartsWithInstances(const AssemblyItemIds& anyItems,
+                          PartsToInstancesMap&   partsToInstances,
+                          const bool             isAlreadyLeafs = false) const;
 
   //! For the given list of any assembly items, this method extracts parts
   //! without duplications, and fills in the map of parts to their instances.
@@ -428,9 +416,9 @@ public:
   //! \param[in]  isAlreadyLeafs disable leafs searching for passed items
   //!                            in case of true value
   asiAsm_EXPORT void
-    GetPartsWithInstances(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                          asiAsm_XdePartsToInstancesMap&               partsToInstances,
-                          const bool                                   isAlreadyLeafs = false) const;
+    GetPartsWithInstances(const Handle(HAssemblyItemIdsMap)& anyItems,
+                          PartsToInstancesMap&               partsToInstances,
+                          const bool                         isAlreadyLeafs = false) const;
 
   //! For the given entry ID of the assembly item, this method extracts
   //! entry ID of the corresponding original.
@@ -442,8 +430,8 @@ public:
   //! \param[in]  assemblyEntryId item ID of interest.
   //! \param[out] partId          extracted part ID.
   asiAsm_EXPORT void
-    GetAsPartId(const asiAsm_XdeAssemblyItemId& assemblyEntryId,
-                asiAsm_XdePartId&               partId);
+    GetAsPartId(const AssemblyItemId& assemblyEntryId,
+                PartId&               partId);
 
   //! Accessor for the underlying CAF TDF Label.
   //! \return CAF Label.
@@ -454,33 +442,33 @@ public:
   //! \param[in] id object ID of interest.
   //! \return object's label.
   asiAsm_EXPORT TDF_Label
-    GetLabel(const asiAsm_XdePersistentId& id) const;
+    GetLabel(const PersistentId& id) const;
 
   //! Accessor for the ultimate OCAF label corresponding to the given item.
   //! \param[in] item assembly item of interest.
   //! \return ultimate label.
   asiAsm_EXPORT TDF_Label
-    GetLabel(const asiAsm_XdeAssemblyItemId& item) const;
+    GetLabel(const AssemblyItemId& item) const;
 
   //! Accessor for the label representing the given part.
   //! \param[in] part part of interest.
   //! \return part's label.
   asiAsm_EXPORT TDF_Label
-    GetLabel(const asiAsm_XdePartId& part) const;
+    GetLabel(const PartId& part) const;
 
   //! Returns shape for the given assembly item.
   //! \param[in] item        assembly item of interest.
   //! \param[in] doTransform whether to apply transformation.
   //! \return shape.
   asiAsm_EXPORT TopoDS_Shape
-    GetShape(const asiAsm_XdeAssemblyItemId& item,
-             const bool                      doTransform = true) const;
+    GetShape(const AssemblyItemId& item,
+             const bool            doTransform = true) const;
 
   //! Returns shape for a part.
   //! \param[in] part part to get shape for.
   //! \return stored shape.
   asiAsm_EXPORT TopoDS_Shape
-    GetShape(const asiAsm_XdePartId& part) const;
+    GetShape(const PartId& part) const;
 
   //! Extracts shape from the label. Use this method for originals and prefer
   //! using GetShape() with core_AssemblyItem signature for references.
@@ -494,32 +482,32 @@ public:
   //! \param[out] parent parent assembly item.
   //! \return true if parent exists, false -- otherwise.
   asiAsm_EXPORT bool
-    GetParent(const asiAsm_XdeAssemblyItemId& item,
-              asiAsm_XdeAssemblyItemId&       parent) const;
+    GetParent(const AssemblyItemId& item,
+              AssemblyItemId&       parent) const;
 
   //! Returns parent's location for the given assembly item.
   //! \param[in] item        assembly item of interest.
   //! \param[in] doTransform whether to apply transformation.
   //! \return location.
   asiAsm_EXPORT TopLoc_Location
-    GetParentLocation(const asiAsm_XdeAssemblyItemId& item,
-                      const bool                      doTransform = true) const;
+    GetParentLocation(const AssemblyItemId& item,
+                      const bool            doTransform = true) const;
 
   //! Returns own (without parent's) location for the given assembly item.
   //! \param[in] item        assembly item of interest.
   //! \return location.
   asiAsm_EXPORT TopLoc_Location
-    GetOwnLocation(const asiAsm_XdeAssemblyItemId& item) const;
+    GetOwnLocation(const AssemblyItemId& item) const;
 
   //! \return geometry only.
   asiAsm_EXPORT TopoDS_Shape
     GetOneShape() const;
 
   //! Collects shapes corresponding to the given assembly items.
-  //! \param items [in] assembly items.
+  //! \param[in] items assembly items.
   //! \return compound of assembly item shapes.
   asiAsm_EXPORT TopoDS_Shape
-    GetOneShape(const asiAsm_XdeAssemblyItemIds& items) const;
+    GetOneShape(const AssemblyItemIds& items) const;
 
   //! Returns OCAF labels corresponding to roots.
   //! \param[out] labels labels of roots
@@ -529,7 +517,7 @@ public:
   //! Returns root assembly items.
   //! \param[out] items roots assembly items
   asiAsm_EXPORT void
-    GetRootAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const;
+    GetRootAssemblyItems(AssemblyItemIds& items) const;
 
   //! Returns assembly items corresponding to individual parts. The good point
   //! about this method is that it returns the user-ready data, i.e. only those
@@ -541,7 +529,7 @@ public:
   //! \param[out] items assembly items representing ultimate leafs in
   //!                   the assembly structure.
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const;
+    GetLeafAssemblyItems(AssemblyItemIds& items) const;
 
   //! Returns assembly items corresponding to individual parts. The good point
   //! about this method is that it returns the user-ready data, i.e. only those
@@ -553,7 +541,7 @@ public:
   //! \param[out] items assembly items representing ultimate leafs in
   //!                   the assembly structure.
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetLeafAssemblyItems(const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Extracts all leafs from the given assembly items. It can be the item
   //! itself from the input list, or, in case of sub-assembly input, the
@@ -565,8 +553,8 @@ public:
   //! \param[out] items   output collection of items (sub-assemblies will never
   //!                     appear here).
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds&             parents,
-                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetLeafAssemblyItems(const AssemblyItemIds&             parents,
+                         const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Extracts all leafs from the given assembly items. It can be the item
   //! itself from the input list, or, in case of sub-assembly input, the
@@ -578,8 +566,8 @@ public:
   //! \param[out] items   output collection of items (sub-assemblies will never
   //!                     appear here).
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& parents,
-                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetLeafAssemblyItems(const Handle(HAssemblyItemIdsMap)& parents,
+                         const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Returns all ultimate components for the given assembly item (the parent one).
   //! If the passed parent is itself a part, it will be simply transferred to
@@ -588,8 +576,8 @@ public:
   //! \param[in]  parent parent assembly item to gather all parts for.
   //! \param[out] items  output collection of ultimate items.
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemId&              parent,
-                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetLeafAssemblyItems(const AssemblyItemId&              parent,
+                         const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Extracts all parts from the given assembly items. It can be the item
   //! itself from the input list, or, in case of sub-assembly input, the
@@ -601,8 +589,8 @@ public:
   //! \param[out] items   output collection of items (sub-assemblies will never
   //!                     appear here).
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds& parents,
-                         asiAsm_XdeAssemblyItemIds&       items) const;
+    GetLeafAssemblyItems(const AssemblyItemIds& parents,
+                         AssemblyItemIds&       items) const;
 
   //! Returns all ultimate components for the given assembly item (the parent one).
   //! If the passed parent is itself a part, it will be simply transferred to
@@ -611,8 +599,8 @@ public:
   //! \param[in]  parent parent assembly item to gather all parts for.
   //! \param[out] items  output collection of ultimate items.
   asiAsm_EXPORT void
-    GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemId& parent,
-                         asiAsm_XdeAssemblyItemIds&      items) const;
+    GetLeafAssemblyItems(const AssemblyItemId& parent,
+                         AssemblyItemIds&      items) const;
 
   //! Collects all replicas for the given list.
   //! \param[in]  label    original's label.
@@ -626,100 +614,100 @@ public:
   //! \param[in]  part  part ID.
   //! \param[out] items assembly items referring to the given part.
   asiAsm_EXPORT void
-    GetAssemblyItemsForPart(const asiAsm_XdePartId&    part,
-                            asiAsm_XdeAssemblyItemIds& items) const;
+    GetAssemblyItemsForPart(const PartId&    part,
+                            AssemblyItemIds& items) const;
 
   //! Gathers all assembly items for the given parts.
   //! Put parts as assembly item if it is Free shape (has no instances).
   //! \param[in]  parts part IDs.
   //! \param[out] items assembly items referring to the given parts.
   asiAsm_EXPORT void
-    GetAssemblyItemsForParts(const asiAsm_XdePartIds&   parts,
-                             asiAsm_XdeAssemblyItemIds& items) const;
+    GetAssemblyItemsForParts(const PartIds&   parts,
+                             AssemblyItemIds& items) const;
 
   //! Gathers all assembly items for the labels map.
   //! \param[in]  original original labels map.
   //! \param[out] items    assembly items referring to the given original.
   asiAsm_EXPORT void
-    GetAssemblyItemsForParts(const TDF_LabelMap&        originals,
-                             asiAsm_XdeAssemblyItemIds& items) const;
+    GetAssemblyItemsForParts(const TDF_LabelMap& originals,
+                             AssemblyItemIds&    items) const;
 
   //! Gathers all assembly items for the labels map.
   //! \param[in]  original original labels map.
   //! \param[out] items    assembly items referring to the given original.
   asiAsm_EXPORT void
-    GetAssemblyItemsForParts(const TDF_LabelMap&                          originals,
-                             const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetAssemblyItemsForParts(const TDF_LabelMap&                originals,
+                             const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Gathers all assembly items for the given original.
   //! \param[in]  original original label.
   //! \param[out] items    assembly items referring to the given original.
   asiAsm_EXPORT void
-    GetAssemblyItemsForPart(const TDF_Label&           original,
-                            asiAsm_XdeAssemblyItemIds& items) const;
+    GetAssemblyItemsForPart(const TDF_Label& original,
+                            AssemblyItemIds& items) const;
 
   //! Gathers all assembly items for the given original.
   //! \param[in]  original original label.
   //! \param[out] items    assembly items referring to the given original.
   asiAsm_EXPORT void
-    GetAssemblyItemsForPart(const TDF_Label&                             original,
-                            const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    GetAssemblyItemsForPart(const TDF_Label&                   original,
+                            const Handle(HAssemblyItemIdsMap)& items) const;
 
   //! For the given assembly item, this method will search for all partners,
   //! i.e. the assembly items sharing the same original.
   //! \param[in]  anyItem  item to search partners for.
   //! \param[out] partners partner items.
   asiAsm_EXPORT void
-    GetPartners(const asiAsm_XdeAssemblyItemId& anyItem,
-                asiAsm_XdeAssemblyItemIds&      partners) const;
+    GetPartners(const AssemblyItemId& anyItem,
+                AssemblyItemIds&      partners) const;
 
   //! For the given assembly item, this method will search for all partners,
   //! i.e. the assembly items sharing the same original.
   //! \param[in]  anyItem  item to search partners for.
   //! \param[out] partners partner items.
   asiAsm_EXPORT void
-    GetPartners(const TDF_Label&           original,
-                asiAsm_XdeAssemblyItemIds& partners) const;
+    GetPartners(const TDF_Label& original,
+                AssemblyItemIds& partners) const;
 
   //! For the given assembly items, this method will search for all partners,
   //! i.e. the assembly items sharing the same original.
   //! \param[in]  anyItems items to search partners for.
   //! \param[out] partners partner items.
   asiAsm_EXPORT void
-    GetPartners(const asiAsm_XdeAssemblyItemIds& anyItems,
-                asiAsm_XdeAssemblyItemIds&       partners) const;
+    GetPartners(const AssemblyItemIds& anyItems,
+                AssemblyItemIds&       partners) const;
 
   //! For the given assembly items, this method will search for all partners,
   //! i.e. the assembly items sharing the same original.
   //! \param[in]  anyItems items to search partners for.
   //! \param[out] partners partner items.
   asiAsm_EXPORT void
-    GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                asiAsm_XdeAssemblyItemIds&                   partners) const;
+    GetPartners(const Handle(HAssemblyItemIdsMap)& anyItems,
+                AssemblyItemIds&                   partners) const;
 
   //! For the given assembly items, this method will search for all partners,
   //! i.e. the assembly items sharing the same original.
   //! \param[in]  anyItems items to search partners for.
   //! \param[out] partners partner items.
   asiAsm_EXPORT void
-    GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                Handle(asiAsm_XdeHAssemblyItemIdsMap)&       partners) const;
+    GetPartners(const Handle(HAssemblyItemIdsMap)& anyItems,
+                Handle(HAssemblyItemIdsMap)&       partners) const;
 
   //! Returns RGB color associated with the given part.
   //! \param[in]  partId part ID in question.
   //! \param[out] color  associated color.
   //! \return true if color exists, false -- otherwise.
   asiAsm_EXPORT bool
-    GetColor(const asiAsm_XdePartId& partId,
-             Quantity_Color&         color) const;
+    GetColor(const PartId&   partId,
+             Quantity_Color& color) const;
 
   //! Returns RGBA color associated with the given part.
   //! \param[in]  partId part ID in question.
   //! \param[out] color  associated color.
   //! \return true if color exists, false -- otherwise.
   asiAsm_EXPORT bool
-    GetColor(const asiAsm_XdePartId& partId,
-             Quantity_ColorRGBA&     color) const;
+    GetColor(const PartId&       partId,
+             Quantity_ColorRGBA& color) const;
 
   //! Returns color associated with the given label.
   //! \param[in]  label OCAF label of the prototype in question.
@@ -735,8 +723,8 @@ public:
   //! \return the Boolean flag indicating whether the accociated color with a
   //!         transparency component was found or not.
   asiAsm_EXPORT bool
-    GetColorAlpha(const asiAsm_XdePartId& partId,
-                  double&                 alpha);
+    GetColorAlpha(const PartId& partId,
+                  double&       alpha);
 
   //! Returns color associated with the subshape of the input part.
   //! \param[in]  partId   part ID in question.
@@ -744,9 +732,9 @@ public:
   //! \param[out] color    associated color.
   //! \return true if color exists, false -- otherwise.
   asiAsm_EXPORT bool
-    GetSubShapeColor(const asiAsm_XdePartId& partId,
-                     const TopoDS_Shape&     subShape,
-                     Quantity_ColorRGBA&     color) const;
+    GetSubShapeColor(const PartId&       partId,
+                     const TopoDS_Shape& subShape,
+                     Quantity_ColorRGBA& color) const;
 
   //! Sets the given color to the shape on the passed label.
   //! \param[in] label label with shape to set the passed color for.
@@ -774,8 +762,8 @@ public:
   //! \param[in] force  whether to override possibly existing part's color.
   //! \return false if nothing was done, true -- otherwise.
   asiAsm_EXPORT bool
-    AutoColorizePart(const asiAsm_XdePartId& partId,
-                     const bool              force = false);
+    AutoColorizePart(const PartId& partId,
+                     const bool    force = false);
 
   //! Updates boundary representation (shape) of the given part. The passed
   //! history is used to update the related metadata (e.g., colors of faces).
@@ -812,8 +800,8 @@ public:
   //! \return true if the part of expanded, false -- otherwise (e.g., if the part is not
   //!         of a compound geometric type).
   asiAsm_EXPORT bool
-    ExpandCompound(const asiAsm_XdePartId& partId,
-                   const bool              updateAssemblies = true);
+    ExpandCompound(const PartId& partId,
+                   const bool    updateAssemblies = true);
 
   //! Expands the compound parts by turning them into subassemblies. This
   //! function does recursive processing, so that the nested compound parts
@@ -821,20 +809,20 @@ public:
   //! reached.
   //! \param[in] items the assembly items to start expansion from.
   asiAsm_EXPORT void
-    ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items);
+    ExpandCompounds(const AssemblyItemIds& items);
 
   //! Creates a new part with the given shape as a primary representation.
   //! \param[in] shape the shape to add as a part.
   //! \param[in] name  the part's name.
   //! \return ID of the newly added part.
-  asiAsm_EXPORT asiAsm_XdePartId
+  asiAsm_EXPORT PartId
     AddPart(const TopoDS_Shape& shape = TopoDS_Shape(),
             const std::string&  name  = "");
 
   //! Creates a new part with the given name.
   //! \param[in] name the part's name.
   //! \return ID of the newly added part.
-  asiAsm_EXPORT asiAsm_XdePartId
+  asiAsm_EXPORT PartId
     AddPart(const std::string& name);
 
   //! Adds subshape label under the given part.
@@ -842,8 +830,8 @@ public:
   //! \param[in] subshape the subshape to add.
   //! \return the newly created OCAF label.
   asiAsm_EXPORT TDF_Label
-    AddSubShape(const asiAsm_XdePartId& partId,
-                const TopoDS_Shape&     subshape);
+    AddSubShape(const PartId&       partId,
+                const TopoDS_Shape& subshape);
 
   //! Removes all given parts with their instances from the document.
   //! \param[in] parts              parts to remove.
@@ -851,8 +839,8 @@ public:
   //!                               upon removal of parts.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
-    RemoveParts(const asiAsm_XdePartIds& parts,
-                const bool               doUpdateAssemblies = true);
+    RemoveParts(const PartIds& parts,
+                const bool     doUpdateAssemblies = true);
 
   //! Removes all empty assemblies and their components.
   asiAsm_EXPORT void
@@ -897,7 +885,7 @@ protected:
     newDocument();
 
   //! \return instance of XDE Application which manages XDE Document.
-  asiAsm_EXPORT Handle(asiAsm_XdeApp)
+  asiAsm_EXPORT Handle(App)
     getApplication();
 
   //! Starting from the given assembly item, iterates assembly structure downwards
@@ -907,10 +895,10 @@ protected:
   //! \param[out] items     vector of collected leaf items.
   //! \param[out] traversed map of already traversed items.
   asiAsm_EXPORT void
-    getLeafItems(asiAsm_XdeAssemblyItemId                     parent,
-                 const Handle(asiAsm_XdeHAssemblyItemIdsMap)& itemsMap,
-                 asiAsm_XdeAssemblyItemIds&                   items,
-                 const Handle(asiAsm_XdeHAssemblyItemIdsMap)& traversed) const;
+    getLeafItems(AssemblyItemId                     parent,
+                 const Handle(HAssemblyItemIdsMap)& itemsMap,
+                 AssemblyItemIds&                   items,
+                 const Handle(HAssemblyItemIdsMap)& traversed) const;
 
   //! For the given list of originals, this method extracts parts.
   //!
@@ -918,23 +906,23 @@ protected:
   //! \param[out] parts     extracted parts.
   asiAsm_EXPORT void
     getParts(const TDF_LabelSequence& originals,
-             asiAsm_XdePartIds&       parts) const;
+             PartIds&                 parts) const;
 
   //! Auxiliary method to convert labels to part IDs.
   //!
   //! \param[in]  origInstances  map of labels to instances to processed.
   //! \param[out] partsInstances output map of part IDs.
   asiAsm_EXPORT void
-    getPartsWithInstances(const asiAsm_XdeLabelsToInstancesMap& origInstances,
-                          asiAsm_XdePartsToInstancesMap&        partsInstances) const;
+    getPartsWithInstances(const LabelsToInstancesMap& origInstances,
+                          PartsToInstancesMap&        partsInstances) const;
 
   //! Add the item of interest to the proper label in the given map.
   //!
   //! \param[in,out] item          item of interest.
   //! \param[out]    origInstances output map of labels to instances.
   asiAsm_EXPORT void
-    getOriginalsWithInstances(const asiAsm_XdeAssemblyItemId& item,
-                              asiAsm_XdeLabelsToInstancesMap& origInstances) const;
+    getOriginalsWithInstances(const AssemblyItemId& item,
+                              LabelsToInstancesMap& origInstances) const;
 
   //! Auxiliary method to get assembly items for part.
   //!
@@ -943,10 +931,10 @@ protected:
   //! \param[out] itemsMap output map of assembly item ID (filled in priority in case of not NULL value).
   //! \param[out] items    output vector of assembly item IDs.
   asiAsm_EXPORT void
-    getAssemblyItemsForPart(const TDF_Label&                             original,
-                            const asiAsm_XdeAssemblyItemId&              item,
-                            const Handle(asiAsm_XdeHAssemblyItemIdsMap)& itemsMap,
-                            asiAsm_XdeAssemblyItemIds&                   items) const;
+    getAssemblyItemsForPart(const TDF_Label&                   original,
+                            const AssemblyItemId&              item,
+                            const Handle(HAssemblyItemIdsMap)& itemsMap,
+                            AssemblyItemIds&                   items) const;
 
   //! Clears working session which is an internal data structure used by
   //! data translators of OpenCascade.
@@ -959,8 +947,8 @@ protected:
   //! \param[in]     items     the assembly items in question.
   //! \param[in,out] processed the processed prototypes' labels.
   asiAsm_EXPORT void
-    expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& items,
-                               TDF_LabelMap&                    processed);
+    expandCompoundsRecursively(const AssemblyItemIds& items,
+                               TDF_LabelMap&          processed);
 
   //! Internal mechanics for compounds expansion. This method works the
   //! at TDF_Label's level.
@@ -998,10 +986,10 @@ protected:
   //!                                        that color will be returned without
   //!                                        checking the colors of sub-shapes.
   asiAsm_EXPORT void
-    getCommonColor(const asiAsm_XdePartId& partId,
-                   Quantity_Color&         color,
-                   bool&                   isOnFaces,
-                   const bool              isIgnorePartColor = false) const;
+    getCommonColor(const PartId&   partId,
+                   Quantity_Color& color,
+                   bool&           isOnFaces,
+                   const bool      isIgnorePartColor = false) const;
 
   //! Copies all OCAF/XDE attributes from the `from` label to the `to` label.
   //! \param[in] from the source label.
@@ -1028,11 +1016,11 @@ protected:
   //! \param[in,out] path     the current path to the item.
   //! \param[out]    items    the found items.
   asiAsm_EXPORT void
-    findItemsRecursively(const Handle(asiAsm_XdeGraph)&         asmGraph,
-                         const int                              parentId,
-                         const std::string&                     name,
-                         std::vector<int>&                      path,
-                         Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const;
+    findItemsRecursively(const Handle(Graph)&         asmGraph,
+                         const int                    parentId,
+                         const std::string&           name,
+                         std::vector<int>&            path,
+                         Handle(HAssemblyItemIdsMap)& items) const;
 
   //! Removes the given assembly in the case it's empty.
   //! \param[in] assembly the assembly label to remove.
@@ -1113,5 +1101,8 @@ protected:
   mutable ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
 
 };
+
+} // xde
+} // asiAsm
 
 #endif

@@ -72,6 +72,10 @@
 
 //-----------------------------------------------------------------------------
 
+using namespace asiAsm::xde;
+
+//-----------------------------------------------------------------------------
+
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
@@ -84,8 +88,8 @@
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdeDoc::asiAsm_XdeDoc(ActAPI_ProgressEntry progress,
-                             ActAPI_PlotterEntry  plotter)
+Doc::Doc(ActAPI_ProgressEntry progress,
+         ActAPI_PlotterEntry  plotter)
 : Standard_Transient (),
   m_progress         (progress),
   m_plotter          (plotter)
@@ -95,14 +99,14 @@ asiAsm_XdeDoc::asiAsm_XdeDoc(ActAPI_ProgressEntry progress,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::NewDocument()
+void Doc::NewDocument()
 {
   this->init( this->newDocument() ); // Initialize internal structure.
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::Load(const TCollection_AsciiString& filename)
+bool Doc::Load(const TCollection_AsciiString& filename)
 {
   // Recognize format.
   const asiAlgo_FileFormat
@@ -125,12 +129,12 @@ bool asiAsm_XdeDoc::Load(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::LoadNative(const TCollection_AsciiString& filename)
+bool Doc::LoadNative(const TCollection_AsciiString& filename)
 {
   if ( !m_doc.IsNull() )
     this->Release();
 
-  Handle(asiAsm_XdeApp) A = this->getApplication();
+  Handle(App) A = this->getApplication();
   //
   Handle(TDocStd_Document) Doc;
 
@@ -213,7 +217,7 @@ bool asiAsm_XdeDoc::LoadNative(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::LoadSTEP(const TCollection_AsciiString& filename)
+bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
 {
   if ( m_doc.IsNull() )
   {
@@ -263,12 +267,12 @@ bool asiAsm_XdeDoc::LoadSTEP(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::SaveAs(const TCollection_AsciiString& filename)
+bool Doc::SaveAs(const TCollection_AsciiString& filename)
 {
   if ( m_doc.IsNull() )
     return false;
 
-  Handle(asiAsm_XdeApp) A = this->getApplication();
+  Handle(App) A = this->getApplication();
 
   // Write.
   PCDM_StoreStatus status = PCDM_SS_WriteFailure;
@@ -308,7 +312,7 @@ bool asiAsm_XdeDoc::SaveAs(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsEmpty() const
+bool Doc::IsEmpty() const
 {
   if ( m_doc.IsNull() )
     return true;
@@ -321,13 +325,13 @@ bool asiAsm_XdeDoc::IsEmpty() const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::Release()
+void Doc::Release()
 {
   if ( m_doc.IsNull() )
     return;
 
   // Close OCAF Document.
-  Handle(asiAsm_XdeApp) A = this->getApplication();
+  Handle(App) A = this->getApplication();
   //
   if ( A->CanClose(m_doc) == CDM_CCS_OK )
     A->Close(m_doc);
@@ -340,13 +344,13 @@ void asiAsm_XdeDoc::Release()
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::FindItems(const std::string&                     name,
-                              Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+bool Doc::FindItems(const std::string&            name,
+                    Handle(HAssemblyItemIdsMap)& items) const
 {
-  items = new asiAsm_XdeHAssemblyItemIdsMap;
+  items = new HAssemblyItemIdsMap;
 
   // Prepare assembly graph.
-  Handle(asiAsm_XdeGraph) asmGraph = new asiAsm_XdeGraph(this);
+  Handle(Graph) asmGraph = new Graph(this);
 
   // DFS starting from roots.
   const TColStd_PackedMapOfInteger& roots = asmGraph->GetRoots();
@@ -365,16 +369,16 @@ bool asiAsm_XdeDoc::FindItems(const std::string&                     name,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::SetObjectName(const TDF_Label&                  label,
-                                  const TCollection_ExtendedString& name)
+void Doc::SetObjectName(const TDF_Label&                  label,
+                        const TCollection_ExtendedString& name)
 {
   TDataStd_Name::Set(label, name);
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePersistentId& id,
-                                  TCollection_ExtendedString&   name) const
+bool Doc::GetObjectName(const PersistentId&         id,
+                        TCollection_ExtendedString& name) const
 {
   // Get label for object ID.
   TDF_Label label;
@@ -394,8 +398,8 @@ bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePersistentId& id,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePartId&     id,
-                                  TCollection_ExtendedString& name) const
+bool Doc::GetObjectName(const PartId&               id,
+                        TCollection_ExtendedString& name) const
 {
   name = this->GetPartName(id);
   return true;
@@ -403,8 +407,8 @@ bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdePartId&     id,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdeAssemblyItemId& id,
-                                  TCollection_ExtendedString&     name) const
+bool Doc::GetObjectName(const AssemblyItemId&       id,
+                        TCollection_ExtendedString& name) const
 {
   TDF_Label original = this->GetOriginal(id);
 
@@ -416,7 +420,7 @@ bool asiAsm_XdeDoc::GetObjectName(const asiAsm_XdeAssemblyItemId& id,
 //-----------------------------------------------------------------------------
 
 TCollection_ExtendedString
-  asiAsm_XdeDoc::GetObjectName(const TDF_Label& label) const
+  Doc::GetObjectName(const TDF_Label& label) const
 {
   // Get name directly from OCAF attribute.
   Handle(TDataStd_Name) nameAttr;
@@ -429,7 +433,7 @@ TCollection_ExtendedString
 //-----------------------------------------------------------------------------
 
 TCollection_ExtendedString
-  asiAsm_XdeDoc::GetPartName(const asiAsm_XdePartId& part) const
+  Doc::GetPartName(const PartId& part) const
 {
   // Get label by part ID.
   TDF_Label label;
@@ -441,16 +445,16 @@ TCollection_ExtendedString
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartRepresentations(const asiAsm_XdePartId&                  partId,
-                                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const
+void Doc::GetPartRepresentations(const PartId&                  partId,
+                                 std::vector<Handle(PartRepr)>& reps) const
 {
   this->GetPartRepresentations(this->GetLabel(partId), reps);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartRepresentations(const TDF_Label&                         label,
-                                           std::vector<Handle(asiAsm_XdePartRepr)>& reps) const
+void Doc::GetPartRepresentations(const TDF_Label&               label,
+                                 std::vector<Handle(PartRepr)>& reps) const
 {
   if ( label.IsNull() ) return; // Contract check.
 
@@ -461,7 +465,7 @@ void asiAsm_XdeDoc::GetPartRepresentations(const TDF_Label&                     
     const Handle(TDF_Attribute)& attr = itAtt.Value();
 
     // Construct representation.
-    Handle(asiAsm_XdePartRepr) repr = asiAsm_XdePartReprFactory::New(attr);
+    Handle(PartRepr) repr = PartReprFactory::New(attr);
     //
     if ( !repr.IsNull() )
       reps.push_back(repr);
@@ -470,9 +474,9 @@ void asiAsm_XdeDoc::GetPartRepresentations(const TDF_Label&                     
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetPartRepresentation(const asiAsm_XdePartId&     partId,
-                                          const Standard_GUID&        guid,
-                                          Handle(asiAsm_XdePartRepr)& rep) const
+bool Doc::GetPartRepresentation(const PartId&        partId,
+                                const Standard_GUID& guid,
+                                Handle(PartRepr)&    rep) const
 {
   TDF_Label partLab = this->GetLabel(partId);
 
@@ -483,14 +487,14 @@ bool asiAsm_XdeDoc::GetPartRepresentation(const asiAsm_XdePartId&     partId,
     return false;
 
   // Construct a representation using the factory.
-  rep = asiAsm_XdePartReprFactory::New(attr);
+  rep = PartReprFactory::New(attr);
   //
   return !rep.IsNull();
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsAssembly(const TDF_Label& itemLabel) const
+bool Doc::IsAssembly(const TDF_Label& itemLabel) const
 {
   if ( itemLabel.IsNull() )
     return false;
@@ -500,15 +504,15 @@ bool asiAsm_XdeDoc::IsAssembly(const TDF_Label& itemLabel) const
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsAssembly(const asiAsm_XdeAssemblyItemId& item) const
+bool Doc::IsAssembly(const AssemblyItemId& item) const
 {
   return this->IsAssembly( this->GetOriginal(item) );
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsInstance(const TDF_Label& itemLab,
-                               TDF_Label&       origin) const
+bool Doc::IsInstance(const TDF_Label& itemLab,
+                     TDF_Label&       origin) const
 {
   if ( itemLab.IsNull() )
     return false;
@@ -529,8 +533,8 @@ bool asiAsm_XdeDoc::IsInstance(const TDF_Label& itemLab,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsInstance(const asiAsm_XdeAssemblyItemId& item,
-                               TDF_Label&                      origin) const
+bool Doc::IsInstance(const AssemblyItemId& item,
+                     TDF_Label&            origin) const
 {
   TDF_Label label = this->GetLabel(item);
   //
@@ -539,7 +543,7 @@ bool asiAsm_XdeDoc::IsInstance(const asiAsm_XdeAssemblyItemId& item,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsPart(const TDF_Label& label) const
+bool Doc::IsPart(const TDF_Label& label) const
 {
   if ( label.IsNull() )
     return false;
@@ -552,7 +556,7 @@ bool asiAsm_XdeDoc::IsPart(const TDF_Label& label) const
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsPart(const asiAsm_XdeAssemblyItemId& item) const
+bool Doc::IsPart(const AssemblyItemId& item) const
 {
   // Check original on being a simple shape.
   TDF_Label original = this->GetOriginal(item);
@@ -562,7 +566,7 @@ bool asiAsm_XdeDoc::IsPart(const asiAsm_XdeAssemblyItemId& item) const
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::IsOriginal(const TDF_Label& label) const
+bool Doc::IsOriginal(const TDF_Label& label) const
 {
   if ( label.IsNull() )
     return false;
@@ -579,7 +583,7 @@ bool asiAsm_XdeDoc::IsOriginal(const TDF_Label& label) const
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetOriginal(const TDF_Label& itemLabel) const
+TDF_Label Doc::GetOriginal(const TDF_Label& itemLabel) const
 {
   if ( itemLabel.IsNull() )
     return itemLabel;
@@ -594,37 +598,37 @@ TDF_Label asiAsm_XdeDoc::GetOriginal(const TDF_Label& itemLabel) const
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetOriginal(const asiAsm_XdeAssemblyItemId& item) const
+TDF_Label Doc::GetOriginal(const AssemblyItemId& item) const
 {
   return this->GetOriginal( this->GetLabel(item) );
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdePartId
-  asiAsm_XdeDoc::GetPart(const asiAsm_XdeAssemblyItemId& item) const
+PartId
+  Doc::GetPart(const AssemblyItemId& item) const
 {
   TDF_Label prototypeLab = this->GetOriginal(item);
   //
   if ( prototypeLab.IsNull() )
-    return asiAsm_XdePartId();
+    return PartId();
 
   TCollection_AsciiString entry;
   __entry(prototypeLab, entry);
 
-  return asiAsm_XdePartId::FromEntry(entry);
+  return PartId::FromEntry(entry);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetOriginals(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                                 TDF_LabelSequence&                           originalLabels) const
+void Doc::GetOriginals(const Handle(HAssemblyItemIdsMap)& anyItems,
+                       TDF_LabelSequence&                 originalLabels) const
 {
   // Loop over the items of interest and collect originals as labels into
   // a map, so that no duplications will be stored.
   NCollection_IndexedMap<TDF_Label, TDF_LabelMapHasher> originals;
   //
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator iter(*anyItems); iter.More(); iter.Next() )
+  for ( HAssemblyItemIdsMap::Iterator iter(*anyItems); iter.More(); iter.Next() )
   {
     TDF_Label original = this->GetOriginal( iter.Value() );
 
@@ -638,14 +642,14 @@ void asiAsm_XdeDoc::GetOriginals(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& an
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetOriginals(const asiAsm_XdeAssemblyItemIds& anyItems,
-                                 TDF_LabelSequence&               originalLabels) const
+void Doc::GetOriginals(const AssemblyItemIds& anyItems,
+                       TDF_LabelSequence&     originalLabels) const
 {
   // Loop over the items of interest and collect originals as labels into
   // a map, so that no duplications will be stored.
   NCollection_IndexedMap<TDF_Label, TDF_LabelMapHasher> originals;
   //
-  for ( asiAsm_XdeAssemblyItemIds::Iterator iter(anyItems); iter.More(); iter.Next() )
+  for ( AssemblyItemIds::Iterator iter(anyItems); iter.More(); iter.Next() )
   {
     TDF_Label original = this->GetOriginal( iter.Value() );
 
@@ -659,31 +663,31 @@ void asiAsm_XdeDoc::GetOriginals(const asiAsm_XdeAssemblyItemIds& anyItems,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetOriginalsWithInstances(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                                              asiAsm_XdeLabelsToInstancesMap&              origInstances) const
+void Doc::GetOriginalsWithInstances(const Handle(HAssemblyItemIdsMap)& anyItems,
+                                    LabelsToInstancesMap&              origInstances) const
 {
   // Loop over the items of interest and collect originals as labels into
   // a map, so that no duplications will be stored.
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator iter(*anyItems); iter.More(); iter.Next() )
+  for ( HAssemblyItemIdsMap::Iterator iter(*anyItems); iter.More(); iter.Next() )
     this->getOriginalsWithInstances(iter.Value(), origInstances);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetOriginalsWithInstances(const asiAsm_XdeAssemblyItemIds& anyItems,
-                                              asiAsm_XdeLabelsToInstancesMap&  origInstances) const
+void Doc::GetOriginalsWithInstances(const AssemblyItemIds& anyItems,
+                                    LabelsToInstancesMap&  origInstances) const
 {
   // Loop over the items of interest and collect originals as labels into
   // a map, so that no duplications will be stored.
-  for ( asiAsm_XdeAssemblyItemIds::Iterator iter(anyItems); iter.More(); iter.Next() )
+  for ( AssemblyItemIds::Iterator iter(anyItems); iter.More(); iter.Next() )
     this->getOriginalsWithInstances(iter.Value(), origInstances);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(asiAsm_XdePartIds& parts) const
+void Doc::GetParts(PartIds& parts) const
 {
-  asiAsm_XdeAssemblyItemIds parents;
+  AssemblyItemIds parents;
   this->GetRootAssemblyItems(parents);
   //
   this->GetParts(parents, parts, false);
@@ -691,15 +695,15 @@ void asiAsm_XdeDoc::GetParts(asiAsm_XdePartIds& parts) const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                             asiAsm_XdePartIds&                           parts,
-                             const bool                                   isAlreadyLeafs) const
+void Doc::GetParts(const Handle(HAssemblyItemIdsMap)& anyItems,
+                   PartIds&                           parts,
+                   const bool                         isAlreadyLeafs) const
 {
   // Get leaf assembly items.
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) leafItems;
+  Handle(HAssemblyItemIdsMap) leafItems;
   if ( !isAlreadyLeafs )
   {
-    leafItems = new asiAsm_XdeHAssemblyItemIdsMap;
+    leafItems = new HAssemblyItemIdsMap;
     this->GetLeafAssemblyItems(anyItems, leafItems);
   }
 
@@ -712,9 +716,9 @@ void asiAsm_XdeDoc::GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyIte
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
-                             asiAsm_XdePartIds&               parts,
-                             const bool                       isAlreadyLeafs) const
+void Doc::GetParts(const AssemblyItemIds& anyItems,
+                   PartIds&               parts,
+                   const bool             isAlreadyLeafs) const
 {
   if ( anyItems.IsEmpty() )
   {
@@ -724,7 +728,7 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
   }
 
   // Get leaf assembly items.
-  asiAsm_XdeAssemblyItemIds leafItems;
+  AssemblyItemIds leafItems;
   if ( !isAlreadyLeafs )
     this->GetLeafAssemblyItems(anyItems, leafItems);
 
@@ -737,9 +741,9 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds&       anyItems,
-                             Handle(asiAsm_XdeHAssemblyItemIdsMap)& leafItems,
-                             asiAsm_XdePartIds&                     parts) const
+void Doc::GetParts(const AssemblyItemIds&       anyItems,
+                   Handle(HAssemblyItemIdsMap)& leafItems,
+                   PartIds&                     parts) const
 {
   // Get leaf assembly items.
   this->GetLeafAssemblyItems(anyItems, leafItems);
@@ -749,9 +753,9 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds&       anyItems,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                             Handle(asiAsm_XdeHAssemblyItemIdsMap)&       leafItems,
-                             asiAsm_XdePartIds&                           parts) const
+void Doc::GetParts(const Handle(HAssemblyItemIdsMap)& anyItems,
+                   Handle(HAssemblyItemIdsMap)&       leafItems,
+                   PartIds&                           parts) const
 {
   // Get leaf assembly items.
   this->GetLeafAssemblyItems(anyItems, leafItems);
@@ -761,9 +765,9 @@ void asiAsm_XdeDoc::GetParts(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyIte
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
-                             asiAsm_XdeAssemblyItemIds&       leafItems,
-                             asiAsm_XdePartIds&               parts) const
+void Doc::GetParts(const AssemblyItemIds& anyItems,
+                   AssemblyItemIds&       leafItems,
+                   PartIds&               parts) const
 {
   // Get leaf assembly items.
   this->GetLeafAssemblyItems(anyItems, leafItems);
@@ -773,22 +777,22 @@ void asiAsm_XdeDoc::GetParts(const asiAsm_XdeAssemblyItemIds& anyItems,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::CountParts(NCollection_DataMap<asiAsm_XdePartId, int, asiAsm_XdePartId::Hasher>& quantities) const
+void Doc::CountParts(NCollection_DataMap<PartId, int, PartId::Hasher>& quantities) const
 {
   // Construct HAG.
-  Handle(asiAsm_XdeGraph) hag = new asiAsm_XdeGraph(this);
+  Handle(Graph) hag = new Graph(this);
 
   // Loop over the HAG elements and collect the information for the elements
   // of PART type. We are interested in their usage occurrences.
-  const NCollection_IndexedMap<asiAsm_XdePersistentId>& elems = hag->GetNodes();
+  const NCollection_IndexedMap<PersistentId>& elems = hag->GetNodes();
   //
   for ( int nid = 1; nid <= elems.Extent(); ++nid )
   {
-    if ( hag->GetNodeType(nid) != asiAsm_XdeGraph::NodeType_Part )
+    if ( hag->GetNodeType(nid) != Graph::NodeType_Part )
       continue;
 
-    const asiAsm_XdePersistentId& pid      = elems(nid);
-    const int                     quantity = hag->GetUsageOccurrenceQuantity(nid);
+    const PersistentId& pid      = elems(nid);
+    const int           quantity = hag->GetUsageOccurrenceQuantity(nid);
 
     quantities.Bind(pid, quantity);
   }
@@ -796,20 +800,20 @@ void asiAsm_XdeDoc::CountParts(NCollection_DataMap<asiAsm_XdePartId, int, asiAsm
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartsWithInstances(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                                          asiAsm_XdePartsToInstancesMap&               partsInstances,
-                                          const bool                                   isAlreadyLeafs) const
+void Doc::GetPartsWithInstances(const Handle(HAssemblyItemIdsMap)& anyItems,
+                                PartsToInstancesMap&               partsInstances,
+                                const bool                         isAlreadyLeafs) const
 {
   // Get leaf assembly items.
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) leafItems;
+  Handle(HAssemblyItemIdsMap) leafItems;
   if ( !isAlreadyLeafs )
   {
-    leafItems = new asiAsm_XdeHAssemblyItemIdsMap;
+    leafItems = new HAssemblyItemIdsMap;
     this->GetLeafAssemblyItems(anyItems, leafItems);
   }
 
   // Get map of original labels to instances.
-  asiAsm_XdeLabelsToInstancesMap origInstances;
+  LabelsToInstancesMap origInstances;
   this->GetOriginalsWithInstances(isAlreadyLeafs ? anyItems : leafItems, origInstances);
   //
   this->getPartsWithInstances(origInstances, partsInstances);
@@ -817,17 +821,17 @@ void asiAsm_XdeDoc::GetPartsWithInstances(const Handle(asiAsm_XdeHAssemblyItemId
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartsWithInstances(const asiAsm_XdeAssemblyItemIds& anyItems,
-                                          asiAsm_XdePartsToInstancesMap&   partsInstances,
-                                          const bool                       isAlreadyLeafs) const
+void Doc::GetPartsWithInstances(const AssemblyItemIds& anyItems,
+                                PartsToInstancesMap&   partsInstances,
+                                const bool             isAlreadyLeafs) const
 {
   // Get leaf assembly items.
-  asiAsm_XdeAssemblyItemIds leafItems;
+  AssemblyItemIds leafItems;
   if ( !isAlreadyLeafs )
     this->GetLeafAssemblyItems(anyItems, leafItems);
 
   // Get map of original labels to instances.
-  asiAsm_XdeLabelsToInstancesMap origInstances;
+  LabelsToInstancesMap origInstances;
   this->GetOriginalsWithInstances(isAlreadyLeafs ? anyItems : leafItems, origInstances);
   //
   this->getPartsWithInstances(origInstances, partsInstances);
@@ -835,8 +839,8 @@ void asiAsm_XdeDoc::GetPartsWithInstances(const asiAsm_XdeAssemblyItemIds& anyIt
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAsPartId(const asiAsm_XdeAssemblyItemId& assemblyEntryId,
-                                asiAsm_XdePartId&               partEntryId)
+void Doc::GetAsPartId(const AssemblyItemId& assemblyEntryId,
+                      PartId&               partEntryId)
 {
   TDF_Label original = this->GetOriginal(assemblyEntryId);
   TDF_Tool::Entry(original, partEntryId.Entry);
@@ -844,14 +848,14 @@ void asiAsm_XdeDoc::GetAsPartId(const asiAsm_XdeAssemblyItemId& assemblyEntryId,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetLabelOfModel() const
+TDF_Label Doc::GetLabelOfModel() const
 {
   return m_doc->Main().Root();
 }
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdeAssemblyItemId& item) const
+TDF_Label Doc::GetLabel(const AssemblyItemId& item) const
 {
   if ( item.IsNull() )
     return TDF_Label();
@@ -863,7 +867,7 @@ TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdeAssemblyItemId& item) const
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdePartId& part) const
+TDF_Label Doc::GetLabel(const PartId& part) const
 {
   if ( part.IsNull() )
     return TDF_Label();
@@ -873,7 +877,7 @@ TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdePartId& part) const
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdePersistentId& id) const
+TDF_Label Doc::GetLabel(const PersistentId& id) const
 {
   if ( id.IsEmpty() )
     return TDF_Label();
@@ -886,8 +890,8 @@ TDF_Label asiAsm_XdeDoc::GetLabel(const asiAsm_XdePersistentId& id) const
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiAsm_XdeDoc::GetShape(const asiAsm_XdeAssemblyItemId& item,
-                                     const bool                      doTransform) const
+TopoDS_Shape Doc::GetShape(const AssemblyItemId& item,
+                           const bool            doTransform) const
 {
   const Handle(XCAFDoc_ShapeTool)& STool = this->GetShapeTool();
   //
@@ -927,7 +931,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetShape(const asiAsm_XdeAssemblyItemId& item,
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiAsm_XdeDoc::GetShape(const asiAsm_XdePartId& part) const
+TopoDS_Shape Doc::GetShape(const PartId& part) const
 {
   TDF_Label L;
   TDF_Tool::Label(this->m_doc->GetData(), part.Entry, L);
@@ -941,7 +945,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetShape(const asiAsm_XdePartId& part) const
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiAsm_XdeDoc::GetShape(const TDF_Label& label) const
+TopoDS_Shape Doc::GetShape(const TDF_Label& label) const
 {
   if ( label.IsNull() )
     return TopoDS_Shape();
@@ -951,8 +955,8 @@ TopoDS_Shape asiAsm_XdeDoc::GetShape(const TDF_Label& label) const
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetParent(const asiAsm_XdeAssemblyItemId& item,
-                              asiAsm_XdeAssemblyItemId&       parent) const
+bool Doc::GetParent(const AssemblyItemId& item,
+                    AssemblyItemId&       parent) const
 {
   if ( item.GetPathLength() <= 1 )
     return false;
@@ -965,8 +969,8 @@ bool asiAsm_XdeDoc::GetParent(const asiAsm_XdeAssemblyItemId& item,
 //-----------------------------------------------------------------------------
 
 TopLoc_Location
-  asiAsm_XdeDoc::GetParentLocation(const asiAsm_XdeAssemblyItemId& item,
-                                   const bool                      doTransform) const
+  Doc::GetParentLocation(const AssemblyItemId& item,
+                         const bool            doTransform) const
 {
   const Handle(XCAFDoc_ShapeTool)& STool = this->GetShapeTool();
   //
@@ -1004,14 +1008,14 @@ TopLoc_Location
 
 //-----------------------------------------------------------------------------
 
-TopLoc_Location asiAsm_XdeDoc::GetOwnLocation(const asiAsm_XdeAssemblyItemId& item) const
+TopLoc_Location Doc::GetOwnLocation(const AssemblyItemId& item) const
 {
   return this->GetShapeTool()->GetLocation( this->GetLabel(item) );
 }
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiAsm_XdeDoc::GetOneShape() const
+TopoDS_Shape Doc::GetOneShape() const
 {
   // Get all parts.
   TDF_LabelSequence labels;
@@ -1038,7 +1042,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetOneShape() const
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiAsm_XdeDoc::GetOneShape(const asiAsm_XdeAssemblyItemIds& items) const
+TopoDS_Shape Doc::GetOneShape(const AssemblyItemIds& items) const
 {
   // Create result container.
   TopoDS_Compound result;
@@ -1046,7 +1050,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetOneShape(const asiAsm_XdeAssemblyItemIds& items) 
   BB.MakeCompound(result);
 
   // Extract shapes.
-  for ( asiAsm_XdeAssemblyItemIds::Iterator iter(items); iter.More(); iter.Next() )
+  for ( AssemblyItemIds::Iterator iter(items); iter.More(); iter.Next() )
   {
     TopoDS_Shape shape = this->GetShape( iter.Value() );
     BB.Add(result, shape);
@@ -1056,7 +1060,7 @@ TopoDS_Shape asiAsm_XdeDoc::GetOneShape(const asiAsm_XdeAssemblyItemIds& items) 
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLabelsOfRoots(TDF_LabelSequence& labels) const
+void Doc::GetLabelsOfRoots(TDF_LabelSequence& labels) const
 {
   Handle(XCAFDoc_ShapeTool) STool = this->GetShapeTool();
   STool->GetFreeShapes(labels);
@@ -1064,7 +1068,7 @@ void asiAsm_XdeDoc::GetLabelsOfRoots(TDF_LabelSequence& labels) const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetRootAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetRootAssemblyItems(AssemblyItemIds& items) const
 {
   TDF_LabelSequence roots;
   this->GetLabelsOfRoots(roots);
@@ -1076,16 +1080,16 @@ void asiAsm_XdeDoc::GetRootAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const
     TCollection_AsciiString entry;
     TDF_Tool::Entry(it.Value(), entry);
 
-    asiAsm_XdeAssemblyItemId item = asiAsm_XdeAssemblyItemId::FromPath(entry);
+    AssemblyItemId item = AssemblyItemId::FromPath(entry);
     items.Append(item);
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetLeafAssemblyItems(AssemblyItemIds& items) const
 {
-  asiAsm_XdeAssemblyItemIds parents;
+  AssemblyItemIds parents;
   this->GetRootAssemblyItems(parents);
   //
   this->GetLeafAssemblyItems(parents, items);
@@ -1093,9 +1097,9 @@ void asiAsm_XdeDoc::GetLeafAssemblyItems(asiAsm_XdeAssemblyItemIds& items) const
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetLeafAssemblyItems(const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds parents;
+  AssemblyItemIds parents;
   this->GetRootAssemblyItems(parents);
   //
   this->GetLeafAssemblyItems(parents, items);
@@ -1103,52 +1107,52 @@ void asiAsm_XdeDoc::GetLeafAssemblyItems(const Handle(asiAsm_XdeHAssemblyItemIds
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds&             parents,
-                                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetLeafAssemblyItems(const AssemblyItemIds&             parents,
+                               const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds dumpItems;
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) traversed = new asiAsm_XdeHAssemblyItemIdsMap;
+  AssemblyItemIds dumpItems;
+  Handle(HAssemblyItemIdsMap) traversed = new HAssemblyItemIdsMap;
 
-  for ( asiAsm_XdeAssemblyItemIds::Iterator ait(parents); ait.More(); ait.Next() )
+  for ( AssemblyItemIds::Iterator ait(parents); ait.More(); ait.Next() )
     this->getLeafItems(ait.Value(), items, dumpItems, traversed);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& parents,
-                                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetLeafAssemblyItems(const Handle(HAssemblyItemIdsMap)& parents,
+                               const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds dumpItems;
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) traversed = new asiAsm_XdeHAssemblyItemIdsMap();
+  AssemblyItemIds dumpItems;
+  Handle(HAssemblyItemIdsMap) traversed = new HAssemblyItemIdsMap();
 
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator ait(*parents); ait.More(); ait.Next() )
+  for ( HAssemblyItemIdsMap::Iterator ait(*parents); ait.More(); ait.Next() )
     this->getLeafItems(ait.Value(), items, dumpItems, traversed);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemId&              parent,
-                                         const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetLeafAssemblyItems(const AssemblyItemId&              parent,
+                               const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds oneElemList;
+  AssemblyItemIds oneElemList;
   oneElemList.Append(parent);
   this->GetLeafAssemblyItems(oneElemList, items);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemId& parent,
-                                         asiAsm_XdeAssemblyItemIds&      items) const
+void Doc::GetLeafAssemblyItems(const AssemblyItemId& parent,
+                               AssemblyItemIds&      items) const
 {
-  asiAsm_XdeAssemblyItemIds oneElemList;
+  AssemblyItemIds oneElemList;
   oneElemList.Append(parent);
   this->GetLeafAssemblyItems(oneElemList, items);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds& parents,
-                                         asiAsm_XdeAssemblyItemIds&       items) const
+void Doc::GetLeafAssemblyItems(const AssemblyItemIds& parents,
+                               AssemblyItemIds&       items) const
 {
   if ( parents.IsEmpty() )
   {
@@ -1157,16 +1161,16 @@ void asiAsm_XdeDoc::GetLeafAssemblyItems(const asiAsm_XdeAssemblyItemIds& parent
     return;
   }
 
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) traversed = new asiAsm_XdeHAssemblyItemIdsMap();
+  Handle(HAssemblyItemIdsMap) traversed = new HAssemblyItemIdsMap();
 
-  for ( asiAsm_XdeAssemblyItemIds::Iterator ait(parents); ait.More(); ait.Next() )
+  for ( AssemblyItemIds::Iterator ait(parents); ait.More(); ait.Next() )
     this->getLeafItems(ait.Value(), NULL, items, traversed);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetLabelsOfReplicas(const TDF_Label&   label,
-                                        TDF_LabelSequence& replicas)
+void Doc::GetLabelsOfReplicas(const TDF_Label&   label,
+                              TDF_LabelSequence& replicas)
 {
   Handle(TDataStd_TreeNode) TN;
   if ( !label.FindAttribute(XCAFDoc::ShapeRefGUID(), TN) )
@@ -1178,8 +1182,8 @@ void asiAsm_XdeDoc::GetLabelsOfReplicas(const TDF_Label&   label,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForPart(const asiAsm_XdePartId&    part,
-                                            asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetAssemblyItemsForPart(const PartId&    part,
+                                  AssemblyItemIds& items) const
 {
   // Get label by part ID.
   TDF_Label label;
@@ -1192,50 +1196,50 @@ void asiAsm_XdeDoc::GetAssemblyItemsForPart(const asiAsm_XdePartId&    part,
   // Handle cases when part is Free shape (in terms of ShapeTool),
   // i.e. has no instances.
   if ( this->GetShapeTool()->IsFree(label) )
-    items.Append( asiAsm_XdeAssemblyItemId(part.Entry) );
+    items.Append( AssemblyItemId(part.Entry) );
   else
     this->GetAssemblyItemsForPart(label, items);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForPart(const TDF_Label&           original,
-                                            asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetAssemblyItemsForPart(const TDF_Label& original,
+                                  AssemblyItemIds& items) const
 {
-  asiAsm_XdeAssemblyItemIds allItems;
+  AssemblyItemIds allItems;
   this->GetLeafAssemblyItems(allItems);
 
   // Choose proper ones.
-  for ( asiAsm_XdeAssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
+  for ( AssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
     this->getAssemblyItemsForPart(original, it.Value(), NULL, items);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForPart(const TDF_Label&                             original,
-                                            const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetAssemblyItemsForPart(const TDF_Label&                   original,
+                                  const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds allItems;
+  AssemblyItemIds allItems;
   this->GetLeafAssemblyItems(allItems);
 
   // Choose proper ones.
-  asiAsm_XdeAssemblyItemIds dumpItems;
-  for ( asiAsm_XdeAssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
+  AssemblyItemIds dumpItems;
+  for ( AssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
     this->getAssemblyItemsForPart(original, it.Value(), items, dumpItems);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForParts(const TDF_LabelMap&        originals,
-                                             asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetAssemblyItemsForParts(const TDF_LabelMap& originals,
+                                   AssemblyItemIds&    items) const
 {
-  asiAsm_XdeAssemblyItemIds allItems;
+  AssemblyItemIds allItems;
   this->GetLeafAssemblyItems(allItems);
 
   // Choose proper ones.
-  for ( asiAsm_XdeAssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
+  for ( AssemblyItemIds::Iterator it(allItems); it.More(); it.Next() )
   {
-    const asiAsm_XdeAssemblyItemId& item = it.Value();
+    const AssemblyItemId& item = it.Value();
     //
     TDF_Label itemLab = this->GetLabel(item);
     TDF_Label itemOriginalLab;
@@ -1257,7 +1261,7 @@ void asiAsm_XdeDoc::GetAssemblyItemsForParts(const TDF_LabelMap&        original
     {
       TCollection_AsciiString entry;
       TDF_Tool::Entry(it.Value(), entry);
-      const asiAsm_XdeAssemblyItemId& item = asiAsm_XdeAssemblyItemId::FromPath(entry);
+      const AssemblyItemId& item = AssemblyItemId::FromPath(entry);
       items.Append(item);
     }
   }
@@ -1265,11 +1269,11 @@ void asiAsm_XdeDoc::GetAssemblyItemsForParts(const TDF_LabelMap&        original
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForParts(const asiAsm_XdePartIds&   parts,
-                                             asiAsm_XdeAssemblyItemIds& items) const
+void Doc::GetAssemblyItemsForParts(const PartIds&   parts,
+                                   AssemblyItemIds& items) const
 {
   TDF_LabelMap labelsMap;
-  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  for ( PartIds::Iterator pit(parts); pit.More(); pit.Next() )
   {
     TDF_Label label;
     TDF_Tool::Label(this->m_doc->GetData(), pit.Value().Entry, label);
@@ -1280,7 +1284,7 @@ void asiAsm_XdeDoc::GetAssemblyItemsForParts(const asiAsm_XdePartIds&   parts,
     // Handle cases when part is Free shape (in terms of ShapeTool),
     // i.e. has no instances.
     if ( this->GetShapeTool()->IsFree(label) )
-      items.Append( asiAsm_XdeAssemblyItemId(pit.Value().Entry) );
+      items.Append( AssemblyItemId(pit.Value().Entry) );
     else
       labelsMap.Add(label);
   }
@@ -1290,34 +1294,34 @@ void asiAsm_XdeDoc::GetAssemblyItemsForParts(const asiAsm_XdePartIds&   parts,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetAssemblyItemsForParts(const TDF_LabelMap&                          originals,
-                                             const Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::GetAssemblyItemsForParts(const TDF_LabelMap&                originals,
+                                   const Handle(HAssemblyItemIdsMap)& items) const
 {
-  asiAsm_XdeAssemblyItemIds itemList;
+  AssemblyItemIds itemList;
   this->GetAssemblyItemsForParts(originals, itemList);
   //
-  for ( asiAsm_XdeAssemblyItemIds::Iterator it(itemList); it.More(); it.Next() )
+  for ( AssemblyItemIds::Iterator it(itemList); it.More(); it.Next() )
     items->Add( it.Value() );
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartners(const asiAsm_XdeAssemblyItemId& anyItem,
-                                asiAsm_XdeAssemblyItemIds&      partners) const
+void Doc::GetPartners(const AssemblyItemId& anyItem,
+                      AssemblyItemIds&      partners) const
 {
   this->GetPartners(this->GetOriginal(anyItem), partners);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartners(const TDF_Label&           original,
-                                asiAsm_XdeAssemblyItemIds& partners) const
+void Doc::GetPartners(const TDF_Label& original,
+                      AssemblyItemIds& partners) const
 {
   // Loop over the parts and sub-assemblies in depth-first order.
-  for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
+  for ( DocIterator ait(this); ait.More(); ait.Next() )
   {
-    asiAsm_XdeAssemblyItemId currentItem     = ait.Current();
-    TDF_Label                currentOriginal = this->GetOriginal(currentItem);
+    AssemblyItemId currentItem     = ait.Current();
+    TDF_Label      currentOriginal = this->GetOriginal(currentItem);
 
     if ( currentOriginal == original )
     {
@@ -1333,11 +1337,11 @@ void asiAsm_XdeDoc::GetPartners(const TDF_Label&           original,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartners(const asiAsm_XdeAssemblyItemIds& anyItems,
-                                asiAsm_XdeAssemblyItemIds&       partners) const
+void Doc::GetPartners(const AssemblyItemIds& anyItems,
+                      AssemblyItemIds&       partners) const
 {
   TDF_LabelMap originals;
-  for ( asiAsm_XdeAssemblyItemIds::Iterator it(anyItems); it.More(); it.Next() )
+  for ( AssemblyItemIds::Iterator it(anyItems); it.More(); it.Next() )
   {
     originals.Add( this->GetOriginal( it.Value() ) );
   }
@@ -1346,11 +1350,11 @@ void asiAsm_XdeDoc::GetPartners(const asiAsm_XdeAssemblyItemIds& anyItems,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                                Handle(asiAsm_XdeHAssemblyItemIdsMap)&       partners) const
+void Doc::GetPartners(const Handle(HAssemblyItemIdsMap)& anyItems,
+                      Handle(HAssemblyItemIdsMap)&       partners) const
 {
   TDF_LabelMap originals;
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator it(*anyItems); it.More(); it.Next() )
+  for ( HAssemblyItemIdsMap::Iterator it(*anyItems); it.More(); it.Next() )
   {
     originals.Add( this->GetOriginal( it.Value() ) );
   }
@@ -1359,8 +1363,8 @@ void asiAsm_XdeDoc::GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& any
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& anyItems,
-                                asiAsm_XdeAssemblyItemIds&                   partners) const
+void Doc::GetPartners(const Handle(HAssemblyItemIdsMap)& anyItems,
+                      AssemblyItemIds&                   partners) const
 {
   TDF_LabelMap originals;
   for ( int i = 1; i <= anyItems->Extent(); ++i )
@@ -1372,8 +1376,8 @@ void asiAsm_XdeDoc::GetPartners(const Handle(asiAsm_XdeHAssemblyItemIdsMap)& any
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
-                             Quantity_Color&         color) const
+bool Doc::GetColor(const PartId&   partId,
+                   Quantity_Color& color) const
 {
   Quantity_ColorRGBA colorRGBA;
   const bool isOk = this->GetColor(partId, colorRGBA);
@@ -1386,8 +1390,8 @@ bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
-                             Quantity_ColorRGBA&     color) const
+bool Doc::GetColor(const PartId&       partId,
+                   Quantity_ColorRGBA& color) const
 {
   TDF_Label label = this->GetLabel(partId);
 
@@ -1396,8 +1400,8 @@ bool asiAsm_XdeDoc::GetColor(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetColor(const TDF_Label&    label,
-                             Quantity_ColorRGBA& color) const
+bool Doc::GetColor(const TDF_Label&    label,
+                   Quantity_ColorRGBA& color) const
 {
   bool isColorFound = false;
 
@@ -1427,8 +1431,8 @@ bool asiAsm_XdeDoc::GetColor(const TDF_Label&    label,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetColorAlpha(const asiAsm_XdePartId& partId,
-                                  double&                 alpha)
+bool Doc::GetColorAlpha(const PartId& partId,
+                        double&       alpha)
 {
   Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
 
@@ -1462,9 +1466,9 @@ bool asiAsm_XdeDoc::GetColorAlpha(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::GetSubShapeColor(const asiAsm_XdePartId& partId,
-                                     const TopoDS_Shape&     subShape,
-                                     Quantity_ColorRGBA&     color) const
+bool Doc::GetSubShapeColor(const PartId&       partId,
+                           const TopoDS_Shape& subShape,
+                           Quantity_ColorRGBA& color) const
 {
   Quantity_ColorRGBA partColor;
   //
@@ -1502,8 +1506,8 @@ bool asiAsm_XdeDoc::GetSubShapeColor(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::ExpandCompound(const asiAsm_XdePartId& partId,
-                                   const bool              updateAssemblies)
+bool Doc::ExpandCompound(const PartId& partId,
+                         const bool    updateAssemblies)
 {
   // Contract check 1: null or non-compound shapes are out of interest.
   TopoDS_Shape partShape = this->GetShape(partId);
@@ -1621,8 +1625,8 @@ bool asiAsm_XdeDoc::ExpandCompound(const asiAsm_XdePartId& partId,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::SetColor(const TDF_Label&      label,
-                             const Quantity_Color& color)
+void Doc::SetColor(const TDF_Label&      label,
+                   const Quantity_Color& color)
 {
   if ( label.IsNull() )
     return;
@@ -1632,7 +1636,7 @@ void asiAsm_XdeDoc::SetColor(const TDF_Label&      label,
 
   Quantity_ColorRGBA colorRGBA(color), oldColorRGBA;
   //
-  if ( this->GetColor( asiAsm_XdePartId::FromEntry(partId), oldColorRGBA) )
+  if ( this->GetColor( PartId::FromEntry(partId), oldColorRGBA) )
     colorRGBA.SetAlpha( oldColorRGBA.Alpha() );
 
   this->SetColor(label, colorRGBA, true);
@@ -1640,9 +1644,9 @@ void asiAsm_XdeDoc::SetColor(const TDF_Label&      label,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::SetColor(const TDF_Label&          label,
-                             const Quantity_ColorRGBA& color,
-                             const bool                changeTransp)
+void Doc::SetColor(const TDF_Label&          label,
+                   const Quantity_ColorRGBA& color,
+                   const bool                changeTransp)
 {
   if ( label.IsNull() )
     return;
@@ -1686,7 +1690,7 @@ void asiAsm_XdeDoc::SetColor(const TDF_Label&          label,
     {
       double alpha = 1.0;
       //
-      if ( this->GetColorAlpha(asiAsm_XdePartId::FromLabel(label), alpha) )
+      if ( this->GetColorAlpha(PartId::FromLabel(label), alpha) )
         colorRGBA.SetAlpha( (float) alpha );
     }
 
@@ -1735,8 +1739,8 @@ void asiAsm_XdeDoc::SetColor(const TDF_Label&          label,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::AutoColorizePart(const asiAsm_XdePartId& part,
-                                     const bool              force)
+bool Doc::AutoColorizePart(const PartId& part,
+                           const bool    force)
 {
   Quantity_Color color;
   bool isOnFaces = false;
@@ -1761,10 +1765,10 @@ bool asiAsm_XdeDoc::AutoColorizePart(const asiAsm_XdePartId& part,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::UpdatePartShape(const TDF_Label&                 partLab,
-                                    const TopoDS_Shape&              newShape,
-                                    const Handle(BRepTools_History)& history,
-                                    const bool                       doUpdateAssemblies)
+void Doc::UpdatePartShape(const TDF_Label&                 partLab,
+                          const TopoDS_Shape&              newShape,
+                          const Handle(BRepTools_History)& history,
+                          const bool                       doUpdateAssemblies)
 {
   Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
   Handle(XCAFDoc_ColorTool) CT = this->GetColorTool();
@@ -1981,7 +1985,7 @@ void asiAsm_XdeDoc::UpdatePartShape(const TDF_Label&                 partLab,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::UpdateAssemblies()
+void Doc::UpdateAssemblies()
 {
   // This thing is made a part of OpenCascade, so why bother?
   this->GetShapeTool()->UpdateAssemblies();
@@ -1989,7 +1993,7 @@ void asiAsm_XdeDoc::UpdateAssemblies()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items)
+void Doc::ExpandCompounds(const AssemblyItemIds& items)
 {
   // Continue recursively.
   TDF_LabelMap processed;
@@ -2002,46 +2006,46 @@ void asiAsm_XdeDoc::ExpandCompounds(const asiAsm_XdeAssemblyItemIds& items)
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const TopoDS_Shape& shape,
-                                        const std::string&  name)
+PartId Doc::AddPart(const TopoDS_Shape& shape,
+                    const std::string&  name)
 {
   TDF_Label lab = this->__addPart(shape, name);
 
   TCollection_AsciiString entry;
   this->__entry(lab, entry);
 
-  return asiAsm_XdePartId(entry);
+  return PartId(entry);
 }
 
 //-----------------------------------------------------------------------------
 
-asiAsm_XdePartId asiAsm_XdeDoc::AddPart(const std::string& name)
+PartId Doc::AddPart(const std::string& name)
 {
   return this->AddPart(TopoDS_Shape(), name);
 }
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::AddSubShape(const asiAsm_XdePartId& partId,
-                                     const TopoDS_Shape&     subshape)
+TDF_Label Doc::AddSubShape(const PartId&       partId,
+                           const TopoDS_Shape& subshape)
 {
   return this->__addSubShape( this->GetLabel(partId), subshape );
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::RemoveParts(const asiAsm_XdePartIds& parts,
-                                const bool               doUpdateAssemblies)
+bool Doc::RemoveParts(const PartIds& parts,
+                      const bool     doUpdateAssemblies)
 {
   Handle(XCAFDoc_ShapeTool) ShapeTool = this->GetShapeTool();
 
   // Get labels to clean up.
   TDF_LabelSequence list2Delete;
   //
-  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  for ( PartIds::Iterator pit(parts); pit.More(); pit.Next() )
   {
-    const asiAsm_XdePartId& part      = pit.Value();
-    TDF_Label               partLabel = this->GetLabel(part);
+    const PartId& part      = pit.Value();
+    TDF_Label     partLabel = this->GetLabel(part);
 
     if ( partLabel.IsNull() )
     {
@@ -2082,7 +2086,7 @@ bool asiAsm_XdeDoc::RemoveParts(const asiAsm_XdePartIds& parts,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::RemoveAllEmptyAssemblies()
+void Doc::RemoveAllEmptyAssemblies()
 {
   Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
 
@@ -2104,11 +2108,11 @@ void asiAsm_XdeDoc::RemoveAllEmptyAssemblies()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
+void Doc::DumpAssemblyItems(Standard_OStream& out) const
 {
-  for ( asiAsm_XdeDocIterator ait(this); ait.More(); ait.Next() )
+  for ( DocIterator ait(this); ait.More(); ait.Next() )
   {
-    asiAsm_XdeAssemblyItemId item = ait.Current();
+    AssemblyItemId item = ait.Current();
 
     // Get direct label.
     TDF_Label L;
@@ -2138,35 +2142,35 @@ void asiAsm_XdeDoc::DumpAssemblyItems(Standard_OStream& out) const
 
 //-----------------------------------------------------------------------------
 
-Handle(TDocStd_Document)& asiAsm_XdeDoc::ChangeDocument()
+Handle(TDocStd_Document)& Doc::ChangeDocument()
 {
   return m_doc;
 }
 
 //-----------------------------------------------------------------------------
 
-const Handle(TDocStd_Document)& asiAsm_XdeDoc::GetDocument() const
+const Handle(TDocStd_Document)& Doc::GetDocument() const
 {
   return m_doc;
 }
 
 //-----------------------------------------------------------------------------
 
-Handle(XCAFDoc_ShapeTool) asiAsm_XdeDoc::GetShapeTool() const
+Handle(XCAFDoc_ShapeTool) Doc::GetShapeTool() const
 {
   return XCAFDoc_DocumentTool::ShapeTool( m_doc->Main() );
 }
 
 //-----------------------------------------------------------------------------
 
-Handle(XCAFDoc_ColorTool) asiAsm_XdeDoc::GetColorTool() const
+Handle(XCAFDoc_ColorTool) Doc::GetColorTool() const
 {
   return XCAFDoc_DocumentTool::ColorTool( m_doc->Main() );
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::init(const Handle(TDocStd_Document)& doc)
+void Doc::init(const Handle(TDocStd_Document)& doc)
 {
   // Store the pointer to the passed Document in the member field.
   m_doc = doc;
@@ -2174,10 +2178,10 @@ void asiAsm_XdeDoc::init(const Handle(TDocStd_Document)& doc)
 
 //-----------------------------------------------------------------------------
 
-Handle(TDocStd_Document) asiAsm_XdeDoc::newDocument()
+Handle(TDocStd_Document) Doc::newDocument()
 {
   Handle(TDocStd_Document) D;
-  Handle(asiAsm_XdeApp)    A = this->getApplication();
+  Handle(App)              A = this->getApplication();
 
   // Create XDE Document and return.
   A->NewDocument(BinXCAF, D);
@@ -2186,17 +2190,17 @@ Handle(TDocStd_Document) asiAsm_XdeDoc::newDocument()
 
 //-----------------------------------------------------------------------------
 
-Handle(asiAsm_XdeApp) asiAsm_XdeDoc::getApplication()
+Handle(App) Doc::getApplication()
 {
-  return asiAsm_XdeApp::Instance();
+  return App::Instance();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     parent,
-                                 const Handle(asiAsm_XdeHAssemblyItemIdsMap)& itemsMap,
-                                 asiAsm_XdeAssemblyItemIds&                   items,
-                                 const Handle(asiAsm_XdeHAssemblyItemIdsMap)& traversed) const
+void Doc::getLeafItems(AssemblyItemId                     parent,
+                       const Handle(HAssemblyItemIdsMap)& itemsMap,
+                       AssemblyItemIds&                   items,
+                       const Handle(HAssemblyItemIdsMap)& traversed) const
 {
   // Check current assembly item id to be traversed.
   if ( traversed->Contains(parent) )
@@ -2208,7 +2212,7 @@ void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     pa
   // Loop over the parts and sub-assemblies in depth-first order.
   // ...
 
-  std::stack<asiAsm_XdeAssemblyItemId> m_fringe;
+  std::stack<AssemblyItemId> m_fringe;
 
   TDF_Tool::Label(m_doc->GetData(), parent.GetLastEntry(), parent.m_label);
   //
@@ -2221,7 +2225,7 @@ void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     pa
 
   while ( !m_fringe.empty() )
   {
-    asiAsm_XdeAssemblyItemId topId = m_fringe.top();
+    AssemblyItemId topId = m_fringe.top();
     m_fringe.pop();
 
     const int numTraversed = traversed->Size();
@@ -2260,7 +2264,7 @@ void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     pa
         // Get entry to form assembly item ID.
         this->__entry(label, entry);
         //
-        asiAsm_XdeAssemblyItemId result;
+        AssemblyItemId result;
         result.m_label = label;
         result << topId.ToString();
         result << entry;
@@ -2273,8 +2277,8 @@ void asiAsm_XdeDoc::getLeafItems(asiAsm_XdeAssemblyItemId                     pa
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getParts(const TDF_LabelSequence& originals,
-                             asiAsm_XdePartIds&       parts) const
+void Doc::getParts(const TDF_LabelSequence& originals,
+                   PartIds&                 parts) const
 {
   // Convert labels to part IDs
   for ( TDF_LabelSequence::Iterator it(originals); it.More(); it.Next() )
@@ -2283,43 +2287,43 @@ void asiAsm_XdeDoc::getParts(const TDF_LabelSequence& originals,
     TCollection_AsciiString partId;
     TDF_Tool::Entry(it.Value(), partId);
     //
-    parts.Append( asiAsm_XdePartId::FromEntry(partId) );
+    parts.Append( PartId::FromEntry(partId) );
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getPartsWithInstances(const asiAsm_XdeLabelsToInstancesMap& origInstances,
-                                          asiAsm_XdePartsToInstancesMap&        partsInstances) const
+void Doc::getPartsWithInstances(const LabelsToInstancesMap& origInstances,
+                                PartsToInstancesMap&        partsInstances) const
 {
   // Convert labels to part IDs
-  asiAsm_XdeLabelsToInstancesMap::Iterator it(origInstances);
+  LabelsToInstancesMap::Iterator it(origInstances);
   for ( ; it.More(); it.Next() )
   {
-    const TDF_Label&              original  = it.Key();
-    asiAsm_XdeAssemblyItemIdList& instances = it.ChangeValue();
+    const TDF_Label&    original  = it.Key();
+    AssemblyItemIdList& instances = it.ChangeValue();
 
     // Part ID is nothing but an entry
     TCollection_AsciiString partId;
     TDF_Tool::Entry(original, partId);
     //
-    const int ind = partsInstances.Add( asiAsm_XdePartId::FromEntry(partId),
-                                        asiAsm_XdeAssemblyItemIdList() );
+    const int ind = partsInstances.Add( PartId::FromEntry(partId),
+                                        AssemblyItemIdList() );
     partsInstances(ind).Append(instances);
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getOriginalsWithInstances(const asiAsm_XdeAssemblyItemId& item,
-                                              asiAsm_XdeLabelsToInstancesMap& origInstances) const
+void Doc::getOriginalsWithInstances(const AssemblyItemId& item,
+                                    LabelsToInstancesMap& origInstances) const
 {
-  TDF_Label original = this->GetOriginal( item );
-  asiAsm_XdeAssemblyItemIdList* instances = origInstances.ChangeSeek(original);
+  TDF_Label           original  = this->GetOriginal( item );
+  AssemblyItemIdList* instances = origInstances.ChangeSeek(original);
   //
   if ( instances == 0L )
   {
-    const int ind = origInstances.Add( original, asiAsm_XdeAssemblyItemIdList() );
+    const int ind = origInstances.Add( original, AssemblyItemIdList() );
     instances     = &origInstances.ChangeFromIndex(ind);
   }
   instances->Append( item );
@@ -2327,10 +2331,10 @@ void asiAsm_XdeDoc::getOriginalsWithInstances(const asiAsm_XdeAssemblyItemId& it
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getAssemblyItemsForPart(const TDF_Label&                             original,
-                                            const asiAsm_XdeAssemblyItemId&              item,
-                                            const Handle(asiAsm_XdeHAssemblyItemIdsMap)& itemsMap,
-                                            asiAsm_XdeAssemblyItemIds&                   items) const
+void Doc::getAssemblyItemsForPart(const TDF_Label&                   original,
+                                  const AssemblyItemId&              item,
+                                  const Handle(HAssemblyItemIdsMap)& itemsMap,
+                                  AssemblyItemIds&                   items) const
 {
   TDF_Label itemLab = this->GetLabel(item);
   TDF_Label itemOriginalLab;
@@ -2357,7 +2361,7 @@ void asiAsm_XdeDoc::getAssemblyItemsForPart(const TDF_Label&                    
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::clearSession(const Handle(XSControl_WorkSession)& WS)
+void Doc::clearSession(const Handle(XSControl_WorkSession)& WS)
 {
   if ( WS.IsNull() )
     return;
@@ -2370,10 +2374,10 @@ void asiAsm_XdeDoc::clearSession(const Handle(XSControl_WorkSession)& WS)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& items,
-                                               TDF_LabelMap&                    processed)
+void Doc::expandCompoundsRecursively(const AssemblyItemIds& items,
+                                     TDF_LabelMap&                    processed)
 {
-  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(items); aiit.More(); aiit.Next() )
+  for ( AssemblyItemIds::Iterator aiit(items); aiit.More(); aiit.Next() )
   {
     TDF_Label original = this->GetOriginal( aiit.Value() );
     //
@@ -2381,7 +2385,7 @@ void asiAsm_XdeDoc::expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& 
       continue; // Skip the already processed prototypes.
 
     // Check if we're at the compound part.
-    const asiAsm_XdePartId pid = asiAsm_XdePartId::FromLabel(original);
+    const PartId pid = PartId::FromLabel(original);
     //
     if ( this->GetShape(pid).ShapeType() != TopAbs_COMPOUND )
       continue; // Skip anything but TopoDS_Compound geometries.
@@ -2390,8 +2394,8 @@ void asiAsm_XdeDoc::expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& 
     if ( this->ExpandCompound(pid, false) ) // Assemblies are not updated, we'll do this at one shot.
     {
       // Get the generated leaves and continue expansion on them.
-      asiAsm_XdeAssemblyItemIds newLeaves;
-      asiAsm_XdeAssemblyItemId  parent(pid);
+      AssemblyItemIds newLeaves;
+      AssemblyItemId  parent(pid);
       //
       this->GetLeafAssemblyItems(parent, newLeaves);
 
@@ -2403,10 +2407,10 @@ void asiAsm_XdeDoc::expandCompoundsRecursively(const asiAsm_XdeAssemblyItemIds& 
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::expand(const TDF_Label&                                    expandedLabel,
-                           const TopLoc_Location&                              curLoc,
-                           t_expansionMap&                                     subshapeMap,
-                           std::vector<std::pair<TDF_Label, TopLoc_Location>>& newParts)
+void Doc::expand(const TDF_Label&                                    expandedLabel,
+                 const TopLoc_Location&                              curLoc,
+                 t_expansionMap&                                     subshapeMap,
+                 std::vector<std::pair<TDF_Label, TopLoc_Location>>& newParts)
 {
   Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
   TopoDS_Shape              mainShape = this->GetShape(expandedLabel);
@@ -2460,13 +2464,13 @@ void asiAsm_XdeDoc::expand(const TDF_Label&                                    e
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::propagateColor(const TDF_Label&          assemblyLabel,
-                                   const bool                isSurfColoredAssembly,
-                                   const Quantity_ColorRGBA& surfColor,
-                                   const bool                isCurvColoredAssembly,
-                                   const Quantity_ColorRGBA& curvColor,
-                                   const bool                isGenColoredAssembly,
-                                   const Quantity_ColorRGBA& genColor)
+void Doc::propagateColor(const TDF_Label&          assemblyLabel,
+                         const bool                isSurfColoredAssembly,
+                         const Quantity_ColorRGBA& surfColor,
+                         const bool                isCurvColoredAssembly,
+                         const Quantity_ColorRGBA& curvColor,
+                         const bool                isGenColoredAssembly,
+                         const Quantity_ColorRGBA& genColor)
 {
   // Get tools.
   Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
@@ -2550,10 +2554,10 @@ void asiAsm_XdeDoc::propagateColor(const TDF_Label&          assemblyLabel,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::getCommonColor(const asiAsm_XdePartId& part,
-                                   Quantity_Color&         color,
-                                   bool&                   isOnFaces,
-                                   const bool              isIgnorePartColor) const
+void Doc::getCommonColor(const PartId&   part,
+                         Quantity_Color& color,
+                         bool&           isOnFaces,
+                         const bool      isIgnorePartColor) const
 {
   Quantity_ColorRGBA partColor;
 
@@ -2708,8 +2712,8 @@ void asiAsm_XdeDoc::getCommonColor(const asiAsm_XdePartId& part,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::copyAttributes(const TDF_Label from,
-                                   TDF_Label&      to)
+void Doc::copyAttributes(const TDF_Label from,
+                         TDF_Label&      to)
 {
   // Contract check.
   if ( from.IsNull() || to.IsNull() || from.IsEqual(to) )
@@ -2804,9 +2808,9 @@ void asiAsm_XdeDoc::copyAttributes(const TDF_Label from,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::addComponent(const TDF_Label&       assemblyLabel,
-                                      const TDF_Label&       compLabel,
-                                      const TopLoc_Location& location)
+TDF_Label Doc::addComponent(const TDF_Label&       assemblyLabel,
+                            const TDF_Label&       compLabel,
+                            const TopLoc_Location& location)
 {
   TDF_Label result;
 
@@ -2833,11 +2837,11 @@ TDF_Label asiAsm_XdeDoc::addComponent(const TDF_Label&       assemblyLabel,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         asmGraph,
-                                         const int                              parentId,
-                                         const std::string&                     name,
-                                         std::vector<int>&                      path,
-                                         Handle(asiAsm_XdeHAssemblyItemIdsMap)& items) const
+void Doc::findItemsRecursively(const Handle(Graph)&         asmGraph,
+                               const int                    parentId,
+                               const std::string&           name,
+                               std::vector<int>&            path,
+                               Handle(HAssemblyItemIdsMap)& items) const
 {
   if ( asmGraph->HasChildren(parentId) )
   {
@@ -2846,8 +2850,8 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         
     //
     for ( TColStd_MapIteratorOfPackedMapOfInteger cit(children); cit.More(); cit.Next() )
     {
-      const int                     childId = cit.Key();
-      const asiAsm_XdePersistentId& pid     = asmGraph->GetPersistentId(childId);
+      const int           childId = cit.Key();
+      const PersistentId& pid     = asmGraph->GetPersistentId(childId);
 
       path.push_back(childId);
 
@@ -2861,18 +2865,18 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         
       if ( currNameStr == name )
       {
         // Loop over the parents to gather all persistent IDs.
-        asiAsm_XdeAssemblyItemId item;
+        AssemblyItemId item;
 
         for ( std::vector<int>::reverse_iterator pit = path.rbegin(); pit != path.rend(); ++pit )
         {
           // Get node's type in the assembly graph.
-          const int                 nid  = *pit;
-          asiAsm_XdeGraph::NodeType type = asmGraph->GetNodeType(nid);
+          const int       nid  = *pit;
+          Graph::NodeType type = asmGraph->GetNodeType(nid);
 
           // The assembly item ID does not contain prototypes' IDs except
           // the root one by convention.
-          if ( ( (type != asiAsm_XdeGraph::NodeType_Part) &&
-                 (type != asiAsm_XdeGraph::NodeType_Subassembly) ) || (pit == path.rend() - 1) )
+          if ( ( (type != Graph::NodeType_Part) &&
+                 (type != Graph::NodeType_Subassembly) ) || (pit == path.rend() - 1) )
           {
             item.Prepend( asmGraph->GetPersistentId(nid) );
           }
@@ -2892,8 +2896,8 @@ void asiAsm_XdeDoc::findItemsRecursively(const Handle(asiAsm_XdeGraph)&         
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::removeEmptyAssembly(const TDF_Label& assembly,
-                                        const bool       isUpdate)
+bool Doc::removeEmptyAssembly(const TDF_Label& assembly,
+                              const bool       isUpdate)
 {
   Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
   //
@@ -2921,7 +2925,7 @@ bool asiAsm_XdeDoc::removeEmptyAssembly(const TDF_Label& assembly,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::removeEmptySubAssemblies(const TDF_Label& assembly)
+void Doc::removeEmptySubAssemblies(const TDF_Label& assembly)
 {
   Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
 
@@ -2952,8 +2956,8 @@ void asiAsm_XdeDoc::removeEmptySubAssemblies(const TDF_Label& assembly)
 // Methods with improved efficiency
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::__getComponents(const TDF_Label&        l,
-                                    std::vector<TDF_Label>& labels) const
+void Doc::__getComponents(const TDF_Label&        l,
+                          std::vector<TDF_Label>& labels) const
 {
   for ( TDF_ChildIterator lit(l); lit.More(); lit.Next() )
   {
@@ -2966,8 +2970,8 @@ void asiAsm_XdeDoc::__getComponents(const TDF_Label&        l,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_XdeDoc::__entry(const TDF_Label&         label,
-                            TCollection_AsciiString& entry) const
+void Doc::__entry(const TDF_Label&         label,
+                  TCollection_AsciiString& entry) const
 {
   if ( label.IsNull() )
     return;
@@ -3001,9 +3005,9 @@ void asiAsm_XdeDoc::__entry(const TDF_Label&         label,
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm_XdeDoc::__isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
-                                 const TDF_Label&                 itemLab,
-                                 TDF_Label&                       originLab) const
+bool Doc::__isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
+                       const TDF_Label&                 itemLab,
+                       TDF_Label&                       originLab) const
 {
   if ( ST->IsReference(itemLab) )
   {
@@ -3020,8 +3024,8 @@ bool asiAsm_XdeDoc::__isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape,
-                                   const std::string&  name)
+TDF_Label Doc::__addPart(const TopoDS_Shape& shape,
+                         const std::string&  name)
 {
   // Add new part.
   TDF_Label resultL;
@@ -3060,8 +3064,8 @@ TDF_Label asiAsm_XdeDoc::__addPart(const TopoDS_Shape& shape,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label asiAsm_XdeDoc::__addSubShape(const TDF_Label&    partLabel,
-                                       const TopoDS_Shape& subshape)
+TDF_Label Doc::__addSubShape(const TDF_Label&    partLabel,
+                             const TopoDS_Shape& subshape)
 {
   TDF_Label resultL;
   TDF_TagSource tag;

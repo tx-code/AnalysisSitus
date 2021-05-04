@@ -41,8 +41,8 @@
   #include <rapidjson/ostreamwrapper.h>
 #endif
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! JSON serializer declared in AS header to avoid inclusion of rapidjson header
 //! files in the dependent libs. This `gltf_JsonSerializer.h` should be
@@ -62,6 +62,7 @@ public:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

@@ -18,9 +18,11 @@
 // Own include
 #include <gltf_XdeVisualStyle.h>
 
+using namespace asiAsm::xde;
+
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_XdeVisualStyle::gltf_XdeVisualStyle()
+gltf_XdeVisualStyle::gltf_XdeVisualStyle()
 //
 : m_bHasColorSurf  (false),
   m_bHasColorCurve (false),
@@ -29,7 +31,7 @@ asiAsm::gltf_XdeVisualStyle::gltf_XdeVisualStyle()
 
 //-----------------------------------------------------------------------------
 
-asiAsm::gltf_XdeVisualStyle::gltf_XdeVisualStyle(const XCAFPrs_Style& other)
+gltf_XdeVisualStyle::gltf_XdeVisualStyle(const XCAFPrs_Style& other)
 {
   m_colorSurf.SetRGB( other.GetColorSurf() );
   //
@@ -41,50 +43,50 @@ asiAsm::gltf_XdeVisualStyle::gltf_XdeVisualStyle(const XCAFPrs_Style& other)
 
 //-----------------------------------------------------------------------------
 
-const Handle(asiAsm::gltf_MaterialAttr)&
-  asiAsm::gltf_XdeVisualStyle::GetMaterial() const
+const Handle(gltf_MaterialAttr)&
+  gltf_XdeVisualStyle::GetMaterial() const
 {
   return m_material;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::SetMaterial(const Handle(gltf_MaterialAttr)& material)
+void gltf_XdeVisualStyle::SetMaterial(const Handle(gltf_MaterialAttr)& material)
 {
   m_material = material;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::IsSetColorSurf() const
+bool gltf_XdeVisualStyle::IsSetColorSurf() const
 {
   return m_bHasColorSurf;
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_Color& asiAsm::gltf_XdeVisualStyle::GetColorSurf() const
+const Quantity_Color& gltf_XdeVisualStyle::GetColorSurf() const
 {
   return m_colorSurf.GetRGB();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::SetColorSurf(const Quantity_Color& color)
+void gltf_XdeVisualStyle::SetColorSurf(const Quantity_Color& color)
 {
   this->SetColorSurf( Quantity_ColorRGBA(color) );
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_ColorRGBA& asiAsm::gltf_XdeVisualStyle::GetColorSurfRGBA() const
+const Quantity_ColorRGBA& gltf_XdeVisualStyle::GetColorSurfRGBA() const
 {
   return m_colorSurf;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
+void gltf_XdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
 {
   m_colorSurf     = color;
   m_bHasColorSurf = true;
@@ -92,7 +94,7 @@ void asiAsm::gltf_XdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::UnSetColorSurf()
+void gltf_XdeVisualStyle::UnSetColorSurf()
 {
   m_bHasColorSurf = false;
   m_colorSurf.ChangeRGB().SetValues(Quantity_NOC_YELLOW);
@@ -101,21 +103,21 @@ void asiAsm::gltf_XdeVisualStyle::UnSetColorSurf()
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::IsSetColorCurve() const
+bool gltf_XdeVisualStyle::IsSetColorCurve() const
 {
   return m_bHasColorCurve;
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_Color& asiAsm::gltf_XdeVisualStyle::GetColorCurve() const
+const Quantity_Color& gltf_XdeVisualStyle::GetColorCurve() const
 {
   return m_colorCurve;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::SetColorCurve(const Quantity_Color& color)
+void gltf_XdeVisualStyle::SetColorCurve(const Quantity_Color& color)
 {
   m_colorCurve     = color;
   m_bHasColorCurve = true;
@@ -123,7 +125,7 @@ void asiAsm::gltf_XdeVisualStyle::SetColorCurve(const Quantity_Color& color)
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::UnSetColorCurve()
+void gltf_XdeVisualStyle::UnSetColorCurve()
 {
   m_bHasColorCurve = false;
   m_colorCurve.SetValues(Quantity_NOC_YELLOW);
@@ -131,21 +133,21 @@ void asiAsm::gltf_XdeVisualStyle::UnSetColorCurve()
 
 //-----------------------------------------------------------------------------
 
-void asiAsm::gltf_XdeVisualStyle::SetVisibility(const bool on)
+void gltf_XdeVisualStyle::SetVisibility(const bool on)
 {
   m_bIsVisible = on;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::IsVisible() const
+bool gltf_XdeVisualStyle::IsVisible() const
 {
   return m_bIsVisible;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::IsEqual(const gltf_XdeVisualStyle& other) const
+bool gltf_XdeVisualStyle::IsEqual(const gltf_XdeVisualStyle& other) const
 {
   if ( m_bIsVisible != other.m_bIsVisible )
   {
@@ -165,15 +167,15 @@ bool asiAsm::gltf_XdeVisualStyle::IsEqual(const gltf_XdeVisualStyle& other) cons
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::operator==(const gltf_XdeVisualStyle& other) const
+bool gltf_XdeVisualStyle::operator==(const gltf_XdeVisualStyle& other) const
 {
   return this->IsEqual(other);
 }
 
 //-----------------------------------------------------------------------------
 
-int asiAsm::gltf_XdeVisualStyle::Hasher::HashCode(const gltf_XdeVisualStyle& style,
-                                                  const int                  upper)
+int gltf_XdeVisualStyle::Hasher::HashCode(const gltf_XdeVisualStyle& style,
+                                          const int                  upper)
 {
   if ( !style.m_bIsVisible )
     return 1; // ??? Taken from OpenCascade like this.
@@ -196,8 +198,8 @@ int asiAsm::gltf_XdeVisualStyle::Hasher::HashCode(const gltf_XdeVisualStyle& sty
 
 //-----------------------------------------------------------------------------
 
-bool asiAsm::gltf_XdeVisualStyle::Hasher::IsEqual(const gltf_XdeVisualStyle& S1,
-                                                  const gltf_XdeVisualStyle& S2)
+bool gltf_XdeVisualStyle::Hasher::IsEqual(const gltf_XdeVisualStyle& S1,
+                                          const gltf_XdeVisualStyle& S2)
 {
   return S1.IsEqual(S2);
 }

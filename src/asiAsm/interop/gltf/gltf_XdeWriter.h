@@ -43,8 +43,8 @@ class XCAFDoc_ShapeTool;
 
 //-----------------------------------------------------------------------------
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 // Forward declarations from the `asiAsm` namespace.
 class gltf_FaceIterator;
@@ -72,12 +72,12 @@ class gltf_MaterialMap;
 //! 3) The original version of glTF writer in OpenCascade is too coupled with the
 //!    rest of OpenCascade kernel. This version is our attempt to make it more
 //!    compact in its code base.
-class gltf_XdeWriter : public ActAPI_IAlgorithm
+class gltfWriter : public ActAPI_IAlgorithm
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_XdeWriter, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(gltfWriter, ActAPI_IAlgorithm)
 
 public:
 
@@ -88,14 +88,14 @@ public:
   //! \param[in] progress the progress notifier.
   //! \param[in] plotter  the imperative plotter.
   gltf_EXPORT
-    gltf_XdeWriter(const TCollection_AsciiString& filename,
-                   const bool                     isBinary,
-                   ActAPI_ProgressEntry           progress = nullptr,
-                   ActAPI_PlotterEntry            plotter  = nullptr);
+    gltfWriter(const TCollection_AsciiString& filename,
+               const bool                     isBinary,
+               ActAPI_ProgressEntry           progress = nullptr,
+               ActAPI_PlotterEntry            plotter  = nullptr);
 
   //! Dtor.
   gltf_EXPORT virtual
-    ~gltf_XdeWriter();
+    ~gltfWriter();
 
 public:
 
@@ -413,6 +413,7 @@ protected:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif

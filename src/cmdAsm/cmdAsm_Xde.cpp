@@ -71,15 +71,16 @@
 #pragma warning(pop)
 
 using namespace asiAsm;
+using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
-                          const asiAsm_XdePartIds&     parts,
-                          const asiAlgo_FacetQuality   quality,
-                          double&                      linDefl,
-                          double&                      angDeflDeg,
-                          ActAPI_ProgressEntry         progress)
+void SelectFaceterOptions(const Handle(Doc)&         model,
+                          const PartIds&             parts,
+                          const asiAlgo_FacetQuality quality,
+                          double&                    linDefl,
+                          double&                    angDeflDeg,
+                          ActAPI_ProgressEntry       progress)
 {
   linDefl    = asiAlgo_LINDEFL_MIN;
   angDeflDeg = asiAlgo_ANGDEFL_MIN;
@@ -89,9 +90,9 @@ void SelectFaceterOptions(const Handle(asiAsm_XdeDoc)& model,
   progress.SetMessageKey("Select faceter options");
 
   // Select deflections for each part and then take the max values.
-  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  for ( PartIds::Iterator pit(parts); pit.More(); pit.Next() )
   {
-    const asiAsm_XdePartId& pid = pit.Value();
+    const PartId& pid = pit.Value();
 
     double partLinDefl = asiAlgo_LINDEFL_MIN;
     double partAngDefl = asiAlgo_ANGDEFL_MIN;
@@ -149,7 +150,7 @@ int ASMXDE_DFBrowse(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   DFBrowser::DFBrowserCall( doc->GetDocument() );
 
@@ -182,8 +183,8 @@ int ASMXDE_New(const Handle(asiTcl_Interp)& interp,
   TIMER_GO
 
   // Create a new empty XDE document.
-  Handle(asiAsm_XdeDoc) doc = new asiAsm_XdeDoc( interp->GetProgress(),
-                                                 interp->GetPlotter() );
+  Handle(Doc) doc = new Doc( interp->GetProgress(),
+                             interp->GetPlotter() );
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-new")
@@ -220,8 +221,8 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
   }
 
   // Create a new empty XDE document.
-  Handle(asiAsm_XdeDoc) doc = new asiAsm_XdeDoc( interp->GetProgress(),
-                                                 interp->GetPlotter() );
+  Handle(Doc) doc = new Doc( interp->GetProgress(),
+                             interp->GetPlotter() );
 
   TIMER_NEW
   TIMER_GO
@@ -279,7 +280,7 @@ int ASMXDE_Save(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   TIMER_NEW
   TIMER_GO
@@ -324,7 +325,7 @@ int ASMXDE_Release(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   TIMER_NEW
   TIMER_GO
@@ -432,10 +433,10 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
 
   // Get items.
-  asiAsm_XdeAssemblyItemIds items, leaves;
+  AssemblyItemIds items, leaves;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -445,7 +446,7 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+      items.Append( AssemblyItemId(argv[ii]) );
     }
 
     xdeDoc->GetLeafAssemblyItems(items, leaves);
@@ -495,7 +496,7 @@ int ASMXDE_PrintStructure(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
 
   // Read the level of hierarchy.
   int level = INT_MAX;
@@ -506,9 +507,9 @@ int ASMXDE_PrintStructure(const Handle(asiTcl_Interp)& interp,
   TIMER_GO
 
   // Use assembly iterator to traverse structure.
-  for ( asiAsm_XdeDocIterator it(xdeDoc, level); it.More(); it.Next() )
+  for ( DocIterator it(xdeDoc, level); it.More(); it.Next() )
   {
-    asiAsm_XdeAssemblyItemId id = it.Current();
+    AssemblyItemId id = it.Current();
     //
     interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Next item: %1." << id.ToString() );
   }
@@ -590,10 +591,10 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+  Handle(Doc)             xdeDoc   = xdeModel->GetDocument();
 
   // Get items (if any).
-  asiAsm_XdeAssemblyItemIds items;
+  AssemblyItemIds items;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -603,7 +604,7 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+      items.Append( AssemblyItemId(argv[ii]) );
     }
   }
 
@@ -612,7 +613,7 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
 
   // If the collection of items is empty, all parts of the model will
   // be gathered.
-  asiAsm_XdePartIds pids;
+  PartIds pids;
   //
   xdeDoc->GetParts(items, pids);
 
@@ -622,7 +623,7 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
   // Add part IDs to the interpreter.
   int pid = 1;
   //
-  for ( asiAsm_XdePartIds::Iterator pit(pids); pit.More(); pit.Next(), ++pid )
+  for ( PartIds::Iterator pit(pids); pit.More(); pit.Next(), ++pid )
   {
     *interp << pit.Value().Entry.ToCString();
 
@@ -659,10 +660,10 @@ int ASMXDE_GetLeaves(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+  Handle(Doc)             xdeDoc   = xdeModel->GetDocument();
 
   // Get items (if any).
-  asiAsm_XdeAssemblyItemIds items;
+  AssemblyItemIds items;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -672,7 +673,7 @@ int ASMXDE_GetLeaves(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+      items.Append( AssemblyItemId(argv[ii]) );
     }
   }
 
@@ -681,7 +682,7 @@ int ASMXDE_GetLeaves(const Handle(asiTcl_Interp)& interp,
 
   // If the collection of items is empty, all leaves of the model will
   // be gathered.
-  asiAsm_XdeAssemblyItemIds leaves;
+  AssemblyItemIds leaves;
   //
   xdeDoc->GetLeafAssemblyItems(items, leaves);
 
@@ -691,7 +692,7 @@ int ASMXDE_GetLeaves(const Handle(asiTcl_Interp)& interp,
   // Add items IDs to the interpreter.
   int aiid = 1;
   //
-  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves);
+  for ( AssemblyItemIds::Iterator aiit(leaves);
         aiit.More();
         aiit.Next(), ++aiid )
   {
@@ -730,7 +731,7 @@ int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+  Handle(Doc)             xdeDoc   = xdeModel->GetDocument();
 
   // Get item name.
   std::string itemName;
@@ -742,14 +743,14 @@ int ASMXDE_FindItems(const Handle(asiTcl_Interp)& interp,
   }
 
   // Find unique items.
-  Handle(asiAsm_XdeHAssemblyItemIdsMap) items;
+  Handle(HAssemblyItemIdsMap) items;
   //
   xdeDoc->FindItems(itemName, items);
 
   // Add items IDs to the interpreter.
   int aiid = 1;
   //
-  for ( asiAsm_XdeHAssemblyItemIdsMap::Iterator aiit(*items); aiit.More(); aiit.Next(), ++aiid )
+  for ( HAssemblyItemIdsMap::Iterator aiit(*items); aiit.More(); aiit.Next(), ++aiid )
   {
     *interp << aiit.Value().ToString();
 
@@ -797,7 +798,7 @@ int ASMXDE_AddPart(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+  Handle(Doc)             xdeDoc   = xdeModel->GetDocument();
 
   // Get part name.
   std::string partName;
@@ -808,7 +809,7 @@ int ASMXDE_AddPart(const Handle(asiTcl_Interp)& interp,
   TIMER_GO
 
   // Add part.
-  asiAsm_XdePartId pid = xdeDoc->AddPart(shape, partName);
+  PartId pid = xdeDoc->AddPart(shape, partName);
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Part was added with id %1."
                                                        << pid);
@@ -861,15 +862,15 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   TIMER_NEW
   TIMER_GO
 
-  gltf_XdeWriter cafWriter( filename,
-                            ext.EndsWith(".glb"),
-                            interp->GetProgress(),
-                            interp->GetPlotter() );
+  gltfWriter cafWriter( filename,
+                        ext.EndsWith(".glb"),
+                        interp->GetProgress(),
+                        interp->GetPlotter() );
   //
   cafWriter.SetTransformationFormat(gltf_WriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);
@@ -930,14 +931,14 @@ int ASMXDE_SaveFBX(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   TIMER_NEW
   TIMER_GO
 
-  fbx_XdeWriter cafWriter( filename,
-                           interp->GetProgress(),
-                           interp->GetPlotter() );
+  fbxWriter cafWriter( filename,
+                       interp->GetProgress(),
+                       interp->GetPlotter() );
 
   if ( !cafWriter.Perform(doc) )
   {
@@ -977,10 +978,10 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   // Get items (if any).
-  asiAsm_XdeAssemblyItemIds items;
+  AssemblyItemIds items;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -990,12 +991,12 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+      items.Append( AssemblyItemId(argv[ii]) );
     }
   }
 
   // Get parts (if any).
-  asiAsm_XdePartIds parts;
+  PartIds parts;
   int partsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "parts", partsIdx) )
@@ -1005,13 +1006,13 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      parts.Append( asiAsm_XdePartId(argv[ii]) );
+      parts.Append( PartId(argv[ii]) );
     }
   }
 
   if ( !items.IsEmpty() )
   {
-    asiAsm_XdeAssemblyItemIds leaves;
+    AssemblyItemIds leaves;
     doc->GetParts(items, leaves, parts);
   }
 
@@ -1078,11 +1079,11 @@ int ASMXDE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  for ( asiAsm_XdePartIds::Iterator pit(parts); pit.More(); pit.Next() )
+  for ( PartIds::Iterator pit(parts); pit.More(); pit.Next() )
   {
     // Get part.
-    const asiAsm_XdePartId& pid       = pit.Value();
-    TopoDS_Shape            partShape = doc->GetShape(pid);
+    const PartId& pid       = pit.Value();
+    TopoDS_Shape  partShape = doc->GetShape(pid);
 
     // Get name.
     TCollection_ExtendedString partName;
@@ -1150,7 +1151,7 @@ int ASMXDE_SetAsVar(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   // Get the item in question.
   std::string itemIdStr;
@@ -1161,7 +1162,7 @@ int ASMXDE_SetAsVar(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  asiAsm_XdeAssemblyItemId aiid( itemIdStr.c_str() );
+  AssemblyItemId aiid( itemIdStr.c_str() );
 
   // Get variable name.
   std::string varName;
@@ -1293,7 +1294,7 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   xdeDoc   = xdeModel->GetDocument();
+  Handle(Doc)             xdeDoc   = xdeModel->GetDocument();
 
   TIMER_NEW
   TIMER_GO
@@ -1316,30 +1317,30 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   TopTools_IndexedMapOfShape allFaces = asmAag->GetMapOfFaces();
 
   // Get all leaves of the model.
-  asiAsm_XdeAssemblyItemIds leaves;
+  AssemblyItemIds leaves;
   xdeDoc->GetLeafAssemblyItems(leaves);
 
   TopoDS_Compound allTools;
   BRep_Builder().MakeCompound(allTools);
 
   // Tool prisms grouped by their originating parts.
-  NCollection_DataMap<asiAsm_XdePartId,
+  NCollection_DataMap<PartId,
                       TopoDS_Compound,
-                      asiAsm_XdePartId::Hasher> partTools;
+                      PartId::Hasher> partTools;
 
   // AAGs of the part shapes.
-  NCollection_DataMap<asiAsm_XdePartId,
+  NCollection_DataMap<PartId,
                       Handle(asiAlgo_AAG),
-                      asiAsm_XdePartId::Hasher> partAAGs;
+                      PartId::Hasher> partAAGs;
 
   // Iterate over all parts of the model.
-  for ( asiAsm_XdeAssemblyItemIds::Iterator aiit(leaves); aiit.More(); aiit.Next() )
+  for ( AssemblyItemIds::Iterator aiit(leaves); aiit.More(); aiit.Next() )
   {
     // Get item.
-    const asiAsm_XdeAssemblyItemId& aiid = aiit.Value();
+    const AssemblyItemId& aiid = aiit.Value();
 
     // Get part.
-    asiAsm_XdePartId pid = xdeDoc->GetPart(aiid);
+    PartId pid = xdeDoc->GetPart(aiid);
 
     // Get shape.
     TopoDS_Shape itemShape = xdeDoc->GetShape(aiid);
@@ -1449,9 +1450,9 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   //interp->GetPlotter().REDRAW_SHAPE("allTools", allTools, Color_White);
 
   // Output the results.
-  for ( NCollection_DataMap<asiAsm_XdePartId,
+  for ( NCollection_DataMap<PartId,
                             TopoDS_Compound,
-                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+                            PartId::Hasher>::Iterator resIt(partTools);
         resIt.More(); resIt.Next() )
   {
     TCollection_AsciiString groupName("tools_");
@@ -1470,18 +1471,18 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   BRep_Builder().MakeCompound(asmShapeWithTools);
   BRep_Builder().Add(asmShapeWithTools, asmShape);
   //
-  for ( NCollection_DataMap<asiAsm_XdePartId,
+  for ( NCollection_DataMap<PartId,
                             TopoDS_Compound,
-                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+                            PartId::Hasher>::Iterator resIt(partTools);
         resIt.More(); resIt.Next() )
   {
     BRep_Builder().Add( asmShapeWithTools, resIt.Value() );
   }
 
   // Compose another map with invisible prisms only.
-  NCollection_DataMap<asiAsm_XdePartId,
+  NCollection_DataMap<PartId,
                       TopoDS_Compound,
-                      asiAsm_XdePartId::Hasher> invisibleTools;
+                      PartId::Hasher> invisibleTools;
 
   asiAlgo_FindVisibleFaces FindVisible2( asmShapeWithTools,
                                          interp->GetProgress(),
@@ -1492,13 +1493,13 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   // Map faces to be able to derive subdomains.
   allFaces = asmShapeWithToolsAag->GetMapOfFaces();
 
-  for ( NCollection_DataMap<asiAsm_XdePartId,
+  for ( NCollection_DataMap<PartId,
                             TopoDS_Compound,
-                            asiAsm_XdePartId::Hasher>::Iterator resIt(partTools);
+                            PartId::Hasher>::Iterator resIt(partTools);
         resIt.More(); resIt.Next() )
   {
-    const asiAsm_XdePartId& pid            = resIt.Key();
-    const TopoDS_Shape&     subdomainShape = resIt.Value();
+    const PartId&       pid            = resIt.Key();
+    const TopoDS_Shape& subdomainShape = resIt.Value();
 
     for ( TopExp_Explorer exp(subdomainShape, TopAbs_SOLID); exp.More(); exp.Next() )
     {
@@ -1559,9 +1560,9 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
   }
 
   // Output the results.
-  for ( NCollection_DataMap<asiAsm_XdePartId,
+  for ( NCollection_DataMap<PartId,
                             TopoDS_Compound,
-                            asiAsm_XdePartId::Hasher>::Iterator resIt(invisibleTools);
+                            PartId::Hasher>::Iterator resIt(invisibleTools);
         resIt.More(); resIt.Next() )
   {
     TCollection_AsciiString groupName("invtools_");
@@ -1574,9 +1575,9 @@ int ASMXDE_KEA(const Handle(asiTcl_Interp)& interp,
    *  Fuse remaining tools with their owning parts.
    * ============================================== */
 
-  for ( NCollection_DataMap<asiAsm_XdePartId,
+  for ( NCollection_DataMap<PartId,
                             TopoDS_Compound,
-                            asiAsm_XdePartId::Hasher>::Iterator resIt(invisibleTools);
+                            PartId::Hasher>::Iterator resIt(invisibleTools);
         resIt.More(); resIt.Next() )
   {
     TopTools_ListOfShape args;
@@ -1633,7 +1634,7 @@ int ASMXDE_SetName(const Handle(asiTcl_Interp)& interp,
   }
   //
   Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
-  Handle(asiAsm_XdeDoc)   doc      = xdeModel->GetDocument();
+  Handle(Doc)             doc      = xdeModel->GetDocument();
 
   // Whether to set names for instances.
   const bool is4Instance = interp->HasKeyword(argc, argv, "instance");
@@ -1647,7 +1648,7 @@ int ASMXDE_SetName(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  asiAsm_XdeAssemblyItemId aiid( itemIdStr.c_str() );
+  AssemblyItemId aiid( itemIdStr.c_str() );
 
   // Get new name.
   std::string itemName;
@@ -1696,10 +1697,10 @@ int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  Handle(asiAsm_XdeDoc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
 
   // Get items.
-  asiAsm_XdeAssemblyItemIds items, leaves;
+  AssemblyItemIds items, leaves;
   int itemsIdx = -1;
   //
   if ( interp->HasKeyword(argc, argv, "items", itemsIdx) )
@@ -1709,7 +1710,7 @@ int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
       if ( interp->IsKeyword(argv[ii]) )
         break;
 
-      items.Append( asiAsm_XdeAssemblyItemId(argv[ii]) );
+      items.Append( AssemblyItemId(argv[ii]) );
     }
 
     xdeDoc->GetLeafAssemblyItems(items, leaves);
@@ -1720,26 +1721,26 @@ int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get parts to remove.
-  asiAsm_XdePartIds partsPassed, parts2Remove;
+  PartIds partsPassed, parts2Remove;
   xdeDoc->GetParts(leaves, partsPassed, true);
 
   // Check whether the selection of parts to remove should be inverted.
   if ( interp->HasKeyword(argc, argv, "invert") )
   {
     // Get all parts in the model.
-    asiAsm_XdePartIds allParts;
+    PartIds allParts;
     xdeDoc->GetParts(allParts);
 
     // Keep only those parts that have not been passed.
-    for ( asiAsm_XdePartIds::Iterator allPartsIt(allParts); allPartsIt.More(); allPartsIt.Next() )
+    for ( PartIds::Iterator allPartsIt(allParts); allPartsIt.More(); allPartsIt.Next() )
     {
-      const asiAsm_XdePartId& pid1 = allPartsIt.Value();
+      const PartId& pid1 = allPartsIt.Value();
 
       // Check if the part is passed as an input.
       bool isPassed = false;
-      for ( asiAsm_XdePartIds::Iterator passedPartsIt(partsPassed); passedPartsIt.More(); passedPartsIt.Next() )
+      for ( PartIds::Iterator passedPartsIt(partsPassed); passedPartsIt.More(); passedPartsIt.Next() )
       {
-        const asiAsm_XdePartId& pid2 = passedPartsIt.Value();
+        const PartId& pid2 = passedPartsIt.Value();
         //
         if ( pid1.IsEqual(pid2) )
         {

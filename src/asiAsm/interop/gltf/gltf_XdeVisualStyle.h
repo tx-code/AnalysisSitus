@@ -26,8 +26,8 @@
 
 //-----------------------------------------------------------------------------
 
-namespace asiAsm
-{
+namespace asiAsm {
+namespace xde {
 
 //! Data transfer object for visual styles taken out from XDE document.
 class gltf_XdeVisualStyle
@@ -153,6 +153,7 @@ protected:
 
 };
 
-}
+} // xde
+} // asiAsm
 
 #endif
