@@ -37,7 +37,7 @@
 
 //-----------------------------------------------------------------------------
 
-std::string AnalysisSitus::GetBuildNumber()
+std::string asi::GetBuildNumber()
 {
   struct tm tm;
 

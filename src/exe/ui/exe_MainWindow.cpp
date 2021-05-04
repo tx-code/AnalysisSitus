@@ -83,7 +83,7 @@ exe_MainWindow::exe_MainWindow(const bool offscreen)
   // Prepare application name with the version number.
   TCollection_AsciiString appName(ASITUS_APP_NAME);
   appName += " "; appName += ASITUS_VERSION_STRING;
-  appName += " ["; appName += AnalysisSitus::GetBuildNumber().c_str(); appName += "]";
+  appName += " ["; appName += asi::GetBuildNumber().c_str(); appName += "]";
   //
   this->setWindowTitle( appName.ToCString() );
 

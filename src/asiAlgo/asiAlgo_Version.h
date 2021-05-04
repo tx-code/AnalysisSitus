@@ -54,7 +54,7 @@
 #define ASITUS_VERSION_STRING "1.0.0"
 #define ASITUS_APP_NAME "Analysis Situs"
 
-namespace AnalysisSitus
+namespace asi
 {
   //! Returns build number as the compilation timestamp.
   //! \return build number as string.

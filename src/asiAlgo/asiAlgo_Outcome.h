@@ -37,7 +37,7 @@
 // Standard includes
 #include <string>
 
-namespace AnalysisSitus {
+namespace asi {
 
 //! Defines a class for holding the results of API functions. This class
 //! contains a Boolean flag to indicate success or failure status of the
