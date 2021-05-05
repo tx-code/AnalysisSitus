@@ -289,7 +289,9 @@ endif()
 # Installation
 #------------------------------------------------------------------------------
 
-install (TARGETS asiAsm RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS asiAsm RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

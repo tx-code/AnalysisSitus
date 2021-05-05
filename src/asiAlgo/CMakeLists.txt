@@ -772,7 +772,9 @@ endif()
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS asiAlgo RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS asiAlgo RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+enif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework
