@@ -379,6 +379,42 @@ int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 }
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString filename(argv[1]);
+
+   // Modify Data Model.
+  cmdEngine::model->OpenCommand();
+  {
+    if ( !asiEngine_Part(cmdEngine::model).Import(filename) )
+    {
+      return TCL_ERROR;
+    }
+  }
+  cmdEngine::model->CommitCommand();
+
+  if ( cmdEngine::cf )
+  {
+    // Update viewer.
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+
+    // Update object browser.
+    cmdEngine::cf->ObjectBrowser->Populate();
+  }
+
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 int ENGINE_LoadSTL(const Handle(asiTcl_Interp)& interp,
@@ -627,6 +663,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t Loads BREP file to the active part.",
     //
     __FILE__, group, ENGINE_LoadBRep);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("load-part",
+    //
+    "load-part <filename>\n"
+    "\t Loads CAD file of any supported format to the active part.",
+    //
+    __FILE__, group, ENGINE_LoadPart);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-stl",

@@ -44,8 +44,13 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
 {
   // Register standard Active Data Parameters.
   REGISTER_PARAMETER(Name,          PID_Name);
-  REGISTER_PARAMETER(Bool,          PID_AutoAAG);
+  //
+  REGISTER_PARAMETER(Group,         PID_GroupGeometry);
   REGISTER_PARAMETER(Shape,         PID_Geometry);
+  REGISTER_PARAMETER(Bool,          PID_AutoAAG);
+  //
+  REGISTER_PARAMETER(Group,         PID_GroupImportExport);
+  REGISTER_PARAMETER(AsciiString,   PID_FilenameIn);
   //
   REGISTER_PARAMETER(Group,         PID_GroupTrsf);
   REGISTER_PARAMETER(Real,          PID_TrsfTx);
@@ -100,6 +105,7 @@ void asiData_PartNode::Init(const bool resetNaming)
     this->setNaming ( nullptr );
 
   // Set default values to primitive Parameters.
+  this->SetFilenameIn            ("");
   this->SetAutoAAG               (true);
   this->SetLinearDeflection      (0.0);
   this->SetAngularDeflection     (0.0);
@@ -121,6 +127,9 @@ void asiData_PartNode::Init(const bool resetNaming)
   // Initialize Parameter flags.
   this->InitParameter(PID_Name,               "Name",               "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_AutoAAG,            "Auto-construct AAG", "",               ParameterFlag_IsVisible, true);
+  //
+  this->InitParameter(PID_GroupImportExport,  "Import/export",      "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_FilenameIn,         "Input filename",     "",               ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupTrsf,          "Transformation",     "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TrsfTx,             "Tx",                 "Part_TX",        ParameterFlag_IsVisible, true);
@@ -167,6 +176,19 @@ void asiData_PartNode::SetName(const TCollection_ExtendedString& name)
 //-----------------------------------------------------------------------------
 // Handy accessors
 //-----------------------------------------------------------------------------
+
+//! \return input filename if the part was ever imported.
+TCollection_AsciiString asiData_PartNode::GetFilenameIn() const
+{
+  return ActParamTool::AsAsciiString( this->Parameter(PID_FilenameIn) )->GetValue();
+}
+
+//! Sets the filename to store the source path of a part.
+//! \param[in] filename the filename to store.
+void asiData_PartNode::SetFilenameIn(const TCollection_AsciiString& filename)
+{
+  ActParamTool::AsAsciiString( this->Parameter(PID_FilenameIn) )->SetValue(filename);
+}
 
 //! Returns the stored CAD part.
 //! \param[in] applyTransform indicates whether to apply the persistent

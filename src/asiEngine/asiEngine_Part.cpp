@@ -33,6 +33,7 @@
 
 // asiEngine includes
 #include <asiEngine_Curve.h>
+#include <asiEngine_STEPReaderOutput.h>
 #include <asiEngine_TolerantShapes.h>
 
 // asiVisu includes
@@ -42,7 +43,10 @@
 
 // asiAlgo includes
 #include <asiAlgo_CheckDeviations.h>
+#include <asiAlgo_FileFormat.h>
 #include <asiAlgo_MeshGen.h>
+#include <asiAlgo_ReadSTEPWithMeta.h>
+#include <asiAlgo_STEP.h>
 #include <asiAlgo_Utils.h>
 
 // Active Data includes
@@ -225,6 +229,73 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
 
   // Return the just created Node
   return geom_n;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiEngine_Part::Import(const TCollection_AsciiString& filename)
+{
+  // Auto-recognize file format.
+  asiAlgo_FileFormat
+    format = asiAlgo_FileFormatTool::FormatFromFileContent(filename);
+  //
+  if ( format == FileFormat_Unknown )
+  {
+    // Recognize file format from file extension.
+    format = asiAlgo_FileFormatTool::FormatFromFileExtension(filename);
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = m_model->GetPartNode();
+
+  // Load CAD data.
+  switch ( format )
+  {
+    case FileFormat_STEP:
+    {
+      // Prepare output
+      Handle(asiEngine_STEPReaderOutput)
+        output = new asiEngine_STEPReaderOutput(m_model);
+
+      // Prepare reader.
+      asiAlgo_ReadSTEPWithMeta reader(m_progress, m_plotter);
+      reader.SetOutput(output);
+
+      // Read & translate.
+      if ( !reader.Perform(filename) )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "STEP reader failed.");
+        return false;
+      }
+
+      break;
+    }
+    case FileFormat_BREP:
+    {
+      // Read BREP.
+      TopoDS_Shape shape;
+      if ( !asiAlgo_Utils::ReadBRep(filename, shape) )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "BREP reader failed.");
+        return false;
+      }
+
+      // Update geometric data structures.
+      this->Update( shape, nullptr, !partNode->IsKeepTessParams() );
+
+      break;
+    }
+    default:
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Unsupported file format.");
+      return false;
+    }
+  }
+
+  // Set filename for reference.
+  partNode->SetFilenameIn(filename);
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------

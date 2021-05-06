@@ -78,11 +78,17 @@ public:
   //------------------------//
   // Geometry               //
   //------------------------//
+    PID_GroupGeometry,
     PID_Geometry,           //!< B-Rep structure.
     PID_AutoAAG,            //!< Whether to build AAG automatically.
     PID_AAG,                //!< AAG structure.
     PID_BVH,                //!< BVH structure.
     PID_Naming,             //!< Topology naming service.
+  //------------------------//
+  // Import/export          //
+  //------------------------//
+    PID_GroupImportExport,  //!< Import/export group.
+    PID_FilenameIn,         //!< Input filename.
   //------------------------//
   // Transformation         //
   //------------------------//
@@ -138,6 +144,12 @@ public:
 
 // Handy accessors to the stored data:
 public:
+
+  asiData_EXPORT TCollection_AsciiString
+    GetFilenameIn() const;
+
+  asiData_EXPORT void
+    SetFilenameIn(const TCollection_AsciiString& filename);
 
   asiData_EXPORT TopoDS_Shape
     GetShape(const bool applyTransform = false) const;

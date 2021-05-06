@@ -319,29 +319,10 @@ int main(int argc, char** argv)
     TCollection_AsciiString
       arg1Str = QStr2AsciiStr( QDir::fromNativeSeparators( qtArgs.at(1) ) );
 
-    // Auto-recognize file format.
-    asiAlgo_FileFormat
-     format = asiAlgo_FileFormatTool(ASI_FILE_EXT).FormatFromFileContent(arg1Str);
-    //
-    if ( format == FileFormat_Unknown )
-    {
-      // Recognize file format from file extension
-      format = asiAlgo_FileFormatTool(ASI_FILE_EXT).FormatFromFileExtension(arg1Str);
-    }
-
     // Prepare Tcl command.
     TCollection_AsciiString cmd;
     //
-    if ( format == FileFormat_STEP )
-    {
-      cmd = "load-step"; cmd += " "; cmd += arg1Str;
-    }
-    else if ( format == FileFormat_BREP )
-    {
-      cmd = "load-brep"; cmd += " "; cmd += arg1Str;
-    }
-    else
-      std::cout << "Unexpected or not supported file format." << std::endl;
+    cmd = "load-part"; cmd += " "; cmd += arg1Str;
 
     // Execute command.
     if ( !cmd.IsEmpty() )

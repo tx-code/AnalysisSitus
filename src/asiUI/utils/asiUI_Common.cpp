@@ -47,13 +47,19 @@ QString asiUI_Common::selectGraphicsFile(const OpenSaveAction action)
 }
 
 //! Allows to select filename for B-Rep format.
-//! \param action [in] open or save.
+//! \param action        [in] open or save.
+//! \param preferredName [in] preferred filename.
 //! \return selected filename.
-QString asiUI_Common::selectBRepFile(const OpenSaveAction action)
+QString asiUI_Common::selectBRepFile(const OpenSaveAction action,
+                                     const QString&       preferredName)
 {
   QString filter = "BREP (*.brep *.bin *.binbrep)";
   //
-  return selectFile(filter, "Select BREP file", "Save BREP file", action);
+  return selectFile(filter,
+                   "Select BREP file",
+                   "Save BREP file",
+                    preferredName,
+                    action);
 }
 
 //! Allows to select filename for IGES format.
@@ -67,13 +73,19 @@ QString asiUI_Common::selectIGESFile(const OpenSaveAction action)
 }
 
 //! Allows to select filename for STEP format.
-//! \param action [in] open or save.
+//! \param action        [in] open or save.
+//! \param preferredName [in] preferred filename.
 //! \return selected filename.
-QString asiUI_Common::selectSTEPFile(const OpenSaveAction action)
+QString asiUI_Common::selectSTEPFile(const OpenSaveAction action,
+                                     const QString&       preferredName)
 {
   QString filter = "STEP (*.stp *.step)";
   //
-  return selectFile(filter, "Select STEP file", "Save STEP file", action);
+  return selectFile(filter,
+                   "Select STEP file",
+                   "Save STEP file",
+                    preferredName,
+                    action);
 }
 
 //! Allows to select filename for ply format.
@@ -147,17 +159,19 @@ QString asiUI_Common::selectDOTFile(const OpenSaveAction action)
 }
 
 //! Selects filename for opening or saving.
-//! \param filter    [in] filter for extensions.
-//! \param openTitle [in] title for open dialog.
-//! \param saveTitle [in] title for save dialog.
-//! \param action    [in] open/save action.
+//! \param filter        [in] filter for extensions.
+//! \param openTitle     [in] title for open dialog.
+//! \param saveTitle     [in] title for save dialog.
+//! \param preferredName [in] preferred filename.
+//! \param action        [in] open/save action.
 //! \return filename selected by user.
 QString asiUI_Common::selectFile(const QString&       filter,
                                  const QString&       openTitle,
                                  const QString&       saveTitle,
+                                 const QString&       preferredName,
                                  const OpenSaveAction action)
 {
-  QString dir;
+  QString dir = preferredName;
   QString filename;
 
   try
@@ -174,6 +188,22 @@ QString asiUI_Common::selectFile(const QString&       filter,
   }
 
   return filename;
+}
+
+//! Selects filename for opening or saving.
+//! \param filter    [in] filter for extensions.
+//! \param openTitle [in] title for open dialog.
+//! \param saveTitle [in] title for save dialog.
+//! \param action    [in] open/save action.
+//! \return filename selected by user.
+QString asiUI_Common::selectFile(const QString&       filter,
+                                 const QString&       openTitle,
+                                 const QString&       saveTitle,
+                                 const OpenSaveAction action)
+{
+  QString dir;
+
+  return selectFile(filter, openTitle, saveTitle, dir, action);
 }
 
 //-----------------------------------------------------------------------------

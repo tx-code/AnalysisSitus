@@ -32,14 +32,12 @@
 #include <asiUI_DialogSTEP.h>
 
 // asiAlgo includes
-#include <asiAlgo_ReadSTEPWithMeta.h>
-#include <asiAlgo_STEP.h>
+#include <asiAlgo_InteropVars.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_WriteSTEPWithMeta.h>
 
 // asiEngine includes
 #include <asiEngine_Part.h>
-#include <asiEngine_STEPReaderOutput.h>
 #include <asiEngine_STEPWriterInput.h>
 
 // asiUI includes
@@ -296,10 +294,15 @@ void asiUI_DialogSTEP::saveVars()
 //! Writes STEP.
 void asiUI_DialogSTEP::proceed_Write()
 {
-  QString filename = asiUI_Common::selectSTEPFile(asiUI_Common::OpenSaveAction_Save);
-
-  // Check Geometry Node
+  // Check Part Node.
   if ( m_part.IsNull() || !m_part->IsWellFormed() )
+    return;
+
+  QString
+    filename = asiUI_Common::selectSTEPFile( asiUI_Common::OpenSaveAction_Save,
+                                             AsciiStr2QStr( m_part->GetFilenameIn() ) );
+  //
+  if ( filename.isEmpty() )
     return;
 
   // Shape to save
@@ -342,21 +345,15 @@ void asiUI_DialogSTEP::proceed_Read()
   if ( filename.IsEmpty() )
     return;
 
-  // Check Geometry Node
+  // Check Part Node.
   if ( m_part.IsNull() || !m_part->IsWellFormed() )
     return;
 
   QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
   m_notifier.SetMessageKey("Load STEP");
 
-  // Prepare output
-  Handle(asiEngine_STEPReaderOutput)
-    output = new asiEngine_STEPReaderOutput( Handle(asiEngine_Model)::DownCast(m_model) );
-
-  // Prepare translator
-  asiAlgo_ReadSTEPWithMeta reader(m_notifier, m_plotter);
-  reader.SetOutput(output);
+  asiEngine_Part partApi(Handle(asiEngine_Model)::DownCast(m_model),
+                         m_notifier, m_plotter);
 
   TIMER_NEW
   TIMER_GO
@@ -364,7 +361,7 @@ void asiUI_DialogSTEP::proceed_Read()
   // Load from STEP
   m_model->OpenCommand(); // tx start
   {
-    if ( !reader.Perform(filename) )
+    if ( !partApi.Import(filename) )
     {
       m_notifier.SendLogMessage(LogErr(Normal) << "STEP reader failed.");
       QApplication::restoreOverrideCursor();
@@ -376,9 +373,9 @@ void asiUI_DialogSTEP::proceed_Read()
   m_model->CommitCommand();
 
   TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(m_notifier, "Load STEP file")
+  TIMER_COUT_RESULT_NOTIFIER(m_notifier, "Import STEP file")
 
-  m_notifier.SendLogMessage(LogNotice(Normal) << "Part loaded from STEP file %1" << filename);
+  m_notifier.SendLogMessage(LogNotice(Normal) << "Part loaded from STEP file '%1'." << filename);
   m_notifier.SetProgressStatus(Progress_Succeeded);
   QApplication::restoreOverrideCursor();
 }

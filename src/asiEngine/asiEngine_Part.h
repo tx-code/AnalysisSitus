@@ -84,6 +84,16 @@ public:
   asiEngine_EXPORT Handle(asiData_PartNode)
     CreatePart();
 
+  //! Imports CAD data from a file with the passed filename into the Part Node.
+  //! This function will automatically recognize the file format from its extension
+  //! or contents.
+  //! \param[in] filename the input filename.
+  //! \return true in case of success, false -- otherwise.
+  asiEngine_EXPORT bool
+    Import(const TCollection_AsciiString& filename);
+
+public:
+
   asiEngine_EXPORT bool
     CheckDeviation(const Handle(asiData_IVPointSetNode)& pcNode);
 

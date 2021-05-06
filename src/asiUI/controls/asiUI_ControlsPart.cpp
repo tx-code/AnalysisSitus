@@ -142,28 +142,25 @@ void asiUI_ControlsPart::onLoadFromBRep()
     return;
 
   m_notifier.SetMessageKey("Load BREP");
-  m_notifier.Init(2);
 
-  // Read BREP
-  TopoDS_Shape shape;
-  if ( !asiAlgo_Utils::ReadBRep(QStr2AsciiStr(filename), shape) )
-  {
-    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot read BREP file.");
-    m_notifier.SetProgressStatus(Progress_Failed);
-    return;
-  }
-  m_notifier.SendLogMessage( LogNotice(Normal) << "Part loaded from BREP file %1." << QStr2AsciiStr(filename) );
-  m_notifier.StepProgress(1);
-  m_notifier.SetMessageKey("Update accelerating structures");
+  asiEngine_Part partApi(m_model);
 
-  // Update part
-  m_model->OpenCommand(); // tx start
+  // Read BREP.
+  m_model->OpenCommand();
   {
-    asiEngine_Part(m_model).Update( shape, nullptr, !m_model->GetPartNode()->IsKeepTessParams() );
+    if ( !partApi.Import( QStr2AsciiStr(filename) ) )
+    {
+      m_model->AbortCommand();
+
+      m_notifier.SendLogMessage(LogErr(Normal) << "Cannot read BREP file.");
+      m_notifier.SetProgressStatus(Progress_Failed);
+      return;
+    }
   }
-  m_model->CommitCommand(); // tx commit
+  m_model->CommitCommand();
   //
-  m_notifier.StepProgress(1);
+  m_notifier.SendLogMessage( LogNotice(Normal) << "Part loaded from BREP file '%1'."
+                                               << QStr2AsciiStr(filename) );
   m_notifier.SetProgressStatus(Progress_Succeeded);
 
   // Notify
@@ -271,7 +268,11 @@ void asiUI_ControlsPart::onSaveToBRep()
   //
   if ( !asiUI_Common::PartShape(m_model, part_n, part) ) return;
   //
-  QString filename = asiUI_Common::selectBRepFile(asiUI_Common::OpenSaveAction_Save);
+  QString
+    filename = asiUI_Common::selectBRepFile(asiUI_Common::OpenSaveAction_Save);
+  //
+  if ( filename.isEmpty() )
+    return;
 
   // Save shape
   if ( !asiAlgo_Utils::WriteBRep( part, QStr2AsciiStr(filename) ) )

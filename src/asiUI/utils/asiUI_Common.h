@@ -214,13 +214,15 @@ public:
     selectGraphicsFile(const OpenSaveAction action);
 
   asiUI_EXPORT static QString
-    selectBRepFile(const OpenSaveAction action);
+    selectBRepFile(const OpenSaveAction action,
+                   const QString&       preferredName = "");
 
   asiUI_EXPORT static QString
     selectIGESFile(const OpenSaveAction action);
 
   asiUI_EXPORT static QString
-    selectSTEPFile(const OpenSaveAction action);
+    selectSTEPFile(const OpenSaveAction action,
+                   const QString&       preferredName = "");
 
   asiUI_EXPORT static QString
     selectPLYFile(const OpenSaveAction action);
@@ -249,6 +251,13 @@ public:
     selectFile(const QString&       filter,
                const QString&       openTitle,
                const QString&       saveTitle,
+               const OpenSaveAction action);
+
+  asiUI_EXPORT static QString
+    selectFile(const QString&       filter,
+               const QString&       openTitle,
+               const QString&       saveTitle,
+               const QString&       savePreferredName,
                const OpenSaveAction action);
 
 public:
