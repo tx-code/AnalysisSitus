@@ -304,6 +304,122 @@ double SignedDistance(const gp_Pln& pln, const gp_Pnt& P)
   return D;
 }
 
+
+//-----------------------------------------------------------------------------
+
+int MISC_TestPentagon(const Handle(asiTcl_Interp)& interp,
+                      int                          /*argc*/,
+                      const char**                 /*argv*/)
+{
+  const double h = 1;
+
+  // Get hexagon poles in 2D
+  std::vector<gp_XY> Poles2d;
+  asiAlgo_Utils::PolygonPoles(gp::Origin2d().XY(),
+                              5.0,
+                              5,
+                              Poles2d);
+
+  // Choose working plane
+  Handle(Geom_Plane) workPlane = new Geom_Plane( gp_Pln( gp::Origin(), gp::DZ() ) );
+
+  TopoDS_Face facets[5];
+
+  {
+    BRepBuilderAPI_MakePolygon mkPoly;
+    mkPoly.Add( workPlane->Value( Poles2d[0].X(), Poles2d[0].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[2].X(), Poles2d[2].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[3].X(), Poles2d[3].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[0].X(), Poles2d[0].Y() ) );
+    //
+    mkPoly.Build();
+    //
+    facets[0] = BRepBuilderAPI_MakeFace( mkPoly.Wire() );
+  }
+
+  {
+    BRepBuilderAPI_MakePolygon mkPoly;
+    mkPoly.Add( workPlane->Value( Poles2d[1].X(), Poles2d[1].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[3].X(), Poles2d[3].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[4].X(), Poles2d[4].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[1].X(), Poles2d[1].Y() ) );
+    //
+    mkPoly.Build();
+    //
+    facets[1] = BRepBuilderAPI_MakeFace( mkPoly.Wire() );
+  }
+
+  {
+    BRepBuilderAPI_MakePolygon mkPoly;
+    mkPoly.Add( workPlane->Value( Poles2d[2].X(), Poles2d[2].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[4].X(), Poles2d[4].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[0].X(), Poles2d[0].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[2].X(), Poles2d[2].Y() ) );
+    //
+    mkPoly.Build();
+    //
+    facets[2] = BRepBuilderAPI_MakeFace( mkPoly.Wire() );
+  }
+
+  {
+    BRepBuilderAPI_MakePolygon mkPoly;
+    mkPoly.Add( workPlane->Value( Poles2d[3].X(), Poles2d[3].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[0].X(), Poles2d[0].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[1].X(), Poles2d[1].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[3].X(), Poles2d[3].Y() ) );
+    //
+    mkPoly.Build();
+    //
+    facets[3] = BRepBuilderAPI_MakeFace( mkPoly.Wire() );
+  }
+
+  {
+    BRepBuilderAPI_MakePolygon mkPoly;
+    mkPoly.Add( workPlane->Value( Poles2d[4].X(), Poles2d[4].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[1].X(), Poles2d[1].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[2].X(), Poles2d[2].Y() ) );
+    mkPoly.Add( workPlane->Value( Poles2d[4].X(), Poles2d[4].Y() ) );
+    //
+    mkPoly.Build();
+    //
+    facets[4] = BRepBuilderAPI_MakeFace( mkPoly.Wire() );
+  }
+
+  for ( int k = 0; k < 5; ++k )
+    interp->GetPlotter().DRAW_SHAPE(facets[k], "facet");
+
+  TopoDS_Shape paves[5];
+  for ( int k = 0; k < 5; ++k )
+  {
+    TopTools_ListOfShape tools;
+    tools.Append(facets[k]);
+    tools.Append(facets[(k == 4) ? 0 : (k + 1)]);
+
+    paves[k] = asiAlgo_Utils::BooleanIntersect(tools);
+  }
+
+  for ( int k = 0; k < 5; ++k )
+    interp->GetPlotter().DRAW_SHAPE(paves[k], "pave");
+
+  TopTools_ListOfShape tools;
+  for ( int k = 0; k < 5; ++k )
+  {
+    tools.Append(paves[k]);
+  }
+
+  TopoDS_Shape base = asiAlgo_Utils::BooleanFuse(tools);
+  asiAlgo_Utils::MaximizeFaces(base);
+
+  interp->GetPlotter().REDRAW_SHAPE("base", base);
+
+  // Build prism
+  TopoDS_Shape prism = BRepPrimAPI_MakePrism(base, gp_Vec( workPlane->Axis().Direction() )*h);
+
+  interp->GetPlotter().REDRAW_SHAPE("prism", prism);
+
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 int MISC_TestHexagonBops(const Handle(asiTcl_Interp)& interp,
@@ -3639,6 +3755,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   /* ==================
    *  Add Tcl commands
    * ================== */
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("test-pentagon",
+    //
+    "test-pentagon\n"
+    "\t No arguments are expected.",
+    //
+    __FILE__, group, MISC_TestPentagon);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-hexagon-bops",

@@ -322,7 +322,7 @@ int main(int argc, char** argv)
     // Prepare Tcl command.
     TCollection_AsciiString cmd;
     //
-    cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += " \"";
+    cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += "\"";
 
     // Execute command.
     if ( !cmd.IsEmpty() )
