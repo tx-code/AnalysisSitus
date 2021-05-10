@@ -59,7 +59,8 @@ asiAlgo_RecognizeEBF::asiAlgo_RecognizeEBF(const Handle(asiAlgo_AAG)& aag,
                                            ActAPI_ProgressEntry       progress,
                                            ActAPI_PlotterEntry        plotter)
 : ActAPI_IAlgorithm (progress, plotter),
-  m_aag             (aag)
+  m_aag             (aag),
+  m_pEdgeLengthMap  (nullptr)
 {}
 
 //-----------------------------------------------------------------------------

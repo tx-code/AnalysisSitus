@@ -299,8 +299,7 @@ bool asiAlgo_RecognizeVBF::treatToroidalCase(const Handle(asiAlgo_AttrBlendCandi
     gp_Dir2d            DU(1, 0);
     GeomAbs_CurveType   c2dType = GAC.GetType();
 
-    /* Treat special cases of lines parallel to the U, V axes.
-       In such cases, we do not need to approximate. */
+    /* Check if pcurve line is parallel to OU axis. */
 
     gp_Lin2d lin;
     //
