@@ -35,21 +35,43 @@
 #include <asiAlgo.h>
 
 // OCCT includes
+#include <Poly_Triangulation.hxx>
 #include <Standard_OStream.hxx>
+#include <TopoDS_Shape.hxx>
 
 //-----------------------------------------------------------------------------
 
 //! Mesh information.
 struct asiAlgo_MeshInfo
 {
-  int    nNodes;
-  int    nFacets;
-  double maxDeflection;
+  int    nNodes;        //!< Num. of mesh nodes.
+  int    nFacets;       //!< Num of facets.
+  double maxDeflection; //!< Max deflection.
 
+  //! Default ctor.
   asiAlgo_MeshInfo() : nNodes(0), nFacets(0), maxDeflection(0.0) {}
 
-  asiAlgo_EXPORT
-    void Dump(Standard_OStream& out);
+  //! Extracts mesh info from the passed shape and returns the mesh
+  //! info structure by value.
+  //! \param[in] shape the shape to consult.
+  //! \return the outcome mesh info.
+  asiAlgo_EXPORT static asiAlgo_MeshInfo
+    Extract(const TopoDS_Shape& shape);
+
+  //! Extracts mesh summary for the given B-Rep model.
+  //! \param[in] shape OCCT shape as a container for triangulation.
+  asiAlgo_EXPORT void
+    ExtractInfoFrom(const TopoDS_Shape& shape);
+
+  //! Extracts mesh summary for the given triangulation.
+  //! \param mesh [in] CAD-agnostic triangulation.
+  asiAlgo_EXPORT void
+    ExtractInfoFrom(const Handle(Poly_Triangulation)& mesh);
+
+  //! Dumps mesh information to the given output stream.
+  //! \param[in,out] out the target output stream.
+  asiAlgo_EXPORT void
+    Dump(Standard_OStream& out);
 };
 
 #endif

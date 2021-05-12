@@ -31,8 +31,60 @@
 // Own include
 #include <asiAlgo_MeshInfo.h>
 
-//! Dumps mesh information to the given output stream.
-//! \param out [in/out] target output stream.
+// OpenCascade includes
+#include <BRep_Tool.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_MeshInfo
+  asiAlgo_MeshInfo::Extract(const TopoDS_Shape& shape)
+{
+  asiAlgo_MeshInfo result;
+  result.ExtractInfoFrom(shape);
+  return result;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_MeshInfo::ExtractInfoFrom(const TopoDS_Shape& shape)
+{
+  if ( shape.IsNull() )
+    return;
+
+  nNodes = nFacets = 0;
+  maxDeflection = 0.0;
+
+  for ( TopExp_Explorer ex(shape, TopAbs_FACE); ex.More(); ex.Next() )
+  {
+    const TopoDS_Face&                F = TopoDS::Face( ex.Current() );
+    TopLoc_Location                   L;
+    const Handle(Poly_Triangulation)& T = BRep_Tool::Triangulation(F, L);
+    //
+    if ( T.IsNull() )
+      continue;
+
+    nFacets += T->NbTriangles();
+    nNodes  += T->NbNodes();
+    //
+    if ( T->Deflection() > maxDeflection )
+      maxDeflection = T->Deflection();
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_MeshInfo::ExtractInfoFrom(const Handle(Poly_Triangulation)& mesh)
+{
+  nNodes        = mesh.IsNull() ? 0 : mesh->NbNodes();
+  nFacets       = mesh.IsNull() ? 0 : mesh->NbTriangles();
+  maxDeflection = mesh.IsNull() ? 0 : mesh->Deflection();
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_MeshInfo::Dump(Standard_OStream& out)
 {
   out << "Num. triangles: "        << nFacets       << "\n";
