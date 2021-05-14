@@ -1,0 +1,41 @@
+set datadir $env(ASI_TEST_DATA)
+
+# This procedure is used to perform recognition job and this way avoid
+# code duplication in Tcl scripts that are supposed to run this procedure
+# for specific shapes.
+proc __recognize-cavities {} {
+  global datadir
+  global refFids
+  global datafile
+  global maxSize
+
+  clear
+
+  puts "Loading '$datadir/$datafile'..."
+
+  # Read input geometry.
+  load-part $datadir/$datafile
+  fit
+  #
+  print-summary
+
+  # Recognize all cavities.
+  set fids [recognize-cavities -size $maxSize]
+  #
+  puts "Recognized face IDs: $fids"
+  #
+  if { [llength $fids] != [llength $refFids] } {
+    error "Unexpected number of recognized faces."
+  }
+
+  set i 0
+  foreach item $fids {
+    set refItem [lindex $refFids $i]
+    set index [lsearch $item $refItem]
+
+    if { $index == -1 } {
+      error "Expected ${refItem} not found in the result list \{${fids}\}"
+    }
+    incr i
+  }
+}

@@ -94,7 +94,7 @@
 <h2 id="toc-feat-rec-rule-based">More on rule-based approach</h2>
 
 <p>
-  Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
+  Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach, because any customization would require recompilation. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
 </p>
 
 <table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
@@ -120,7 +120,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      For the given position of AAG iterator, a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited nodes can be recorded to avoid checking them twice in the main loop.
+      For the given position of AAG iterator (a "cursor"), a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited nodes are usually memorized to avoid checking them twice in the main loop.
     </p>
     <div class="note">
       One of the fundamental heuristics is the <a href="./features_check-dih-angles.html">dihedral angle</a> between feature faces.
@@ -143,7 +143,7 @@
 <h2 id="toc-feat-workflow">Recognition workflow</h2>
 
 <p>
-  The feature recognition tools available in Analysis Situs might be combined freely. They all work on the AAG constructed out of the initial shape. You may choose to build up a new AAG each time you run a recognizer or, alternatively, reuse the same AAG and collect all recognized features as its attributes. Whatever option you prefer, the recognizers will give you a series of indices to address the detected feature faces uniquely.
+  The feature recognition tools available in Analysis Situs might be combined freely. They all work on the AAG constructed out of the initial shape. You may choose to build up a new AAG each time you run a recognizer or, alternatively, reuse the same AAG and collect all recognized features as its attributes. Whatever option you prefer, the recognizers will give you a <a href="./features_recognition-anatomy-of-feature.html">series of indices</a> to address the detected feature faces uniquely.
 </p>
 
 <p>
@@ -195,7 +195,7 @@
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">
 <tr>
   <td>
-    Copyright &copy; Analysis&nbsp;Situs 2020-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
   </td>
 </tr>
 </table>

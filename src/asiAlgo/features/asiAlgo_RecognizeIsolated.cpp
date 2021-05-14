@@ -64,18 +64,6 @@ asiAlgo_RecognizeIsolated::asiAlgo_RecognizeIsolated(const TopoDS_Shape&  shape,
 
 //-----------------------------------------------------------------------------
 
-asiAlgo_RecognizeIsolated::asiAlgo_RecognizeIsolated(const TopoDS_Shape&        shape,
-                                                     const Handle(asiAlgo_AAG)& aag,
-                                                     ActAPI_ProgressEntry       progress,
-                                                     ActAPI_PlotterEntry        plotter)
-: asiAlgo_Recognizer(shape,
-                     aag,
-                     progress,
-                     plotter)
-{}
-
-//-----------------------------------------------------------------------------
-
 asiAlgo_RecognizeIsolated::asiAlgo_RecognizeIsolated(const Handle(asiAlgo_AAG)& aag,
                                                      ActAPI_ProgressEntry       progress,
                                                      ActAPI_PlotterEntry        plotter)

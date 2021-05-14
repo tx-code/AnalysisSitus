@@ -43,9 +43,14 @@ class asiTest_TclTestCase : public asiTestEngine_TestCase
 protected:
 
   //! Evaluates Tcl script using the available Tcl interpretor.
-  //! \param[in] scriptFilename full script's filename.
+  //! \param[in] scriptFilename the full script's filename.
   //! \return true if Tcl returns TCL_OK, false -- otherwise.
   static outcome evaluate(const TCollection_AsciiString& scriptFilename);
+
+  //! Evaluates all Tcl scripts in the passed directory.
+  //! \param[in] dir the directory containing Tcl test scripts.
+  //! \return true if Tcl returns TCL_OK, false -- otherwise.
+  static outcome evaluateAll(const TCollection_AsciiString& dir);
 
 };
 

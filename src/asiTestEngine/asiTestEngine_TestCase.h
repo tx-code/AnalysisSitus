@@ -309,10 +309,18 @@ public:
   //! Returns full filename for the test script by appending the script's filename
   //! to the slashed path defined at ASI_TEST_SCRIPTS environment variable.
   //! \param[in] scriptName name of the script defined relatively to the
-  //!                       path contained at ASI_TEST_SCRIPTS variable.
+  //!                       path contained in ASI_TEST_SCRIPTS variable.
   //! \return full filename.
   asiTestEngine_EXPORT static TCollection_AsciiString
     GetFilename(const char* scriptName);
+
+  //! Returns full directory for the test scripts by appending the script's dir
+  //! to the slashed path defined at ASI_TEST_SCRIPTS environment variable.
+  //! \param[in] subdir path to script files defined relatively to the
+  //!                   path contained in ASI_TEST_SCRIPTS variable.
+  //! \return full path.
+  asiTestEngine_EXPORT static TCollection_AsciiString
+    GetPath(const char* subdir);
 
 private:
 

@@ -48,3 +48,15 @@ TCollection_AsciiString
   return filename;
 }
 
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString asiTestEngine_TestCase::GetPath(const char* subdir)
+{
+  std::string
+    dir = asiAlgo_Utils::Str::Slashed( OSD_Environment("ASI_TEST_SCRIPTS").Value().ToCString() );
+
+  TCollection_AsciiString dirname( dir.c_str() );
+  dirname += TCollection_AsciiString(subdir);
+
+  return dirname;
+}

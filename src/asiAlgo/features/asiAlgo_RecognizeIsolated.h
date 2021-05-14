@@ -61,19 +61,8 @@ public:
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_RecognizeIsolated(const TopoDS_Shape&  shape,
-                              ActAPI_ProgressEntry progress,
-                              ActAPI_PlotterEntry  plotter);
-
-  //! Ctor.
-  //! \param[in] shape    shape in question.
-  //! \param[in] aag      attributed adjacency graph in question.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
-  asiAlgo_EXPORT
-    asiAlgo_RecognizeIsolated(const TopoDS_Shape&        shape,
-                              const Handle(asiAlgo_AAG)& aag,
-                              ActAPI_ProgressEntry       progress,
-                              ActAPI_PlotterEntry        plotter);
+                              ActAPI_ProgressEntry progress = nullptr,
+                              ActAPI_PlotterEntry  plotter  = nullptr);
 
   //! Ctor.
   //! \param[in] aag      attributed adjacency graph in question.
@@ -81,8 +70,8 @@ public:
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_RecognizeIsolated(const Handle(asiAlgo_AAG)& aag,
-                              ActAPI_ProgressEntry       progress,
-                              ActAPI_PlotterEntry        plotter);
+                              ActAPI_ProgressEntry       progress = nullptr,
+                              ActAPI_PlotterEntry        plotter  = nullptr);
 
 public:
 

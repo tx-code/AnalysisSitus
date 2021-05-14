@@ -396,8 +396,9 @@ int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
    // Modify Data Model.
   cmdEngine::model->OpenCommand();
   {
-    if ( !asiEngine_Part(cmdEngine::model).Import(filename) )
+    if ( !asiEngine_Part( cmdEngine::model, interp->GetProgress() ).Import(filename) )
     {
+      cmdEngine::model->AbortCommand();
       return TCL_ERROR;
     }
   }

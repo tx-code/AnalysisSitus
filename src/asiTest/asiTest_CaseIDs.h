@@ -56,6 +56,7 @@ enum test_CaseID
   CaseID_AAG,
   CaseID_IsContourClosed,
   CaseID_EdgeVexity,
+  CaseID_RecognizeCavities,
 
 /* ------------------------------------------------------------------------ */
 

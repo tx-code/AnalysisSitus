@@ -46,7 +46,7 @@ asiAlgo_Feature
   Handle(asiAlgo_AAG) aag   = partNode->GetAAG();
 
   // Perform recognition.
-  asiAlgo_RecognizeIsolated algo(shape, aag, m_progress, m_plotter);
+  asiAlgo_RecognizeIsolated algo(aag, m_progress, m_plotter);
   //
   if ( !algo.Perform(baseFaces) )
   {

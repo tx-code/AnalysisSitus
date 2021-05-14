@@ -34,6 +34,10 @@
 // asiTest includes
 #include <asiTest_CommonFacilities.h>
 
+// OpenCascade includes
+#include <OSD_Directory.hxx>
+#include <OSD_FileIterator.hxx>
+
 //-----------------------------------------------------------------------------
 
 outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilename)
@@ -49,6 +53,45 @@ outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilen
   // Check result.
   if ( ret != TCL_OK )
     cf->Interp->PrintLastError();
+
+  return (ret == TCL_OK) ? res.success() : res.failure();
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_TclTestCase::evaluateAll(const TCollection_AsciiString& dir)
+{
+  outcome res;
+
+  // Get common facilities.
+  Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
+
+  int ret = TCL_OK;
+
+  OSD_Path path(dir);
+  //
+  for ( OSD_FileIterator fi(path, "*.tcl"); fi.More(); fi.Next() )
+  {
+    OSD_Path filePath;
+    fi.Values().Path(filePath);
+
+    TCollection_AsciiString filename;
+    filePath.SystemName(filename);
+    filename = dir + "/" + filename;
+
+    cf->Progress.SendLogMessage(LogNotice(Normal) << "Next script to execute: '%1'."
+                                                  << filename);
+
+    // Execute script.
+    ret = cf->Interp->Eval( asiTcl_SourceCmd(filename) );
+
+    // Check result.
+    if ( ret != TCL_OK )
+    {
+      cf->Interp->PrintLastError();
+      break;
+    }
+  }
 
   return (ret == TCL_OK) ? res.success() : res.failure();
 }

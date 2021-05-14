@@ -55,6 +55,7 @@
 #include <asiAlgo_FindVisibleFaces.h>
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_RecognizeBlends.h>
+#include <asiAlgo_RecognizeCavities.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -2631,6 +2632,79 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_RecognizeCavities(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  /* ==============
+   *  Get prepared.
+   * ============== */
+
+  // Get part.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape        partShape = partNode->GetShape();
+  Handle(asiAlgo_AAG) G         = partNode->GetAAG();
+
+  // Read max allowed feature size.
+  double maxSize = Precision::Infinite();
+  interp->GetKeyValue<double>(argc, argv, "size", maxSize);
+  //
+  if ( Abs(maxSize) < gp::Resolution() )
+    maxSize = Precision::Infinite();
+
+  /* ==============================
+   *  Recognize arbitrary cavities.
+   * ============================== */
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Recognize cavities.
+  asiAlgo_RecognizeCavities recCavities( G,
+                                         interp->GetProgress(),
+                                         interp->GetPlotter() );
+  //
+  recCavities.SetMaxSize(maxSize);
+  //
+  if ( !recCavities.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cavity recognition failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Recognize cavities")
+
+  // Get the extracted face indices.
+  const asiAlgo_Feature& resIndices = recCavities.GetResultIndices();
+
+  /* ==========
+   *  Finalize.
+   * ========== */
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          cmdEngine::cf.IsNull() ? nullptr : cmdEngine::cf->ViewerPart->PrsMgr() );
+
+  // Highlight the detected faces.
+  if ( !cmdEngine::cf.IsNull() && cmdEngine::cf->ViewerPart )
+    partApi.HighlightFaces(resIndices);
+
+  // Dump to result.
+  *interp << resIndices;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_DrawPlot(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
@@ -3678,6 +3752,19 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t to join the fillet faces into chains.",
     //
     __FILE__, group, ENGINE_RecognizeBlends);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("recognize-cavities",
+    //
+    "recognize-cavities [-vol <maxSize>]\n"
+    "\t Recognizes arbitrary cavities in the active part. If the '-size'\n"
+    "\t key is passed, it allows to limit the size of a cavity feature\n"
+    "\t being recognized. The size is computed simply as the max dimension of\n"
+    "\t the axis-aligned bounding box (AABB) of all feature faces. If the\n"
+    "\t '-size' key is not passed or the <maxSize> value is zero, then no\n"
+    "\t constraint on the feature size is imposed.",
+    //
+    __FILE__, group, ENGINE_RecognizeCavities);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("draw-plot",
