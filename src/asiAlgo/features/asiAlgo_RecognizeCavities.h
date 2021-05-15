@@ -34,6 +34,9 @@
 // asiAlgo includes
 #include <asiAlgo_Recognizer.h>
 
+// Standard includes
+#include <unordered_map>
+
 //-----------------------------------------------------------------------------
 
 //! Recognizes all negative features in a CAD part. Their shape
@@ -77,6 +80,10 @@ public:
   asiAlgo_EXPORT double
     GetMaxSize() const;
 
+  //! \return cavity features distributed by their base faces.
+  asiAlgo_EXPORT const std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> >&
+    GetCavities() const;
+
 public:
 
   //! Performs recognition.
@@ -92,10 +99,17 @@ protected:
   asiAlgo_EXPORT void
     findSeeds(asiAlgo_Feature& seeds);
 
+  //! Collects cavity features and their base faces.
+  asiAlgo_EXPORT void
+    collectCavities();
+
 protected:
 
   //! Max allowed feature size.
   double m_fMaxSize;
+
+  //! Recognized cavities and their base faces.
+  std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> > m_cavities;
 
 };
 

@@ -68,9 +68,32 @@
 
 <div align="center"><img src="../imgs/situ_recognize-cavities-anim.gif"/></div>
 
+<p>
+  To perform the recognition of cavities, use <span class="code-inline">recognize-cavities</span> command.
+</p>
+
 <pre class="code">
 > set ids [recognize-cavities]
 > puts $ids
+</pre>
+
+<p>
+  If the optional <span class="code-inline">-details</span> flag is passed, the function will print out all detected cavities with their base faces, e.g.:
+</p>
+
+<pre class="code">
+-----------------------
+ Feature -> base faces
+-----------------------
+[11, 12, 48] -> [2]
+[14] -> [6, 8]
+[15] -> [6, 8]
+[16] -> [6, 8]
+[17] -> [6, 8]
+[25, 55, 69, 72, 82, 86, 87] -> [8, 49]
+[60, 73] -> [49]
+[61, 74] -> [49]
+[62, 75] -> [49]
 </pre>
 
 <!-- [END] contents -->
@@ -79,7 +102,7 @@
 <table class="footer" cellpadding="0" cellspacing="0" width="100%">
 <tr>
   <td>
-    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> 
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
   </td>
 </tr>
 </table>

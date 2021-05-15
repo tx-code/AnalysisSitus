@@ -2757,6 +2757,31 @@ int ENGINE_RecognizeCavities(const Handle(asiTcl_Interp)& interp,
   // Get the extracted face indices.
   const asiAlgo_Feature& resIndices = recCavities.GetResultIndices();
 
+  // Print more details, if asked.
+  if ( interp->HasKeyword(argc, argv, "details") )
+  {
+    const std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> >&
+      cavities = recCavities.GetCavities();
+
+    std::string lbl;
+    lbl += "\n----------------------";
+    lbl += "\n Feature -> base faces";
+    lbl += "\n----------------------";
+    //
+    for ( const auto& tuple : cavities )
+    {
+      const asiAlgo_Feature& feature = tuple.first;
+      const asiAlgo_Feature& bases   = tuple.second;
+
+      lbl += "\n";
+      lbl += asiAlgo_Utils::Json::FromFeature(feature);
+      lbl += " -> ";
+      lbl += asiAlgo_Utils::Json::FromFeature(bases);
+    }
+
+    interp->GetProgress().SendLogMessage( LogInfo(Normal) << lbl.c_str() );
+  }
+
   /* ==========
    *  Finalize.
    * ========== */
@@ -3841,7 +3866,10 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t being recognized. The size is computed simply as the max dimension of\n"
     "\t the axis-aligned bounding box (AABB) of all feature faces. If the\n"
     "\t '-size' key is not passed or the <maxSize> value is zero, then no\n"
-    "\t constraint on the feature size is imposed.",
+    "\t constraint on the feature size is imposed.\n\n"
+    ""
+    "\t If the '-details' flag is passed, the result of recognition is\n"
+    "\t printed to the logger in a more detailed way.",
     //
     __FILE__, group, ENGINE_RecognizeCavities);
 

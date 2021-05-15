@@ -83,6 +83,14 @@ double asiAlgo_RecognizeCavities::GetMaxSize() const
 
 //-----------------------------------------------------------------------------
 
+const std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> >&
+  asiAlgo_RecognizeCavities::GetCavities() const
+{
+  return m_cavities;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_RecognizeCavities::Perform()
 {
   // Clean up the result.
@@ -154,6 +162,9 @@ bool asiAlgo_RecognizeCavities::Perform()
       return false;
     }
   }
+
+  // Initialize cavities.
+  this->collectCavities();
 
 #if defined COUT_DEBUG
   TIMER_FINISH
@@ -247,5 +258,46 @@ void asiAlgo_RecognizeCavities::findSeeds(asiAlgo_Feature& seeds)
         seeds.Add(fid);
       }
     }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeCavities::collectCavities()
+{
+  std::vector<asiAlgo_Feature> ccomps;
+
+  m_aag->PushSubgraph(m_result.ids);
+  {
+    m_aag->GetConnectedComponents(ccomps);
+  }
+  m_aag->PopSubgraph();
+
+  for ( const auto& ccomp : ccomps )
+  {
+    asiAlgo_Feature bases;
+
+    // Collect neighbor faces that are not cavities. These would be the bases.
+    for ( asiAlgo_Feature::Iterator fit(ccomp); fit.More(); fit.Next() )
+    {
+      const int fid = fit.Key();
+
+      // Collect base faces by traversing all the neighbors.
+      const asiAlgo_Feature& nids = m_aag->GetNeighbors(fid);
+      //
+      for ( asiAlgo_Feature::Iterator nit(nids); nit.More(); nit.Next() )
+      {
+        const int nid = nit.Key();
+
+        // Skip feature faces.
+        if ( m_result.ids.Contains(nid) || bases.Contains(nid) )
+          continue;
+
+        bases.Add(nid);
+      }
+    } // by connected components
+
+    // Add to the result.
+    m_cavities.push_back({ccomp, bases});
   }
 }
