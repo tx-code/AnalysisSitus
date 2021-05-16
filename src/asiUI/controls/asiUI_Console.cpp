@@ -70,6 +70,7 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
   this->setWordWrapMode    ( QTextOption::WrapAnywhere );
   this->setAcceptRichText  ( false );
   this->setReadOnly        ( false );
+  this->setUndoRedoEnabled ( true );
   this->setFont            ( QFont("monospace", 9) );
   //
   this->viewport()->unsetCursor(); // Unset busy cursor.
