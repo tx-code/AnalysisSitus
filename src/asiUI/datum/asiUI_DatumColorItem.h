@@ -63,7 +63,7 @@ class asiUI_EXPORT asiUI_DatumColorItem : public asiUI_Datum
 
 public:
 
-  asiUI_DatumColorItem(const QString& theDicID, 
+  asiUI_DatumColorItem(const QString& theDicID,
                         QWidget*       theParent = 0,
                         const int      theDatumFlags = All);
 
@@ -71,7 +71,7 @@ signals:
 
   //! Signal when current color value has been modified.
   void ColorChanged(const int theValue);
-  
+
 public slots:
 
   virtual void onUnitsUpdated();
@@ -181,6 +181,7 @@ public:
   //! \param theParent [in] - the parent of this widget.
   ColorItemDialog(QWidget* theParent) : QColorDialog(theParent)
   {
+    this->setOption(QColorDialog::DontUseNativeDialog);
   }
 
 signals:

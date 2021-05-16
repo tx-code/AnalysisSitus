@@ -70,7 +70,7 @@
 //! calling OnUnitsSystemChanged(...) slot.
 //!
 //! \param theParent [in] parent object for the datum.
-asiUI_Datum::asiUI_Datum(QWidget* theParent) 
+asiUI_Datum::asiUI_Datum(QWidget* theParent)
 : QObject(theParent),
   m_bBlocked(false)
 {
@@ -119,7 +119,7 @@ QString asiUI_Datum::GetUnits(const QString& theDicID)
 }
 
 //! Get the datum's filter string.
-//! \return filter string. 
+//! \return filter string.
 QString asiUI_Datum::GetFilter() const
 {
   return getDatum()->filter();
@@ -300,7 +300,7 @@ void asiUI_Datum::Hide(const int theWidgets)
 //! or their bitwise summed value.
 //! \param theIsShown [in] show if true, hide if false.
 //! \param theWidgets [in] subwidgets flags.
-void asiUI_Datum::SetShown(const bool theIsShown, 
+void asiUI_Datum::SetShown(const bool theIsShown,
                             const int  theWidgets)
 {
   getDatum()->setShown(theIsShown, convertWidgets(theWidgets));
@@ -416,7 +416,7 @@ void asiUI_Datum::OnUnitSystemChanged(const asiAlgo_DictionaryUnitSystem& thePre
   bool isBlocked = setChangedBlocked(true);
   asiAlgo_Dictionary::SetLocalUnitSystem(thePrevious);
   QVariant aValue = GetValue();
-  
+
   asiAlgo_Dictionary::SetLocalUnitSystem(theNew);
   onUnitsUpdated();
   SetValue(aValue);
@@ -430,7 +430,7 @@ asiUI_Datum::operator QWidget*() const
   return getDatum()->widget(QDS::Control);
 }
 
-//! Initialize self, connect value changed signals 
+//! Initialize self, connect value changed signals
 //! to re-emit them when value changes and send deletion signal for
 //! QDS_Datum entity when the asiUI_Datum instance is destroyed.
 void asiUI_Datum::init(QDS_Datum* theDatum)
@@ -571,7 +571,7 @@ asiUI_Datum::DatumImpl<base_t>::DatumImpl(const QString& theDictId,
   Handle(asiAlgo_DictionaryItem) aDictItem =
     asiAlgo_Dictionary::GetDictionaryItem( QStr2AsciiStr(theDictId) );
 
-  QString aFmt = !aDictItem.IsNull() 
+  QString aFmt = !aDictItem.IsNull()
     ? AsciiStr2QStr( aDictItem->GetFormat(false) )
     : QString();
 
@@ -604,9 +604,23 @@ QString asiUI_Datum::DatumImpl<base_t>::GetFormatted(const bool theLongFmt)
   {
     switch ( base_t::type() )
     {
-      case DDS_DicItem::Integer: return m_Fmt->Format(aValue.toInt(),    theLongFmt);
-      case DDS_DicItem::Float:   return m_Fmt->Format(aValue.toDouble(), theLongFmt);
-      case DDS_DicItem::String:  return m_Fmt->Format(aValue,            theLongFmt);
+      case DDS_DicItem::Integer:
+      {
+        QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+        if ( !re.exactMatch(aValue) )
+          return "";
+
+        return m_Fmt->Format(aValue.toInt(), theLongFmt);
+      }
+      case DDS_DicItem::Float:
+      {
+        QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+        if ( !re.exactMatch(aValue) )
+          return "";
+
+        return m_Fmt->Format(aValue.toDouble(), theLongFmt);
+      }
+      case DDS_DicItem::String: return m_Fmt->Format(aValue,            theLongFmt);
       default:
         return aValue;
     }
@@ -616,7 +630,7 @@ QString asiUI_Datum::DatumImpl<base_t>::GetFormatted(const bool theLongFmt)
 }
 
 //! Override suit basics validator with generic ones.
-//! \param theLimits [in] boolean flag indicating whether the minimum and maximum 
+//! \param theLimits [in] boolean flag indicating whether the minimum and maximum
 //! limits should be controlled by validator or not.
 //! \return validator instance.
 template <typename base_t>
@@ -639,7 +653,7 @@ QValidator* asiUI_Datum::DatumImpl<base_t>::validator(const bool theLimits) cons
       aDoubleVal->setTop(aLimit);
 
     Handle(DDS_DicItem) anItem = base_t::dicItem();
-    if ( !anItem.IsNull() ) 
+    if ( !anItem.IsNull() )
     {
       aDoubleVal->SetFixupFormat( m_Fmt, isLongFmt() );
     }
@@ -752,11 +766,11 @@ QString asiUI_Datum::DatumImpl<base_t>::formatValue(const QString& theValue) con
     {
       bool isOk = false;
       double aValue = theValue.toDouble(&isOk);
-      if (!isOk) 
+      if (!isOk)
         return "";
 
       bool isDouble = (aType == DDS_DicItem::Float);
-      if (m_Fmt != nullptr) 
+      if (m_Fmt != nullptr)
         return m_Fmt->Format( aValue, isLongFmt() );
 
       return isDouble
@@ -803,6 +817,10 @@ asiUI_Datum::DoubleValidator::DoubleValidator(const QString& theFilter,
 //! \return status or validation result.
 QValidator::State asiUI_Datum::DoubleValidator::validate(QString& theInput, int& thePos) const
 {
+  QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+  if ( !re.exactMatch(theInput) )
+    return Invalid;
+
   State aFormatState = Acceptable;
   State aValueState = QDS_DoubleValidator::validate(theInput, thePos);
   if ( aValueState != Invalid )
@@ -834,7 +852,7 @@ QValidator::State asiUI_Datum::DoubleValidator::validate(QString& theInput, int&
   {
     aFormatState = validateFormat(theInput);
   }
-  
+
   return qMin(aValueState, aFormatState);
 }
 
@@ -869,6 +887,10 @@ void asiUI_Datum::DoubleValidator::fixup(QString& theInput) const
     theInput = m_fixupCache.StrFixup;
     return;
   }
+
+  QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+  if ( !re.exactMatch(theInput) )
+    return;
 
   bool isConverted = false;
   double aDoubleValue = theInput.toDouble(&isConverted);

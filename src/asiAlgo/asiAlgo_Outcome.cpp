@@ -96,7 +96,7 @@ Outcome::Outcome(const std::string& _name,
 
 Outcome::~Outcome()
 {
-  delete m_timer;
+  delete (OSD_Timer*) m_timer;
 }
 
 //-----------------------------------------------------------------------------
