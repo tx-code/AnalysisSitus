@@ -58,6 +58,38 @@ namespace asiAlgo_CanRecTools
              double&                     dev,
              gp_Lin2d&                   lin);
 
+  //! Checks if the passed surface can be represented with an analytical
+  //! cylinder.
+  //!
+  //! \param[in]  surface  the surface in question.
+  //! \param[in]  uMinSurf the min U parameter.
+  //! \param[in]  uMaxSurf the max U parameter.
+  //! \param[in]  vMinSurf the min V parameter.
+  //! \param[in]  vMaxSurf the max V parameter.
+  //! \param[in]  toler    the tolerance to use.
+  //! \param[out] cyl      the extracted cylinder.
+  //! \param[out] uMinCyl  the U min parameter of the cylinder's domain.
+  //! \param[out] uMaxCyl  the U max parameter of the cylinder's domain.
+  //! \param[out] vMinCyl  the V min parameter of the cylinder's domain.
+  //! \param[out] vMaxCyl  the V max parameter of the cylinder's domain.
+  //! \param[in]  progress the progress notifier.
+  //! \param[in]  plotter  the imperative plotter.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const Handle(Geom_Surface)& surface,
+                  const double                uMinSurf,
+                  const double                uMaxSurf,
+                  const double                vMinSurf,
+                  const double                vMaxSurf,
+                  const double                toler,
+                  gp_Cylinder&                cyl,
+                  double&                     uMinCyl,
+                  double&                     uMaxCyl,
+                  double&                     vMinCyl,
+                  double&                     vMaxCyl,
+                  ActAPI_ProgressEntry        progress = nullptr,
+                  ActAPI_PlotterEntry         plotter  = nullptr);
+
 }
 
 #endif

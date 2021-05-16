@@ -1151,6 +1151,29 @@ bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
 
   return isCylindrical;
 }
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsConical(const TopoDS_Face& face)
+{
+  gp_Ax1 ax;
+  return IsConical(face, ax);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
+                              gp_Ax1&            ax)
+{
+  Handle(Geom_ConicalSurface) surf;
+  //
+  if ( IsTypeOf<Geom_ConicalSurface>(face, surf) )
+  {
+    ax = surf->Axis();
+    return true;
+  }
+
+  return false;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -1472,11 +1495,11 @@ bool asiAlgo_Utils::WriteBRep(const TopoDS_Shape&            theShape,
   bool isGood = (os.good() && !os.eof());
   if ( !isGood )
     return isGood;
-  
+
   // We disable triangulation right in ShapeSet.
   BRepTools_ShapeSet SS(false);
   SS.Add(theShape);
-  
+
   os << "DBRep_DrawableShape\n";  // for easy Draw read
   SS.Write(os);
   isGood = os.good();
@@ -3901,7 +3924,7 @@ void asiAlgo_Utils::MapTShapesAndAncestors(const TopoDS_Shape&                  
     }
     exa.Next();
   }
-  
+
   // Visit shapes not under ancestors.
   TopExp_Explorer ex(S, TS, TA);
   while ( ex.More() )

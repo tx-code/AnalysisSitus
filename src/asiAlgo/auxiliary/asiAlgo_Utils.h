@@ -499,6 +499,20 @@ namespace asiAlgo_Utils
                   double&            h_min,
                   double&            h_max);
 
+  //! Checks whether the passed face has conical support.
+  //! \param[in] face face to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsConical(const TopoDS_Face& face);
+
+  //! Checks whether the passed face has conical support.
+  //! \param[in]  face face to check.
+  //! \param[out] ax1  cone axis.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsConical(const TopoDS_Face& face,
+              gp_Ax1&            ax1);
+
   //! Checks whether the passed shape is empty. A series of nested
   //! compounds is also considered an empty shape.
   //! \param[in] shape the shape to check.
@@ -1011,7 +1025,7 @@ namespace asiAlgo_Utils
   //!
   //! \param[in]  face topological face in question.
   //! \param[out] uv   UV coordinates of the selected point.
-  //! \param[out] xyz  Cartesian coordinates of the selected point in the 
+  //! \param[out] xyz  Cartesian coordinates of the selected point in the
   //!                  modeling space.
   //!
   //! \return true in case of success, false -- otherwise.

@@ -56,6 +56,7 @@
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_RecognizeBlends.h>
 #include <asiAlgo_RecognizeCavities.h>
+#include <asiAlgo_RecognizeDrillHoles.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -2629,6 +2630,76 @@ int ENGINE_RecognizeBlends(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 }
+//-----------------------------------------------------------------------------
+
+int ENGINE_RecognizeHoles(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  /* ==============
+   *  Get prepared.
+   * ============== */
+
+  // Get part.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape        partShape = partNode->GetShape();
+  Handle(asiAlgo_AAG) G         = partNode->GetAAG();
+
+  // Read max allowed radius.
+  double r = Precision::Infinite();
+  interp->GetKeyValue<double>(argc, argv, "radius", r);
+  //
+  if ( Abs(r) < gp::Resolution() )
+    r = Precision::Infinite();
+
+  /* =========================
+   *  Recognize drilled holes.
+   * ========================= */
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Recognize cavities.
+  asiAlgo_RecognizeDrillHoles recHoles( G, true,
+                                        interp->GetProgress(),
+                                        interp->GetPlotter() );
+  //
+  if ( !recHoles.Perform(r) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Drilled holes recognition failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Recognize drilled holes")
+
+  // Get the extracted face indices.
+  const asiAlgo_Feature& resIndices = recHoles.GetResultIndices();
+
+  /* ==========
+   *  Finalize.
+   * ========== */
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          cmdEngine::cf.IsNull() ? nullptr : cmdEngine::cf->ViewerPart->PrsMgr() );
+
+  // Highlight the detected faces.
+  if ( !cmdEngine::cf.IsNull() && cmdEngine::cf->ViewerPart )
+    partApi.HighlightFaces(resIndices);
+
+  // Dump to result.
+  *interp << resIndices;
+
+  return TCL_OK;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -3754,9 +3825,17 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_RecognizeBlends);
 
   //-------------------------------------------------------------------------//
+  interp->AddCommand("recognize-holes",
+    //
+    "recognize-holes [-radius <r>]\n"
+    "\t Recognizes drilled holes.",
+    //
+    __FILE__, group, ENGINE_RecognizeHoles);
+
+  //-------------------------------------------------------------------------//
   interp->AddCommand("recognize-cavities",
     //
-    "recognize-cavities [-vol <maxSize>]\n"
+    "recognize-cavities [-size <maxSize>]\n"
     "\t Recognizes arbitrary cavities in the active part. If the '-size'\n"
     "\t key is passed, it allows to limit the size of a cavity feature\n"
     "\t being recognized. The size is computed simply as the max dimension of\n"
