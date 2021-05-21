@@ -289,7 +289,7 @@ bool asiAlgo_RecognizeDrillHoles::performInternal(const double radius)
 //-----------------------------------------------------------------------------
 
 void asiAlgo_RecognizeDrillHoles::matchConnectedComponent(const Handle(asiAlgo_AAG)& cc,
-                                                        asiAlgo_Feature&           feature)
+                                                          asiAlgo_Feature&           feature)
 {
   // TODO: NYI
 }

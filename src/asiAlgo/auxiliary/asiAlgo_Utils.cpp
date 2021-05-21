@@ -38,6 +38,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BuildCoonsSurf.h>
+#include <asiAlgo_CanRecTools.h>
 #include <asiAlgo_ClassifyPointFace.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
@@ -96,6 +97,8 @@
 #include <Geom_Line.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Geom_Parabola.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_HCurve.hxx>
 #include <GeomAPI_PointsToBSpline.hxx>
@@ -1170,6 +1173,62 @@ bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
   {
     ax = surf->Axis();
     return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
+                                     const bool                  canrec)
+{
+  gp_Lin2d dummy;
+  return IsStraightPCurve(pcu, dummy, canrec);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
+                                     gp_Lin2d&                   lin,
+                                     const bool                  canrec)
+{
+  if ( pcu.IsNull() )
+    return false;
+
+  if ( pcu->IsKind( STANDARD_TYPE(Geom2d_Line) ) )
+  {
+    lin = Handle(Geom2d_Line)::DownCast(pcu)->Lin2d();
+    return true;
+  }
+
+  if ( canrec )
+  {
+    if ( pcu->IsKind( STANDARD_TYPE(Geom2d_BSplineCurve) ) )
+    {
+      Handle(Geom2d_BSplineCurve)
+        spl = Handle(Geom2d_BSplineCurve)::DownCast(pcu);
+
+      gp_Lin2d linFit;
+      double   dev = 0.;
+      //
+      if ( asiAlgo_CanRecTools::IsLinear(spl->Poles(), 1.e-2, dev, linFit) )
+      {
+        lin = linFit;
+        return true;
+      }
+    }
+  }
+
+  if ( pcu->IsInstance( STANDARD_TYPE(Geom2d_TrimmedCurve) ) )
+  {
+    Handle(Geom2d_TrimmedCurve) tcurve = Handle(Geom2d_TrimmedCurve)::DownCast(pcu);
+    //
+    if ( tcurve->BasisCurve()->IsKind( STANDARD_TYPE(Geom2d_Line) ) )
+    {
+      lin = Handle(Geom2d_Line)::DownCast( tcurve->BasisCurve() )->Lin2d();
+      return true;
+    }
   }
 
   return false;

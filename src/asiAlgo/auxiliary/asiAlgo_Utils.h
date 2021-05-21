@@ -513,6 +513,24 @@ namespace asiAlgo_Utils
     IsConical(const TopoDS_Face& face,
               gp_Ax1&            ax1);
 
+  //! Checks if the passed pcurve is a straight line.
+  //! \param[in] pcu    pcurve to check.
+  //! \param[in] canrec whether to try canonical recognition.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
+                     const bool                  canrec);
+
+  //! Checks if the passed pcurve is a straight line.
+  //! \param[in]  pcu    pcurve to check.
+  //! \param[out] lin    straight line primitive.
+  //! \param[in]  canrec whether to try canonical recognition.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
+                     gp_Lin2d&                   lin,
+                     const bool                  canrec);
+
   //! Checks whether the passed shape is empty. A series of nested
   //! compounds is also considered an empty shape.
   //! \param[in] shape the shape to check.

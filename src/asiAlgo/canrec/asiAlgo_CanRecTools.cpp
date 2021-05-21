@@ -386,8 +386,8 @@ bool
   CLProp.CentreOfCurvature(center_onCurve);
 
 #if defined DRAW_DEBUG
-  plotter.REDRAW_CURVE("iso", iso,            Color_Blue);
-  plotter.REDRAW_POINT("C",   center_onCurve, Color_Red);
+  plotter.DRAW_CURVE(iso,            Color_Blue, "iso");
+  plotter.DRAW_POINT(center_onCurve, Color_Red,  "C");
 #endif
 
   // Axis.
@@ -399,28 +399,44 @@ bool
   ElSLib::Parameters(cyl, Pmin, uMinCyl, vMinCyl);
   ElSLib::Parameters(cyl, Pmax, uMaxCyl, vMaxCyl);
 
-  // Resolve possible ambiguity of projection on periodic surface
-  // by adjusting the min/max U values according the curve length
-  // they induce.
-  if ( uMinCyl > uMaxCyl )
+  if ( uMinCyl > M_PI )
+    uMinCyl -= 2*M_PI;
+
+  if ( uMaxCyl > M_PI )
+    uMaxCyl -= 2*M_PI;
+
+  /* Resolve possible ambiguity of projection on periodic surface
+     by adjusting the min/max U values according the curve length
+     they induce. */
+
+  // Compute the spline curve's length by Gauss integration.
+  const double
+    originalLen = GCPnts_AbscissaPoint::Length( GeomAdaptor_Curve(iso) );
+
+  // Compute the converted arc's length by angle and radius.
+  const double convLen[2] = { Abs(uMaxCyl - uMinCyl)*convRadius,
+                              Abs(2*M_PI - uMaxCyl + uMinCyl)*convRadius };
+  //
+  const double lenDev[2] = { Abs(originalLen - convLen[0]),
+                             Abs(originalLen - convLen[1]) };
+
+  if ( (lenDev[0] > toler) && (lenDev[1] > toler) )
+    return false; // Length is not well approximated.
+
+  // Check if the lengths are matching.
+  if ( lenDev[1] < lenDev[0] )
   {
-    // Compute the spline curve's length by Gauss integration.
-    const double originalLen = GCPnts_AbscissaPoint::Length( GeomAdaptor_Curve(iso) );
+    const double newUMin = uMaxCyl;
+    const double newUMax = 2*M_PI + uMinCyl;
 
-    // Compute the converted arc's length by angle and radius.
-    const double convLen = (uMinCyl - uMaxCyl)*convRadius;
-
-    // Check if the lengths are matching.
-    if ( Abs(convLen - originalLen) > Precision::Confusion() )
-    {
-      uMinCyl -= 2*M_PI;
-    }
+    uMinCyl = newUMin;
+    uMaxCyl = newUMax;
   }
 
 #if defined DRAW_DEBUG
-  plotter.REDRAW_POINT     ("PminCyl", ElSLib::Value(uMinCyl, vMinCyl, cyl),  Color_Red);
-  plotter.REDRAW_POINT     ("PmaxCyl", ElSLib::Value(uMaxCyl, vMaxCyl, cyl),  Color_Red);
-  plotter.REDRAW_VECTOR_AT ("Ax",      center_onCurve, isCurvedU ? D1v : D1u, Color_Red);
+  plotter.DRAW_POINT     (ElSLib::Value(uMinCyl, vMinCyl, cyl),  Color_Red, "PminCyl");
+  plotter.DRAW_POINT     (ElSLib::Value(uMaxCyl, vMaxCyl, cyl),  Color_Red, "PmaxCyl");
+  plotter.DRAW_VECTOR_AT (center_onCurve, isCurvedU ? D1v : D1u, Color_Red, "Ax");
 #endif
 
   return true;
