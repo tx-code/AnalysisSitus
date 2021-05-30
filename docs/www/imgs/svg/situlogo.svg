@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -9,20 +7,26 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="120mm"
-   height="45mm"
-   viewBox="0 0 425.19685 159.44882"
+   width="92.724075mm"
+   height="35.525139mm"
+   viewBox="0 0 328.54987 125.87648"
    id="svg4284"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   inkscape:export-filename="C:\Work\analysis_situs\docs\www\imgs\situlogo.png"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   inkscape:export-filename="D:\Work\AnalysisSitus\docs\www\imgs\svg\logo.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    sodipodi:docname="situlogo.svg">
   <defs
      id="defs4286">
+    <rect
+       x="23.864855"
+       y="863.41376"
+       width="400.39923"
+       height="218.76117"
+       id="rect24" />
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        inkscape:label="Greyscale"
        id="filter4886">
       <feColorMatrix
@@ -38,16 +42,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8284271"
-     inkscape:cx="230.37751"
-     inkscape:cy="73.68272"
+     inkscape:cx="168.73876"
+     inkscape:cy="68.171426"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1027"
+     inkscape:window-height="1137"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0" />
   <metadata
      id="metadata4289">
     <rdf:RDF>
@@ -56,7 +61,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -64,9 +69,9 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-892.91339)">
+     transform="translate(-50.494289,-898.08023)">
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#989898;stroke-width:0.75917053;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.51834111, 1.51834111;stroke-dashoffset:0;stroke-opacity:0.51612902"
+       style="fill:none;fill-rule:evenodd;stroke:#dcdcdc;stroke-width:0.75937504;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.27812513, 2.27812512999999983;stroke-dashoffset:0;stroke-opacity:0.51612902"
        d="m 322.63864,908.83521 49.5776,53.59223 -54.99344,51.61726"
        id="path5491"
        inkscape:connector-curvature="0"
@@ -74,8 +79,8 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot4850"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       transform="translate(-95.000002,896.91338)"><flowRegion
+       style="font-style:normal;font-weight:normal;line-height:0.01%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="translate(-88.039419,896.91338)"><flowRegion
          id="flowRegion4852"><rect
            id="rect4854"
            width="341"
@@ -83,11 +88,20 @@
            x="145"
            y="28.448822" /></flowRegion><flowPara
          id="flowPara4858"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Calibri;-inkscape-font-specification:'Calibri Bold';fill:#bcbcbc;fill-opacity:1">Analysis Situs</flowPara></flowRoot>    <flowRoot
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri Bold';fill:#f9f9f9;fill-opacity:1"><flowSpan
+   style="fill:#ffffff"
+   id="flowSpan851">A</flowSpan><flowSpan
+   style="fill:#f9f9f9;fill-opacity:0.698795"
+   id="flowSpan855">nalysis</flowSpan> <flowSpan
+   style="fill:#ffffff"
+   id="flowSpan853">S</flowSpan><flowSpan
+   style="fill:#f9f9f9;fill-opacity:0.702811"
+   id="flowSpan869">itus</flowSpan></flowPara></flowRoot>
+    <flowRoot
        xml:space="preserve"
        id="flowRoot4850-3"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       transform="translate(-52.267513,948.24182)"><flowRegion
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:0.01%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="translate(-79.593421,948.24182)"><flowRegion
          id="flowRegion4852-8"><rect
            id="rect4854-4"
            width="341"
@@ -95,35 +109,40 @@
            x="145"
            y="28.448822" /></flowRegion><flowPara
          id="flowPara4858-8"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.00000191px;font-family:Calibri;-inkscape-font-specification:Calibri;fill:#a3a3a3;fill-opacity:1">debug your BREP</flowPara></flowRoot>    <path
-       style="fill:none;fill-rule:evenodd;stroke:#979797;stroke-width:1.51834106;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:Calibri;fill:#f9f9f9;fill-opacity:1">We speak CAD language here</flowPara></flowRoot>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#f0f0f0;stroke-width:1.51834;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 316.54231,1013.7473 c 30.43541,-28.36387 44.05838,-64.26749 5.8505,-105.07487"
        id="path5442"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <rect
-       style="opacity:0.706;fill:none;fill-opacity:1;stroke:#979797;stroke-width:1.51834106;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:#ffffff;fill-opacity:0.60240966;stroke:#f0f0f0;stroke-width:1.51834;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect5444-3"
        width="8.9583874"
        height="8.9583874"
        x="-468.58817"
        y="952.56042"
-       transform="matrix(0.73156517,-0.68177152,0.68177152,0.73156517,0,0)" />
+       transform="rotate(-42.982231)" />
     <rect
-       style="opacity:0.706;fill:none;fill-opacity:1;stroke:#979797;stroke-width:1.51834106;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:#ffffff;fill-opacity:0.60240966;stroke:#f0f0f0;stroke-width:1.51834;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect5444-7"
        width="8.9583874"
        height="8.9583874"
        x="-388.33438"
        y="875.52753"
-       transform="matrix(0.73156517,-0.68177152,0.68177152,0.73156517,0,0)" />
+       transform="rotate(-42.982231)" />
     <rect
-       style="opacity:0.706;fill:none;fill-opacity:1;stroke:#979797;stroke-width:1.51834106;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:#ffffff;fill-opacity:0.60240966;stroke:#f0f0f0;stroke-width:1.51834;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect5444-7-2"
        width="8.9583874"
        height="8.9583874"
        x="-388.87115"
        y="953.09729"
-       transform="matrix(0.73156517,-0.68177152,0.68177152,0.73156517,0,0)" />
+       transform="rotate(-42.982231)" />
+    <text
+       xml:space="preserve"
+       id="text22"
+       style="font-style:normal;font-weight:normal;font-size:37.5px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect24);fill:#000000;fill-opacity:1;stroke:none;" />
   </g>
 </svg>

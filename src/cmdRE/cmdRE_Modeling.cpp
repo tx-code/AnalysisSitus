@@ -551,9 +551,9 @@ int RE_CutWithPlane(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int RE_ApproxPoints(const Handle(asiTcl_Interp)& interp,
-                    int                          argc,
-                    const char**                 argv)
+int RE_ApproxCurve(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
 {
   if ( argc < 4 )
   {
@@ -1588,11 +1588,6 @@ int RE_ApproxSurf(const Handle(asiTcl_Interp)& interp,
                   const char**                 argv)
 {
 #if defined USE_MOBIUS
-  if (argc != 7 && argc != 8 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   // Find Points Node by name.
   Handle(asiData_IVPointSetNode)
     pointsNode = Handle(asiData_IVPointSetNode)::DownCast( interp->GetModel()->FindNodeByName(argv[2]) );
@@ -2201,12 +2196,12 @@ void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, RE_CutWithPlane);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("re-approx-points",
+  interp->AddCommand("re-approx-curve",
     //
-    "re-approx-points resCurve points prec [-closed]\n"
+    "re-approx-curve <resCurve> <points> <prec> [-closed]\n"
     "\t Attempts to approximate the given point cloud with a curve.",
     //
-    __FILE__, group, RE_ApproxPoints);
+    __FILE__, group, RE_ApproxCurve);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("re-skin-surface",

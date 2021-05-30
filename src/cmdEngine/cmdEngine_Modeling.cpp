@@ -869,9 +869,9 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_InterpolatePoints(const Handle(asiTcl_Interp)& interp,
-                             int                          argc,
-                             const char**                 argv)
+int ENGINE_InterpolateCurve(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
 {
   // Get points to interpolate.
   Handle(asiAlgo_BaseCloud<double>) pts = new asiAlgo_BaseCloud<double>;
@@ -1917,12 +1917,12 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_MakeSurf);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("interpolate-points",
+  interp->AddCommand("interpolate-curve",
     //
-    "interpolate-points <curveName> -points <pointsName> -degree <deg>\n"
+    "interpolate-curve <curveName> -points <pointsName> -degree <deg>\n"
     "\t Creates a curve from the passed point series by interpolation.",
     //
-    __FILE__, group, ENGINE_InterpolatePoints);
+    __FILE__, group, ENGINE_InterpolateCurve);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("bop-split",
