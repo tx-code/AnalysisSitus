@@ -74,7 +74,7 @@ asiUI_DatumDelegate::asiUI_DatumDelegate(QWidget* theParent)
   if ( aSession )
     aResMgr = aSession->resourceMgr();*/
 
-  m_Browse = /*aResMgr ? 
+  m_Browse = /*aResMgr ?
     aResMgr->loadPixmap( "asiUI", tr("ICON_BROWSE") ) :*/ QPixmap(asiUI_BrowsePixmap);
 }
 
@@ -97,7 +97,7 @@ void asiUI_DatumDelegate::SetRowMargin(const int theMargin)
 //! \param theParent [in] - parent widget for editor.
 //! \param theOption [in] - style options for widget.
 //! \param theIndex [in] - the model index for the item's cell.
-QWidget* asiUI_DatumDelegate::createEditor(QWidget* theParent, 
+QWidget* asiUI_DatumDelegate::createEditor(QWidget* theParent,
                                             const QStyleOptionViewItem& theOption,
                                             const QModelIndex &theIndex) const
 {
@@ -199,7 +199,7 @@ void asiUI_DatumDelegate::drawCheck(QPainter* thePainter,
   aPaintOpt.rect = theRect;
   aPaintOpt.state = aPaintOpt.state & ~QStyle::State_HasFocus;
 
-  switch (theState) 
+  switch (theState)
   {
     case Qt::Unchecked:
       aPaintOpt.state |= QStyle::State_Off;
@@ -226,7 +226,7 @@ void asiUI_DatumDelegate::drawBackground(QPainter* thePainter,
   if ( theOption.showDecorationSelected && (theOption.state & QStyle::State_Selected) )
   {
     QPalette::ColorGroup aGround =
-      theOption.state & QStyle::State_Enabled 
+      theOption.state & QStyle::State_Enabled
         ? QPalette::Normal
         : QPalette::Disabled;
 
@@ -238,8 +238,8 @@ void asiUI_DatumDelegate::drawBackground(QPainter* thePainter,
     const QBrush& aBrush = theOption.palette.brush(aGround, QPalette::Highlight);
 
     thePainter->fillRect(theOption.rect, aBrush);
-  } 
-  else 
+  }
+  else
   {
     QVariant aValue = theIndex.data(Qt::BackgroundRole);
     if ( aValue.canConvert(QMetaType::QBrush) )
@@ -328,10 +328,14 @@ void asiUI_DatumDelegate::paint(QPainter* thePainter,
    *  Paint path browser item
    * ========================= */
 
-  if ( asiUI_DatumPathItem* aPathItem = isPathItem(theIndex) )
+  if ( isPathItem(theIndex) )
   {
     // draw short path name...
     QString aString = theIndex.data(Qt::DisplayRole).toString();
+    //
+    if ( aString.isEmpty() )
+      aString = theIndex.data(Qt::EditRole).toString();
+
     QStringList aSeparatedList =
       aString.split( QRegExp("(\\\\|/)") );
     QString aShortPath = aSeparatedList.last();
@@ -344,7 +348,7 @@ void asiUI_DatumDelegate::paint(QPainter* thePainter,
   }
 
   /* ============================
-   *  Paint custom selector item 
+   *  Paint custom selector item
    * ============================ */
 
   if ( asiUI_DatumCustomSelector* aSelectorItem = isCustomSelector(theIndex) )
@@ -429,7 +433,7 @@ void asiUI_DatumDelegate::setModelData(QWidget* theEditor,
 //! \param theOption [in] cell options.
 //! \param theIndex [in] index in view's model.
 QSize asiUI_DatumDelegate::sizeHint(const QStyleOptionViewItem& theOption,
-                                     const QModelIndex& theIndex) const
+                                    const QModelIndex& theIndex) const
 {
   QSize aSize = QStyledItemDelegate::sizeHint(theOption, theIndex);
   aSize.setHeight( qMax(aSize.height(), MIN_ITEM_HEIGHT) + m_iRowMargin );
@@ -444,12 +448,12 @@ QSize asiUI_DatumDelegate::sizeHint(const QStyleOptionViewItem& theOption,
 //! \param theIndex [in] the item model index.
 //! \return true if event processed.
 bool asiUI_DatumDelegate::editorEvent(QEvent* theEvent,
-                                       QAbstractItemModel* theModel,
-                                       const QStyleOptionViewItem& theOption,
-                                       const QModelIndex& theIndex)
+                                      QAbstractItemModel* theModel,
+                                      const QStyleOptionViewItem& theOption,
+                                      const QModelIndex& theIndex)
 {
   /* =================================
-   *  Handle events for generic items 
+   *  Handle events for generic items
    * ================================= */
 
   if ( asiUI_DatumPathItem* aItem = isPathItem(theIndex) )
@@ -481,7 +485,7 @@ bool asiUI_DatumDelegate::eventFilter(QObject* theObject, QEvent* theEvent)
   {
     return QStyledItemDelegate::eventFilter(theObject, theEvent);
   }
-  
+
   if (theEvent->type() == QEvent::KeyPress)
   {
     QKeyEvent* aKeyEvent = static_cast<QKeyEvent*>(theEvent);
@@ -503,7 +507,7 @@ bool asiUI_DatumDelegate::eventFilter(QObject* theObject, QEvent* theEvent)
         break;
     }
   }
-  
+
   return QStyledItemDelegate::eventFilter(theObject, theEvent);
 }
 
@@ -526,9 +530,9 @@ void asiUI_DatumDelegate::initStyleOption(QStyleOptionViewItem *theOption,
 }
 
 //! Cast widget to a datum item editor.
-//! \return casted editor or a null pointer if the widget is 
+//! \return casted editor or a null pointer if the widget is
 //!         of another type.
-asiUI_DatumItemEditor* 
+asiUI_DatumItemEditor*
   asiUI_DatumDelegate::castDatumEditor(QWidget* theWidget) const
 {
   return qobject_cast<asiUI_DatumItemEditor*>(theWidget);
@@ -622,11 +626,11 @@ bool asiUI_DatumDelegate::selectorDatumEvent(
       return false;
     }
 
-    QToolButton* aButton = theItem->AccessButton();
+    /*QToolButton* aButton = theItem->AccessButton();*/
 
     QRect aBorderRect;
-    QRect aPixRect = this->getIconRect(
-      theOption, aButton->iconSize(), aBorderRect);
+    /*QRect aPixRect = this->getIconRect(
+      theOption, aButton->iconSize(), aBorderRect);*/
 
     // fall back if no click on button
     if ( !aBorderRect.contains( aMouseEv->pos() ) )
@@ -687,9 +691,9 @@ QRect asiUI_DatumDelegate::getIconRect(const QStyleOptionViewItem& theOption,
   theBorderRect.moveBottomRight(
     QPoint( aRight - aBorderMargin, aBottom - aBorderMargin ) );
 
-  // align result to bottom right 
+  // align result to bottom right
   QRect aResultRect( QPoint(0, 0), aIconSize );
-  aResultRect.moveBottomRight( 
+  aResultRect.moveBottomRight(
     QPoint( aRight - aPixmapMargin, aBottom - aPixmapMargin) );
 
   return aResultRect;

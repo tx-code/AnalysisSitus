@@ -66,7 +66,7 @@ asiUI_DatumItemEditor*
 {
   if ( m_pTreeView.isNull() )
     return NULL;
-  
+
   asiUI_Datum* aDatum = m_pTreeView->GetItem(theIndex)->GetDatum();
   if ( !aDatum )
     return NULL;

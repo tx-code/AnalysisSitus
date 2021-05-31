@@ -70,7 +70,7 @@ asiUI_DatumPathItem::asiUI_DatumPathItem(const QString& theDictId,
   connect( m_pDatumImpl, SIGNAL( ReturnPressed() ), this, SIGNAL( ReturnPressed() ) );
   connect( m_pDatumImpl, SIGNAL( EditingFinished() ), this, SIGNAL( EditingFinished() ) );
 
-  Handle(asiAlgo_DictionaryItem) anItem = 
+  Handle(asiAlgo_DictionaryItem) anItem =
     asiAlgo_Dictionary::GetDictionaryItem( QStr2AsciiStr(theDictId) );
 
   if ( anItem.IsNull() )
@@ -112,7 +112,7 @@ asiUI_DatumPathItem::asiUI_DatumPathItem(const QString& theDictId,
     case DirPath  : aQtxType = Qtx::PT_Directory; break;
   }
 
-  m_pDatumImpl->SetPathCompleter( Qtx::pathCompleter(aQtxType, m_Filter) ); 
+  m_pDatumImpl->SetPathCompleter( Qtx::pathCompleter(aQtxType, m_Filter) );
 }
 
 //! Get type of path.
@@ -150,7 +150,7 @@ void asiUI_DatumPathItem::SetPathType(const PathType thePathType)
 }
 
 //! Set file extension filter string.
-//! The filter format should be given in qt style 
+//! The filter format should be given in qt style
 //! (ex. "IGES files (*.igs *.iges);;All files (*.*)" )
 //! \param theFilter [in] extension filter string.
 void asiUI_DatumPathItem::SetFilter(const QString& theFilter)
@@ -195,6 +195,7 @@ QString asiUI_DatumPathItem::Browse()
 
   aDialog.setNameFilter( GetFilter() );
   aDialog.setWindowTitle( GetTitle() );
+  aDialog.setOption(QFileDialog::DontUseNativeDialog);
 
   if ( aDialog.exec() != QFileDialog::Accepted )
     return QString();
@@ -257,7 +258,7 @@ QString asiUI_DatumPathItem::PathEditImpl::getString() const
 }
 
 //! Create validator according to the datum type of value.
-//! \param theConsiderLimits defines whether the value limits should 
+//! \param theConsiderLimits defines whether the value limits should
 //! be considered during valiation or not.
 QValidator* asiUI_DatumPathItem::PathEditImpl::validator(const bool theConsiderLimits) const
 {
@@ -307,7 +308,7 @@ QWidget* asiUI_DatumPathItem::PathEditImpl::createControl(QWidget* theParent)
 
   connect( anEditor, SIGNAL( returnPressed() ), this, SIGNAL( ReturnPressed() ) );
   connect( anEditor, SIGNAL( editingFinished() ), this, SIGNAL( EditingFinished() ) );
-  connect( anEditor, SIGNAL( textChanged( const QString& ) ), 
+  connect( anEditor, SIGNAL( textChanged( const QString& ) ),
     this, SLOT( onTextChanged( const QString& ) ) );
 
   if ( m_PathCompleter )

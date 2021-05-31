@@ -129,7 +129,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->InitParameter(PID_AutoAAG,            "Auto-construct AAG", "",               ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupImportExport,  "Import/export",      "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_FilenameIn,         "Input filename",     "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_FilenameIn,         "Input filename",     "FileSelector",   ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupTrsf,          "Transformation",     "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TrsfTx,             "Tx",                 "Part_TX",        ParameterFlag_IsVisible, true);

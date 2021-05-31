@@ -109,6 +109,13 @@
     <description>Directory selector</description>
   </datum>
 
+  <!-- Selector for files -->
+  <datum id="FileSelector" format="" label="">
+    <domain type="String" />
+    <ui widget="OpenFilePath" widgetParams="title=Select file..." />
+    <description>File selector</description>
+  </datum>
+
   <datum id="Part_TX" format="%0.3g" label="X">
     <dimensions>
       <dimension name="extra" value="mm" />
