@@ -52,8 +52,9 @@
 // asiEngine includes
 #include <asiEngine_Model.h>
 
-// asiUI includes
-#include <asiUI_CommonFacilities.h>
+//-----------------------------------------------------------------------------
+
+class asiUI_CommonFacilities;
 
 //-----------------------------------------------------------------------------
 

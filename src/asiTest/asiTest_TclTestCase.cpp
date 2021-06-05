@@ -34,6 +34,9 @@
 // asiTest includes
 #include <asiTest_CommonFacilities.h>
 
+// asiTcl includes
+#include <asiTcl_Interp.h>
+
 // OpenCascade includes
 #include <OSD_Directory.hxx>
 #include <OSD_FileIterator.hxx>

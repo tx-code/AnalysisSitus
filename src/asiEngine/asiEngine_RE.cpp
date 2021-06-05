@@ -950,6 +950,10 @@ bool asiEngine_RE::FillPatchCoons(const std::vector<Handle(asiData_ReCoedgeNode)
   surf = cascade::GetOpenCascadeBSurface(mobSurf);
   return true;
 #else
+  (void) coedges;
+  (void) minNumKnots;
+  (void) surf;
+
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return false;
 #endif

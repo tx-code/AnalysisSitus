@@ -149,6 +149,7 @@ int asiEngine_BuildEdgeFunc::execute(const Handle(ActAPI_HParameterList)& inputs
 
   return 0; // Success.
 #else
+  (void) inputs;
   m_progress.SendLogMessage( LogErr(Normal) << "Mobius is not available." );
   return 1; // Error.
 #endif

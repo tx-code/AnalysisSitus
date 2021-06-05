@@ -254,6 +254,11 @@ bool
 
   return true; // Success.
 #else
+  (void) curveLeft;
+  (void) sameSenseLeft;
+  (void) curveRight;
+  (void) sameSenseRight;
+
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return false;
 #endif

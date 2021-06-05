@@ -33,6 +33,10 @@
 
 // asiTcl includes
 #include <asiTcl_PluginMacro.h>
+
+// asiUI includes
+#include <asiUI_CommonFacilities.h>
+
 //-----------------------------------------------------------------------------
 
 Handle(asiEngine_Model)        cmdAsm::model = nullptr;

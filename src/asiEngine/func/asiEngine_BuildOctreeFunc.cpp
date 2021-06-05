@@ -293,6 +293,9 @@ int asiEngine_BuildOctreeFunc::execute(const Handle(ActAPI_HParameterList)& inpu
 
   return 0; // Success.
 #else
+  (void) inputs;
+  (void) outputs;
+
   return 1;
 #endif
 }

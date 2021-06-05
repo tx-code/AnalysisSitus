@@ -155,7 +155,7 @@ void exe_CommandServer::initSocket()
 
   if ( m_pSocket->state() != m_pSocket->BoundState )
   {
-    m_bReady = m_pSocket->bind(m_hostAddr, m_iPort);
+    m_bReady = m_pSocket->bind( m_hostAddr, (quint16) (m_iPort) );
 
     if ( m_bReady )
       std::cout << "Socket is ready." << std::endl;

@@ -32,6 +32,7 @@
 #include <asiTest_RecognizeBlends.h>
 
 // asiAlgo includes
+#include <asiAlgo_AAG.h>
 #include <asiAlgo_RecognizeBlends.h>
 
 #undef FILE_DEBUG

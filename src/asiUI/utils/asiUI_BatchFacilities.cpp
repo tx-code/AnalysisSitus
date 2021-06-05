@@ -35,6 +35,9 @@
 #include <asiUI_IV.h>
 #include <asiUI_Logger.h>
 
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
 //-----------------------------------------------------------------------------
 
 asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initBatch,

@@ -359,6 +359,10 @@ void asiVisu_OctreeSource::samplePoints(void*                       pNode,
     }
   }
 #else
+  (void) pPts;
+  (void) pNorms;
+  (void) scalars;
+
   vtkErrorMacro( << "Mobius SVO data structure is not available." );
 #endif
 }
@@ -439,6 +443,8 @@ void asiVisu_OctreeSource::addVoxels(void*                pNode,
     }
   }
 #else
+  (void) pData;
+
   vtkErrorMacro( << "Mobius SVO data structure is not available." );
 #endif
 }

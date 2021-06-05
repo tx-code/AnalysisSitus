@@ -37,6 +37,8 @@
 // asiTestEngine includes
 #include <asiTestEngine_TestCase.h>
 
+class asiAlgo_AAG;
+
 //! Test functions for attributed adjacency graphs (AAG).
 class asiTest_AAG : public asiTestEngine_TestCase
 {

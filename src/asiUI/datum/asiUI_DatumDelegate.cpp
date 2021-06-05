@@ -613,7 +613,7 @@ bool asiUI_DatumDelegate::selectorDatumEvent(
                                           QEvent* theEvent,
                                           QAbstractItemModel* theModel,
                                           const QStyleOptionViewItem& theOption,
-                                          asiUI_DatumCustomSelector* theItem,
+                                          asiUI_DatumCustomSelector* /*theItem*/,
                                           const QModelIndex& theIndex)
 {
   if ( theEvent->type() == QEvent::MouseButtonPress ||

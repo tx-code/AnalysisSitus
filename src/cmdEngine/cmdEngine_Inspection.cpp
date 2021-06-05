@@ -398,14 +398,14 @@ int ENGINE_GetSummary(const Handle(asiTcl_Interp)& interp,
   // Set Tcl variables.
   int varIdx = 0;
   //
-  interp->SetVar<int>(argv[++varIdx], numCompounds);
-  interp->SetVar<int>(argv[++varIdx], numCompSolids);
-  interp->SetVar<int>(argv[++varIdx], numSolids);
-  interp->SetVar<int>(argv[++varIdx], numShells);
-  interp->SetVar<int>(argv[++varIdx], numFaces);
-  interp->SetVar<int>(argv[++varIdx], numWires);
-  interp->SetVar<int>(argv[++varIdx], numEdges);
-  interp->SetVar<int>(argv[++varIdx], numVertices);
+  interp->SetVarFundamental<int>(argv[++varIdx], numCompounds);
+  interp->SetVarFundamental<int>(argv[++varIdx], numCompSolids);
+  interp->SetVarFundamental<int>(argv[++varIdx], numSolids);
+  interp->SetVarFundamental<int>(argv[++varIdx], numShells);
+  interp->SetVarFundamental<int>(argv[++varIdx], numFaces);
+  interp->SetVarFundamental<int>(argv[++varIdx], numWires);
+  interp->SetVarFundamental<int>(argv[++varIdx], numEdges);
+  interp->SetVarFundamental<int>(argv[++varIdx], numVertices);
 
   return TCL_OK;
 }

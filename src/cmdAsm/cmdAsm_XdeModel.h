@@ -58,6 +58,10 @@ public:
   cmdAsm_EXPORT
     cmdAsm_XdeModel(const Handle(asiAsm::xde::Doc)& doc = nullptr);
 
+  //! Dtor.
+  cmdAsm_EXPORT virtual
+    ~cmdAsm_XdeModel();
+
 public:
 
   //! Sets XDE document.

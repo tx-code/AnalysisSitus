@@ -42,6 +42,12 @@ cmdAsm_XdeModel::cmdAsm_XdeModel(const Handle(asiAsm::xde::Doc)& doc)
 
 //-----------------------------------------------------------------------------
 
+cmdAsm_XdeModel::~cmdAsm_XdeModel()
+{
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm_XdeModel::SetDocument(const Handle(asiAsm::xde::Doc)& doc)
 {
   m_doc = doc;

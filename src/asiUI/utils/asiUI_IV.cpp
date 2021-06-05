@@ -31,6 +31,13 @@
 // Own include
 #include <asiUI_IV.h>
 
+
+// asiUI includes
+#include <asiUI_ObjectBrowser.h>
+
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
 // asiEngine includes
 #include <asiEngine_IV.h>
 #include <asiEngine_Part.h>
@@ -56,6 +63,90 @@
 #include <vtkMapper.h>
 #include <vtkProperty.h>
 #pragma warning(pop)
+
+//---------------------------------------------------------------------------//
+
+asiUI_IV::asiUI_IV(const Handle(asiEngine_Model)&             model,
+                   const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
+                   const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
+                   asiUI_ObjectBrowser*                       pBrowser)
+: ActAPI_IPlotter (),
+  m_bBrowserOn    (true),
+  m_bVisuOn       (true),
+  m_bRepaintOn    (true),
+  m_bAsPart       (false),
+  m_model         (model),
+  m_prsMgr3d      (prsMgr3d),
+  m_prsMgr2d      (prsMgr2d),
+  m_pBrowser      (pBrowser)
+{}
+
+//---------------------------------------------------------------------------//
+
+asiUI_IV::~asiUI_IV()
+{}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::Init(const Handle(asiEngine_Model)&             model,
+                    const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
+                    const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
+                    asiUI_ObjectBrowser*                       pBrowser)
+{
+  m_model    = model;
+  m_prsMgr3d = prsMgr3d;
+  m_prsMgr2d = prsMgr2d;
+  m_pBrowser = pBrowser;
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::SetPrsMgr3d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr)
+{
+  m_prsMgr3d = prsMgr;
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::SetPrsMgr2d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr)
+{
+  m_prsMgr2d = prsMgr;
+}
+
+//---------------------------------------------------------------------------//
+
+const vtkSmartPointer<asiVisu_PrsManager>& asiUI_IV::GetPrsMgr3d() const
+{
+  return m_prsMgr3d;
+}
+
+//---------------------------------------------------------------------------//
+
+const vtkSmartPointer<asiVisu_PrsManager>& asiUI_IV::GetPrsMgr2d() const
+{
+  return m_prsMgr2d;
+}
+
+//---------------------------------------------------------------------------//
+
+const Handle(ActAPI_INode)& asiUI_IV::GetLastNode() const
+{
+  return m_lastObj;
+}
+
+//---------------------------------------------------------------------------//
+
+const Handle(asiEngine_Model)& asiUI_IV::GetModel() const
+{
+  return m_model;
+}
+
+//---------------------------------------------------------------------------//
+
+asiUI_ObjectBrowser* asiUI_IV::GetObjectBrowser() const
+{
+  return m_pBrowser;
+}
 
 //---------------------------------------------------------------------------//
 

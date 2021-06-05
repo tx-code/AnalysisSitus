@@ -159,6 +159,9 @@ void Graph::CalculateSummary(int& numRoots,
 
 void Graph::buildGraph()
 {
+  if ( m_model->GetDocument().IsNull() )
+    return;
+
   // We start from those shapes which are "free" in terms of XDE.
   TDF_LabelSequence roots;
   //

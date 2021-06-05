@@ -32,10 +32,7 @@
 #define asiUI_IV_h
 
 // asiUI includes
-#include <asiUI_ObjectBrowser.h>
-
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
+#include <asiUI.h>
 
 // asiEngine includes
 #include <asiEngine_Model.h>
@@ -56,6 +53,12 @@
 // STD includes
 #include <vector>
 
+// VTK includes
+#include <vtkSmartPointer.h>
+
+class asiUI_ObjectBrowser;
+class asiVisu_PrsManager;
+
 //-----------------------------------------------------------------------------
 
 //! Interface for Imperative Viewer. A particular algorithm may benefit
@@ -71,24 +74,15 @@ public:
 public:
 
   //! Constructor.
-  asiUI_IV(const Handle(asiEngine_Model)&             model,
-           const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
-           const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
-           asiUI_ObjectBrowser*                       pBrowser)
-  //
-  : ActAPI_IPlotter (),
-    m_bBrowserOn    (true),
-    m_bVisuOn       (true),
-    m_bRepaintOn    (true),
-    m_bAsPart       (false),
-    m_model         (model),
-    m_prsMgr3d      (prsMgr3d),
-    m_prsMgr2d      (prsMgr2d),
-    m_pBrowser      (pBrowser)
-  {}
+  asiUI_EXPORT
+    asiUI_IV(const Handle(asiEngine_Model)&             model,
+             const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
+             const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
+             asiUI_ObjectBrowser*                       pBrowser);
 
   //! Destructor.
-  virtual ~asiUI_IV() {}
+  asiUI_EXPORT virtual
+    ~asiUI_IV();
 
 // COMMON:
 public:
@@ -519,60 +513,41 @@ public:
   //! \param prsMgr3d [in] 3D presentation manager.
   //! \param prsMgr2d [in] 2D presentation manager.
   //! \param pBrowser [in] Object browser instance.
-  void Init(const Handle(asiEngine_Model)&             model,
-            const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
-            const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
-            asiUI_ObjectBrowser*                       pBrowser)
-  {
-    m_model    = model;
-    m_prsMgr3d = prsMgr3d;
-    m_prsMgr2d = prsMgr2d;
-    m_pBrowser = pBrowser;
-  }
+  asiUI_EXPORT void
+    Init(const Handle(asiEngine_Model)&             model,
+         const vtkSmartPointer<asiVisu_PrsManager>& prsMgr3d,
+         const vtkSmartPointer<asiVisu_PrsManager>& prsMgr2d,
+         asiUI_ObjectBrowser*                       pBrowser);
 
   //! Sets presentation manager for 3D visualization.
   //! \param prsMgr [in] presentation manager to set.
-  void SetPrsMgr3d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr)
-  {
-    m_prsMgr3d = prsMgr;
-  }
+  asiUI_EXPORT void
+    SetPrsMgr3d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr);
 
   //! Sets presentation manager for 3D visualization.
   //! \param prsMgr [in] presentation manager to set.
-  void SetPrsMgr2d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr)
-  {
-    m_prsMgr2d = prsMgr;
-  }
+  asiUI_EXPORT void
+    SetPrsMgr2d(const vtkSmartPointer<asiVisu_PrsManager>& prsMgr);
 
   //! \return presentation manager for 3D visualization.
-  const vtkSmartPointer<asiVisu_PrsManager>& GetPrsMgr3d() const
-  {
-    return m_prsMgr3d;
-  }
+  asiUI_EXPORT const vtkSmartPointer<asiVisu_PrsManager>&
+    GetPrsMgr3d() const;
 
   //! \return presentation manager for 2D visualization.
-  const vtkSmartPointer<asiVisu_PrsManager>& GetPrsMgr2d() const
-  {
-    return m_prsMgr2d;
-  }
+  asiUI_EXPORT const vtkSmartPointer<asiVisu_PrsManager>&
+    GetPrsMgr2d() const;
 
   //! \return last created Node.
-  const Handle(ActAPI_INode)& GetLastNode() const
-  {
-    return m_lastObj;
-  }
+  asiUI_EXPORT const Handle(ActAPI_INode)&
+    GetLastNode() const;
 
   //! \return Data Model instance.
-  const Handle(asiEngine_Model)& GetModel() const
-  {
-    return m_model;
-  }
+  asiUI_EXPORT const Handle(asiEngine_Model)&
+    GetModel() const;
 
   //! \return object browser.
-  asiUI_ObjectBrowser* GetObjectBrowser() const
-  {
-    return m_pBrowser;
-  }
+  asiUI_EXPORT asiUI_ObjectBrowser*
+    GetObjectBrowser() const;
 
 protected:
 

@@ -396,9 +396,12 @@ public:
   //! \param[in] name variable name.
   //! \param[in] val  variable value.
   template<typename T>
-  void SetVar(const char* name,
-              const T     val)
+  void SetVarFundamental(const char* name,
+                         const T     val)
   {
+    if ( !std::is_fundamental<T>::value )
+      throw std::domain_error("Invalid function call: can be used for primitive types only.");
+
     std::string valStr = asiAlgo_Utils::Str::ToString<T>(val);
     this->SetVar( name, valStr.c_str() );
   }

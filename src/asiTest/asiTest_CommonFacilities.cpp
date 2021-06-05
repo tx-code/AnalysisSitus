@@ -31,9 +31,60 @@
 // Own include
 #include <asiTest_CommonFacilities.h>
 
+// asiEngine includes
+#include <asiEngine_Model.h>
+
+// asiTcl includes
+#include <asiTcl_Interp.h>
+
+// asiUI includes
+#include <asiUI_IV.h>
+
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
+// VTK includes
+#include <vtkSmartPointer.h>
+
+//-----------------------------------------------------------------------------
+
 Handle(asiTest_CommonFacilities) asiTest_CommonFacilities::Instance()
 {
   static Handle(asiTest_CommonFacilities) ref = new asiTest_CommonFacilities;
 
   return ref;
+}
+
+//-----------------------------------------------------------------------------
+
+asiTest_CommonFacilities::asiTest_CommonFacilities()
+//
+: Standard_Transient()
+{
+  // Create Data Model.
+  this->Model = new asiEngine_Model;
+  if ( !Model->NewEmpty() )
+  {
+    Standard_ProgramError::Raise("Cannot create Data Model");
+  }
+  //
+  this->Model->DisableTransactions();
+  {
+    this->Model->Populate();
+  }
+  this->Model->EnableTransactions();
+
+  // Initialize progress notifier.
+  this->Progress = ActAPI_ProgressEntry( new asiTest_ProgressNotifier(std::cout) );
+
+  // Initialize plotter as we may want at least to work with the data
+  // objects created by the plotter if not with their presentations.
+  this->Plotter = ActAPI_PlotterEntry( new asiUI_IV(this->Model, NULL, NULL, NULL) );
+
+  // Construct the interpreter
+  this->Interp = new asiTcl_Interp;
+  this->Interp->Init(false);
+  this->Interp->SetModel(this->Model);
+  this->Interp->SetProgress(this->Progress);
+  this->Interp->SetPlotter(this->Plotter);
 }
