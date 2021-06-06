@@ -101,6 +101,7 @@
 #pragma warning(push, 0)
 #include <QDir>
 #include <QSplashScreen>
+#include <QSurfaceFormat>
 #include <QTextStream>
 #include <QTimer>
 #pragma warning(pop)

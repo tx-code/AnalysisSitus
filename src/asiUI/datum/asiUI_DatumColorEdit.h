@@ -67,7 +67,7 @@ class asiUI_EXPORT asiUI_DatumColorEdit : public asiUI_Datum
 
 public:
 
-  asiUI_DatumColorEdit(const QString& theDicID, 
+  asiUI_DatumColorEdit(const QString& theDicID,
                         QWidget*       theParent = 0,
                         const int      theDatumFlags = All);
 
@@ -149,7 +149,7 @@ protected:
       ActAPI_Color
         color = asiVisu_Utils::StringToColor( string.toUtf8().constData() );
 
-      pButton->setColor( QColor( color.Red(), color.Green(), color.Blue() ) );
+      pButton->setColor( QColor::fromRgbF( color.Red(), color.Green(), color.Blue() ) );
     }
   }
 

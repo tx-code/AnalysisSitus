@@ -252,7 +252,7 @@ bool asiVisu_Utils::AdjustCamera(vtkRenderer*       theRenderer,
 
     // Find size of the viewport
     int* pViewPortSize = theRenderer->GetSize();
-    if ( pViewPortSize[0] < pViewPortSize[1] ) 
+    if ( pViewPortSize[0] < pViewPortSize[1] )
       width *= double(pViewPortSize[1]) / double(pViewPortSize[0]);
 
     if ( doScaling )
@@ -363,7 +363,7 @@ void asiVisu_Utils::CameraOnBack(vtkRenderer* renderer)
 //! \param[in] renderer renderer instance.
 void asiVisu_Utils::CameraOnLeft(vtkRenderer* renderer)
 {
-  vtkCamera* activeCamera = renderer->GetActiveCamera(); 
+  vtkCamera* activeCamera = renderer->GetActiveCamera();
   activeCamera->SetPosition   (0, -1, 0);
   activeCamera->SetViewUp     (0,  0, 1);
   activeCamera->SetFocalPoint (0,  0, 0);
@@ -955,5 +955,5 @@ ActAPI_Color asiVisu_Utils::StringToColor(const std::string& string)
   if ( isOk )
     return IntToColor(value);
 
-  return ActAPI_Color();
+  return ActAPI_Color(Quantity_NOC_WHITE); // Default color for undefined case.
 }

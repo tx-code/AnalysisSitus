@@ -139,7 +139,7 @@ protected:
     ActAPI_Color
       color = asiVisu_Utils::StringToColor( str.toUtf8().constData() );
 
-    m_EditColor = QColor( color.Red(), color.Green(), color.Blue() );
+    m_EditColor = QColor::fromRgbF( color.Red(), color.Green(), color.Blue() );
 
     QColorDialog* aDialog = colorDialog();
     if ( aDialog )
