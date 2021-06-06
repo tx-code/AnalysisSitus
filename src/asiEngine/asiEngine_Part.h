@@ -201,6 +201,11 @@ public:
            const Handle(asiAlgo_History)& history = nullptr,
            const bool                     doResetTessParams = false);
 
+  //! Stores the passed AAG in the project tree.
+  //! \param[in] aag AAG instance to store.
+  asiEngine_EXPORT void
+    SetAAG(const Handle(asiAlgo_AAG)& aag);
+
   asiEngine_EXPORT bool
     HasNaming() const;
 

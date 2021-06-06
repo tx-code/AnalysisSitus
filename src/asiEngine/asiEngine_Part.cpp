@@ -685,6 +685,16 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Part::SetAAG(const Handle(asiAlgo_AAG)& aag)
+{
+  // Store AAG in the corresponding Parameter.
+  Handle(asiData_PartNode) partNode = m_model->GetPartNode();
+  //
+  Handle(asiData_AAGParameter)::DownCast( partNode->Parameter(asiData_PartNode::PID_AAG) )->SetAAG(aag);
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiEngine_Part::HasNaming() const
 {
   // Get Part Node.
