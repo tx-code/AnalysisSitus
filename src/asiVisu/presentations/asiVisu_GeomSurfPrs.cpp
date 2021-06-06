@@ -223,13 +223,13 @@ bool asiVisu_GeomSurfPrs::IsVisible() const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_GeomSurfPrs::SetColor(const QColor& color) const
+void asiVisu_GeomSurfPrs::SetColor(const ActAPI_Color& color) const
 {
   asiVisu_Prs::SetColor(color);
 
   // Adjust color of text.
   vtkTextActor* actor = m_textWidget->GetTextActor();
-  actor->GetTextProperty()->SetColor( color.redF(), color.greenF(), color.blueF() );
+  actor->GetTextProperty()->SetColor( color.Red(), color.Green(), color.Blue() );
 }
 
 //-----------------------------------------------------------------------------

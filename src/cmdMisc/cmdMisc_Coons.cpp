@@ -158,6 +158,6 @@ void cmdMisc::Commands_Coons(const Handle(asiTcl_Interp)&      interp,
     //
     __FILE__, group, MISC_BuildCoonsLinear);
 #else
-  cmdMisc_NotUsed(interp);
+  (void) interp;
 #endif
 }

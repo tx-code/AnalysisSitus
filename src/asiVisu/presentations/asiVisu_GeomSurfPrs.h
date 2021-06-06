@@ -82,7 +82,7 @@ public:
 //-----------------------------------------------------------------------------
 public:
 
-  asiVisu_EXPORT void SetColor(const QColor& color) const override;
+  asiVisu_EXPORT void SetColor(const ActAPI_Color& color) const override;
   //
   asiVisu_EXPORT void DoWireframe();
   asiVisu_EXPORT void DoShaded();

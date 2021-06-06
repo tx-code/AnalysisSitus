@@ -46,11 +46,6 @@
 #include <vtkSmartPointer.h>
 #pragma warning(pop)
 
-// Qt includes
-#pragma warning(push, 0)
-#include <QPoint>
-#pragma warning(pop)
-
 //-----------------------------------------------------------------------------
 
 //! Picker type.
@@ -107,9 +102,9 @@ enum asiVisu_SelectionMode
 //! shoot the actual picking request.
 struct asiVisu_PickInput
 {
-  QPoint Start;      //!< Picked (X, Y) coordinates of start event.
-  QPoint Finish;     //!< Picked (X, Y) coordinates of finish event.
-  bool   IsMultiple; //!< Indicates whether the multiple picking is enabled.
+  std::pair<int, int> Start;      //!< Picked (X, Y) coordinates of start event.
+  std::pair<int, int> Finish;     //!< Picked (X, Y) coordinates of finish event.
+  bool                IsMultiple; //!< Indicates whether the multiple picking is enabled.
 
   //! Default constructor
   asiVisu_PickInput()
@@ -118,15 +113,15 @@ struct asiVisu_PickInput
   }
 
   //! Complete constructor.
-  //! \param theStart   [in] start picking point.
-  //! \param theFinish  [in] finish picking point.
-  //! \param isMultiple [in] indicates whether the multiple picking is enabled.
-  asiVisu_PickInput(const QPoint& theStart,
-                    const QPoint& theFinish,
-                    const bool    isMultiple)
+  //! \param[in] start      start picking point.
+  //! \param[in] finish     finish picking point.
+  //! \param[in] isMultiple indicates whether the multiple picking is enabled.
+  asiVisu_PickInput(const std::pair<int, int>& start,
+                    const std::pair<int, int>& finish,
+                    const bool                 isMultiple)
   {
-    this->Start      = theStart;
-    this->Finish     = theFinish;
+    this->Start      = start;
+    this->Finish     = finish;
     this->IsMultiple = isMultiple;
   }
 };

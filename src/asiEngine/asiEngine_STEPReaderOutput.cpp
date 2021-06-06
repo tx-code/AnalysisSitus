@@ -35,6 +35,7 @@
 #include <asiEngine_Part.h>
 
 // asiVisu includes
+#include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
 
 //-----------------------------------------------------------------------------

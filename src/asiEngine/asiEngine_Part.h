@@ -38,14 +38,19 @@
 #include <asiAlgo_AAG.h>
 #include <asiAlgo_AAGIterator.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
-
 // OCCT includes
 #include <BRepAdaptor_Surface.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <math_BullardGenerator.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+
+// asiVisu includes
+#include <asiVisu_Selection.h>
+
+// VTK includes
+#include <vtkSmartPointer.h>
+
+class asiVisu_PrsManager;
 
 //! Data Model API for geometric part.
 class asiEngine_Part : public asiEngine_Base

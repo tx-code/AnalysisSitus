@@ -96,9 +96,9 @@ void asiVisu_InteractorStylePick::OnMouseMove()
   m_PickedPos[0] = this->Interactor->GetEventPosition()[0];
   m_PickedPos[1] = this->Interactor->GetEventPosition()[1];
 
-  QPoint aPickPoint(m_PickedPos[0], m_PickedPos[1]);
-  m_pPickInput->Start      = aPickPoint;
-  m_pPickInput->Finish     = aPickPoint;
+  std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
+  m_pPickInput->Start      = pickPoint;
+  m_pPickInput->Finish     = pickPoint;
   m_pPickInput->IsMultiple = false;
 
   if ( m_bIsLeftButtonDown )
@@ -163,9 +163,9 @@ void asiVisu_InteractorStylePick::OnLeftButtonUp()
   //
   if ( pos[0] == m_PickedPos[0] && pos[1] == m_PickedPos[1] )
   {
-    QPoint aPickPoint(m_PickedPos[0], m_PickedPos[1]);
-    m_pPickInput->Start  = aPickPoint;
-    m_pPickInput->Finish = aPickPoint;
+    std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
+    m_pPickInput->Start  = pickPoint;
+    m_pPickInput->Finish = pickPoint;
 
     if ( this->Interactor->GetShiftKey() )
     {

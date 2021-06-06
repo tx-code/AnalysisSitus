@@ -34,6 +34,11 @@
 // asiVisu includes
 #include <asiVisu_ShapePrimitive.h>
 
+// Qt includes
+#pragma warning(push, 0)
+#include <QImage>
+#pragma warning(pop)
+
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkActor.h>
@@ -733,13 +738,13 @@ vtkSmartPointer<vtkLookupTable>
     const int scalar  = it.Value();
 
     // Convert color.
-    QColor color = IntToColor(colorId);
-    int r = color.red();
-    int g = color.green();
-    int b = color.blue();
+    ActAPI_Color color = IntToColor(colorId);
+    const double r     = color.Red();
+    const double g     = color.Green();
+    const double b     = color.Blue();
 
     // Add scalar mapping to the lookup table.
-    colorTable->SetTableValue(scalar, r/255., g/255., b/255.);
+    colorTable->SetTableValue(scalar, r, g, b);
   }
 
   return colorTable;
@@ -923,4 +928,32 @@ void asiVisu_Utils::InitTextWidget(vtkTextWidget* textWidget)
   //
   textActor->GetTextProperty()->SetJustificationToLeft();
   textActor->GetTextProperty()->SetVerticalJustificationToBottom();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Converts string to color.
+//! \param[in] string string to convert.
+//! \return color.
+ActAPI_Color asiVisu_Utils::StringToColor(const std::string& string)
+{
+  QString qstr( string.c_str() );
+
+  bool isOk;
+  int value = (int) qstr.toInt(&isOk);
+  if ( !isOk )
+  {
+    QRegExp rx("^\\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
+    //
+    if ( rx.indexIn(qstr) != -1 )
+    {
+      QString match = rx.cap(1);
+      value = (int) match.toInt(&isOk, 16);
+    }
+  }
+
+  if ( isOk )
+    return IntToColor(value);
+
+  return ActAPI_Color();
 }

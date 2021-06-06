@@ -38,6 +38,9 @@
 #include <asiUI_Common.h>
 #include <asiUI_DialogCommandsDelegate.h>
 
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
 // Qt includes
 #pragma warning(push, 0)
 #include <QApplication>

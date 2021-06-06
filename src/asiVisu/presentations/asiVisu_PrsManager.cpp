@@ -35,12 +35,14 @@
 #include <asiVisu_PartNodeInfo.h>
 #include <asiVisu_Prs.h>
 #include <asiVisu_Pipeline.h>
+#include <asiVisu_QVTKWidget.h>
 #include <asiVisu_Selection.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
 
 // VTK includes
+#pragma warning(push, 0)
 #include <vtkCamera.h>
 #include <vtkCellData.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -54,11 +56,17 @@
 #include <vtkRenderWindow.h>
 #include <vtkWidgetRepresentation.h>
 #include <vtkWindowToImageFilter.h>
+#pragma warning(pop)
 
 // OCCT includes
 #include <gp_Lin.hxx>
 #include <NCollection_Sequence.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+
+// QVTK includes
+#pragma warning(push, 0)
+#include <QVTKOpenGLNativeWidget.h>
+#pragma warning(pop)
 
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
@@ -655,8 +663,8 @@ bool
    *  Some preparations
    * =================== */
 
-  const int  xStart     = pickInput->Start.x();
-  const int  yStart     = pickInput->Start.y();
+  const int  xStart     = pickInput->Start.first;
+  const int  yStart     = pickInput->Start.second;
   const bool isMultiple = pickInput->IsMultiple;
 
   // Reset current selection (if any).

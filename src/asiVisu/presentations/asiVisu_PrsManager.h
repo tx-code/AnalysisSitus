@@ -35,7 +35,6 @@
 #include <asiVisu_InteractorStylePick.h>
 #include <asiVisu_InteractorStylePick2d.h>
 #include <asiVisu_Prs.h>
-#include <asiVisu_QVTKWidget.h>
 #include <asiVisu_Utils.h>
 
 // asiData includes
@@ -59,13 +58,11 @@
 #include <vtkSmartPointer.h>
 #pragma warning(pop)
 
-// QVTK includes
-#pragma warning(push, 0)
-#include <QVTKOpenGLNativeWidget.h>
-#pragma warning(pop)
-
 // OCCT includes
 #include <NCollection_DataMap.hxx>
+
+class asiVisu_QVTKWidget;
+class QVTKOpenGLNativeWidget;
 
 //-----------------------------------------------------------------------------
 

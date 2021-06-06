@@ -55,11 +55,6 @@
 #include <vtkRenderer.h>
 #pragma warning(pop)
 
-// Qt includes
-#pragma warning(push, 0)
-#include <QColor>
-#pragma warning(pop)
-
 //-----------------------------------------------------------------------------
 
 //! Base class for all kinds of Node Presentations which can be visualized
@@ -93,7 +88,7 @@ public:
     IsColorizable() const;
 
   asiVisu_EXPORT virtual void
-    SetColor(const QColor& color) const;
+    SetColor(const ActAPI_Color& color) const;
 
   asiVisu_EXPORT virtual void
     InitPipelines();

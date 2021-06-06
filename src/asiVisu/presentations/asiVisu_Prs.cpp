@@ -68,7 +68,7 @@ bool asiVisu_Prs::IsColorizable() const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_Prs::SetColor(const QColor& color) const
+void asiVisu_Prs::SetColor(const ActAPI_Color& color) const
 {
   for ( PipelineMap::Iterator pit( m_pipelineRepo.Find(Group_Prs) );
         pit.More(); pit.Next() )
@@ -80,7 +80,7 @@ void asiVisu_Prs::SetColor(const QColor& color) const
     vtkProperty* prop  = actor->GetProperty();
 
     // Set color for VTK property.
-    prop->SetColor( color.redF(), color.greenF(), color.blueF() );
+    prop->SetColor( color.Red(), color.Green(), color.Blue() );
   }
 }
 

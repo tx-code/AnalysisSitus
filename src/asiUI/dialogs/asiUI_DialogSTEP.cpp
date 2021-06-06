@@ -44,6 +44,9 @@
 #include <asiUI_Common.h>
 #include <asiUI_DialogSTEPDelegate.h>
 
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
 // OCCT includes
 #include <Interface_Static.hxx>
 #include <STEPControl_Controller.hxx>

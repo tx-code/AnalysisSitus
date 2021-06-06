@@ -180,8 +180,8 @@ int DDF_BuildSVO(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -252,8 +252,8 @@ int DDF_DumpVTU(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -356,8 +356,8 @@ int DDF_SetSVO(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -423,8 +423,8 @@ int DDF_EvalSVO(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -502,8 +502,8 @@ int DDF_Polygonize(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_TRIANGULATION(argv[1], triangulation, Color_Default, 1.);
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -598,8 +598,8 @@ int DDF_PolygonizeCell(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -728,8 +728,8 @@ int DDF_PolygonizeSVO(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -795,8 +795,8 @@ int DDF_Unite(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -862,8 +862,8 @@ int DDF_Common(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -929,8 +929,8 @@ int DDF_Cut(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 
@@ -988,8 +988,8 @@ int DDF_ExtractOutsideLeaves(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdDDF_NotUsed(argc);
-  cmdDDF_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "SVO is a part of Mobius (not available in open source).");
 

@@ -146,8 +146,8 @@ int MOBIUS_POLY_ComputeNorms(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdMobius_NotUsed(argc);
-  cmdMobius_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
 

@@ -34,6 +34,9 @@
 // asiEngine includes
 #include <asiEngine_Part.h>
 
+// asiVisu includes
+#include <asiVisu_PrsManager.h>
+
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
 

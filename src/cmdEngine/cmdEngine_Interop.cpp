@@ -56,7 +56,9 @@
 #include <BRepTools.hxx>
 
 // VTK includes
+#pragma warning(push, 0)
 #include <vtkXMLPolyDataWriter.h>
+#pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 
@@ -596,8 +598,7 @@ int ENGINE_DumpThicknessVTP(const Handle(asiTcl_Interp)& interp,
   Handle(asiVisu_MeshEScalarPipeline)
     pl = Handle(asiVisu_MeshEScalarPipeline)::DownCast( prs->GetPipeline(asiVisu_ThicknessPrs::Pipeline_Main) );
   //
-  asiVisu_TriangulationSource* pSource = pl->GetSource();
-  asiVisu_MeshEScalarFilter*   pFilter = pl->GetScalarFilter();
+  asiVisu_MeshEScalarFilter* pFilter = pl->GetScalarFilter();
 
   // Update and dump to file.
   pFilter->Update();

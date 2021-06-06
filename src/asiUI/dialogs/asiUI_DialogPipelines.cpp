@@ -34,6 +34,9 @@
 // asiUI includes
 #include <asiUI_Common.h>
 
+// asiVisu includes
+#include <asiVisu_QVTKWidget.h>
+
 // Qt includes
 #pragma warning(push, 0)
 #include <QApplication>

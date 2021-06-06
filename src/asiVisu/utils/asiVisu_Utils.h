@@ -40,11 +40,6 @@
 // Active Data (API) includes
 #include <ActAPI_INode.h>
 
-// Qt includes
-#pragma warning(push, 0)
-#include <QImage>
-#pragma warning(pop)
-
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkAxesActor.h>
@@ -375,26 +370,8 @@ public:
   //! Converts string to color.
   //! \param[in] string string to convert.
   //! \return color.
-  static QColor StringToColor(const QString& string)
-  {
-    bool isOk;
-    int value = (int) string.toInt(&isOk);
-    if ( !isOk )
-    {
-      QRegExp rx("^\\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
-      //
-      if ( rx.indexIn(string) != -1 )
-      {
-        QString match = rx.cap(1);
-        value = (int) match.toInt(&isOk, 16);
-      }
-    }
-
-    if ( isOk )
-      return IntToColor(value);
-    
-    return QColor(Qt::white);
-  }
+  asiVisu_EXPORT static ActAPI_Color
+    StringToColor(const std::string& string);
 
   //! Converts RGB color to integer.
   //! \param[in] r red component.
@@ -431,23 +408,20 @@ public:
   //! Converts color value to an integer representation.
   //! \param[in] color Qt color.
   //! \return converted value
-  static int ColorToInt(const QColor& color)
+  static int ColorToInt(const ActAPI_Color& color)
   {
-    unsigned char uRed   = (unsigned char) color.red();
-    unsigned char uGreen = (unsigned char) color.green();
-    unsigned char uBlue  = (unsigned char) color.blue();
-    return uRed << 16 | uGreen << 8 | uBlue;
+    return ColorToInt( color.Red(), color.Green(), color.Blue() );
   }
 
   //! Converts integer value to a color.
   //! \param[in] icolor integer color code.
   //! \return converted value
-  static QColor IntToColor(const int icolor)
+  static ActAPI_Color IntToColor(const int icolor)
   {
     unsigned char uRed   = ( icolor >> 16 ) & 0xFF;
     unsigned char uGreen = ( icolor >>  8 ) & 0xFF;
     unsigned char uBlue  =   icolor         & 0xFF;
-    return QColor(uRed, uGreen, uBlue);
+    return ActAPI_Color(uRed/255., uGreen/255., uBlue/255., Quantity_TOC_RGB);
   }
 
 private:

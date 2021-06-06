@@ -39,6 +39,7 @@
 // asiVisu includes
 #include <asiVisu_PartPrs.h>
 #include <asiVisu_PartNodeInfo.h>
+#include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
 
 // asiAlgo includes

@@ -71,7 +71,7 @@ public:
     IsVisible() const;
 
   asiVisu_EXPORT virtual void
-    SetColor(const QColor& color) const override;
+    SetColor(const ActAPI_Color& color) const override;
 
 public:
 

@@ -1555,6 +1555,9 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
+  (void) argc;
+  (void) argv;
+
   // Test anything here.
 
   RETURN_TCL_ERROR_MSG(interp, "test function is empty");
@@ -1674,6 +1677,9 @@ int MISC_TestPointInversion1(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
+  (void) argc;
+  (void) argv;
+
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius module is disabled.");
   return TCL_ERROR;
 #endif
@@ -3577,8 +3583,8 @@ int MISC_InvertBPoles(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdMisc_NotUsed(argc);
-  cmdMisc_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;

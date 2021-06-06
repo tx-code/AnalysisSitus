@@ -477,8 +477,8 @@ int RE_FairContourLines(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdRE_NotUsed(argc);
-  cmdRE_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "This feature is not available.");
   return TCL_ERROR;
@@ -843,8 +843,8 @@ int RE_SkinSurface(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdRE_NotUsed(argc);
-  cmdRE_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "This feature is not available.");
   return TCL_ERROR;
@@ -980,8 +980,8 @@ int RE_InterpMulticurve(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdRE_NotUsed(argc);
-  cmdRE_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "This feature is not available.");
   return TCL_ERROR;
@@ -1538,8 +1538,8 @@ int RE_InvertPoints(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  cmdRE_NotUsed(argc);
-  cmdRE_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
@@ -1712,8 +1712,8 @@ int RE_ApproxSurf(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_SURFACE(argv[1], cascade::GetOpenCascadeBSurface(resSurf), Color_Default);
   return TCL_OK;
 #else
-  cmdRE_NotUsed(argc);
-  cmdRE_NotUsed(argv);
+  (void) argc;
+  (void) argv;
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
