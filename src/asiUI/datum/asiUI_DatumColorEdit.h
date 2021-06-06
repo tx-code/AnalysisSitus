@@ -119,9 +119,13 @@ public:
   //! \return value of string type.
   virtual QString getString() const
   {
-    QColor aColor = colorButton()->color();
+    QColor       qcolor = colorButton()->color();
+    ActAPI_Color color(qcolor.redF(),
+                       qcolor.greenF(),
+                       qcolor.blueF(),
+                       Quantity_TOC_RGB);
 
-    return QString::number(asiVisu_Utils::ColorToInt(aColor));
+    return QString::number( asiVisu_Utils::ColorToInt(color) );
   }
 
 signals:
@@ -136,23 +140,31 @@ protected:
   //! set value in form of string.
   //! \param theString [in] value converted to
   //!        stirng type.
-  virtual void setString(const QString& theString)
+  virtual void setString(const QString& string)
   {
-    QtxColorButton* aButton = colorButton();
-    if ( aButton )
-      aButton->setColor(asiVisu_Utils::StringToColor(theString));
+    QtxColorButton* pButton = colorButton();
+
+    if ( pButton )
+    {
+      ActAPI_Color
+        color = asiVisu_Utils::StringToColor( string.toUtf8().constData() );
+
+      pButton->setColor( QColor( color.Red(), color.Green(), color.Blue() ) );
+    }
   }
 
   QtxColorButton* colorButton() const;
 
 private slots:
 
-  void onColorChanged(QColor theColor)
+  void onColorChanged(QColor qcolor)
   {
-    int aValue = asiVisu_Utils::ColorToInt(theColor);
-    setIntegerValue(aValue);
+    ActAPI_Color color(qcolor.redF(), qcolor.greenF(), qcolor.blueF(), Quantity_TOC_RGB);
 
-    emit ColorChanged(aValue);
+    int value = asiVisu_Utils::ColorToInt(color);
+    setIntegerValue(value);
+
+    emit ColorChanged(value);
   }
 };
 

@@ -190,18 +190,15 @@ void asiVisu_PartPrs::VerticesOff() const
 
 //! Sets custom color.
 //! \param[in] color color to set.
-void asiVisu_PartPrs::Colorize(const QColor& color) const
+void asiVisu_PartPrs::Colorize(const ActAPI_Color& color) const
 {
-  if ( !color.isValid() )
-    return;
-
   Handle(asiVisu_PartPipeline)
     pl = Handle(asiVisu_PartPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
 
   if ( !pl.IsNull() )
-    pl->Actor()->GetProperty()->SetColor( color.redF(),
-                                          color.greenF(),
-                                          color.blueF() );
+    pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                          color.Green(),
+                                          color.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -362,7 +359,7 @@ void asiVisu_PartPrs::afterUpdatePipelines() const
 
   /* Actualize color */
 
-  QColor color = asiVisu_Utils::IntToColor( N->GetColor() );
+  ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
   this->Colorize(color);
 
   /* Actualize visualization of vertices */

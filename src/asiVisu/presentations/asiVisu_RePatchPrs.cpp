@@ -101,17 +101,14 @@ Handle(asiVisu_Prs) asiVisu_RePatchPrs::Instance(const Handle(ActAPI_INode)& N)
 
 //! Sets custom color.
 //! \param[in] color color to set.
-void asiVisu_RePatchPrs::Colorize(const QColor& color) const
+void asiVisu_RePatchPrs::Colorize(const ActAPI_Color& color) const
 {
-  if ( !color.isValid() )
-    return;
-
   Handle(asiVisu_RePatchPipeline)
     pl = Handle(asiVisu_RePatchPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
 
-  pl->Actor()->GetProperty()->SetColor( color.redF(),
-                                        color.greenF(),
-                                        color.blueF() );
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -127,9 +124,9 @@ void asiVisu_RePatchPrs::afterUpdatePipelines() const
 
   if ( N->HasColor() )
   {
-    QColor color = asiVisu_Utils::IntToColor( N->GetColor() );
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
     this->Colorize(color);
   }
   else
-    this->Colorize(Qt::white);
+    this->Colorize( ActAPI_Color(Quantity_NOC_WHITE) );
 }

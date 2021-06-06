@@ -106,9 +106,9 @@ Quantity_Color
   if ( metaNode.IsNull() )
     return Quantity_Color(1., 1., 1., Quantity_TOC_RGB);
 
-  QColor qCol = asiVisu_Utils::IntToColor( metaNode->GetColor() );
+  ActAPI_Color color = asiVisu_Utils::IntToColor( metaNode->GetColor() );
 
-  return Quantity_Color(qCol.redF(), qCol.greenF(), qCol.blueF(), Quantity_TOC_RGB);
+  return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 
 //-----------------------------------------------------------------------------

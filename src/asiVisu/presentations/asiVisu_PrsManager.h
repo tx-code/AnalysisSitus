@@ -61,6 +61,7 @@
 // OCCT includes
 #include <NCollection_DataMap.hxx>
 
+class QWidget;
 class asiVisu_QVTKWidget;
 class QVTKOpenGLNativeWidget;
 

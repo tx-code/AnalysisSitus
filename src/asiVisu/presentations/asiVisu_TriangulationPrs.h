@@ -90,7 +90,7 @@ public:
     VerticesOff() const;
 
   asiVisu_EXPORT void
-    Colorize(const QColor& color) const;
+    Colorize(const ActAPI_Color& color) const;
 
 public:
 

@@ -201,18 +201,15 @@ void asiVisu_TriangulationPrs::VerticesOff() const
 
 //! Sets custom color.
 //! \param[in] color color to set.
-void asiVisu_TriangulationPrs::Colorize(const QColor& color) const
+void asiVisu_TriangulationPrs::Colorize(const ActAPI_Color& color) const
 {
-  if ( !color.isValid() )
-    return;
-
   Handle(asiVisu_TriangulationPipeline)
     pl = Handle(asiVisu_TriangulationPipeline)::DownCast( this->GetPipeline(Pipeline_Triangulation) );
 
   if ( !pl.IsNull() )
-    pl->Actor()->GetProperty()->SetColor( color.redF(),
-                                          color.greenF(),
-                                          color.blueF() );
+    pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                          color.Green(),
+                                          color.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -289,7 +286,7 @@ void asiVisu_TriangulationPrs::afterUpdatePipelines() const
 
   /* Actualize color */
 
-  QColor color = asiVisu_Utils::IntToColor( N->GetColor() );
+  ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
   this->Colorize(color);
 }
 

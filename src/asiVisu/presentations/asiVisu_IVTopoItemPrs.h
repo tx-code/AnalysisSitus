@@ -65,7 +65,7 @@ public:
 public:
 
   asiVisu_EXPORT void
-    Colorize(const QColor& color) const;
+    Colorize(const ActAPI_Color& color) const;
 
   asiVisu_EXPORT void
     SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode) const;

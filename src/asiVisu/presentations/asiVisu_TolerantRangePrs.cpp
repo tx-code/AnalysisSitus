@@ -71,10 +71,10 @@ asiVisu_TolerantRangePrs::asiVisu_TolerantRangePrs(const Handle(ActAPI_INode)& N
   const int colorNum = rangeNode->GetColor();
 
   // Convert color to QColor.
-  QColor qcolor = asiVisu_Utils::IntToColor(colorNum);
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorNum);
 
   // Set color for the main actor.
-  pl->Actor()->GetProperty()->SetColor( qcolor.redF(), qcolor.greenF(), qcolor.blueF() );
+  pl->Actor()->GetProperty()->SetColor( color.Red(), color.Green(), color.Blue() );
 }
 
 //! Factory method for Presentation.

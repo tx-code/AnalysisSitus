@@ -116,17 +116,14 @@ Handle(asiVisu_Prs) asiVisu_IVSurfacePrs::Instance(const Handle(ActAPI_INode)& N
 
 //! Sets custom color.
 //! \param[in] color color to set.
-void asiVisu_IVSurfacePrs::Colorize(const QColor& color) const
+void asiVisu_IVSurfacePrs::Colorize(const ActAPI_Color& color) const
 {
-  if ( !color.isValid() )
-    return;
-
   Handle(asiVisu_IVSurfacePipeline)
     pl = Handle(asiVisu_IVSurfacePipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
 
-  pl->Actor()->GetProperty()->SetColor( color.redF(),
-                                        color.greenF(),
-                                        color.blueF() );
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -171,9 +168,9 @@ void asiVisu_IVSurfacePrs::afterUpdatePipelines() const
 
   if ( N->HasColor() )
   {
-    QColor color = asiVisu_Utils::IntToColor( N->GetColor() );
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
     this->Colorize(color);
   }
   else
-    this->Colorize(Qt::white);
+    this->Colorize( ActAPI_Color(Quantity_NOC_WHITE) );
 }

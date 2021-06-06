@@ -170,11 +170,11 @@ void asiVisu_PartDataProvider::GetColor(double& r, double& g, double& b) const
 {
   const int icolor = m_node->GetColor();
 
-  QColor qcolor = asiVisu_Utils::IntToColor(icolor);
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
 
-  r = qcolor.redF();
-  g = qcolor.greenF();
-  b = qcolor.blueF();
+  r = color.Red();
+  g = color.Green();
+  b = color.Blue();
 }
 
 //-----------------------------------------------------------------------------

@@ -81,17 +81,14 @@ Handle(asiVisu_Prs) asiVisu_IVTopoItemPrs::Instance(const Handle(ActAPI_INode)& 
 
 //! Sets custom color.
 //! \param[in] color color to set.
-void asiVisu_IVTopoItemPrs::Colorize(const QColor& color) const
+void asiVisu_IVTopoItemPrs::Colorize(const ActAPI_Color& color) const
 {
-  if ( !color.isValid() )
-    return;
-
   Handle(asiVisu_ShapePipeline)
     pl = Handle(asiVisu_ShapePipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
 
-  pl->Actor()->GetProperty()->SetColor( color.redF(),
-                                        color.greenF(),
-                                        color.blueF() );
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -136,7 +133,7 @@ void asiVisu_IVTopoItemPrs::afterUpdatePipelines() const
 
   if ( N->HasColor() )
   {
-    QColor color = asiVisu_Utils::IntToColor( N->GetColor() );
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
     this->Colorize(color);
   }
 }

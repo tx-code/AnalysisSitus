@@ -69,7 +69,7 @@ public:
 public:
 
   asiVisu_EXPORT void
-    Colorize(const QColor& color) const;
+    Colorize(const ActAPI_Color& color) const;
 
 private:
 

@@ -279,9 +279,10 @@ void asiUI_DatumDelegate::paint(QPainter* thePainter,
 
     int aColorCode = theIndex.data(aValueRole).toInt();
 
-    QColor aBgColor = asiVisu_Utils::IntToColor(aColorCode);
+    ActAPI_Color bgColor = asiVisu_Utils::IntToColor(aColorCode);
+    QColor qcolor( bgColor.Red(), bgColor.Green(), bgColor.Blue() );
 
-    thePainter->fillRect(aSmallRect, aBgColor);
+    thePainter->fillRect(aSmallRect, qcolor);
     thePainter->setPen(Qt::black);
     thePainter->drawRect(aSmallRect);
 

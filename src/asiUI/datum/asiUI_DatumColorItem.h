@@ -115,7 +115,12 @@ public:
   //! \return value of string type.
   virtual QString getString() const
   {
-    return QString::number(asiVisu_Utils::ColorToInt(m_EditColor));
+    ActAPI_Color color(m_EditColor.redF(),
+                       m_EditColor.greenF(),
+                       m_EditColor.blueF(),
+                       Quantity_TOC_RGB);
+
+    return QString::number( asiVisu_Utils::ColorToInt(color) );
   }
 
 signals:
@@ -127,12 +132,14 @@ protected:
 
   virtual QWidget* createControl(QWidget* theParent);
 
-  //! set value in form of string.
-  //! \param theString [in] value converted to
-  //!        stirng type.
-  virtual void setString(const QString& theString)
+  //! Sets value as string.
+  //! \param[in] str value converted to string type.
+  virtual void setString(const QString& str)
   {
-    m_EditColor = asiVisu_Utils::StringToColor(theString);
+    ActAPI_Color
+      color = asiVisu_Utils::StringToColor( str.toUtf8().constData() );
+
+    m_EditColor = QColor( color.Red(), color.Green(), color.Blue() );
 
     QColorDialog* aDialog = colorDialog();
     if ( aDialog )
@@ -143,17 +150,23 @@ protected:
   //! \return qcolor value.
   virtual QVariant value() const
   {
-    return asiVisu_Utils::ColorToInt(m_EditColor);
+    ActAPI_Color color(m_EditColor.redF(), m_EditColor.greenF(), m_EditColor.blueF(), Quantity_TOC_RGB);
+    int value = asiVisu_Utils::ColorToInt(color);
+    return value;
   }
 
   QColorDialog* colorDialog() const;
 
 private slots:
 
-  void onColorChanged(const QColor& theColor)
+  void onColorChanged(const QColor& qcolor)
   {
-    m_EditColor = theColor;
-    emit ColorChanged(asiVisu_Utils::ColorToInt(m_EditColor));
+    m_EditColor = qcolor;
+
+    ActAPI_Color color(m_EditColor.redF(), m_EditColor.greenF(), m_EditColor.blueF(), Quantity_TOC_RGB);
+    int value = asiVisu_Utils::ColorToInt(color);
+
+    emit ColorChanged(value);
   }
 
 private:
