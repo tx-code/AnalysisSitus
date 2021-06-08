@@ -777,6 +777,8 @@ TCollection_AsciiString
     // Dump.
     msg += "\n\t Surface: ";
     msg += surf->DynamicType()->Name();
+    msg += "\n\t Natural bounds: ";
+    msg += (BRep_Tool::NaturalRestriction(face) ? "true" : "false");
     msg += "\n\t Min U parameter: ";
     msg += uMin;
     msg += "\n\t Max U parameter: ";
