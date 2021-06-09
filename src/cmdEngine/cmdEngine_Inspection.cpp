@@ -84,6 +84,7 @@
 #include <BRepGProp.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepTools.hxx>
+#include <GeomLProp_CLProps.hxx>
 #include <GProp_GProps.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <TopExp.hxx>
@@ -1066,6 +1067,45 @@ int ENGINE_EvalCurve(const Handle(asiTcl_Interp)& interp,
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Order %1 is not supported for OpenCascade method."
                                                           << order);
       return TCL_OK;
+    }
+
+    // Add the centre of curvature.
+    if ( order >= 2 )
+    {
+      GeomLProp_CLProps clProp( occtCurve, 2, Precision::Confusion() );
+      clProp.SetParameter(u);
+      //
+      if ( !clProp.IsTangentDefined() )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Tangent is not defined."
+                                                            << order);
+        return TCL_OK;
+      }
+
+      // Curvature.
+      const double K = clProp.Curvature();
+      if ( Abs(K) > Precision::Confusion() )
+      {
+        const double r_onCurve = 1/Abs(K); // Radius of curvature.
+
+        // Calculate the center of curvature.
+        gp_Pnt center_onCurve;
+        clProp.CentreOfCurvature(center_onCurve);
+
+        interp->GetPlotter().REDRAW_POINT("centre_K", center_onCurve, Color_White);
+
+        // Build the osculating circle manually.
+        gp_Dir tang_onCurve, norm_onCurve;
+        clProp.Tangent(tang_onCurve);
+        clProp.Normal(norm_onCurve);
+        gp_Dir axDir_ofCircle = norm_onCurve ^ tang_onCurve; // Cross product.
+        gp_Ax2 ax_ofCircle(center_onCurve, axDir_ofCircle, norm_onCurve);
+      
+        // Construct the osculating circle.
+        interp->GetPlotter().REDRAW_CURVE( "osculatingCircle",
+                                           new Geom_Circle(ax_ofCircle, r_onCurve),
+                                           Color_White );
+      }
     }
   }
   else
