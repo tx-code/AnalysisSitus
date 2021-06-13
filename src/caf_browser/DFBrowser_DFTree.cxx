@@ -93,10 +93,22 @@ void DFBrowser_DFTree::Update ()
 void DFBrowser_DFTree::Close ()
 {
   myNbBrowsers--;
-  myRoot->Del();
-  myRoot.Nullify();
-  myDoc.Nullify();
-  myAttr.Nullify();
+
+  if ( !myRoot.IsNull() )
+  {
+    myRoot->Del();
+    myRoot.Nullify();
+  }
+
+  if ( !myDoc.IsNull() )
+  {
+    myDoc.Nullify();
+  }
+
+  if ( !myAttr.IsNull() )
+  {
+    myAttr.Nullify();
+  }
 }
 
 void DFBrowser_DFTree::AddDocName (TCollection_AsciiString& theName) const

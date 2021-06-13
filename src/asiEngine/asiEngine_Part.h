@@ -38,14 +38,17 @@
 #include <asiAlgo_AAG.h>
 #include <asiAlgo_AAGIterator.h>
 
+// asiAsm includes
+#include <asiAsm_XdeDoc.h>
+
+// asiVisu includes
+#include <asiVisu_Selection.h>
+
 // OCCT includes
 #include <BRepAdaptor_Surface.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <math_BullardGenerator.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-
-// asiVisu includes
-#include <asiVisu_Selection.h>
 
 // VTK includes
 #include <vtkSmartPointer.h>
@@ -483,6 +486,14 @@ public:
 
     return mateId > 0;
   }
+
+  //! Passes metadata from the Part Node to the given XDE document.
+  //! This method is to be used for XDE-based data tranlators.
+  //! \param[in] pid    the target part in the XDE document.
+  //! \param[in] xdeDoc the target XDE document to set metadata to.
+  asiEngine_EXPORT void
+    TransferMetadata(const asiAsm::xde::PartId&      pid,
+                     const Handle(asiAsm::xde::Doc)& xdeDoc);
 
 protected:
 

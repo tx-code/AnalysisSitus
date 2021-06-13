@@ -217,9 +217,13 @@ const TCollection_AsciiString & DFBrowser_Attr::LoadAttribute(const Handle(TDF_A
     if (!(Handle(TPrsStd_AISViewer)::DownCast(theAttribute)->GetInteractiveContext()).IsNull())
       AddToName(" ( Attached )");
   } else if(theAttribute->IsInstance(STANDARD_TYPE(TDocStd_Owner))){
-    Handle(TDocStd_Document) aD=Handle(TDocStd_Owner)::DownCast(theAttribute)->GetDocument();
-    AddToName("= ");
-    AddToName(aD->StorageFormat());
+    Handle(TDocStd_Document) aD = Handle(TDocStd_Owner)::DownCast(theAttribute)->GetDocument();
+
+    if ( !aD.IsNull() )
+    {
+      AddToName("= ");
+      AddToName(aD->StorageFormat());
+    }
   } else if(theAttribute->IsInstance(STANDARD_TYPE(TDocStd_XLink))){
     AddToName(" = ( ");
     AddToName(Handle(TDocStd_XLink)::DownCast(theAttribute)->LabelEntry());

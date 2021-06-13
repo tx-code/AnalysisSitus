@@ -1155,3 +1155,32 @@ void asiEngine_Part::GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndi
       vertIndices.Add(v);
   }
 }
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Part::TransferMetadata(const asiAsm::xde::PartId&      pid,
+                                      const Handle(asiAsm::xde::Doc)& xdeDoc)
+{
+  // Get all metadata elements.
+  Handle(ActAPI_HNodeList) mdElems;
+  this->GetMetadataElems(mdElems);
+  //
+  if ( mdElems.IsNull() || !mdElems->Length() )
+    return;
+
+  for ( ActAPI_HNodeList::Iterator nit(*mdElems); nit.More(); nit.Next() )
+  {
+    Handle(asiData_ElemMetadataNode)
+      mdNode = Handle(asiData_ElemMetadataNode)::DownCast( nit.Value() );
+
+    // Get shape and color.
+    TopoDS_Shape shape  = mdNode->GetShape();
+    const int    icolor = mdNode->GetColor();
+
+    ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+
+    // Pass to the XDE document.
+    TDF_Label ssLab = xdeDoc->AddSubShape(pid, shape);
+    xdeDoc->SetColor(ssLab, color);
+  }
+}

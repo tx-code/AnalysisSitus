@@ -32,6 +32,7 @@
 #include <cmdEngine.h>
 
 // asiEngine includes
+#include <asiEngine_Model.h>
 #include <asiEngine_Part.h>
 #include <asiEngine_STEPReaderOutput.h>
 
@@ -52,12 +53,34 @@
 #include <asiAlgo_Utils.h>
 #include <asiAlgo_WriteDXF.h>
 
+// asiAsm includes
+#include <asiAsm_XdeDoc.h>
+
+// asiUI includes
+#include <asiUI_XdeBrowser.h>
+
+// glTF includes
+#include <gltf_XdeWriter.h>
+
+#ifdef _WIN32
+// DF Browser includes
+#include <DFBrowser.hxx>
+#endif
+
 // OpenCascade includes
 #include <BRepTools.hxx>
+#include <UnitsMethods.hxx>
 
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkXMLPolyDataWriter.h>
+#pragma warning(pop)
+
+// Qt includes
+#pragma warning(push, 0)
+#include <QDialog>
+#include <QMainWindow>
+#include <QVBoxLayout>
 #pragma warning(pop)
 
 //-----------------------------------------------------------------------------
@@ -353,6 +376,115 @@ int ENGINE_SaveDxf(const Handle(asiTcl_Interp)& interp,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "DXF export")
 
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get Part Node to access shape.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_ERROR;
+  }
+
+  // Get the output filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not provided.");
+    return TCL_ERROR;
+  }
+
+  // Get solid shape as currently glTF works only for solids.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  TopTools_IndexedMapOfShape partSolids;
+  TopExp::MapShapes(partShape, TopAbs_SOLID, partSolids);
+  //
+  if ( partSolids.IsEmpty() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There are no solids in the part to export.");
+    return TCL_ERROR;
+  }
+  //
+  if ( partSolids.Extent() > 1 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "One single-solid parts are supported right now.");
+    return TCL_ERROR;
+  }
+
+  // Prepare XDE document.
+  Handle(asiAsm::xde::Doc) xdeDoc = new asiAsm::xde::Doc;
+  //
+  const asiAsm::xde::PartId pid = xdeDoc->AddPart( partSolids(1) );
+
+  // Transfer metadata.
+  asiEngine_Part partApi(cmdEngine::model);
+  //
+  partApi.TransferMetadata(pid, xdeDoc);
+  xdeDoc->UpdateAssemblies();
+
+  // Browse XDE document if requested.
+  if ( interp->HasKeyword(argc, argv, "browse") )
+  {
+    // Prepare browser.
+    asiUI_XdeBrowser*
+      pBrowser = new asiUI_XdeBrowser( xdeDoc,
+                                       cmdEngine::cf,
+                                       nullptr );
+    //
+    pBrowser->Populate();
+
+    // Open UI dialog.
+    QWidget* pDlg = new QDialog(cmdEngine::cf->MainWindow);
+    //
+    pDlg->setWindowTitle( "XDE Browser" );
+    //
+    QVBoxLayout* pDlgLayout = new QVBoxLayout;
+    pDlgLayout->setAlignment(Qt::AlignTop);
+    pDlgLayout->setContentsMargins(10, 10, 10, 10);
+    //
+    pDlgLayout->addWidget(pBrowser);
+    pDlg->setLayout(pDlgLayout);
+    //
+    pDlg->show();
+
+#ifdef _WIN32
+    // DFBrowse
+    DFBrowser::DFBrowserCall( xdeDoc->GetDocument() );
+#endif
+  }
+
+  // Export to glTF.
+  asiAsm::xde::gltfWriter cafWriter(TCollection_AsciiString( filename.c_str() ),
+                                    true, nullptr, nullptr);
+  //
+  cafWriter.SetTransformationFormat(asiAsm::xde::gltf_WriterTrsfFormat_TRS);
+  cafWriter.SetForcedUVExport(false);
+  //
+  const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
+  cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
+  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(asiAsm::xde::gltf_CoordinateSystem_Zup);
+  //
+  TColStd_IndexedDataMapOfStringString fileInfo;
+  fileInfo.Add("Author", "Analysis Situs");
+  fileInfo.Add("Organization", "Analysis Situs");
+
+  if ( !cafWriter.Perform(xdeDoc->GetDocument(), fileInfo) )
+  {
+    xdeDoc->Release();
+    return false;
+  }
+
+  xdeDoc->Release();
   return TCL_OK;
 }
 
@@ -657,6 +789,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t the XOY plane.",
     //
     __FILE__, group, ENGINE_SaveDxf);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-gltf",
+    //
+    "save-gltf -filename <filename>\n"
+    "\t Exports the part shape to glTF file <filename> with all assigned colors.",
+    //
+    __FILE__, group, ENGINE_SaveGLTF);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-brep",

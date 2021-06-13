@@ -59,10 +59,12 @@ include_directories ( SYSTEM
                       ${cmdEngine_include_dir_loc}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
+                      ${asiAsm_include_dir}
                       ${asiData_include_dir}
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
+                      ${caf_browser_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
@@ -84,7 +86,11 @@ add_library (cmdEngine SHARED
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(cmdEngine asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
+target_link_libraries(cmdEngine asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
+
+if (WIN32)
+  target_link_libraries(cmdEngine caf_browser)
+endif()
 
 if (USE_MOBIUS)
   foreach (LIB_FILE ${MOBIUS_LIB_FILES})

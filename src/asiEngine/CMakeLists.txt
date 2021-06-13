@@ -163,6 +163,7 @@ set (asiEngine_include_dir ${asiEngine_include_dir_loc} PARENT_SCOPE)
 include_directories ( SYSTEM
                       ${asiEngine_include_dir_loc}
                       ${asiAlgo_include_dir}
+                      ${asiAsm_include_dir}
                       ${asiData_include_dir}
                       ${asiVisu_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
@@ -184,7 +185,7 @@ add_library (asiEngine SHARED ${H_FILES} ${CPP_FILES} ${func_H_FILES} ${func_CPP
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiEngine asiAlgo asiData asiVisu)
+target_link_libraries(asiEngine asiAlgo asiAsm asiData asiVisu)
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)
   link_directories(${3RDPARTY_tbb_LIBRARY_DIR_DEBUG})

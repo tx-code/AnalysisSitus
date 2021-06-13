@@ -52,6 +52,7 @@ include_directories ( SYSTEM
                       ${cmdMisc_include_dir_loc}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
+                      ${asiAsm_include_dir}
                       ${asiData_include_dir}
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
