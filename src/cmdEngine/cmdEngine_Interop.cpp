@@ -64,7 +64,7 @@
 
 #ifdef _WIN32
 // DF Browser includes
-#include <DFBrowser.hxx>
+//#include <DFBrowser.hxx>
 #endif
 
 // OpenCascade includes
@@ -457,10 +457,10 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
     //
     pDlg->show();
 
-#ifdef _WIN32
-    // DFBrowse
-    DFBrowser::DFBrowserCall( xdeDoc->GetDocument() );
-#endif
+//#ifdef _WIN32
+//    // DFBrowse
+//    DFBrowser::DFBrowserCall( xdeDoc->GetDocument() );
+//#endif
   }
 
   // Export to glTF.
