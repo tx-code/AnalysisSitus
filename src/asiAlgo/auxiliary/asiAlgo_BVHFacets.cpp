@@ -50,11 +50,6 @@
 
 //-----------------------------------------------------------------------------
 
-//! Creates the accelerating structure with immediate initialization.
-//! \param[in] model       CAD model to create the accelerating structure for.
-//! \param[in] builderType type of builder to use.
-//! \param[in] progress    progress notifier.
-//! \param[in] plotter     imperative plotter.
 asiAlgo_BVHFacets::asiAlgo_BVHFacets(const TopoDS_Shape&  model,
                                      const BuilderType    builderType,
                                      ActAPI_ProgressEntry progress,
@@ -70,11 +65,6 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const TopoDS_Shape&  model,
 
 //-----------------------------------------------------------------------------
 
-//! Creates the accelerating structure with immediate initialization.
-//! \param[in] mesh        triangulation to create the accelerating structure for.
-//! \param[in] builderType type of builder to use.
-//! \param[in] progress    progress notifier.
-//! \param[in] plotter     imperative plotter.
 asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
                                      const BuilderType                 builderType,
                                      ActAPI_ProgressEntry              progress,
@@ -90,7 +80,6 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
 
 //-----------------------------------------------------------------------------
 
-//! \return number of stored facets.
 int asiAlgo_BVHFacets::Size() const
 {
   return (int) m_facets.size();
@@ -98,9 +87,6 @@ int asiAlgo_BVHFacets::Size() const
 
 //-----------------------------------------------------------------------------
 
-//! Builds an elementary box for a facet with the given index.
-//! \param[in] index index of the facet of interest.
-//! \return AABB for the facet of interest.
 BVH_Box<double, 3> asiAlgo_BVHFacets::Box(const int index) const
 {
   BVH_Box<double, 3> box;
@@ -115,10 +101,6 @@ BVH_Box<double, 3> asiAlgo_BVHFacets::Box(const int index) const
 
 //-----------------------------------------------------------------------------
 
-//! Calculates center point of a facet with respect to the axis of interest.
-//! \param[in] index index of the facet of interest.
-//! \param[in] axis  axis of interest.
-//! \return center parameter along the straight line.
 double asiAlgo_BVHFacets::Center(const int index, const int axis) const
 {
   const t_facet& facet = m_facets[index];
@@ -134,9 +116,6 @@ double asiAlgo_BVHFacets::Center(const int index, const int axis) const
 
 //-----------------------------------------------------------------------------
 
-//! Swaps two elements for BVH building.
-//! \param[in] index1 first index.
-//! \param[in] index2 second index.
 void asiAlgo_BVHFacets::Swap(const int index1, const int index2)
 {
   std::swap(m_facets[index1], m_facets[index2]);
@@ -144,7 +123,6 @@ void asiAlgo_BVHFacets::Swap(const int index1, const int index2)
 
 //-----------------------------------------------------------------------------
 
-//! Returns vertices for a facet with the given 0-based index.
 inline void asiAlgo_BVHFacets::GetVertices(const int  index,
                                            BVH_Vec3d& vertex1,
                                            BVH_Vec3d& vertex2,
@@ -159,7 +137,6 @@ inline void asiAlgo_BVHFacets::GetVertices(const int  index,
 
 //-----------------------------------------------------------------------------
 
-//! \return characteristic diagonal of the full model.
 double asiAlgo_BVHFacets::GetBoundingDiag() const
 {
   return m_fBoundingDiag;
@@ -167,8 +144,6 @@ double asiAlgo_BVHFacets::GetBoundingDiag() const
 
 //-----------------------------------------------------------------------------
 
-//! Dumps the primitive set to the plotter.
-//! \param[in] IV imperative plotter to dump to.
 void asiAlgo_BVHFacets::Dump(ActAPI_PlotterEntry IV)
 {
   // Access (build) hierarchy of boxes
@@ -305,10 +280,6 @@ void asiAlgo_BVHFacets::Dump(ActAPI_PlotterEntry IV)
 
 //-----------------------------------------------------------------------------
 
-//! Initializes the accelerating structure with the given CAD model.
-//! \param[in] model       CAD model to prepare the accelerating structure for.
-//! \param[in] builderType type of builder to use.
-//! \return true in case of success, false -- otherwise.
 bool asiAlgo_BVHFacets::init(const TopoDS_Shape& model,
                              const BuilderType   builderType)
 {
@@ -322,13 +293,13 @@ bool asiAlgo_BVHFacets::init(const TopoDS_Shape& model,
     myBuilder = new BVH_LinearBuilder<double, 3>(5, 32);
 
   // Explode shape on faces to get face indices
-  TopTools_IndexedMapOfShape faces;
-  TopExp::MapShapes(model, TopAbs_FACE, faces);
+  if ( m_faces.IsEmpty() )
+    TopExp::MapShapes(model, TopAbs_FACE, m_faces);
 
   // Initialize with facets taken from faces
-  for ( int fidx = 1; fidx <= faces.Extent(); ++fidx )
+  for ( int fidx = 1; fidx <= m_faces.Extent(); ++fidx )
   {
-    const TopoDS_Face& face = TopoDS::Face( faces(fidx) );
+    const TopoDS_Face& face = TopoDS::Face( m_faces(fidx) );
     //
     if ( !this->addFace(face, fidx) )
       continue; // Do not return false, just skip as otherwise
@@ -346,10 +317,6 @@ bool asiAlgo_BVHFacets::init(const TopoDS_Shape& model,
 
 //-----------------------------------------------------------------------------
 
-//! Initializes the accelerating structure with the given CAD model.
-//! \param[in] model       CAD model to prepare the accelerating structure for.
-//! \param[in] builderType type of builder to use.
-//! \return true in case of success, false -- otherwise.
 bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
                              const BuilderType                 builderType)
 {
@@ -377,10 +344,6 @@ bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
 
 //-----------------------------------------------------------------------------
 
-//! Adds face to the accelerating structure.
-//! \param[in] face     face to add.
-//! \param[in] face_idx index of the face being added.
-//! \return true in case of success, false -- otherwise.
 bool asiAlgo_BVHFacets::addFace(const TopoDS_Face& face,
                                 const int          face_idx)
 {
@@ -392,12 +355,6 @@ bool asiAlgo_BVHFacets::addFace(const TopoDS_Face& face,
 
 //-----------------------------------------------------------------------------
 
-//! Adds triangulation to the accelerating structure.
-//! \param[in] triangulation triangulation to add.
-//! \param[in] loc           location to apply.
-//! \param[in] face_idx      index of the corresponding face being.
-//! \param[in] isReversed    true if the original B-rep face is reversed.
-//! \return true in case of success, false -- otherwise.
 bool asiAlgo_BVHFacets::addTriangulation(const Handle(Poly_Triangulation)& triangulation,
                                          const TopLoc_Location&            loc,
                                          const int                         face_idx,

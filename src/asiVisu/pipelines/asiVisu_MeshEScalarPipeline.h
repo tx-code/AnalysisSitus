@@ -35,7 +35,9 @@
 #include <asiVisu_Pipeline.h>
 
 // VTK includes
+#pragma warning(push, 0)
 #include <vtkLookupTable.h>
+#pragma warning(pop)
 
 class asiVisu_MeshEScalarFilter;
 class asiVisu_TriangulationSource;

@@ -35,9 +35,11 @@
 #include <asiVisu.h>
 
 // VTK includes
+#pragma warning(push, 0)
 #include <vtkDoubleArray.h>
 #include <vtkIdList.h>
 #include <vtkPolyDataAlgorithm.h>
+#pragma warning(pop)
 
 // Active Data includes
 #include <ActAPI_Common.h>

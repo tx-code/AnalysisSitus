@@ -14,7 +14,9 @@ test/results/*
 test/dumping/*
 include/
 build/
+build-sdk/
 install/
+install-sdk/
 .vscode
 *.exe
 *.psess

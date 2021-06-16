@@ -35,10 +35,11 @@
 #include <asiAlgo.h>
 
 // OCCT includes
-#include <TopoDS_Face.hxx>
 #include <BVH_Types.hxx>
 #include <BVH_PrimitiveSet.hxx>
 #include <NCollection_Vector.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 
 // STL includes
 #include <vector>
@@ -75,12 +76,22 @@ public:
 
 public:
 
+  //! Creates the accelerating structure with immediate initialization.
+  //! \param[in] model       CAD model to create the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \param[in] progress    progress notifier.
+  //! \param[in] plotter     imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_BVHFacets(const TopoDS_Shape&  model,
                       const BuilderType    builderType = Builder_Binned,
                       ActAPI_ProgressEntry progress    = nullptr,
                       ActAPI_PlotterEntry  plotter     = nullptr);
 
+  //! Creates the accelerating structure with immediate initialization.
+  //! \param[in] mesh        triangulation to create the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \param[in] progress    progress notifier.
+  //! \param[in] plotter     imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
                       const BuilderType                 builderType = Builder_Binned,
@@ -89,37 +100,65 @@ public:
 
 public:
 
+  //! \return number of stored facets.
   asiAlgo_EXPORT virtual int
     Size() const override;
 
+  //! Builds an elementary box for a facet with the given index.
+  //! \param[in] index index of the facet of interest.
+  //! \return AABB for the facet of interest.
   asiAlgo_EXPORT virtual BVH_Box<double, 3>
     Box(const int index) const override;
 
+  //! Calculates center point of a facet with respect to the axis of interest.
+  //! \param[in] index index of the facet of interest.
+  //! \param[in] axis  axis of interest.
+  //! \return center parameter along the straight line.
   asiAlgo_EXPORT virtual double
     Center(const int index,
            const int axis) const override;
 
+  //! Swaps two elements for BVH building.
+  //! \param[in] index1 first index.
+  //! \param[in] index2 second index.
   asiAlgo_EXPORT virtual void
     Swap(const int index1,
          const int index2) override;
 
 public:
 
+  //! Returns vertices for a facet with the given 0-based index.
   asiAlgo_EXPORT void
     GetVertices(const int  index,
                 BVH_Vec3d& vertex1,
                 BVH_Vec3d& vertex2,
                 BVH_Vec3d& vertex3) const;
 
+  //! \return characteristic diagonal of the full model.
   asiAlgo_EXPORT double
     GetBoundingDiag() const;
 
 public:
 
+  //! Dumps the BVH primitive set to the passed plotter.
+  //! \param[in] IV imperative plotter to dump to.
   asiAlgo_EXPORT void
     Dump(ActAPI_PlotterEntry IV);
 
 public:
+
+  //! Sets the map of faces to use.
+  //! \param[in] faces the map of faces to set.
+  void SetMapOfFaces(const TopTools_IndexedMapOfShape& faces)
+  {
+    m_faces = faces;
+  }
+
+  //! \return the constructed map of faces.
+  const TopTools_IndexedMapOfShape& GetMapOfFaces() const
+  {
+    return m_faces;
+  }
 
   //! Returns a facet by its 0-based index.
   //! \param[in] index index of the facet of interest.
@@ -144,18 +183,36 @@ public:
 
 protected:
 
+  //! Initializes the accelerating structure with the given CAD model.
+  //! \param[in] model       CAD model to prepare the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     init(const TopoDS_Shape& model,
          const BuilderType   builderType);
 
+  //! Initializes the accelerating structure with the given CAD model.
+  //! \param[in] model       CAD model to prepare the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     init(const Handle(Poly_Triangulation)& mesh,
          const BuilderType                 builderType);
 
+  //! Adds face to the accelerating structure.
+  //! \param[in] face     face to add.
+  //! \param[in] face_idx index of the face being added.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     addFace(const TopoDS_Face& face,
             const int          face_idx);
 
+  //! Adds triangulation to the accelerating structure.
+  //! \param[in] triangulation triangulation to add.
+  //! \param[in] loc           location to apply.
+  //! \param[in] face_idx      index of the corresponding face being.
+  //! \param[in] isReversed    true if the original B-rep face is reversed.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     addTriangulation(const Handle(Poly_Triangulation)& triangulation,
                      const TopLoc_Location&            loc,
@@ -163,6 +220,9 @@ protected:
                      const bool                        isReversed);
 
 protected:
+
+  //! Map of faces constructed by the BVH builder.
+  TopTools_IndexedMapOfShape m_faces;
 
   //! Array of facets.
   std::vector<t_facet> m_facets;

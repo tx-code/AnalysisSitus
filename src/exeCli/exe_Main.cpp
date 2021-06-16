@@ -39,7 +39,9 @@
 #include <OSD_Process.hxx>
 
 // VTK init
+#pragma warning(push, 0)
 #include <vtkAutoInit.h>
+#pragma warning(pop)
 
 // Qt includes
 #pragma warning(push, 0)
