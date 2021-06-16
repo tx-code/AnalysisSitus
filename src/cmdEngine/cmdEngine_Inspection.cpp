@@ -4017,9 +4017,9 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("print-attrs",
     //
-    "print-attrs -fid <faceId>\n"
+    "print-attrs -fid [<faceId>]\n"
     "\t Prints all AAG attributes available for the face with the given ID\n"
-    "\t or the interactively selected faces.",
+    "\t or for the interactively selected faces.",
     //
     __FILE__, group, ENGINE_PrintAttrs);
 }

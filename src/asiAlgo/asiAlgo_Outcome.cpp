@@ -95,9 +95,7 @@ Outcome::Outcome(const std::string& _name,
 //-----------------------------------------------------------------------------
 
 Outcome::~Outcome()
-{
-  delete (OSD_Timer*) m_timer;
-}
+{}
 
 //-----------------------------------------------------------------------------
 
@@ -140,9 +138,10 @@ void Outcome::Dump(std::ostream& out) const
 void Outcome::startTimer()
 {
   if ( m_timer == nullptr )
-    m_timer = new OSD_Timer;
+    m_timer = std::make_shared<OSD_Timer>();
 
-  ( (OSD_Timer*) m_timer)->Start();
+  auto timer = std::static_pointer_cast<OSD_Timer>(m_timer);
+  timer->Start();
 }
 
 //-----------------------------------------------------------------------------
@@ -152,8 +151,8 @@ void Outcome::stopTimer()
   if ( m_timer == nullptr )
     return;
 
-  OSD_Timer* casted = (OSD_Timer*) m_timer;
-  casted->Stop();
+  auto timer = std::static_pointer_cast<OSD_Timer>(m_timer);
+  timer->Stop();
 
-  this->ElapsedTimeSec = casted->ElapsedTime();
+  this->ElapsedTimeSec = timer->ElapsedTime();
 }

@@ -35,6 +35,7 @@
 #include <asiAlgo.h>
 
 // Standard includes
+#include <memory>
 #include <string>
 
 namespace asi {
@@ -125,7 +126,14 @@ protected:
 
 protected:
 
-  void* m_timer; //!< Automatic timer.
+  //! Automatic timer. The pointer here is shared to allow for passing the ownership to
+  //! the copied outcome objects. In the invocations like `api().Ok`, where `api()` is a
+  //! function returning an outcome object by value (and that is the as-designed way of
+  //! returning outcomes), the outcome object will be destroyed once the function is done,
+  //! and then copied to the caller function's [temporary] variable for accessing the
+  //! outcome status like `.Ok`. We want to be able to access just the same timer, so we
+  //! make it shared and let the copy outcome object destroy it.
+  std::shared_ptr<void> m_timer;
 
 };
 
