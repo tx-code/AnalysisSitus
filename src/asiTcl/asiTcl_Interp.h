@@ -254,6 +254,9 @@ public:
                      TColStd_PackedMapOfInteger& ids) const;
 
   //! Returns true if the passed command line option specifies the expected key.
+  //! If the passed key is empty, this function checks that the passed option
+  //! looks like a keyword, i.e., it starts with the leading dash character.
+  //!
   //! \param[in] opt option to check.
   //! \param[in] key keyword to check (without any "-" prefix). You can pass
   //!                the empty string here. If you do so, the function will

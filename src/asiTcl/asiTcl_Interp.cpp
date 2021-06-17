@@ -575,7 +575,12 @@ bool asiTcl_Interp::IsKeyword(const TCollection_AsciiString& opt,
   else // If the reference key is empty, let's check the '-' prefix only.
   {
     if ( opt.StartsWith(key2check) )
-      return true;
+    {
+      // Check that we are not having a negative value that is going to
+      // be recognized as a keyword.
+      TCollection_AsciiString tail = opt.SubString( 2, opt.Length() );
+      return !tail.IsRealValue();
+    }
   }
 
   return false;
