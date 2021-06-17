@@ -60,25 +60,30 @@
 #pragma warning(pop)
 
 //! Fill list of parameters in parameter editor.
-void asiUI_ParamEditorImpl::SetParameters(const Handle(ActAPI_HIndexedParameterMap)& theParameterList)
+void asiUI_ParamEditorImpl::SetParameters(const Handle(ActAPI_HIndexedParameterMap)& paramList)
 {
   m_paramList.Nullify();
 
   if ( m_pEditor == 0 )
     return;
 
-  // if input list is empty, clear the parameter
-  if ( theParameterList.IsNull() )
+  // if input list is empty, clear the parameter editor
+  if ( paramList.IsNull() )
   {
     m_pEditor->ClearParameters();
     return;
   }
 
-  QList<asiUI_ParameterEditorData> aParamList;
+  ActAPI_IndexedParameterMap* pParamMap = paramList.get();
   //
-  for ( auto pit = theParameterList->cbegin(); pit != theParameterList->cend(); ++pit )
+  if ( (pParamMap == nullptr) || pParamMap->empty() )
+    return;
+
+  QList<asiUI_ParameterEditorData> qParamList;
+  //
+  for ( const auto& param : *pParamMap )
   {
-    const Handle(ActAPI_IUserParameter)& P = pit->second;
+    const Handle(ActAPI_IUserParameter)& P = param.second;
 
     const bool isVisible  = P->HasUserFlags(ParameterFlag_IsVisible);
     const bool isReadOnly = P->HasUserFlags(ParameterFlag_IsReadOnly);
@@ -86,17 +91,17 @@ void asiUI_ParamEditorImpl::SetParameters(const Handle(ActAPI_HIndexedParameterM
     if ( P->GetName().Length() == 0 || !isVisible )
       continue;
 
-    int aNodalId = pit->first;
+    int aNodalId = param.first;
 
     if ( P->IsKind(STANDARD_TYPE(ActData_GroupParameter)) )
     {
-      aParamList.append( asiUI_ParameterEditorData::GroupParameter( aNodalId, asiUI_Common::ToQString( P->GetName() ) ) );
+      qParamList.append( asiUI_ParameterEditorData::GroupParameter( aNodalId, asiUI_Common::ToQString( P->GetName() ) ) );
       continue;
     }
 
     Handle(ActAPI_INode) aNode = P->GetNode();
 
-    aParamList.append( asiUI_ParameterEditorData::ValueParameter( aNodalId,
+    qParamList.append( asiUI_ParameterEditorData::ValueParameter( aNodalId,
                        asiUI_Common::ToQString( P->GetName() ),
                        ConvertValue(P),
                        asiUI_Common::ToQString( P->GetSemanticId() ),
@@ -106,8 +111,8 @@ void asiUI_ParamEditorImpl::SetParameters(const Handle(ActAPI_HIndexedParameterM
   }
 
   m_paramList = new ActAPI_HIndexedParameterMap;
-  *m_paramList = *theParameterList;
-  m_pEditor->SetParameters(aParamList);
+ *m_paramList = *paramList;
+  m_pEditor->SetParameters(qParamList);
 }
 
 //! Update displayed data of the parameters shown in the parameter editor.
