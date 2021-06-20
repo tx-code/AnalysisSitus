@@ -121,9 +121,9 @@ void asiVisu_MeshPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update routine.
 void asiVisu_MeshPipeline::callback_update()
 {
-  if ( !m_bMapperColorsSet )
-  {
-    asiVisu_MeshUtils::InitMapper(m_mapper, ARRNAME_MESH_ITEM_TYPE);
-    m_bMapperColorsSet = true;
-  }
+  //if ( !m_bMapperColorsSet )
+  //{
+  //  asiVisu_MeshUtils::InitMapper(m_mapper, ARRNAME_MESH_ITEM_TYPE);
+  //  m_bMapperColorsSet = true;
+  //}
 }

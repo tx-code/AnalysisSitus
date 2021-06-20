@@ -44,8 +44,6 @@
 // Data Node representing a single tessellation item in IV (Imperative Viewer)
 //-----------------------------------------------------------------------------
 
-DEFINE_STANDARD_HANDLE(asiData_IVTessItemNode, ActData_BaseNode)
-
 //! Data Node representing a single tessellation item in IV (Imperative Viewer).
 class asiData_IVTessItemNode : public ActData_BaseNode
 {
@@ -68,6 +66,11 @@ public:
     PID_Name,         //!< Name of the Node.
   //------------------//
     PID_Mesh,         //!< Stored mesh.
+  //------------------//
+  // Presentation     //
+  //------------------//
+    PID_GroupPrs,     //!< Presentation group.
+    PID_Color,        //!< Color.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -94,6 +97,12 @@ public:
 
   asiData_EXPORT void
     SetMesh(const Handle(ActData_Mesh)& mesh);
+
+  asiData_EXPORT void
+    SetColor(const int color) const;
+
+  asiData_EXPORT int
+    GetColor() const;
 
 // Initialization:
 public:

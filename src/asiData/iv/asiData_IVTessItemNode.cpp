@@ -39,8 +39,10 @@
 //! Default constructor. Registers all involved Parameters.
 asiData_IVTessItemNode::asiData_IVTessItemNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name, PID_Name);
-  REGISTER_PARAMETER(Mesh, PID_Mesh);
+  REGISTER_PARAMETER(Name,  PID_Name);
+  REGISTER_PARAMETER(Mesh,  PID_Mesh);
+  REGISTER_PARAMETER(Group, PID_GroupPrs);
+  REGISTER_PARAMETER(Int,   PID_Color);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -54,10 +56,14 @@ Handle(ActAPI_INode) asiData_IVTessItemNode::Instance()
 //! Performs initial actions required to make Node WELL-FORMED.
 void asiData_IVTessItemNode::Init()
 {
-  // Initialize name Parameter
   this->InitParameter(PID_Name, "Name");
-  //
-  this->SetMesh(new ActData_Mesh);
+
+  this->SetMesh  (new ActData_Mesh);
+  this->SetColor (190 << 16 | 190 << 8 | 190); // Initial color.
+
+  // Initialize Parameter flags.
+  this->InitParameter(PID_GroupPrs, "Presentation",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,    "Color",         "PrsCustomColor", ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -93,4 +99,18 @@ Handle(ActData_Mesh) asiData_IVTessItemNode::GetMesh() const
 void asiData_IVTessItemNode::SetMesh(const Handle(ActData_Mesh)& mesh)
 {
   ActParamTool::AsMesh( this->Parameter(PID_Mesh) )->SetMesh(mesh);
+}
+
+//! Sets color.
+//! \param color [in] color to set.
+void asiData_IVTessItemNode::SetColor(const int color) const
+{
+  ActParamTool::AsInt( this->Parameter(PID_Color) )->SetValue(color);
+}
+
+//! Accessor for the stored color value.
+//! \return color value.
+int asiData_IVTessItemNode::GetColor() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
 }

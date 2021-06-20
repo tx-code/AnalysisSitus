@@ -66,9 +66,35 @@ asiVisu_IVTessItemPrs::asiVisu_IVTessItemPrs(const Handle(ActAPI_INode)& N)
 }
 
 //! Factory method for Presentation.
-//! \param theNode [in] Node to create a Presentation for.
+//! \param[in] N the Node to create a Presentation for.
 //! \return new Presentation instance.
 Handle(asiVisu_Prs) asiVisu_IVTessItemPrs::Instance(const Handle(ActAPI_INode)& N)
 {
   return new asiVisu_IVTessItemPrs(N);
+}
+
+//! Sets custom color.
+//! \param[in] color the color to set.
+void asiVisu_IVTessItemPrs::Colorize(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_MeshPipeline)
+    pl = Handle(asiVisu_MeshPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
+
+  if ( !pl.IsNull() )
+    pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                          color.Green(),
+                                          color.Blue() );
+}
+
+//! Callback for updating of Presentation pipelines invoked after the
+//! kernel update routine completes.
+void asiVisu_IVTessItemPrs::afterUpdatePipelines() const
+{
+  Handle(asiData_IVTessItemNode)
+    N = Handle(asiData_IVTessItemNode)::DownCast( this->GetNode() );
+
+  /* Actualize color */
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
+  this->Colorize(color);
 }
