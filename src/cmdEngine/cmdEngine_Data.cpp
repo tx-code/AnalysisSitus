@@ -842,6 +842,93 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  if ( argc != 3 && argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get edge ID (if passed).
+  int eid = 0;
+  TCollection_AsciiString eidStr;
+  //
+  if ( interp->GetKeyValue(argc, argv, "eid", eidStr) )
+    eid = eidStr.IntegerValue();
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+  // If the edge ID is not passed, get the selected edge.
+  TColStd_PackedMapOfInteger eids;
+  //
+  if ( !eid )
+    partApi.GetHighlightedEdges(eids);
+  else
+    eids.Add(eid);
+
+  cmdEngine::model->OpenCommand();
+  {
+    // Add metadata.
+    for ( TColStd_MapIteratorOfPackedMapOfInteger eit(eids); eit.More(); eit.Next() )
+    {
+      Handle(asiData_ElemMetadataNode)
+        emn = partApi.CreateElemMetadata( "Color", partApi.GetEdge( eit.Key() ) );
+      //
+      const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
+                                                   colorComponents[1],
+                                                   colorComponents[2]);
+      //
+      interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Setting edge color to %1." << icolor);
+      //
+      emn->SetColor(icolor);
+    }
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+  //
+  if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_GetMetadataIds(const Handle(asiTcl_Interp)& interp,
                           int                          argc,
                           const char**                 argv)
@@ -1133,6 +1220,14 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Sets color for the given face.",
     //
     __FILE__, group, ENGINE_SetFaceColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("set-edge-color",
+    //
+    "set-edge-color [-eid id] -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Sets color for the given edge.",
+    //
+    __FILE__, group, ENGINE_SetEdgeColor);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("get-metadata-ids",

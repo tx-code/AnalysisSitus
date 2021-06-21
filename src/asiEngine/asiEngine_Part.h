@@ -237,6 +237,12 @@ public:
   asiEngine_EXPORT TopoDS_Face
     GetFace(const int oneBasedId);
 
+  //! Accessor for a transient pointer to a B-Rep edge by its one-based index.
+  //! \param[in] oneBasedId one-based index of an edge to access.
+  //! \return transient pointer to an edge.
+  asiEngine_EXPORT TopoDS_Edge
+    GetEdge(const int oneBasedId);
+
   //! \return shape stored in Part Node.
   asiEngine_EXPORT TopoDS_Shape
     GetShape();

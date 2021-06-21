@@ -836,6 +836,31 @@ TopoDS_Face asiEngine_Part::GetFace(const int oneBasedId)
 
 //-----------------------------------------------------------------------------
 
+TopoDS_Edge asiEngine_Part::GetEdge(const int oneBasedId)
+{
+  // Get Part Node
+  Handle(asiData_PartNode) part_n = m_model->GetPartNode();
+  //
+  if ( part_n.IsNull() || !part_n->IsWellFormed() )
+    return TopoDS_Edge();
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = part_n->GetAAG();
+  //
+  if ( aag.IsNull() )
+    return TopoDS_Edge();
+
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
+
+  // Get edge.
+  if ( (oneBasedId < 1) || ( oneBasedId > allEdges.Extent() ) )
+    return TopoDS_Edge();
+
+  return TopoDS::Edge( allEdges(oneBasedId) );
+}
+
+//-----------------------------------------------------------------------------
+
 TopoDS_Shape asiEngine_Part::GetShape()
 {
   // Get Part Node

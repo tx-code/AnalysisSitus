@@ -184,7 +184,7 @@ bool gltf_FaceIterator::HasTexCoords() const
 
 gp_Dir gltf_FaceIterator::NormalTransformed(int theNode)
 {
-  gp_Dir aNorm = normal (theNode);
+  gp_Dir aNorm = normal(theNode);
   if ( m_trsf.Form() != gp_Identity )
   {
     aNorm.Transform (m_trsf);
@@ -256,7 +256,7 @@ gp_Dir gltf_FaceIterator::normal(int N)
                                    m_pNormals->Value(m_pNormals->Lower() + nodeIdx * 3 + 2) );
     if ( normVec3.Modulus() != 0.0f )
     {
-      norm.SetCoord (normVec3.x(), normVec3.y(), normVec3.z());
+      norm.SetCoord( normVec3.x(), normVec3.y(), normVec3.z() );
     }
   }
   else if ( m_bHasNormals && m_pNodeUVs != NULL )
