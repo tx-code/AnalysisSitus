@@ -31,7 +31,7 @@
 // Own include
 #include <asiAlgo_BVHFacets.h>
 
-// Geometry includes
+// asiAlgo includes
 #include <asiAlgo_BVHIterator.h>
 
 // OCCT includes
@@ -47,6 +47,15 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
+
+// Standard includes
+#include <map>
+
+#if defined USE_MOBIUS
+#include <mobius/cascade.h>
+
+using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -73,6 +82,17 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
   m_fBoundingDiag             (0.0),
   m_progress                  (progress),
   m_plotter                   (plotter)
+{
+  this->init(mesh, builderType);
+  this->MarkDirty();
+}
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<poly_Mesh>& mesh,
+                                     const BuilderType       builderType,
+                                     ActAPI_ProgressEntry    progress,
+                                     ActAPI_PlotterEntry     plotter)
 {
   this->init(mesh, builderType);
   this->MarkDirty();
@@ -337,6 +357,91 @@ bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
   Bnd_Box aabb;
   BRepBndLib::Add(F, aabb);
   //
+  m_fBoundingDiag = ( aabb.CornerMax().XYZ() - aabb.CornerMin().XYZ() ).Modulus();
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
+                             const BuilderType       builderType)
+{
+  if ( mesh.IsNull() )
+    return false;
+
+  // Prepare builder
+  if ( builderType == Builder_Binned )
+    myBuilder = new BVH_BinnedBuilder<double, 3, 32>(5, 32);
+  else
+    myBuilder = new BVH_LinearBuilder<double, 3>(5, 32);
+
+  Bnd_Box aabb;
+
+  // Iterate the mesh.
+  for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+  {
+    poly_TriangleHandle th = tit.Current();
+    poly_Triangle       t;
+    poly_VertexHandle   vh[3];
+
+    // Get triangle and skip it if it's marked as "deleted".
+    mesh->GetTriangle(th, t);
+    //
+    if ( t.IsDeleted() )
+      continue;
+
+    // Access the vertices.
+    t.GetVertices(vh[0], vh[1], vh[2]);
+    //
+    t_xyz  nodes[3];
+    gp_Pnt pts[3];
+    //
+    for ( int k = 0; k < 3; ++k )
+    {
+      mesh->GetVertex(vh[k], nodes[k]);
+      pts[k] = cascade::GetOpenCascadePnt(nodes[k]);
+
+      aabb.Add(pts[k]);
+    }
+
+    // Create a new facet
+    const int face_idx = t.GetFaceRef();
+    t_facet facet(face_idx == Mobius_InvalidHandleIndex ? -1 : face_idx);
+
+    // Initialize nodes
+    facet.P0 = BVH_Vec3d( nodes[0].X(), nodes[0].Y(), nodes[0].Z() );
+    facet.P1 = BVH_Vec3d( nodes[1].X(), nodes[1].Y(), nodes[1].Z() );
+    facet.P2 = BVH_Vec3d( nodes[2].X(), nodes[2].Y(), nodes[2].Z() );
+
+    /* Initialize normal */
+
+    gp_Vec V1(pts[0], pts[1]);
+    //
+    if ( V1.SquareMagnitude() < 1e-8 )
+      continue; // Skip invalid facet.
+    //
+    V1.Normalize();
+
+    gp_Vec V2(pts[0], pts[2]);
+    //
+    if ( V2.SquareMagnitude() < 1e-8 )
+      continue; // Skip invalid facet.
+    //
+    V2.Normalize();
+
+    // Compute norm
+    facet.N = V1.Crossed(V2);
+    //
+    if ( facet.N.SquareMagnitude() < 1e-8 )
+      continue; // Skip invalid facet
+    //
+    facet.N.Normalize();
+
+    // Store facet in the internal collection
+    m_facets.push_back(facet);
+  }
+
   m_fBoundingDiag = ( aabb.CornerMax().XYZ() - aabb.CornerMin().XYZ() ).Modulus();
 
   return true;

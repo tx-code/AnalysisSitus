@@ -48,6 +48,11 @@
 #include <ActAPI_IPlotter.h>
 #include <ActAPI_IProgressNotifier.h>
 
+#if defined USE_MOBIUS
+// Mobius includes
+#include <mobius/poly_Mesh.h>
+#endif
+
 //-----------------------------------------------------------------------------
 
 //! BVH-based accelerating structure representing CAD model's
@@ -97,6 +102,17 @@ public:
                       const BuilderType                 builderType = Builder_Binned,
                       ActAPI_ProgressEntry              progress    = nullptr,
                       ActAPI_PlotterEntry               plotter     = nullptr);
+
+  //! Creates the accelerating structure with immediate initialization.
+  //! \param[in] mesh        triangulation to create the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \param[in] progress    progress notifier.
+  //! \param[in] plotter     imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_BVHFacets(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
+                      const BuilderType                       builderType = Builder_Binned,
+                      ActAPI_ProgressEntry                    progress    = nullptr,
+                      ActAPI_PlotterEntry                     plotter     = nullptr);
 
 public:
 
@@ -191,13 +207,21 @@ protected:
     init(const TopoDS_Shape& model,
          const BuilderType   builderType);
 
-  //! Initializes the accelerating structure with the given CAD model.
-  //! \param[in] model       CAD model to prepare the accelerating structure for.
+  //! Initializes the accelerating structure with the given triangulation.
+  //! \param[in] model       triangulation to prepare the accelerating structure for.
   //! \param[in] builderType type of builder to use.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     init(const Handle(Poly_Triangulation)& mesh,
          const BuilderType                 builderType);
+
+  //! Initializes the accelerating structure with the given mesh.
+  //! \param[in] model       mesh model to prepare the accelerating structure for.
+  //! \param[in] builderType type of builder to use.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    init(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
+         const BuilderType                       builderType);
 
   //! Adds face to the accelerating structure.
   //! \param[in] face     face to add.

@@ -390,10 +390,11 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
     m_resultMobMesh = new poly_Mesh;
 
     // [BEGIN] Iterate over the faces
-    int triangleIndex = 0;
+    int faceId = 0;
     //
     for ( TopExp_Explorer exp(body, TopAbs_FACE); exp.More(); exp.Next() )
     {
+      faceId++;
       const TopoDS_Face& F = TopoDS::Face( exp.Current() );
       NCollection_DataMap<int, int> FaceNodeIds_ToGlobalNodeIds;
 
@@ -447,15 +448,8 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
 
         m_resultMobMesh->AddTriangle( poly_VertexHandle(m[0]),
                                       poly_VertexHandle(m[1]),
-                                      poly_VertexHandle(m[2]) );
-
-        // Add mapping of indices.
-        NCollection_Vector<int>* mapPtr = m_faceElems.ChangeSeek(F);
-        if ( mapPtr == nullptr )
-          mapPtr = m_faceElems.Bound(F, NCollection_Vector<int>());
-        //
-        (*mapPtr).Append(triangleIndex);
-        ++triangleIndex;
+                                      poly_VertexHandle(m[2]),
+                                      faceId );
       }
     }
     // [END] Iterate over the faces
