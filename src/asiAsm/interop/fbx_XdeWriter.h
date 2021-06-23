@@ -35,9 +35,6 @@
 // asiAsm includes
 #include <asiAsm.h>
 
-// asiAlgo includes
-#include <asiAlgo_MeshMerge.h>
-
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 

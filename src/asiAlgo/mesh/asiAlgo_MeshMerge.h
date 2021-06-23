@@ -37,6 +37,11 @@
 // Active Data includes
 #include <ActData_Mesh.h>
 
+// Mobius includes
+#if defined USE_MOBIUS
+#include <mobius/poly_Mesh.h>
+#endif
+
 // OCCT includes
 #include <Poly_CoherentTriangulation.hxx>
 #include <TColStd_PackedMapOfInteger.hxx>
@@ -61,7 +66,8 @@ public:
   enum Mode
   {
     Mode_PolyCoherentTriangulation,
-    Mode_Mesh
+    Mode_Mesh,
+    Mode_MobiusMesh
   };
 
 public:
@@ -125,6 +131,14 @@ public:
     return m_resultPoly->GetTriangulation();
   }
 
+#if defined USE_MOBIUS
+  //! \return the resulting mesh data structure of Mobius kernel.
+  const mobius::t_ptr<mobius::poly_Mesh>& GetMobiusMesh() const
+  {
+    return m_resultMobMesh;
+  }
+#endif
+
 protected:
 
   void build(const TopoDS_Shape& body,
@@ -139,6 +153,11 @@ protected:
   Handle(Poly_CoherentTriangulation) m_resultPoly; //!< Result tessellation.
   Handle(ActData_Mesh)               m_resultMesh; //!< Result mesh.
   t_faceElems                        m_faceElems;  //!< Map to store indices of mesh triagnles for face.
+
+#if defined USE_MOBIUS
+  //! Result Mobius mesh.
+  mobius::t_ptr<mobius::poly_Mesh> m_resultMobMesh;
+#endif
 
 };
 
