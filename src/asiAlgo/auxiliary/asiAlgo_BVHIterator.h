@@ -42,6 +42,93 @@
 
 //-----------------------------------------------------------------------------
 
+namespace
+{
+
+// This default hash assumes T can be converted to int implicitly.
+// The user can define how to map T to int with template specializations.
+template <class T>
+struct DefaultHashFunc
+{
+  inline static int to_int(const T& t)
+  {
+    return t;
+  }
+};
+
+// This is a stack-based hash table supporting basic operations:
+// - insert an element into the hash
+// - see if an element exist
+//
+// Pros: Fast, no heap memory, no STL header needed. e.g. embeded programming
+// Cons: User must anticipate max memory usage. Limited functionality.
+// NOTE: if N is not enough to hold all element, error will be reported.
+template <class T, int N, class HashFunc = DefaultHashFunc<T> >
+class StackHash
+{
+private:
+
+  struct Node
+  {
+    T val;
+    Node *next;
+  };
+
+  Node  buffer[N];
+  Node *hash[N] = {nullptr};
+  int   buf_i   = 0;
+
+public:
+
+  void Add(const T& t)
+  {
+    if ( buf_i >= N )
+    {
+      std::cerr << "error: exceeded capacity!" << std::endl;
+      return;
+    }
+    buffer[buf_i].val = t;
+
+    int hash_value = HashFunc::to_int(t)%N;
+
+    if ( hash[hash_value] == nullptr )
+    {
+      buffer[buf_i].next = nullptr;
+      hash[hash_value] = &buffer[buf_i];
+    }
+    else
+    {
+      buffer[buf_i].next = hash[hash_value];
+      hash[hash_value] = &buffer[buf_i];
+    }
+    buf_i++;
+  }
+
+  bool Contains(const T& t)
+  {
+    int hash_value = HashFunc::to_int(t)%N;
+
+    if ( hash[hash_value] == nullptr )
+    {
+      return false;
+    }
+    else
+    {
+      Node *p = hash[hash_value];
+      while ( p )
+      {
+        if ( p->val == t ) return true;
+        p = p->next;
+      }
+    }
+    return false;
+  }
+};
+
+}
+
+//-----------------------------------------------------------------------------
+
 //! Depth-first iterator for BVH structure.
 //!
 //! Stored data of each BVH node has the following meaning:
@@ -93,12 +180,11 @@ protected:
   opencascade::handle< BVH_Tree<double, 3> > m_bvh; //!< Structure to iterate over.
 
   // Iteration state variables
-  BVH_Item                   m_stack[96];   //!< Non-traversed nodes to return.
-  int                        m_iStackHead;  //!< Pointer to the stack head.
-  BVH_Item                   m_currentNode; //!< Current node.
-  TColStd_PackedMapOfInteger m_blocked;     //!< Nodes to stop traverse (their
-                                            //!< children will be skipped).
+  BVH_Item            m_stack[96];   //!< Non-traversed nodes to return.
+  int                 m_iStackHead;  //!< Pointer to the stack head.
+  BVH_Item            m_currentNode; //!< Current node.
+  StackHash<int, 512> m_blocked;     //!< Nodes to stop traverse (their children will be skipped).
 
 };
 
-#endif 
+#endif
