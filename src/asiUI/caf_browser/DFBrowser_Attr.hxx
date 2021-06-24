@@ -18,7 +18,7 @@
 #ifndef _DFBrowser_Attr_h
 #define _DFBrowser_Attr_h
 
-#include <caf_browser.h>
+#include <asiUI.h>
 
 #include <Handle_DFBrowser_Attr.hxx>
 #include <Standard_Transient.hxx>
@@ -36,13 +36,13 @@ class DFBrowser_Attr : public Standard_Transient
 {
  public:
 
-  CAFBrowser_EXPORT DFBrowser_Attr();
+  asiUI_EXPORT DFBrowser_Attr();
 
-  CAFBrowser_EXPORT const TCollection_AsciiString & LoadLabel(const TDF_Label& theLabel,const Standard_Boolean theName = Standard_True);
+  asiUI_EXPORT const TCollection_AsciiString & LoadLabel(const TDF_Label& theLabel,const Standard_Boolean theName = Standard_True);
 
-  CAFBrowser_EXPORT const TCollection_AsciiString & LoadAttribute(const Handle(TDF_Attribute)& theAttribute);
+  asiUI_EXPORT const TCollection_AsciiString & LoadAttribute(const Handle(TDF_Attribute)& theAttribute);
 
-  CAFBrowser_EXPORT const TCollection_AsciiString & LoadAttribute(const Handle(TDF_Attribute)& theAttribute,const Standard_Boolean theFull);
+  asiUI_EXPORT const TCollection_AsciiString & LoadAttribute(const Handle(TDF_Attribute)& theAttribute,const Standard_Boolean theFull);
 
   inline DFBrowser_Colors GetColor() const
   {
@@ -64,33 +64,33 @@ class DFBrowser_Attr : public Standard_Transient
     myDetailed = theDetailed;
   }
 
-  CAFBrowser_EXPORT void NamedShape(const Standard_Address theTree, const Standard_Address theNode);
+  asiUI_EXPORT void NamedShape(const Standard_Address theTree, const Standard_Address theNode);
 
-  CAFBrowser_EXPORT const TCollection_AsciiString & LoadShape(const TopoDS_Shape& theShape,const TDF_Label& theAccess);
+  asiUI_EXPORT const TCollection_AsciiString & LoadShape(const TopoDS_Shape& theShape,const TDF_Label& theAccess);
 
-  CAFBrowser_EXPORT const TCollection_AsciiString & LoadVertices(const TopoDS_Shape& theShape);
+  asiUI_EXPORT const TCollection_AsciiString & LoadVertices(const TopoDS_Shape& theShape);
 
-  CAFBrowser_EXPORT void Description(const Handle(TDF_Attribute) &theAttr,TCollection_AsciiString &theName);
+  asiUI_EXPORT void Description(const Handle(TDF_Attribute) &theAttr,TCollection_AsciiString &theName);
 
-  CAFBrowser_EXPORT void Description(const TDF_Label &theLabel,TCollection_AsciiString &theName);
+  asiUI_EXPORT void Description(const TDF_Label &theLabel,TCollection_AsciiString &theName);
 
-  CAFBrowser_EXPORT void AddToName(const TCollection_ExtendedString& theString);
+  asiUI_EXPORT void AddToName(const TCollection_ExtendedString& theString);
 
-  CAFBrowser_EXPORT void AddToName(const TCollection_AsciiString& theString);
+  asiUI_EXPORT void AddToName(const TCollection_AsciiString& theString);
 
-  CAFBrowser_EXPORT void AddToName(const Standard_CString theString);
+  asiUI_EXPORT void AddToName(const Standard_CString theString);
 
-  CAFBrowser_EXPORT void AddToName(const Handle(TDF_Attribute)& theAttribute);
+  asiUI_EXPORT void AddToName(const Handle(TDF_Attribute)& theAttribute);
 
-  CAFBrowser_EXPORT void AddToName(const Standard_Integer theType,const Standard_Integer theCount);
+  asiUI_EXPORT void AddToName(const Standard_Integer theType,const Standard_Integer theCount);
 
   DEFINE_STANDARD_RTTI_INLINE(DFBrowser_Attr, Standard_Transient)
 
  private:
 
-  CAFBrowser_EXPORT void AddList(const Standard_CString theString);
+  asiUI_EXPORT void AddList(const Standard_CString theString);
 
-  CAFBrowser_EXPORT void AddList(const Handle(TDF_Attribute)& theAttribute);
+  asiUI_EXPORT void AddList(const Handle(TDF_Attribute)& theAttribute);
 
   TCollection_AsciiString myName;
   DFBrowser_Colors myColor;

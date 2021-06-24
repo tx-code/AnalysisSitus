@@ -87,10 +87,6 @@ add_library (cmdEngine SHARED
 
 target_link_libraries(cmdEngine asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
 
-#if (WIN32)
-#  target_link_libraries(cmdEngine caf_browser)
-#endif()
-
 if (USE_MOBIUS)
   foreach (LIB_FILE ${MOBIUS_LIB_FILES})
     if (WIN32)

@@ -28,17 +28,17 @@ class DFBrowser_NSNode : public DFBrowser_AttrNode
 {
  public:
 
-  CAFBrowser_EXPORT DFBrowser_NSNode();
+  asiUI_EXPORT DFBrowser_NSNode();
 
-  CAFBrowser_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode);
+  asiUI_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode);
 
-  CAFBrowser_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const;
+  asiUI_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const;
 
-  CAFBrowser_EXPORT virtual void Update();
+  asiUI_EXPORT virtual void Update();
 
-  CAFBrowser_EXPORT Handle(TNaming_NamedShape) NamedShape() const;
+  asiUI_EXPORT Handle(TNaming_NamedShape) NamedShape() const;
 
-  CAFBrowser_EXPORT void NamedShape(const Handle(TNaming_NamedShape)& theNS);
+  asiUI_EXPORT void NamedShape(const Handle(TNaming_NamedShape)& theNS);
 
   inline Standard_Boolean Structure() const
   {
@@ -50,7 +50,7 @@ class DFBrowser_NSNode : public DFBrowser_AttrNode
     if (!myIsShape) myStructure = theSet;
   }
 
-  CAFBrowser_EXPORT void SetShape(const TopoDS_Shape& theNewShape,
+  asiUI_EXPORT void SetShape(const TopoDS_Shape& theNewShape,
                                 const TopoDS_Shape& theOldShape,
                                 const Standard_Boolean theVertices,
                                 const Standard_Boolean theNew);
@@ -60,7 +60,7 @@ class DFBrowser_NSNode : public DFBrowser_AttrNode
     return myShape;
   }
 
-  CAFBrowser_EXPORT virtual void Del();
+  asiUI_EXPORT virtual void Del();
 
   DEFINE_STANDARD_RTTI_INLINE(DFBrowser_NSNode, DFBrowser_AttrNode)
 

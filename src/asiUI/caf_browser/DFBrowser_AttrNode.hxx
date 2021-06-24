@@ -15,22 +15,47 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef _DFBrowser_h
-#define _DFBrowser_h
+#ifndef _DFBrowser_AttrNode_h
+#define _DFBrowser_AttrNode_h
 
-#include <caf_browser.h>
+#include <Handle_DFBrowser_AttrNode.hxx>
+#include <DFBrowser_DFNode.hxx>
+#include <TDF_Attribute.hxx>
+#include <Standard_CString.hxx>
 
-#include <TDocStd_Document.hxx>
-
-class DFBrowser
+class DFBrowser_AttrNode : public DFBrowser_DFNode
 {
  public:
 
-  CAFBrowser_EXPORT static Standard_Integer DFBrowserCall(const Handle(TDocStd_Document)& theDoc);
-  //! Loads DFBrowser functionality for not Draw based application. Used for plugin. <br>
-  CAFBrowser_EXPORT static Standard_Integer Factory(const Handle(TDocStd_Document)& theDoc);
+  asiUI_EXPORT DFBrowser_AttrNode();
+
+  asiUI_EXPORT virtual DFBrowser_NodeType GetType() const;
+
+  asiUI_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode);
+
+  asiUI_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const;
+
+  asiUI_EXPORT virtual const TCollection_AsciiString & Name();
+
+  asiUI_EXPORT virtual void Update();
+
+  inline const Handle(TDF_Attribute)& Attribute() const
+  {
+    return myAttr;
+  }
+
+  inline void Attribute(const Handle(TDF_Attribute)& theAttr)
+  {
+    myAttr = theAttr;
+  }
+
+  asiUI_EXPORT virtual void Del();
+
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_AttrNode, DFBrowser_DFNode)
+
+ private:
+
+  Handle(TDF_Attribute) myAttr;
 };
-
-
 
 #endif

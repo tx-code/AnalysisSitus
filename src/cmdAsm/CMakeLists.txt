@@ -46,7 +46,6 @@ include_directories ( SYSTEM
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
-                      ${caf_browser_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
@@ -69,10 +68,6 @@ add_library (cmdAsm SHARED
 #------------------------------------------------------------------------------
 
 target_link_libraries(cmdAsm asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
-
-if (WIN32)
-  target_link_libraries(cmdAsm caf_browser)
-endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software

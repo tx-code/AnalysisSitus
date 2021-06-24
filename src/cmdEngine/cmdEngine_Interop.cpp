@@ -62,10 +62,8 @@
 // glTF includes
 #include <gltf_XdeWriter.h>
 
-#ifdef _WIN32
 // DF Browser includes
-//#include <DFBrowser.hxx>
-#endif
+#include <DFBrowser.hxx>
 
 // OpenCascade includes
 #include <BRepTools.hxx>
@@ -457,10 +455,8 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
     //
     pDlg->show();
 
-//#ifdef _WIN32
-//    // DFBrowse
-//    DFBrowser::DFBrowserCall( xdeDoc->GetDocument() );
-//#endif
+    // DFBrowse
+    DFBrowser::DFBrowserCall( xdeDoc->GetDocument() );
   }
 
   // Export to glTF.

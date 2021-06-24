@@ -15,51 +15,72 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef _DFBrowser_ListNode_h
-#define _DFBrowser_ListNode_h
+#ifndef _DFBrowser_LabelNode_h
+#define _DFBrowser_LabelNode_h
 
-#include <Handle_DFBrowser_ListNode.hxx>
+#include <Handle_DFBrowser_LabelNode.hxx>
 #include <DFBrowser_DFNode.hxx>
 
 #include <Standard_CString.hxx>
-#include <Handle_DFBrowser_AttrNode.hxx>
+#include <TDF_Label.hxx>
+#include <Handle_DFBrowser_ListNode.hxx>
 #include <DFBrowser_NodeType.hxx>
 
-class DFBrowser_ListNode : public DFBrowser_DFNode
+class DFBrowser_LabelNode : public DFBrowser_DFNode
 {
  public:
 
-  CAFBrowser_EXPORT DFBrowser_ListNode();
+  asiUI_EXPORT DFBrowser_LabelNode();
 
-  CAFBrowser_EXPORT virtual DFBrowser_NodeType GetType() const;
+  asiUI_EXPORT virtual DFBrowser_NodeType GetType() const;
 
-  CAFBrowser_EXPORT virtual void Update();
+  asiUI_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode);
 
-  CAFBrowser_EXPORT virtual const TCollection_AsciiString & Name();
+  asiUI_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const;
 
-  CAFBrowser_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode);
+  asiUI_EXPORT void DelSub(Handle(DFBrowser_DFNode)& theNode);
 
-  CAFBrowser_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const;
+  asiUI_EXPORT virtual void Update();
 
-  inline const Handle(DFBrowser_AttrNode) & FirstAttribute() const
+  asiUI_EXPORT virtual const TCollection_AsciiString & Name();
+
+  inline const TDF_Label & Label() const
   {
-    return myAttr;
+    return myLabel;
   }
 
-  inline void FirstAttribute(const Handle(DFBrowser_AttrNode)& theAttribute)
+  inline void Label(const TDF_Label& theLabel)
   {
-    myAttr = theAttribute;
+    myLabel = theLabel;
   }
 
-  CAFBrowser_EXPORT Handle(DFBrowser_AttrNode) LastAttribute() const;
+  inline const Handle(DFBrowser_DFNode) & Child() const
+  {
+    return myChild;
+  }
 
-  CAFBrowser_EXPORT virtual void Del();
+  inline const Handle(DFBrowser_LabelNode) & FirstLabel() const
+  {
+    return myFirstLabel;
+  }
 
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_ListNode, DFBrowser_DFNode)
+  asiUI_EXPORT void AddList(const Standard_Boolean theAdd);
+
+  inline const Handle(DFBrowser_ListNode) & List() const
+  {
+    return myList;
+  }
+
+  asiUI_EXPORT virtual void Del();
+
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_LabelNode, DFBrowser_DFNode)
 
  private: 
 
-  Handle_DFBrowser_AttrNode myAttr;
+  TDF_Label myLabel;
+  Handle(DFBrowser_DFNode)    myChild;
+  Handle(DFBrowser_LabelNode) myFirstLabel;
+  Handle(DFBrowser_ListNode)  myList;
 };
 
 #endif

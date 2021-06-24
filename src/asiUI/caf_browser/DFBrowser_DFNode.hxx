@@ -18,7 +18,7 @@
 #ifndef _DFBrowser_DFNode_h
 #define _DFBrowser_DFNode_h
 
-#include <caf_browser.h>
+#include <asiUI.h>
 
 #include <Handle_DFBrowser_DFNode.hxx>
 #include <Standard_Transient.hxx>
@@ -34,31 +34,31 @@ class DFBrowser_DFNode : public Standard_Transient
 {
  public:
 
-  CAFBrowser_EXPORT DFBrowser_DFNode();
+  asiUI_EXPORT DFBrowser_DFNode();
 
-  CAFBrowser_EXPORT virtual DFBrowser_NodeType GetType() const = 0;
+  asiUI_EXPORT virtual DFBrowser_NodeType GetType() const = 0;
 
-  CAFBrowser_EXPORT virtual void Update() = 0;
+  asiUI_EXPORT virtual void Update() = 0;
 
-  CAFBrowser_EXPORT void Next(const Handle(DFBrowser_DFNode)& theNext);
+  asiUI_EXPORT void Next(const Handle(DFBrowser_DFNode)& theNext);
 
   inline const Handle(DFBrowser_DFNode) & Next() const
   {
     return myNext;
   }
 
-  CAFBrowser_EXPORT void Parent(const Handle(DFBrowser_DFNode)& theParent);
+  asiUI_EXPORT void Parent(const Handle(DFBrowser_DFNode)& theParent);
 
   inline const Handle(DFBrowser_DFNode) & Parent() const
   {
     return myParent;
   }
 
-  CAFBrowser_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode) = 0;
+  asiUI_EXPORT virtual void AddSub(Handle(DFBrowser_DFNode)& theNode) = 0;
 
-  CAFBrowser_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const = 0;
+  asiUI_EXPORT virtual Handle(DFBrowser_DFNode) Sub() const = 0;
 
-  CAFBrowser_EXPORT virtual const TCollection_AsciiString & Name() = 0;
+  asiUI_EXPORT virtual const TCollection_AsciiString & Name() = 0;
 
   inline const Handle(DFBrowser_DFTree) & Tree() const
   {
@@ -75,14 +75,14 @@ class DFBrowser_DFNode : public Standard_Transient
     return myIsOpened;
   }
 
-  CAFBrowser_EXPORT void Opened(const Standard_Boolean theOpened);
+  asiUI_EXPORT void Opened(const Standard_Boolean theOpened);
 
   inline Standard_Boolean CanOpen() const
   {
     return myCanOpen;
   }
 
-  CAFBrowser_EXPORT void CanOpen(const Standard_Boolean theCanOpen);
+  asiUI_EXPORT void CanOpen(const Standard_Boolean theCanOpen);
 
   inline Standard_Boolean Selected() const
   {
@@ -109,7 +109,7 @@ class DFBrowser_DFNode : public Standard_Transient
     return myIsVisible;
   }
 
-  CAFBrowser_EXPORT void Visible(const Standard_Boolean theIsVisible);
+  asiUI_EXPORT void Visible(const Standard_Boolean theIsVisible);
 
   inline DFBrowser_Colors Color() const
   {
@@ -121,7 +121,7 @@ class DFBrowser_DFNode : public Standard_Transient
     return myPixmap;
   }
 
-  CAFBrowser_EXPORT virtual void Del() = 0;
+  asiUI_EXPORT virtual void Del() = 0;
 
   DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFNode, Standard_Transient)
 

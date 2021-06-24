@@ -15,68 +15,46 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef _DFBrowser_DFTree_h
-#define _DFBrowser_DFTree_h
+#ifndef _DFBrowser_QTGUI_h
+#define _DFBrowser_QTGUI_h
 
-// CAF Browser includes
-#include <caf_browser.h>
+#include <asiUI.h>
 
-#include <Handle_DFBrowser_DFTree.hxx>
-#include <Standard_Transient.hxx>
-
+#include <Standard_Address.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <DFBrowser_PtrGUI.hxx>
-#include <DFBrowser_Attr.hxx>
-#include <DFBrowser_AttrNode.hxx>
-#include <DFBrowser_LabelNode.hxx>
-#include <TDocStd_Document.hxx>
+#include <DFBrowser_Picture.hxx>
 
-class TDF_Label;
-
-class DFBrowser_DFTree : public Standard_Transient
+class DFBrowser_QTGUI
 {
  public:
 
-  CAFBrowser_EXPORT
-    DFBrowser_DFTree(const Handle(TDocStd_Document)& theDoc);
-
-  CAFBrowser_EXPORT
-    DFBrowser_DFTree();
-
-  CAFBrowser_EXPORT
-    Handle(DFBrowser_AttrNode) Node(const Handle(TDF_Attribute)& theAttr) const;
-
-  CAFBrowser_EXPORT
-    Handle(DFBrowser_LabelNode) Node(const TDF_Label& theLabel) const;
-
-public:
-
-  inline const Handle(DFBrowser_Attr) & Attr() const
+  void* operator new(size_t,void* anAddress) 
   {
-    return myAttr;
+    return anAddress;
+  }
+  void* operator new(size_t size) 
+  {
+    return Standard::Allocate(size); 
+  }
+  void  operator delete(void *anAddress) 
+  {
+    if (anAddress) Standard::Free((Standard_Address&)anAddress); 
   }
 
-  inline const Handle(DFBrowser_LabelNode) & Root() const
-  {
-    return myRoot;
-  }
+  asiUI_EXPORT DFBrowser_QTGUI(const DFBrowser_PtrGUI& theGUI);
 
-  CAFBrowser_EXPORT static Standard_Integer NbBrowsers();
+  asiUI_EXPORT void Update();
 
-  CAFBrowser_EXPORT void Update();
+  const TCollection_AsciiString & Filter() const;
 
-  CAFBrowser_EXPORT void Close();
+  asiUI_EXPORT void Close();
 
-  CAFBrowser_EXPORT void AddDocName(TCollection_AsciiString& theName) const;
+  asiUI_EXPORT void Description(const TCollection_AsciiString &theDescription);
 
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFTree, Standard_Transient)
+  asiUI_EXPORT const TCollection_AsciiString & Description() const;
 
- private: 
-
-  Handle(TDocStd_Document) myDoc;
-  Handle(DFBrowser_LabelNode) myRoot;
-  Handle(DFBrowser_Attr) myAttr;
-  DFBrowser_PtrGUI myGUI;
+  asiUI_EXPORT static Standard_Address Pixmap(const DFBrowser_Picture thePicture);
 };
 
 #endif

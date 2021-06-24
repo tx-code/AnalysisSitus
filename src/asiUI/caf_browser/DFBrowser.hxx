@@ -15,19 +15,22 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef caf_browser_h
-#define caf_browser_h
+#ifndef _DFBrowser_h
+#define _DFBrowser_h
 
-#define CAFBrowser_NotUsed(x)
+#include <asiUI.h>
 
-#ifdef _WIN32
-  #ifdef caf_browser_EXPORTS
-    #define CAFBrowser_EXPORT __declspec(dllexport)
-  #else
-    #define CAFBrowser_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define CAFBrowser_EXPORT
-#endif
+#include <TDocStd_Document.hxx>
+
+class DFBrowser
+{
+ public:
+
+  asiUI_EXPORT static Standard_Integer DFBrowserCall(const Handle(TDocStd_Document)& theDoc);
+  //! Loads DFBrowser functionality for not Draw based application. Used for plugin. <br>
+  asiUI_EXPORT static Standard_Integer Factory(const Handle(TDocStd_Document)& theDoc);
+};
+
+
 
 #endif

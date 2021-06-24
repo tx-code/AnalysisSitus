@@ -18,7 +18,7 @@
 #ifndef _DFBrowser_GUI_h
 #define _DFBrowser_GUI_h
 
-#include <caf_browser.h>
+#include <asiUI.h>
 
 #include <Handle_DFBrowser_DFTree.hxx>
 #include <Handle_DFBrowser_DFNode.hxx>
@@ -46,38 +46,38 @@ class DFBrowser_GUI
     if (anAddress) Standard::Free((Standard_Address&)anAddress); 
   }
 
-  CAFBrowser_EXPORT DFBrowser_GUI(const Handle(DFBrowser_DFTree)& theTree);
+  asiUI_EXPORT DFBrowser_GUI(const Handle(DFBrowser_DFTree)& theTree);
 
-  CAFBrowser_EXPORT void Selected(const Handle(DFBrowser_DFNode)& theNode);
+  asiUI_EXPORT void Selected(const Handle(DFBrowser_DFNode)& theNode);
 
-  CAFBrowser_EXPORT void DoubleClicked(const Handle(DFBrowser_DFNode)& theNode) const;
+  asiUI_EXPORT void DoubleClicked(const Handle(DFBrowser_DFNode)& theNode) const;
 
-  CAFBrowser_EXPORT const Handle(DFBrowser_DFNode) & First() const;
+  asiUI_EXPORT const Handle(DFBrowser_DFNode) & First() const;
 
-  CAFBrowser_EXPORT Handle(DFBrowser_DFNode) Next(const Handle(DFBrowser_DFNode)& theNode) const;
+  asiUI_EXPORT Handle(DFBrowser_DFNode) Next(const Handle(DFBrowser_DFNode)& theNode) const;
 
-  CAFBrowser_EXPORT Handle(DFBrowser_DFNode) NextVisible(const Handle(DFBrowser_DFNode)& theNode) const;
+  asiUI_EXPORT Handle(DFBrowser_DFNode) NextVisible(const Handle(DFBrowser_DFNode)& theNode) const;
 
-  CAFBrowser_EXPORT Standard_Integer NodeDepth(const Handle(DFBrowser_DFNode)& theNode) const;
+  asiUI_EXPORT Standard_Integer NodeDepth(const Handle(DFBrowser_DFNode)& theNode) const;
 
-  CAFBrowser_EXPORT void Update() const;
+  asiUI_EXPORT void Update() const;
 
-  CAFBrowser_EXPORT Standard_Address Pixmap(const DFBrowser_Picture theID) const;
+  asiUI_EXPORT Standard_Address Pixmap(const DFBrowser_Picture theID) const;
 
   inline const Handle(DFBrowser_DFTree) & Tree() const
   {
     return myTree;
   }
 
-  CAFBrowser_EXPORT void SetLevel(const DFBrowser_Level theLevel);
+  asiUI_EXPORT void SetLevel(const DFBrowser_Level theLevel);
 
-  CAFBrowser_EXPORT void SetAttrPrs(const DFBrowser_AttrPrs thePrs);
+  asiUI_EXPORT void SetAttrPrs(const DFBrowser_AttrPrs thePrs);
 
-  CAFBrowser_EXPORT Standard_Boolean DoFilter(const Handle(DFBrowser_DFNode)& theFrom);
+  asiUI_EXPORT Standard_Boolean DoFilter(const Handle(DFBrowser_DFNode)& theFrom);
 
-  CAFBrowser_EXPORT void ShowNS(const Standard_Boolean theShow);
+  asiUI_EXPORT void ShowNS(const Standard_Boolean theShow);
 
-  CAFBrowser_EXPORT void Close();
+  asiUI_EXPORT void Close();
 
  private:
 

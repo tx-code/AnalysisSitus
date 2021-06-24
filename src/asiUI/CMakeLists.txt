@@ -367,6 +367,58 @@ set (viewers_CPP_FILES
 )
 
 #------------------------------------------------------------------------------
+# OCAF Browser
+#------------------------------------------------------------------------------
+
+set (caf_browser_H_UI_FILES
+  caf_browser/DFBrowser_QTGUI2.h
+)
+
+set (caf_browser_H_FILES
+  caf_browser/DFBrowser.hxx
+  caf_browser/DFBrowser_Attr.hxx
+  caf_browser/DFBrowser_AttrNode.hxx
+  caf_browser/DFBrowser_AttrPrs.hxx
+  caf_browser/DFBrowser_Colors.hxx
+  caf_browser/DFBrowser_DFNode.hxx
+  caf_browser/DFBrowser_DFTree.hxx
+  caf_browser/DFBrowser_GUI.hxx
+  caf_browser/DFBrowser_LabelNode.hxx
+  caf_browser/DFBrowser_Level.hxx
+  caf_browser/DFBrowser_ListNode.hxx
+  caf_browser/DFBrowser_NodeType.hxx
+  caf_browser/DFBrowser_NSNode.hxx
+  caf_browser/DFBrowser_Picture.hxx
+  caf_browser/DFBrowser_PtrGUI.hxx
+  caf_browser/DFBrowser_PtrQTGUI.hxx
+  caf_browser/DFBrowser_PtrQTGUIMOC.hxx
+  caf_browser/DFBrowser_QTGUI.hxx
+  caf_browser/Handle_DFBrowser_Attr.hxx
+  caf_browser/Handle_DFBrowser_AttrNode.hxx
+  caf_browser/Handle_DFBrowser_DFNode.hxx
+  caf_browser/Handle_DFBrowser_DFTree.hxx
+  caf_browser/Handle_DFBrowser_LabelNode.hxx
+  caf_browser/Handle_DFBrowser_ListNode.hxx
+  caf_browser/Handle_DFBrowser_NSNode.hxx
+)
+
+#------------------------------------------------------------------------------
+
+set (caf_browser_CPP_FILES
+  caf_browser/DFBrowser.cxx
+  caf_browser/DFBrowser_Attr.cxx
+  caf_browser/DFBrowser_AttrNode.cxx
+  caf_browser/DFBrowser_DFNode.cxx
+  caf_browser/DFBrowser_DFTree.cxx
+  caf_browser/DFBrowser_GUI.cxx
+  caf_browser/DFBrowser_LabelNode.cxx
+  caf_browser/DFBrowser_ListNode.cxx
+  caf_browser/DFBrowser_NSNode.cxx
+  caf_browser/DFBrowser_QTGUI.cxx
+  caf_browser/DFBrowser_QTGUI2.cxx
+)
+
+#------------------------------------------------------------------------------
 set (AD_LIB_FILES
   ActiveDataAPI
   ActiveData
@@ -402,6 +454,8 @@ set (OCCT_LIB_FILES
   TKIGES
   TKXDESTEP
   TKXDEIGES
+  TKV3d
+  TKVCAF
 )
 #------------------------------------------------------------------------------
 set (VTK_LIB_FILES
@@ -613,6 +667,28 @@ foreach (FILE ${viewers_CPP_FILES})
   source_group ("Source Files\\Viewers" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${caf_browser_H_FILES})
+  source_group ("Header Files\\OCAF Browser" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${caf_browser_H_UI_FILES})
+  set (src_files ${src_files} ${FILE})
+  #
+  unset (MOC_FILE)
+  qt5_wrap_cpp(MOC_FILE ${FILE})
+  message (STATUS "... Info: next MOC file ${MOC_FILE}")
+  set (ui_moc_files ${ui_moc_files} ${MOC_FILE})
+  #
+  source_group ("Generated" FILES "${MOC_FILE}")
+
+  message (STATUS "... Info: next header file ${FILE}")
+  source_group ("Header Files\\OCAF Browser" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${caf_browser_CPP_FILES})
+  source_group ("Source Files\\OCAF Browser" FILES "${FILE}")
+endforeach (FILE)
+
 #------------------------------------------------------------------------------
 # Configure includes
 #------------------------------------------------------------------------------
@@ -627,6 +703,7 @@ set (asiUI_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/salome;\
   ${CMAKE_CURRENT_SOURCE_DIR}/interaction;\
   ${CMAKE_CURRENT_SOURCE_DIR}/utils;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/caf_browser;\
   ${CMAKE_CURRENT_SOURCE_DIR}/viewers;")
 #
 set (asiUI_include_dir ${asiUI_include_dir_loc} PARENT_SCOPE)
@@ -664,6 +741,7 @@ add_library (asiUI SHARED
   ${interaction_H_FILES}  ${interaction_H_UI_FILES} ${interaction_CPP_FILES}
   ${utils_H_FILES}        ${utils_H_UI_FILES}       ${utils_CPP_FILES}
   ${viewers_H_FILES}      ${viewers_H_UI_FILES}     ${viewers_CPP_FILES}
+  ${caf_browser_H_FILES}  ${caf_browser_H_UI_FILES} ${caf_browser_CPP_FILES}
 )
 
 #------------------------------------------------------------------------------
@@ -775,3 +853,5 @@ install (FILES ${utils_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}includ
 install (FILES ${utils_H_UI_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${viewers_H_FILES}        DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${viewers_H_UI_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${caf_browser_H_FILES}    DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${caf_browser_H_UI_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
