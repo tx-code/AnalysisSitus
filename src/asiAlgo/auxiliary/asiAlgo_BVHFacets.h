@@ -103,6 +103,7 @@ public:
                       ActAPI_ProgressEntry              progress    = nullptr,
                       ActAPI_PlotterEntry               plotter     = nullptr);
 
+#if defined USE_MOBIUS
   //! Creates the accelerating structure with immediate initialization.
   //! \param[in] mesh        triangulation to create the accelerating structure for.
   //! \param[in] builderType type of builder to use.
@@ -113,6 +114,7 @@ public:
                       const BuilderType                       builderType = Builder_Binned,
                       ActAPI_ProgressEntry                    progress    = nullptr,
                       ActAPI_PlotterEntry                     plotter     = nullptr);
+#endif
 
 public:
 
@@ -215,6 +217,7 @@ protected:
     init(const Handle(Poly_Triangulation)& mesh,
          const BuilderType                 builderType);
 
+#if defined USE_MOBIUS
   //! Initializes the accelerating structure with the given mesh.
   //! \param[in] model       mesh model to prepare the accelerating structure for.
   //! \param[in] builderType type of builder to use.
@@ -222,6 +225,7 @@ protected:
   asiAlgo_EXPORT bool
     init(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
          const BuilderType                       builderType);
+#endif
 
   //! Adds face to the accelerating structure.
   //! \param[in] face     face to add.

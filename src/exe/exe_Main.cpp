@@ -151,8 +151,6 @@ int main(int argc, char** argv)
   }
 #endif
 
-  //OSD::SetSignal();
-
   // Construct Qt application.
   QApplication app(argc, argv);
   //

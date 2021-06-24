@@ -89,6 +89,7 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<poly_Mesh>& mesh,
                                      const BuilderType       builderType,
                                      ActAPI_ProgressEntry    progress,
@@ -97,6 +98,7 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<poly_Mesh>& mesh,
   this->init(mesh, builderType);
   this->MarkDirty();
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -364,6 +366,7 @@ bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
                              const BuilderType       builderType)
 {
@@ -446,6 +449,7 @@ bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
 
   return true;
 }
+#endif
 
 //-----------------------------------------------------------------------------
 

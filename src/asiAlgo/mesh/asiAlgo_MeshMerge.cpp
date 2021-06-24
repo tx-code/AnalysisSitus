@@ -166,6 +166,7 @@ namespace
     }
   }
 
+#if defined USE_MOBIUS
   void appendNodeInGlobalTri(const int                            localNodeId,
                              int&                                 globalNodeId,
                              const gp_XYZ&                        xyz,
@@ -201,6 +202,7 @@ namespace
       LocGlobMap.Bind(localNodeId, equalID);
     }
   }
+#endif
 
   Handle(Poly_Triangulation) TriangulationFromFace(const TopoDS_Face& F)
   {
@@ -387,6 +389,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
   /* Mobius data structure */
   if ( mode == Mode_MobiusMesh )
   {
+#if defined USE_MOBIUS
     m_resultMobMesh = new poly_Mesh;
 
     // [BEGIN] Iterate over the faces
@@ -453,6 +456,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
       }
     }
     // [END] Iterate over the faces
+#endif
   }
   /* OpenCascade-based data structures */
   else
