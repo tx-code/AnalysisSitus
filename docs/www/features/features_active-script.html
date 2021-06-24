@@ -52,11 +52,14 @@
 <blockquote class="quote">"Drive or Script." (Alexis S.)</blockquote>
 
 <p>
-Most functionality of Analysis Situs is available through scripting. We use Tcl language which we
-appreciate for its clearness and pure functional paradigm. Each command in Analysis Situs is
-formulated in the following fashion: <span class="code-inline">verb</span> minus
-<span class="code-inline">noun</span>, e.g.: <span class="code-inline">offset-shell</span>,
-<span class="code-inline">start-contour</span>, <span class="code-inline">print-summary</span>, etc.
+Most functionality of Analysis Situs is available through scripting. We use Tcl language which we appreciate for its clearness (and we fully agree with what's written <a href="http://yosefk.com/blog/i-cant-believe-im-praising-tcl.html">here</a>). Tcl is a command language, i.e., it works best when what you're mostly doing is passing commands for execution. It is arguably worse in its "programming language" aspects, but still, it's also a programming language. Although Tcl really shines as a command language, you still have all necessary programming tools, such as conditionals, loops and user-defined procedures.
+
+<p>
+Another shiny facet of Tcl is its C API which is very easy to plug in without any wrapping whatsoever. And, finally, Tcl is natively used by OpenCascade, so we are a little bit biased in the choice.
+</p>
+
+<p>
+Each command in Analysis Situs is formulated in the following fashion: <span class="code-inline">verb</span> minus <span class="code-inline">noun</span>, e.g.: <span class="code-inline">offset-shell</span>, <span class="code-inline">start-contour</span>, <span class="code-inline">print-summary</span>, etc (minus is better than underscore!).
 </p>
 
 <p>
