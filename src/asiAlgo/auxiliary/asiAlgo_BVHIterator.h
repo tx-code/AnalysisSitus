@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Created on: 23 September 2016
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2016-present, Sergey Slyadnev, Alexander Malyshev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -145,45 +145,61 @@ public:
 //! </pre>
 class asiAlgo_BVHIterator
 {
-  typedef int BVH_Item; // Local jargon (node in BVH).
+  const static int STACK_DEPTH = 64;
 
 public:
 
+  //! Ctor. Constructs the iterator for visiting a BVH tree.
+  //! \param[in] bvh the BVH structure to traverse.
   asiAlgo_EXPORT
-    asiAlgo_BVHIterator(const opencascade::handle<BVH_Tree<double, 3> >& bvh);
+    asiAlgo_BVHIterator(const opencascade::handle<BVH_Tree<double, 3>>& bvh);
 
 public:
 
+  //! Moves iterator to the next position.
+  //! \param [in] rightFirst indicates that the right sub-tree should be
+  //!                        inspected before the left one.
+  asiAlgo_EXPORT void
+    Next(const bool rightFirst = false);
+
+  //! \return true if there is still something to iterate over,
+  //!         false -- otherwise.
   asiAlgo_EXPORT bool
     More() const;
 
+  //! \return current item.
   asiAlgo_EXPORT const BVH_Vec4i&
     Current() const;
 
+  //! \return current node's index.
   asiAlgo_EXPORT int
     CurrentIndex() const;
 
-  asiAlgo_EXPORT void
-    Next();
-
+  //! \return true if the current BVH node is leaf, false -- otherwise.
   asiAlgo_EXPORT bool
     IsLeaf() const;
 
+  //! Prevents iterator from visiting left child of the current node.
   asiAlgo_EXPORT void
     BlockLeft();
 
+  //! Prevents iterator from visiting right child of the current node.
   asiAlgo_EXPORT void
     BlockRight();
 
 protected:
 
-  opencascade::handle< BVH_Tree<double, 3> > m_bvh; //!< Structure to iterate over.
+  opencascade::handle<BVH_Tree<double, 3>> m_bvh; //!< Structure to iterate over.
 
-  // Iteration state variables
-  BVH_Item            m_stack[96];   //!< Non-traversed nodes to return.
-  int                 m_iStackHead;  //!< Pointer to the stack head.
-  BVH_Item            m_currentNode; //!< Current node.
-  StackHash<int, 512> m_blocked;     //!< Nodes to stop traverse (their children will be skipped).
+  // Iteration variables.
+  int     m_stack[STACK_DEPTH]; //!< Non-traversed nodes to return.
+  int     m_stackHead;          //!< Pointer to the stack head.
+  int     m_currentNode;        //!< Current node.
+  bool    m_blocked[2];         //!< Nodes to stop traverse (their children will be skipped).
+
+  // Internal variables to speedup calculation.
+  BVH_Vec4i m_current;         //!< current node.
+  bool      m_isLeaf;          //!< flag indicating whether the current node is leaf or not.
 
 };
 
