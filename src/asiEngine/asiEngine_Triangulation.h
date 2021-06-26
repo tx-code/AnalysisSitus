@@ -78,6 +78,10 @@ public:
   asiEngine_EXPORT Handle(asiData_TriangulationNode)
     CreateTriangulation();
 
+  //! \return the existing triangulation.
+  asiEngine_EXPORT Handle(Poly_Triangulation)
+    GetTriangulation();
+
   //! Constructs BVH structure for the facets stored in the Triangulation Node.
   //! \param[in] store specifies whether to store BVH in the Node.
   //! \return constructed BVH.

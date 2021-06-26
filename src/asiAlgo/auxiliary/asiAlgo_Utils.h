@@ -279,6 +279,18 @@ namespace asiAlgo_Utils
       FromDirAsTuple(const gp_Dir& dir);
   }
 
+  //! Functions to work with meshes.
+  namespace Mesh
+  {
+    //! Extracts a region out of the given mesh.
+    //! \param[in] tris the triangulation to extract a region from.
+    //! \param[in] ids  the set of 1-based element indices to extract.
+    //! \return the extracted region.
+    asiAlgo_EXPORT Handle(Poly_Triangulation)
+      ExtractRegion(const Handle(Poly_Triangulation)& tris,
+                    const TColStd_PackedMapOfInteger& ids);
+  }
+
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.
   //! \return label.

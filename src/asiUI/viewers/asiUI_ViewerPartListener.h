@@ -110,6 +110,7 @@ protected:
 
   //! Custom actions.
   QAction* m_pSaveBREPAction;
+  QAction* m_pSaveSTLAction;
   QAction* m_pShowNormsAction;
   QAction* m_pInvertFacesAction;
   QAction* m_pShowOriContourAction;

@@ -175,12 +175,40 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( facetIds.Extent() )
+  {
+    tris = asiAlgo_Utils::Mesh::ExtractRegion(tris, facetIds);
+  }
+
   // Convert to Mobius.
   t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
 
-  // Flip edges.
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
   mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  TIMER_RESET
+  TIMER_GO
+
+  // Flip edges
   mesh->FlipEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edges")
 
   // Update data model.
   cmdMobius::model->OpenCommand();
@@ -241,18 +269,18 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
    * ================== */
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("mobius-poly-compute-norms",
+  interp->AddCommand("poly-compute-norms",
     //
-    "mobius-poly-compute-norms\n"
+    "poly-compute-norms\n"
     "\n"
     "\t Computes normal field.",
     //
     __FILE__, group, MOBIUS_POLY_ComputeNorms);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("mobius-poly-flip-edges",
+  interp->AddCommand("poly-flip-edges",
     //
-    "mobius-poly-flip-edges\n"
+    "poly-flip-edges\n"
     "\n"
     "\t Flips triangulation edges.",
     //

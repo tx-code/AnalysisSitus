@@ -59,6 +59,13 @@ Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
 
 //-----------------------------------------------------------------------------
 
+Handle(Poly_Triangulation) asiEngine_Triangulation::GetTriangulation()
+{
+  return m_model->GetTriangulationNode()->GetTriangulation();
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiAlgo_BVHFacets) asiEngine_Triangulation::BuildBVH(const bool store)
 {
   // Get Triangulation Node

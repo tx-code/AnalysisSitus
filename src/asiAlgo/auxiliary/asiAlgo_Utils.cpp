@@ -116,6 +116,7 @@
 #include <NCollection_IncAllocator.hxx>
 #include <OSD_Environment.hxx>
 #include <OSD_OpenFile.hxx>
+#include <Poly_CoherentTriangulation.hxx>
 #include <Precision.hxx>
 #include <RWStl.hxx>
 #include <ShapeAnalysis_Edge.hxx>
@@ -662,6 +663,66 @@ std::string asiAlgo_Utils::Json::FromDirAsTuple(const gp_Dir& dir)
   out << "]";
 
   return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Poly_Triangulation)
+  asiAlgo_Utils::Mesh::ExtractRegion(const Handle(Poly_Triangulation)& tris,
+                                     const TColStd_PackedMapOfInteger& ids)
+{
+  Handle(Poly_CoherentTriangulation)
+    cohTris = new Poly_CoherentTriangulation(tris);
+
+  // Collect new nodes.
+  int                           localNodeId = 1;
+  NCollection_DataMap<int, int> nodeMap;
+  std::vector<gp_XYZ>           newNodes;
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator fit(ids); fit.More(); fit.Next() )
+  {
+    const int cohId = fit.Key() - 1; // Coherent triangulation has 0-based indexing.
+
+    const Poly_CoherentTriangle& ctri = cohTris->Triangle(cohId);
+    int globalNodeIds[3] = { ctri.Node(0), ctri.Node(1), ctri.Node(2) };
+
+    for ( int k = 0; k < 3; ++k )
+    {
+      if ( !nodeMap.IsBound(globalNodeIds[k]) )
+      {
+        nodeMap.Bind(globalNodeIds[k], localNodeId++);
+        newNodes.push_back( cohTris->Node(globalNodeIds[k]) );
+      }
+    }
+  }
+
+  // Collect new triangles.
+  std::vector<Poly_Triangle> newTriangles;
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator fit(ids); fit.More(); fit.Next() )
+  {
+    const int cohId = fit.Key() - 1; // Coherent triangulation has 0-based indexing.
+
+    const Poly_CoherentTriangle& ctri = cohTris->Triangle(cohId);
+    int globalNodeIds[3] = { ctri.Node(0), ctri.Node(1), ctri.Node(2) };
+
+    newTriangles.push_back( Poly_Triangle( nodeMap(globalNodeIds[0]),
+                                            nodeMap(globalNodeIds[1]),
+                                            nodeMap(globalNodeIds[2]) ) );
+  }
+
+  // Construct resulting triangulation.
+  TColgp_Array1OfPnt    newNodesArr ( 1, int( newNodes.size() ) );
+  Poly_Array1OfTriangle newTrisArr  ( 1, int( newTriangles.size() ) );
+  //
+  for ( int i = 1; i <= newNodesArr.Length(); ++i )
+    newNodesArr(i) = newNodes[i - 1];
+  //
+  for ( int i = 1; i <= newTrisArr.Length(); ++i )
+    newTrisArr(i) = newTriangles[i - 1];
+
+  // Set result and return.
+  return new Poly_Triangulation(newNodesArr, newTrisArr);
 }
 
 //-----------------------------------------------------------------------------

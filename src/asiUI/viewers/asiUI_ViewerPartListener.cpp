@@ -40,6 +40,7 @@
 #include <asiAlgo_CheckDihedralAngle.h>
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
+#include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -48,6 +49,7 @@
 #include <asiEngine_Features.h>
 #include <asiEngine_IV.h>
 #include <asiEngine_Part.h>
+#include <asiEngine_Triangulation.h>
 
 // asiVisu includes
 #include <asiVisu_PartNodeInfo.h>
@@ -97,6 +99,15 @@ namespace
 
     return oneShape;
   }
+
+  //! Prepares one mesh out of the passed collection of faces.
+  //! \param[in] faces the faces to process.
+  //! \return one bulk of mesh.
+  Handle(Poly_Triangulation) FacesAsOneMesh(const TopTools_IndexedMapOfShape& faces)
+  {
+    asiAlgo_MeshMerge::t_faceElems history;
+    return asiAlgo_MeshMerge::PutTogether( FacesAsOneShape(faces), history );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -114,12 +125,17 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_wViewerHost           (wViewerHost),
   m_wBrowser              (wBrowser),
   m_pSaveBREPAction       (nullptr),
+  m_pSaveSTLAction        (nullptr),
   m_pShowNormsAction      (nullptr),
   m_pInvertFacesAction    (nullptr),
   m_pShowOriContourAction (nullptr),
   m_pCopyAsStringAction   (nullptr),
   m_pSetAsVariableAction  (nullptr),
-  m_pFindIsolated         (nullptr)
+  m_pFindIsolated         (nullptr),
+  m_pCheckDihAngle        (nullptr),
+  m_pAddAsFeature         (nullptr),
+  m_pGetAsBLOB            (nullptr),
+  m_pMeasureLength        (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -319,12 +335,16 @@ void asiUI_ViewerPartListener::onVertexPicked(asiVisu_PickerResult* pickRes)
 
 void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
 {
+  asiEngine_Part          partApi ( m_model, m_pViewer->PrsMgr() );
+  asiEngine_Triangulation trisApi ( m_model, m_pViewer->PrsMgr() );
+
   // Get highlighted faces and edges.
-  TColStd_PackedMapOfInteger faceIndices, edgeIndices, vertIndices;
+  TColStd_PackedMapOfInteger faceIndices, edgeIndices, vertIndices, facetIndices;
   //
-  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedFaces    (faceIndices);
-  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedEdges    (edgeIndices);
-  asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedVertices (vertIndices);
+  partApi.GetHighlightedFaces    (faceIndices);
+  partApi.GetHighlightedEdges    (edgeIndices);
+  partApi.GetHighlightedVertices (vertIndices);
+  trisApi.GetHighlightedFacets   (facetIndices);
 
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();
@@ -333,6 +353,13 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   {
     m_progress.SendLogMessage( LogErr(Normal) << "Part Node is null or bad-formed." );
     return;
+  }
+
+  // Prepare the context menu items.
+  if ( facetIndices.Extent() )
+  {
+    menu.addSeparator();
+    m_pSaveSTLAction = menu.addAction("Save to STL...");
   }
 
   // Prepare the context menu items.
@@ -359,6 +386,9 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     //
     m_pSaveBREPAction      = menu.addAction("Save to BREP...");
     m_pSetAsVariableAction = menu.addAction("Set as variable");
+
+    if ( faceIndices.Extent() )
+      m_pSaveSTLAction = menu.addAction("Save to STL...");
 
     // Add items which work for single-element selection.
     if ( faceIndices.Extent() == 1 || edgeIndices.Extent() == 1 )
@@ -404,7 +434,42 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Save shape
     if ( !asiAlgo_Utils::WriteBRep( shape2Save, QStr2AsciiStr(filename) ) )
     {
-      m_progress.SendLogMessage( LogErr(Normal) << "Cannot save shape" );
+      m_progress.SendLogMessage( LogErr(Normal) << "Cannot save shape." );
+      return;
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: save STL
+  //---------------------------------------------------------------------------
+  if ( pAction == m_pSaveSTLAction )
+  {
+    asiEngine_Part          partApi( m_model, m_pViewer->PrsMgr() );
+    asiEngine_Triangulation trisApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get highlighted elements
+    TopTools_IndexedMapOfShape selectedShapes;
+    TColStd_PackedMapOfInteger selectedFacets;
+    //
+    partApi.GetHighlightedSubShapes(selectedShapes);
+    trisApi.GetHighlightedFacets(selectedFacets);
+
+    // Let user choose a filename
+    QString filename = asiUI_Common::selectSTLFile(asiUI_Common::OpenSaveAction_Save);
+    //
+    if ( filename.isEmpty() )
+      return;
+
+    // Prepare a triangulation to dump
+    Handle(Poly_Triangulation)
+      mesh2Save = selectedShapes.Extent() ? ::FacesAsOneMesh(selectedShapes)
+                                          : asiAlgo_Utils::Mesh::ExtractRegion( trisApi.GetTriangulation(),
+                                                                                selectedFacets );
+
+    // Save mesh
+    if ( !asiAlgo_Utils::WriteStl( mesh2Save, QStr2AsciiStr(filename) ) )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Cannot save triangulation." );
       return;
     }
   }
