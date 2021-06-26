@@ -157,6 +157,55 @@ int MOBIUS_POLY_ComputeNorms(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+  //
+  Handle(Poly_Triangulation)
+    tris = tris_n->GetTriangulation();
+  //
+  if ( tris.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
+    return TCL_ERROR;
+  }
+
+  // Convert to Mobius.
+  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+
+  // Flip edges.
+  mesh->ComputeEdges();
+  mesh->FlipEdges();
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -199,6 +248,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Computes normal field.",
     //
     __FILE__, group, MOBIUS_POLY_ComputeNorms);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("mobius-poly-flip-edges",
+    //
+    "mobius-poly-flip-edges\n"
+    "\n"
+    "\t Flips triangulation edges.",
+    //
+    __FILE__, group, MOBIUS_POLY_FlipEdges);
 }
 
 // Declare entry point PLUGINFACTORY
