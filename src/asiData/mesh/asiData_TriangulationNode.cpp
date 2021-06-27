@@ -73,7 +73,7 @@ void asiData_TriangulationNode::Init()
   this->SetOptions     (nullptr);
   this->SetBVH         (nullptr);
   this->SetUseScalars  (true);
-  this->SetColor       (190 << 16 | 190 << 8 | 190); // Initial color.
+  this->SetColor       (120 << 16 | 120 << 8 | 120); // Initial color.
   this->SetDisplayMode (1);
   this->SetHasVertices (false);
 

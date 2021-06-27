@@ -210,6 +210,9 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edges")
 
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
+                                                        << mesh->GetNumTriangles() );
+
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
