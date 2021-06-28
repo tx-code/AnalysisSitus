@@ -105,6 +105,11 @@ public:
     CheckDeviation(const Handle(asiData_IVPointSetNode)& pcNode,
                    Handle(asiData_DeviationNode)&        devNode);
 
+  //! Highlights facets.
+  //! \param[in] facetIndices facets to highlight.
+  asiEngine_EXPORT void
+    HighlightFacets(const TColStd_PackedMapOfInteger& facetIndices);
+
   //! Returns highlighted facets.
   //! \param[out] facetIndices indices of highlighted facets.
   asiEngine_EXPORT void

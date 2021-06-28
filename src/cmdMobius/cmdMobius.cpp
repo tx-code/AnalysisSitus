@@ -204,7 +204,7 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_RESET
   TIMER_GO
 
-  // Flip edges
+  // Flip edges.
   mesh->FlipEdges();
 
   TIMER_FINISH
@@ -223,6 +223,97 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   // Update UI.
   cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
   cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+  //
+  Handle(Poly_Triangulation)
+    tris = tris_n->GetTriangulation();
+  //
+  if ( tris.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( !facetIds.Extent() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No facets are selected.");
+    return TCL_ERROR;
+  }
+
+  // Convert to Mobius.
+  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  TIMER_RESET
+  TIMER_GO
+
+  // Find triangles.
+  TColStd_PackedMapOfInteger foundIds;
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
+  {
+    const int fid = fit.Key() - 1; // Mobius indices are 0-based.
+
+    std::vector<poly_TriangleHandle> ths;
+    if ( !mesh->FindAdjacent(poly_TriangleHandle(fid), ths) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find adjacent triangles.");
+      return TCL_ERROR;
+    }
+
+    for ( const auto& th : ths )
+      foundIds.Add(th.iIdx + 1); // OpenCascade triangles are 1-based.
+  }
+  //
+  foundIds.Subtract(facetIds); // Do not pass the initially selected facets.
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find adjacent triangles")
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles found: %1."
+                                                        << foundIds.Extent() );
+
+  trisApi.HighlightFacets(foundIds);
+
+  *interp << foundIds;
 
   return TCL_OK;
 #else
@@ -288,6 +379,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Flips triangulation edges.",
     //
     __FILE__, group, MOBIUS_POLY_FlipEdges);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-find-adjacent",
+    //
+    "poly-find-adjacent\n"
+    "\n"
+    "\t Finds adjacent triangles for the given one.",
+    //
+    __FILE__, group, MOBIUS_POLY_FindAdjacent);
 }
 
 // Declare entry point PLUGINFACTORY

@@ -33,6 +33,7 @@
 
 // asiVisu includes
 #include <asiVisu_TriangulationNodeInfo.h>
+#include <asiVisu_TriangulationPrs.h>
 
 // asiAlgo includes
 #include <asiAlgo_CheckDeviations.h>
@@ -128,6 +129,28 @@ bool
   trisNode->AddChildNode(devNode);
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Triangulation::HighlightFacets(const TColStd_PackedMapOfInteger& facetIndices)
+{
+  // Get Triangulatiom Node.
+  Handle(asiData_TriangulationNode) N = m_model->GetTriangulationNode();
+
+  // Get Presentation for the Triangulation Node.
+  Handle(asiVisu_TriangulationPrs)
+    prs = Handle(asiVisu_TriangulationPrs)::DownCast( m_prsMgr->GetPresentation(N) );
+  //
+  if ( prs.IsNull() )
+    return;
+
+  // Make sure to restore the previous selection mode.
+  const int prevMode = m_prsMgr->GetCurrentSelection().GetSelectionModes();
+  {
+    m_prsMgr->Highlight(N, prs->MainActor(), facetIndices, SelectionMode_Face);
+  }
+  m_prsMgr->ChangeCurrentSelection().SetSelectionModes(prevMode);
 }
 
 //-----------------------------------------------------------------------------
