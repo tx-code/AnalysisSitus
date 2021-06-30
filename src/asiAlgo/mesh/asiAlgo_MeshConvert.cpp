@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshMerge.h>
+#include <asiAlgo_MeshMergeNodes.h>
 
 // Active Data includes
 #include <ActData_Mesh_ElementsIterator.h>
@@ -255,8 +256,10 @@ bool asiAlgo_MeshConvert::FromVTK(vtkPolyData*                source,
 
   // Calculate real amount of triangles and nodes in resulting mesh.
   // Some algorithms, like healing can produce linear segments instead of triangles.
-  std::vector<gp_Pnt> nodes;
+  asiAlgo_MeshMergeNodes        merger;
+  std::vector<gp_Pnt>           nodes;
   std::vector<std::vector<int>> faces;
+  //
   for ( vtkIdType cellId = 0; cellId < numCells; ++cellId )
   {
     const int cellType = source->GetCellType(cellId);
@@ -284,22 +287,27 @@ bool asiAlgo_MeshConvert::FromVTK(vtkPolyData*                source,
     const gp_Pnt pnt3(coord3[0],coord3[1],coord3[2]);
     int resIdx1 = 0, resIdx2 = 0, resIdx3 = 0;
 
-    nodes.push_back(pnt1);
-    nodes.push_back(pnt2);
-    nodes.push_back(pnt3);
+    if ( merger.Perform(pnt1, resIdx1) )
+      nodes.push_back(pnt1);
 
-    std::vector<int> indexes;
-    indexes.push_back(resIdx1);
-    indexes.push_back(resIdx2);
-    indexes.push_back(resIdx3);
+    if ( merger.Perform(pnt2, resIdx2) )
+      nodes.push_back(pnt2);
+
+    if ( merger.Perform(pnt3, resIdx3) )
+      nodes.push_back(pnt3);
+
+    std::vector<int> indexes(3);
+    indexes[0] = resIdx1;
+    indexes[1] = resIdx2;
+    indexes[2] = resIdx3;
     faces.push_back(indexes);
   }
 
   // Construct resulting mesh and copy data.
   result = new Poly_Triangulation((int) nodes.size(), (int) faces.size(), false);
-  for (int i = 0; i < (int)nodes.size(); ++i)
+  for ( int i = 0; i < (int)nodes.size(); ++i )
     result->ChangeNode(i + 1) = nodes[i];
-  for (int i = 0; i < (int)faces.size(); ++i)
+  for ( int i = 0; i < (int)faces.size(); ++i )
     result->ChangeTriangle(i + 1).Set(faces[i][0], faces[i][1], faces[i][2]);
 
   return true;

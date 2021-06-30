@@ -39,6 +39,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshComputeNorms.h>
+#include <asiAlgo_MeshSmooth.h>
 #include <asiAlgo_Timer.h>
 
 // asiTcl includes
@@ -379,11 +380,14 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // Compute links.
     mesh->ComputeEdges();
 
-    const double areaThreshold = 0.1;
-    const double lenThreshold  = 0.1;
-    const int    maxIter       = 1;
-    bool         stop          = false;
-    int          iter          = 0;
+    double areaThreshold = 10.;
+    double lenThreshold  = 1.;
+    //
+    interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
+
+    const int maxIter = 1;
+    bool      stop    = false;
+    int       iter    = 0;
 
     // Refine. Notice that we do not use triangle iterator here as more triangles
     // are added as long as we refine.
@@ -538,7 +542,7 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Collapse edge")
 
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles edge collapse: %1."
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles after edge collapse: %1."
                                                         << mesh->GetNumTriangles() );
 
   // Update data model.
@@ -561,6 +565,261 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
 
   return TCL_ERROR;
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+  //
+  Handle(Poly_Triangulation)
+    tris = tris_n->GetTriangulation();
+  //
+  if ( tris.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
+    return TCL_ERROR;
+  }
+
+  double maxLen = 1.;
+  //
+  interp->GetKeyValue(argc, argv, "maxlen", maxLen);
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Convert to Mobius.
+  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+
+  TIMER_NEW
+  TIMER_GO
+
+  const int maxIter = 10;
+  bool      stop    = false;
+  int       iter    = 0;
+
+  // Refine.
+  do
+  {
+    ///
+    mesh->ComputeEdges();
+    ///
+
+    int  numEdges   = mesh->GetNumEdges();
+    bool anyRefined = false;
+    //
+    for ( int idx = 0; idx < numEdges; ++idx )
+    {
+      poly_EdgeHandle eh(idx);
+      poly_Edge       e;
+
+      // Get the next edge.
+      mesh->GetEdge(eh, e);
+      //
+      if ( e.IsDeleted() )
+        continue;
+
+      t_xyz V[2];
+      mesh->GetVertex(e.hVertices[0], V[0]);
+      mesh->GetVertex(e.hVertices[1], V[1]);
+
+      // Refine triangle based on its size.
+      const double len = (V[1] - V[0]).Modulus();
+      //
+      if ( len < maxLen )
+      {
+        mesh->CollapseEdge(eh);
+
+        ///
+        mesh->ComputeEdges();
+        ///
+
+        if ( !anyRefined ) anyRefined = true;
+      }
+    }
+
+    if ( !anyRefined || (++iter >= maxIter) )
+      stop = true;
+  }
+  while ( !stop );
+
+  ///
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles after edge collapse: %1."
+                                                        << mesh->GetNumTriangles() );
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
+                                int                          argc,
+                                const char**                 argv)
+{
+#if defined USE_MOBIUS
+
+  // Get mesh from the Triangulation Node.
+  Handle(Poly_Triangulation)
+    poly = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
+  //
+  if ( poly.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
+    return TCL_ERROR;
+  }
+
+  // Convert to Mobius.
+  t_ptr<poly_Mesh> mobMesh;
+  {
+    cascade_Triangulation converter(poly);
+    converter.DirectConvert();
+    mobMesh = converter.GetMobiusTriangulation();
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  const int numTris = mobMesh->GetNumTriangles();
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to refine."
+                                                       << numTris);
+
+  double areaThreshold = 10.;
+  double lenThreshold  = 1.;
+  //
+  interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
+
+  // Refine. Notice that we do not use triangle iterator here as more triangles
+  // are added as long as we refine.
+  for ( int idx = 0; idx < numTris; ++idx )
+  {
+    poly_TriangleHandle th(idx);
+    poly_Triangle       t;
+
+    // Get the next triangle to process.
+    mobMesh->GetTriangle(th, t);
+    //
+    if ( t.IsDeleted() )
+      continue;
+
+    // Refine triangle based on its size.
+    const double area = mobMesh->ComputeArea(th);
+    const double len  = mobMesh->ComputeMaxLen(th);
+    //
+    if ( (area > areaThreshold) && (len > lenThreshold) )
+    {
+      mobMesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+    }
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
+
+  // Convert back to the OpenCascade triangulation.
+  Handle(Poly_Triangulation) refinedPoly;
+  {
+    cascade_Triangulation converter(mobMesh);
+    converter.DirectConvert();
+    refinedPoly = converter.GetOpenCascadeTriangulation();
+  }
+
+  // Update Data Model.
+  cmdMobius::model->OpenCommand();
+  {
+    cmdMobius::model->GetTriangulationNode()->SetTriangulation(refinedPoly);
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Actualize.
+  if ( cmdMobius::cf->ViewerPart )
+    cmdMobius::cf->ViewerPart->PrsMgr()->Actualize( cmdMobius::model->GetTriangulationNode() );
+
+  return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+
+  // Get mesh from the Triangulation Node.
+  Handle(Poly_Triangulation) poly = tris_n->GetTriangulation();
+  //
+  if ( poly.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  int iter = 1;
+  interp->GetKeyValue(argc, argv, "iter", iter);
+
+  const int numTris = poly->NbTriangles();
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iterations."
+                                                       << numTris << iter);
+
+  // Apply smoothing.
+  if ( !asiAlgo_MeshSmooth::DoVTK(poly, iter, poly) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Smoothing failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Smooth")
+
+  // Update Data Model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation(poly);
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Actualize.
+  if ( cmdMobius::cf->ViewerPart )
+    cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+
+  return TCL_OK;
 }
 
 //-----------------------------------------------------------------------------
@@ -629,7 +888,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-refine-midedges",
     //
-    "poly-refine-midedges\n"
+    "poly-refine-midedges [-minarea <minarea>]\n"
     "\n"
     "\t Refines the input triangles by midedges.",
     //
@@ -643,6 +902,31 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Collapses the edge between the two selected triangles.",
     //
     __FILE__, group, MOBIUS_POLY_CollapseEdge);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-collapse-edges",
+    //
+    "poly-collapse-edges -maxlen <maxlen>\n"
+    "\n"
+    "\t Collapses tiny edges incrementally.",
+    //
+    __FILE__, group, MOBIUS_POLY_CollapseEdges);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-refine-midpoints",
+    //
+    "poly-refine-midpoints [-minarea <minarea>]\n"
+    "\t Applies midpoint refinement to each triangle.",
+    //
+    __FILE__, group, MOBIUS_POLY_RefineMidpoints);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-smooth",
+    //
+    "poly-smooth [-iter <iter>]\n"
+    "\t Smooths triangulation.",
+    //
+    __FILE__, group, MOBIUS_POLY_Smooth);
 }
 
 // Declare entry point PLUGINFACTORY
