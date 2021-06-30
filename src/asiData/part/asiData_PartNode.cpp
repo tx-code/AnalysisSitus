@@ -132,12 +132,12 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->InitParameter(PID_FilenameIn,         "Input filename",     "FileSelector",   ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupTrsf,          "Transformation",     "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTx,             "Tx",                 "Part_TX",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTy,             "Ty",                 "Part_TY",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfTz,             "Tz",                 "Part_TZ",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRx,             "Rx",                 "Part_RX",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRy,             "Ry",                 "Part_RY",        ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_TrsfRz,             "Rz",                 "Part_RZ",        ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTx,             "Tx",                 "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTy,             "Ty",                 "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfTz,             "Tz",                 "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRx,             "Rx",                 "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRy,             "Ry",                 "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_TrsfRz,             "Rz",                 "",               ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupTess,          "Tessellation",       "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TessLinDefl,        "Linear deflection",  "",               ParameterFlag_IsVisible, true);
