@@ -307,15 +307,15 @@ void asiVisu_TriangulationPrs::highlight(vtkRenderer*                        asi
   if ( cellPickRes.IsNull() )
     return;
 
-  TColStd_PackedMapOfInteger        cellIds = cellPickRes->GetPickedCellIds();
+  //TColStd_PackedMapOfInteger        cellIds = cellPickRes->GetPickedCellIds();
   const TColStd_PackedMapOfInteger& elemIds = cellPickRes->GetPickedElementIds();
 
   // If no cells are picked, derive their IDs from the element IDs.
-  if ( cellIds.IsEmpty() && !elemIds.IsEmpty() )
+  /*if ( cellIds.IsEmpty() && !elemIds.IsEmpty() )
   {
     for ( TColStd_PackedMapOfInteger::Iterator it(elemIds); it.More(); it.Next() )
       cellIds.Add( it.Key() - 1 );
-  }
+  }*/
 
   // There is one peculiarity in selection mechanism for mesh elements. To
   // save memory, we do not store element IDs as pedigrees or global IDs in
@@ -336,7 +336,7 @@ void asiVisu_TriangulationPrs::highlight(vtkRenderer*                        asi
     Handle(asiVisu_TriangulationPipeline)
       mainPl = Handle(asiVisu_TriangulationPipeline)::DownCast( this->GetPipeline(Pipeline_Triangulation) );
 
-    mainPl->SetPickedElements( cellIds, selNature );
+    mainPl->SetPickedElements( elemIds, selNature );
 
     // Diagnostic dump.
     if ( selNature == SelectionNature_Persistent )
@@ -354,7 +354,7 @@ void asiVisu_TriangulationPrs::highlight(vtkRenderer*                        asi
     Handle(asiVisu_TriangulationLinksPipeline)
       contourPl = Handle(asiVisu_TriangulationLinksPipeline)::DownCast( this->GetPipeline(Pipeline_TriangulationLinks) );
 
-    contourPl->SetPickedElements( cellIds, selNature );
+    contourPl->SetPickedElements( elemIds, selNature );
 
     // Diagnostic dump.
     if ( selNature == SelectionNature_Persistent )
@@ -372,7 +372,7 @@ void asiVisu_TriangulationPrs::highlight(vtkRenderer*                        asi
     Handle(asiVisu_TriangulationLinksPipeline)
       nodesPl = Handle(asiVisu_TriangulationLinksPipeline)::DownCast( this->GetPipeline(Pipeline_TriangulationNodes) );
 
-    nodesPl->SetPickedElements( cellIds, selNature );
+    nodesPl->SetPickedElements( elemIds, selNature );
 
     // Diagnostic dump.
     if ( selNature == SelectionNature_Persistent )

@@ -3185,6 +3185,84 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_AddInternalVertex(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape shape = partNode->GetShape();
+
+  TopoDS_Face face;
+
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  {
+    // Access selected faces (if any).
+    TColStd_PackedMapOfInteger selected;
+    asiEngine_Part( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+
+    if ( !selected.IsEmpty() )
+    {
+      for ( TColStd_PackedMapOfInteger::Iterator fit(selected); fit.More(); fit.Next() )
+      {
+        face = partNode->GetAAG()->GetFace( fit.Key() );
+
+        face.TShape()->Free(true);
+
+        double uMin, uMax, vMin, vMax;
+        BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+        {
+          const double u = 0.75*(uMin + uMax);
+          const double v = 0.35*(vMin + vMax);
+          BRepAdaptor_Surface bas(face);
+          gp_Pnt P = bas.Value(u, v);
+          TopoDS_Vertex V = BRepBuilderAPI_MakeVertex(P);
+          V.Orientation(TopAbs_EXTERNAL);
+          BRep_Builder().UpdateVertex( V, u, v, face, Precision::Confusion() );
+          BRep_Builder().Add(face, V);
+        }
+
+        {
+          const double u = 0.15*(uMin + uMax);
+          const double v = 0.65*(vMin + vMax);
+          BRepAdaptor_Surface bas(face);
+          gp_Pnt P = bas.Value(u, v);
+          TopoDS_Vertex V = BRepBuilderAPI_MakeVertex(P);
+          V.Orientation(TopAbs_EXTERNAL);
+          BRep_Builder().UpdateVertex( V, u, v, face, Precision::Confusion() );
+          BRep_Builder().Add(face, V);
+        }
+
+        interp->GetPlotter().REDRAW_SHAPE("face", face);
+      }
+    }
+  }
+
+  // Modify Data Model.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part(cmdEngine::model).Update(face);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
@@ -3617,4 +3695,12 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t to the faces of the resulting model.",
     //
     __FILE__, group, ENGINE_ConvertToBRep);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("add-internal-vertex",
+    //
+    "add-internal-vertex\n"
+    "\t Test command.",
+    //
+    __FILE__, group, ENGINE_AddInternalVertex);
 }

@@ -108,6 +108,10 @@ void asiVisu_TriangulationPipelineBase::SetPickedElements(const TColStd_PackedMa
   vtkCellData* pCellData       = pData->GetCellData();
   const int    numOfInputCells = pCellData->GetNumberOfTuples();
 
+  // Get array of pedigree IDs
+  vtkIdTypeArray*
+    pPedigreeArr = vtkIdTypeArray::SafeDownCast( pCellData->GetPedigreeIds() );
+
   // Get array of cell types
   vtkIdTypeArray*
     pShapePrimArr = vtkIdTypeArray::SafeDownCast( pCellData->GetArray(ARRNAME_MESH_ITEM_TYPE) );
@@ -126,9 +130,12 @@ void asiVisu_TriangulationPipelineBase::SetPickedElements(const TColStd_PackedMa
   // Mark cells
   for ( vtkIdType cellId = 0; cellId < numOfInputCells; ++cellId )
   {
-    // NOTICE: unlike for B-Reps, here we can use cell IDs as element IDs.
+    // Check pedigree ID of the cell.
+    double pedigreeIdDbl;
+    pPedigreeArr->GetTuple(cellId, &pedigreeIdDbl);
+    const int pedigreeId = (int) pedigreeIdDbl;
 
-    if ( !elementIds.Contains(cellId) )
+    if ( !elementIds.Contains(pedigreeId) )
       continue;
 
     // Get the current scalar
