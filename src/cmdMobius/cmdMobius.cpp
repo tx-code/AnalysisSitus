@@ -313,8 +313,8 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
       }
     }
 
-    for ( const auto& th : ths )
-      foundIds.Add(th.iIdx + 1); // OpenCascade triangles are 1-based.
+    for ( const auto& _th : ths )
+      foundIds.Add(_th.iIdx + 1); // OpenCascade triangles are 1-based.
   }
   //
   foundIds.Subtract(facetIds); // Do not pass the initially selected facets.
@@ -650,6 +650,9 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
       stop = true;
   }
   while ( !stop );
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Collapse edges")
 
   ///
 
