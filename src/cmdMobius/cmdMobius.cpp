@@ -384,6 +384,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     double lenThreshold  = 1.;
     //
     interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
+    interp->GetKeyValue(argc, argv, "minlen",  lenThreshold);
 
     const int maxIter = 1;
     bool      stop    = false;
@@ -393,10 +394,31 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // are added as long as we refine.
     do
     {
-      int  numTris    = mesh->GetNumTriangles();
-      bool anyRefined = false;
+      int numTris = mesh->GetNumTriangles();
+
+      // Compute areas.
+      std::vector<poly_TriangleHandle> ths;
+      std::vector<double>              tAreas;
+      std::vector<int>                 tNums;
       //
       for ( int idx = 0; idx < numTris; ++idx )
+      {
+        poly_TriangleHandle th(idx);
+
+        tAreas.push_back( mesh->ComputeArea(th) );
+        tNums .push_back( idx );
+      }
+
+      // Sort facets by descending areas.
+      std::sort( tNums.begin(), tNums.end(),
+                 [&](const int a, const int b)
+                 {
+                   return tAreas[a] > tAreas[b];
+                 } );
+
+      bool anyRefined = false;
+      //
+      for ( int idx : tNums )
       {
         poly_TriangleHandle th(idx);
         poly_Triangle       t;
@@ -411,7 +433,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
         const double area = mesh->ComputeArea(th);
         const double len  = mesh->ComputeMaxLen(th);
         //
-        if ( (area > areaThreshold) || (len > lenThreshold) )
+        if ( (area > areaThreshold) && (len > lenThreshold) )
         {
           mesh->RefineByMidedges(th);
 
@@ -532,8 +554,16 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  const bool force = interp->HasKeyword(argc, argv, "force");
+  bool       isOk  = false;
+
   // Collapse the common edge.
-  if ( !mesh->CollapseEdge(he) )
+  if ( force )
+    isOk = mesh->CollapseEdge(he);
+  else
+    isOk = mesh->CollapseEdge(he, true, true, 0.01);
+
+  if ( !isOk )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot collapse the edge.");
     return TCL_ERROR;
@@ -602,6 +632,8 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
+  mesh->ComputeEdges();
+
   const int maxIter = 10;
   bool      stop    = false;
   int       iter    = 0;
@@ -609,10 +641,6 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   // Refine.
   do
   {
-    ///
-    mesh->ComputeEdges();
-    ///
-
     int  numEdges   = mesh->GetNumEdges();
     bool anyRefined = false;
     //
@@ -636,11 +664,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
       //
       if ( len < maxLen )
       {
-        mesh->CollapseEdge(eh);
-
-        ///
-        mesh->ComputeEdges();
-        ///
+        mesh->CollapseEdge(eh, true, true, 0.01);
 
         if ( !anyRefined ) anyRefined = true;
       }
@@ -720,9 +744,29 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
   //
   interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
 
+  // Compute areas.
+  std::vector<poly_TriangleHandle> ths;
+  std::vector<double>              tAreas;
+  std::vector<int>                 tNums;
+  //
+  for ( int idx = 0; idx < numTris; ++idx )
+  {
+    poly_TriangleHandle th(idx);
+
+    tAreas.push_back( mobMesh->ComputeArea(th) );
+    tNums .push_back( idx );
+  }
+
+  // Sort facets by descending areas.
+  std::sort( tNums.begin(), tNums.end(),
+             [&](const int a, const int b)
+             {
+               return tAreas[a] > tAreas[b];
+             } );
+
   // Refine. Notice that we do not use triangle iterator here as more triangles
   // are added as long as we refine.
-  for ( int idx = 0; idx < numTris; ++idx )
+  for ( int idx : tNums )
   {
     poly_TriangleHandle th(idx);
     poly_Triangle       t;
@@ -891,7 +935,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-refine-midedges",
     //
-    "poly-refine-midedges [-minarea <minarea>]\n"
+    "poly-refine-midedges [-minarea <minarea>] [-minlen <minlen>]\n"
     "\n"
     "\t Refines the input triangles by midedges.",
     //
@@ -900,9 +944,10 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-collapse-edge",
     //
-    "poly-collapse-edge\n"
+    "poly-collapse-edge [-force]\n"
     "\n"
-    "\t Collapses the edge between the two selected triangles.",
+    "\t Collapses the edge between the two selected triangles. If the '-force' flag\n"
+    "\t is passed, no validity checks are performed on edge collapse.",
     //
     __FILE__, group, MOBIUS_POLY_CollapseEdge);
 
