@@ -998,6 +998,58 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_CheckJacobian(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
+{
+#if defined USE_MOBIUS
+
+  // Get mesh from the Triangulation Node.
+  Handle(Poly_Triangulation)
+    tris = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
+  //
+  if ( tris.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Convert to Mobius.
+  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( facetIds.IsEmpty() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select facet(s).");
+    return TCL_ERROR;
+  }
+
+  for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
+  {
+    const poly_TriangleHandle ht( fit.Key() - 1 );
+    const double J = mesh->ComputeScaledJacobian(ht);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Scaled Jacobian for the facet %1 is %2."
+                                                         << ht.GetIdx() << J);
+  }
+
+  return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -1121,6 +1173,14 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Incrementally refines the named triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_RefineInc);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-check-jacobian",
+    //
+    "poly-check-jacobian\n"
+    "\t Checks the scaled Jacobian for the selected triangles.",
+    //
+    __FILE__, group, MOBIUS_POLY_CheckJacobian);
 }
 
 // Declare entry point PLUGINFACTORY
