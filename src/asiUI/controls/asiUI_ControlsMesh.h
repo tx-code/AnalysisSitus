@@ -75,7 +75,7 @@ public slots:
   void onLoadFromObj();
   //
   void onSaveToStl();
-  void onSaveFacetsToPly();
+  void onSaveFacetsToStl();
   //
   void onSelectFaces();
   void onSelectEdges();
@@ -102,11 +102,11 @@ private:
     struct t_save
     {
       //! Ctor.
-      t_save() : pToStl(nullptr), pFacetsToPly(nullptr)
+      t_save() : pToStl(nullptr), pFacetsToStl(nullptr)
       {}
 
       QPushButton* pToStl;       //!< Button for STL saving.
-      QPushButton* pFacetsToPly; //!< Button for saving part's facets to PLY.
+      QPushButton* pFacetsToStl; //!< Button for saving part's facets to STL.
     } Save;
 
     struct t_select

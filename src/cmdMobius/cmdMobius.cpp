@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // cmdMobius includes
-#include <cmdMobius.h>
+#include <cmdMobius_Mesh.h>
 
 // asiEngine includes
 #include <asiEngine_IV.h>
@@ -39,6 +39,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshComputeNorms.h>
+#include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_MeshSmooth.h>
 #include <asiAlgo_Timer.h>
 
@@ -81,6 +82,61 @@ void cmdMobius::ClearViewers(const bool repaint)
     cf->ViewerHost->Repaint();
     cf->ViewerDomain->Repaint();
   }
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get shape.
+  Handle(asiData_PartNode) part_n = cmdMobius::model->GetPartNode();
+  TopoDS_Shape             shape  = part_n->GetShape();
+  //
+  if ( shape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part shape is null.");
+    return TCL_ERROR;
+  }
+
+  asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
+  const t_ptr<poly_Mesh>& mesh = meshMerge.GetMobiusMesh();
+
+  // Set as Tcl variable.
+  std::string name;
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->SetVar( name, new cmdMobius_Mesh(mesh) );
+  }
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
+                                                        << mesh->GetNumTriangles() );
+
+  // Get triangulation node.
+  Handle(asiData_TriangulationNode) tris_n = cmdMobius::model->GetTriangulationNode();
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -871,6 +927,77 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  /* =============
+   *  Preparation.
+   * ============= */
+
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+
+  // Get name of the mesh.
+  std::string name;
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mesh name is not provided.");
+    return TCL_ERROR;
+  }
+
+  // Get the named mesh.
+  Handle(asiTcl_Variable) var     = interp->GetVar(name);
+  Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+  //
+  if ( meshVar.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+
+  // Get mesh.
+  const t_ptr<poly_Mesh>& mesh = meshVar->GetMesh();
+  //
+  if ( mesh.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The mesh named '%1' is null."
+                                                        << name);
+    return TCL_ERROR;
+  }
+
+  /* ============
+   *  Refinement.
+   * ============ */
+
+  TIMER_NEW
+  TIMER_GO
+
+  // TODO: NYI
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Incremental refine")
+
+  /* ==============
+   *  Finalization.
+   * ============== */
+
+  // Update Data Model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Actualize.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -904,6 +1031,17 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   /* ==================
    *  Add Tcl commands.
    * ================== */
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-init",
+    //
+    "poly-init [-model <M>]\n"
+    "\n"
+    "\t Initializes a mesh from a CAD part and optionally stores it is a Tcl variable\n"
+    "\t named <M>. If the mesh is to stored, it keeps associativity with the originating\n"
+    "\t CAD model.",
+    //
+    __FILE__, group, MOBIUS_POLY_Init);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-compute-norms",
@@ -975,6 +1113,14 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Smooths triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_Smooth);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-refine-inc",
+    //
+    "poly-refine-inc -model M\n"
+    "\t Incrementally refines the named triangulation.",
+    //
+    __FILE__, group, MOBIUS_POLY_RefineInc);
 }
 
 // Declare entry point PLUGINFACTORY

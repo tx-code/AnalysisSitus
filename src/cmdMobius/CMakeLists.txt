@@ -6,9 +6,11 @@ project(cmdMobius)
 
 set (H_FILES
   cmdMobius.h
+  cmdMobius_Mesh.h
 )
 set (CPP_FILES
   cmdMobius.cpp
+  cmdMobius_Mesh.cpp
 )
 
 #------------------------------------------------------------------------------

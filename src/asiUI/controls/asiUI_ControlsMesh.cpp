@@ -36,6 +36,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshConvert.h>
+#include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -67,7 +68,7 @@ asiUI_ControlsMesh::asiUI_ControlsMesh(const Handle(asiEngine_Model)& model,
   m_widgets.Load.pFromObj = new QPushButton("From OBJ");
   //
   m_widgets.Save.pToStl       = new QPushButton("To STL");
-  m_widgets.Save.pFacetsToPly = new QPushButton("B-Rep facets to PLY");
+  m_widgets.Save.pFacetsToStl = new QPushButton("B-Rep facets to STL");
   //
   m_widgets.Select.pFaces    = new QPushButton("Triangles");
   m_widgets.Select.pEdges    = new QPushButton("Links");
@@ -90,7 +91,7 @@ asiUI_ControlsMesh::asiUI_ControlsMesh(const Handle(asiEngine_Model)& model,
   QVBoxLayout* pSaveLay   = new QVBoxLayout(pSaveGroup);
   //
   pSaveLay->addWidget(m_widgets.Save.pToStl);
-  pSaveLay->addWidget(m_widgets.Save.pFacetsToPly);
+  pSaveLay->addWidget(m_widgets.Save.pFacetsToStl);
 
   // Group box for interactive selection.
   QGroupBox*   pSelectionGroup = new QGroupBox("Select");
@@ -119,7 +120,7 @@ asiUI_ControlsMesh::asiUI_ControlsMesh(const Handle(asiEngine_Model)& model,
   connect( m_widgets.Load.pFromPly,     SIGNAL( clicked() ), SLOT( onLoadFromPly     () ) );
   connect( m_widgets.Load.pFromObj,     SIGNAL( clicked() ), SLOT( onLoadFromObj     () ) );
   connect( m_widgets.Save.pToStl,       SIGNAL( clicked() ), SLOT( onSaveToStl       () ) );
-  connect( m_widgets.Save.pFacetsToPly, SIGNAL( clicked() ), SLOT( onSaveFacetsToPly () ) );
+  connect( m_widgets.Save.pFacetsToStl, SIGNAL( clicked() ), SLOT( onSaveFacetsToStl () ) );
   connect( m_widgets.Select.pFaces,     SIGNAL( clicked() ), SLOT( onSelectFaces     () ) );
   connect( m_widgets.Select.pEdges,     SIGNAL( clicked() ), SLOT( onSelectEdges     () ) );
   connect( m_widgets.Select.pVertices,  SIGNAL( clicked() ), SLOT( onSelectVertices  () ) );
@@ -276,27 +277,27 @@ void asiUI_ControlsMesh::onSaveToStl()
 
 //-----------------------------------------------------------------------------
 
-//! Saves facets to PLY file.
-void asiUI_ControlsMesh::onSaveFacetsToPly()
+//! Saves facets to STL file.
+void asiUI_ControlsMesh::onSaveFacetsToStl()
 {
   Handle(asiData_PartNode) part_n;
   TopoDS_Shape             part;
   //
   if ( !asiUI_Common::PartShape(m_model, part_n, part) ) return;
   //
-  QString filename = asiUI_Common::selectPLYFile(asiUI_Common::OpenSaveAction_Save);
+  QString filename = asiUI_Common::selectSTLFile(asiUI_Common::OpenSaveAction_Save);
+
+  asiAlgo_MeshMerge meshMerge(part);
 
   // Convert shape's inherent mesh to a storable mesh.
-  Handle(ActData_Mesh) storedMesh;
-  //
-  if ( !asiAlgo_MeshConvert::ToPersistent(part, storedMesh) )
+  if ( meshMerge.GetResultPoly().IsNull() )
   {
-    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot convert mesh to persistent form.");
+    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot create mesh from shape.");
     return;
   }
 
-  // Save mesh to ply file.
-  if ( !asiAlgo_PLY(m_notifier).Write( storedMesh, QStr2AsciiStr(filename) ) )
+  // Save mesh to STL file.
+  if ( !asiAlgo_Utils::WriteStl( meshMerge.GetResultPoly()->GetTriangulation(), QStr2AsciiStr(filename) ) )
   {
     m_notifier.SendLogMessage(LogErr(Normal) << "Cannot save mesh to PLY file.");
     return;
