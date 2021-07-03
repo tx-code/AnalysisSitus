@@ -890,6 +890,9 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  // Convert to Mobius.
+  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(poly);
+
   TIMER_NEW
   TIMER_GO
 
@@ -902,11 +905,14 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
                                                        << numTris << iter);
 
   // Apply smoothing.
-  if ( !asiAlgo_MeshSmooth::DoVTK(poly, iter, poly) )
+  /*if ( !asiAlgo_MeshSmooth::DoVTK(poly, iter, poly) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Smoothing failed.");
     return TCL_ERROR;
-  }
+  }*/
+
+  mesh->ComputeEdges();
+  mesh->Smooth(iter);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Smooth")
@@ -914,7 +920,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
   // Update Data Model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation(poly);
+    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
   }
   cmdMobius::model->CommitCommand();
 
