@@ -159,8 +159,30 @@ int MOBIUS_POLY_ComputeNorms(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   // Compute norm of each triangle.
   Handle(HIntArray)                elemIds;
@@ -246,8 +268,30 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
     tris = asiAlgo_Utils::Mesh::ExtractRegion(tris, facetIds);
   }
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   TIMER_NEW
   TIMER_GO
@@ -327,8 +371,30 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   TIMER_NEW
   TIMER_GO
@@ -421,8 +487,30 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
                                    interp->GetProgress(),
                                    interp->GetPlotter() );
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   // Check if there's any user selection to process.
   TColStd_PackedMapOfInteger facetIds;
@@ -436,7 +524,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // Compute links.
     mesh->ComputeEdges();
 
-    double areaThreshold = 10.;
+    double areaThreshold = 1.;
     double lenThreshold  = 1.;
     //
     interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
@@ -580,8 +668,30 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
                                    interp->GetProgress(),
                                    interp->GetPlotter() );
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   // Check if there's any user selection to process.
   TColStd_PackedMapOfInteger facetIds;
@@ -682,8 +792,30 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
                                    interp->GetProgress(),
                                    interp->GetPlotter() );
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(tris);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(tris);
+  }
 
   TIMER_NEW
   TIMER_GO
@@ -779,23 +911,40 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Convert to Mobius.
-  t_ptr<poly_Mesh> mobMesh;
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
   {
-    cascade_Triangulation converter(poly);
-    converter.DirectConvert();
-    mobMesh = converter.GetMobiusTriangulation();
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(poly);
   }
 
   TIMER_NEW
   TIMER_GO
 
-  const int numTris = mobMesh->GetNumTriangles();
+  const int numTris = mesh->GetNumTriangles();
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to refine."
                                                        << numTris);
 
-  double areaThreshold = 10.;
+  double areaThreshold = 1.;
   double lenThreshold  = 1.;
   //
   interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
@@ -809,7 +958,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
   {
     poly_TriangleHandle th(idx);
 
-    tAreas.push_back( mobMesh->ComputeArea(th) );
+    tAreas.push_back( mesh->ComputeArea(th) );
     tNums .push_back( idx );
   }
 
@@ -828,36 +977,28 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     poly_Triangle       t;
 
     // Get the next triangle to process.
-    mobMesh->GetTriangle(th, t);
+    mesh->GetTriangle(th, t);
     //
     if ( t.IsDeleted() )
       continue;
 
     // Refine triangle based on its size.
-    const double area = mobMesh->ComputeArea(th);
-    const double len  = mobMesh->ComputeMaxLen(th);
+    const double area = mesh->ComputeArea(th);
+    const double len  = mesh->ComputeMaxLen(th);
     //
     if ( (area > areaThreshold) && (len > lenThreshold) )
     {
-      mobMesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+      mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
     }
   }
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
 
-  // Convert back to the OpenCascade triangulation.
-  Handle(Poly_Triangulation) refinedPoly;
-  {
-    cascade_Triangulation converter(mobMesh);
-    converter.DirectConvert();
-    refinedPoly = converter.GetOpenCascadeTriangulation();
-  }
-
   // Update Data Model.
   cmdMobius::model->OpenCommand();
   {
-    cmdMobius::model->GetTriangulationNode()->SetTriangulation(refinedPoly);
+    cmdMobius::model->GetTriangulationNode()->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
   }
   cmdMobius::model->CommitCommand();
 
@@ -890,8 +1031,44 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Convert to Mobius.
-  t_ptr<t_mesh> mesh = cascade::GetMobiusMesh(poly);
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(poly);
+  }
+
+  // Compose the domain of planar faces only.
+  std::unordered_set<int> planarDomain;
+  Handle(asiAlgo_AAG)     aag = cmdMobius::model->GetPartNode()->GetAAG();
+  //
+  if ( !aag.IsNull() )
+  {
+    const TopTools_IndexedMapOfShape& allFaces = aag->GetMapOfFaces();
+    //
+    for ( int fid = 1; fid <= allFaces.Extent(); ++fid )
+    {
+      if ( asiAlgo_Utils::IsPlanar() )
+    }
+  }
 
   TIMER_NEW
   TIMER_GO
@@ -903,13 +1080,6 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iterations."
                                                        << numTris << iter);
-
-  // Apply smoothing.
-  /*if ( !asiAlgo_MeshSmooth::DoVTK(poly, iter, poly) )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Smoothing failed.");
-    return TCL_ERROR;
-  }*/
 
   mesh->ComputeEdges();
   mesh->Smooth(iter);
@@ -1167,7 +1337,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-smooth",
     //
-    "poly-smooth [-iter <iter>]\n"
+    "poly-smooth [-model <name>] [-iter <iter>]\n"
     "\t Smooths triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_Smooth);
