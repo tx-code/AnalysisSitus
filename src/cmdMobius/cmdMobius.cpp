@@ -577,7 +577,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
         const double area = mesh->ComputeArea(th);
         const double len  = mesh->ComputeMaxLen(th);
         //
-        if ( (area > areaThreshold) && (len > lenThreshold) )
+        if ( (area > areaThreshold) || (len > lenThreshold) )
         {
           mesh->RefineByMidedges(th);
 
@@ -1066,7 +1066,8 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
     //
     for ( int fid = 1; fid <= allFaces.Extent(); ++fid )
     {
-      if ( asiAlgo_Utils::IsPlanar() )
+      if ( asiAlgo_Utils::IsPlanar( aag->GetFace(fid) ) )
+        planarDomain.insert(fid);
     }
   }
 
@@ -1082,7 +1083,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
                                                        << numTris << iter);
 
   mesh->ComputeEdges();
-  mesh->Smooth(iter);
+  mesh->Smooth(iter, planarDomain);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Smooth")
