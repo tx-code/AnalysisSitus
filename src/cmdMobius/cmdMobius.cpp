@@ -582,8 +582,8 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // Compute links.
     mesh->ComputeEdges();
 
-    double areaThreshold = 1.;
-    double lenThreshold  = 1.;
+    double areaThreshold = 0.01;
+    double lenThreshold  = 0.01;
     //
     interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
     interp->GetKeyValue(argc, argv, "minlen",  lenThreshold);
@@ -596,19 +596,23 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // are added as long as we refine.
     do
     {
-      int numTris = mesh->GetNumTriangles();
-
       // Compute areas.
       std::vector<poly_TriangleHandle> ths;
       std::vector<double>              tAreas;
+      std::vector<int>                 tIds;
       std::vector<int>                 tNums;
       //
-      for ( int idx = 0; idx < numTris; ++idx )
+      for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
       {
-        poly_TriangleHandle th(idx);
+        poly_TriangleHandle th( tit.Current() );
+        poly_Triangle       t;
+        //
+        if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
+          continue;
 
-        tAreas.push_back( mesh->ComputeArea(th) );
-        tNums .push_back( idx );
+        tAreas .push_back( mesh->ComputeArea(th) );
+        tIds   .push_back( tit.Current().GetIdx() );
+        tNums  .push_back( int( tNums.size() ) );
       }
 
       // Sort facets by descending areas.
@@ -622,7 +626,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
       //
       for ( int idx : tNums )
       {
-        poly_TriangleHandle th(idx);
+        poly_TriangleHandle th(tIds[idx]);
         poly_Triangle       t;
 
         // Get the next triangle to process.
@@ -638,6 +642,9 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
         // Refine triangle based on its size.
         const double area = mesh->ComputeArea(th);
         const double len  = mesh->ComputeMaxLen(th);
+        //
+        std::cout << "triangle " << idx << ": (area, len) = ("
+                  << area << ", " << len << ")" << std::endl;
         //
         if ( (area > areaThreshold) || (len > lenThreshold) )
         {
@@ -895,6 +902,135 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
+                                int                          argc,
+                                const char**                 argv)
+{
+#if defined USE_MOBIUS
+
+  // Get mesh from the Triangulation Node.
+  Handle(Poly_Triangulation)
+    poly = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
+  //
+  if ( poly.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
+    return TCL_ERROR;
+  }
+
+  // Get the named mesh.
+  t_ptr<t_mesh> mesh;
+  std::string   name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the named mesh.
+    Handle(asiTcl_Variable) var     = interp->GetVar(name);
+    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
+    //
+    if ( meshVar.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
+                                                          << name);
+      return TCL_ERROR;
+    }
+    //
+    mesh = meshVar->GetMesh();
+  }
+  else
+  {
+    // Take from the node.
+    mesh = cascade::GetMobiusMesh(poly);
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  const int numTris = mesh->GetNumTriangles();
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to refine."
+                                                       << numTris);
+
+  double areaThreshold = 0.01;
+  double lenThreshold  = 0.01;
+  //
+  interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
+
+  // Compute areas.
+  std::vector<poly_TriangleHandle> ths;
+  std::vector<double>              tAreas;
+  std::vector<int>                 tIds;
+  std::vector<int>                 tNums;
+  //
+  for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+  {
+    poly_TriangleHandle th( tit.Current() );
+    poly_Triangle       t;
+    //
+    if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
+      continue;
+
+    tAreas .push_back( mesh->ComputeArea(th) );
+    tIds   .push_back( tit.Current().GetIdx() );
+    tNums  .push_back( int( tNums.size() ) );
+  }
+
+  // Sort facets by descending areas.
+  std::sort( tNums.begin(), tNums.end(),
+             [&](const int a, const int b)
+             {
+               return tAreas[a] > tAreas[b];
+             } );
+
+  // Refine. Notice that we do not use triangle iterator here as more triangles
+  // are added as long as we refine.
+  for ( int idx : tNums )
+  {
+    poly_TriangleHandle th(tIds[idx]);
+    poly_Triangle       t;
+
+    // Get the next triangle to process.
+    mesh->GetTriangle(th, t);
+    //
+    if ( t.IsDeleted() )
+      continue;
+
+    // Refine triangle based on its size.
+    const double area = mesh->ComputeArea(th);
+    const double len  = mesh->ComputeMaxLen(th);
+
+    std::cout << "triangle " << idx << ": (area, len) = ("
+              << area << ", " << len << ")" << std::endl;
+
+    if ( (area > areaThreshold) || (len > lenThreshold) )
+    {
+      mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+    }
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
+
+  // Update Data Model.
+  cmdMobius::model->OpenCommand();
+  {
+    cmdMobius::model->GetTriangulationNode()->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Actualize.
+  if ( cmdMobius::cf->ViewerPart )
+    cmdMobius::cf->ViewerPart->PrsMgr()->Actualize( cmdMobius::model->GetTriangulationNode() );
+
+  return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
                        int                          argc,
                        const char**                 argv)
@@ -991,9 +1127,9 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int MOBIUS_POLY_CheckJacobian(const Handle(asiTcl_Interp)& interp,
-                              int                          argc,
-                              const char**                 argv)
+int MOBIUS_POLY_Check(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
 {
 #if defined USE_MOBIUS
   asiEngine_Triangulation trisApi( cmdMobius::model,
@@ -1017,9 +1153,18 @@ int MOBIUS_POLY_CheckJacobian(const Handle(asiTcl_Interp)& interp,
   for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
   {
     const poly_TriangleHandle ht( fit.Key() - 1 );
+
+    const double L = mesh->ComputeMaxLen(ht);
+    const double A = mesh->ComputeArea(ht);
     const double J = mesh->ComputeScaledJacobian(ht);
 
-    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Scaled Jacobian for the facet %1 is %2."
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Max length of the facet %1 is %2."
+                                                         << ht.GetIdx() << L);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Area of the facet %1 is %2."
+                                                         << ht.GetIdx() << A);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Scaled Jacobian of the facet %1 is %2."
                                                          << ht.GetIdx() << J);
   }
 
@@ -1157,12 +1302,12 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, MOBIUS_POLY_RefineInc);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("poly-check-jacobian",
+  interp->AddCommand("poly-check",
     //
-    "poly-check-jacobian\n"
-    "\t Checks the scaled Jacobian for the selected triangles.",
+    "poly-check\n"
+    "\t Checks the basic metrics on the selected triangles, such as area, scaled Jacobian, etc.",
     //
-    __FILE__, group, MOBIUS_POLY_CheckJacobian);
+    __FILE__, group, MOBIUS_POLY_Check);
 }
 
 // Declare entry point PLUGINFACTORY
