@@ -478,76 +478,100 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+  //
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "%1 triangles in the active mesh."
+                                                        << mesh->GetNumTriangles() );
 
   // Compose the domain of interest.
   t_domain domain;
   if ( interp->HasKeyword(argc, argv, "planar") )
     domain = ::ComposePlanarDomain();
 
-  TIMER_NEW
-  TIMER_GO
-
-  const int numTris = mesh->GetNumTriangles();
-
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to refine."
-                                                       << numTris);
-
-  double areaThreshold = 1.;
-  double lenThreshold  = 1.;
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
   //
-  interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
-
-  // Compute areas.
-  std::vector<poly_TriangleHandle> ths;
-  std::vector<double>              tAreas;
-  std::vector<int>                 tNums;
-  //
-  for ( int idx = 0; idx < numTris; ++idx )
+  if ( !facetIds.Extent() )
   {
-    poly_TriangleHandle th(idx);
+    TIMER_NEW
+    TIMER_GO
 
-    tAreas.push_back( mesh->ComputeArea(th) );
-    tNums .push_back( idx );
-  }
-
-  // Sort facets by descending areas.
-  std::sort( tNums.begin(), tNums.end(),
-             [&](const int a, const int b)
-             {
-               return tAreas[a] > tAreas[b];
-             } );
-
-  // Refine. Notice that we do not use triangle iterator here as more triangles
-  // are added as long as we refine.
-  for ( int idx : tNums )
-  {
-    poly_TriangleHandle th(idx);
-    poly_Triangle       t;
-
-    // Get the next triangle to process.
-    mesh->GetTriangle(th, t);
+    double areaThreshold = 1.;
+    double lenThreshold  = 1.;
     //
-    if ( t.IsDeleted() )
-      continue;
+    interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
 
-    // Check that this triangle is in the domain.
-    if ( !domain.empty() && !domain.count( t.GetFaceRef() ) )
-      continue;
-
-    // Refine triangle based on its size.
-    const double area = mesh->ComputeArea(th);
-    const double len  = mesh->ComputeMaxLen(th);
+    // Compute areas.
+    std::vector<poly_TriangleHandle> ths;
+    std::vector<double>              tAreas;
+    std::vector<int>                 tNums;
     //
-    if ( (area > areaThreshold) && (len > lenThreshold) )
+    for ( int idx = 0; idx < mesh->GetNumTriangles(); ++idx )
     {
-      mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+      poly_TriangleHandle th(idx);
+
+      tAreas.push_back( mesh->ComputeArea(th) );
+      tNums .push_back( idx );
+    }
+
+    // Sort facets by descending areas.
+    std::sort( tNums.begin(), tNums.end(),
+               [&](const int a, const int b)
+               {
+                 return tAreas[a] > tAreas[b];
+               } );
+
+    // Refine. Notice that we do not use triangle iterator here as more triangles
+    // are added as long as we refine.
+    for ( int idx : tNums )
+    {
+      poly_TriangleHandle th(idx);
+      poly_Triangle       t;
+
+      // Get the next triangle to process.
+      mesh->GetTriangle(th, t);
+      //
+      if ( t.IsDeleted() )
+        continue;
+
+      // Check that this triangle is in the domain.
+      if ( !domain.empty() && !domain.count( t.GetFaceRef() ) )
+        continue;
+
+      // Refine triangle based on its size.
+      const double area = mesh->ComputeArea(th);
+      const double len  = mesh->ComputeMaxLen(th);
+      //
+      if ( (area > areaThreshold) && (len > lenThreshold) )
+      {
+        mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+      }
+    }
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
+  }
+  else
+  {
+    // Refine triangles.
+    for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
+    {
+      const int fid = fit.Key() - 1; // Mobius indices are 0-based.
+
+      if ( !mesh->RefineByMidpoint( poly_TriangleHandle(fid) ) )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot refine by midpoint.");
+        return TCL_ERROR;
+      }
     }
   }
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
 
   // Update Data Model.
   cmdMobius::model->OpenCommand();
