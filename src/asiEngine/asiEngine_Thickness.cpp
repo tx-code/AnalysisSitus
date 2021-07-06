@@ -37,6 +37,13 @@
 // asiAlgo includes
 #include <asiAlgo_MeshMerge.h>
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 Handle(asiData_ThicknessNode)
@@ -59,10 +66,12 @@ Handle(asiData_ThicknessNode)
     //
     mesh = meshMerge.GetResultPoly()->GetTriangulation();
   }
+#if defined USE_MOBIUS
   else if ( owner->IsKind( STANDARD_TYPE(asiData_TriangulationNode) ) )
   {
-    mesh = Handle(asiData_TriangulationNode)::DownCast(owner)->GetTriangulation();
+    mesh = cascade::GetOpenCascadeMesh( Handle(asiData_TriangulationNode)::DownCast(owner)->GetTriangulation() );
   }
+#endif
   else
   {
     return nullptr; // Unexpected type of owner.

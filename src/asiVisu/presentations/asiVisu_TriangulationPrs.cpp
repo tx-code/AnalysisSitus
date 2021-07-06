@@ -56,8 +56,8 @@ asiVisu_TriangulationPrs::asiVisu_TriangulationPrs(const Handle(ActAPI_INode)& N
   Handle(asiData_TriangulationNode)
     TN = Handle(asiData_TriangulationNode)::DownCast(N);
   //
-  Handle(ActData_TriangulationParameter)
-    TP = Handle(ActData_TriangulationParameter)::DownCast( TN->Parameter(asiData_TriangulationNode::PID_Triangulation) );
+  Handle(asiData_MeshParameter)
+    TP = Handle(asiData_MeshParameter)::DownCast( TN->Parameter(asiData_TriangulationNode::PID_Triangulation) );
   //
   Handle(ActData_BoolParameter)
     scalarsP = Handle(ActData_BoolParameter)::DownCast( TN->Parameter(asiData_TriangulationNode::PID_UseScalars) );

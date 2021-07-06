@@ -42,6 +42,12 @@
 #include <vtkInformation.h>
 #include <vtkProperty.h>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
@@ -75,7 +81,7 @@ void asiVisu_TriangulationPipeline::SetInput(const Handle(asiVisu_DataProvider)&
    *  Validate input Parameters.
    * =========================== */
 
-  Handle(Poly_Triangulation) triangulation = DP->GetTriangulation();
+  t_ptr<poly_Mesh> triangulation = DP->GetTriangulation();
   //
   if ( triangulation.IsNull() )
   {

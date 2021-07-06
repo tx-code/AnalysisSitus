@@ -37,13 +37,16 @@
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
+#if defined USE_MOBIUS
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 //! Default constructor. Registers all involved Parameters.
 asiData_TriangulationNode::asiData_TriangulationNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name,          PID_Name);
-  REGISTER_PARAMETER(Triangulation, PID_Triangulation);
   REGISTER_PARAMETER(RealArray,     PID_Options);
   REGISTER_PARAMETER(Group,         PID_GroupPrs);
   REGISTER_PARAMETER(Int,           PID_DisplayMode);
@@ -52,7 +55,8 @@ asiData_TriangulationNode::asiData_TriangulationNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,          PID_HasVertices);
 
   // Non-standard Parameters.
-  this->registerParameter(PID_BVH, asiData_BVHParameter::Instance(), false);
+  this->registerParameter(PID_BVH,           asiData_BVHParameter::Instance(), false);
+  this->registerParameter(PID_Triangulation, asiData_MeshParameter::Instance(), false);
 }
 
 //! Returns new DETACHED instance of Mesh Node ensuring its correct
@@ -97,7 +101,7 @@ TCollection_ExtendedString asiData_TriangulationNode::GetName()
 }
 
 //! Sets name for the Node.
-//! \param name [in] name to set.
+//! \param[in] name the name to set.
 void asiData_TriangulationNode::SetName(const TCollection_ExtendedString& name)
 {
   ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(name);
@@ -108,24 +112,41 @@ void asiData_TriangulationNode::SetName(const TCollection_ExtendedString& name)
 //-----------------------------------------------------------------------------
 
 //! \return triangulation parameter.
-Handle(ActData_TriangulationParameter)
+Handle(asiData_MeshParameter)
   asiData_TriangulationNode::GetTriangulationParam() const
 {
-  return ActParamTool::AsTriangulation( this->Parameter(PID_Triangulation) );
+  Handle(asiData_MeshParameter)
+    param = Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Triangulation) );
+
+  return param;
 }
 
+#if defined USE_MOBIUS
+
 //! \return stored tessellation.
-Handle(Poly_Triangulation) asiData_TriangulationNode::GetTriangulation() const
+t_ptr<poly_Mesh> asiData_TriangulationNode::GetTriangulation() const
 {
-  return ActParamTool::AsTriangulation( this->Parameter(PID_Triangulation) )->GetTriangulation();
+  Handle(asiData_MeshParameter) param = this->GetTriangulationParam();
+  //
+  if ( param.IsNull() )
+    return nullptr;
+
+  return static_cast<poly_Mesh*>( param->GetMesh() );
 }
 
 //! Sets tessellation to store.
-//! \param triangulation [in] tessellation to store.
-void asiData_TriangulationNode::SetTriangulation(const Handle(Poly_Triangulation)& triangulation)
+//! \param[in] triangulation the tessellation to store.
+void asiData_TriangulationNode::SetTriangulation(const t_ptr<poly_Mesh>& triangulation)
 {
-  ActParamTool::AsTriangulation( this->Parameter(PID_Triangulation) )->SetTriangulation(triangulation);
+  Handle(asiData_MeshParameter) param = this->GetTriangulationParam();
+  //
+  if ( param.IsNull() )
+    return;
+
+  param->SetMesh(triangulation.Access() );
 }
+
+#endif
 
 //! \return stored BVH.
 Handle(asiAlgo_BVHFacets) asiData_TriangulationNode::GetBVH() const

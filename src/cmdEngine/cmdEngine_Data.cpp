@@ -62,6 +62,13 @@
 #include <vtkXMLPolyDataWriter.h>
 #pragma warning(pop)
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 void onUndoRedo(const Handle(ActAPI_TxRes)& txRes,
@@ -441,6 +448,7 @@ int ENGINE_SetAsTriangulation(const Handle(asiTcl_Interp)& interp,
                               int                          argc,
                               const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -471,7 +479,7 @@ int ENGINE_SetAsTriangulation(const Handle(asiTcl_Interp)& interp,
   // Modify Data Model.
   cmdEngine::model->OpenCommand();
   {
-    cmdEngine::model->GetTriangulationNode()->SetTriangulation(trisToSet);
+    cmdEngine::model->GetTriangulationNode()->SetTriangulation( cascade::GetMobiusMesh(trisToSet) );
   }
   cmdEngine::model->CommitCommand();
 
@@ -480,6 +488,9 @@ int ENGINE_SetAsTriangulation(const Handle(asiTcl_Interp)& interp,
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetTriangulationNode() );
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------

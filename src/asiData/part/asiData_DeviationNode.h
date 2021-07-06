@@ -32,7 +32,7 @@
 #define asiData_DeviationNode_h
 
 // asiData includes
-#include <asiData.h>
+#include <asiData_MeshParameter.h>
 
 // asiAlgo includes
 #include <asiAlgo_Mesh.h>

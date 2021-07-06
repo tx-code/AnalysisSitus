@@ -491,6 +491,7 @@ int RE_CutWithPlane(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 3 && argc != 4 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -498,7 +499,7 @@ int RE_CutWithPlane(const Handle(asiTcl_Interp)& interp,
 
   const bool doSort = !interp->HasKeyword(argc, argv, "nosort");
 
-  // Get Triangulaion.
+  // Get Triangulation.
   Handle(asiData_TriangulationNode) tris_n = cmdRE::model->GetTriangulationNode();
   //
   if ( tris_n.IsNull() || !tris_n->IsWellFormed() )
@@ -507,9 +508,10 @@ int RE_CutWithPlane(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  Handle(Poly_Triangulation) triangulation = tris_n->GetTriangulation();
+  Handle(Poly_Triangulation)
+    triangulation = cascade::GetOpenCascadeMesh( tris_n->GetTriangulation() );
 
-  // Get cutting t_plane.
+  // Get cutting plane.
   Handle(ActAPI_INode) node = cmdRE::model->FindNodeByName(argv[2]);
   //
   if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
@@ -547,6 +549,10 @@ int RE_CutWithPlane(const Handle(asiTcl_Interp)& interp,
                                      doSort ? Color_Green : Color_Red);
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1726,6 +1732,7 @@ int RE_GetTriangulationNodes(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -1733,7 +1740,7 @@ int RE_GetTriangulationNodes(const Handle(asiTcl_Interp)& interp,
 
   // Get triangulation.
   Handle(Poly_Triangulation)
-    tris = cmdRE::model->GetTriangulationNode()->GetTriangulation();
+    tris = cascade::GetOpenCascadeMesh( cmdRE::model->GetTriangulationNode()->GetTriangulation() );
   //
   if ( tris.IsNull() )
   {
@@ -1750,6 +1757,10 @@ int RE_GetTriangulationNodes(const Handle(asiTcl_Interp)& interp,
   // Set result.
   interp->GetPlotter().REDRAW_POINTS(argv[1], cloud->GetCoordsArray(), Color_Default);
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1807,6 +1818,7 @@ int RE_Topologize(const Handle(asiTcl_Interp)& interp,
                   int                          argc,
                   const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 1 && argc != 2 && argc != 3 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -1823,7 +1835,7 @@ int RE_Topologize(const Handle(asiTcl_Interp)& interp,
 
   // Get triangulation.
   Handle(Poly_Triangulation)
-    tris = cmdRE::model->GetTriangulationNode()->GetTriangulation();
+    tris = cascade::GetOpenCascadeMesh( cmdRE::model->GetTriangulationNode()->GetTriangulation() );
   //
   if ( tris.IsNull() )
   {
@@ -2062,6 +2074,10 @@ int RE_Topologize(const Handle(asiTcl_Interp)& interp,
 
   interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------

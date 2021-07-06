@@ -47,6 +47,12 @@
 // OCCT includes
 #include <Bnd_Box.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 //! Constructor.
@@ -146,37 +152,45 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_TessNormalsDataProvider::GetPointsd()
    *  Triangulation.
    * =============== */
 
+#if defined USE_MOBIUS
   else if ( PN->IsKind( STANDARD_TYPE(asiData_TriangulationNode) ) )
   {
-    Handle(Poly_Triangulation)
+    t_ptr<poly_Mesh>
       tris = Handle(asiData_TriangulationNode)::DownCast(PN)->GetTriangulation();
 
     // Get positions of the vectors.
     if ( normsNode->IsElemental() )
     {
       // Compute COGs of mesh elements.
-      for ( int tidx = 1; tidx <= tris->NbTriangles(); ++tidx )
+      for ( poly_Mesh::TriangleIterator tit(tris); tit.More(); tit.Next() )
       {
-        if ( !idsMap.Contains(tidx - 1) )
+        const poly_TriangleHandle th = tit.Current();
+
+        if ( !idsMap.Contains( th.GetIdx() ) )
+          continue;
+
+        poly_Triangle tri;
+        if ( !tris->GetTriangle(th, tri) || tri.IsDeleted() )
           continue;
 
         // Get nodes of the element.
-        int n0, n1, n2;
-        const Poly_Triangle& tri = tris->Triangle(tidx);
-        //
-        tri.Get(n0, n1, n2);
-        //
-        const gp_Pnt& P0 = tris->Node(n0);
-        const gp_Pnt& P1 = tris->Node(n1);
-        const gp_Pnt& P2 = tris->Node(n2);
+        poly_VertexHandle vh[3];
+        tri.GetVertices(vh[0], vh[1], vh[2]);
+
+        // Get coordinates.
+        t_xyz P[3];
+        tris->GetVertex(vh[0], P[0]);
+        tris->GetVertex(vh[1], P[1]);
+        tris->GetVertex(vh[2], P[2]);
 
         // Compute COG.
-        gp_XYZ cog = ( P0.XYZ() + P1.XYZ() + P2.XYZ() ) / 3.0;
+        t_xyz cog = ( P[0] + P[1] + P[2] ) / 3.0;
 
         m_points->AddElement( cog.X(), cog.Y(), cog.Z() );
       }
     }
   }
+#endif
 
   return m_points;
 }

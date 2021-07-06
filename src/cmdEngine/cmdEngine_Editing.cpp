@@ -2589,6 +2589,7 @@ int ENGINE_MoveTriangulation(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 7 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -2596,7 +2597,7 @@ int ENGINE_MoveTriangulation(const Handle(asiTcl_Interp)& interp,
 
   // Get mesh from the Triangulation Node.
   Handle(Poly_Triangulation)
-    poly = cmdEngine::model->GetTriangulationNode()->GetTriangulation();
+    poly = cascade::GetOpenCascadeMesh( cmdEngine::model->GetTriangulationNode()->GetTriangulation() );
   //
   if ( poly.IsNull() )
   {
@@ -2636,7 +2637,7 @@ int ENGINE_MoveTriangulation(const Handle(asiTcl_Interp)& interp,
   // Update Data Model.
   cmdEngine::model->OpenCommand();
   {
-    cmdEngine::model->GetTriangulationNode()->SetTriangulation(newPoly);
+    cmdEngine::model->GetTriangulationNode()->SetTriangulation( cascade::GetMobiusMesh(newPoly) );
   }
   cmdEngine::model->CommitCommand();
 
@@ -2645,6 +2646,9 @@ int ENGINE_MoveTriangulation(const Handle(asiTcl_Interp)& interp,
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetTriangulationNode() );
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -3066,6 +3070,7 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 1 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -3073,7 +3078,7 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
 
   // Get mesh from the Triangulation Node.
   Handle(Poly_Triangulation)
-    poly = cmdEngine::model->GetTriangulationNode()->GetTriangulation();
+    poly = cascade::GetOpenCascadeMesh( cmdEngine::model->GetTriangulationNode()->GetTriangulation() );
   //
   if ( poly.IsNull() )
   {
@@ -3108,8 +3113,10 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
-
 
 //-----------------------------------------------------------------------------
 

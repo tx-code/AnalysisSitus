@@ -81,6 +81,13 @@
 #include <QVBoxLayout>
 #pragma warning(pop)
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 void onModelLoaded(const TopoDS_Shape& loadedShape)
@@ -106,10 +113,11 @@ void onModelLoaded(const TopoDS_Shape& loadedShape)
 
 void onModelLoaded(const Handle(Poly_Triangulation)& loadedMesh)
 {
+#if defined USE_MOBIUS
   // Modify Data Model.
   cmdEngine::model->OpenCommand();
   {
-    cmdEngine::model->GetTriangulationNode()->SetTriangulation(loadedMesh);
+    cmdEngine::model->GetTriangulationNode()->SetTriangulation( cascade::GetMobiusMesh(loadedMesh) );
   }
   cmdEngine::model->CommitCommand();
 
@@ -118,6 +126,9 @@ void onModelLoaded(const Handle(Poly_Triangulation)& loadedMesh)
     // Update viewer.
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetTriangulationNode() );
   }
+#else
+  cmdEngine::cf->Progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------

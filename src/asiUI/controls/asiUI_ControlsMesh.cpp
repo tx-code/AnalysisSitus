@@ -46,6 +46,13 @@
 #include <QGroupBox>
 #pragma warning(pop)
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiUI_ControlsMesh::asiUI_ControlsMesh(const Handle(asiEngine_Model)& model,
@@ -131,6 +138,7 @@ asiUI_ControlsMesh::asiUI_ControlsMesh(const Handle(asiEngine_Model)& model,
 //! On STL loading.
 void asiUI_ControlsMesh::onLoadFromStl()
 {
+#if defined USE_MOBIUS
   // Select filename.
   QString filename = asiUI_Common::selectSTLFile(asiUI_Common::OpenSaveAction_Open);
 
@@ -164,7 +172,7 @@ void asiUI_ControlsMesh::onLoadFromStl()
   //
   m_model->OpenCommand(); // tx start
   {
-    triangulation_n->SetTriangulation(triangulation);
+    triangulation_n->SetTriangulation( cascade::GetMobiusMesh(triangulation) );
   }
   m_model->CommitCommand(); // tx commit
 
@@ -173,6 +181,9 @@ void asiUI_ControlsMesh::onLoadFromStl()
   //---------------------------------------------------------------------------
 
   m_partViewer->PrsMgr()->Actualize(triangulation_n.get(), false, true);
+#else
+  m_notifier.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -258,12 +269,13 @@ void asiUI_ControlsMesh::onLoadFromObj()
 //! On STL saving.
 void asiUI_ControlsMesh::onSaveToStl()
 {
+#if defined USE_MOBIUS
   // Select filename.
   QString filename = asiUI_Common::selectSTLFile(asiUI_Common::OpenSaveAction_Save);
 
   // Get mesh
   Handle(asiData_TriangulationNode) triangulation_n = m_model->GetTriangulationNode();
-  Handle(Poly_Triangulation)        triangulation   = triangulation_n->GetTriangulation();
+  Handle(Poly_Triangulation)        triangulation   = cascade::GetOpenCascadeMesh( triangulation_n->GetTriangulation() );
 
   // Save
   if ( !asiAlgo_Utils::WriteStl( triangulation, QStr2AsciiStr(filename) ) )
@@ -273,6 +285,9 @@ void asiUI_ControlsMesh::onSaveToStl()
   }
   //
   m_notifier.SendLogMessage( LogInfo(Normal) << "Mesh was saved to %1." << QStr2AsciiStr(filename) );
+#else
+  m_notifier.SendLogMessage( LogErr(Normal) << "Mobius is not available." )
+#endif
 }
 
 //-----------------------------------------------------------------------------

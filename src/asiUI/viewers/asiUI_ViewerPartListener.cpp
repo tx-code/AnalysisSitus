@@ -70,6 +70,13 @@
 #include <QClipboard>
 #pragma warning(pop)
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 namespace
 {
   //! Prepares one shape out of the passed collection of faces. Is there
@@ -463,7 +470,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Prepare a triangulation to dump
     Handle(Poly_Triangulation)
       mesh2Save = selectedShapes.Extent() ? ::FacesAsOneMesh(selectedShapes)
-                                          : asiAlgo_Utils::Mesh::ExtractRegion( trisApi.GetTriangulation(),
+                                          : asiAlgo_Utils::Mesh::ExtractRegion( cascade::GetOpenCascadeMesh( trisApi.GetTriangulation() ),
                                                                                 selectedFacets );
 
     // Save mesh

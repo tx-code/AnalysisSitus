@@ -34,8 +34,15 @@
 // asiVisu includes
 #include <asiVisu_DataProvider.h>
 
+// asiData includes
+#include <asiData_MeshParameter.h>
+
 // Active Data includes
 #include <ActData_ParameterFactory.h>
+
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -60,9 +67,9 @@ public:
   //!                               whether to apply colors by scalars.
   //! \param[in] colorParam         Parameter holding the custom color.
   asiVisu_EXPORT
-    asiVisu_TriangulationDataProvider(const Handle(ActData_TriangulationParameter)& triangulationParam,
-                                      const Handle(ActData_BoolParameter)&          hasScalarsParam,
-                                      const Handle(ActData_IntParameter)&           colorParam);
+    asiVisu_TriangulationDataProvider(const Handle(asiData_MeshParameter)& triangulationParam,
+                                      const Handle(ActData_BoolParameter)& hasScalarsParam,
+                                      const Handle(ActData_IntParameter)&  colorParam);
 
 public:
 
@@ -75,7 +82,7 @@ public:
 
   //! Returns the OCCT triangulation to be visualized.
   //! \return OCCT facet model.
-  asiVisu_EXPORT virtual Handle(Poly_Triangulation)
+  asiVisu_EXPORT virtual mobius::t_ptr<mobius::poly_Mesh>
     GetTriangulation() const;
 
   //! \return true if scalars are active.
@@ -109,7 +116,7 @@ protected:
   Handle(ActAPI_INode) m_node;
 
   //! Source Parameter with triangulation.
-  Handle(ActData_TriangulationParameter) m_triangulationParam;
+  Handle(asiData_MeshParameter) m_triangulationParam;
 
   //! Source Parameter with scalars on/off Boolean flag.
   Handle(ActData_BoolParameter) m_hasScalarsParam;

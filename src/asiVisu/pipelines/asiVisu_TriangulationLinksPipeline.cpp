@@ -42,6 +42,12 @@
 #include <vtkInformation.h>
 #include <vtkProperty.h>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiVisu_TriangulationLinksPipeline::asiVisu_TriangulationLinksPipeline(const vtkSmartPointer<asiVisu_TriangulationSource>& source)
@@ -68,7 +74,7 @@ void asiVisu_TriangulationLinksPipeline::SetInput(const Handle(asiVisu_DataProvi
    *  Validate input Parameters.
    * =========================== */
 
-  Handle(Poly_Triangulation) triangulation = DP->GetTriangulation();
+  t_ptr<poly_Mesh> triangulation = DP->GetTriangulation();
   //
   if ( triangulation.IsNull() )
   {

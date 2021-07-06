@@ -40,7 +40,11 @@
 // asiVisu includes
 #include <asiVisu_PrsManager.h>
 
-//! Data Model API for mesh.
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
+
+//! Data Model API for triangulation.
 class asiEngine_Triangulation : public asiEngine_Base
 {
 public:
@@ -79,7 +83,7 @@ public:
     CreateTriangulation();
 
   //! \return the existing triangulation.
-  asiEngine_EXPORT Handle(Poly_Triangulation)
+  asiEngine_EXPORT mobius::t_ptr<mobius::poly_Mesh>
     GetTriangulation();
 
   //! Constructs BVH structure for the facets stored in the Triangulation Node.

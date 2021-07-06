@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 06 July 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,39 +28,69 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
-
-#define asiData_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
+#ifndef asiData_MeshAttr_h
+#define asiData_MeshAttr_h
 
 // asiData includes
-#include <asiData_ParameterFlags.h>
+#include <asiData.h>
 
-// Active Data includes
-#include <ActAPI_IParameter.h>
+// OCCT includes
+#include <TDF_Attribute.hxx>
+#include <TDF_Label.hxx>
 
-//-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
+//! OCAF Attribute representing unstructured mesh.
+class asiData_MeshAttr : public TDF_Attribute
+{
+public:
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiData_MeshAttr, TDF_Attribute)
+
+// Construction & settling-down routines:
+public:
+
+  asiData_EXPORT
+    asiData_MeshAttr();
+
+  asiData_EXPORT static Handle(asiData_MeshAttr)
+    Set(const TDF_Label& Label);
+
+// GUID accessors:
+public:
+
+  asiData_EXPORT static const Standard_GUID&
+    GUID();
+
+  asiData_EXPORT virtual const Standard_GUID&
+    ID() const;
+
+// Attribute's kernel methods:
+public:
+
+  asiData_EXPORT virtual Handle(TDF_Attribute)
+    NewEmpty() const;
+
+  asiData_EXPORT virtual void
+    Restore(const Handle(TDF_Attribute)& mainAttr);
+
+  asiData_EXPORT virtual void
+    Paste(const Handle(TDF_Attribute)&       into,
+          const Handle(TDF_RelocationTable)& relocTable) const;
+
+// Accessors for domain-specific data:
+public:
+
+  asiData_EXPORT void
+    SetMesh(void* octree);
+
+  asiData_EXPORT void*
+    GetMesh() const;
+
+// Members:
+private:
+
+  void* m_pMesh; //!< Pointer to mesh.
+
+};
 
 #endif

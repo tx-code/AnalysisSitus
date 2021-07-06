@@ -51,6 +51,8 @@
   // Mobius includes
   #include <mobius/cascade_BSplineCurve.h>
   #include <mobius/geom_FairBCurve.h>
+
+  using namespace mobius;
 #endif
 
 // OCCT includes
@@ -1556,6 +1558,7 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
                                  int                          argc,
                                  const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -1570,7 +1573,8 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  Handle(Poly_Triangulation) triangulation = tris_n->GetTriangulation();
+  Handle(Poly_Triangulation)
+    triangulation = cascade::GetOpenCascadeMesh( tris_n->GetTriangulation() );
 
   // Build OBB.
   asiAlgo_MeshOBB mkOBB(triangulation);
@@ -1587,6 +1591,9 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_SHAPE(argv[1], obb, Color_Yellow, 1.0, true);
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------

@@ -37,6 +37,10 @@
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
+#if defined USE_MOBIUS
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider()
@@ -45,9 +49,9 @@ asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider()
 
 //-----------------------------------------------------------------------------
 
-asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider(const Handle(ActData_TriangulationParameter)& triangulationParam,
-                                                                     const Handle(ActData_BoolParameter)&          hasScalarsParam,
-                                                                     const Handle(ActData_IntParameter)&           colorParam)
+asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider(const Handle(asiData_MeshParameter)& triangulationParam,
+                                                                     const Handle(ActData_BoolParameter)& hasScalarsParam,
+                                                                     const Handle(ActData_IntParameter)&  colorParam)
 : asiVisu_DataProvider ( ),
   m_node               ( triangulationParam->GetNode() ),
   m_triangulationParam ( triangulationParam ),
@@ -65,10 +69,10 @@ ActAPI_DataObjectId
 
 //-----------------------------------------------------------------------------
 
-Handle(Poly_Triangulation)
+t_ptr<poly_Mesh>
   asiVisu_TriangulationDataProvider::GetTriangulation() const
 {
-  return m_triangulationParam->GetTriangulation();
+  return static_cast<poly_Mesh*>( m_triangulationParam->GetMesh() );
 }
 
 //-----------------------------------------------------------------------------

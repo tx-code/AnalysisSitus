@@ -32,19 +32,22 @@
 #define asiData_TriangulationNode_h
 
 // asiData includes
-#include <asiData.h>
+#include <asiData_MeshParameter.h>
 
 // asiAlgo includes
 #include <asiAlgo_BVHFacets.h>
 
 // Active Data includes
 #include <ActData_BaseNode.h>
-#include <ActData_TriangulationParameter.h>
 #include <ActData_Utils.h>
+
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
-//! Node representing surface triangulation.
+//! Node representing unstructured surface triangulation and its properties.
 class asiData_TriangulationNode : public ActData_BaseNode
 {
 public:
@@ -102,14 +105,18 @@ public:
 // Handy accessors to the stored data:
 public:
 
-  asiData_EXPORT Handle(ActData_TriangulationParameter)
+  asiData_EXPORT Handle(asiData_MeshParameter)
     GetTriangulationParam() const;
 
-  asiData_EXPORT Handle(Poly_Triangulation)
+#if defined USE_MOBIUS
+
+  asiData_EXPORT mobius::t_ptr<mobius::poly_Mesh>
     GetTriangulation() const;
 
   asiData_EXPORT void
-    SetTriangulation(const Handle(Poly_Triangulation)& triangulation);
+    SetTriangulation(const mobius::t_ptr<mobius::poly_Mesh>& triangulation);
+
+#endif
 
   asiData_EXPORT Handle(asiAlgo_BVHFacets)
     GetBVH() const;

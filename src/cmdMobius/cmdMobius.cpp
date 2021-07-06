@@ -112,7 +112,7 @@ namespace
     else
     {
       // Take from the node.
-      mesh = cascade::GetMobiusMesh( cmdMobius::model->GetTriangulationNode()->GetTriangulation() );
+      mesh = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
     }
 
     return mesh;
@@ -185,7 +185,7 @@ int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -211,19 +211,6 @@ int MOBIUS_POLY_ComputeNorms(const Handle(asiTcl_Interp)& interp,
                              const char**                 argv)
 {
 #if defined USE_MOBIUS
-  // Get triangulation.
-  Handle(asiData_TriangulationNode)
-    tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
-
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
 
@@ -253,8 +240,8 @@ int MOBIUS_POLY_ComputeNorms(const Handle(asiTcl_Interp)& interp,
   //
   cmdMobius::model->OpenCommand();
   {
-    norms_n = asiEngine_Tessellation(cmdMobius::model).CreateNorms(tris_n,
-                                                                   "Normal field",
+    norms_n = asiEngine_Tessellation(cmdMobius::model).CreateNorms(cmdMobius::model->GetTriangulationNode(),
+                                                                  "Normal field",
                                                                    true); // Elemental.
     //
     norms_n->SetIDs(elemIds);
@@ -287,29 +274,20 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   // Get triangulation.
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
 
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
                                    interp->GetProgress(),
                                    interp->GetPlotter() );
 
-  // Check if there's any user selection to process.
-  TColStd_PackedMapOfInteger facetIds;
-  trisApi.GetHighlightedFacets(facetIds);
-  //
-  if ( facetIds.Extent() )
-  {
-    tris = asiAlgo_Utils::Mesh::ExtractRegion(tris, facetIds);
-  }
+  //// Check if there's any user selection to process.
+  //TColStd_PackedMapOfInteger facetIds;
+  //trisApi.GetHighlightedFacets(facetIds);
+  ////
+  //if ( facetIds.Extent() )
+  //{
+  //  tris = asiAlgo_Utils::Mesh::ExtractRegion(tris, facetIds);
+  //}
 
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
@@ -338,7 +316,7 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -364,19 +342,6 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
                              const char**                 argv)
 {
 #if defined USE_MOBIUS
-  // Get triangulation.
-  Handle(asiData_TriangulationNode)
-    tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
-
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
                                    interp->GetProgress(),
@@ -468,16 +433,6 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
                                 const char**                 argv)
 {
 #if defined USE_MOBIUS
-  // Get mesh from the Triangulation Node.
-  Handle(Poly_Triangulation)
-    poly = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
-  //
-  if ( poly.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
-    return TCL_ERROR;
-  }
-
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
                                    interp->GetProgress(),
@@ -576,7 +531,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
   // Update Data Model.
   cmdMobius::model->OpenCommand();
   {
-    cmdMobius::model->GetTriangulationNode()->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    cmdMobius::model->GetTriangulationNode()->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -601,15 +556,6 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
   // Get triangulation.
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
 
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
@@ -740,7 +686,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -769,15 +715,6 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
   // Get triangulation.
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
 
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
@@ -838,7 +775,7 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -867,15 +804,6 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   // Get triangulation.
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
-  //
-  Handle(Poly_Triangulation)
-    tris = tris_n->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is null.");
-    return TCL_ERROR;
-  }
 
   double maxLen = 1.;
   //
@@ -946,7 +874,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   // Update data model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -974,15 +902,6 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
 
-  // Get mesh from the Triangulation Node.
-  Handle(Poly_Triangulation) poly = tris_n->GetTriangulation();
-  //
-  if ( poly.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
-    return TCL_ERROR;
-  }
-
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
 
@@ -992,7 +911,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
   int iter = 1;
   interp->GetKeyValue(argc, argv, "iter", iter);
 
-  const int numTris = poly->NbTriangles();
+  const int numTris = mesh->GetNumTriangles();
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iterations."
                                                        << numTris << iter);
@@ -1006,7 +925,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
   // Update Data Model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -1060,7 +979,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
   // Update Data Model.
   cmdMobius::model->OpenCommand();
   {
-    tris_n->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
+    tris_n->SetTriangulation(mesh);
   }
   cmdMobius::model->CommitCommand();
 
@@ -1077,17 +996,6 @@ int MOBIUS_POLY_CheckJacobian(const Handle(asiTcl_Interp)& interp,
                               const char**                 argv)
 {
 #if defined USE_MOBIUS
-
-  // Get mesh from the Triangulation Node.
-  Handle(Poly_Triangulation)
-    tris = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
-  //
-  if ( tris.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
-    return TCL_ERROR;
-  }
-
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
                                    interp->GetProgress(),

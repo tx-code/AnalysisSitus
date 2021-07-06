@@ -31,6 +31,9 @@
 // Own include
 #include <asiData_ThicknessNode.h>
 
+// asiData includes
+#include <asiData_MeshParameter.h>
+
 // asiAlgo includes
 #include <asiAlgo_MeshField.h>
 
@@ -41,17 +44,18 @@
 
 asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name,          PID_Name);
-  REGISTER_PARAMETER(Triangulation, PID_Mesh);
-  REGISTER_PARAMETER(IntArray,      PID_ThicknessFieldIds);
-  REGISTER_PARAMETER(RealArray,     PID_ThicknessFieldValues);
-  REGISTER_PARAMETER(Real,          PID_ScalarMin);
-  REGISTER_PARAMETER(Real,          PID_ScalarMax);
-  REGISTER_PARAMETER(Bool,          PID_IsCustomDir);
-  REGISTER_PARAMETER(Real,          PID_Dx);
-  REGISTER_PARAMETER(Real,          PID_Dy);
-  REGISTER_PARAMETER(Real,          PID_Dz);
-  REGISTER_PARAMETER(TreeFunction,  PID_CheckThicknessFunc);
+  REGISTER_PARAMETER(Name,         PID_Name);
+  REGISTER_PARAMETER(IntArray,     PID_ThicknessFieldIds);
+  REGISTER_PARAMETER(RealArray,    PID_ThicknessFieldValues);
+  REGISTER_PARAMETER(Real,         PID_ScalarMin);
+  REGISTER_PARAMETER(Real,         PID_ScalarMax);
+  REGISTER_PARAMETER(Bool,         PID_IsCustomDir);
+  REGISTER_PARAMETER(Real,         PID_Dx);
+  REGISTER_PARAMETER(Real,         PID_Dy);
+  REGISTER_PARAMETER(Real,         PID_Dz);
+  REGISTER_PARAMETER(TreeFunction, PID_CheckThicknessFunc);
+
+  this->registerParameter(PID_Mesh, asiData_MeshParameter::Instance(), false);
 }
 
 //-----------------------------------------------------------------------------

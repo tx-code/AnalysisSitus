@@ -49,6 +49,10 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
+#if defined USE_MOBIUS
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 vtkStandardNewMacro(asiVisu_TriangulationSource)
@@ -72,18 +76,19 @@ asiVisu_TriangulationSource::~asiVisu_TriangulationSource()
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_TriangulationSource::SetInputTriangulation(const Handle(Poly_Triangulation)& triangulation)
+void asiVisu_TriangulationSource::SetInputTriangulation(const t_ptr<poly_Mesh>& triangulation)
 {
-  m_triangulation = triangulation;
+  m_mesh = triangulation;
   //
   this->Modified();
 }
 
 //-----------------------------------------------------------------------------
 
-const Handle(Poly_Triangulation)& asiVisu_TriangulationSource::GetInputTriangulation() const
+const t_ptr<poly_Mesh>&
+  asiVisu_TriangulationSource::GetInputTriangulation() const
 {
-  return m_triangulation;
+  return m_mesh;
 }
 
 //-----------------------------------------------------------------------------
@@ -92,35 +97,35 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
                                              vtkInformationVector** inputVector,
                                              vtkInformationVector*  outputVector)
 {
-  if ( m_triangulation.IsNull() )
+  if ( m_mesh.IsNull() )
   {
-    vtkErrorMacro( << "Invalid input: nullptr triangulation" );
+    vtkErrorMacro( << "Invalid input: null triangulation" );
     return 0;
   }
 
   m_regPoints.Clear();
 
   /* ================
-   *  Prepare output
+   *  Prepare output.
    * ================ */
 
-  // Get output polygonal data from the information vector
+  // Get output polygonal data from the information vector.
   vtkPolyData* polyOutput = vtkPolyData::GetData(outputVector);
   polyOutput->Allocate();
   polyOutput->SetPoints( vtkSmartPointer<vtkPoints>::New() );
 
-  // Add array for mesh item types
+  // Add array for mesh item types.
   vtkSmartPointer<vtkIdTypeArray> typeArr = vtkSmartPointer<vtkIdTypeArray>::New();
   typeArr->SetName(ARRNAME_MESH_ITEM_TYPE);
   typeArr->SetNumberOfComponents(1);
   polyOutput->GetCellData()->AddArray(typeArr);
 
-  // Array for mesh node IDs
+  // Array for mesh node IDs.
   vtkSmartPointer<vtkIntArray> nodeIDsArr = asiVisu_Utils::InitIntArray(ARRNAME_MESH_NODE_IDS);
   nodeIDsArr->SetNumberOfComponents(1);
   polyOutput->GetPointData()->AddArray(nodeIDsArr);
 
-  // Add array for mesh element IDs
+  // Add array for mesh element IDs.
   vtkSmartPointer<vtkIdTypeArray> faceIDsArr = vtkSmartPointer<vtkIdTypeArray>::New();
   faceIDsArr->SetName(ARRNAME_MESH_ELEM_IDS);
   faceIDsArr->SetNumberOfComponents(1);
@@ -130,72 +135,81 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
    *  Take care of free nodes by collecting them into a dedicated
    *  VTK_POLY_VERTEX cell. Notice that such cell (as well as
    *  simple VTK_VERTEX) must be added FIRST when working with
-   *  vtkPolyData objects in order to have the data set consistent
+   *  vtkPolyData objects in order to have the data set consistent.
    * ============================================================== */
 
-  // Internal collections of triangles and nodes
-  const Poly_Array1OfTriangle& triangles = m_triangulation->Triangles();
-  const TColgp_Array1OfPnt&    nodes     = m_triangulation->Nodes();
-
-  // Collect all used nodes
+  // Collect all used nodes.
   NCollection_Map<int> usedNodeIDs;
   //
-  for ( int i = triangles.Lower(); i <= triangles.Upper(); ++i )
+  for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
   {
-    const Poly_Triangle& tri = triangles(i);
+    const poly_TriangleHandle th = tit.Current();
+    poly_Triangle             tri;
 
-    // Get nodes
-    int n1, n2, n3;
-    tri.Get(n1, n2, n3);
-    //
-    usedNodeIDs.Add(n1);
-    usedNodeIDs.Add(n2);
-    usedNodeIDs.Add(n3);
+    if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
+      continue;
+
+    poly_VertexHandle vh[3];
+    tri.GetVertices(vh[0], vh[1], vh[2]);
+
+    usedNodeIDs.Add(vh[0].iIdx);
+    usedNodeIDs.Add(vh[1].iIdx);
+    usedNodeIDs.Add(vh[2].iIdx);
   }
 
-  // Collect free nodes (ones which are not used)
+  // Collect free nodes (ones which are not used).
   TColStd_PackedMapOfInteger freeNodeIDs;
   //
-  for ( int i = nodes.Lower(); i <= nodes.Upper(); ++i )
+  for ( poly_Mesh::VertexIterator vit(m_mesh); vit.More(); vit.Next() )
   {
-    // Add as a free node
-    if ( !usedNodeIDs.Contains(i) )
-      freeNodeIDs.Add(i);
+    const poly_VertexHandle vh = vit.Current();
+
+    // Add as a free node.
+    if ( !usedNodeIDs.Contains(vh.iIdx) )
+    {
+      freeNodeIDs.Add(vh.iIdx);
+    }
     else if ( m_bVerticesOn )
-      this->registerNodeCell(i, MeshPrimitive_SharedNode, polyOutput);
+    {
+      this->registerNodeCell(vh.iIdx, MeshPrimitive_SharedNode, polyOutput);
+    }
   }
   //
   if ( !freeNodeIDs.IsEmpty() )
   {
-    m_progress.SendLogMessage( LogWarn(Normal) << "Num. free nodes: %1" << freeNodeIDs.Extent() );
+    m_progress.SendLogMessage( LogWarn(Normal) << "Num. free nodes: %1." << freeNodeIDs.Extent() );
     //
     this->registerFreeNodesCell(freeNodeIDs, polyOutput);
   }
 
   /* ===========
-   *  Add edges
+   *  Add edges.
    * =========== */
 
   if ( m_bEdgesOn )
   {
-    //   0 -- never happens by construction
-    //   1 -- free link
-    //   2 -- shared link
-    // > 2 -- non-manifold link
+    //   0 -- never happens by construction.
+    //   1 -- free link.
+    //   2 -- shared link.
+    // > 2 -- non-manifold link.
     NCollection_DataMap<asiAlgo_MeshLink, int, asiAlgo_MeshLink> linkOccurenceMap;
 
-    for ( int i = triangles.Lower(); i <= triangles.Upper(); ++i )
+    for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
     {
-      const Poly_Triangle& tri = triangles(i);
+      const poly_TriangleHandle th = tit.Current();
+      poly_Triangle             tri;
 
-      // Get nodes
-      int n1, n2, n3;
-      tri.Get(n1, n2, n3);
+      if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
+        continue;
+
+      // Get nodes.
+      poly_VertexHandle vh[3];
+      tri.GetVertices(vh[0], vh[1], vh[2]);
 
       // Add unoriented links to the set of all links
-      asiAlgo_MeshLink l1(n1, n2);
-      asiAlgo_MeshLink l2(n1, n3);
-      asiAlgo_MeshLink l3(n2, n3);
+      asiAlgo_MeshLink l1(vh[0].iIdx, vh[1].iIdx);
+      asiAlgo_MeshLink l2(vh[1].iIdx, vh[2].iIdx);
+      asiAlgo_MeshLink l3(vh[2].iIdx, vh[0].iIdx);
       //
       if ( linkOccurenceMap.IsBound(l1) )
         linkOccurenceMap.ChangeFind(l1)++;
@@ -213,12 +227,13 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
         linkOccurenceMap.Bind(l3, 1);
     }
 
-    // Add links to VTK data set
+    // Add links to VTK data set.
     //
     int numFreeLinks = 0;
     int numNonManifoldLinks = 0;
     //
-    for ( NCollection_DataMap<asiAlgo_MeshLink, int, asiAlgo_MeshLink>::Iterator lit(linkOccurenceMap); lit.More(); lit.Next() )
+    for ( NCollection_DataMap<asiAlgo_MeshLink, int, asiAlgo_MeshLink>::Iterator lit(linkOccurenceMap);
+          lit.More(); lit.Next() )
     {
       asiVisu_MeshPrimitive linkType;
 
@@ -254,19 +269,23 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
   }
 
   /* ============
-   *  Add facets
+   *  Add facets.
    * ============ */
 
-  for ( int elemId = triangles.Lower(); elemId <= triangles.Upper(); ++elemId )
+  for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
   {
-    const Poly_Triangle& tri = triangles(elemId);
+    const poly_TriangleHandle th = tit.Current();
+    poly_Triangle             tri;
 
-    // Get nodes
-    int n1, n2, n3;
-    tri.Get(n1, n2, n3);
+    if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
+      continue;
 
-    // Register VTK cell
-    this->registerFacet(elemId, n1, n2, n3, polyOutput);
+    // Get nodes.
+    poly_VertexHandle vh[3];
+    tri.GetVertices(vh[0], vh[1], vh[2]);
+
+    // Register VTK cell.
+    this->registerFacet(th.iIdx, vh[0].iIdx, vh[1].iIdx, vh[2].iIdx, polyOutput);
   }
 
   return Superclass::RequestData(request, inputVector, outputVector);
@@ -282,7 +301,8 @@ vtkIdType
   vtkPoints* points = polyData->GetPoints();
 
   // Access mesh node
-  const gp_Pnt& node = m_triangulation->Node(nodeID);
+  t_xyz node;
+  m_mesh->GetVertex( poly_VertexHandle(nodeID), node );
 
   vtkIdType resPid;
   if ( !m_regPoints.IsBound(nodeID) )

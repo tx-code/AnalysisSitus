@@ -37,18 +37,26 @@
 // OpenCascade includes
 #include <Precision.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 //! Default constructor. Registers all involved Parameters.
 asiData_DeviationNode::asiData_DeviationNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name,          PID_Name);
-  REGISTER_PARAMETER(Triangulation, PID_Mesh);
-  REGISTER_PARAMETER(IntArray,      PID_DistanceFieldIds);
-  REGISTER_PARAMETER(RealArray,     PID_DistanceFieldValues);
-  REGISTER_PARAMETER(Real,          PID_Tolerance);
-  REGISTER_PARAMETER(Real,          PID_ScalarMin);
-  REGISTER_PARAMETER(Real,          PID_ScalarMax);
+  REGISTER_PARAMETER(Name,      PID_Name);
+  REGISTER_PARAMETER(IntArray,  PID_DistanceFieldIds);
+  REGISTER_PARAMETER(RealArray, PID_DistanceFieldValues);
+  REGISTER_PARAMETER(Real,      PID_Tolerance);
+  REGISTER_PARAMETER(Real,      PID_ScalarMin);
+  REGISTER_PARAMETER(Real,      PID_ScalarMax);
+
+  this->registerParameter(PID_Mesh, asiData_MeshParameter::Instance(), false);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -98,7 +106,10 @@ void asiData_DeviationNode::SetName(const TCollection_ExtendedString& N)
 
 void asiData_DeviationNode::SetMeshWithScalars(const asiAlgo_Mesh& mesh)
 {
-  ActParamTool::AsTriangulation( this->Parameter(PID_Mesh) )->SetTriangulation(mesh.triangulation);
+  Handle(asiData_MeshParameter)
+    param = Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) );
+  //
+  param->SetMesh( cascade::GetMobiusMesh(mesh.triangulation) );
 
   // Prepare array of node ids.
   if ( mesh.fields.size() )

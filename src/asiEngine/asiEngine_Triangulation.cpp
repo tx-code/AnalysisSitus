@@ -39,6 +39,12 @@
 #include <asiAlgo_CheckDeviations.h>
 #include <asiAlgo_Timer.h>
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
@@ -60,7 +66,7 @@ Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
 
 //-----------------------------------------------------------------------------
 
-Handle(Poly_Triangulation) asiEngine_Triangulation::GetTriangulation()
+t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
 {
   return m_model->GetTriangulationNode()->GetTriangulation();
 }
@@ -108,7 +114,7 @@ bool
                                            m_progress,
                                            m_plotter );
   //
-  if ( !checkDeviations.Perform( trisNode->GetTriangulation() ) )
+  if ( !checkDeviations.Perform( cascade::GetOpenCascadeMesh( trisNode->GetTriangulation() ) ) )
     return false;
 
   // Create Deviation Node.

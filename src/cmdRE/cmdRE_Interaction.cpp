@@ -50,6 +50,13 @@
 // OCCT includes
 #include <Geom_Plane.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 int RE_DefineContour(const Handle(asiTcl_Interp)& interp,
@@ -229,6 +236,7 @@ int RE_InterpMesh(const Handle(asiTcl_Interp)& interp,
                   int                          argc,
                   const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 5 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -257,7 +265,7 @@ int RE_InterpMesh(const Handle(asiTcl_Interp)& interp,
   contour_n->GetPoints(poles);
 
   // Prepare interpolation tool.
-  asiAlgo_InterpolateSurfMesh algo( tris_n->GetTriangulation(),
+  asiAlgo_InterpolateSurfMesh algo( cascade::GetOpenCascadeMesh( tris_n->GetTriangulation() ),
                                     interp->GetProgress(),
                                     interp->GetPlotter() );
 
@@ -274,6 +282,9 @@ int RE_InterpMesh(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, Color_White);
 
   return TCL_OK;
+#else
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------

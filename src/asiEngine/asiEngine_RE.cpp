@@ -515,6 +515,7 @@ bool
   asiEngine_RE::ExtractBoundedRegion(const Handle(asiData_RePatchNode)& patch,
                                      Handle(Poly_Triangulation)&        region) const
 {
+#if defined USE_MOBIUS
   // Get indices of the triangles constituting the contour coverage.
   TColStd_PackedMapOfInteger boundaryInds;
   this->CollectContourTriangles(patch, boundaryInds);
@@ -526,7 +527,8 @@ bool
   }
 
   // Get working triangulation.
-  Handle(Poly_Triangulation) tris = m_model->GetTriangulationNode()->GetTriangulation();
+  Handle(Poly_Triangulation)
+    tris = cascade::GetOpenCascadeMesh( m_model->GetTriangulationNode()->GetTriangulation() );
 
   // Get BVH from the working triangulation.
   Handle(asiAlgo_BVHFacets) bvh = m_model->GetTriangulationNode()->GetBVH();
@@ -708,6 +710,10 @@ bool
 #endif
 
   return true;
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------

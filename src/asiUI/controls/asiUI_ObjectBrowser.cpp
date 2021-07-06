@@ -68,6 +68,13 @@
 #include <QTreeWidgetItemIterator>
 #pragma warning(pop)
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 #define TREEVIEW_MINSIZE 200
 
 //-----------------------------------------------------------------------------
@@ -891,6 +898,7 @@ void asiUI_ObjectBrowser::onComputeElementalNorms()
 
 void asiUI_ObjectBrowser::onConvertToTris()
 {
+#if defined USE_MOBIUS
   Handle(ActAPI_INode) selected_n;
   if ( !this->selectedNode(selected_n) ) return;
 
@@ -907,7 +915,7 @@ void asiUI_ObjectBrowser::onConvertToTris()
   // Modify Data Model.
   m_model->OpenCommand();
   {
-    m_model->GetTriangulationNode()->SetTriangulation(polyTris);
+    m_model->GetTriangulationNode()->SetTriangulation( cascade::GetMobiusMesh(polyTris) );
   }
   m_model->CommitCommand();
 
@@ -920,12 +928,16 @@ void asiUI_ObjectBrowser::onConvertToTris()
     if ( pViewerPart )
       pViewerPart->PrsMgr()->Actualize( m_model->GetTriangulationNode() );
   }
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 void asiUI_ObjectBrowser::onConvertToTess()
 {
+#if defined USE_MOBIUS
   Handle(ActAPI_INode) selected_n;
   if ( !this->selectedNode(selected_n) ) return;
 
@@ -937,7 +949,7 @@ void asiUI_ObjectBrowser::onConvertToTess()
 
   // Convert to Poly triangulation.
   Handle(ActData_Mesh) mesh;
-  asiAlgo_MeshConvert::ToPersistent(trisNode->GetTriangulation(), mesh);
+  asiAlgo_MeshConvert::ToPersistent(cascade::GetOpenCascadeMesh( trisNode->GetTriangulation() ), mesh);
 
   // Modify Data Model.
   m_model->OpenCommand();
@@ -955,6 +967,9 @@ void asiUI_ObjectBrowser::onConvertToTess()
     if ( pViewerPart )
       pViewerPart->PrsMgr()->Actualize( m_model->GetTessellationNode() );
   }
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+#endif
 }
 
 //-----------------------------------------------------------------------------

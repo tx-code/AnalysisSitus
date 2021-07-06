@@ -37,7 +37,6 @@
 // OCCT includes
 #include <NCollection_DataMap.hxx>
 #include <NCollection_List.hxx>
-#include <Poly_Triangulation.hxx>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>
@@ -48,10 +47,11 @@
 #include <vtkSmartPointer.h>
 #include <vtkType.h>
 
-//! \todo Free links are not recognized yet.
-//! \todo Dangling links are not recognized yet.
-//! \todo Border nodes are not recognized yet.
-//!
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+#endif
+
 //! Source of polygonal data representing surface triangulation.
 class asiVisu_TriangulationSource : public vtkPolyDataAlgorithm
 {
@@ -67,12 +67,12 @@ public:
 public:
 
   //! Sets triangulation to visualize.
-  //! \param triangulation [in] triangulation to visualize.
+  //! \param[in] triangulation the triangulation to visualize.
   asiVisu_EXPORT void
-    SetInputTriangulation(const Handle(Poly_Triangulation)& triangulation);
+    SetInputTriangulation(const mobius::t_ptr<mobius::poly_Mesh>& triangulation);
 
   //! \return initial triangulation.
-  asiVisu_EXPORT const Handle(Poly_Triangulation)&
+  asiVisu_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
     GetInputTriangulation() const;
 
 public:
@@ -214,9 +214,9 @@ private:
   asiVisu_TriangulationSource& operator=(const asiVisu_TriangulationSource&);
 
 private:
-  
+
   //! Triangulation to convert to VTK polygonal data.
-  Handle(Poly_Triangulation) m_triangulation;
+  mobius::t_ptr<mobius::poly_Mesh> m_mesh;
 
   //! Registered VTK points.
   NCollection_DataMap<int, vtkIdType> m_regPoints;
