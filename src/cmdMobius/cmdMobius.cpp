@@ -907,7 +907,6 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
                                 const char**                 argv)
 {
 #if defined USE_MOBIUS
-
   // Get mesh from the Triangulation Node.
   Handle(Poly_Triangulation)
     poly = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
@@ -919,29 +918,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get the named mesh.
-  t_ptr<t_mesh> mesh;
-  std::string   name;
-  //
-  if ( interp->GetKeyValue(argc, argv, "model", name) )
-  {
-    // Get the named mesh.
-    Handle(asiTcl_Variable) var     = interp->GetVar(name);
-    Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
-    //
-    if ( meshVar.IsNull() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
-                                                          << name);
-      return TCL_ERROR;
-    }
-    //
-    mesh = meshVar->GetMesh();
-  }
-  else
-  {
-    // Take from the node.
-    mesh = cascade::GetMobiusMesh(poly);
-  }
+  t_ptr<t_mesh> mesh = ::GetActiveMesh();
 
   TIMER_NEW
   TIMER_GO
@@ -1049,7 +1026,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
 
   const int numTris = mesh->GetNumTriangles();
 
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iterations."
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iteration(s)."
                                                        << numTris << iter);
 
   mesh->ComputeEdges();
