@@ -34,15 +34,18 @@
 // OCCT includes
 #include <Standard_GUID.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 // Construction & settling-down routines
 //-----------------------------------------------------------------------------
 
 //! Default constructor.
-asiData_MeshAttr::asiData_MeshAttr()
-: TDF_Attribute (),
-  m_pMesh       (nullptr)
-{}
+asiData_MeshAttr::asiData_MeshAttr() : TDF_Attribute() {}
 
 //! Settles down new Mesh Attribute to the given OCAF Label.
 //! \param[in] label TDF Label to settle down the new Attribute to.
@@ -96,8 +99,16 @@ Handle(TDF_Attribute) asiData_MeshAttr::NewEmpty() const
 //! \param[in] mainAttr OCAF Attribute to copy data from.
 void asiData_MeshAttr::Restore(const Handle(TDF_Attribute)& mainAttr)
 {
-  Handle(asiData_MeshAttr) fromCasted = Handle(asiData_MeshAttr)::DownCast(mainAttr);
-  m_pMesh = fromCasted->GetMesh();
+  m_mesh.Nullify();
+
+  Handle(asiData_MeshAttr)
+    fromCasted = Handle(asiData_MeshAttr)::DownCast(mainAttr);
+
+  if ( !fromCasted->m_mesh.IsNull() )
+  {
+    t_ptr<poly_Mesh> mesh = fromCasted->m_mesh->DeepCopy();
+    m_mesh = mesh;
+  }
 }
 
 //! Supporting method for Copy/Paste functionality. Performs full copying of
@@ -108,7 +119,14 @@ void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
                              const Handle(TDF_RelocationTable)& asiData_NotUsed(relocTable)) const
 {
   Handle(asiData_MeshAttr) intoCasted = Handle(asiData_MeshAttr)::DownCast(into);
-  intoCasted->SetMesh(m_pMesh);
+
+  intoCasted->m_mesh.Nullify();
+
+  if ( !m_mesh.IsNull() )
+  {
+    t_ptr<poly_Mesh> mesh = m_mesh->DeepCopy();
+    intoCasted->m_mesh = mesh;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -117,16 +135,16 @@ void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
 
 //! Sets mesh to store.
 //! \param[in] mesh mesh to store.
-void asiData_MeshAttr::SetMesh(void* mesh)
+void asiData_MeshAttr::SetMesh(const t_ptr<poly_Mesh>& mesh)
 {
   this->Backup();
 
-  m_pMesh = mesh;
+  m_mesh = mesh;
 }
 
 //! Returns the stored mesh.
 //! \return stored mesh.
-void* asiData_MeshAttr::GetMesh() const
+const t_ptr<poly_Mesh>& asiData_MeshAttr::GetMesh() const
 {
-  return m_pMesh;
+  return m_mesh;
 }

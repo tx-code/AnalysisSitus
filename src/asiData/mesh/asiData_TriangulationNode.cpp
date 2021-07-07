@@ -143,7 +143,7 @@ void asiData_TriangulationNode::SetTriangulation(const t_ptr<poly_Mesh>& triangu
   if ( param.IsNull() )
     return;
 
-  param->SetMesh(triangulation.Access() );
+  param->SetMesh(triangulation);
 }
 
 #endif

@@ -39,6 +39,10 @@
 #include <ActData_Common.h>
 #include <ActData_ParameterDTO.h>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
+
 //-----------------------------------------------------------------------------
 // Parameter DTO
 //-----------------------------------------------------------------------------
@@ -62,7 +66,7 @@ public:
 
 public:
 
-  void* pMesh; //!< Mesh.
+  mobius::t_ptr<mobius::poly_Mesh> pMesh; //!< Mesh.
 
 };
 
@@ -87,12 +91,12 @@ public:
 public:
 
   asiData_EXPORT void
-    SetMesh(void*                         mesh,
-            const ActAPI_ModificationType MType           = MT_Touched,
-            const bool                    doResetValidity = true,
-            const bool                    doResetPending  = true);
+    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
+            const ActAPI_ModificationType           MType           = MT_Touched,
+            const bool                              doResetValidity = true,
+            const bool                              doResetPending  = true);
 
-  asiData_EXPORT void*
+  asiData_EXPORT mobius::t_ptr<mobius::poly_Mesh>
     GetMesh();
 
 protected:

@@ -38,6 +38,10 @@
 #include <TDF_Attribute.hxx>
 #include <TDF_Label.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
+
 //! OCAF Attribute representing unstructured mesh.
 class asiData_MeshAttr : public TDF_Attribute
 {
@@ -77,19 +81,23 @@ public:
     Paste(const Handle(TDF_Attribute)&       into,
           const Handle(TDF_RelocationTable)& relocTable) const;
 
+#if defined USE_MOBIUS
+
 // Accessors for domain-specific data:
 public:
 
   asiData_EXPORT void
-    SetMesh(void* octree);
+    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh);
 
-  asiData_EXPORT void*
+  asiData_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
     GetMesh() const;
 
 // Members:
 private:
 
-  void* m_pMesh; //!< Pointer to mesh.
+  mobius::t_ptr<mobius::poly_Mesh> m_mesh; //!< Pointer to mesh.
+
+#endif
 
 };
 

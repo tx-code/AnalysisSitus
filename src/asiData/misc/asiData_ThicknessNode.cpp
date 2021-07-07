@@ -40,6 +40,13 @@
 // OpenCascade includes
 #include <Precision.hxx>
 
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/poly_Mesh.h>
+
+  using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
@@ -100,7 +107,7 @@ void asiData_ThicknessNode::SetName(const TCollection_ExtendedString& N)
 
 void asiData_ThicknessNode::SetMesh(const Handle(Poly_Triangulation)& mesh)
 {
-  ActParamTool::AsTriangulation( this->Parameter(PID_Mesh) )->SetTriangulation(mesh);
+  Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh( cascade::GetMobiusMesh(mesh) );
 }
 
 //-----------------------------------------------------------------------------

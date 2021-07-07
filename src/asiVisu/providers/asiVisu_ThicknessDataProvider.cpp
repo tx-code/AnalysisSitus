@@ -43,7 +43,7 @@ asiVisu_ThicknessDataProvider::asiVisu_ThicknessDataProvider(const Handle(asiDat
 : asiVisu_MeshEScalarDataProvider()
 {
   m_node = N;
-  m_triangulationParam = ActParamTool::AsTriangulation( N->Parameter(asiData_ThicknessNode::PID_Mesh) );
+  m_triangulationParam = Handle(asiData_MeshParameter)::DownCast( N->Parameter(asiData_ThicknessNode::PID_Mesh) );
 }
 
 //-----------------------------------------------------------------------------

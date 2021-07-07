@@ -90,30 +90,10 @@ namespace
                                  int                          argc,
                                  const char**                 argv)
   {
-    // Get the named mesh.
-    t_ptr<t_mesh> mesh;
-    std::string   name;
-    //
-    if ( interp->GetKeyValue(argc, argv, "model", name) )
-    {
-      // Get the named mesh.
-      Handle(asiTcl_Variable) var     = interp->GetVar(name);
-      Handle(cmdMobius_Mesh)  meshVar = Handle(cmdMobius_Mesh)::DownCast(var);
-      //
-      if ( meshVar.IsNull() )
-      {
-        interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no mesh named '%1'."
-                                                            << name);
-        return TCL_ERROR;
-      }
-      //
-      mesh = meshVar->GetMesh();
-    }
-    else
-    {
-      // Take from the node.
-      mesh = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
-    }
+    // Make a copy to assure that we do not modify the persistent data
+    // directly as otherwise undo/redo will be buggy.
+    t_ptr<t_mesh>
+      mesh = cmdMobius::model->GetTriangulationNode()->GetTriangulation()->DeepCopy();
 
     return mesh;
   }
@@ -168,13 +148,6 @@ int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
 
   asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
   const t_ptr<poly_Mesh>& mesh = meshMerge.GetMobiusMesh();
-
-  // Set as Tcl variable.
-  std::string name;
-  if ( interp->GetKeyValue(argc, argv, "model", name) )
-  {
-    interp->SetVar( name, new cmdMobius_Mesh(mesh) );
-  }
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
                                                         << mesh->GetNumTriangles() );
@@ -280,17 +253,11 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
                                    interp->GetProgress(),
                                    interp->GetPlotter() );
 
-  //// Check if there's any user selection to process.
-  //TColStd_PackedMapOfInteger facetIds;
-  //trisApi.GetHighlightedFacets(facetIds);
-  ////
-  //if ( facetIds.Extent() )
-  //{
-  //  tris = asiAlgo_Utils::Mesh::ExtractRegion(tris, facetIds);
-  //}
-
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
+                                                        << mesh->GetNumTriangles() );
 
   TIMER_NEW
   TIMER_GO
@@ -301,17 +268,57 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
 
-  TIMER_RESET
-  TIMER_GO
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( !facetIds.Extent() ) // Entire mesh.
+  {
+    TIMER_RESET
+    TIMER_GO
 
-  // Flip edges.
-  mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
+    // Flip edges.
+    mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
 
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edges")
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edges")
+  }
+  else if ( facetIds.Extent() == 2 )
+  {
+    poly_TriangleHandle th[2] = { poly_TriangleHandle( facetIds.GetMinimalMapped() ),
+                                  poly_TriangleHandle( facetIds.GetMaximalMapped() ) };
 
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
-                                                        << mesh->GetNumTriangles() );
+    poly_EdgeHandle he = mesh->FindEdge(th[0], th[1]);
+    //
+    if ( !he.IsValid() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The selected triangles have no common edge.");
+      return TCL_ERROR;
+    }
+
+    const bool force = interp->HasKeyword(argc, argv, "force");
+    bool       isOk  = false;
+
+    // Flip the common edge.
+    if ( force )
+      isOk = mesh->FlipEdge(he, M_PI, M_PI);
+    else
+      isOk = mesh->FlipEdge(he);
+
+    if ( !isOk )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot flip the edge (try '-force').");
+      return TCL_ERROR;
+    }
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edge")
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select two adjacent triangles.");
+    return TCL_ERROR;
+  }
 
   // Update data model.
   cmdMobius::model->OpenCommand();
@@ -466,14 +473,20 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     // Compute areas.
     std::vector<poly_TriangleHandle> ths;
     std::vector<double>              tAreas;
+    std::vector<int>                 tIds;
     std::vector<int>                 tNums;
     //
-    for ( int idx = 0; idx < mesh->GetNumTriangles(); ++idx )
+    for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
     {
-      poly_TriangleHandle th(idx);
+      poly_TriangleHandle th( tit.Current() );
+      poly_Triangle       t;
+      //
+      if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
+        continue;
 
-      tAreas.push_back( mesh->ComputeArea(th) );
-      tNums .push_back( idx );
+      tAreas .push_back( mesh->ComputeArea(th) );
+      tIds   .push_back( tit.Current().GetIdx() );
+      tNums  .push_back( int( tNums.size() ) );
     }
 
     // Sort facets by descending areas.
@@ -487,7 +500,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     // are added as long as we refine.
     for ( int idx : tNums )
     {
-      poly_TriangleHandle th(idx);
+      poly_TriangleHandle th(tIds[idx]);
       poly_Triangle       t;
 
       // Get the next triangle to process.
@@ -503,8 +516,11 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
       // Refine triangle based on its size.
       const double area = mesh->ComputeArea(th);
       const double len  = mesh->ComputeMaxLen(th);
-      //
-      if ( (area > areaThreshold) && (len > lenThreshold) )
+
+      std::cout << "triangle " << idx << ": (area, len) = ("
+                << area << ", " << len << ")" << std::endl;
+
+      if ( (area > areaThreshold) || (len > lenThreshold) )
       {
         mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
       }
@@ -518,7 +534,9 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     // Refine triangles.
     for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
     {
-      const int fid = fit.Key() - 1; // Mobius indices are 0-based.
+      const int fid = fit.Key();
+
+      interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Refining facet #%1." << fid);
 
       if ( !mesh->RefineByMidpoint( poly_TriangleHandle(fid) ) )
       {
@@ -673,7 +691,9 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
     // Refine triangles.
     for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
     {
-      const int fid = fit.Key() - 1; // Mobius indices are 0-based.
+      const int fid = fit.Key(); // Mobius indices are 0-based.
+
+      interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Refining facet #%1." << fid);
 
       std::vector<poly_TriangleHandle> ths;
       if ( !mesh->RefineByMidedges(poly_TriangleHandle(fid), ths) )
@@ -747,14 +767,14 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
   // Compute links.
   mesh->ComputeEdges();
 
-  poly_TriangleHandle th[2] = { poly_TriangleHandle(facetIds.GetMinimalMapped() - 1),
-                                poly_TriangleHandle(facetIds.GetMaximalMapped() - 1) };
+  poly_TriangleHandle th[2] = { poly_TriangleHandle( facetIds.GetMinimalMapped() ),
+                                poly_TriangleHandle( facetIds.GetMaximalMapped() ) };
 
   poly_EdgeHandle he = mesh->FindEdge(th[0], th[1]);
   //
   if ( !he.IsValid() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The selected triangle have no common edge.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The selected triangles have no common edge.");
     return TCL_ERROR;
   }
 
@@ -763,13 +783,13 @@ int MOBIUS_POLY_CollapseEdge(const Handle(asiTcl_Interp)& interp,
 
   // Collapse the common edge.
   if ( force )
-    isOk = mesh->CollapseEdge(he);
+    isOk = mesh->CollapseEdge(he, false, false);
   else
     isOk = mesh->CollapseEdge(he, true, true, 0.01);
 
   if ( !isOk )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot collapse the edge.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot collapse the edge (try '-force').");
     return TCL_ERROR;
   }
 
@@ -896,112 +916,6 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
 
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
 
-  return TCL_ERROR;
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
-                                int                          argc,
-                                const char**                 argv)
-{
-#if defined USE_MOBIUS
-  // Get mesh from the Triangulation Node.
-  Handle(Poly_Triangulation)
-    poly = cmdMobius::model->GetTriangulationNode()->GetTriangulation();
-  //
-  if ( poly.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is empty.");
-    return TCL_ERROR;
-  }
-
-  // Get the named mesh.
-  t_ptr<t_mesh> mesh = ::GetActiveMesh();
-
-  TIMER_NEW
-  TIMER_GO
-
-  const int numTris = mesh->GetNumTriangles();
-
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to refine."
-                                                       << numTris);
-
-  double areaThreshold = 0.01;
-  double lenThreshold  = 0.01;
-  //
-  interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
-
-  // Compute areas.
-  std::vector<poly_TriangleHandle> ths;
-  std::vector<double>              tAreas;
-  std::vector<int>                 tIds;
-  std::vector<int>                 tNums;
-  //
-  for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
-  {
-    poly_TriangleHandle th( tit.Current() );
-    poly_Triangle       t;
-    //
-    if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
-      continue;
-
-    tAreas .push_back( mesh->ComputeArea(th) );
-    tIds   .push_back( tit.Current().GetIdx() );
-    tNums  .push_back( int( tNums.size() ) );
-  }
-
-  // Sort facets by descending areas.
-  std::sort( tNums.begin(), tNums.end(),
-             [&](const int a, const int b)
-             {
-               return tAreas[a] > tAreas[b];
-             } );
-
-  // Refine. Notice that we do not use triangle iterator here as more triangles
-  // are added as long as we refine.
-  for ( int idx : tNums )
-  {
-    poly_TriangleHandle th(tIds[idx]);
-    poly_Triangle       t;
-
-    // Get the next triangle to process.
-    mesh->GetTriangle(th, t);
-    //
-    if ( t.IsDeleted() )
-      continue;
-
-    // Refine triangle based on its size.
-    const double area = mesh->ComputeArea(th);
-    const double len  = mesh->ComputeMaxLen(th);
-
-    std::cout << "triangle " << idx << ": (area, len) = ("
-              << area << ", " << len << ")" << std::endl;
-
-    if ( (area > areaThreshold) || (len > lenThreshold) )
-    {
-      mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
-    }
-  }
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Midpoint refine")
-
-  // Update Data Model.
-  cmdMobius::model->OpenCommand();
-  {
-    cmdMobius::model->GetTriangulationNode()->SetTriangulation( cascade::GetOpenCascadeMesh(mesh) );
-  }
-  cmdMobius::model->CommitCommand();
-
-  // Actualize.
-  if ( cmdMobius::cf->ViewerPart )
-    cmdMobius::cf->ViewerPart->PrsMgr()->Actualize( cmdMobius::model->GetTriangulationNode() );
-
-  return TCL_OK;
-#else
-  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
 #endif
 }
@@ -1191,11 +1105,9 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-init",
     //
-    "poly-init [-model <M>]\n"
+    "poly-init\n"
     "\n"
-    "\t Initializes a mesh from a CAD part and optionally stores it is a Tcl variable\n"
-    "\t named <M>. If the mesh is to stored, it keeps associativity with the originating\n"
-    "\t CAD model.",
+    "\t Initializes a mesh from a CAD part.",
     //
     __FILE__, group, MOBIUS_POLY_Init);
 
@@ -1265,7 +1177,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-smooth",
     //
-    "poly-smooth [-model <name>] [-iter <iter>]\n"
+    "poly-smooth [-iter <iter>]\n"
     "\t Smooths triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_Smooth);
@@ -1273,7 +1185,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-refine-inc",
     //
-    "poly-refine-inc -model M\n"
+    "poly-refine-inc\n"
     "\t Incrementally refines the named triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_RefineInc);
