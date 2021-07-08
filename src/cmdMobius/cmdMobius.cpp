@@ -287,6 +287,8 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
     poly_TriangleHandle th[2] = { poly_TriangleHandle( facetIds.GetMinimalMapped() ),
                                   poly_TriangleHandle( facetIds.GetMaximalMapped() ) };
 
+    mesh->ComputeEdges();
+
     poly_EdgeHandle he = mesh->FindEdge(th[0], th[1]);
     //
     if ( !he.IsValid() )
@@ -392,7 +394,7 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
   //
   for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
   {
-    const int fid = fit.Key() - 1; // Mobius indices are 0-based.
+    const int fid = fit.Key(); // Mobius indices are 0-based.
     const poly_TriangleHandle th(fid);
 
     std::vector<poly_TriangleHandle> ths;
@@ -415,7 +417,7 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
     }
 
     for ( const auto& _th : ths )
-      foundIds.Add(_th.iIdx + 1); // OpenCascade triangles are 1-based.
+      foundIds.Add(_th.iIdx); // OpenCascade triangles are 1-based.
   }
   //
   foundIds.Subtract(facetIds); // Do not pass the initially selected facets.
@@ -860,22 +862,22 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  mesh->ComputeEdges();
-
-  const int maxIter = 10;
+  const int maxIter = 1;
   bool      stop    = false;
   int       iter    = 0;
+  int       nbDone  = 0;
+
+  mesh->ComputeEdges();
 
   // Refine.
-  do
-  {
-    int  numEdges   = mesh->GetNumEdges();
+  /*do
+  {*/
     bool anyRefined = false;
     //
-    for ( int idx = 0; idx < numEdges; ++idx )
+    for ( poly_Mesh::EdgeIterator eit(mesh); eit.More(); eit.Next() )
     {
-      poly_EdgeHandle eh(idx);
-      poly_Edge       e;
+      const poly_EdgeHandle eh = eit.Current();
+      poly_Edge             e;
 
       // Get the next edge.
       mesh->GetEdge(eh, e);
@@ -892,24 +894,27 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
       //
       if ( len < maxLen )
       {
-        mesh->CollapseEdge(eh, true, true, 0.01);
+        if ( mesh->CollapseEdge(eh, true, true, 0.01) )
+        {
+          nbDone++;
+        }
 
         if ( !anyRefined ) anyRefined = true;
       }
+
+      mesh->ComputeEdges();
     }
 
     if ( !anyRefined || (++iter >= maxIter) )
       stop = true;
-  }
-  while ( !stop );
+  /*}
+  while ( !stop );*/
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Collapse edges")
 
-  ///
-
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles after edge collapse: %1."
-                                                        << mesh->GetNumTriangles() );
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of edges collapsed: %1."
+                                                        << nbDone );
 
   // Update data model.
   cmdMobius::model->OpenCommand();
@@ -951,13 +956,18 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
   int iter = 1;
   interp->GetKeyValue(argc, argv, "iter", iter);
 
+  // Compose the domain of interest.
+  t_domain domain;
+  if ( interp->HasKeyword(argc, argv, "planar") )
+    domain = ::ComposePlanarDomain();
+
   const int numTris = mesh->GetNumTriangles();
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1 triangles to smooth in %2 iteration(s)."
                                                        << numTris << iter);
 
   mesh->ComputeEdges();
-  mesh->Smooth( iter, ::ComposePlanarDomain() );
+  mesh->Smooth(iter, domain);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Smooth")
