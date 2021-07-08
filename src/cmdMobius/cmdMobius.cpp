@@ -256,17 +256,12 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   // Get the active mesh.
   t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
 
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
-                                                        << mesh->GetNumTriangles() );
+  // Get the desired number of flipping iterations.
+  int iter = 1;
+  interp->GetKeyValue(argc, argv, "iter", iter);
 
-  TIMER_NEW
-  TIMER_GO
-
-  // Compute links.
-  mesh->ComputeEdges();
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1. To flip edges in %2 iteration(s)."
+                                                        << mesh->GetNumTriangles() << iter );
 
   // Check if there's any user selection to process.
   TColStd_PackedMapOfInteger facetIds;
@@ -274,11 +269,15 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
   //
   if ( !facetIds.Extent() ) // Entire mesh.
   {
-    TIMER_RESET
+    TIMER_NEW
     TIMER_GO
 
     // Flip edges.
-    mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
+    for ( int i = 0; i < iter; ++i )
+    {
+      mesh->ComputeEdges();
+      mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
+    }
 
     TIMER_FINISH
     TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Flip edges")
@@ -299,15 +298,24 @@ int MOBIUS_POLY_FlipEdges(const Handle(asiTcl_Interp)& interp,
     const bool force = interp->HasKeyword(argc, argv, "force");
     bool       isOk  = false;
 
+    TIMER_NEW
+    TIMER_GO
+
+    mesh->ComputeEdges();
+
     // Flip the common edge.
     if ( force )
-      isOk = mesh->FlipEdge(he, M_PI, M_PI);
+      isOk = mesh->FlipEdge(he, 1./180.*M_PI, 15./180.*M_PI, false, false);
     else
       isOk = mesh->FlipEdge(he);
 
     if ( !isOk )
     {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot flip the edge (try '-force').");
+      if ( !force )
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot flip the edge (try '-force').");
+      else
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot forcibly flip the edge.");
+
       return TCL_ERROR;
     }
 
@@ -465,8 +473,8 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     TIMER_NEW
     TIMER_GO
 
-    double areaThreshold = 1.;
-    double lenThreshold  = 1.;
+    double areaThreshold = 0.01;
+    double lenThreshold  = 0.01;
     //
     interp->GetKeyValue(argc, argv, "minarea", areaThreshold);
 
@@ -522,7 +530,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
 
       if ( (area > areaThreshold) || (len > lenThreshold) )
       {
-        mesh->RefineByMidpoint( poly_TriangleHandle(idx) );
+        mesh->RefineByMidpoint(th);
       }
     }
 
@@ -1123,9 +1131,14 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-flip-edges",
     //
-    "poly-flip-edges\n"
+    "poly-flip-edges [-force] [-iter <num>]\n"
     "\n"
-    "\t Flips triangulation edges.",
+    "\t Flips triangulation edges for entire model if no facets are selected.\n"
+    "\t If two facets with a common edge are selected, the shared edge will be\n"
+    "\t flipped unless it's impossible to do. If so, you can still use the '-force'\n"
+    "\t flag to relax the angular distortion criteria applied by the flipping operator.\n"
+    "\t You might also want to perfom edge flipping iteratively. For that, pass the\n"
+    "\t '-iter' flag followed by the number of iterations.",
     //
     __FILE__, group, MOBIUS_POLY_FlipEdges);
 
