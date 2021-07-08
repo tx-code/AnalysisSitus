@@ -840,9 +840,14 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
 
+  // Read max edge length.
   double maxLen = 1.;
-  //
   interp->GetKeyValue(argc, argv, "maxlen", maxLen);
+
+  // Compose the domain of interest.
+  t_domain domain;
+  if ( interp->HasKeyword(argc, argv, "planar") )
+    domain = ::ComposePlanarDomain();
 
   asiEngine_Triangulation trisApi( cmdMobius::model,
                                    cmdMobius::cf->ViewerPart->PrsMgr(),
@@ -1181,7 +1186,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-collapse-edges",
     //
-    "poly-collapse-edges -maxlen <maxlen>\n"
+    "poly-collapse-edges -maxlen <maxlen> [-planar]\n"
     "\n"
     "\t Collapses tiny edges incrementally.",
     //
