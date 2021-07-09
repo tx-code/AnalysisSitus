@@ -862,7 +862,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  const int maxIter = 1;
+  const int maxIter = 10;
   bool      stop    = false;
   int       iter    = 0;
   int       nbDone  = 0;
@@ -870,8 +870,8 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   mesh->ComputeEdges();
 
   // Refine.
-  /*do
-  {*/
+  do
+  {
     bool anyRefined = false;
     //
     for ( poly_Mesh::EdgeIterator eit(mesh); eit.More(); eit.Next() )
@@ -901,14 +901,12 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
 
         if ( !anyRefined ) anyRefined = true;
       }
-
-      mesh->ComputeEdges();
     }
 
     if ( !anyRefined || (++iter >= maxIter) )
       stop = true;
-  /*}
-  while ( !stop );*/
+  }
+  while ( !stop );
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Collapse edges")

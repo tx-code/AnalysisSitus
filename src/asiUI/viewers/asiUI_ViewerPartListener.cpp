@@ -79,6 +79,61 @@
 
 namespace
 {
+  Handle(Poly_Triangulation)
+    ExtractRegion(const t_ptr<poly_Mesh>&           tris,
+                  const TColStd_PackedMapOfInteger& ids)
+  {
+    t_ptr<poly_Mesh> region = new poly_Mesh;
+
+    // Add new nodes.
+    std::unordered_map<poly_VertexHandle, poly_VertexHandle> nodeMap;
+    //
+    for ( TColStd_PackedMapOfInteger::Iterator fit(ids); fit.More(); fit.Next() )
+    {
+      const int tid = fit.Key();
+
+      poly_Triangle t;
+      tris->GetTriangle(poly_TriangleHandle(tid), t);
+
+      poly_VertexHandle globalNodeHandles[3];
+      t.GetVertices(globalNodeHandles[0], globalNodeHandles[1], globalNodeHandles[2]);
+
+      for ( int k = 0; k < 3; ++k )
+      {
+        if ( nodeMap.find(globalNodeHandles[k]) == nodeMap.end() )
+        {
+          t_xyz V;
+          tris->GetVertex(globalNodeHandles[k], V);
+
+          poly_VertexHandle localNodeHandle = region->AddVertex(V);
+
+          nodeMap.insert({globalNodeHandles[k], localNodeHandle});
+        }
+      }
+    }
+
+    // Add new triangles.
+    std::vector<poly_Triangle> newTriangles;
+    //
+    for ( TColStd_PackedMapOfInteger::Iterator fit(ids); fit.More(); fit.Next() )
+    {
+      const int tid = fit.Key();
+
+      poly_Triangle t;
+      tris->GetTriangle(poly_TriangleHandle(tid), t);
+
+      poly_VertexHandle globalNodeHandles[3];
+      t.GetVertices(globalNodeHandles[0], globalNodeHandles[1], globalNodeHandles[2]);
+
+      region->AddTriangle( nodeMap[globalNodeHandles[0]],
+                           nodeMap[globalNodeHandles[1]],
+                           nodeMap[globalNodeHandles[2]] );
+    }
+
+    // Set result and return.
+    return cascade::GetOpenCascadeMesh(region);
+  }
+
   //! Prepares one shape out of the passed collection of faces. Is there
   //! is only one face passed, it will be returned without any processing.
   //! For multiple faces, a compound is constructed and returned.
@@ -470,8 +525,8 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Prepare a triangulation to dump
     Handle(Poly_Triangulation)
       mesh2Save = selectedShapes.Extent() ? ::FacesAsOneMesh(selectedShapes)
-                                          : asiAlgo_Utils::Mesh::ExtractRegion( cascade::GetOpenCascadeMesh( trisApi.GetTriangulation() ),
-                                                                                selectedFacets );
+                                          : ::ExtractRegion( trisApi.GetTriangulation(),
+                                                             selectedFacets );
 
     // Save mesh
     if ( !asiAlgo_Utils::WriteStl( mesh2Save, QStr2AsciiStr(filename) ) )
