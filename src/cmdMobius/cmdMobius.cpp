@@ -896,7 +896,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
       //
       if ( len < maxLen )
       {
-        if ( mesh->CollapseEdge(eh, true, true, 0.01) )
+        if ( mesh->CollapseEdge(eh, true, true, 0.01, domain) )
         {
           nbDone++;
 
