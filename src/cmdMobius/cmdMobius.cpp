@@ -899,6 +899,8 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
         if ( mesh->CollapseEdge(eh, true, true, 0.01) )
         {
           nbDone++;
+
+          mesh->ComputeEdges();
         }
 
         if ( !anyRefined ) anyRefined = true;

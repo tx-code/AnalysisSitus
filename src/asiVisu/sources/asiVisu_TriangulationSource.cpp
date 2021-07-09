@@ -169,6 +169,10 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
   {
     const poly_VertexHandle vh = vit.Current();
 
+    poly_Vertex v;
+    if ( !m_mesh->GetVertex(vh, v) || v.IsDeleted() )
+      continue;
+
     // Add as a free node.
     if ( !usedNodeIDs.Contains(vh.iIdx) )
     {
