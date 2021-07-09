@@ -64,6 +64,8 @@ Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
   return triangulation_n;
 }
 
+#if defined USE_MOBIUS
+
 //-----------------------------------------------------------------------------
 
 t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
@@ -71,10 +73,13 @@ t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
   return m_model->GetTriangulationNode()->GetTriangulation();
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 Handle(asiAlgo_BVHFacets) asiEngine_Triangulation::BuildBVH(const bool store)
 {
+#if defined USE_MOBIUS
   // Get Triangulation Node
   Handle(asiData_TriangulationNode) tris_n = m_model->GetTriangulationNode();
 
@@ -89,6 +94,13 @@ Handle(asiAlgo_BVHFacets) asiEngine_Triangulation::BuildBVH(const bool store)
     tris_n->SetBVH(bvh);
 
   return bvh;
+#else
+  (void) store;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return nullptr;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -106,6 +118,7 @@ bool
   asiEngine_Triangulation::CheckDeviation(const Handle(asiData_IVPointSetNode)& pcNode,
                                           Handle(asiData_DeviationNode)&        devNode)
 {
+#if defined USE_MOBIUS
   // Get Triangulation Node.
   Handle(asiData_TriangulationNode) trisNode = m_model->GetTriangulationNode();
 
@@ -135,6 +148,14 @@ bool
   trisNode->AddChildNode(devNode);
 
   return true;
+#else
+  (void) pcNode;
+  (void) devNode;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------

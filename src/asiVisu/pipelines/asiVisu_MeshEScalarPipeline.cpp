@@ -95,7 +95,10 @@ void asiVisu_MeshEScalarPipeline::SetInput(const Handle(asiVisu_DataProvider)& t
     //
     m_source->CollectEdgesModeOff();
     m_source->CollectVerticesModeOff();
+
+#if defined USE_MOBIUS
     m_source->SetInputTriangulation( meshDp->GetTriangulation() );
+#endif
 
     // Initialize scalar range.
     m_fMinScalar = meshDp->GetMinScalar();

@@ -54,6 +54,8 @@ Handle(asiData_MeshParameter) asiData_MeshParameter::Instance()
   return new asiData_MeshParameter();
 }
 
+#if defined USE_MOBIUS
+
 //! Sets the mesh to store.
 //! \param[in] mesh            mesh to set.
 //! \param[in] MType           modification type.
@@ -105,6 +107,8 @@ t_ptr<poly_Mesh> asiData_MeshParameter::GetMesh()
   return attr->GetMesh();
 }
 
+#endif
+
 //! Checks if this Parameter object is mapped onto CAF data structure in a
 //! correct way.
 //! \return true if the object is well-formed, false -- otherwise.
@@ -138,8 +142,15 @@ void asiData_MeshParameter::setFromDTO(const Handle(ActData_ParameterDTO)& DTO,
                                        const bool                          doResetValidity,
                                        const bool                          doResetPending)
 {
+#if defined USE_MOBIUS
   Handle(asiData_MeshDTO) MyDTO = Handle(asiData_MeshDTO)::DownCast(DTO);
   this->SetMesh(MyDTO->pMesh, MType, doResetValidity, doResetPending);
+#else
+  (void) DTO;
+  (void) MType;
+  (void) doResetValidity;
+  (void) doResetPending;
+#endif
 }
 
 //! Creates and populates DTO.
@@ -148,7 +159,12 @@ void asiData_MeshParameter::setFromDTO(const Handle(ActData_ParameterDTO)& DTO,
 Handle(ActData_ParameterDTO)
   asiData_MeshParameter::createDTO(const ActAPI_ParameterGID& GID)
 {
+#if defined USE_MOBIUS
   Handle(asiData_MeshDTO) res = new asiData_MeshDTO(GID);
   res->pMesh = this->GetMesh();
   return res;
+#else
+  (void) GID;
+  return nullptr;
+#endif
 }

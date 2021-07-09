@@ -63,7 +63,8 @@ public:
   asiVisu_EXPORT static asiVisu_TriangulationSource*
     New();
 
-// Kernel:
+#if defined USE_MOBIUS
+
 public:
 
   //! Sets triangulation to visualize.
@@ -74,6 +75,8 @@ public:
   //! \return initial triangulation.
   asiVisu_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
     GetInputTriangulation() const;
+
+#endif
 
 public:
 
@@ -215,8 +218,12 @@ private:
 
 private:
 
+#if defined USE_MOBIUS
+
   //! Triangulation to convert to VTK polygonal data.
   mobius::t_ptr<mobius::poly_Mesh> m_mesh;
+
+#endif
 
   //! Registered VTK points.
   NCollection_DataMap<int, vtkIdType> m_regPoints;

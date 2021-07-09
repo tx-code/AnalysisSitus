@@ -79,6 +79,8 @@
 
 namespace
 {
+#if defined USE_MOBIUS
+
   Handle(Poly_Triangulation)
     ExtractRegion(const t_ptr<poly_Mesh>&           tris,
                   const TColStd_PackedMapOfInteger& ids)
@@ -133,6 +135,8 @@ namespace
     // Set result and return.
     return cascade::GetOpenCascadeMesh(region);
   }
+
+#endif
 
   //! Prepares one shape out of the passed collection of faces. Is there
   //! is only one face passed, it will be returned without any processing.
@@ -523,10 +527,19 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
       return;
 
     // Prepare a triangulation to dump
-    Handle(Poly_Triangulation)
-      mesh2Save = selectedShapes.Extent() ? ::FacesAsOneMesh(selectedShapes)
-                                          : ::ExtractRegion( trisApi.GetTriangulation(),
-                                                             selectedFacets );
+    Handle(Poly_Triangulation) mesh2Save;
+    //
+    if ( selectedShapes.Extent() )
+    {
+      mesh2Save = ::FacesAsOneMesh(selectedShapes);
+    }
+#if defined USE_MOBIUS
+    else
+    {
+      mesh2Save = ::ExtractRegion( trisApi.GetTriangulation(),
+                                   selectedFacets );
+    }
+#endif
 
     // Save mesh
     if ( !asiAlgo_Utils::WriteStl( mesh2Save, QStr2AsciiStr(filename) ) )

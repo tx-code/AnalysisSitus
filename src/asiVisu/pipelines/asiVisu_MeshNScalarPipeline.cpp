@@ -96,7 +96,10 @@ void asiVisu_MeshNScalarPipeline::SetInput(const Handle(asiVisu_DataProvider)& d
     //
     trisSource->CollectEdgesModeOff();
     trisSource->CollectVerticesModeOff();
+
+#if defined USE_MOBIUS
     trisSource->SetInputTriangulation( meshDp->GetTriangulation() );
+#endif
 
     // Initialize safety range.
     m_fToler = meshDp->GetTolerance();

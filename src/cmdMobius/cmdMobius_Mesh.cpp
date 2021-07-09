@@ -32,6 +32,8 @@
 // Own include
 #include <cmdMobius_Mesh.h>
 
+#if defined USE_MOBIUS
+
 using namespace mobius;
 
 //-----------------------------------------------------------------------------
@@ -42,11 +44,15 @@ cmdMobius_Mesh::cmdMobius_Mesh(const t_ptr<poly_Mesh>& mesh)
   this->SetMesh(mesh);
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 cmdMobius_Mesh::~cmdMobius_Mesh()
 {
 }
+
+#if defined USE_MOBIUS
 
 //-----------------------------------------------------------------------------
 
@@ -61,6 +67,8 @@ const t_ptr<poly_Mesh>& cmdMobius_Mesh::GetMesh() const
 {
   return m_mesh;
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 

@@ -1592,7 +1592,11 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
+  (void) argc;
+  (void) argv;
+
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
 #endif
 }
 

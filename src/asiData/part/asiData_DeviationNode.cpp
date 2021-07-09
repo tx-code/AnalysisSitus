@@ -106,6 +106,7 @@ void asiData_DeviationNode::SetName(const TCollection_ExtendedString& N)
 
 void asiData_DeviationNode::SetMeshWithScalars(const asiAlgo_Mesh& mesh)
 {
+#if defined USE_MOBIUS
   Handle(asiData_MeshParameter)
     param = Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) );
   //
@@ -145,4 +146,7 @@ void asiData_DeviationNode::SetMeshWithScalars(const asiAlgo_Mesh& mesh)
     ActParamTool::AsIntArray( this->Parameter(PID_DistanceFieldIds) )->SetArray(nullptr);
     ActParamTool::AsRealArray( this->Parameter(PID_DistanceFieldValues) )->SetArray(nullptr);
   }
+#else
+  (void) mesh;
+#endif
 }

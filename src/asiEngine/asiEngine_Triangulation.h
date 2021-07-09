@@ -82,9 +82,13 @@ public:
   asiEngine_EXPORT Handle(asiData_TriangulationNode)
     CreateTriangulation();
 
+#if defined USE_MOBIUS
+
   //! \return the existing triangulation.
   asiEngine_EXPORT mobius::t_ptr<mobius::poly_Mesh>
     GetTriangulation();
+
+#endif
 
   //! Constructs BVH structure for the facets stored in the Triangulation Node.
   //! \param[in] store specifies whether to store BVH in the Node.

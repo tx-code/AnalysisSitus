@@ -107,7 +107,11 @@ void asiData_ThicknessNode::SetName(const TCollection_ExtendedString& N)
 
 void asiData_ThicknessNode::SetMesh(const Handle(Poly_Triangulation)& mesh)
 {
+#if defined USE_MOBIUS
   Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh( cascade::GetMobiusMesh(mesh) );
+#else
+  (void) mesh;
+#endif
 }
 
 //-----------------------------------------------------------------------------

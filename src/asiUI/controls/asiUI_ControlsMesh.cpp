@@ -286,7 +286,7 @@ void asiUI_ControlsMesh::onSaveToStl()
   //
   m_notifier.SendLogMessage( LogInfo(Normal) << "Mesh was saved to %1." << QStr2AsciiStr(filename) );
 #else
-  m_notifier.SendLogMessage( LogErr(Normal) << "Mobius is not available." )
+  m_notifier.SendLogMessage( LogErr(Normal) << "Mobius is not available." );
 #endif
 }
 

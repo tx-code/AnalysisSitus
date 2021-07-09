@@ -63,6 +63,7 @@ int RE_DefineContour(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 1 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -121,6 +122,14 @@ int RE_DefineContour(const Handle(asiTcl_Interp)& interp,
   PM->AddObserver(EVENT_SELECT_CELL,        cb);
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -129,6 +138,7 @@ int RE_DefineCurve(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -196,6 +206,14 @@ int RE_DefineCurve(const Handle(asiTcl_Interp)& interp,
   PM->AddObserver(EVENT_SELECT_CELL,        cb);
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -283,7 +301,11 @@ int RE_InterpMesh(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
+  (void) argc;
+  (void) argv;
+
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
 #endif
 }
 

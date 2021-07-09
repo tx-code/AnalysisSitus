@@ -99,6 +99,7 @@ Handle(TDF_Attribute) asiData_MeshAttr::NewEmpty() const
 //! \param[in] mainAttr OCAF Attribute to copy data from.
 void asiData_MeshAttr::Restore(const Handle(TDF_Attribute)& mainAttr)
 {
+#if defined USE_MOBIUS
   m_mesh.Nullify();
 
   Handle(asiData_MeshAttr)
@@ -109,6 +110,9 @@ void asiData_MeshAttr::Restore(const Handle(TDF_Attribute)& mainAttr)
     t_ptr<poly_Mesh> mesh = fromCasted->m_mesh->DeepCopy();
     m_mesh = mesh;
   }
+#else
+  (void) mainAttr;
+#endif
 }
 
 //! Supporting method for Copy/Paste functionality. Performs full copying of
@@ -118,6 +122,7 @@ void asiData_MeshAttr::Restore(const Handle(TDF_Attribute)& mainAttr)
 void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
                              const Handle(TDF_RelocationTable)& asiData_NotUsed(relocTable)) const
 {
+#if defined USE_MOBIUS
   Handle(asiData_MeshAttr) intoCasted = Handle(asiData_MeshAttr)::DownCast(into);
 
   intoCasted->m_mesh.Nullify();
@@ -127,11 +132,16 @@ void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
     t_ptr<poly_Mesh> mesh = m_mesh->DeepCopy();
     intoCasted->m_mesh = mesh;
   }
+#else
+  (void) into;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 // Accessors for domain-specific data
 //-----------------------------------------------------------------------------
+
+#if defined USE_MOBIUS
 
 //! Sets mesh to store.
 //! \param[in] mesh mesh to store.
@@ -148,3 +158,5 @@ const t_ptr<poly_Mesh>& asiData_MeshAttr::GetMesh() const
 {
   return m_mesh;
 }
+
+#endif

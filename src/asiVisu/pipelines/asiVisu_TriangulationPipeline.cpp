@@ -74,6 +74,7 @@ asiVisu_TriangulationPipeline::asiVisu_TriangulationPipeline()
 //! \param[in] dataProvider Data Provider.
 void asiVisu_TriangulationPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataProvider)
 {
+#if defined USE_MOBIUS
   Handle(asiVisu_TriangulationDataProvider)
     DP = Handle(asiVisu_TriangulationDataProvider)::DownCast(dataProvider);
 
@@ -120,6 +121,9 @@ void asiVisu_TriangulationPipeline::SetInput(const Handle(asiVisu_DataProvider)&
 
   // Update modification timestamp.
   this->Modified();
+#else
+  (void) dataProvider;
+#endif
 }
 
 //-----------------------------------------------------------------------------

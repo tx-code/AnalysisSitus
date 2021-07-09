@@ -80,6 +80,7 @@ namespace
     return planarDomain;
   }
 
+#if defined USE_MOBIUS
   //! Returns the mesh to work with. It can be either the named mesh from a
   //! Tcl variable or the persistent mesh from the data model.
   //! \param[in] interp the Tcl interpreter.
@@ -97,6 +98,7 @@ namespace
 
     return mesh;
   }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -942,6 +944,7 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
                        int                          argc,
                        const char**                 argv)
 {
+#if defined USE_MOBIUS
   Handle(asiData_TriangulationNode)
     tris_n = cmdMobius::model->GetTriangulationNode();
 
@@ -982,6 +985,14 @@ int MOBIUS_POLY_Smooth(const Handle(asiTcl_Interp)& interp,
     cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -990,6 +1001,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
                           int                          argc,
                           const char**                 argv)
 {
+#if defined USE_MOBIUS
   /* =============
    *  Preparation.
    * ============= */
@@ -1035,6 +1047,14 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
   cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------

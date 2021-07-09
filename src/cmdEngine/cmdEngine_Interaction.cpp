@@ -93,6 +93,7 @@ int ENGINE_MoveCurveHandle(const Handle(asiTcl_Interp)& interp,
                            int                          argc,
                            const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 1 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -152,6 +153,13 @@ int ENGINE_MoveCurveHandle(const Handle(asiTcl_Interp)& interp,
     cb->SetBVH( tris_n->GetBVH() );
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
 }
 
 //-----------------------------------------------------------------------------

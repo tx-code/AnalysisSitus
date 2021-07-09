@@ -76,6 +76,8 @@ asiVisu_TriangulationSource::~asiVisu_TriangulationSource()
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
+
 void asiVisu_TriangulationSource::SetInputTriangulation(const t_ptr<poly_Mesh>& triangulation)
 {
   m_mesh = triangulation;
@@ -91,12 +93,15 @@ const t_ptr<poly_Mesh>&
   return m_mesh;
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
                                              vtkInformationVector** inputVector,
                                              vtkInformationVector*  outputVector)
 {
+#if defined USE_MOBIUS
   if ( m_mesh.IsNull() )
   {
     vtkErrorMacro( << "Invalid input: null triangulation" );
@@ -289,6 +294,14 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
   }
 
   return Superclass::RequestData(request, inputVector, outputVector);
+#else
+  (void) request;
+  (void) inputVector;
+  (void) outputVector;
+
+  vtkErrorMacro( << "Mobius is not available." );
+  return 0;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -297,6 +310,7 @@ vtkIdType
   asiVisu_TriangulationSource::findMeshNode(const int    nodeID,
                                             vtkPolyData* polyData)
 {
+#if defined USE_MOBIUS
   // Access necessary arrays
   vtkPoints* points = polyData->GetPoints();
 
@@ -321,6 +335,11 @@ vtkIdType
     resPid = m_regPoints.Find(nodeID);
 
   return resPid;
+#else
+  (void) nodeID;
+  (void) polyData;
+  return -1;
+#endif
 }
 
 //-----------------------------------------------------------------------------

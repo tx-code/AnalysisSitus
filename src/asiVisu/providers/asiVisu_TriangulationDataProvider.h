@@ -80,10 +80,12 @@ public:
   asiVisu_EXPORT virtual ActAPI_DataObjectId
     GetNodeID() const;
 
+#if defined USE_MOBIUS
   //! Returns the OCCT triangulation to be visualized.
   //! \return OCCT facet model.
   asiVisu_EXPORT virtual mobius::t_ptr<mobius::poly_Mesh>
     GetTriangulation() const;
+#endif
 
   //! \return true if scalars are active.
   asiVisu_EXPORT bool

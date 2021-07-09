@@ -47,6 +47,8 @@
 // Parameter DTO
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
+
 //! Data Transfer Object (DTO) corresponding to the data wrapped with
 //! Mesh Parameter without any OCAF connectivity.
 class asiData_MeshDTO : public ActData_ParameterDTO
@@ -61,7 +63,8 @@ public:
   //! Constructor accepting GID.
   //! \param[in] GID GID.
   asiData_MeshDTO(const ActAPI_ParameterGID& GID)
-  : ActData_ParameterDTO(GID, Parameter_UNDEFINED), pMesh(nullptr)
+  : ActData_ParameterDTO (GID, Parameter_UNDEFINED),
+    pMesh                (nullptr)
   {}
 
 public:
@@ -69,6 +72,10 @@ public:
   mobius::t_ptr<mobius::poly_Mesh> pMesh; //!< Mesh.
 
 };
+
+#else
+  class asiData_MeshDTO : public ActData_ParameterDTO {};
+#endif
 
 //-----------------------------------------------------------------------------
 // Parameter
@@ -87,6 +94,8 @@ public:
   asiData_EXPORT static Handle(asiData_MeshParameter)
     Instance();
 
+#if defined USE_MOBIUS
+
 // API:
 public:
 
@@ -98,6 +107,8 @@ public:
 
   asiData_EXPORT mobius::t_ptr<mobius::poly_Mesh>
     GetMesh();
+
+#endif
 
 protected:
 

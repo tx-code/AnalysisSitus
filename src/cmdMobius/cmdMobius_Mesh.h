@@ -54,14 +54,20 @@ public:
 
 public:
 
+#if defined USE_MOBIUS
+
   //! Ctor.
   //! \param[in] mesh the mesh to set.
   cmdMobius_EXPORT
     cmdMobius_Mesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh = nullptr);
 
+#endif
+
   //! Dtor.
   cmdMobius_EXPORT virtual
     ~cmdMobius_Mesh();
+
+#if defined USE_MOBIUS
 
 public:
 
@@ -74,6 +80,8 @@ public:
   cmdMobius_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
     GetMesh() const;
 
+#endif
+
 public:
 
   //! \return brief description "what is" this object.
@@ -85,9 +93,13 @@ public:
   cmdMobius_EXPORT virtual void
     Dump(std::ostream& out) const;
 
+#if defined USE_MOBIUS
+
 protected:
 
   mobius::t_ptr<mobius::poly_Mesh> m_mesh; //!< Owned mesh.
+
+#endif
 
 };
 
