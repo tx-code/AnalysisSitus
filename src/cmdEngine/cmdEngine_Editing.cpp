@@ -1836,18 +1836,12 @@ int ENGINE_Repatch(const Handle(asiTcl_Interp)& interp,
     }
   }
 
-  // Get faces.
-  std::vector<TopoDS_Face> faces;
-  //
-  for ( TColStd_MapIteratorOfPackedMapOfInteger mit(fids); mit.More(); mit.Next() )
-    faces.push_back( aag->GetFace( mit.Key() ) );
-
   // Repatch.
   asiAlgo_RepatchFaces repatcher( shape,
                                   interp->GetProgress(),
                                   interp->GetPlotter() );
   //
-  if ( !repatcher.Perform(faces) )
+  if ( !repatcher.Perform(fids) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Repatching failed.");
     return TCL_OK;

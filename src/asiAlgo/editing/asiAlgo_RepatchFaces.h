@@ -38,6 +38,7 @@
 #include <ActAPI_IAlgorithm.h>
 
 // OCCT includes
+#include <BRepTools_History.hxx>
 #include <TopoDS_Face.hxx>
 
 //-----------------------------------------------------------------------------
@@ -55,7 +56,7 @@ public:
 public:
 
   asiAlgo_EXPORT bool
-    Perform(const std::vector<TopoDS_Face>& faces);
+    Perform(const TColStd_PackedMapOfInteger& faceIds);
 
 public:
 
@@ -65,10 +66,24 @@ public:
     return m_result;
   }
 
+  //! \return modification history.
+  const Handle(BRepTools_History)& GetHistory() const
+  {
+    return m_history;
+  }
+
 protected:
 
-  TopoDS_Shape m_input;  //!< Master model.
-  TopoDS_Shape m_result; //!< Result.
+  asiAlgo_EXPORT bool
+    repatchGroup(const TColStd_PackedMapOfInteger& faceIds,
+                 const TopTools_IndexedMapOfShape& facesMap,
+                 TopoDS_Shape&                     newfFace);
+
+protected:
+
+  TopoDS_Shape              m_input;   //!< Master model.
+  TopoDS_Shape              m_result;  //!< Result.
+  Handle(BRepTools_History) m_history; //!< Modification history.
 
 };
 

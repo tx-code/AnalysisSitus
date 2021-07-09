@@ -35,6 +35,7 @@
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
+#include <BRepTools_History.hxx>
 #include <NCollection_Map.hxx>
 
 //-----------------------------------------------------------------------------
@@ -424,6 +425,28 @@ void asiAlgo_History::Concatenate(const Handle(asiAlgo_History)& other)
     if ( !pOtherRoot->IsDeleted && !mergedRoots.Contains(pOtherRoot) )
       this->AddRoot( pOtherRoot->DeepCopy(m_items) );
   }
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(BRepTools_History) asiAlgo_History::ConvertToOcc() const
+{
+  Handle(BRepTools_History) result = new BRepTools_History;
+
+  // For each root, get its ultimate image and put it to the map.
+  const std::vector<t_item*>& roots = this->GetRoots();
+  //
+  for ( size_t k = 0; k < roots.size(); ++k )
+  {
+    TopoDS_Shape image = this->GetLastImageOrArg(roots[k]->TransientPtr);
+    //
+    if ( image.IsNull() ) // Was deleted.
+      result->Remove(roots[k]->TransientPtr);
+    else if ( BRepTools_History::IsSupportedType(roots[k]->TransientPtr) )
+      result->AddModified(roots[k]->TransientPtr, image);
+  }
+
+  return result;
 }
 
 //-----------------------------------------------------------------------------

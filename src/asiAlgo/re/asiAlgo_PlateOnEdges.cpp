@@ -34,16 +34,11 @@
 // asiAlgo includes
 #include <asiAlgo_Timer.h>
 
-// Mobius includes
-#if defined USE_MOBIUS
-  #include <mobius/cascade.h>
-  #include <mobius/geom_FairBSurf.h>
-#endif
-
 // OCCT includes
 #include <Adaptor3d_HCurveOnSurface.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
+#include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo.hxx>
@@ -53,12 +48,12 @@
 #include <BRepLib.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 #include <Geom_BSplineSurface.hxx>
-#include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_HSurface.hxx>
 #include <GeomPlate_BuildPlateSurface.hxx>
 #include <GeomPlate_HArray1OfHCurve.hxx>
 #include <GeomPlate_MakeApprox.hxx>
 #include <GeomPlate_PlateG0Criterion.hxx>
+#include <NCollection_CellFilter.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Shape.hxx>
@@ -66,15 +61,108 @@
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_Array1OfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/geom_FairBSurf.h>
+
+  using namespace mobius;
+#endif
 
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
+
+#undef DRAW_DEBUG
+#if defined COUT_DEBUG
+  #pragma message("===== warning: COUT_DEBUG is enabled")
+#endif
+
+//-----------------------------------------------------------------------------
+
+namespace
+{
+
+  class PlateInspector : public NCollection_CellFilter_InspectorXYZ
+  {
+  public:
+    typedef gp_XYZ Target;
+
+    //! Constructor; remembers the tolerance.
+    PlateInspector(const double tol)
+    { m_tol = tol * tol; m_isFind = false; }
+
+    void ClearFind()
+    { m_isFind = false; }
+
+    const bool IsFind() const
+    { return m_isFind; }
+
+    //! Set current point to search for coincidence.
+    void SetCurrent (const gp_XYZ& pnt)
+    { m_current = pnt; }
+
+    //! Implementation of inspection method.
+    NCollection_CellFilter_Action Inspect (const Target& obj)
+    {
+      const gp_XYZ pt = m_current.Subtracted(obj);
+      const double sqDist = pt.SquareModulus();
+      if( sqDist < m_tol )
+        m_isFind = true;
+
+      return CellFilter_Keep;
+    }
+
+  private:
+    Standard_Real    m_tol;     //!< Squared comparison tolerance.
+    gp_XYZ           m_current; //!< Current point.
+    Standard_Boolean m_isFind;  //!< Detection state.
+  };
+
+  void FillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
+                       const unsigned int                       continuity,
+                       GeomPlate_BuildPlateSurface&             builder)
+  {
+    const double tol =  0.05;
+    NCollection_CellFilter<PlateInspector> cellFilter(tol);
+
+    // Iterate over edges to add point constraints.
+    for( int i = 1; i <= edges->Size(); ++i )
+    {
+      const TopoDS_Edge& edge = TopoDS::Edge(edges->Value(i));
+      BRepAdaptor_Curve curve(edge);
+      const double f = curve.FirstParameter();
+      const double l = curve.LastParameter();
+
+      // Get points from the current edge.
+      const int nbPnt = 23;
+      for( int j = 0; j < nbPnt; ++j )
+      {
+        const double param = f + j * (l - f) / (nbPnt - 1);
+        const gp_Pnt pnt = curve.Value(param);
+
+        PlateInspector inspector(tol);
+        const gp_XYZ min = inspector.Shift(pnt.XYZ(), -tol);
+        const gp_XYZ max = inspector.Shift(pnt.XYZ(),  tol);
+
+        inspector.ClearFind();
+        inspector.SetCurrent(pnt.XYZ());
+        cellFilter.Inspect(min, max, inspector);
+
+        if ( !inspector.IsFind() )
+        {
+          cellFilter.Add(pnt.XYZ(), pnt.XYZ());
+          Handle(GeomPlate_PointConstraint) pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
+          builder.Add(pntCon);
+        }
+      }
+    }
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -82,7 +170,7 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(ActAPI_ProgressEntry progress,
                                            ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_iNumDiscrPts    ( 10 ),
-  m_fFairCoeff      ( 0. )
+  m_fFairCoeff      ( 0.01 )
 {}
 
 //-----------------------------------------------------------------------------
@@ -94,7 +182,7 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(const Handle(asiAlgo_AAG)& aag,
   m_shape           ( aag->GetMasterShape() ),
   m_aag             ( aag),
   m_iNumDiscrPts    ( 10 ),
-  m_fFairCoeff      ( 0. )
+  m_fFairCoeff      ( 0.01 )
 {}
 
 //-----------------------------------------------------------------------------
@@ -105,7 +193,7 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(const TopoDS_Shape&  shape,
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_shape           ( shape ),
   m_iNumDiscrPts    ( 10 ),
-  m_fFairCoeff      ( 0. )
+  m_fFairCoeff      ( 0.01 )
 {}
 
 //-----------------------------------------------------------------------------
@@ -188,126 +276,37 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
    *  STAGE 1: prepare constraints
    * ============================== */
 
-  const int nbedges = int( edges->Length() );
-
-  // Prepare working collection for support curves (used to create
-  // pinpoint constraints).
-  Handle(GeomPlate_HArray1OfHCurve)
-    fronts = new GeomPlate_HArray1OfHCurve(1, nbedges);
-
-  // Prepare working collection for smoothness values associated with
-  // each support curve.
-  Handle(TColStd_HArray1OfInteger)
-    tang = new TColStd_HArray1OfInteger(1, nbedges);
-
-  // Prepare working collection for discretization numbers associated with
-  // each support curve.
-  Handle(TColStd_HArray1OfInteger)
-    nbPtsCur = new TColStd_HArray1OfInteger(1, nbedges);
-
-  if ( m_shape.IsNull() )
-  {
-    /* Master shape is null -> we cannot use CONS constraints */
-
-    // Loop over the curves to prepare constraints.
-    int i = 0;
-    for ( int eidx = 0; eidx < nbedges; ++eidx )
-    {
-      i++;
-      tang->SetValue(i, continuity);
-      nbPtsCur->SetValue(i, m_iNumDiscrPts); // Number of discretization points.
-
-      // Get edge and its host curve.
-      double f, l;
-      const TopoDS_Edge& E = TopoDS::Edge( edges->Value(eidx + 1) );
-      Handle(Geom_Curve) C = BRep_Tool::Curve(E, f, l);
-
-      Handle(GeomAdaptor_HCurve)
-        curveAdt = new GeomAdaptor_HCurve(C);
-
-      fronts->SetValue(i, curveAdt);
-    }
-  }
-  else
-  {
-    /* Master shape is not null -> we can use CONS constraints */
-
-    // Get model.
-    const TopoDS_Shape& model = m_shape;
-
-    // Build edge-face map.
-    TopTools_IndexedDataMapOfShapeListOfShape M;
-    TopExp::MapShapesAndAncestors(model, TopAbs_EDGE, TopAbs_FACE, M);
-
-    // Loop over the edges to prepare constraints.
-    int i = 0;
-    for ( int eidx = 0; eidx < nbedges; ++eidx )
-    {
-      i++;
-      tang->SetValue(i, continuity);
-      nbPtsCur->SetValue(i, m_iNumDiscrPts); // Number of discretization points.
-
-      const TopoDS_Edge& E = TopoDS::Edge( edges->Value(eidx + 1) );
-      const TopoDS_Face& F = TopoDS::Face( M.FindFromKey(E).First() );
-
-      m_plotter.DRAW_SHAPE(E, Color_Red, 1.0, true, "asiAlgo_PlateOnEdges_E");
-
-      // Get CONS for each edge and fill the constraint
-      BRepAdaptor_Surface S(F);
-      GeomAdaptor_Surface GAS = S.Surface();
-      Handle(GeomAdaptor_HSurface) HGAS = new GeomAdaptor_HSurface(GAS);
-      //
-      Handle(BRepAdaptor_HCurve2d) C = new BRepAdaptor_HCurve2d();
-      C->ChangeCurve2d().Initialize(E, F);
-      //
-      Adaptor3d_CurveOnSurface ConS(C, HGAS);
-      Handle(Adaptor3d_HCurveOnSurface) HConS = new Adaptor3d_HCurveOnSurface(ConS);
-      fronts->SetValue(i, HConS);
-    }
-  }
+  // Create builder instance.
+  GeomPlate_BuildPlateSurface builder;
+  ::FillConstraints(edges, continuity, builder);
 
   /* ======================
    *  STAGE 2: build plate
    * ====================== */
 
-  TIMER_NEW
-  TIMER_GO
-
-  // Build plate.
-  GeomPlate_BuildPlateSurface BuildPlate(nbPtsCur, fronts, tang, 3);
-  //
   try
   {
-    BuildPlate.Perform();
+    builder.Perform();
   }
   catch ( ... )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Exception in OCCT plate surface builder");
+    m_progress.SendLogMessage(LogErr(Normal) << "Exception in OCCT plate surface builder.");
     return false;
   }
   //
-  if ( !BuildPlate.IsDone() )
+  if ( !builder.IsDone() )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Plating failed");
+    m_progress.SendLogMessage(LogErr(Normal) << "Plating failed.");
     return false;
   }
-  Handle(GeomPlate_Surface) plate = BuildPlate.Surface();
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_MSG("Build plate")
+  Handle(GeomPlate_Surface) plate = builder.Surface();
 
   /* =======================================
    *  STAGE 3: approximate plate with NURBS
    * ======================================= */
 
-  TIMER_RESET
-  TIMER_GO
-
-  GeomPlate_MakeApprox MKS(plate, Precision::Approximation(), 4, 7, 0.001, 1);
+  GeomPlate_MakeApprox MKS(plate, 1.0e-7, 16, 7, 1.0e-7, 0);
   support = MKS.Surface();
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_MSG("Approximate plate with B-surface")
 
   /* ================================
    *  STAGE 4: fair surface if asked
@@ -316,14 +315,13 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
    if ( m_fFairCoeff )
    {
 #if defined USE_MOBIUS
-     TIMER_RESET
+     TIMER_NEW
      TIMER_GO
 
-     mobius::t_ptr<mobius::t_bsurf>
-       mobSurf = mobius::cascade::GetMobiusBSurface(support);
+     t_ptr<t_bsurf> mobSurf = cascade::GetMobiusBSurface(support);
 
      // Perform fairing.
-     mobius::geom_FairBSurf fairing(mobSurf, m_fFairCoeff, nullptr, nullptr);
+     geom_FairBSurf fairing(mobSurf, m_fFairCoeff, nullptr, nullptr);
      //
      const int nPolesU = int( mobSurf->GetPoles().size() );
      const int nPolesV = int( mobSurf->GetPoles()[0].size() );
@@ -347,10 +345,10 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
      }
 
      // Get the faired surface.
-     const mobius::t_ptr<mobius::t_bsurf>& mobResult = fairing.GetResult();
+     const t_ptr<t_bsurf>& mobResult = fairing.GetResult();
 
      // Convert to OCCT B-surface.
-     support = mobius::cascade::GetOpenCascadeBSurface(mobResult);
+     support = cascade::GetOpenCascadeBSurface(mobResult);
 
      TIMER_FINISH
      TIMER_COUT_RESULT_MSG("Fair B-surface")

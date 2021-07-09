@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Analysis Situs: suppress blends</title>
+  <title>Analysis Situs: repatch faces</title>
   <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
   <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
 
@@ -27,7 +27,7 @@
   <td align="left" class="header">
     <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
     &nbsp;
-    ./<a class="header-href" href="../features.html">features</a>/suppress blends
+    ./<a class="header-href" href="../features.html">features</a>/repatch faces
   </td>
 </tr>
 </table>
@@ -45,39 +45,29 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Suppress blends</h1>
+<h1>Repatch faces</h1>
 
 <p>
-The blend suppression algorithm of Analysis Situs is based on the approach presented by <a href="../references.html#venkataraman-2002">[Venkataraman et al, 2002]</a>
-and adopted for the OpenCascade boundary representation. You can find more details on this algorithm in our paper <a href="../references.html#slyadnev-2020">[Slyadnev et al, 2020]</a>.
+    The face repatching operator allows getting rid of sliver or unwanted faces by merging a group of neighbor faces together. This operator reapproximates the area of interest with a new B-spline surface that is optionally <a href="./features_re-surface-smoothing.html">faired</a> at the end to minimize its bending energy. One important limitation of the repatching algorithm is that it can proceed with outer contours only, i.e., it would not work on faces with holes.
 </p>
 
 <p>
-The corresponding Tcl commands are listed below:
-<ul>
-  <li><span class="code-inline">recognize-blends</span>: performs blends recognition for the entire model.</li>
-  <li><span class="code-inline">kill-blend</span>: recognizes and suppresses a blend chain starting from the selected candidate face.</li>
-  <li><span class="code-inline">kill-blends-inc</span>: performs fully automatic incremental recognition & suppression procedure.</li>
-</ul>
+    Here is an example of a sheet metal part with a corner we would like to repatch:
 </p>
+
+<div align="center"><img src="../imgs/repatch-before.png"/></div>
 
 <p>
-Check out the <a href="https://gitlab.com/ssv/AnalysisSitus">sources</a> for implementation of the blend
-recognition and suppression algorithm.
+    After repatching, the sliver face goes away while the curved shape of the corner is preserved:
 </p>
 
-<h1>Test data</h1>
+<div align="center"><img src="../imgs/repatch-after.png"/></div>
 
 <p>
-Our blends recognition and suppression algorithm is being tested on the specifically prepared data set.
-We made this data set <a href="./suppress-blends/features_suppress-blends_data.html">publicly available</a>
-together with the basic version of the algorithm. We also collect test reports to trace how the algorithm
-evolves (see below).
+    To use this function, select the neighbor faces you'd like to merge and execute <span class="code-inline">repatch</span> command from the <a href="./features_active-script.html">scripting window</a>.
 </p>
 
-<ul>
-  <li>Test report from 2019-12-26: <a href="./suppress-blends/reports/2019-12-26_FR-vs-BRS.xlsx">download spreadsheet</a>.</li>
-</ul>
+<div align="center"><img src="../imgs/repatch-anim.gif"/></div>
 
 <!-- [END] contents -->
 </div>

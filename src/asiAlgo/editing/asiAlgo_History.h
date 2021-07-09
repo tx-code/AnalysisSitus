@@ -46,6 +46,8 @@
 #include <stack>
 #include <vector>
 
+class BRepTools_History;
+
 //-----------------------------------------------------------------------------
 
 //! \brief History graph for topological elements.
@@ -533,6 +535,11 @@ public:
   //! \param[in] other history to concatenate to this one.
   asiAlgo_EXPORT void
     Concatenate(const Handle(asiAlgo_History)& other);
+
+  //! Converts `this` history graph to OpenCascade history maps.
+  //! \return the converted map.
+  asiAlgo_EXPORT Handle(BRepTools_History)
+    ConvertToOcc() const;
 
 public:
 
