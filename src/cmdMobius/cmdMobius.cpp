@@ -864,7 +864,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  const int maxIter = 10;
+  const int maxIter = 1;//10;
   bool      stop    = false;
   int       iter    = 0;
   int       nbDone  = 0;
@@ -900,7 +900,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
         {
           nbDone++;
 
-          mesh->ComputeEdges();
+          //mesh->ComputeEdges();
         }
 
         if ( !anyRefined ) anyRefined = true;
