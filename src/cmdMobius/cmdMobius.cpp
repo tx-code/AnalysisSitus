@@ -478,6 +478,24 @@ int MOBIUS_POLY_FindBoundary(const Handle(asiTcl_Interp)& interp,
   //
   mesh->FindBoundaryEdges(bndEdges, bndTris);
 
+  if ( interp->HasKeyword(argc, argv, "draw") )
+  {
+    for ( const auto he : bndEdges )
+    {
+      poly_Edge e;
+      mesh->GetEdge(he, e);
+
+      t_xyz V[2];
+      mesh->GetVertex(e.hVertices[0], V[0]);
+      mesh->GetVertex(e.hVertices[1], V[1]);
+
+      gp_XYZ P[2] = { gp_XYZ( V[0].X(), V[0].Y(), V[0].Z() ),
+                      gp_XYZ( V[1].X(), V[1].Y(), V[1].Z() ) };
+
+      interp->GetPlotter().DRAW_LINK(P[0], P[1], Color_Red, "bnd");
+    }
+  }
+
   TColStd_PackedMapOfInteger foundIds;
   for ( const auto ht : bndTris )
     foundIds.Add(ht.iIdx);
@@ -1089,15 +1107,15 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
   // Derive the min element size.
   const double minDim  = Min(Abs(xMax - xMin), Min(Abs(yMax - yMin), Abs(zMax - zMin)));
-  const double minLen  = minDim*0.1;
+  const double minLen  = minDim*0.33;
   const double minArea = minLen*minLen;
 
   interp->GetProgress().SendLogMessage(LogNotice(Normal) << "Min edge length: %1." << minLen);
   interp->GetProgress().SendLogMessage(LogNotice(Normal) << "Min triangle area: %1." << minArea);
 
-  /* Stage 01: refine midedges */
+  /* Next stage: refine midedges */
 
-  const int maxIter = 5;
+  const int maxIter = 4;
   bool      stop    = false;
   int       iter    = 0;
 
@@ -1157,7 +1175,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
       /*std::cout << "triangle " << idx << ": (area, len) = ("
                 << area << ", " << len << ")" << std::endl;*/
 
-      if ( (area > minArea) && (len > minLen) )
+      if ( (area > minArea) || (len > minLen) )
       {
         mesh->RefineByMidedges(th);
 
@@ -1167,24 +1185,16 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
     if ( !anyRefined || (++iter >= maxIter) )
       stop = true;
+
+    if ( !stop )
+    {
+      mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
+      mesh->ComputeEdges();
+    }
   }
   while ( !stop );
 
-  /* Stage 02: flip edges */
-
-  // Flip edges.
-  for ( int i = 0; i < maxIter; ++i )
-  {
-    mesh->ComputeEdges();
-    mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
-  }
-
-  /* Stage 03: smooth mesh */
-
-  mesh->ComputeEdges();
-  mesh->Smooth(maxIter, domain);
-
-  /* Stage 04: refine my midpoints */
+  /* Next stage: refine my midpoints */
 
   {
     // Compute areas.
@@ -1244,7 +1254,20 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     }
   }
 
-  /* Stage 05: flip edges */
+  /* Next stage: split boundary edges */
+
+  // Find boundary.
+  //std::vector<poly_EdgeHandle>     bndEdges;
+  //std::vector<poly_TriangleHandle> bndTris;
+  ////
+  //mesh->FindBoundaryEdges(bndEdges, bndTris);
+
+  //for ( const auto he : bndEdges )
+  //{
+  //  mesh->SplitEdge(he);
+  //}
+
+  /* Stage 03: flip edges */
 
   // Flip edges.
   for ( int i = 0; i < maxIter; ++i )
@@ -1253,10 +1276,24 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
   }
 
-  /* Stage 06: smooth mesh */
+  /* Next stage: smooth mesh */
 
   mesh->ComputeEdges();
-  mesh->Smooth(maxIter, domain);
+  mesh->Smooth(1, domain);
+
+  /* Next stage: flip edges */
+
+  // Flip edges.
+  for ( int i = 0; i < maxIter; ++i )
+  {
+    mesh->ComputeEdges();
+    mesh->FlipEdges(1./180.*M_PI, 5./180.*M_PI);
+  }
+
+  /* Next stage: smooth mesh */
+
+  mesh->ComputeEdges();
+  mesh->Smooth(10, domain);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Incremental refine")
@@ -1332,6 +1369,173 @@ int MOBIUS_POLY_Check(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 #else
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_SplitEdge(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( facetIds.Extent() != 2 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select two adjacent triangles.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  poly_TriangleHandle th[2] = { poly_TriangleHandle( facetIds.GetMinimalMapped() ),
+                                poly_TriangleHandle( facetIds.GetMaximalMapped() ) };
+
+  poly_EdgeHandle he = mesh->FindEdge(th[0], th[1]);
+  //
+  if ( !he.IsValid() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The selected triangles have no common edge.");
+    return TCL_ERROR;
+  }
+
+  // Split the common edge.
+  if ( !mesh->SplitEdge(he) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot split the edge.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Split edge")
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles after edge split: %1."
+                                                        << mesh->GetNumTriangles() );
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation(mesh);
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_SplitBoundary(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  TIMER_RESET
+  TIMER_GO
+
+  // Find boundary.
+  std::vector<poly_EdgeHandle>     bndEdges;
+  std::vector<poly_TriangleHandle> bndTris;
+  //
+  mesh->FindBoundaryEdges(bndEdges, bndTris);
+
+  if ( interp->HasKeyword(argc, argv, "draw") )
+  {
+    for ( const auto he : bndEdges )
+    {
+      poly_Edge e;
+      mesh->GetEdge(he, e);
+
+      t_xyz V[2];
+      mesh->GetVertex(e.hVertices[0], V[0]);
+      mesh->GetVertex(e.hVertices[1], V[1]);
+
+      gp_XYZ P[2] = { gp_XYZ( V[0].X(), V[0].Y(), V[0].Z() ),
+                      gp_XYZ( V[1].X(), V[1].Y(), V[1].Z() ) };
+
+      interp->GetPlotter().DRAW_LINK(P[0], P[1], Color_Red, "bnd");
+    }
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find boundary edges")
+
+  TIMER_RESET
+  TIMER_GO
+
+  for ( const auto he : bndEdges )
+  {
+    mesh->SplitEdge(he);
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Split boundary edges")
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation(mesh);
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
   return TCL_ERROR;
 #endif
 }
@@ -1416,7 +1620,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-find-boundary",
     //
-    "poly-find-boundary\n"
+    "poly-find-boundary [-draw]\n"
     "\n"
     "\t Finds boundary edges and triangles.",
     //
@@ -1481,6 +1685,24 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Checks the basic metrics on the selected triangles, such as area, scaled Jacobian, etc.",
     //
     __FILE__, group, MOBIUS_POLY_Check);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-split-edge",
+    //
+    "poly-split-edge\n"
+    "\n"
+    "\t Splits the edge between the two selected triangles.",
+    //
+    __FILE__, group, MOBIUS_POLY_SplitEdge);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-split-boundary",
+    //
+    "poly-split-boundary [-draw]\n"
+    "\n"
+    "\t Splits boundary triangles.",
+    //
+    __FILE__, group, MOBIUS_POLY_SplitBoundary);
 }
 
 // Declare entry point PLUGINFACTORY
