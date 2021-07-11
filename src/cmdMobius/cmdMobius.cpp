@@ -1094,6 +1094,11 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
   // Compose the domain of interest.
   t_domain domain = ::ComposePlanarDomain();
 
+  double coeff = 0.33;
+  //
+  if ( interp->HasKeyword(argc, argv, "fine") )
+    coeff = 0.05;
+
   /* ============
    *  Refinement.
    * ============ */
@@ -1107,7 +1112,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
   // Derive the min element size.
   const double minDim  = Min(Abs(xMax - xMin), Min(Abs(yMax - yMin), Abs(zMax - zMin)));
-  const double minLen  = minDim*0.33;
+  const double minLen  = minDim*coeff;
   const double minArea = minLen*minLen;
 
   interp->GetProgress().SendLogMessage(LogNotice(Normal) << "Min edge length: %1." << minLen);
@@ -1673,7 +1678,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-refine-inc",
     //
-    "poly-refine-inc\n"
+    "poly-refine-inc [-fine]\n"
     "\t Incrementally refines the named triangulation.",
     //
     __FILE__, group, MOBIUS_POLY_RefineInc);
