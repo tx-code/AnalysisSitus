@@ -183,6 +183,11 @@ target_link_libraries(asiTest asiAlgo asiAsm asiData asiEngine asiTestEngine asi
 #------------------------------------------------------------------------------
 
 if (WIN32)
-  install (TARGETS asiTest RUNTIME DESTINATION bin COMPONENT Runtime)
-  install (FILES resources/asiTestDictionary.xml DESTINATION bin/resources)
+  install (TARGETS asiTest CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiTest CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiTest CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+
+  install (FILES resources/asiTestDictionary.xml CONFIGURATIONS Release        DESTINATION bin/resources)
+  install (FILES resources/asiTestDictionary.xml CONFIGURATIONS RelWithDebInfo DESTINATION bini/resources)
+  install (FILES resources/asiTestDictionary.xml CONFIGURATIONS Debug          DESTINATION bind/resources)
 endif()

@@ -41,150 +41,73 @@ message (STATUS "... VTK Debug Binary  dirs: ${3RDPARTY_vtk_DLL_DIR_DEBUG}")
 # Installation
 #--------------------------------------------------------------------------
 
-if (NOT BUILD_ALGO_ONLY)
-  if (WIN32)
-    set (3RDPATY_INSTALL_DIR ${3RDPARTY_vtk_DLL_DIR})
-    set (3RDPATY_INSTALL_DIR_DEBUG ${3RDPARTY_vtk_DLL_DIR}d)
-    set (LIB_PREFIX "")
-    set (LIB_SUFFIX ".dll")
-  else()
-    set (3RDPATY_INSTALL_DIR ${3RDPARTY_vtk_LIBRARY_DIR})
-    set (3RDPATY_INSTALL_DIR_DEBUG ${3RDPARTY_vtk_LIBRARY_DIR})
-    set (LIB_PREFIX "lib")
-    set (LIB_SUFFIX ".so.1")
-  endif()
+set (LIBS
+  vtkChartsCore-8.2
+  vtkCommonComputationalGeometry-8.2
+  vtkCommonColor-8.2
+  vtkCommonCore-8.2
+  vtkCommonDataModel-8.2
+  vtkCommonExecutionModel-8.2
+  vtkCommonMath-8.2
+  vtkCommonMisc-8.2
+  vtkCommonSystem-8.2
+  vtkCommonTransforms-8.2
+  vtkFiltersCore-8.2
+  vtkFiltersExtraction-8.2
+  vtkFiltersGeneral-8.2
+  vtkFiltersGeometry-8.2
+  vtkFiltersHybrid-8.2
+  vtkFiltersImaging-8.2
+  vtkFiltersModeling-8.2
+  vtkFiltersParallel-8.2
+  vtkFiltersSources-8.2
+  vtkFiltersStatistics-8.2
+  vtkfreetype-8.2
+  vtkGUISupportQt-8.2
+  vtkglew-8.2
+  vtkImagingColor-8.2
+  vtkImagingCore-8.2
+  vtkImagingFourier-8.2
+  vtkImagingGeneral-8.2
+  vtkImagingHybrid-8.2
+  vtkImagingSources-8.2
+  vtkInteractionWidgets-8.2
+  vtkInteractionStyle-8.2
+  vtkInfovisCore-8.2
+  vtkInfovisLayout-8.2
+  vtkIOCore-8.2
+  vtkIOImage-8.2
+  vtkIOLegacy-8.2
+  vtkIOExport-8.2
+  vtkIOXML-8.2
+  vtkIOXMLParser-8.2
+  vtkexpat-8.2
+  vtkIOExportOpenGL2-8.2
+  vtkParallelCore-8.2
+  vtkRenderingAnnotation-8.2
+  vtkRenderingContext2D-8.2
+  vtkRenderingContextOpenGL2-8.2
+  vtkRenderingCore-8.2
+  vtkRenderingGL2PSOpenGL2-8.2
+  vtkRenderingFreeType-8.2
+  vtkRenderingLabel-8.2
+  vtkRenderingOpenGL2-8.2
+  vtkRenderingVolume-8.2
+  vtksys-8.2
+  vtkViewsContext2D-8.2
+  vtkViewsCore-8.2
+  vtkViewsInfovis-8.2
+  vtkzlib-8.2
+  vtklz4-8.2
+  vtkgl2ps-8.2
+  vtkpng-8.2
+  vtklibharu-8.2
+  vtkDICOMParser-8.2
+  vtkmetaio-8.2
+  vtktiff-8.2
+  vtkjpeg-8.2
+  vtklzma-8.2
+  vtkdoubleconversion-8.2
+)
 
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkChartsCore-8.2${LIB_SUFFIX}                  CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonComputationalGeometry-8.2${LIB_SUFFIX} CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonColor-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonCore-8.2${LIB_SUFFIX}                  CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonDataModel-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonExecutionModel-8.2${LIB_SUFFIX}        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonMath-8.2${LIB_SUFFIX}                  CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonMisc-8.2${LIB_SUFFIX}                  CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonSystem-8.2${LIB_SUFFIX}                CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkCommonTransforms-8.2${LIB_SUFFIX}            CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersExtraction-8.2${LIB_SUFFIX}           CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersGeneral-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersGeometry-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersHybrid-8.2${LIB_SUFFIX}               CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersImaging-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersModeling-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersParallel-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersSources-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkFiltersStatistics-8.2${LIB_SUFFIX}           CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkfreetype-8.2${LIB_SUFFIX}                    CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkGUISupportQt-8.2${LIB_SUFFIX}                CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkglew-8.2${LIB_SUFFIX}                        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingColor-8.2${LIB_SUFFIX}                CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingFourier-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingGeneral-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingHybrid-8.2${LIB_SUFFIX}               CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkImagingSources-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkInteractionWidgets-8.2${LIB_SUFFIX}          CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkInteractionStyle-8.2${LIB_SUFFIX}            CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkInfovisCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkInfovisLayout-8.2${LIB_SUFFIX}               CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOCore-8.2${LIB_SUFFIX}                      CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOImage-8.2${LIB_SUFFIX}                     CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOLegacy-8.2${LIB_SUFFIX}                    CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOExport-8.2${LIB_SUFFIX}                    CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOXML-8.2${LIB_SUFFIX}                       CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOXMLParser-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkexpat-8.2${LIB_SUFFIX}                       CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkIOExportOpenGL2-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkParallelCore-8.2${LIB_SUFFIX}                CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingAnnotation-8.2${LIB_SUFFIX}         CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingContext2D-8.2${LIB_SUFFIX}          CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingContextOpenGL2-8.2${LIB_SUFFIX}     CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingCore-8.2${LIB_SUFFIX}               CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingGL2PSOpenGL2-8.2${LIB_SUFFIX}       CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingFreeType-8.2${LIB_SUFFIX}           CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingLabel-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingOpenGL2-8.2${LIB_SUFFIX}            CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkRenderingVolume-8.2${LIB_SUFFIX}             CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtksys-8.2${LIB_SUFFIX}                         CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkViewsContext2D-8.2${LIB_SUFFIX}              CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkViewsCore-8.2${LIB_SUFFIX}                   CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkViewsInfovis-8.2${LIB_SUFFIX}                CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkzlib-8.2${LIB_SUFFIX}                        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtklz4-8.2${LIB_SUFFIX}                         CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkgl2ps-8.2${LIB_SUFFIX}                       CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkpng-8.2${LIB_SUFFIX}                         CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtklibharu-8.2${LIB_SUFFIX}                     CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkDICOMParser-8.2${LIB_SUFFIX}                 CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkmetaio-8.2${LIB_SUFFIX}                      CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtktiff-8.2${LIB_SUFFIX}                        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkjpeg-8.2${LIB_SUFFIX}                        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtklzma-8.2${LIB_SUFFIX}                        CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR}/${LIB_PREFIX}vtkdoubleconversion-8.2${LIB_SUFFIX}            CONFIGURATIONS Release RelWithDebInfo DESTINATION bin)
-
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkChartsCore-8.2${LIB_SUFFIX}                  CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonComputationalGeometry-8.2${LIB_SUFFIX} CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonColor-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonCore-8.2${LIB_SUFFIX}                  CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonDataModel-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonExecutionModel-8.2${LIB_SUFFIX}        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonMath-8.2${LIB_SUFFIX}                  CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonMisc-8.2${LIB_SUFFIX}                  CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonSystem-8.2${LIB_SUFFIX}                CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkCommonTransforms-8.2${LIB_SUFFIX}            CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersExtraction-8.2${LIB_SUFFIX}           CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersGeneral-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersGeometry-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersHybrid-8.2${LIB_SUFFIX}               CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersImaging-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersModeling-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersParallel-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersSources-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkFiltersStatistics-8.2${LIB_SUFFIX}           CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkfreetype-8.2${LIB_SUFFIX}                    CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkGUISupportQt-8.2${LIB_SUFFIX}                CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkglew-8.2${LIB_SUFFIX}                        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingColor-8.2${LIB_SUFFIX}                CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingFourier-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingGeneral-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingHybrid-8.2${LIB_SUFFIX}               CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkImagingSources-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkInteractionWidgets-8.2${LIB_SUFFIX}          CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkInteractionStyle-8.2${LIB_SUFFIX}            CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkInfovisCore-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkInfovisLayout-8.2${LIB_SUFFIX}               CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOCore-8.2${LIB_SUFFIX}                      CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOImage-8.2${LIB_SUFFIX}                     CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOLegacy-8.2${LIB_SUFFIX}                    CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOExport-8.2${LIB_SUFFIX}                    CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOXML-8.2${LIB_SUFFIX}                       CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOXMLParser-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkexpat-8.2${LIB_SUFFIX}                       CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkIOExportOpenGL2-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkParallelCore-8.2${LIB_SUFFIX}                CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingAnnotation-8.2${LIB_SUFFIX}         CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingContext2D-8.2${LIB_SUFFIX}          CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingContextOpenGL2-8.2${LIB_SUFFIX}     CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingCore-8.2${LIB_SUFFIX}               CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingGL2PSOpenGL2-8.2${LIB_SUFFIX}       CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingFreeType-8.2${LIB_SUFFIX}           CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingLabel-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingOpenGL2-8.2${LIB_SUFFIX}            CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkRenderingVolume-8.2${LIB_SUFFIX}             CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtksys-8.2${LIB_SUFFIX}                         CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkViewsContext2D-8.2${LIB_SUFFIX}              CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkViewsCore-8.2${LIB_SUFFIX}                   CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkViewsInfovis-8.2${LIB_SUFFIX}                CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkzlib-8.2${LIB_SUFFIX}                        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtklz4-8.2${LIB_SUFFIX}                         CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkgl2ps-8.2${LIB_SUFFIX}                       CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkpng-8.2${LIB_SUFFIX}                         CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtklibharu-8.2${LIB_SUFFIX}                     CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkDICOMParser-8.2${LIB_SUFFIX}                 CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkmetaio-8.2${LIB_SUFFIX}                      CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtktiff-8.2${LIB_SUFFIX}                        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkjpeg-8.2${LIB_SUFFIX}                        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtklzma-8.2${LIB_SUFFIX}                        CONFIGURATIONS Debug DESTINATION bin)
-  install (FILES ${3RDPATY_INSTALL_DIR_DEBUG}/${LIB_PREFIX}vtkdoubleconversion-8.2${LIB_SUFFIX}            CONFIGURATIONS Debug DESTINATION bin)
-endif()
+ASITUS_INSTALL_3RDPARTY (LIBS "vtk")

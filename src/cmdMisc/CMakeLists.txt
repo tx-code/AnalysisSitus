@@ -101,7 +101,11 @@ endif()
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS cmdMisc RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS cmdMisc CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS cmdMisc CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS cmdMisc CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

@@ -103,7 +103,11 @@ endif()
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS cmdMobius RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS cmdMobius CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS cmdMobius CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS cmdMobius CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

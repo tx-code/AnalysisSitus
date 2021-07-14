@@ -671,7 +671,11 @@ endforeach()
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS asiVisu RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS asiVisu CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiVisu CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiVisu CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

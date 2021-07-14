@@ -33,169 +33,42 @@ message (STATUS "... OCCT Debug Binary  dirs: ${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
 # Installation
 #--------------------------------------------------------------------------
 
-if (NOT BUILD_ALGO_ONLY)
-  if (WIN32)
-    message (STATUS "... OCCT binaries: ${3RDPARTY_OCCT_DLL_DIR}")
+set (LIBS
+  TKBin
+  TKBinL
+  TKBinXCAF
+  TKBO
+  TKBool
+  TKBRep
+  TKCAF
+  TKCDF
+  TKernel
+  TKG2d
+  TKG3d
+  TKGeomAlgo
+  TKGeomBase
+  TKIGES
+  TKLCAF
+  TKMath
+  TKMesh
+  TKOffset
+  TKPrim
+  TKShHealing
+  TKSTEP
+  TKSTEP209
+  TKSTEPAttr
+  TKSTEPBase
+  TKTopAlgo
+  TKXSBase
+  TKHLR
+  TKFillet
+  TKSTL
+  TKXCAF
+  TKXDESTEP
+  TKVCAF
+  TKV3d
+  TKOpenGl
+  TKService
+)
 
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBin.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBinL.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBinXCAF.dll   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBO.dll        DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBool.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKBRep.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKCAF.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKCDF.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKernel.dll     DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKG2d.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKG3d.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKGeomAlgo.dll  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKGeomBase.dll  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKIGES.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKLCAF.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKMath.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKMesh.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKOffset.dll    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKPrim.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKShHealing.dll DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKSTEP.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKSTEP209.dll   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKSTEPAttr.dll  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKSTEPBase.dll  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKTopAlgo.dll   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKXSBase.dll    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKHLR.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKFillet.dll    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKSTL.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKXCAF.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKXDESTEP.dll   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKVCAF.dll      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKV3d.dll       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKOpenGl.dll    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_DLL_DIR}/TKService.dll   DESTINATION bin)
-  else()
-    message (STATUS "... OCCT libraries: ${3RDPARTY_OCCT_LIBRARY_DIR}")
-
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBin.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinL.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinXCAF.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBO.so        DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBool.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBRep.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCAF.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCDF.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKernel.so     DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG2d.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG3d.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomAlgo.so  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomBase.so  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKIGES.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKLCAF.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMath.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMesh.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOffset.so    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKPrim.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKShHealing.so DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP209.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPAttr.so  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPBase.so  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKTopAlgo.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXSBase.so    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKHLR.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKFillet.so    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTL.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOpenGl.so    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so   DESTINATION bin)
-    #
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBin.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinL.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinXCAF.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBO.so.7        DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBool.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBRep.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCAF.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCDF.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKernel.so.7     DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG2d.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG3d.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomAlgo.so.7  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomBase.so.7  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKIGES.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKLCAF.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMath.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMesh.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOffset.so.7    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKPrim.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKShHealing.so.7 DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP209.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPAttr.so.7  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPBase.so.7  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKTopAlgo.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXSBase.so.7    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKHLR.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKFillet.so.7    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTL.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so.7   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so.7      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so.7       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOpenGl.so.7    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so.7   DESTINATION bin)
-    #
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBin.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinL.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBinXCAF.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBO.so.7.4.0        DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBool.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKBRep.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCAF.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKCDF.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKernel.so.7.4.0     DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG2d.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKG3d.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomAlgo.so.7.4.0  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKGeomBase.so.7.4.0  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKIGES.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKLCAF.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMath.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKMesh.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOffset.so.7.4.0    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKPrim.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKShHealing.so.7.4.0 DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEP209.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPAttr.so.7.4.0  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTEPBase.so.7.4.0  DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKTopAlgo.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXSBase.so.7.4.0    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKHLR.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKFillet.so.7.4.0    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKSTL.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXCAF.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKXDESTEP.so.7.4.0   DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKVCAF.so.7.4.0      DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKV3d.so.7.4.0       DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKOpenGl.so.7.4.0    DESTINATION bin)
-    install (FILES ${3RDPARTY_OCCT_LIBRARY_DIR}/libTKService.so.7.4.0   DESTINATION bin)
-  endif()
-endif()
+ASITUS_INSTALL_3RDPARTY (LIBS "OCCT")

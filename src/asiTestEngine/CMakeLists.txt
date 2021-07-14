@@ -88,7 +88,9 @@ target_link_libraries(asiTestEngine asiAlgo asiData)
 #------------------------------------------------------------------------------
 
 if (WIN32)
-  install (TARGETS asiTestEngine RUNTIME DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiTestEngine CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiTestEngine CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiTestEngine CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
 endif()
 
 install (TARGETS asiTestEngine

@@ -788,7 +788,9 @@ endif()
 #------------------------------------------------------------------------------
 
 if (NOT BUILD_ALGO_ONLY)
-  install (TARGETS asiAlgo RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiAlgo CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiAlgo CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiAlgo CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
 endif()
 
 #------------------------------------------------------------------------------

@@ -267,7 +267,9 @@ endforeach()
 #------------------------------------------------------------------------------
 
 if (WIN32)
-  install (TARGETS asiExe RUNTIME DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiExe CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiExe CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiExe CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
 else()
   install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin/asiExe DESTINATION bin
            CONFIGURATIONS Release

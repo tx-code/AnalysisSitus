@@ -242,7 +242,11 @@ endforeach()
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS asiEngine RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS asiEngine CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiEngine CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiEngine CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

@@ -227,7 +227,9 @@ endforeach()
 #------------------------------------------------------------------------------
 
 if (WIN32)
-  install (TARGETS asiExeCli RUNTIME DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiExeCli CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiExeCli CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiExeCli CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
 else()
   install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin/asiExeCli DESTINATION bin
            CONFIGURATIONS Release

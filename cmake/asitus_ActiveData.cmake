@@ -36,14 +36,10 @@ message (STATUS "... Active Data Debug Binary  dirs: ${3RDPARTY_active_data_DLL_
 # Installation
 #--------------------------------------------------------------------------
 
-if (NOT BUILD_ALGO_ONLY)
-  if (WIN32)
-    install (FILES ${3RDPARTY_active_data_DLL_DIR}/ActiveData.dll DESTINATION bin)
-    install (FILES ${3RDPARTY_active_data_DLL_DIR}/ActiveDataAPI.dll DESTINATION bin)
-    install (FILES ${3RDPARTY_active_data_DLL_DIR}/ActiveDataAux.dll DESTINATION bin)
-  else()
-    install (FILES ${3RDPARTY_active_data_LIBRARY_DIR}/libActiveData.so DESTINATION bin)
-    install (FILES ${3RDPARTY_active_data_LIBRARY_DIR}/libActiveDataAPI.so DESTINATION bin)
-    install (FILES ${3RDPARTY_active_data_LIBRARY_DIR}/libActiveDataAux.so DESTINATION bin)
-  endif()
-endif()
+set (LIBS
+  ActiveData
+  ActiveDataAPI
+  ActiveDataAux
+)
+
+ASITUS_INSTALL_3RDPARTY (LIBS "active_data")

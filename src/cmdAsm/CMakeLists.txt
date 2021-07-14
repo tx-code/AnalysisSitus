@@ -73,7 +73,11 @@ target_link_libraries(cmdAsm asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asi
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 
-install (TARGETS cmdAsm RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+if (NOT BUILD_ALGO_ONLY)
+  install (TARGETS cmdAsm CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS cmdAsm CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS cmdAsm CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a framework

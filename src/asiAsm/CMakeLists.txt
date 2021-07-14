@@ -290,7 +290,9 @@ endif()
 #------------------------------------------------------------------------------
 
 if (NOT BUILD_ALGO_ONLY)
-  install (TARGETS asiAsm RUNTIME DESTINATION bin LIBRARY DESTINATION bin COMPONENT Runtime)
+  install (TARGETS asiAsm CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
+  install (TARGETS asiAsm CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
+  install (TARGETS asiAsm CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
 endif()
 
 #------------------------------------------------------------------------------
