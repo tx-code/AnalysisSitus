@@ -120,6 +120,20 @@ set (OCCT_LIB_FILES
 )
 
 #------------------------------------------------------------------------------
+# Mobius
+#------------------------------------------------------------------------------
+
+if (USE_MOBIUS)
+  set (MOBIUS_LIB_FILES
+    mobiusCore
+    mobiusPoly
+    mobiusBSpl
+    mobiusCascade
+    mobiusGeom
+  )
+endif()
+
+#------------------------------------------------------------------------------
 # FBX SDK libraries
 #------------------------------------------------------------------------------
 
@@ -204,6 +218,10 @@ include_directories ( SYSTEM
                       ${3RDPARTY_rapidjson_DIR}
                       ${3RDPARTY_FBX_SDK_INCLUDE_DIR}
                       ${3RDPARTY_tbb_INCLUDE_DIR} )
+
+if (USE_MOBIUS)
+  include_directories(SYSTEM ${3RDPARTY_mobius_INCLUDE_DIR})
+endif()
 
 #------------------------------------------------------------------------------
 # Create library

@@ -32,6 +32,9 @@
 // Own include
 #include <fbx_XdeWriter.h>
 
+// asiAlgo includes
+#include <asiAlgo_MeshMerge.h>
+
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
 
