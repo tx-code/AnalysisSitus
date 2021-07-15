@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiTest_ProgressNotifier.h>
+#include <asiAlgo_ProgressNotifier.h>
 
 // OCCT includes
 #include <Message_MsgFile.hxx>
@@ -41,7 +41,7 @@
 
 //-----------------------------------------------------------------------------
 
-asiTest_ProgressNotifier::asiTest_ProgressNotifier(Standard_OStream& os)
+asiAlgo_ProgressNotifier::asiAlgo_ProgressNotifier(Standard_OStream& os)
 : ActAPI_IProgressNotifier(),
   m_out(os),
   m_SendLogMessageCalled(true)
@@ -57,7 +57,7 @@ asiTest_ProgressNotifier::asiTest_ProgressNotifier(Standard_OStream& os)
  *           containing several tasks
  * ========================================================================= */
 
-void asiTest_ProgressNotifier::Reset()
+void asiAlgo_ProgressNotifier::Reset()
 {
   m_status               = Progress_Undefined;
   m_iCapacity            = 0;
@@ -68,7 +68,7 @@ void asiTest_ProgressNotifier::Reset()
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::Init(const int capacity)
+void asiAlgo_ProgressNotifier::Init(const int capacity)
 {
   m_status    = Progress_Running;
   m_iCapacity = capacity;
@@ -77,35 +77,35 @@ void asiTest_ProgressNotifier::Init(const int capacity)
 
 //-----------------------------------------------------------------------------
 
-int asiTest_ProgressNotifier::Capacity() const
+int asiAlgo_ProgressNotifier::Capacity() const
 {
   return m_iCapacity;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_ProgressNotifier::IsInfinite() const
+bool asiAlgo_ProgressNotifier::IsInfinite() const
 {
   return m_iCapacity == INT_MAX;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::SetMessageKey(const TCollection_AsciiString& msgKey)
+void asiAlgo_ProgressNotifier::SetMessageKey(const TCollection_AsciiString& msgKey)
 {
   m_msgKey = msgKey;
 }
 
 //-----------------------------------------------------------------------------
 
-TCollection_AsciiString asiTest_ProgressNotifier::MessageKey() const
+TCollection_AsciiString asiAlgo_ProgressNotifier::MessageKey() const
 {
   return m_msgKey;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::SetProgressStatus(const ActAPI_ProgressStatus status)
+void asiAlgo_ProgressNotifier::SetProgressStatus(const ActAPI_ProgressStatus status)
 {
   m_status = status;
 
@@ -135,35 +135,35 @@ void asiTest_ProgressNotifier::SetProgressStatus(const ActAPI_ProgressStatus sta
 
 //-----------------------------------------------------------------------------
 
-ActAPI_ProgressStatus asiTest_ProgressNotifier::ProgressStatus() const
+ActAPI_ProgressStatus asiAlgo_ProgressNotifier::ProgressStatus() const
 {
   return m_status;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::Cancel()
+void asiAlgo_ProgressNotifier::Cancel()
 {
   // Do nothing, no way to cancel in Draw console
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_ProgressNotifier::IsCancelling()
+bool asiAlgo_ProgressNotifier::IsCancelling()
 {
   return false;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_ProgressNotifier::IsRunning()
+bool asiAlgo_ProgressNotifier::IsRunning()
 {
   return (m_status == Progress_Running);
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiTest_ProgressNotifier::IsFailed()
+bool asiAlgo_ProgressNotifier::IsFailed()
 {
   return (m_status == Progress_Failed);
 }
@@ -172,14 +172,14 @@ bool asiTest_ProgressNotifier::IsFailed()
  *  Section: Thread-safe methods
  * ========================================================================= */
 
-int asiTest_ProgressNotifier::CurrentProgress() const
+int asiAlgo_ProgressNotifier::CurrentProgress() const
 {
   return m_iProgress;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::StepProgress(const int stepProgress)
+void asiAlgo_ProgressNotifier::StepProgress(const int stepProgress)
 {
   m_iProgress += stepProgress;
 
@@ -209,7 +209,7 @@ void asiTest_ProgressNotifier::StepProgress(const int stepProgress)
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::SetProgress(const int progress)
+void asiAlgo_ProgressNotifier::SetProgress(const int progress)
 {
   m_iProgress = progress;
 }
@@ -248,7 +248,7 @@ TCollection_AsciiString getString(const Handle(Standard_Transient)& theValue)
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  message,
+void asiAlgo_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  message,
                                              const ActAPI_LogMessageSeverity severity,
                                              const ActAPI_LogMessagePriority /*priority*/,
                                              const ActAPI_LogArguments&      arguments)
@@ -319,7 +319,7 @@ void asiTest_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  me
 
 //-----------------------------------------------------------------------------
 
-void asiTest_ProgressNotifier::SendLogMessage(const ActAPI_LogStream& logStream)
+void asiAlgo_ProgressNotifier::SendLogMessage(const ActAPI_LogStream& logStream)
 {
   this->SendLogMessage( logStream.Text(),
                         logStream.Severity(),

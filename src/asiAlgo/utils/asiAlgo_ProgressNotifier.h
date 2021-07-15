@@ -28,11 +28,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_ProgressNotifier_h
-#define asiTest_ProgressNotifier_h
+#ifndef asiAlgo_ProgressNotifier_h
+#define asiAlgo_ProgressNotifier_h
 
-// asiTest includes
-#include <asiTest.h>
+// asiAlgo includes
+#include <asiAlgo.h>
 
 // Active Data includes
 #include <ActAPI_IProgressNotifier.h>
@@ -43,25 +43,26 @@
 #endif
 
 //! Notification tool to take care of algorithmic messages.
-class asiTest_ProgressNotifier : public ActAPI_IProgressNotifier
+class asiAlgo_ProgressNotifier : public ActAPI_IProgressNotifier
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiTest_ProgressNotifier, ActAPI_IProgressNotifier)
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ProgressNotifier, ActAPI_IProgressNotifier)
 
 public:
 
   //! Constructor.
   //! \param[in,out] os output stream.
-  asiTest_ProgressNotifier(Standard_OStream& os);
+  asiAlgo_EXPORT
+    asiAlgo_ProgressNotifier(Standard_OStream& os);
 
 // Thread-unsafe methods:
 public:
 
   //! Cleans up the internal state of the Progress Notifier, so that it
   //! becomes ready to track another job.
-  virtual void
+  asiAlgo_EXPORT virtual void
     Reset();
 
   //! Initializes the Progress Notifier with the deterministic capacity
@@ -75,61 +76,61 @@ public:
   //! shown to the user).
   //!
   //! \param[in] capacity capacity to set (infinite by default: INT_MAX).
-  virtual void
+  asiAlgo_EXPORT virtual void
     Init(const int capacity = INT_MAX);
 
   //! Returns the capacity value.
   //! \return requested capacity value.
-  virtual int
+  asiAlgo_EXPORT virtual int
     Capacity() const;
 
   //! Returns true if the capacity value is infinite.
   //! \return true/false.
-  virtual bool
+  asiAlgo_EXPORT virtual bool
     IsInfinite() const;
 
   //! Sets message localization key.
   //! \param[in] msgKey localization key to set.
-  virtual void
+  asiAlgo_EXPORT virtual void
     SetMessageKey(const TCollection_AsciiString& msgKey);
 
   //! Returns message localization key.
   //! \return localization key.
-  virtual TCollection_AsciiString
+  asiAlgo_EXPORT virtual TCollection_AsciiString
     MessageKey() const;
 
   //! Sets the ultimate progress status for the job.
   //! \param[in] status progress status to set.
-  virtual void
+  asiAlgo_EXPORT virtual void
     SetProgressStatus(const ActAPI_ProgressStatus status);
 
   //! Returns current progress status.
   //! \return ultimate progress status.
-  virtual ActAPI_ProgressStatus
+  asiAlgo_EXPORT virtual ActAPI_ProgressStatus
     ProgressStatus() const;
 
   //! Requests job cancellation.
-  virtual void
+  asiAlgo_EXPORT virtual void
     Cancel();
 
   //! Checks whether the job is being cancelled.
   //! \return true/false.
-  virtual bool
+  asiAlgo_EXPORT virtual bool
     IsCancelling();
 
   //! Checks whether the job is in running state.
   //! \return true/false.
-  virtual bool
+  asiAlgo_EXPORT virtual bool
     IsRunning();
 
   //! Checks whether the job is in failed state.
   //! \return true/false.
-  virtual bool
+  asiAlgo_EXPORT virtual bool
     IsFailed();
 
   //! Returns the currently cumulated progress value.
   //! \return current cumulative progress.
-  virtual int
+  asiAlgo_EXPORT virtual int
     CurrentProgress() const;
 
 // Methods to be used by parallel algorithms (should be thread-safe):
@@ -137,12 +138,12 @@ public:
 
   //! Thread-safe method used to increment the progress value by the passed step.
   //! \param[in] progressStep progress value to increment by.
-  virtual void
+  asiAlgo_EXPORT virtual void
     StepProgress(const int progressStep);
 
   //! Thread-safe method used to set the progress value.
   //! \param[in] progress progress value to set.
-  virtual void
+  asiAlgo_EXPORT virtual void
     SetProgress(const int progress);
 
   //! Thread-safe method used to send a logging message. Normally, this is
@@ -152,7 +153,7 @@ public:
   //! \param[in] severity  message severity (info, warning, error).
   //! \param[in] priority  message priority (normal, high).
   //! \param[in] arguments message arguments (if any).
-  virtual void
+  asiAlgo_EXPORT virtual void
     SendLogMessage(const TCollection_AsciiString&  message,
                    const ActAPI_LogMessageSeverity severity,
                    const ActAPI_LogMessagePriority priority  = Priority_Normal,
@@ -162,7 +163,7 @@ public:
   //! Normally, this is not GUI directly as Progress Notifier is designed for
   //! usage in multi-threaded environment.
   //! \param[in] logStream logging stream.
-  virtual void
+  asiAlgo_EXPORT virtual void
     SendLogMessage(const ActAPI_LogStream& logStream);
 
 // Concurrent collections:
@@ -195,8 +196,8 @@ private:
 
 private:
 
-  void operator=(const asiTest_ProgressNotifier&) = delete;
-  asiTest_ProgressNotifier(const asiTest_ProgressNotifier& pn) = delete;
+  void operator=(const asiAlgo_ProgressNotifier&) = delete;
+  asiAlgo_ProgressNotifier(const asiAlgo_ProgressNotifier& pn) = delete;
 
 };
 

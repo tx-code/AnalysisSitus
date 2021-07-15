@@ -75,7 +75,7 @@ asiTest_CommonFacilities::asiTest_CommonFacilities()
   this->Model->EnableTransactions();
 
   // Initialize progress notifier.
-  this->Progress = ActAPI_ProgressEntry( new asiTest_ProgressNotifier(std::cout) );
+  this->Progress = ActAPI_ProgressEntry( new asiAlgo_ProgressNotifier(std::cout) );
 
   // Initialize plotter as we may want at least to work with the data
   // objects created by the plotter if not with their presentations.

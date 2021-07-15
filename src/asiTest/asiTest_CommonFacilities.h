@@ -32,7 +32,10 @@
 #define asiTest_CommonFacilities_h
 
 // asiTest includes
-#include <asiTest_ProgressNotifier.h>
+#include <asiTest.h>
+
+// asiAlgo includes
+#include <asiAlgo_ProgressNotifier.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>

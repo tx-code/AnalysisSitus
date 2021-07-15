@@ -8,13 +8,11 @@ set (H_FILES
   asiTest.h
   asiTest_CaseIDs.h
   asiTest_CommonFacilities.h
-  asiTest_ProgressNotifier.h
   asiTest_TclTestCase.h
 )
 set (CPP_FILES
   asiTest_CommonFacilities.cpp
   asiTest_Main.cpp
-  asiTest_ProgressNotifier.cpp
   asiTest_TclTestCase.cpp
 )
 
