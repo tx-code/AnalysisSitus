@@ -152,7 +152,7 @@ protected:
 
   Handle(Poly_CoherentTriangulation) m_resultPoly; //!< Result tessellation.
   Handle(ActData_Mesh)               m_resultMesh; //!< Result mesh.
-  t_faceElems                        m_faceElems;  //!< Map to store indices of mesh triagnles for face.
+  t_faceElems                        m_faceElems;  //!< Map to store indices of mesh triangles for face.
 
 #if defined USE_MOBIUS
   //! Result Mobius mesh.
