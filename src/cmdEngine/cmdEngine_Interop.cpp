@@ -208,7 +208,7 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
     //
-    shape = partNode->GetShape();
+    shape = partNode->GetShape(true);
   }
   else
   {
