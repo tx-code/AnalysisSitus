@@ -38,6 +38,10 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+#if defined USE_MOBIUS
+#include <mobius/poly_Mesh.h>
+#endif
+
 //-----------------------------------------------------------------------------
 
 //! Utility to check thickness of a CAD part.
@@ -59,14 +63,18 @@ public:
                            ActAPI_ProgressEntry progress = nullptr,
                            ActAPI_PlotterEntry  plotter  = nullptr);
 
+#if defined USE_MOBIUS
+
   //! Ctor.
   //! \param[in] tris     facets of a CAD part to analyze.
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_CheckThickness(const Handle(Poly_Triangulation)& tris,
-                           ActAPI_ProgressEntry              progress = nullptr,
-                           ActAPI_PlotterEntry               plotter  = nullptr);
+    asiAlgo_CheckThickness(const mobius::t_ptr<mobius::poly_Mesh>& tris,
+                           ActAPI_ProgressEntry                    progress = nullptr,
+                           ActAPI_PlotterEntry                     plotter  = nullptr);
+
+#endif
 
 public:
 

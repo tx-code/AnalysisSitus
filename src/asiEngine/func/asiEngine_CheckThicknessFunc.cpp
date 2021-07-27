@@ -32,6 +32,7 @@
 #include <asiEngine_CheckThicknessFunc.h>
 
 // asiData includes
+#include <asiData_MeshParameter.h>
 #include <asiData_ThicknessNode.h>
 
 // asiAlgo includes
@@ -40,6 +41,12 @@
 
 // Active Data includes
 #include <ActData_ParameterFactory.h>
+#include <ActData_UserExtParameter.h>
+
+#if defined USE_MOBIUS
+#include <mobius/cascade.h>
+using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -54,10 +61,23 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
    * ============================ */
 
   // Get mesh.
-  Handle(ActData_TriangulationParameter)
-    trisParam = ActParamTool::AsTriangulation( inputs->Value(1) );
+  Handle(ActData_UserExtParameter)
+    trisExtParam = Handle(ActData_UserExtParameter)::DownCast( inputs->Value(1) );
   //
-  Handle(Poly_Triangulation) tris = trisParam->GetTriangulation();
+  Handle(ActAPI_INode) ownerNode = trisExtParam->GetNode();
+
+  // Get the custom Mesh Parameter.
+  Handle(asiData_MeshParameter)
+    trisParam = Handle(asiData_MeshParameter)::DownCast( ownerNode->Parameter( trisExtParam->GetParamId() ) );
+
+  Handle(Poly_Triangulation) tris;
+
+#if defined USE_MOBIUS
+  tris = cascade::GetOpenCascadeMesh( trisParam->GetMesh() );
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return 1
+#endif
 
   // Get Thickness Node.
   Handle(asiData_ThicknessNode)
@@ -124,11 +144,11 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
 ActAPI_ParameterTypeStream
   asiEngine_CheckThicknessFunc::inputSignature() const
 {
-  return ActAPI_ParameterTypeStream() << Parameter_Triangulation // Mesh of a CAD part to check.
-                                      << Parameter_Bool          // Is custom direction.
-                                      << Parameter_Real          // X component of the custom direction.
-                                      << Parameter_Real          // Y component of the custom direction.
-                                      << Parameter_Real          // Z component of the custom direction.
+  return ActAPI_ParameterTypeStream() << Parameter_PolyMesh // Mesh of a CAD part to check.
+                                      << Parameter_Bool     // Is custom direction.
+                                      << Parameter_Real     // X component of the custom direction.
+                                      << Parameter_Real     // Y component of the custom direction.
+                                      << Parameter_Real     // Z component of the custom direction.
   ;
 }
 
