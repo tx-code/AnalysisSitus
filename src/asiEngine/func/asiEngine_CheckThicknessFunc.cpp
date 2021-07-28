@@ -54,6 +54,7 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
                                           const Handle(ActAPI_HParameterList)& outputs,
                                           const Handle(Standard_Transient)&) const
 {
+#if defined USE_MOBIUS
   ActAPI_ProgressEntry progress = this->GetProgressNotifier();
 
   /* ============================
@@ -70,14 +71,7 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   Handle(asiData_MeshParameter)
     trisParam = Handle(asiData_MeshParameter)::DownCast( ownerNode->Parameter( trisExtParam->GetParamId() ) );
 
-  Handle(Poly_Triangulation) tris;
-
-#if defined USE_MOBIUS
-  tris = cascade::GetOpenCascadeMesh( trisParam->GetMesh() );
-#else
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
-  return 1
-#endif
+  t_ptr<poly_Mesh> tris = trisParam->GetMesh();
 
   // Get Thickness Node.
   Handle(asiData_ThicknessNode)
@@ -113,7 +107,7 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   asiAlgo_CheckThickness algo(tris, m_progress, m_plotter);
   //
   algo.SetIsCustomDir(isCustomDir);
-  algo.SetCustomDir( gp_Dir(dx, dy, dz) );
+  algo.SetCustomDir( t_xyz(dx, dy, dz) );
 
   // Perform.
   if ( !algo.Perform_RayMethod() )
@@ -137,6 +131,10 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   ActParamTool::AsReal( outputs->Value(2) )->SetValue( algo.GetMaxThickness() );
 
   return 0; // Success.
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return 1
+#endif
 }
 
 //-----------------------------------------------------------------------------

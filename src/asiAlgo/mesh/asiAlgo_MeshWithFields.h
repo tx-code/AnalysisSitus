@@ -28,14 +28,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_Mesh_h
-#define asiAlgo_Mesh_h
+#ifndef asiAlgo_MeshWithFields_h
+#define asiAlgo_MeshWithFields_h
 
 // asiAlgo includes
 #include <asiAlgo.h>
 
-// OCCT includes
-#include <Poly_Triangulation.hxx>
+#if defined USE_MOBIUS
+#include <mobius/poly_Mesh.h>
+#endif
 
 // Standard includes
 #include <vector>
@@ -46,10 +47,12 @@ class asiAlgo_MeshField;
 //-----------------------------------------------------------------------------
 
 //! Data structure for mesh with optional fields.
-struct asiAlgo_Mesh
+struct asiAlgo_MeshWithFields
 {
-  Handle(Poly_Triangulation)             triangulation;
+#if defined USE_MOBIUS
+  mobius::t_ptr<mobius::poly_Mesh>       triangulation;
   std::vector<Handle(asiAlgo_MeshField)> fields;
+#endif
 };
 
 #endif

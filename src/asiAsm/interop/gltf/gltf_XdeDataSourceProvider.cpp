@@ -276,8 +276,8 @@ void gltf_XdeDataSourceProvider::processSceneMeshes(NCollection_DataMap<TDF_Labe
             facePrimitive.NodeUV.Type = gltf_AccessorLayout_Vec2;
             facePrimitive.NodeUV.ComponentType = gltf_AccessorComponentType_Float32;
 
-            const int nodeUpper = faceProperty.NodeUpper();
-            for (int nit = faceProperty.NodeLower(); nit <= nodeUpper; ++nit)
+            const int nodeUpper1 = faceProperty.NodeUpper();
+            for (int nit = faceProperty.NodeLower(); nit <= nodeUpper1; ++nit)
             {
               gp_Pnt2d texCoord = faceProperty.NodeTexCoord(nit);
               texCoord.SetY(1.0 - texCoord.Y());

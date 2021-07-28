@@ -410,7 +410,7 @@ bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
 
     // Create a new facet
     const int face_idx = t.GetFaceRef();
-    t_facet facet(face_idx == Mobius_InvalidHandleIndex ? -1 : face_idx);
+    t_facet facet(face_idx == Mobius_InvalidHandleIndex ? th.iIdx : face_idx);
 
     // Initialize nodes
     facet.P0 = BVH_Vec3d( nodes[0].X(), nodes[0].Y(), nodes[0].Z() );

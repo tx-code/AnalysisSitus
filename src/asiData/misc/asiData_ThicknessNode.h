@@ -35,11 +35,15 @@
 #include <asiData.h>
 
 // asiAlgo includes
-#include <asiAlgo_Mesh.h>
+#include <asiAlgo_MeshWithFields.h>
 
 // Active Data includes
 #include <ActData_BaseNode.h>
 #include <ActData_ParameterFactory.h>
+
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -107,15 +111,17 @@ public:
 
 public:
 
+#if defined USE_MOBIUS
   //! Sets mesh without a scalar field.
   //! \param[in] mesh mesh to store.
   asiData_EXPORT void
-    SetMesh(const Handle(Poly_Triangulation)& mesh);
+    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh);
+#endif
 
   //! Stores mesh with associated thickness field scalars.
   //! \param[in] mesh mesh and fields to store.
   asiData_EXPORT void
-    SetMeshWithScalars(const asiAlgo_Mesh& mesh);
+    SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh);
 
 protected:
 

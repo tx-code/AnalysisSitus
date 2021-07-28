@@ -55,7 +55,9 @@
 asiVisu_MeshEScalarPipeline::asiVisu_MeshEScalarPipeline()
 : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New() ),
-  m_fToler(0.)
+  m_fToler     ( 0. ),
+  m_fMinScalar ( Precision::Infinite() ),
+  m_fMaxScalar ( Precision::Infinite() )
 {
   /* ========================
    *  Prepare custom filters

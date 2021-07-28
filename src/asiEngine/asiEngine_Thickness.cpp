@@ -49,29 +49,30 @@
 Handle(asiData_ThicknessNode)
   asiEngine_Thickness::CreateThickness(const Handle(ActAPI_INode)& owner)
 {
-  Handle(Poly_Triangulation) mesh;
+#if defined USE_MOBIUS
+  t_ptr<poly_Mesh> mesh;
 
   // Resolve the owner.
   if ( owner->IsKind( STANDARD_TYPE(asiData_PartNode) ) )
   {
     // Merge facets.
-    asiAlgo_MeshMerge meshMerge( Handle(asiData_PartNode)::DownCast(owner)->GetShape() );
+    asiAlgo_MeshMerge meshMerge( Handle(asiData_PartNode)::DownCast(owner)->GetShape(),
+                                 asiAlgo_MeshMerge::Mode_MobiusMesh );
     //
-    mesh = meshMerge.GetResultPoly()->GetTriangulation();
+    mesh = meshMerge.GetMobiusMesh();
   }
   else if ( owner->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
   {
     // Merge facets.
-    asiAlgo_MeshMerge meshMerge( Handle(asiData_IVTopoItemNode)::DownCast(owner)->GetShape() );
+    asiAlgo_MeshMerge meshMerge( Handle(asiData_IVTopoItemNode)::DownCast(owner)->GetShape(),
+                                 asiAlgo_MeshMerge::Mode_MobiusMesh );
     //
-    mesh = meshMerge.GetResultPoly()->GetTriangulation();
+    mesh = meshMerge.GetMobiusMesh();
   }
-#if defined USE_MOBIUS
   else if ( owner->IsKind( STANDARD_TYPE(asiData_TriangulationNode) ) )
   {
-    mesh = cascade::GetOpenCascadeMesh( Handle(asiData_TriangulationNode)::DownCast(owner)->GetTriangulation() );
+    mesh = Handle(asiData_TriangulationNode)::DownCast(owner)->GetTriangulation();
   }
-#endif
   else
   {
     return nullptr; // Unexpected type of owner.
@@ -107,4 +108,8 @@ Handle(asiData_ThicknessNode)
   owner->AddChildNode(node);
 
   return node;
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return nullptr;
+#endif
 }

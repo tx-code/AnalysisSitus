@@ -83,13 +83,13 @@ int asiVisu_MeshEScalarFilter::FillInputPortInformation(int /*port*/, vtkInforma
 //!                           typically just one key such as REQUEST_INFORMATION.
 //! \param inputVector  [in]  inputs of the algorithm.
 //! \param outputVector [out] outputs of the algorithm.
-int asiVisu_MeshEScalarFilter::RequestData(vtkInformation*,
-                                           vtkInformationVector** theInputVector,
-                                           vtkInformationVector*  theOutputVector)
+int asiVisu_MeshEScalarFilter::RequestData(vtkInformation*        request,
+                                           vtkInformationVector** inputVector,
+                                           vtkInformationVector*  outputVector)
 {
   // Get input and output data sets
-  vtkDataSet*  anInput  = vtkDataSet::GetData(theInputVector[0]);
-  vtkPolyData* anOutput = vtkPolyData::GetData(theOutputVector);
+  vtkDataSet*  anInput  = vtkDataSet::GetData(inputVector[0]);
+  vtkPolyData* anOutput = vtkPolyData::GetData(outputVector);
 
   vtkIdType aNbCells  = anInput->GetNumberOfCells();
   vtkIdType aNbPoints = anInput->GetNumberOfPoints();
@@ -225,7 +225,7 @@ int asiVisu_MeshEScalarFilter::RequestData(vtkInformation*,
   // Avoid keeping extra memory around
   anOutput->Squeeze();
 
-  return 1;
+  return Superclass::RequestData(request, inputVector, outputVector);
 }
 
 //! Retrieves scalar value for the element with the given ID.

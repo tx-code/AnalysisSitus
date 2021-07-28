@@ -323,7 +323,6 @@ set (interop_CPP_FILES
 
 set (mesh_H_FILES
   mesh/asiAlgo_FacetQuality.h
-  mesh/asiAlgo_Mesh.h
   mesh/asiAlgo_MeshComputeNorms.h
   mesh/asiAlgo_MeshComputeShapeNorms.h
   mesh/asiAlgo_MeshConvert.h
@@ -339,6 +338,7 @@ set (mesh_H_FILES
   mesh/asiAlgo_MeshParams.h
   mesh/asiAlgo_MeshProjectLine.h
   mesh/asiAlgo_MeshSmooth.h
+  mesh/asiAlgo_MeshWithFields.h
 )
 set (mesh_CPP_FILES
   mesh/asiAlgo_MeshComputeNorms.cpp

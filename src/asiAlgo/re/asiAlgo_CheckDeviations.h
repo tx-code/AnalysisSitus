@@ -34,7 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_BVHFacets.h>
-#include <asiAlgo_Mesh.h>
+#include <asiAlgo_MeshWithFields.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -80,7 +80,7 @@ public:
   //!         of the CAD part with associated distance field. The scalar
   //!         values representing the distance field are bounded to the
   //!         mesh nodes.
-  const asiAlgo_Mesh& GetResult() const
+  const asiAlgo_MeshWithFields& GetResult() const
   {
     return m_result;
   }
@@ -97,7 +97,7 @@ protected:
 
   Handle(asiAlgo_BaseCloud<double>) m_points;   //!< Point cloud.
   Handle(asiAlgo_BVHFacets)         m_bvh;      //!< BVH for point-to-mesh projection.
-  asiAlgo_Mesh                      m_result;   //!< Mesh with field.
+  asiAlgo_MeshWithFields            m_result;   //!< Mesh with field.
 
 };
 

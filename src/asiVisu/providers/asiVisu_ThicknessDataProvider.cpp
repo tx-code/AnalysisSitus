@@ -80,6 +80,7 @@ Handle(ActAPI_HParameterList) asiVisu_ThicknessDataProvider::translationSources(
 {
   ActAPI_ParameterStream out;
   out << m_node->Parameter(asiData_ThicknessNode::PID_Mesh)
+      << m_node->Parameter(asiData_ThicknessNode::PID_IsCustomDir)
       << m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldIds)
       << m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldValues)
       << m_node->Parameter(asiData_ThicknessNode::PID_ScalarMin)

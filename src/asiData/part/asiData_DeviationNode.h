@@ -35,7 +35,7 @@
 #include <asiData_MeshParameter.h>
 
 // asiAlgo includes
-#include <asiAlgo_Mesh.h>
+#include <asiAlgo_MeshWithFields.h>
 
 // Active Data includes
 #include <ActData_BaseNode.h>
@@ -96,7 +96,7 @@ public:
   //! Stores mesh with associated distance field scalars.
   //! \param[in] mesh mesh and fields to store.
   asiData_EXPORT void
-    SetMeshWithScalars(const asiAlgo_Mesh& mesh);
+    SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh);
 
 protected:
 

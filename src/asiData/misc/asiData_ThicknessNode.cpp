@@ -42,7 +42,6 @@
 
 #if defined USE_MOBIUS
   #include <mobius/cascade.h>
-  #include <mobius/poly_Mesh.h>
 
   using namespace mobius;
 #endif
@@ -79,7 +78,7 @@ void asiData_ThicknessNode::Init()
   this->InitParameter(PID_Dz,          "Dz",               "",                  ParameterFlag_IsVisible, true);
 
   // Set default values.
-  this->SetMeshWithScalars( asiAlgo_Mesh() );
+  this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
   //
   ActParamTool::AsReal( this->Parameter(PID_ScalarMin) )   ->SetValue(-Precision::Infinite() );
   ActParamTool::AsReal( this->Parameter(PID_ScalarMax) )   ->SetValue( Precision::Infinite() );
@@ -105,10 +104,10 @@ void asiData_ThicknessNode::SetName(const TCollection_ExtendedString& N)
 
 //-----------------------------------------------------------------------------
 
-void asiData_ThicknessNode::SetMesh(const Handle(Poly_Triangulation)& mesh)
+void asiData_ThicknessNode::SetMesh(const t_ptr<poly_Mesh>& mesh)
 {
 #if defined USE_MOBIUS
-  Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh( cascade::GetMobiusMesh(mesh) );
+  Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh(mesh);
 #else
   (void) mesh;
 #endif
@@ -116,7 +115,7 @@ void asiData_ThicknessNode::SetMesh(const Handle(Poly_Triangulation)& mesh)
 
 //-----------------------------------------------------------------------------
 
-void asiData_ThicknessNode::SetMeshWithScalars(const asiAlgo_Mesh& mesh)
+void asiData_ThicknessNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh)
 {
   this->SetMesh(mesh.triangulation);
 

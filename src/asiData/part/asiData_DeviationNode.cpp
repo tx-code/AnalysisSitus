@@ -77,7 +77,7 @@ void asiData_DeviationNode::Init()
   this->InitParameter(PID_ScalarMax, "Max. scalar", "", ParameterFlag_IsVisible, true);
 
   // Set default values.
-  this->SetMeshWithScalars( asiAlgo_Mesh() );
+  this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
   //
   ActParamTool::AsReal( this->Parameter(PID_Tolerance) )->SetValue(  0.1 );
   ActParamTool::AsReal( this->Parameter(PID_ScalarMin) )->SetValue( -Precision::Infinite() );
@@ -104,13 +104,13 @@ void asiData_DeviationNode::SetName(const TCollection_ExtendedString& N)
 
 //-----------------------------------------------------------------------------
 
-void asiData_DeviationNode::SetMeshWithScalars(const asiAlgo_Mesh& mesh)
+void asiData_DeviationNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh)
 {
 #if defined USE_MOBIUS
   Handle(asiData_MeshParameter)
     param = Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) );
   //
-  param->SetMesh( cascade::GetMobiusMesh(mesh.triangulation) );
+  param->SetMesh(mesh.triangulation);
 
   // Prepare array of node ids.
   if ( mesh.fields.size() )

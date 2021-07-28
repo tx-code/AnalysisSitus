@@ -39,6 +39,11 @@
 // OpenCascade includes
 #include <gp_Lin.hxx>
 
+#if defined USE_MOBIUS
+#include <mobius/cascade.h>
+using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
@@ -46,14 +51,14 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
                                                ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_bIsCustomDir    ( false ),
-  m_customDir       ( gp::DZ() ),
+  m_customDir       ( 0, 0, 1 ),
   m_fMinThick       ( 0. ),
   m_fMaxThick       ( 0. )
 {
   // Merge facets.
-  asiAlgo_MeshMerge meshMerge(shape);
+  asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
   //
-  m_resField.triangulation = meshMerge.GetResultPoly()->GetTriangulation();
+  m_resField.triangulation = meshMerge.GetMobiusMesh();
 
   // Build BVH.
   m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation);
@@ -61,9 +66,11 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
 
 //-----------------------------------------------------------------------------
 
-asiAlgo_CheckThickness::asiAlgo_CheckThickness(const Handle(Poly_Triangulation)& tris,
-                                               ActAPI_ProgressEntry              progress,
-                                               ActAPI_PlotterEntry               plotter)
+#if defined USE_MOBIUS
+
+asiAlgo_CheckThickness::asiAlgo_CheckThickness(const t_ptr<poly_Mesh>& tris,
+                                               ActAPI_ProgressEntry    progress,
+                                               ActAPI_PlotterEntry     plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_fMinThick       ( 0. ),
   m_fMaxThick       ( 0. )
@@ -74,10 +81,13 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const Handle(Poly_Triangulation)&
   m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation);
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_CheckThickness::Perform_RayMethod()
 {
+#if defined USE_MOBIUS
   if ( m_resField.triangulation.IsNull() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Null triangulation.");
@@ -93,49 +103,54 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
   // Cast a ray from each facet.
   double minScalar = DBL_MAX, maxScalar = -DBL_MAX;
   //
-  for ( int tidx = 1; tidx <= m_resField.triangulation->NbTriangles(); ++tidx )
+  for ( poly_Mesh::TriangleIterator tit(m_resField.triangulation); tit.More(); tit.Next() )
   {
-    const Poly_Triangle& tri = m_resField.triangulation->Triangle(tidx);
+    const poly_TriangleHandle th = tit.Current();
+
+    poly_Triangle t;
+    if ( !m_resField.triangulation->GetTriangle(th, t) || t.IsDeleted() )
+      continue;
 
     // Get nodes.
-    int n1, n2, n3;
-    tri.Get(n1, n2, n3);
+    poly_VertexHandle vh[3];
+    t.GetVertices(vh[0], vh[1], vh[2]);
     //
-    gp_Pnt P0 = m_resField.triangulation->Node(n1);
-    gp_Pnt P1 = m_resField.triangulation->Node(n2);
-    gp_Pnt P2 = m_resField.triangulation->Node(n3);
+    t_xyz P[3];
+    //
+    for ( int k = 0; k < 3; ++k )
+      m_resField.triangulation->GetVertex(vh[k], P[k]);
 
     // Center point.
-    gp_Pnt C = ( P0.XYZ() + P1.XYZ() + P2.XYZ() ) / 3.;
+    t_xyz C = (P[0] + P[1] + P[2]) / 3.;
 
     /* Initialize norm. */
 
-    gp_Vec V1(P0, P1);
+    t_xyz V1 = P[1] - P[0];
     //
-    if ( V1.SquareMagnitude() < 1e-8 )
+    if ( V1.SquaredModulus() < 1e-8 )
       continue; // Skip invalid facet.
     //
     V1.Normalize();
 
-    gp_Vec V2(P0, P2);
+    t_xyz V2 = P[2] - P[0];
     //
-    if ( V2.SquareMagnitude() < 1e-8 )
+    if ( V2.SquaredModulus() < 1e-8 )
       continue; // Skip invalid facet.
     //
     V2.Normalize();
 
     // Compute norm.
-    gp_Vec N = V1.Crossed(V2);
+    t_xyz N = V1 ^ V2;
     //
-    if ( N.SquareMagnitude() < 1e-8 )
+    if ( N.SquaredModulus() < 1e-8 )
       continue; // Skip invalid facet
     //
     N.Normalize();
 
     // Direction to analyze thickness.
-    bool   isDirDefined = true;
-    gp_Dir dir;
-    gp_Dir localDir = N.Reversed();
+    bool  isDirDefined = true;
+    t_xyz dir;
+    t_xyz localDir = N.Reversed();
     //
     if ( !m_bIsCustomDir )
     {
@@ -155,22 +170,25 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     /* Shoot a ray to find intersection. */
 
     // Exclude the originating face from the intersection test.
-    HitFacet.SetFaceToSkip(tidx);
+    HitFacet.SetFaceToSkip(th.iIdx);
 
     // Thickness scalar.
     double thickness = 0.;
+
+    gp_Lin ray    ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir ) );
+    gp_Lin rayInv ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir.Reversed() ) );
 
     // Do the intersection test. For the custom directions, the
     // test is done twice: in the forward and the reversed directions.
     gp_XYZ hit1, hit2, hit;
     int facetIdx1, facetIdx2, facetIdx = -1;
     //
-    bool isHit1 = HitFacet(gp_Lin( C, dir ), facetIdx1, hit1);
+    bool isHit1 = HitFacet(ray, facetIdx1, hit1);
     bool isHit2 = false;
     //
     if ( m_bIsCustomDir )
     {
-      isHit2 = HitFacet(gp_Lin( C, dir.Reversed() ), facetIdx2, hit2);
+      isHit2 = HitFacet(rayInv, facetIdx2, hit2);
 
       /*if ( tidx == 51121 )
       {
@@ -200,8 +218,8 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
       else
       {
         // Choose the closest one.
-        const double d1 = C.Distance(hit1);
-        const double d2 = C.Distance(hit2);
+        const double d1 = cascade::GetOpenCascadePnt(C).Distance(hit1);
+        const double d2 = cascade::GetOpenCascadePnt(C).Distance(hit2);
         //
         hit      = ( (d1 < d2) ? hit1      : hit2 );
         facetIdx = ( (d1 < d2) ? facetIdx1 : facetIdx2 );
@@ -222,7 +240,7 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
 
     // Now thickness is simply a distance.
     if ( facetIdx != -1 )
-      thickness = C.Distance(hit);
+      thickness = cascade::GetOpenCascadePnt(C).Distance(hit);
 
     /*if ( !m_bIsCustomDir && (tidx == 51121) )
     {
@@ -236,9 +254,10 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     // Store scalars in the field.
     if ( facetIdx != -1 )
     {
-      double *pThick = field->data.ChangeSeek(tidx);
+      double *pThick = field->data.ChangeSeek(th.iIdx);
+      //
       if ( pThick == nullptr )
-        field->data.Bind(tidx, thickness);
+        field->data.Bind(th.iIdx, thickness);
       else if ( thickness > *pThick)
         *pThick = thickness;
 
@@ -259,6 +278,10 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
   m_fMaxThick = maxScalar;
 
   return true;
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------

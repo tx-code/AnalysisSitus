@@ -33,7 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BVHFacets.h>
-#include <asiAlgo_Mesh.h>
+#include <asiAlgo_MeshWithFields.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -97,18 +97,20 @@ public:
     m_bIsCustomDir = on;
   }
 
+#if defined USE_MOBIUS
   //! Sets custom direction of analysis.
   //! \param[in] dir direction to set.
-  void SetCustomDir(const gp_Dir& dir)
+  void SetCustomDir(const mobius::t_xyz& dir)
   {
     m_customDir = dir;
   }
+#endif
 
   //! \return result of thickness check which is a faceted representation
   //!         of the CAD part with associated distance field. The scalar
   //!         values representing the distance field are bounded to the
   //!         mesh nodes.
-  const asiAlgo_Mesh& GetThicknessField() const
+  const asiAlgo_MeshWithFields& GetThicknessField() const
   {
     return m_resField;
   }
@@ -129,8 +131,10 @@ protected:
 
   Handle(asiAlgo_BVHFacets) m_bvh;          //!< BVH representation of a CAD part.
   bool                      m_bIsCustomDir; //!< Whether to use custom direction.
-  gp_Dir                    m_customDir;    //!< Custom direction.
-  asiAlgo_Mesh              m_resField;     //!< Mesh with a scalar field.
+#if defined USE_MOBIUS
+  mobius::t_xyz             m_customDir;    //!< Custom direction.
+#endif
+  asiAlgo_MeshWithFields    m_resField;     //!< Mesh with a scalar field.
   double                    m_fMinThick;    //!< Min thickness.
   double                    m_fMaxThick;    //!< Max thickness.
 

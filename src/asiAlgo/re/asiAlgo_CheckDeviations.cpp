@@ -36,6 +36,11 @@
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_ProjectPointOnMesh.h>
 
+#if defined USE_MOBIUS
+#include <mobius/cascade.h>
+using namespace mobius;
+#endif
+
 //-----------------------------------------------------------------------------
 
 asiAlgo_CheckDeviations::asiAlgo_CheckDeviations(const Handle(asiAlgo_BaseCloud<double>)& points,
@@ -52,9 +57,9 @@ bool asiAlgo_CheckDeviations::Perform(const TopoDS_Shape& part)
   m_progress.SetMessageKey("Merge facets");
 
   // Merge facets.
-  asiAlgo_MeshMerge meshMerge(part);
+  asiAlgo_MeshMerge meshMerge(part, asiAlgo_MeshMerge::Mode_MobiusMesh);
   //
-  m_result.triangulation = meshMerge.GetResultPoly()->GetTriangulation();
+  m_result.triangulation = meshMerge.GetMobiusMesh();
 
   return this->internalPerform();
 }
@@ -63,7 +68,7 @@ bool asiAlgo_CheckDeviations::Perform(const TopoDS_Shape& part)
 
 bool asiAlgo_CheckDeviations::Perform(const Handle(Poly_Triangulation)& tris)
 {
-  m_result.triangulation = tris;
+  m_result.triangulation = cascade::GetMobiusMesh(tris);
 
   return this->internalPerform();
 }
@@ -112,7 +117,7 @@ bool asiAlgo_CheckDeviations::internalPerform()
       maxScalarIdx = k;
     }
 
-    // Get effective facet. The returned facet index is the 1-based index of
+    // Get effective facet. The returned facet index is the 0-based index of
     // a triangle in the merged triangulation from part.
     const int facetInd = pointToMesh.GetFacetIds().size() ? pointToMesh.GetFacetIds()[0] : -1;
     //
@@ -133,15 +138,17 @@ bool asiAlgo_CheckDeviations::internalPerform()
     const int triangleId = facet.FaceIndex;
 
     // Get indices of nodes.
-    const Poly_Triangle& triangle = m_result.triangulation->Triangle(triangleId);
+    poly_Triangle triangle;
+    if ( !m_result.triangulation->GetTriangle(poly_TriangleHandle(triangleId), triangle) || triangle.IsDeleted() )
+      continue;
     //
-    int n1, n2, n3;
-    triangle.Get(n1, n2, n3);
+    poly_VertexHandle n1, n2, n3;
+    triangle.GetVertices(n1, n2, n3);
 
     // Store scalars in the field.
-    field->data.Bind(n1, sd);
-    field->data.Bind(n2, sd);
-    field->data.Bind(n3, sd);
+    field->data.Bind(n1.iIdx, sd);
+    field->data.Bind(n2.iIdx, sd);
+    field->data.Bind(n3.iIdx, sd);
 
     // Progress notifier.
     m_progress.StepProgress(1);
