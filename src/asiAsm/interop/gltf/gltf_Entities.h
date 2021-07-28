@@ -161,14 +161,13 @@ public:
     ByteStride    (0),
     Type          (gltf_AccessorLayout_UNKNOWN),
     ComponentType (gltf_AccessorComponentType_UNKNOWN) {}
-
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF enumeration defining Primitive type.
 //! Similar to Graphic3d_TypeOfData but does not define actual type and includes matrices.
-enum gltf_PrimitiveMode
+enum class gltf_PrimitiveMode
 {
   gltf_PrimitiveMode_UNKNOWN       = -1, //!< unknown or invalid type
   gltf_PrimitiveMode_Points        =  0, //!< GL_POINTS
@@ -178,17 +177,6 @@ enum gltf_PrimitiveMode
   gltf_PrimitiveMode_Triangles     =  4, //!< GL_TRIANGLES
   gltf_PrimitiveMode_TriangleStrip =  5, //!< GL_TRIANGLE_STRIP
   gltf_PrimitiveMode_TriangleFan   =  6  //!< GL_TRIANGLE_FAN
-};
-
-//-----------------------------------------------------------------------------
-
-//! Low-level glTF data structure holding single Face (one primitive array) definition.
-struct gltf_Face
-{
-  gltf_Accessor NodePos;  //!< accessor for nodal positions
-  gltf_Accessor NodeNorm; //!< accessor for nodal normals
-  gltf_Accessor NodeUV;   //!< accessor for nodal UV texture coordinates
-  gltf_Accessor Indices;  //!< accessor for indexes
 };
 
 //-----------------------------------------------------------------------------
@@ -310,7 +298,6 @@ public:
     }
     return 0;
   }
-
 };
 
 //-----------------------------------------------------------------------------
@@ -362,7 +349,6 @@ struct gltf_MaterialCommon
         && other.Shininess       == this->Shininess
         && other.Transparency    == this->Transparency;
   }
-
 };
 
 //-----------------------------------------------------------------------------
@@ -419,7 +405,6 @@ struct gltf_MaterialPbr
         && other.Roughness                == this->Roughness
         && other.RefractionIndex          == this->RefractionIndex;
   }
-
 };
 
 } // xde

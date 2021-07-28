@@ -15,13 +15,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_XdeWriter_HeaderFiler
-#define gltf_XdeWriter_HeaderFiler
+#ifndef gltf_Writer_HeaderFiler
+#define gltf_Writer_HeaderFiler
 
 // glTF includes
 #include <gltf_CSysConverter.h>
-#include <gltf_Entities.h>
 #include <gltf_XdeVisualStyle.h>
+#include <gltf_IDataSourceProvider.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -31,6 +31,7 @@
 #include <TColStd_MapOfAsciiString.hxx>
 #include <TDF_LabelSequence.hxx>
 #include <TopTools_ShapeMapHasher.hxx>
+#include <TopoDS_Edge.hxx>
 
 // Include for shared_ptr
 #include <memory>
@@ -41,13 +42,10 @@
 class TDocStd_Document;
 class XCAFDoc_ShapeTool;
 
-//-----------------------------------------------------------------------------
-
 namespace asiAsm {
 namespace xde {
 
 // Forward declarations from the `asiAsm` namespace.
-class gltf_FaceIterator;
 class gltf_MaterialMap;
 
 //! Writes the passed XDE document to glTF/glb format. All B-rep shapes in the
@@ -72,12 +70,13 @@ class gltf_MaterialMap;
 //! 3) The original version of glTF writer in OpenCascade is too coupled with the
 //!    rest of OpenCascade kernel. This version is our attempt to make it more
 //!    compact in its code base.
-class gltfWriter : public ActAPI_IAlgorithm
+//! To know more about glTF format follow this: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_001_Introduction.md
+class gltf_Writer : public ActAPI_IAlgorithm
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltfWriter, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(gltf_Writer, ActAPI_IAlgorithm)
 
 public:
 
@@ -88,45 +87,16 @@ public:
   //! \param[in] progress the progress notifier.
   //! \param[in] plotter  the imperative plotter.
   gltf_EXPORT
-    gltfWriter(const TCollection_AsciiString& filename,
+    gltf_Writer(const TCollection_AsciiString& filename,
                const bool                     isBinary,
                ActAPI_ProgressEntry           progress = nullptr,
                ActAPI_PlotterEntry            plotter  = nullptr);
 
   //! Dtor.
   gltf_EXPORT virtual
-    ~gltfWriter();
+    ~gltf_Writer();
 
 public:
-
-  //! Writes glTF file and its associated binary file.
-  //! Triangulation data should be precomputed within shapes.
-  //! You can pass additional metadata as `fileInfo`. It will
-  //! be expanded to the `extras` object under `asset` entity:
-  //!
-  //!  "asset": {
-  //!    "generator": "XXX",
-  //!    "version": "2.0",
-  //!      "extras": {
-  //!        "Author": "STEP Inspector",
-  //!        "Organization": "YYY"
-  //!      }
-  //!  }
-  //!
-  //! \param[in] doc       the input XDE document.
-  //! \param[in] rootLabs  the list of root shapes to export.
-  //! \param[in] labFilter the optional filter with document nodes to export,
-  //!                      with keys defined by XCAFPrs_DocumentExplorer::DefineChildId() and filled recursively
-  //!                      (leaves and parent assembly nodes at all levels);
-  //!                      when not NULL, all nodes not included into the map will be ignored.
-  //! \param[in] fileInfo  the map with file metadata to put into glTF header section.
-  //!
-  //! \return true in case of success, false -- otherwise.
-  gltf_EXPORT virtual bool
-    Perform(const Handle(TDocStd_Document)&             doc,
-            const TDF_LabelSequence&                    rootLabs,
-            const TColStd_MapOfAsciiString*             labFilter,
-            const TColStd_IndexedDataMapOfStringString& fileInfo = TColStd_IndexedDataMapOfStringString());
 
   //! Writes glTF file and associated binary file.
   //! Triangulation data should be precomputed within shapes.
@@ -142,12 +112,12 @@ public:
   //!      }
   //!  }
   //!
-  //! \param[in] doc       the input XDE document.
-  //! \param[in] fileInfo  the map with file metadata to put into glTF header section.
+  //! \param[in] dataProvider       the input data source provider feeding glTF writer with scene structure and nodes content.
+  //! \param[in] fileInfo           the map with file metadata to put into glTF header section.
   //!
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
-    Perform(const Handle(TDocStd_Document)&             doc,
+    Perform(const Handle(gltf_IDataSourceProvider)& dataProvider,
             const TColStd_IndexedDataMapOfStringString& fileInfo = TColStd_IndexedDataMapOfStringString());
 
 public:
@@ -203,107 +173,76 @@ protected:
 
   //! Writes binary data file with triangulation data.
   //! Triangulation data should be precomputed within shapes.
-  //! \param[in] doc       input document.
-  //! \param[in] rootLabs  list of root shapes to export.
-  //! \param[in] labFilter optional filter with document nodes to export.
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
-    writeBinData(const Handle(TDocStd_Document)& doc,
-                 const TDF_LabelSequence&        rootLabs,
-                 const TColStd_MapOfAsciiString* labFilter);
+    writeBinData();
 
   //! Writes JSON file with glTF structure (should be called after `writeBinData()`).
-  //! \param[in] doc       input document.
-  //! \param[in] rootLabs  list of root shapes to export.
-  //! \param[in] labFilter optional filter with document nodes to export.
   //! \param[in] fileInfo  extras for the JSON's header section.
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
-    writeJson(const Handle(TDocStd_Document)&             doc,
-              const TDF_LabelSequence&                    rootLabs,
-              const TColStd_MapOfAsciiString*             labFilter,
-              const TColStd_IndexedDataMapOfStringString& fileInfo);
+    writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo);
 
 protected:
 
-  //! Returns true if the current face should be skipped because it's empty.
-  //! \param[in] faceIter the face currently iterated over.
-  //! \return true/false.
-  gltf_EXPORT virtual bool
-    toSkipFaceMesh(const gltf_FaceIterator& faceIter);
-
   //! Writes mesh nodes into binary file.
-  //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
-  //! \param[in]     faceIter   current face to write.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    saveNodes(gltf_Face&               gltfFace,
-              std::ostream&            binFile,
-              const gltf_FaceIterator& faceIter,
-              int&                     accessorNb) const;
+    writeBinDataNodes(std::ostream&            binFile,
+                      int&                     accessorNb) const;
 
   //! Writes mesh normals into binary file.
-  //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
-  //! \param[in]     faceIter   current face to write.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    saveNormals(gltf_Face&         gltfFace,
-                std::ostream&      binFile,
-                gltf_FaceIterator& faceIter,
-                int&               accessorNb) const;
+    writeBinDataNormals(std::ostream&      binFile,
+                        int&               accessorNb) const;
 
   //! Writes mesh texture UV coordinates into binary file.
-  //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
-  //! \param[in]     faceIter   current face to write.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    saveTextCoords(gltf_Face&               gltfFace,
-                   std::ostream&            binFile,
-                   const gltf_FaceIterator& faceIter,
-                   int&                     accessorNb) const;
+    writeBinDataTextCoords(std::ostream&            binFile,
+                           int&                     accessorNb) const;
 
-  //! Writes meshs indexes into binary file.
+  //! Writes meshes indexes into binary file.
   //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
   //! \param[in]     faceIter   current face to write.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    saveIndices(gltf_Face&               gltfFace,
-                std::ostream&            binFile,
-                const gltf_FaceIterator& faceIter,
-                int&                     accessorNb);
+    writeBinDataIndices(std::ostream&            binFile,
+                        int&                     accessorNb);
 
 protected:
 
   //! Writes bufferView for vertex positions within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writePositions(const gltf_Face& gltfFace);
+    writePositions(const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for vertex normals within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNormals(const gltf_Face& gltfFace);
+    writeNormals(const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for vertex texture coordinates within "accessors" section
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeTextCoords (const gltf_Face& gltfFace);
+    writeTextCoords (const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for triangle indexes within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeIndices(const gltf_Face& gltfFace);
+    writeIndices(const gltf_Primitive& gltfPrm);
 
 protected:
 
   //! Writes "accessors" section.
   //! \param[in] scNodeMap ordered map of scene nodes
   gltf_EXPORT virtual void
-    writeAccessors(const gltf_SceneNodeMap& scNodeMap);
+    writeAccessors();
 
   //! Writes "animations" section (reserved).
   gltf_EXPORT virtual void
@@ -328,38 +267,23 @@ protected:
     writeExtensions();
 
   //! Writes "images" section.
-  //! \param[in] scNodeMap    ordered map of scene nodes.
   //! \param[out] materialMap map of materials, filled with image files used by textures.
   gltf_EXPORT virtual void
-    writeImages(const gltf_SceneNodeMap& scNodeMap,
-                gltf_MaterialMap&        materialMap);
+    writeImages(gltf_MaterialMap&        materialMap);
 
   //! Writes "materials" section.
-  //! \param[in]  scNodeMap   ordered map of scene nodes.
   //! \param[out] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMaterials(const gltf_SceneNodeMap& scNodeMap,
-                   gltf_MaterialMap&        materialMap);
+    writeMaterials(gltf_MaterialMap&        materialMap);
 
   //! Writes "meshes" section.
-  //! \param[in] scNodeMap   ordered map of scene nodes.
   //! \param[in] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMeshes(const gltf_SceneNodeMap& scNodeMap,
-                const gltf_MaterialMap&  materialMap);
+    writeMeshes(const gltf_MaterialMap&  materialMap);
 
   //! Writes "nodes" section for the scene nodes.
-  //! \param[in]  doc       input document.
-  //! \param[in]  rootLabs  list of root shapes to export.
-  //! \param[in]  labFilter optional filter with document nodes to export.
-  //! \param[in]  scNodeMap ordered map of scene nodes.
-  //! \param[out] scRootIds sequence of scene nodes pointing to root shapes (to be used for `writeScenes()`).
   gltf_EXPORT virtual void
-    writeNodes(const Handle(TDocStd_Document)&  doc,
-               const TDF_LabelSequence&         rootLabs,
-               const TColStd_MapOfAsciiString*  labFilter,
-               const gltf_SceneNodeMap&         scNodeMap,
-               NCollection_Sequence<int>&       scRootIds);
+    writeNodes();
 
   //! Writes "samplers" section.
   //! \param[in] materialMap map of materials.
@@ -374,23 +298,18 @@ protected:
   //! Writes "scenes" section.
   //! \param[in] scRootIds sequence of scene nodes pointing to root shapes.
   gltf_EXPORT virtual void
-    writeScenes(const NCollection_Sequence<int>& scRootIds);
+    writeScenes(/*const NCollection_Sequence<int>& scRootIds*/);
 
   //! Writes "skins" section (reserved).
   gltf_EXPORT virtual void
     writeSkins();
 
   //! Writes "textures" section.
-  //! \param[in]  scNodeMap   ordered map of scene nodes.
   //! \param[out] materialMap map of materials, filled with textures.
   gltf_EXPORT virtual void
-    writeTextures(const gltf_SceneNodeMap& scNodeMap,
-                  gltf_MaterialMap&        materialMap);
+    writeTextures(gltf_MaterialMap&        materialMap);
 
 protected:
-
-  typedef NCollection_DataMap<TopoDS_Shape, gltf_Face,
-                              TopTools_ShapeMapHasher> t_shapeFacetsMap;
 
   typedef std::shared_ptr<gltf_JsonSerializer> gltf_JsonSerializerPtr;
 
@@ -408,11 +327,10 @@ protected:
   gltf_BufferView           m_buffViewNorm;      //!< Current buffer view with nodes normals.
   gltf_BufferView           m_buffViewTextCoord; //!< Current buffer view with nodes UV coordinates.
   gltf_BufferView           m_buffViewInd;       //!< Current buffer view with triangulation indexes.
-  t_shapeFacetsMap          m_binDataMap;        //!< Map for TopoDS_Face to glTF face (merging duplicates).
   int64_t                   m_binDataLen64;      //!< Length of binary file.
 
+  Handle(gltf_IDataSourceProvider) m_dataProvider;
 };
-
 } // xde
 } // asiAsm
 

@@ -60,7 +60,8 @@
 #include <asiUI_XdeBrowser.h>
 
 // glTF includes
-#include <gltf_XdeWriter.h>
+#include <gltf_Writer.h>
+#include <gltf_XdeDataSourceProvider.h>
 
 // DF Browser includes
 #include <DFBrowser.hxx>
@@ -411,6 +412,9 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not provided.");
     return TCL_ERROR;
   }
+  //
+  TCollection_AsciiString ext = filename.c_str();
+  ext.LowerCase();
 
   // Get solid shape as currently glTF works only for solids.
   TopoDS_Shape partShape = partNode->GetShape();
@@ -471,8 +475,8 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   }
 
   // Export to glTF.
-  asiAsm::xde::gltfWriter cafWriter(TCollection_AsciiString( filename.c_str() ),
-                                    true, nullptr, nullptr);
+  asiAsm::xde::gltf_Writer cafWriter(TCollection_AsciiString( filename.c_str() ),
+                                    ext.EndsWith(".glb"), nullptr, nullptr);
   //
   cafWriter.SetTransformationFormat(asiAsm::xde::gltf_WriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);
@@ -485,7 +489,8 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   fileInfo.Add("Author", "Analysis Situs");
   fileInfo.Add("Organization", "Analysis Situs");
 
-  if ( !cafWriter.Perform(xdeDoc->GetDocument(), fileInfo) )
+  Handle(asiAsm::xde::gltf_XdeDataSourceProvider) dataProvider = new asiAsm::xde::gltf_XdeDataSourceProvider(xdeDoc->GetDocument());
+  if ( !cafWriter.Perform(dataProvider, fileInfo) )
   {
     xdeDoc->Release();
     return false;

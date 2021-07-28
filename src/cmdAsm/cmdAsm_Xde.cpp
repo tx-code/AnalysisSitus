@@ -44,7 +44,8 @@
 #include <asiEngine_Part.h>
 
 // glTF includes
-#include <gltf_XdeWriter.h>
+#include <gltf_Writer.h>
+#include <gltf_XdeDataSourceProvider.h>
 
 // FBX includes
 #include <fbx_XdeWriter.h>
@@ -857,7 +858,7 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  gltfWriter cafWriter( filename,
+  gltf_Writer cafWriter( filename,
                         ext.EndsWith(".glb"),
                         interp->GetProgress(),
                         interp->GetPlotter() );
@@ -869,7 +870,8 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
   cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(gltf_CoordinateSystem_Zup);
 
-  if ( !cafWriter.Perform( doc->GetDocument() ) )
+  Handle(gltf_XdeDataSourceProvider) dataProvider = new gltf_XdeDataSourceProvider(doc->GetDocument());
+  if ( !cafWriter.Perform(dataProvider) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "glTF export failed.");
     return TCL_ERROR;

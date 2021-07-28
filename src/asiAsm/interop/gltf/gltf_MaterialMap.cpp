@@ -143,7 +143,7 @@ void gltf_MaterialMap::AddMaterial(gltf_JsonSerializer*       theWriter,
 #if defined USE_RAPIDJSON
   if (theWriter == NULL
    || ((theStyle.GetMaterial().IsNull() || theStyle.GetMaterial()->IsEmpty())
-    && !theStyle.IsSetColorSurf()))
+    && !(theStyle.IsSetColorSurf() || theStyle.IsSetColorCurve())))
   {
     return;
   }
@@ -276,6 +276,10 @@ void gltf_MaterialMap::DefineMaterial(const gltf_XdeVisualStyle& theStyle,
     {
       aPbrMat.BaseColor.SetAlpha (theStyle.GetColorSurfRGBA().Alpha());
     }
+  }
+  else if (theStyle.IsSetColorCurve())
+  {
+    aPbrMat.BaseColor.SetRGB(theStyle.GetColorCurve());
   }
   myWriter->StartObject();
   {
