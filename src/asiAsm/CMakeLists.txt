@@ -56,22 +56,28 @@ set (interop_CPP_FILES
 set (interop_gltf_H_FILES
   interop/gltf/gltf_CSysConverter.h
   interop/gltf/gltf_Entities.h
-  interop/gltf/gltf_FaceIterator.h
   interop/gltf/gltf_JsonSerializer.h
   interop/gltf/gltf_MaterialAttr.h
   interop/gltf/gltf_MaterialMap.h
   interop/gltf/gltf_MaterialMapBase.h
   interop/gltf/gltf_XdeVisualStyle.h
-  interop/gltf/gltf_XdeWriter.h
+  interop/gltf/gltf_Writer.h
+  interop/gltf/gltf_Primitive.h
+  interop/gltf/gltf_SceneStructure.h 
+  interop/gltf/gltf_FacePropertyExtractor.h
+  interop/gltf/gltf_IDataSourceProvider.h
+  interop/gltf/gltf_XdeDataSourceProvider.h
 )
 set (interop_gltf_CPP_FILES
   interop/gltf/gltf_CSysConverter.cpp
-  interop/gltf/gltf_FaceIterator.cpp
   interop/gltf/gltf_MaterialAttr.cpp
   interop/gltf/gltf_MaterialMap.cpp
   interop/gltf/gltf_MaterialMapBase.cpp
   interop/gltf/gltf_XdeVisualStyle.cpp
-  interop/gltf/gltf_XdeWriter.cpp
+  interop/gltf/gltf_Writer.cpp
+  interop/gltf/gltf_SceneStructure.cpp
+  interop/gltf/gltf_FacePropertyExtractor.cpp
+  interop/gltf/gltf_XdeDataSourceProvider.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -16,14 +16,15 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_XdeWriter.h>
+#include <gltf_Writer.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
 
 // glTF includes
-#include <gltf_FaceIterator.h>
 #include <gltf_MaterialMap.h>
+#include <gltf_FacePropertyExtractor.h>
+
 //
 #if defined USE_RAPIDJSON
   #include <gltf_JsonSerializer.h>
@@ -41,7 +42,8 @@
 #include <TDocStd_Document.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
-#include <XCAFPrs_DocumentExplorer.hxx>
+#include <XCAFPrs.hxx>
+#include <XCAFPrs_IndexedDataMapOfShapeStyle.hxx>
 
 // Rapidjson includes
 #if defined USE_RAPIDJSON
@@ -89,45 +91,11 @@ namespace
   {
     stream.write( (const char*) tri.GetData(), sizeof(tri) );
   }
-
-#if defined USE_RAPIDJSON
-  //! Reads name attribute.
-  static TCollection_AsciiString readNameAttribute(const Handle(XCAFDoc_ShapeTool)& ST,
-                                                   const TDF_Label&                 refLabel,
-                                                   const bool                       usePrototypeNames = false)
-  {
-    TDF_Label lab;
-
-    if ( usePrototypeNames )
-    {
-      if ( ST->IsReference(refLabel) )
-      {
-        ST->GetReferredShape(refLabel, lab);
-      }
-      else
-      {
-        lab = refLabel;
-      }
-    }
-    else
-    {
-      lab = refLabel;
-    }
-
-    Handle(TDataStd_Name) nodeName;
-    //
-    if ( !lab.FindAttribute(TDataStd_Name::GetID(), nodeName) )
-    {
-      return TCollection_AsciiString();
-    }
-    return TCollection_AsciiString( nodeName->Get() );
-  }
-#endif
 }
 
 //-----------------------------------------------------------------------------
 
-gltfWriter::gltfWriter(const TCollection_AsciiString& filename,
+gltf_Writer::gltf_Writer(const TCollection_AsciiString& filename,
                        const bool                     isBinary,
                        ActAPI_ProgressEntry           progress,
                        ActAPI_PlotterEntry            plotter)
@@ -151,197 +119,158 @@ gltfWriter::gltfWriter(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
-gltfWriter::~gltfWriter()
+gltf_Writer::~gltf_Writer()
 {
   m_jsonWriter.reset();
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::toSkipFaceMesh(const gltf_FaceIterator& faceIter)
+void gltf_Writer::writeBinDataNodes(std::ostream&           binFile,
+                                   int&                     accessorNb) const
 {
-  return faceIter.IsEmptyMesh();
-}
-
-//-----------------------------------------------------------------------------
-
-void gltfWriter::saveNodes(gltf_Face&               gltfFace,
-                           std::ostream&            binFile,
-                           const gltf_FaceIterator& faceIter,
-                           int&                     accessorNb) const
-{
-  gltfFace.NodePos.Id            = accessorNb++;
-  gltfFace.NodePos.Count         = faceIter.NbNodes();
-  gltfFace.NodePos.ByteOffset    = (int64_t) binFile.tellp() - m_buffViewPos.ByteOffset;
-  gltfFace.NodePos.Type          = gltf_AccessorLayout_Vec3;
-  gltfFace.NodePos.ComponentType = gltf_AccessorComponentType_Float32;
-
-  const int nodeUpper = faceIter.NodeUpper();
-  //
-  for ( int nit = faceIter.NodeLower(); nit <= nodeUpper; ++nit )
+  t_Meshes2Primitives::Iterator itNodes2Primitives (m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    gp_XYZ node = faceIter.NodeTransformed(nit).XYZ();
-    m_CSTrsf.TransformPosition(node);
-    gltfFace.NodePos.BndBox.Add( Graphic3d_Vec3d( node.X(), node.Y(), node.Z() ) );
-    writeVec3(binFile, node);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void gltfWriter::saveNormals(gltf_Face&         gltfFace,
-                             std::ostream&      binFile,
-                             gltf_FaceIterator& faceIter,
-                             int&               accessorNb) const
-{
-  if ( !faceIter.HasNormals() )
-  {
-    return;
-  }
-
-  gltfFace.NodeNorm.Id            = accessorNb++;
-  gltfFace.NodeNorm.Count         = faceIter.NbNodes();
-  gltfFace.NodeNorm.ByteOffset    = (int64_t) binFile.tellp() - m_buffViewNorm.ByteOffset;
-  gltfFace.NodeNorm.Type          = gltf_AccessorLayout_Vec3;
-  gltfFace.NodeNorm.ComponentType = gltf_AccessorComponentType_Float32;
-
-  const int nodeUpper = faceIter.NodeUpper();
-  //
-  for ( int nit = faceIter.NodeLower(); nit <= nodeUpper; ++nit )
-  {
-    const gp_Dir norm = faceIter.NormalTransformed(nit);
-    Graphic3d_Vec3 vecNormal( (float) norm.X(), (float) norm.Y(), (float) norm.Z() );
-    m_CSTrsf.TransformNormal(vecNormal);
-    writeVec3(binFile, vecNormal);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void gltfWriter::saveTextCoords(gltf_Face&               gltfFace,
-                                std::ostream&            binFile,
-                                const gltf_FaceIterator& faceIter,
-                                int&                     accessorNb) const
-{
-  if ( !faceIter.HasTexCoords() )
-  {
-    return;
-  }
-  if ( !m_bIsForcedUVExport )
-  {
-    if ( faceIter.FaceStyle().GetMaterial().IsNull() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      return;
-    }
+      itPrm.ChangeValue().NodePos.Id = accessorNb++;
+      itPrm.ChangeValue().NodePos.ByteOffset = (int64_t)binFile.tellp() - m_buffViewPos.ByteOffset;
 
-    if ( gltf_MaterialMap::baseColorTexture( faceIter.FaceStyle().GetMaterial() ).IsNull()
-     && faceIter.FaceStyle().GetMaterial()->PbrMaterial().MetallicRoughnessTexture.IsNull()
-     && faceIter.FaceStyle().GetMaterial()->PbrMaterial().EmissiveTexture.IsNull()
-     && faceIter.FaceStyle().GetMaterial()->PbrMaterial().OcclusionTexture.IsNull()
-     && faceIter.FaceStyle().GetMaterial()->PbrMaterial().NormalTexture.IsNull())
-    {
-      return;
-    }
-  }
-
-  gltfFace.NodeUV.Id            = accessorNb++;
-  gltfFace.NodeUV.Count         = faceIter.NbNodes();
-  gltfFace.NodeUV.ByteOffset    = (int64_t) binFile.tellp() - m_buffViewTextCoord.ByteOffset;
-  gltfFace.NodeUV.Type          = gltf_AccessorLayout_Vec2;
-  gltfFace.NodeUV.ComponentType = gltf_AccessorComponentType_Float32;
-
-  const int nodeUpper = faceIter.NodeUpper();
-  //
-  for ( int nit = faceIter.NodeLower(); nit <= nodeUpper; ++nit )
-  {
-    gp_Pnt2d texCoord = faceIter.NodeTexCoord(nit);
-    texCoord.SetY( 1.0 - texCoord.Y() );
-    writeVec2( binFile, texCoord.XY() );
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void gltfWriter::saveIndices(gltf_Face&               gltfFace,
-                             std::ostream&            binFile,
-                             const gltf_FaceIterator& faceIter,
-                             int&                     accessorNb)
-{
-  gltfFace.Indices.Id            = accessorNb++;
-  gltfFace.Indices.Count         = faceIter.NbTriangles() * 3;
-  gltfFace.Indices.ByteOffset    = (int64_t) binFile.tellp() - m_buffViewInd.ByteOffset;
-  gltfFace.Indices.Type          = gltf_AccessorLayout_Scalar;
-  gltfFace.Indices.ComponentType = gltfFace.NodePos.Count > std::numeric_limits<uint16_t>::max()
-                                    ? gltf_AccessorComponentType_UInt32
-                                    : gltf_AccessorComponentType_UInt16;
-
-  const int elemLower = faceIter.ElemLower();
-  const int elemUpper = faceIter.ElemUpper();
-  //
-  for ( int eit = elemLower; eit <= elemUpper; ++eit )
-  {
-    Poly_Triangle tri = faceIter.TriangleOriented (eit);
-    tri(1) -= elemLower;
-    tri(2) -= elemLower;
-    tri(3) -= elemLower;
-
-    if ( gltfFace.Indices.ComponentType == gltf_AccessorComponentType_UInt16 )
-    {
-      writeTriangle16( binFile,
-                       NCollection_Vec3<uint16_t>( (uint16_t) tri(1),
-                                                   (uint16_t) tri(2),
-                                                   (uint16_t) tri(3) ) );
-    }
-    else
-    {
-      writeTriangle32( binFile, Graphic3d_Vec3i( tri(1), tri(2), tri(3) ) );
-    }
-  }
-  if ( gltfFace.Indices.ComponentType == gltf_AccessorComponentType_UInt16 )
-  {
-    // alignment by 4 bytes
-    int64_t contentLen64 = (int64_t) binFile.tellp();
-    //
-    while ( contentLen64 % 4 != 0 )
-    {
-      binFile.write(" ", 1);
-      ++contentLen64;
+      NCollection_Vector<gp_XYZ>::Iterator itNodes(itPrm.Value().MeshNodes);
+      for (; itNodes.More(); itNodes.Next())
+      {
+        gp_XYZ& node = itNodes.ChangeValue();
+        //gp_XYZ node(itNodes.Value());
+        m_CSTrsf.TransformPosition(node);
+        itPrm.ChangeValue().NodePos.BndBox.Add(Graphic3d_Vec3d(node.X(), node.Y(), node.Z()));
+        writeVec3(binFile, node);
+      }
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::Perform(const Handle(TDocStd_Document)&             doc,
+void gltf_Writer::writeBinDataNormals(std::ostream&      binFile,
+                                     int&               accessorNb) const
+{
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
+  {
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
+    {
+      if (itPrm.Value().Normals.Size() == 0)
+        continue;
+
+      itPrm.ChangeValue().NodeNorm.Id = accessorNb++;
+      itPrm.ChangeValue().NodeNorm.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNorm.ByteOffset;
+      NCollection_Vector<Graphic3d_Vec3>::Iterator itNormals(itPrm.Value().Normals);
+      for (; itNormals.More(); itNormals.Next())
+      {
+        //Graphic3d_Vec3 vecNormal(itNormals.Value());
+        m_CSTrsf.TransformNormal(itNormals.ChangeValue());
+        writeVec3(binFile, itNormals.Value());
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
+                                        int&                     accessorNb) const
+{
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
+  {
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
+    {
+      if (itPrm.Value().Textures.Size() == 0)
+        continue;
+
+      itPrm.ChangeValue().NodeUV.Id = accessorNb++;
+      itPrm.ChangeValue().NodeUV.ByteOffset = (int64_t)binFile.tellp() - m_buffViewTextCoord.ByteOffset;
+      NCollection_Vector<gp_Pnt2d>::Iterator itTextures(itPrm.Value().Textures);
+      for (; itTextures.More(); itTextures.Next())
+      {
+        writeVec2(binFile, itTextures.Value().XY());
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
+                                     int&             accessorNb)
+{
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
+  {
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
+    {
+      if (itPrm.Value().Triangles.Size() == 0)
+        continue;
+
+      itPrm.ChangeValue().Indices.Id = accessorNb++;
+      itPrm.ChangeValue().Indices.ByteOffset = (int64_t)binFile.tellp() - m_buffViewInd.ByteOffset;
+      NCollection_Vector<Poly_Triangle>::Iterator itTriangles(itPrm.Value().Triangles);
+      for (; itTriangles.More(); itTriangles.Next())
+      {
+        Poly_Triangle tri = itTriangles.Value();
+        if (itPrm.Value().Indices.ComponentType == gltf_AccessorComponentType_UInt16)
+        {
+          writeTriangle16(binFile,
+            NCollection_Vec3<uint16_t>((uint16_t)tri(1),
+              (uint16_t)tri(2),
+              (uint16_t)tri(3)));
+        }
+        else
+        {
+          writeTriangle32(binFile, Graphic3d_Vec3i(tri(1), tri(2), tri(3)));
+        }
+      }
+      if (itPrm.Value().Indices.ComponentType == gltf_AccessorComponentType_UInt16)
+      {
+        // alignment by 4 bytes
+        int64_t contentLen64 = (int64_t)binFile.tellp();
+        //
+        while (contentLen64 % 4 != 0)
+        {
+          binFile.write(" ", 1);
+          ++contentLen64;
+        }
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool gltf_Writer::Perform(const Handle(gltf_IDataSourceProvider)&     dataProvider,
                          const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
-  TDF_LabelSequence rootLabs;
-  m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
-  m_shapeTool->GetFreeShapes(rootLabs);
+  if (dataProvider.IsNull() )
+    return false;
+  
+  m_dataProvider = dataProvider;
+  m_dataProvider->Process(m_progress);
 
-  return this->Perform(doc, rootLabs, nullptr, fileInfo);
-}
-
-//-----------------------------------------------------------------------------
-
-bool gltfWriter::Perform(const Handle(TDocStd_Document)&             doc,
-                         const TDF_LabelSequence&                    rootLabs,
-                         const TColStd_MapOfAsciiString*             labFilter,
-                         const TColStd_IndexedDataMapOfStringString& fileInfo)
-{
-  if ( m_shapeTool.IsNull() )
-    m_shapeTool = XCAFDoc_DocumentTool::ShapeTool( doc->Main() );
-
-  if ( !this->writeBinData(doc, rootLabs, labFilter) )
+  if ( !this->writeBinData() )
     return false;
 
-  return this->writeJson(doc, rootLabs, labFilter, fileInfo);
+  return this->writeJson(fileInfo);
 }
 
 //-----------------------------------------------------------------------------
 
 const gltf_CSysConverter&
-  gltfWriter::CoordinateSystemConverter() const
+  gltf_Writer::CoordinateSystemConverter() const
 {
   return m_CSTrsf;
 }
@@ -349,21 +278,21 @@ const gltf_CSysConverter&
 //-----------------------------------------------------------------------------
 
 gltf_CSysConverter&
-  gltfWriter::ChangeCoordinateSystemConverter()
+  gltf_Writer::ChangeCoordinateSystemConverter()
 {
   return m_CSTrsf;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::SetCoordinateSystemConverter(const gltf_CSysConverter& converter)
+void gltf_Writer::SetCoordinateSystemConverter(const gltf_CSysConverter& converter)
 {
   m_CSTrsf = converter;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::IsBinary() const
+bool gltf_Writer::IsBinary() const
 {
   return m_bIsBinary;
 }
@@ -371,28 +300,28 @@ bool gltfWriter::IsBinary() const
 //-----------------------------------------------------------------------------
 
 gltf_WriterTrsfFormat
-  gltfWriter::TransformationFormat() const
+  gltf_Writer::TransformationFormat() const
 {
   return m_trsfFormat;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::SetTransformationFormat(const gltf_WriterTrsfFormat fmt)
+void gltf_Writer::SetTransformationFormat(const gltf_WriterTrsfFormat fmt)
 {
   m_trsfFormat = fmt;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::IsForcedUVExport() const
+bool gltf_Writer::IsForcedUVExport() const
 {
   return m_bIsForcedUVExport;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::SetForcedUVExport(const bool toForce)
+void gltf_Writer::SetForcedUVExport(const bool toForce)
 {
   m_bIsForcedUVExport = toForce;
 }
@@ -400,23 +329,21 @@ void gltfWriter::SetForcedUVExport(const bool toForce)
 //-----------------------------------------------------------------------------
 
 const gltf_XdeVisualStyle&
-  gltfWriter::DefaultStyle() const
+  gltf_Writer::DefaultStyle() const
 {
   return m_defaultStyle;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::SetDefaultStyle(const gltf_XdeVisualStyle& style)
+void gltf_Writer::SetDefaultStyle(const gltf_XdeVisualStyle& style)
 {
   m_defaultStyle = style;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
-                              const TDF_LabelSequence&        rootLabs,
-                              const TColStd_MapOfAsciiString* labFilter)
+bool gltf_Writer::writeBinData()
 {
   m_buffViewPos.ByteOffset       = 0;
   m_buffViewPos.ByteLength       = 0;
@@ -434,7 +361,6 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
   m_buffViewInd.ByteLength       = 0;
   m_buffViewInd.Target           = gltf_BufferViewTarget_ELEMENT_ARRAY_BUFFER;
 
-  m_binDataMap.Clear();
   m_binDataLen64 = 0;
 
   std::ofstream binFile;
@@ -455,37 +381,15 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
 
   m_buffViewPos.ByteOffset = binFile.tellp();
   //
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes);
-        docExp.More(); docExp.Next() )
+
+  this->writeBinDataNodes(binFile, nbAccessors);
+
+  if (!binFile.good())
   {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( labFilter != nullptr && !labFilter->Contains(docNode.Id) )
-    {
-      continue;
-    }
-
-    // transformation will be stored at scene nodes
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
-    {
-      if ( m_binDataMap.IsBound( faceIter.Face() ) || this->toSkipFaceMesh(faceIter) )
-      {
-        continue;
-      }
-
-      gltf_Face gltfFace;
-      this->saveNodes(gltfFace, binFile, faceIter, nbAccessors);
-
-      if ( !binFile.good() )
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
-        return false;
-      }
-
-      m_binDataMap.Bind(faceIter.Face(), gltfFace);
-    }
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
+    return false;
   }
+
   m_buffViewPos.ByteLength = (int64_t) binFile.tellp() - m_buffViewPos.ByteOffset;
 
   /* ===============
@@ -493,40 +397,15 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
    * =============== */
 
   m_buffViewNorm.ByteOffset = binFile.tellp();
-  //
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes);
-        docExp.More(); docExp.Next() )
+
+  this->writeBinDataNormals(binFile, nbAccessors);
+
+  if (!binFile.good())
   {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( labFilter != nullptr && !labFilter->Contains(docNode.Id) )
-    {
-      continue;
-    }
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
-    {
-      if ( this->toSkipFaceMesh(faceIter) )
-      {
-        continue;
-      }
-
-      gltf_Face& gltfFace = m_binDataMap.ChangeFind( faceIter.Face() );
-      //
-      if ( gltfFace.NodeNorm.Id != gltf_Accessor::INVALID_ID )
-      {
-        continue;
-      }
-
-      this->saveNormals(gltfFace, binFile, faceIter, nbAccessors);
-
-      if ( !binFile.good() )
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
-        return false;
-      }
-    }
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
+    return false;
   }
+
   m_buffViewNorm.ByteLength = (int64_t) binFile.tellp() - m_buffViewNorm.ByteOffset;
 
   /* ===========================
@@ -534,41 +413,18 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
    * =========================== */
 
   m_buffViewTextCoord.ByteOffset = binFile.tellp();
-  //
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes);
-        docExp.More(); docExp.Next() )
+
+  if (!m_bIsForcedUVExport)
   {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( labFilter != nullptr && !labFilter->Contains(docNode.Id) )
-    {
-      continue;
-    }
-
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
-    {
-      if ( this->toSkipFaceMesh(faceIter) )
-      {
-        continue;
-      }
-
-      gltf_Face& gltfFace = m_binDataMap.ChangeFind( faceIter.Face() );
-      //
-      if ( gltfFace.NodeUV.Id != gltf_Accessor::INVALID_ID )
-      {
-        continue;
-      }
-
-      this->saveTextCoords(gltfFace, binFile, faceIter, nbAccessors);
-
-      if ( !binFile.good() )
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
-        return false;
-      }
-    }
+    this->writeBinDataTextCoords(binFile, nbAccessors);
   }
+
+  if (!binFile.good())
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
+    return false;
+  }
+
   m_buffViewTextCoord.ByteLength = (int64_t) binFile.tellp() - m_buffViewTextCoord.ByteOffset;
 
   /* ===============
@@ -576,40 +432,15 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
    * =============== */
 
   m_buffViewInd.ByteOffset = binFile.tellp();
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes);
-        docExp.More(); docExp.Next() )
+
+  this->writeBinDataIndices(binFile, nbAccessors);
+
+  if (!binFile.good())
   {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( labFilter != nullptr && !labFilter->Contains (docNode.Id) )
-    {
-      continue;
-    }
-
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
-    {
-      if ( this->toSkipFaceMesh(faceIter) )
-      {
-        continue;
-      }
-
-      gltf_Face& gltfFace = m_binDataMap.ChangeFind( faceIter.Face() );
-      //
-      if ( gltfFace.Indices.Id != gltf_Accessor::INVALID_ID )
-      {
-        continue;
-      }
-
-      this->saveIndices(gltfFace, binFile, faceIter, nbAccessors);
-
-      if ( !binFile.good() )
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
-        return false;
-      }
-    }
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
+    return false;
   }
+
   m_buffViewInd.ByteLength = (int64_t )binFile.tellp() - m_buffViewInd.ByteOffset;
 
   /* ==========
@@ -647,10 +478,7 @@ bool gltfWriter::writeBinData(const Handle(TDocStd_Document)& doc,
 
 //-----------------------------------------------------------------------------
 
-bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
-                           const TDF_LabelSequence&                    rootLabs,
-                           const TColStd_MapOfAsciiString*             labFilter,
-                           const TColStd_IndexedDataMapOfStringString& fileInfo)
+bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   m_jsonWriter.reset();
@@ -684,47 +512,6 @@ bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
     gltfContentFile.write( (const char*) &contentType,   sizeof(contentType)   );
   }
 
-  // Prepare an indexed map of scene nodes (without assemblies) in correct order.
-  // Note: this is also order of meshes in glTF document array.
-  gltf_SceneNodeMap scNodeMap;
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_OnlyLeafNodes);
-        docExp.More(); docExp.Next() )
-  {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( labFilter != nullptr && !labFilter->Contains(docNode.Id) )
-    {
-      continue;
-    }
-
-    bool hasMeshData = false;
-    if ( !docNode.IsAssembly )
-    {
-      for ( gltf_FaceIterator fit(docNode.RefLabel,
-                                  TopLoc_Location(),
-                                  true,
-                                  docNode.Style);
-            fit.More(); fit.Next() )
-      {
-        if ( !this->toSkipFaceMesh(fit) )
-        {
-          hasMeshData = true;
-          break;
-        }
-      }
-    }
-    if ( hasMeshData )
-    {
-      scNodeMap.Add(docNode);
-    }
-    else
-    {
-      // glTF does not permit empty meshes / primitive arrays.
-      m_progress.SendLogMessage( LogWarn(Normal) << "gltf_XdeWriter skips node '%1' without meshes."
-                                                 << ::readNameAttribute(m_shapeTool, docNode.RefLabel) );
-    }
-  }
-
   // Prepare material map.
   gltf_MaterialMap materialMap(m_filename, defSamplerId);
   materialMap.SetDefaultStyle(m_defaultStyle);
@@ -740,21 +527,21 @@ bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
   m_jsonWriter->StartObject();
   {
     // Write sections.
-    this->writeAccessors   (scNodeMap);
+    this->writeAccessors   ();
     this->writeAnimations  ();
     this->writeAsset       (fileInfo);
     this->writeBufferViews (binDatbufferId);
     this->writeBuffers     ();
     this->writeExtensions  ();
-    this->writeImages      (scNodeMap, materialMap);
-    this->writeMaterials   (scNodeMap, materialMap);
-    this->writeMeshes      (scNodeMap, materialMap);
-    this->writeNodes       (doc, rootLabs, labFilter, scNodeMap, scRootIds);
+    this->writeImages      (materialMap);
+    this->writeMaterials   (materialMap);
+    this->writeMeshes      (materialMap);
+    this->writeNodes       ();
     this->writeSamplers    (materialMap);
     this->writeScene       (defSceneId);
-    this->writeScenes      (scRootIds);
+    this->writeScenes      ();
     this->writeSkins       ();
-    this->writeTextures    (scNodeMap, materialMap);
+    this->writeTextures    (materialMap);
   }
   m_jsonWriter->EndObject();
 
@@ -839,9 +626,6 @@ bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
   return true;
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) doc;
-  (void) rootLabs;
-  (void) labFilter;
   (void) fileInfo;
 
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
@@ -852,7 +636,7 @@ bool gltfWriter::writeJson(const Handle(TDocStd_Document)&             doc,
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
+void gltf_Writer::writeAccessors()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAccessors()");
@@ -864,24 +648,14 @@ void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
    *  Write positions.
    * ================= */
 
-  NCollection_Map<TopoDS_Shape, TopTools_ShapeMapHasher> writtenFaces;
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      if ( !writtenFaces.Add( faceIter.Face() ) // skip repeated
-         || this->toSkipFaceMesh(faceIter) )    // ... or empty faces
-      {
-        continue;
-      }
-
-      const gltf_Face& gltfFace = m_binDataMap.Find( faceIter.Face() );
       //
-      this->writePositions(gltfFace);
+      this->writePositions(itPrm.Value());
     }
   }
 
@@ -889,24 +663,14 @@ void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
    *  Write normals.
    * =============== */
 
-  writtenFaces.Clear();
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      if ( !writtenFaces.Add(faceIter.Face() ) // skip repeated
-         || this->toSkipFaceMesh(faceIter) )   // ... or empty faces
-      {
-        continue;
-      }
-
-      const gltf_Face& gltfFace = m_binDataMap.Find( faceIter.Face() );
       //
-      this->writeNormals(gltfFace);
+      this->writeNormals(itPrm.Value());
     }
   }
 
@@ -914,24 +678,14 @@ void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
    *  Write texture coordinates.
    * =========================== */
 
-  writtenFaces.Clear();
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      if ( !writtenFaces.Add( faceIter.Face() ) // skip repeated
-         || this->toSkipFaceMesh(faceIter) )    // ... or empty faces
-      {
-        continue;
-      }
-
-      const gltf_Face& gltfFace = m_binDataMap.Find( faceIter.Face() );
       //
-      this->writeTextCoords(gltfFace);
+      this->writeTextCoords(itPrm.Value());
     }
   }
 
@@ -939,32 +693,21 @@ void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
    *  Write indices.
    * =============== */
 
-  writtenFaces.Clear();
   //
-  for ( gltf_SceneNodeMap::Iterator snIt (scNodeMap); snIt.More(); snIt.Next() )
+  for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
-    {
-      if ( !writtenFaces.Add( faceIter.Face() ) // skip repeated
-         || this->toSkipFaceMesh(faceIter) )    // ... or empty faces
-      {
-        continue;
-      }
+    NCollection_Vector<gltf_Primitive> primitives = itNodes2Primitives.Value();
 
-      const gltf_Face& gltfFace = m_binDataMap.Find(faceIter.Face());
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(primitives);
+    for (; itPrm.More(); itPrm.Next())
+    {
       //
-      this->writeIndices(gltfFace);
+      this->writeIndices(itPrm.Value());
     }
   }
 
   m_jsonWriter->EndArray();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scNodeMap;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -972,12 +715,12 @@ void gltfWriter::writeAccessors(const gltf_SceneNodeMap& scNodeMap)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writePositions(const gltf_Face& gltfFace)
+void gltf_Writer::writePositions(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writePositions()");
 
-  if ( gltfFace.NodePos.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.NodePos.Id == gltf_Accessor::INVALID_ID )
   {
     return;
   }
@@ -986,26 +729,26 @@ void gltfWriter::writePositions(const gltf_Face& gltfFace)
   m_jsonWriter->Key   ("bufferView");
   m_jsonWriter->Int   (m_buffViewPos.Id);
   m_jsonWriter->Key   ("byteOffset");
-  m_jsonWriter->Int64 (gltfFace.NodePos.ByteOffset);
+  m_jsonWriter->Int64 (gltfPrm.NodePos.ByteOffset);
   m_jsonWriter->Key   ("componentType");
-  m_jsonWriter->Int   (gltfFace.NodePos.ComponentType);
+  m_jsonWriter->Int   (gltfPrm.NodePos.ComponentType);
   m_jsonWriter->Key   ("count");
-  m_jsonWriter->Int64 (gltfFace.NodePos.Count);
+  m_jsonWriter->Int64 (gltfPrm.NodePos.Count);
 
-  if ( gltfFace.NodePos.BndBox.IsValid() )
+  if (gltfPrm.NodePos.BndBox.IsValid() )
   {
     m_jsonWriter->Key ("max");
     m_jsonWriter->StartArray();
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMax().x() );
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMax().y() );
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMax().z() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().x() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().y() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().z() );
     m_jsonWriter->EndArray();
 
     m_jsonWriter->Key("min");
     m_jsonWriter->StartArray();
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMin().x() );
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMin().y() );
-    m_jsonWriter->Double ( gltfFace.NodePos.BndBox.CornerMin().z() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().x() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().y() );
+    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().z() );
     m_jsonWriter->EndArray();
   }
   m_jsonWriter->Key    ("type");
@@ -1013,9 +756,6 @@ void gltfWriter::writePositions(const gltf_Face& gltfFace)
 
   m_jsonWriter->EndObject();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) gltfFace;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -1023,25 +763,23 @@ void gltfWriter::writePositions(const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeNormals(const gltf_Face& gltfFace)
+void gltf_Writer::writeNormals(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNormals()");
 
-  if ( gltfFace.NodeNorm.Id == gltf_Accessor::INVALID_ID )
-  {
+  if (gltfPrm.NodeNorm.Id == gltf_Accessor::INVALID_ID )
     return;
-  }
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
   m_jsonWriter->Int    (m_buffViewNorm.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfFace.NodeNorm.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.NodeNorm.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfFace.NodeNorm.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.NodeNorm.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfFace.NodeNorm.Count);
+  m_jsonWriter->Int64  (gltfPrm.NodeNorm.Count);
 
   /* min/max values are optional, and not very useful for normals - skip them */
 
@@ -1050,9 +788,6 @@ void gltfWriter::writeNormals(const gltf_Face& gltfFace)
 
   m_jsonWriter->EndObject();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) gltfFace;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -1060,25 +795,23 @@ void gltfWriter::writeNormals(const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeTextCoords(const gltf_Face& gltfFace)
+void gltf_Writer::writeTextCoords(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextCoords()");
 
-  if ( gltfFace.NodeUV.Id == gltf_Accessor::INVALID_ID )
-  {
+  if (gltfPrm.NodeUV.Id == gltf_Accessor::INVALID_ID )
     return;
-  }
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
   m_jsonWriter->Int    (m_buffViewTextCoord.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfFace.NodeUV.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.NodeUV.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfFace.NodeUV.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.NodeUV.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfFace.NodeUV.Count);
+  m_jsonWriter->Int64  (gltfPrm.NodeUV.Count);
 
   /* min/max values are optional, and not very useful for UV coordinates - skip them */
 
@@ -1087,9 +820,6 @@ void gltfWriter::writeTextCoords(const gltf_Face& gltfFace)
 
   m_jsonWriter->EndObject();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) gltfFace;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -1097,34 +827,29 @@ void gltfWriter::writeTextCoords(const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeIndices (const gltf_Face& gltfFace)
+void gltf_Writer::writeIndices (const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeIndices()");
 
-  if ( gltfFace.Indices.Id == gltf_Accessor::INVALID_ID )
-  {
+  if (gltfPrm.Indices.Id == gltf_Accessor::INVALID_ID )
     return;
-  }
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
   m_jsonWriter->Int    (m_buffViewInd.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfFace.Indices.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.Indices.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfFace.Indices.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.Indices.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfFace.Indices.Count);
+  m_jsonWriter->Int64  (gltfPrm.Indices.Count);
 
   m_jsonWriter->Key    ("type");
   m_jsonWriter->String ("SCALAR");
 
   m_jsonWriter->EndObject();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) gltfFace;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -1132,14 +857,14 @@ void gltfWriter::writeIndices (const gltf_Face& gltfFace)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeAnimations()
+void gltf_Writer::writeAnimations()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo)
+void gltf_Writer::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if (m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAsset()");
@@ -1180,7 +905,7 @@ void gltfWriter::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeBufferViews(const int binDataBufferId)
+void gltf_Writer::writeBufferViews(const int binDataBufferId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBufferViews()");
@@ -1258,7 +983,7 @@ void gltfWriter::writeBufferViews(const int binDataBufferId)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeBuffers()
+void gltf_Writer::writeBuffers()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBuffers()");
@@ -1288,15 +1013,14 @@ void gltfWriter::writeBuffers()
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeExtensions()
+void gltf_Writer::writeExtensions()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
-                             gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeImages(gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeImages()");
@@ -1304,14 +1028,13 @@ void gltfWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
   // empty section should NOT be written to avoid validator errors
   bool isStarted = false;
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      materialMap.AddImages(m_jsonWriter.get(), faceIter.FaceStyle(), isStarted);
+      materialMap.AddImages(m_jsonWriter.get(), itPrm.Value().Style, isStarted);
     }
   }
   if ( isStarted )
@@ -1320,7 +1043,6 @@ void gltfWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
   }
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scNodeMap;
   (void) materialMap;
 
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
@@ -1330,8 +1052,7 @@ void gltfWriter::writeImages(const gltf_SceneNodeMap& scNodeMap,
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeMaterials(const gltf_SceneNodeMap& scNodeMap,
-                                gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeMaterials(gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMaterials()");
@@ -1339,34 +1060,32 @@ void gltfWriter::writeMaterials(const gltf_SceneNodeMap& scNodeMap,
   // empty section should NOT be written to avoid validator errors
   bool isStarted = false;
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      materialMap.AddMaterial(m_jsonWriter.get(), faceIter.FaceStyle(), isStarted);
+      materialMap.AddMaterial(m_jsonWriter.get(), itPrm.Value().Style, isStarted);
     }
   }
-  if ( isStarted )
+
+  if (isStarted)
   {
     m_jsonWriter->EndArray();
   }
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scNodeMap;
-  (void) materialMap;
+  (void)materialMap;
 
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
-                                            "Analysis Situs with rapidjson.");
+    "Analysis Situs with rapidjson.");
 #endif
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
-                             const gltf_MaterialMap&  materialMap)
+void gltf_Writer::writeMeshes(const gltf_MaterialMap&  materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMeshes()");
@@ -1374,26 +1093,16 @@ void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
   m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Meshes) );
   m_jsonWriter->StartArray();
 
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode&   docNode  = snIt.Value();
-    const TCollection_AsciiString nodeName = ::readNameAttribute(m_shapeTool, docNode.RefLabel);
+    const TCollection_AsciiString& nodeName = itNodes2Primitives.Key()->Name;
 
-    bool toStartPrims  = true;
-    int  nbFacesInNode = 0;
-    //
-    for ( gltf_FaceIterator fit(docNode.RefLabel,
-                                TopLoc_Location(),
-                                true,
-                                docNode.Style);
-          fit.More();
-          fit.Next(), ++nbFacesInNode)
+    bool toStartPrims = true;
+
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      if ( this->toSkipFaceMesh(fit) )
-      {
-        continue;
-      }
-
       if ( toStartPrims )
       {
         toStartPrims = false;
@@ -1404,32 +1113,35 @@ void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
         m_jsonWriter->StartArray();
       }
 
-      const gltf_Face&              gltfFace = m_binDataMap.Find( fit.Face() );
-      const TCollection_AsciiString matId    = materialMap.FindMaterial( fit.FaceStyle() );
+      const gltf_Primitive& primitive = itPrm.Value();
+      const TCollection_AsciiString matId    = materialMap.FindMaterial(primitive.Style );
 
       m_jsonWriter->StartObject();
       {
         m_jsonWriter->Key("attributes");
         m_jsonWriter->StartObject();
         {
-          if ( gltfFace.NodeNorm.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.NodeNorm.Id != gltf_Accessor::INVALID_ID )
           {
             m_jsonWriter->Key("NORMAL");
-            m_jsonWriter->Int(gltfFace.NodeNorm.Id);
+            m_jsonWriter->Int(primitive.NodeNorm.Id);
           }
           m_jsonWriter->Key("POSITION");
-          m_jsonWriter->Int(gltfFace.NodePos.Id);
+          m_jsonWriter->Int(primitive.NodePos.Id);
 
-          if ( gltfFace.NodeUV.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.NodeUV.Id != gltf_Accessor::INVALID_ID )
           {
             m_jsonWriter->Key("TEXCOORD_0");
-            m_jsonWriter->Int(gltfFace.NodeUV.Id);
+            m_jsonWriter->Int(primitive.NodeUV.Id);
           }
         }
         m_jsonWriter->EndObject();
 
-        m_jsonWriter->Key("indices");
-        m_jsonWriter->Int(gltfFace.Indices.Id);
+        if (primitive.Indices.Id != gltf_Accessor::INVALID_ID)
+        {
+          m_jsonWriter->Key("indices");
+          m_jsonWriter->Int(primitive.Indices.Id);
+        }
 
         if ( !matId.IsEmpty() )
         {
@@ -1437,7 +1149,13 @@ void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
           m_jsonWriter->Int( matId.IntegerValue() );
         }
         m_jsonWriter->Key("mode");
-        m_jsonWriter->Int(gltf_PrimitiveMode_Triangles);
+        m_jsonWriter->Int((int)primitive.Mode);
+
+        if (!primitive.Name.IsEmpty())
+        {
+          m_jsonWriter->Key("name");
+          m_jsonWriter->String(primitive.Name.ToCString());
+        }
       }
       m_jsonWriter->EndObject();
     }
@@ -1451,7 +1169,6 @@ void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
   m_jsonWriter->EndArray();
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scNodeMap;
   (void) materialMap;
 
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
@@ -1461,116 +1178,76 @@ void gltfWriter::writeMeshes(const gltf_SceneNodeMap& scNodeMap,
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeNodes(const Handle(TDocStd_Document)& doc,
-                            const TDF_LabelSequence&        rootLabs,
-                            const TColStd_MapOfAsciiString* labFilter,
-                            const gltf_SceneNodeMap&        scNodeMap,
-                            NCollection_Sequence<int>&      scRootIds)
+void gltf_Writer::writeNodes()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodes()");
 
-  // Prepare full indexed map of scene nodes in correct order.
-  gltf_SceneNodeMap scNodeMapWithChildren; // indexes starting from 1
-  //
-  for ( XCAFPrs_DocumentExplorer docExp(doc, rootLabs, XCAFPrs_DocumentExplorerFlags_None);
-        docExp.More(); docExp.Next() )
-  {
-    const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    //
-    if ( (labFilter != nullptr) && !labFilter->Contains(docNode.Id) )
-    {
-      continue;
-    }
-
-    int nodeIdx = scNodeMapWithChildren.Add(docNode);
-    if ( docExp.CurrentDepth() == 0 )
-    {
-      // save root node index (starting from 0 not 1)
-      scRootIds.Append(nodeIdx - 1);
-    }
-  }
-
-  // Write scene nodes using prepared map for correct order of array members
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Nodes) );
+  //* Write scene nodes using prepared map for correct order of array members
+  m_jsonWriter->Key(gltf_RootElementName(gltf_RootElement_Nodes));
   m_jsonWriter->StartArray();
 
-  for ( gltf_SceneNodeMap::Iterator snIt (scNodeMapWithChildren); snIt.More(); snIt.Next() )
+  const gltf_SceneStructure& sceneNodeStrt = m_dataProvider->GetSceneStructure();
+  for (auto node : sceneNodeStrt.GetNodes())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-
     m_jsonWriter->StartObject();
     {
-      if ( docNode.IsAssembly )
+      if (node->Children.size() > 0)
       {
         m_jsonWriter->Key("children");
         m_jsonWriter->StartArray();
         {
-          for ( TDF_ChildIterator childIt(docNode.RefLabel); childIt.More(); childIt.Next() )
+          for (auto child : node->Children)
           {
-            const TDF_Label& childLab = childIt.Value();
-            if ( childLab.IsNull() )
-            {
-              continue;
-            }
-
-            const TCollection_AsciiString
-              childId = XCAFPrs_DocumentExplorer::DefineChildId(childLab, docNode.Id);
-            //
-            int childIdx = scNodeMapWithChildren.FindIndex(childId);
-
-            if ( childIdx > 0 )
-            {
-              m_jsonWriter->Int(childIdx - 1);
-            }
+            m_jsonWriter->Int(sceneNodeStrt.GetIndex(child));
           }
         }
         m_jsonWriter->EndArray();
       }
     }
-    if ( !docNode.LocalTrsf.IsIdentity() )
+    if (!node->Trsf.IsIdentity())
     {
-      gp_Trsf trsf = docNode.LocalTrsf.Transformation();
+      gp_Trsf trsf = node->Trsf.Transformation();
 
-      if ( trsf.Form() != gp_Identity )
+      if (trsf.Form() != gp_Identity)
       {
         m_CSTrsf.TransformTransformation(trsf);
 
         const gp_Quaternion qn = trsf.GetRotation();
-        const bool hasRotation = Abs( qn.X() )       > gp::Resolution()
-                              || Abs( qn.Y() )       > gp::Resolution()
-                              || Abs( qn.Z() )       > gp::Resolution()
-                              || Abs( qn.W() - 1.0 ) > gp::Resolution();
+        const bool hasRotation = Abs(qn.X()) > gp::Resolution()
+          || Abs(qn.Y()) > gp::Resolution()
+          || Abs(qn.Z()) > gp::Resolution()
+          || Abs(qn.W() - 1.0) > gp::Resolution();
         //
-        const double  scaleFactor    = trsf.ScaleFactor();
-        const bool    hasScale       = Abs(scaleFactor - 1.0) > Precision::Confusion();
-        const gp_XYZ& translPart     = trsf.TranslationPart();
+        const double  scaleFactor = trsf.ScaleFactor();
+        const bool    hasScale = Abs(scaleFactor - 1.0) > Precision::Confusion();
+        const gp_XYZ& translPart = trsf.TranslationPart();
         const bool    hasTranslation = translPart.SquareModulus() > gp::Resolution();
 
         gltf_WriterTrsfFormat trsfFormat = m_trsfFormat;
-        if ( m_trsfFormat == gltf_WriterTrsfFormat_Compact )
+        if (m_trsfFormat == gltf_WriterTrsfFormat_Compact)
         {
           trsfFormat = hasRotation && hasScale && hasTranslation
-                      ? gltf_WriterTrsfFormat_Mat4
-                      : gltf_WriterTrsfFormat_TRS;
+            ? gltf_WriterTrsfFormat_Mat4
+            : gltf_WriterTrsfFormat_TRS;
         }
 
-        if ( trsfFormat == gltf_WriterTrsfFormat_Mat4 )
+        if (trsfFormat == gltf_WriterTrsfFormat_Mat4)
         {
           // write full matrix
           Graphic3d_Mat4 mat4;
           trsf.GetMat4(mat4);
           //
-          if ( !mat4.IsIdentity() )
+          if (!mat4.IsIdentity())
           {
             m_jsonWriter->Key("matrix");
             m_jsonWriter->StartArray();
             //
-            for ( int icol = 0; icol < 4; ++icol )
+            for (int icol = 0; icol < 4; ++icol)
             {
-              for ( int irow = 0; irow < 4; ++irow )
+              for (int irow = 0; irow < 4; ++irow)
               {
-                m_jsonWriter->Double( mat4.GetValue(irow, icol) );
+                m_jsonWriter->Double(mat4.GetValue(irow, icol));
               }
             }
             //
@@ -1579,17 +1256,17 @@ void gltfWriter::writeNodes(const Handle(TDocStd_Document)& doc,
         }
         else // TRS
         {
-          if ( hasRotation )
+          if (hasRotation)
           {
             m_jsonWriter->Key("rotation");
             m_jsonWriter->StartArray();
-            m_jsonWriter->Double( qn.X() );
-            m_jsonWriter->Double( qn.Y() );
-            m_jsonWriter->Double( qn.Z() );
-            m_jsonWriter->Double( qn.W() );
+            m_jsonWriter->Double(qn.X());
+            m_jsonWriter->Double(qn.Y());
+            m_jsonWriter->Double(qn.Z());
+            m_jsonWriter->Double(qn.W());
             m_jsonWriter->EndArray();
           }
-          if ( hasScale )
+          if (hasScale)
           {
             m_jsonWriter->Key("scale");
             m_jsonWriter->StartArray();
@@ -1598,56 +1275,39 @@ void gltfWriter::writeNodes(const Handle(TDocStd_Document)& doc,
             m_jsonWriter->Double(scaleFactor);
             m_jsonWriter->EndArray();
           }
-          if ( hasTranslation )
+          if (hasTranslation)
           {
             m_jsonWriter->Key("translation");
             m_jsonWriter->StartArray();
-            m_jsonWriter->Double( translPart.X() );
-            m_jsonWriter->Double( translPart.Y() );
-            m_jsonWriter->Double( translPart.Z() );
+            m_jsonWriter->Double(translPart.X());
+            m_jsonWriter->Double(translPart.Y());
+            m_jsonWriter->Double(translPart.Z());
             m_jsonWriter->EndArray();
           }
         }
       }
     }
-    if ( !docNode.IsAssembly )
+    if (node->MeshIndex != gltf_Node::INVALID_ID)
     {
-      // Mesh order of current node is equal to order of this node in scene nodes map
-      int meshIdx = scNodeMap.FindIndex(docNode.Id);
-      if ( meshIdx > 0 )
-      {
-        m_jsonWriter->Key("mesh");
-        m_jsonWriter->Int(meshIdx - 1);
-      }
+      m_jsonWriter->Key("mesh");
+      m_jsonWriter->Int(node->MeshIndex);
     }
-    {
-      TCollection_AsciiString nodeName = readNameAttribute(m_shapeTool, docNode.Label);
-      if ( nodeName.IsEmpty() )
-      {
-        nodeName = readNameAttribute(m_shapeTool, docNode.RefLabel);
-      }
-      m_jsonWriter->Key("name");
-      m_jsonWriter->String( nodeName.ToCString() );
-    }
+
+    m_jsonWriter->Key("name");
+    m_jsonWriter->String(node->Name.ToCString());
+
     m_jsonWriter->EndObject();
   }
   m_jsonWriter->EndArray();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) doc;
-  (void) rootLabs;
-  (void) labFilter;
-  (void) scNodeMap;
-  (void) scRootIds;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
-                                            "Analysis Situs with rapidjson.");
+    "Analysis Situs with rapidjson.");
 #endif
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeSamplers(const gltf_MaterialMap& materialMap)
+void gltf_Writer::writeSamplers(const gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeSamplers()");
@@ -1679,7 +1339,7 @@ void gltfWriter::writeSamplers(const gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeScene(const int defSceneId)
+void gltf_Writer::writeScene(const int defSceneId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScene()");
@@ -1697,7 +1357,7 @@ void gltfWriter::writeScene(const int defSceneId)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
+void gltf_Writer::writeScenes()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScenes()");
@@ -1709,9 +1369,10 @@ void gltfWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
     m_jsonWriter->Key("nodes");
     m_jsonWriter->StartArray();
     //
-    for ( NCollection_Sequence<int>::Iterator rit(scRootIds); rit.More(); rit.Next() )
+    const gltf_SceneStructure& structure = m_dataProvider->GetSceneStructure();
+    for (auto root : structure.GetRoots())
     {
-      m_jsonWriter->Int( rit.Value() );
+      m_jsonWriter->Int(structure.GetIndex(root));
     }
     //
     m_jsonWriter->EndArray();
@@ -1719,9 +1380,6 @@ void gltfWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
   }
   m_jsonWriter->EndArray();
 #else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scRootIds;
-
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
                                             "Analysis Situs with rapidjson.");
 #endif
@@ -1729,15 +1387,14 @@ void gltfWriter::writeScenes(const NCollection_Sequence<int>& scRootIds)
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeSkins()
+void gltf_Writer::writeSkins()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltfWriter::writeTextures(const gltf_SceneNodeMap& scNodeMap,
-                               gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeTextures(gltf_MaterialMap&        materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextures()");
@@ -1745,14 +1402,13 @@ void gltfWriter::writeTextures(const gltf_SceneNodeMap& scNodeMap,
   // empty section should not be written to avoid validator errors
   bool isStarted = false;
   //
-  for ( gltf_SceneNodeMap::Iterator snIt(scNodeMap); snIt.More(); snIt.Next() )
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    //
-    for ( gltf_FaceIterator faceIter(docNode.RefLabel, TopLoc_Location(), true, docNode.Style);
-          faceIter.More(); faceIter.Next() )
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
     {
-      materialMap.AddTextures( m_jsonWriter.get(), faceIter.FaceStyle(), isStarted );
+      materialMap.AddTextures( m_jsonWriter.get(), itPrm.Value().Style, isStarted );
     }
   }
   if ( isStarted )
@@ -1761,7 +1417,6 @@ void gltfWriter::writeTextures(const gltf_SceneNodeMap& scNodeMap,
   }
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) scNodeMap;
   (void) materialMap;
 
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
