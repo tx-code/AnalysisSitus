@@ -90,10 +90,19 @@ public:
 
 public:
 
+  //! Ctor.
+  //! \param[in] body         the CAD model to extract triangulation patches from.
+  //! \param[in] mode         the conversion mode.
+  //! \param[in] storeFaceIds the Boolean flag indicating whether to store face IDs
+  //!                         in the mesh elements.
   asiAlgo_EXPORT
     asiAlgo_MeshMerge(const TopoDS_Shape& body,
-                      const Mode          mode = Mode_PolyCoherentTriangulation);
+                      const Mode          mode = Mode_PolyCoherentTriangulation,
+                      const bool          storeFaceIds = true);
 
+  //! Ctor.
+  //! \param[in] triangulations the list of triangulations to merge into one.
+  //! \param[in] mode           the conversion mode.
   asiAlgo_EXPORT
     asiAlgo_MeshMerge(const std::vector<Handle(Poly_Triangulation)>& triangulations,
                       const Mode                                     mode = Mode_PolyCoherentTriangulation);
@@ -141,9 +150,18 @@ public:
 
 protected:
 
+  //! Merges multiple triangulations into a single one.
+  //! \param[in] body         the CAD model to extract triangulation from.
+  //! \param[in] mode         the conversion mode.
+  //! \param[in] storeFaceIds the Boolean flag indicating whether to store face IDs
+  //!                         in the mesh elements.
   void build(const TopoDS_Shape& body,
-             const Mode          mode);
+             const Mode          mode,
+             const bool          storeFaceIds);
 
+  //! Merges multiple triangulations into a single one.
+  //! \param[in] triangulations the triangulations to merge.
+  //! \param[in] mode           the conversion mode.
   void build(const std::vector<Handle(Poly_Triangulation)>& triangulations,
              const Mode                                     mode);
 

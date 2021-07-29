@@ -56,7 +56,7 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
   m_fMaxThick       ( 0. )
 {
   // Merge facets.
-  asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
+  asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh, false);
   //
   m_resField.triangulation = meshMerge.GetMobiusMesh();
 

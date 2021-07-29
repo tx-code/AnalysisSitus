@@ -354,20 +354,15 @@ Handle(Poly_Triangulation)
 // Conglomeration tool
 //-----------------------------------------------------------------------------
 
-//! Constructor.
-//! \param[in] body the CAD model to extract triangulation patches from.
-//! \param[in] mode the conversion mode.
 asiAlgo_MeshMerge::asiAlgo_MeshMerge(const TopoDS_Shape& body,
-                                     const Mode          mode)
+                                     const Mode          mode,
+                                     const bool          storeFaceIds)
 {
-  this->build(body, mode);
+  this->build(body, mode, storeFaceIds);
 }
 
 //-----------------------------------------------------------------------------
 
-//! Constructor.
-//! \param[in] triangulations the list of triangulations to merge into one.
-//! \param[in] mode           the conversion mode.
 asiAlgo_MeshMerge::asiAlgo_MeshMerge(const std::vector<Handle(Poly_Triangulation)>& triangulations,
                                      const Mode                                     mode)
 {
@@ -376,11 +371,9 @@ asiAlgo_MeshMerge::asiAlgo_MeshMerge(const std::vector<Handle(Poly_Triangulation
 
 //-----------------------------------------------------------------------------
 
-//! Assembles many triangulations into a single one.
-//! \param body [in] CAD model to extract triangulation patches from.
-//! \param mode [in] conversion mode.
 void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
-                              const Mode          mode)
+                              const Mode          mode,
+                              const bool          storeFaceIds)
 {
   // Working tools and variables
   int globalNodeId = 0;
@@ -452,7 +445,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
         m_resultMobMesh->AddTriangle( poly_VertexHandle(m[0]),
                                       poly_VertexHandle(m[1]),
                                       poly_VertexHandle(m[2]),
-                                      faceId );
+                                      storeFaceIds ? faceId : -1 );
       }
     }
     // [END] Iterate over the faces
