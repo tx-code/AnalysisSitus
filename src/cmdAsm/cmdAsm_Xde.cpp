@@ -866,8 +866,8 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   cafWriter.SetTransformationFormat(gltf_WriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);
   //
-  const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
-  cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
+  //const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
+  //cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
   cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(gltf_CoordinateSystem_Zup);
 
   Handle(gltf_XdeDataSourceProvider) dataProvider = new gltf_XdeDataSourceProvider(doc->GetDocument());
