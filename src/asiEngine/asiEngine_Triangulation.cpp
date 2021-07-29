@@ -87,6 +87,7 @@ Handle(asiAlgo_BVHFacets) asiEngine_Triangulation::BuildBVH(const bool store)
   Handle(asiAlgo_BVHFacets)
     bvh = new asiAlgo_BVHFacets(tris_n->GetTriangulation(),
                                 asiAlgo_BVHFacets::Builder_Binned,
+                                true,
                                 m_progress,
                                 m_plotter);
 

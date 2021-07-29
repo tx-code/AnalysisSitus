@@ -78,7 +78,9 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const t_ptr<poly_Mesh>& tris,
   m_resField.triangulation = tris;
 
   // Build BVH.
-  m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation);
+  m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation,
+                                asiAlgo_BVHFacets::Builder_Binned,
+                                false);
 }
 
 #endif

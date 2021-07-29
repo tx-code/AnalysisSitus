@@ -107,11 +107,13 @@ public:
   //! Creates the accelerating structure with immediate initialization.
   //! \param[in] mesh        triangulation to create the accelerating structure for.
   //! \param[in] builderType type of builder to use.
+  //! \param[in] useFaceRefs indicates whether to use face IDs as back-refs from BVH-stored facets.
   //! \param[in] progress    progress notifier.
   //! \param[in] plotter     imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_BVHFacets(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
                       const BuilderType                       builderType = Builder_Binned,
+                      const bool                              useFaceRefs = true,
                       ActAPI_ProgressEntry                    progress    = nullptr,
                       ActAPI_PlotterEntry                     plotter     = nullptr);
 #endif
@@ -221,10 +223,12 @@ protected:
   //! Initializes the accelerating structure with the given mesh.
   //! \param[in] model       mesh model to prepare the accelerating structure for.
   //! \param[in] builderType type of builder to use.
+  //! \param[in] useFaceRefs indicates whether to use face IDs as back-refs from BVH-stored facets.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     init(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
-         const BuilderType                       builderType);
+         const BuilderType                       builderType,
+         const bool                              useFaceRefs);
 #endif
 
   //! Adds face to the accelerating structure.

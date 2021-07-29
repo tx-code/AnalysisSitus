@@ -92,10 +92,11 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
 #if defined USE_MOBIUS
 asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<poly_Mesh>& mesh,
                                      const BuilderType       builderType,
+                                     const bool              useFaceRefs,
                                      ActAPI_ProgressEntry    progress,
                                      ActAPI_PlotterEntry     plotter)
 {
-  this->init(mesh, builderType);
+  this->init(mesh, builderType, useFaceRefs);
   this->MarkDirty();
 }
 #endif
@@ -368,7 +369,8 @@ bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
 
 #if defined USE_MOBIUS
 bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
-                             const BuilderType       builderType)
+                             const BuilderType       builderType,
+                             const bool              useFaceRefs)
 {
   if ( mesh.IsNull() )
     return false;
@@ -410,7 +412,7 @@ bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
 
     // Create a new facet
     const int face_idx = t.GetFaceRef();
-    t_facet facet(face_idx == Mobius_InvalidHandleIndex ? th.iIdx : face_idx);
+    t_facet facet( (face_idx == Mobius_InvalidHandleIndex || !useFaceRefs) ? th.iIdx : face_idx );
 
     // Initialize nodes
     facet.P0 = BVH_Vec3d( nodes[0].X(), nodes[0].Y(), nodes[0].Z() );
