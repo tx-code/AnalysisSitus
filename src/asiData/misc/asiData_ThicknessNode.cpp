@@ -69,13 +69,13 @@ asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
 void asiData_ThicknessNode::Init()
 {
   // Initialize Parameters.
-  this->InitParameter(PID_Name,        "Name",             "",                  ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_ScalarMin,   "Min. scalar",      "MinScalarReadOnly", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_ScalarMax,   "Max. scalar",      "MaxScalarReadOnly", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCustomDir, "Custom direction", "",                  ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dx,          "Dx",               "",                  ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dy,          "Dy",               "",                  ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dz,          "Dz",               "",                  ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,        "Name",             "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ScalarMin,   "Min. scalar",      "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ScalarMax,   "Max. scalar",      "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCustomDir, "Custom direction", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dx,          "Dx",               "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dy,          "Dy",               "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dz,          "Dz",               "", ParameterFlag_IsVisible, true);
 
   // Set default values.
   this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
