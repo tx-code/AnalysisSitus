@@ -51,10 +51,13 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
                                                ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_bIsCustomDir    ( false ),
+#if defined USE_MOBIUS
   m_customDir       ( 0, 0, 1 ),
+#endif
   m_fMinThick       ( 0. ),
   m_fMaxThick       ( 0. )
 {
+#if defined USE_MOBIUS
   // Merge facets.
   asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh, false);
   //
@@ -62,6 +65,7 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
 
   // Build BVH.
   m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation);
+#endif
 }
 
 //-----------------------------------------------------------------------------

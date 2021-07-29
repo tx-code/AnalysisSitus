@@ -54,6 +54,7 @@ asiAlgo_CheckDeviations::asiAlgo_CheckDeviations(const Handle(asiAlgo_BaseCloud<
 
 bool asiAlgo_CheckDeviations::Perform(const TopoDS_Shape& part)
 {
+#if defined USE_MOBIUS
   m_progress.SetMessageKey("Merge facets");
 
   // Merge facets.
@@ -62,21 +63,35 @@ bool asiAlgo_CheckDeviations::Perform(const TopoDS_Shape& part)
   m_result.triangulation = meshMerge.GetMobiusMesh();
 
   return this->internalPerform();
+#else
+  (void) part;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_CheckDeviations::Perform(const Handle(Poly_Triangulation)& tris)
 {
+#if defined USE_MOBIUS
   m_result.triangulation = cascade::GetMobiusMesh(tris);
 
   return this->internalPerform();
+#else
+  (void) tris;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_CheckDeviations::internalPerform()
 {
+#if defined USE_MOBIUS
   m_progress.SetMessageKey("Compute BVH");
 
   // Build BVH.
@@ -176,4 +191,8 @@ bool asiAlgo_CheckDeviations::internalPerform()
 
   m_progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
   return true;
+#else
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return false;
+#endif
 }

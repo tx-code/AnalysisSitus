@@ -104,19 +104,18 @@ void asiData_ThicknessNode::SetName(const TCollection_ExtendedString& N)
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
 void asiData_ThicknessNode::SetMesh(const t_ptr<poly_Mesh>& mesh)
 {
-#if defined USE_MOBIUS
   Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh(mesh);
-#else
-  (void) mesh;
-#endif
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
 void asiData_ThicknessNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh)
 {
+#if defined USE_MOBIUS
   this->SetMesh(mesh.triangulation);
 
   // Prepare array of ids.
@@ -153,4 +152,5 @@ void asiData_ThicknessNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mes
     ActParamTool::AsIntArray( this->Parameter(PID_ThicknessFieldIds) )->SetArray(nullptr);
     ActParamTool::AsRealArray( this->Parameter(PID_ThicknessFieldValues) )->SetArray(nullptr);
   }
+#endif
 }
