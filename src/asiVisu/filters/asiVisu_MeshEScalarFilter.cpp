@@ -52,11 +52,10 @@ asiVisu_MeshEScalarFilter::asiVisu_MeshEScalarFilter()
 {
   m_scalarMap = new HScalarMap(100);
 
-  m_fMinScalar =  VTK_FLOAT_MAX;
-  m_fMaxScalar = -VTK_FLOAT_MAX;
-
-  //this->GetInformation()->Set(vtkAlgorithm::PRESERVES_RANGES(), 1);
-  //this->GetInformation()->Set(vtkAlgorithm::PRESERVES_BOUNDS(), 1);
+  m_fMinScalar      =  VTK_FLOAT_MAX;
+  m_fMaxScalar      = -VTK_FLOAT_MAX;
+  m_fMaxScalarBound =  VTK_FLOAT_MAX;
+  m_fMinScalarBound = -VTK_FLOAT_MAX;
 }
 
 //! Destructor.
@@ -229,16 +228,20 @@ int asiVisu_MeshEScalarFilter::RequestData(vtkInformation*        request,
 }
 
 //! Retrieves scalar value for the element with the given ID.
-//! \param theElemID [in]  ID of the mesh element to access scalar value for.
-//! \param theScalar [out] requested scalar if any.
+//! \param elemID [in]  ID of the mesh element to access scalar value for.
+//! \param scalar [out] requested scalar if any.
 //! \return true if scalar value has been found, false -- otherwise.
-bool asiVisu_MeshEScalarFilter::scalarForElem(const int theElemID,
-                                              double&   theScalar)
+bool asiVisu_MeshEScalarFilter::scalarForElem(const int elemID,
+                                              double&   scalar)
 {
-  if ( !m_scalarMap->IsBound(theElemID) )
+  if ( !m_scalarMap->IsBound(elemID) )
     return false;
 
-  theScalar = m_scalarMap->Find(theElemID);
+  scalar = m_scalarMap->Find(elemID);
+
+  if ( scalar < m_fMinScalarBound || scalar > m_fMaxScalarBound )
+    return false; // out of custom range
+
   return true;
 }
 

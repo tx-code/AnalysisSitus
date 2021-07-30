@@ -117,6 +117,10 @@ void asiUI_ParameterEditorListener::onParameterChanged(const int       pid,
       m_cf->ObjectBrowser->UpdateSelectedNode();
   }
 
+  // Update Parameter Editor.
+  if ( m_cf->ParamEditor )
+    m_cf->ParamEditor->UpdateParameters();
+
   // Reset update type (this gives the sub-classes the chance to redefine
   // the update type in callbacks).
   m_obUpdateType = OB_UpdateType_Undefined;

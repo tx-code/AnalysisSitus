@@ -63,23 +63,23 @@ public:
   static asiVisu_MeshEScalarFilter* New();
 
   //! Sets elemental scalars.
-  //! \param theElemIDs  [in] involved mesh element IDs.
-  //! \param theElemData [in] scalars for the involved mesh elements.
-  void SetScalarArrays(const Handle(HIntArray)&  theElemIDs,
-                       const Handle(HRealArray)& theElemData)
+  //! \param elemIDs  [in] involved mesh element IDs.
+  //! \param elemData [in] scalars for the involved mesh elements.
+  void SetScalarArrays(const Handle(HIntArray)&  elemIDs,
+                       const Handle(HRealArray)& elemData)
   {
     m_scalarMap->Clear();
 
-    if ( !theElemIDs.IsNull() && !theElemData.IsNull() )
+    if ( !elemIDs.IsNull() && !elemData.IsNull() )
     {
-      for ( int i = theElemIDs->Lower(); i <= theElemIDs->Upper(); i++ )
+      for ( int i = elemIDs->Lower(); i <= elemIDs->Upper(); i++ )
       {
-        int anID = theElemIDs->Value(i);
-        if ( anID == -1 )
+        int ID = elemIDs->Value(i);
+        if ( ID == -1 )
           continue;
 
-        const double aScalar = theElemData->Value(i);
-        m_scalarMap->Bind(anID, aScalar);
+        const double scalar = elemData->Value(i);
+        m_scalarMap->Bind(ID, scalar);
       }
     }
   }
@@ -96,6 +96,16 @@ public:
   double GetMinScalar() const
   {
     return m_fMinScalar;
+  }
+
+  //! Set the allowed range for scalar values.
+  void SetScalarRange(const double minBound,
+                      const double maxBound)
+  {
+    m_fMinScalarBound = minBound;
+    m_fMaxScalarBound = maxBound;
+
+    this->Modified();
   }
 
 private:
@@ -139,6 +149,12 @@ private:
 
   //! Minimal scalar value obtained during the filtering process.
   double m_fMinScalar;
+
+  //! Max bound scalar value.
+  double m_fMaxScalarBound;
+
+  //! Min bound scalar value.
+  double m_fMinScalarBound;
 
 };
 

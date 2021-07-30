@@ -55,9 +55,7 @@
 asiVisu_MeshEScalarPipeline::asiVisu_MeshEScalarPipeline()
 : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New() ),
-  m_fToler     ( 0. ),
-  m_fMinScalar ( Precision::Infinite() ),
-  m_fMaxScalar ( Precision::Infinite() )
+  m_fToler(0.)
 {
   /* ========================
    *  Prepare custom filters
@@ -102,15 +100,14 @@ void asiVisu_MeshEScalarPipeline::SetInput(const Handle(asiVisu_DataProvider)& t
     m_source->SetInputTriangulation( meshDp->GetTriangulation() );
 #endif
 
-    // Initialize scalar range.
-    m_fMinScalar = meshDp->GetMinScalar();
-    m_fMaxScalar = meshDp->GetMaxScalar();
 
     // Initialize scalars filter.
     asiVisu_MeshEScalarFilter* scFilter = this->GetScalarFilter();
     //
-    scFilter->SetScalarArrays( meshDp->GetElementIDs(),
-                               meshDp->GetElementScalars() );
+    scFilter->SetScalarArrays ( meshDp->GetElementIDs(),
+                                meshDp->GetElementScalars() );
+    scFilter->SetScalarRange  ( meshDp->GetMinScalar(),
+                                meshDp->GetMaxScalar() );
 
     // Complete pipeline.
     this->SetInputConnection( m_source->GetOutputPort() );
@@ -151,8 +148,8 @@ void asiVisu_MeshEScalarPipeline::initLookupTable()
   scFilter->Update();
 
   // Get scalar range.
-  const double minScalar = Precision::IsInfinite(m_fMinScalar) ? scFilter->GetMinScalar() : m_fMinScalar;
-  const double maxScalar = Precision::IsInfinite(m_fMaxScalar) ? scFilter->GetMaxScalar() : m_fMaxScalar;
+  const double minScalar = scFilter->GetMinScalar();
+  const double maxScalar = scFilter->GetMaxScalar();
   const double range     = maxScalar - minScalar;
 
   // Extra variables.
