@@ -61,6 +61,7 @@ set (pipelines_H_FILES
   pipelines/asiVisu_FuncLevelsPipeline2d.h
   pipelines/asiVisu_FuncLevelsPipeline3d.h
   pipelines/asiVisu_FuncUnivariatePipeline.h
+  pipelines/asiVisu_Grid2dPipeline.h
   pipelines/asiVisu_IVSurfacePipeline.h
   pipelines/asiVisu_MeshContourPipeline.h
   pipelines/asiVisu_MeshENScalarPipeline.h
@@ -101,6 +102,7 @@ set (pipelines_CPP_FILES
   pipelines/asiVisu_FaceSurfaceIsosPipeline.cpp
   pipelines/asiVisu_FaceSurfaceShadedPipeline.cpp
   pipelines/asiVisu_FuncUnivariatePipeline.cpp
+  pipelines/asiVisu_Grid2dPipeline.cpp
   pipelines/asiVisu_IVSurfacePipeline.cpp
   pipelines/asiVisu_MeshContourPipeline.cpp
   pipelines/asiVisu_MeshENScalarPipeline.cpp
@@ -142,6 +144,7 @@ set (presentations_H_FILES
   presentations/asiVisu_GeomFaceContourPrs.h
   presentations/asiVisu_GeomFaceNormsPrs.h
   presentations/asiVisu_GeomSurfPrs.h
+  presentations/asiVisu_Grid2dPrs.h
   presentations/asiVisu_IVCurve2dPrs.h
   presentations/asiVisu_IVCurvePrs.h
   presentations/asiVisu_IVPointSet2dPrs.h
@@ -178,6 +181,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_GeomFaceContourPrs.cpp
   presentations/asiVisu_GeomFaceNormsPrs.cpp
   presentations/asiVisu_GeomSurfPrs.cpp
+  presentations/asiVisu_Grid2dPrs.cpp
   presentations/asiVisu_IVCurve2dPrs.cpp
   presentations/asiVisu_IVCurvePrs.cpp
   presentations/asiVisu_IVPointSet2dPrs.cpp
@@ -221,6 +225,7 @@ set (providers_H_FILES
   providers/asiVisu_FaceNormalsDataProvider.h
   providers/asiVisu_FuncDataProvider.h
   providers/asiVisu_FuncUnivariateDataProvider.h
+  providers/asiVisu_Grid2dDataProvider.h
   providers/asiVisu_IVCurve2dDataProvider.h
   providers/asiVisu_IVCurveDataProvider.h
   providers/asiVisu_IVPointSet2dDataProvider.h
@@ -259,6 +264,7 @@ set (providers_CPP_FILES
   providers/asiVisu_FaceContourDataProvider.cpp
   providers/asiVisu_FaceDataProvider.cpp
   providers/asiVisu_FaceNormalsDataProvider.cpp
+  providers/asiVisu_Grid2dDataProvider.cpp
   providers/asiVisu_IVCurve2dDataProvider.cpp
   providers/asiVisu_IVCurveDataProvider.cpp
   providers/asiVisu_IVPointSet2dDataProvider.cpp
@@ -324,6 +330,7 @@ set (sources_H_FILES
   sources/asiVisu_FuncLevelsSource3d.h
   sources/asiVisu_FuncLevelsSourceBase.h
   sources/asiVisu_FuncUnivariateSource.h
+  sources/asiVisu_Grid2dSource.h
   sources/asiVisu_MeshSource.h
   sources/asiVisu_OctreeSource.h
   sources/asiVisu_PCurveSource.h
@@ -351,6 +358,7 @@ set (sources_CPP_FILES
   sources/asiVisu_CurveSource.cpp
   sources/asiVisu_CurveSourceBase.cpp
   sources/asiVisu_FuncUnivariateSource.cpp
+  sources/asiVisu_Grid2dSource.cpp
   sources/asiVisu_MeshSource.cpp
   sources/asiVisu_OctreeSource.cpp
   sources/asiVisu_PCurveSource.cpp
