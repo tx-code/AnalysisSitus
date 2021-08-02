@@ -33,7 +33,6 @@
 
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
-#include <asiAlgo_ProjectPointOnMesh.h>
 
 // asiVisu includes
 #include <asiVisu_MeshUtils.h>
@@ -48,12 +47,6 @@
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
-
-#if defined USE_MOBIUS
-  #include <mobius/cascade.h>
-  #include <mobius/poly_DistanceField.h>
-  #include <mobius/poly_SVO.h>
-#endif
 
 //-----------------------------------------------------------------------------
 

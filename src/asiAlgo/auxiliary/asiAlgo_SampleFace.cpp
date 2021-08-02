@@ -37,6 +37,7 @@
 #include <asiAlgo_Timer.h>
 
 // OpenCascade includes
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
 
 #undef DRAW_DEBUG
@@ -135,6 +136,30 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
 const Handle(asiAlgo_UniformGrid<float>)& asiAlgo_SampleFace::GetResult() const
 {
   return m_grid;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiAlgo_BaseCloud<double>) asiAlgo_SampleFace::GetResult3d() const
+{
+  BRepAdaptor_Surface bas(m_face);
+
+  Handle(asiAlgo_BaseCloud<double>) sampledPts = new asiAlgo_BaseCloud<double>;
+  //
+  for ( int i = 0; i <= m_grid->Nx; ++i )
+  {
+    const double x = m_grid->XMin + m_grid->CellSize*i;
+    //
+    for ( int j = 0; j <= m_grid->Ny; ++j )
+    {
+      const double y = m_grid->YMin + m_grid->CellSize*j;
+
+      if ( m_grid->pArray[i][j][0] )
+        sampledPts->AddElement( bas.Value(x, y) );
+    }
+  }
+
+  return sampledPts;
 }
 
 //-----------------------------------------------------------------------------

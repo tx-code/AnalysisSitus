@@ -3730,6 +3730,9 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       cmdEngine::cf->Model->CommitCommand();
       cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
       cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
+
+      // Draw the sampled points in 3D.
+      interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);
     }
   }
 

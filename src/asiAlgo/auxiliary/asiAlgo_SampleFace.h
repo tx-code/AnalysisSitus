@@ -32,6 +32,7 @@
 #define asiAlgo_SampleFace_h
 
 // asiAlgo includes
+#include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Membership.h>
 #include <asiAlgo_UniformGrid.h>
 
@@ -69,6 +70,10 @@ public:
   //! \return resulting grid.
   asiAlgo_EXPORT const Handle(asiAlgo_UniformGrid<float>)&
     GetResult() const;
+
+  //! \return the sampled points in the modeling space.
+  asiAlgo_EXPORT Handle(asiAlgo_BaseCloud<double>)
+    GetResult3d() const;
 
 protected:
 
