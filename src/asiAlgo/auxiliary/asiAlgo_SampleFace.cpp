@@ -64,9 +64,12 @@ asiAlgo_SampleFace::asiAlgo_SampleFace(const TopoDS_Face&   face,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_SampleFace::Perform(const float step)
+bool asiAlgo_SampleFace::Perform(const int numBins)
 {
   if ( m_face.IsNull() )
+    return false;
+
+  if ( numBins < 2 )
     return false;
 
   // Domain.
@@ -87,28 +90,30 @@ bool asiAlgo_SampleFace::Perform(const float step)
 #endif
 
   // Steps along axes.
-  const float xStep = step;
-  const float yStep = step;
+  const double xStep = (xMax - xMin) / numBins;
+  const double yStep = (yMax - yMin) / numBins;
+  const double step  = Max(xStep, yStep);
 
   // Number of cells in each dimension.
-  const int nx = int( (xMax - xMin) / xStep ) + 1;
-  const int ny = int( (yMax - yMin) / yStep ) + 1;
+  const int nx = int( (xMax - xMin) / step );
+  const int ny = int( (yMax - yMin) / step );
+  const int n  = Max(nx, ny);
 
   // Prepare the output grid.
   m_grid = new asiAlgo_UniformGrid<float>( (float) xMin,
                                            (float) yMin,
                                             0.f,
-                                            nx, ny, 0,
+                                            n, n, 0,
                                            (float) step );
 
   // Process the block of data.
   double x, y;
-  for ( int i = 0; i <= nx; ++i )
+  for ( int i = 0; i <= n; ++i )
   {
-    x = xMin + xStep*i;
-    for ( int j = 0; j <= ny; ++j )
+    x = xMin + step*i;
+    for ( int j = 0; j <= n; ++j )
     {
-      y = yMin + yStep*j;
+      y = yMin + step*j;
 
       // Evaluate scalar.
       const int s = (int) this->classify( gp_Pnt2d(x, y) );

@@ -94,6 +94,11 @@
 #include <TopoDS_Iterator.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
+// VTK includes
+#pragma warning(push, 0)
+#include <vtkBMPWriter.h>
+#pragma warning(pop)
+
 //-----------------------------------------------------------------------------
 
 //! \brief Function to filter the extracted blend candidates by type.
@@ -3665,28 +3670,66 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
     {
       const TopoDS_Face& face = G->GetFace( selected.GetMinimalMapped() );
 
+      int numBins = 10;
+      interp->GetKeyValue(argc, argv, "num", numBins);
+
       // Sample the face.
       asiAlgo_SampleFace sampleFace( face,
                                      interp->GetProgress(),
                                      interp->GetPlotter() );
       //
-      if ( !sampleFace.Perform(1.) )
+      if ( !sampleFace.Perform(numBins) )
       {
         interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to sample the face.");
         return TCL_ERROR;
       }
+      //
+      const Handle(asiAlgo_UniformGrid<float>)& grid = sampleFace.GetResult();
+
+      // Proceed with image dump.
+      std::string filename;
+      if ( interp->GetKeyValue(argc, argv, "filename", filename) )
+      {
+        vtkNew<vtkImageData> image;
+
+        // Specify the size of the image data
+        image->SetDimensions(numBins, numBins, 1);
+        image->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
+        int* dims = image->GetDimensions();
+
+        // Fill the image
+        for ( int i = 0; i < dims[0]; ++i )
+        {
+          for ( int j = 0; j < dims[1]; ++j )
+          {
+            unsigned char*
+              pixel = static_cast<unsigned char*>( image->GetScalarPointer(i, j, 0) );
+            //
+            const float isIn = grid->pArray[i][j][0];
+
+            pixel[0] = isIn ? 0 : 255;
+            pixel[1] = isIn ? 0 : 255;
+            pixel[2] = isIn ? 0 : 255;
+          }
+        }
+
+        vtkNew<vtkBMPWriter> bmpWriter;
+        bmpWriter->SetFileName( filename.c_str() );
+        bmpWriter->SetInputData(image);
+        bmpWriter->Write();
+      }
 
       // Modify data model and actualize scene.
-      Handle(asiData_Grid2dNode) grid2d;
+      Handle(asiData_Grid2dNode) gridNode;
       //
       cmdEngine::cf->Model->OpenCommand();
       {
-        grid2d = partApi.FindFaceGrid2d(true);
-        grid2d->SetUniformGrid( sampleFace.GetResult() );
+        gridNode = partApi.FindFaceGrid2d(true);
+        gridNode->SetUniformGrid(grid);
       }
       cmdEngine::cf->Model->CommitCommand();
       cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
-      cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(grid2d);
+      cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
     }
   }
 
@@ -4087,8 +4130,11 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-face-grid",
     //
-    "build-face-grid\n"
-    "\t Builds a uniform UV grid for the interactively selected face.",
+    "build-face-grid [-num <numBins>] [-filename <filename>]\n"
+    "\t Builds a uniform UV grid for the interactively selected face.\n"
+    "\t Pass the number of bins to control how fine the discretization is.\n"
+    "\t If the filename is passed, the sampled face is converted to vtkImageData\n"
+    "\t and dumped as a bitmap image.",
     //
     __FILE__, group, ENGINE_BuildFaceGrid);
 }

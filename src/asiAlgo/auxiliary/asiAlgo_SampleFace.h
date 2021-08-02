@@ -61,10 +61,10 @@ public:
 public:
 
   //! Performs face sampling.
-  //! \param[in] step the discretization step.
+  //! \param[in] numBins the number of discretization steps.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform(const float step);
+    Perform(const int numBins);
 
   //! \return resulting grid.
   asiAlgo_EXPORT const Handle(asiAlgo_UniformGrid<float>)&
