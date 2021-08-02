@@ -18,14 +18,16 @@
 #ifndef _DFBrowser_AttrNode_h
 #define _DFBrowser_AttrNode_h
 
-#include <Handle_DFBrowser_AttrNode.hxx>
+#include <DFBrowser_AttrNode.hxx>
 #include <DFBrowser_DFNode.hxx>
 #include <TDF_Attribute.hxx>
 #include <Standard_CString.hxx>
 
 class DFBrowser_AttrNode : public DFBrowser_DFNode
 {
- public:
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_AttrNode, DFBrowser_DFNode)
+
+public:
 
   asiUI_EXPORT DFBrowser_AttrNode();
 
@@ -50,8 +52,6 @@ class DFBrowser_AttrNode : public DFBrowser_DFNode
   }
 
   asiUI_EXPORT virtual void Del();
-
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_AttrNode, DFBrowser_DFNode)
 
  private:
 

@@ -18,11 +18,11 @@
 #ifndef _DFBrowser_NSNode_h
 #define _DFBrowser_NSNode_h
 
-#include <Handle_DFBrowser_NSNode.hxx>
 #include <DFBrowser_AttrNode.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TopoDS_Shape.hxx>
-#include <Handle_DFBrowser_DFNode.hxx>
+
+class DFBrowser_DFNode;
 
 class DFBrowser_NSNode : public DFBrowser_AttrNode
 {

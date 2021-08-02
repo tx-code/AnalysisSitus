@@ -58,7 +58,7 @@ void DFBrowser_LabelNode::AddSub (Handle(DFBrowser_DFNode)& theNode)
       Handle(DFBrowser_DFNode) aPrev;
       while(!aNode.IsNull()) {
 	if (aNode->GetType() == DFBrowser_LABEL) {
-	  if (Handle(DFBrowser_LabelNode)::DownCast(aNode)->Label().Tag() > 
+	  if (Handle(DFBrowser_LabelNode)::DownCast(aNode)->Label().Tag() >
 	      Handle(DFBrowser_LabelNode)::DownCast(theNode)->Label().Tag()) break;
 	}
 	aPrev = aNode;
@@ -77,7 +77,7 @@ void DFBrowser_LabelNode::AddSub (Handle(DFBrowser_DFNode)& theNode)
 
 Handle(DFBrowser_DFNode) DFBrowser_LabelNode::Sub () const
 {
-  if (!myList.IsNull()) return myList;
+  if (!myList.IsNull()) return Handle(DFBrowser_DFNode)( myList.get() );
   return myChild;
 }
 
@@ -124,7 +124,7 @@ void DFBrowser_LabelNode::Update ()
       }
     } else {
       Handle(TDF_Attribute) anAttr = Handle(DFBrowser_AttrNode)::DownCast(aChild)->Attribute();
-      if (anAttr->Label().IsNull()) DelSub(aChild); 
+      if (anAttr->Label().IsNull()) DelSub(aChild);
 	  else {
 	    aSubAttributes.Add(anAttr);
 	    aChild->Update();

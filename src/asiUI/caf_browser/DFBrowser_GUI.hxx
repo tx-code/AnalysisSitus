@@ -20,31 +20,15 @@
 
 #include <asiUI.h>
 
-#include <Handle_DFBrowser_DFTree.hxx>
-#include <Handle_DFBrowser_DFNode.hxx>
 #include <DFBrowser_Picture.hxx>
 #include <DFBrowser_Level.hxx>
 #include <DFBrowser_AttrPrs.hxx>
-
-class DFBrowser_DFTree;
-class DFBrowser_DFNode;
+#include <DFBrowser_DFTree.hxx>
+#include <DFBrowser_DFNode.hxx>
 
 class DFBrowser_GUI
 {
  public:
-
-  void* operator new(size_t,void* anAddress) 
-  {
-    return anAddress;
-  }
-  void* operator new(size_t size) 
-  {
-    return Standard::Allocate(size); 
-  }
-  void  operator delete(void *anAddress) 
-  {
-    if (anAddress) Standard::Free((Standard_Address&)anAddress); 
-  }
 
   asiUI_EXPORT DFBrowser_GUI(const Handle(DFBrowser_DFTree)& theTree);
 
@@ -81,7 +65,7 @@ class DFBrowser_GUI
 
  private:
 
-  Handle_DFBrowser_DFTree myTree;
+  Handle(DFBrowser_DFTree) myTree;
   Standard_Address myFLGUI;
   Standard_Address myQTGUI;
 };

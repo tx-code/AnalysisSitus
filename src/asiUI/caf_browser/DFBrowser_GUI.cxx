@@ -142,7 +142,7 @@ Handle(DFBrowser_DFNode) DFBrowser_GUI::NextVisible (const Handle(DFBrowser_DFNo
     aRes = theNode->Parent();
     while (!aRes.IsNull())
       if (!aRes->Next().IsNull()) {
-	aRes = aRes->Next(); 
+	aRes = aRes->Next();
 	break;
       } else aRes = aRes->Parent();
   }
@@ -183,7 +183,7 @@ Standard_Address DFBrowser_GUI::Pixmap (const DFBrowser_Picture theID) const
 
 void DFBrowser_GUI::SetLevel (const DFBrowser_Level theLevel)
 {
-  Handle(DFBrowser_DFNode) aNode = myTree->Root();
+  Handle(DFBrowser_DFNode) aNode( myTree->Root().get() );
   while(!aNode.IsNull()) {
     aNode->Opened(theLevel == DFBrowser_SHOWALL && aNode->CanOpen());
     aNode = Next(aNode);
@@ -221,7 +221,7 @@ void DFBrowser_GUI::SetLevel (const DFBrowser_Level theLevel)
 
 void DFBrowser_GUI::SetAttrPrs (const DFBrowser_AttrPrs thePrs)
 {
-  Handle(DFBrowser_DFNode) aNode = myTree->Root();
+  Handle(DFBrowser_DFNode) aNode( myTree->Root().get() );
   for(;!aNode.IsNull();aNode = Next(aNode)) {
     if (aNode->GetType() == DFBrowser_ATTRIBUTE) aNode->Visible(thePrs!=DFBrowser_VANISH);
     if (aNode->GetType() == DFBrowser_LABEL) {
@@ -264,7 +264,7 @@ void DFBrowser_GUI::ShowNS (const Standard_Boolean theShow)
 	aNS->Structure(theShow);
 	aNS->Update();
       }
-    } 
+    }
   }
   Update();
 }

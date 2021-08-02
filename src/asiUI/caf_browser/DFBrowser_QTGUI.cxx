@@ -74,7 +74,7 @@ public:
 protected:
 
   virtual void   customEvent( QEvent* );
-  
+
 private:
 
   QString        myTitle;
@@ -96,8 +96,9 @@ CAFBrowserWidget* cafBrowser = NULL;
 
 void CAFBrowserWidget::customEvent(QEvent* theE)
 {
-  switch(theE->type()){
-    case Title : 
+  switch( (int) theE->type() )
+  {
+    case Title :
       setWindowTitle(myTitle);
       break;
     case Show : {
@@ -108,7 +109,7 @@ void CAFBrowserWidget::customEvent(QEvent* theE)
     default : break;
   }
 }
-#pragma warning( pop ) 
+#pragma warning( pop )
 
 void CAFBrowserWidget::setTitle(QString& theTitle)
 {
@@ -133,18 +134,18 @@ class DFQThread
    int a(0);
    char *b = new char[2];
    b[0]='a';b[1]=0;
-   new QApplication(a,&b); 
-#endif 
+   new QApplication(a,&b);
+#endif
 */
-    //creating of widgets 
+    //creating of widgets
     cafBrowser = new CAFBrowserWidget();
 
     QVBoxLayout* theLayout = new QVBoxLayout( cafBrowser );
     theLayout->setMargin(0);
     theLayout->setSpacing(0);
-    
+
     cafBrowser->setWindowTitle( QString( "Debug Browser 6.4" ) );
-    myQTGUI = new DFBrowser_QTGUIMOC(thisGUIs,cafBrowser); 
+    myQTGUI = new DFBrowser_QTGUIMOC(thisGUIs,cafBrowser);
     theLayout->addWidget(myQTGUI);
     cafBrowser->resize( 470, 800 );
     (*myAppStarted).release();
@@ -207,11 +208,11 @@ const TCollection_AsciiString & DFBrowser_QTGUI::Filter() const
 void DFBrowser_QTGUI::Close()
 {
   cafBrowser->hide();
-/* 
+/*
 #ifndef WNT
   cafBrowser=NULL ;
   QApplication::quit();
-#endif  
+#endif
   */
 }
 
@@ -248,7 +249,7 @@ Standard_Address DFBrowser_QTGUI::Pixmap(const DFBrowser_Picture thePicture)
   case DFBrowser_CLOSED_TRIGGER: return &myClosedP;
   default: return &myClosedP;
   }
-};
+}
 
 //#ifdef BUILD_WITH_STATIC_QT
 

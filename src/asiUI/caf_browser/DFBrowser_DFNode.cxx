@@ -72,3 +72,13 @@ void DFBrowser_DFNode::Del()
   myNext.Nullify();
   myParent.Nullify();
 }
+
+const Handle(DFBrowser_DFTree)& DFBrowser_DFNode::Tree() const
+{
+  return myTree;
+}
+
+void DFBrowser_DFNode::Tree(const Handle(DFBrowser_DFTree)& theTree)
+{
+  myTree = theTree;
+}

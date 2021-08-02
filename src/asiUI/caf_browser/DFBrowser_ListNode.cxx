@@ -63,12 +63,12 @@ void DFBrowser_ListNode::AddSub (Handle(DFBrowser_DFNode)& theNode)
 
 Handle(DFBrowser_DFNode) DFBrowser_ListNode::Sub () const
 {
-  return myAttr;
+  return Handle(DFBrowser_DFNode) ( myAttr.get() );
 }
 
 Handle(DFBrowser_AttrNode) DFBrowser_ListNode::LastAttribute () const
 {
-  Handle(DFBrowser_DFNode) aNode = myAttr;
+  Handle(DFBrowser_DFNode) aNode ( myAttr.get() );
   while(!aNode.IsNull()) {
     if (aNode->Next().IsNull()) break;
     if (aNode->Next()->GetType() != DFBrowser_ATTRIBUTE) break;

@@ -43,7 +43,7 @@ class asiVisu_Grid2dPrs : public asiVisu_DefaultPrs
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_Grid2dPrs, asiVisu_Prs)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_Grid2dPrs, asiVisu_DefaultPrs)
 
   // Allows to register this Presentation class
   DEFINE_PRESENTATION_FACTORY(asiData_Grid2dNode, Instance)
@@ -76,4 +76,3 @@ private:
 };
 
 #endif
-  

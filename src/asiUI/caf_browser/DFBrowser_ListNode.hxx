@@ -18,16 +18,17 @@
 #ifndef _DFBrowser_ListNode_h
 #define _DFBrowser_ListNode_h
 
-#include <Handle_DFBrowser_ListNode.hxx>
 #include <DFBrowser_DFNode.hxx>
 
 #include <Standard_CString.hxx>
-#include <Handle_DFBrowser_AttrNode.hxx>
 #include <DFBrowser_NodeType.hxx>
+#include <DFBrowser_AttrNode.hxx>
 
 class DFBrowser_ListNode : public DFBrowser_DFNode
 {
- public:
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_ListNode, DFBrowser_DFNode)
+
+public:
 
   asiUI_EXPORT DFBrowser_ListNode();
 
@@ -55,11 +56,9 @@ class DFBrowser_ListNode : public DFBrowser_DFNode
 
   asiUI_EXPORT virtual void Del();
 
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_ListNode, DFBrowser_DFNode)
+ private:
 
- private: 
-
-  Handle_DFBrowser_AttrNode myAttr;
+  Handle(DFBrowser_AttrNode) myAttr;
 };
 
 #endif

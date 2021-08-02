@@ -20,7 +20,7 @@
 
 #include <asiUI.h>
 
-#include <Handle_DFBrowser_Attr.hxx>
+#include <DFBrowser_Attr.hxx>
 #include <Standard_Transient.hxx>
 
 #include <Standard_CString.hxx>
@@ -53,7 +53,7 @@ class DFBrowser_Attr : public Standard_Transient
   {
     return myName;
   }
-  
+
   inline Standard_Boolean HasError() const
   {
     return myError;

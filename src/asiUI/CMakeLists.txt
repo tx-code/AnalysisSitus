@@ -393,13 +393,6 @@ set (caf_browser_H_FILES
   caf_browser/DFBrowser_PtrQTGUI.hxx
   caf_browser/DFBrowser_PtrQTGUIMOC.hxx
   caf_browser/DFBrowser_QTGUI.hxx
-  caf_browser/Handle_DFBrowser_Attr.hxx
-  caf_browser/Handle_DFBrowser_AttrNode.hxx
-  caf_browser/Handle_DFBrowser_DFNode.hxx
-  caf_browser/Handle_DFBrowser_DFTree.hxx
-  caf_browser/Handle_DFBrowser_LabelNode.hxx
-  caf_browser/Handle_DFBrowser_ListNode.hxx
-  caf_browser/Handle_DFBrowser_NSNode.hxx
 )
 
 #------------------------------------------------------------------------------

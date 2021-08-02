@@ -20,7 +20,6 @@
 
 #include <asiUI.h>
 
-#include <Handle_DFBrowser_DFNode.hxx>
 #include <Standard_Transient.hxx>
 
 #include <Standard_CString.hxx>
@@ -28,11 +27,14 @@
 #include <DFBrowser_Colors.hxx>
 #include <DFBrowser_Picture.hxx>
 #include <DFBrowser_NodeType.hxx>
-#include <Handle_DFBrowser_DFTree.hxx>
+
+class DFBrowser_DFTree;
 
 class DFBrowser_DFNode : public Standard_Transient
 {
- public:
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFNode, Standard_Transient)
+
+public:
 
   asiUI_EXPORT DFBrowser_DFNode();
 
@@ -60,15 +62,9 @@ class DFBrowser_DFNode : public Standard_Transient
 
   asiUI_EXPORT virtual const TCollection_AsciiString & Name() = 0;
 
-  inline const Handle(DFBrowser_DFTree) & Tree() const
-  {
-    return myTree;
-  }
+  const Handle(DFBrowser_DFTree)& Tree() const;
 
-  inline void Tree(const Handle(DFBrowser_DFTree)& theTree)
-  {
-    myTree = theTree;
-  }
+  void Tree(const Handle(DFBrowser_DFTree)& theTree);
 
   inline Standard_Boolean Opened() const
   {
@@ -122,8 +118,6 @@ class DFBrowser_DFNode : public Standard_Transient
   }
 
   asiUI_EXPORT virtual void Del() = 0;
-
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFNode, Standard_Transient)
 
  protected:
 

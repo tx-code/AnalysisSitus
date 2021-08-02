@@ -222,7 +222,7 @@ bool asiAlgo_RepatchFaces::Perform(const TColStd_PackedMapOfInteger& faceIds)
     newFaces.push_back(repatchF);
   }
 
-  if ( groups.size() == faceIds.Extent() )
+  if ( int( groups.size() ) == faceIds.Extent() )
   {
     m_progress.SendLogMessage(LogWarn(Normal) << "Faces are not stitched.");
   }
@@ -286,7 +286,7 @@ bool asiAlgo_RepatchFaces::Perform(const TColStd_PackedMapOfInteger& faceIds)
   m_history->Clear();
   m_history = historyWithoutRemovedFaces;
   //
-  for ( int i = 0; i < groups.size(); ++i )
+  for ( int i = 0; i < int( groups.size() ); ++i )
   {
     const TColStd_PackedMapOfInteger& groupInd = groups[i];
     for ( TColStd_MapIteratorOfPackedMapOfInteger fit(groupInd); fit.More(); fit.Next() )
@@ -302,7 +302,7 @@ bool asiAlgo_RepatchFaces::Perform(const TColStd_PackedMapOfInteger& faceIds)
   //
   BRepBuilderAPI_Sewing Sewer(asiAlgo_CheckValidity().MaxTolerance(shape), true, false, false, false);
   Sewer.Add(shape);
-  for ( int i = 0; i < newFaces.size(); ++i )
+  for ( int i = 0; i < int( newFaces.size() ); ++i )
   {
     shapes.push_back(newFaces[i]);
     Sewer.Add(newFaces[i]);

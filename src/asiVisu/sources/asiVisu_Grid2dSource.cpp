@@ -59,25 +59,25 @@
 
 namespace
 {
-  bool IsIn(const double sc[8])
+  bool IsIn(const double sc[4])
   {
-    for ( size_t k = 0; k < 8; ++k )
-      if ( sc[k] > 0)
+    for ( size_t k = 0; k < 4; ++k )
+      if ( sc[k] > 0 )
         return false;
 
     return true;
   }
 
-  bool IsOut(const double sc[8])
+  bool IsOut(const double sc[4])
   {
-    for ( size_t k = 0; k < 8; ++k )
-      if ( sc[k] < 0)
+    for ( size_t k = 0; k < 4; ++k )
+      if ( sc[k] < 0 )
         return false;
 
     return true;
   }
 
-  bool IsZeroCrossing(const double sc[8])
+  bool IsZeroCrossing(const double sc[4])
   {
     return !IsIn(sc) && !IsOut(sc);
   }

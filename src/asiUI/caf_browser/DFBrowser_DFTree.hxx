@@ -21,7 +21,6 @@
 // CAF Browser includes
 #include <asiUI.h>
 
-#include <Handle_DFBrowser_DFTree.hxx>
 #include <Standard_Transient.hxx>
 
 #include <TCollection_AsciiString.hxx>
@@ -35,7 +34,9 @@ class TDF_Label;
 
 class DFBrowser_DFTree : public Standard_Transient
 {
- public:
+  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFTree, Standard_Transient)
+
+public:
 
   asiUI_EXPORT
     DFBrowser_DFTree(const Handle(TDocStd_Document)& theDoc);
@@ -69,9 +70,7 @@ public:
 
   asiUI_EXPORT void AddDocName(TCollection_AsciiString& theName) const;
 
-  DEFINE_STANDARD_RTTI_INLINE(DFBrowser_DFTree, Standard_Transient)
-
- private: 
+ private:
 
   Handle(TDocStd_Document) myDoc;
   Handle(DFBrowser_LabelNode) myRoot;
