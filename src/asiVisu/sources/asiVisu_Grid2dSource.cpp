@@ -208,8 +208,8 @@ void asiVisu_Grid2dSource::addUniformVoxels(vtkUnstructuredGrid* pData)
         const double
           sc[4] = { m_grid->pArray[i]    [j]    [0],
                     m_grid->pArray[i + 1][j]    [0],
-                    m_grid->pArray[i]    [j + 1][0],
-                    m_grid->pArray[i + 1][j + 1][0] };
+                    m_grid->pArray[i + 1][j + 1][0],
+                    m_grid->pArray[i]    [j + 1][0] };
 
         const bool isOn  = ::IsZeroCrossing (sc);
         const bool isIn  = ::IsIn           (sc);
@@ -219,11 +219,11 @@ void asiVisu_Grid2dSource::addUniformVoxels(vtkUnstructuredGrid* pData)
              ( isIn  && (m_strategy & SS_In)  ) ||
              ( isOut && (m_strategy & SS_Out) ) )
         {
-          // Voxel corners.
+          // Cell corners.
           gp_Pnt P0(x,        y,        z);
           gp_Pnt P1(x + step, y,        z);
-          gp_Pnt P2(x,        y + step, z);
-          gp_Pnt P3(x + step, y + step, z);
+          gp_Pnt P2(x + step, y + step, z);
+          gp_Pnt P3(x,        y + step, z);
 
           // Extremities over the scalar values.
           m_fMinScalar = Min(m_fMinScalar, sc[0]);

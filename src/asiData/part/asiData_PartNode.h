@@ -42,6 +42,7 @@
 #include <asiData_FaceNode.h>
 #include <asiData_FaceNormsNode.h>
 #include <asiData_FeaturesNode.h>
+#include <asiData_Grid2dNode.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_NamingParameter.h>
 #include <asiData_SurfNode.h>
@@ -325,6 +326,9 @@ public:
 
   asiData_EXPORT Handle(asiData_FeaturesNode)
     GetFeatures() const;
+
+  asiData_EXPORT Handle(asiData_Grid2dNode)
+    GetGrid2d() const;
 
 // Initialization:
 public:

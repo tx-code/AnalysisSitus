@@ -752,6 +752,21 @@ Handle(asiData_FeaturesNode) asiData_PartNode::GetFeatures() const
   return nullptr;
 }
 
+//! \return underlying Node for Grid 2D.
+Handle(asiData_Grid2dNode) asiData_PartNode::GetGrid2d() const
+{
+  Handle(asiData_Grid2dNode) grid_n;
+  for ( Handle(ActAPI_IChildIterator) cit = this->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    grid_n = Handle(asiData_Grid2dNode)::DownCast( cit->Value() );
+
+    if ( !grid_n.IsNull() && grid_n->IsWellFormed() )
+      return grid_n;
+  }
+
+  return nullptr;
+}
+
 //-----------------------------------------------------------------------------
 
 //! Sets shape to store.

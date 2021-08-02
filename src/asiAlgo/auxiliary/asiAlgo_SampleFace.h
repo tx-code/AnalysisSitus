@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 31 July 2021
+// Created on: 01 August 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,52 +28,70 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiVisu_Grid2dPrs_h
-#define asiVisu_Grid2dPrs_h
+#ifndef asiAlgo_SampleFace_h
+#define asiAlgo_SampleFace_h
 
-// asiVisu includes
-#include <asiVisu_DefaultPrs.h>
+// asiAlgo includes
+#include <asiAlgo_Membership.h>
+#include <asiAlgo_UniformGrid.h>
 
-// asiData includes
-#include <asiData_Grid2dNode.h>
+// Active Data includes
+#include <ActAPI_IAlgorithm.h>
 
-//! Presentation class for a two-dimensional grid.
-class asiVisu_Grid2dPrs : public asiVisu_DefaultPrs
+// OpenCascade includes
+#include <IntTools_FClass2d.hxx>
+#include <TopoDS_Face.hxx>
+
+//-----------------------------------------------------------------------------
+
+//! Samples the UV domain of a face by overlaying a uniform grid.
+class asiAlgo_SampleFace : public ActAPI_IAlgorithm
 {
 public:
 
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_Grid2dPrs, asiVisu_Prs)
-
-  // Allows to register this Presentation class
-  DEFINE_PRESENTATION_FACTORY(asiData_Grid2dNode, Instance)
-
-public:
-
-  //! Pipelines.
-  enum PipelineId
-  {
-    Pipeline_UniformGrid = 1 //!< Uniform grid.
-  };
+  //! Ctor.
+  //! \param[in] face     the face in question.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_SampleFace(const TopoDS_Face&   face,
+                       ActAPI_ProgressEntry progress = nullptr,
+                       ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
-  asiVisu_EXPORT static Handle(asiVisu_Prs)
-    Instance(const Handle(ActAPI_INode)& N);
+  //! Performs face sampling.
+  //! \param[in] step the discretization step.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    Perform(const float step);
 
-public:
+  //! \return resulting grid.
+  asiAlgo_EXPORT const Handle(asiAlgo_UniformGrid<float>)&
+    GetResult() const;
 
-  virtual bool IsVisible() const
-  {
-    return true;
-  }
+protected:
 
-private:
+  //! Performs point-face classification.
+  //! \param[in] PonS the point to classify.
+  //! \return classification result.
+  asiAlgo_Membership
+    classify(const gp_Pnt2d& PonS);
 
-  //! Allocation is allowed only via Instance() method.
-  asiVisu_Grid2dPrs(const Handle(ActAPI_INode)& theNode);
+protected:
+
+  //! Face to sample.
+  TopoDS_Face m_face;
+
+  //! Parametric bounds of the sampled face.
+  double m_fUmin, m_fUmax, m_fVmin, m_fVmax;
+
+  //! Classifier.
+  IntTools_FClass2d m_class;
+
+  //! Uniform grid which is the result of the uniform sampling.
+  Handle(asiAlgo_UniformGrid<float>) m_grid;
 
 };
 
 #endif
-  

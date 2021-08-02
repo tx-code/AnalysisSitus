@@ -49,6 +49,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_ProjectPointOnMesh.h
   auxiliary/asiAlgo_ReapproxContour.h
   auxiliary/asiAlgo_ResampleADF.h
+  auxiliary/asiAlgo_SampleFace.h
   auxiliary/asiAlgo_ShapeSerializer.h
   auxiliary/asiAlgo_UniformGrid.h
   auxiliary/asiAlgo_Utils.h
@@ -76,6 +77,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_ProjectPointOnMesh.cpp
   auxiliary/asiAlgo_ReapproxContour.cpp
   auxiliary/asiAlgo_ResampleADF.cpp
+  auxiliary/asiAlgo_SampleFace.cpp
   auxiliary/asiAlgo_ShapeSerializer.cpp
   auxiliary/asiAlgo_Utils.cpp
 )

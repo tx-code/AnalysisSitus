@@ -70,6 +70,7 @@ REGISTER_NODE_TYPE(asiData_FaceNode)
 REGISTER_NODE_TYPE(asiData_FaceNormsNode)
 REGISTER_NODE_TYPE(asiData_FaceContourNode)
 REGISTER_NODE_TYPE(asiData_SurfNode)
+REGISTER_NODE_TYPE(asiData_Grid2dNode)
 REGISTER_NODE_TYPE(asiData_SurfDeviationNode)
 REGISTER_NODE_TYPE(asiData_EdgeNode)
 REGISTER_NODE_TYPE(asiData_CurveNode)
@@ -325,6 +326,7 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_FaceNormsNode>,      Partition_FaceNorms);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceContourNode>,    Partition_FaceContour);
   REGISTER_PARTITION(asiData_Partition<asiData_SurfNode>,           Partition_Surf);
+  REGISTER_PARTITION(asiData_Partition<asiData_Grid2dNode>,         Partition_Grid2d);
   REGISTER_PARTITION(asiData_Partition<asiData_EdgeNode>,           Partition_Edge);
   REGISTER_PARTITION(asiData_Partition<asiData_CurveNode>,          Partition_Curve);
   REGISTER_PARTITION(asiData_Partition<asiData_CurvatureCombsNode>, Partition_CurvatureCombs);

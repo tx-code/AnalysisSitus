@@ -57,6 +57,7 @@
 #include <asiAlgo_RecognizeBlends.h>
 #include <asiAlgo_RecognizeCavities.h>
 #include <asiAlgo_RecognizeDrillHoles.h>
+#include <asiAlgo_SampleFace.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -3634,6 +3635,66 @@ int ENGINE_PrintAttrs(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  // Get part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::cf->Model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  Handle(asiAlgo_AAG) G = partNode->GetAAG();
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdEngine::cf.IsNull() )
+  {
+    asiEngine_Part partApi( cmdEngine::cf->Model,
+                            cmdEngine::cf->ViewerPart->PrsMgr() );
+
+    partApi.GetHighlightedFaces(selected);
+
+    if ( selected.Extent() == 1 )
+    {
+      const TopoDS_Face& face = G->GetFace( selected.GetMinimalMapped() );
+
+      // Sample the face.
+      asiAlgo_SampleFace sampleFace( face,
+                                     interp->GetProgress(),
+                                     interp->GetPlotter() );
+      //
+      if ( !sampleFace.Perform(1.) )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to sample the face.");
+        return TCL_ERROR;
+      }
+
+      // Modify data model and actualize scene.
+      Handle(asiData_Grid2dNode) grid2d;
+      //
+      cmdEngine::cf->Model->OpenCommand();
+      {
+        grid2d = partApi.FindFaceGrid2d(true);
+        grid2d->SetUniformGrid( sampleFace.GetResult() );
+      }
+      cmdEngine::cf->Model->CommitCommand();
+      cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
+      cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(grid2d);
+    }
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4022,4 +4083,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t or for the interactively selected faces.",
     //
     __FILE__, group, ENGINE_PrintAttrs);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-face-grid",
+    //
+    "build-face-grid\n"
+    "\t Builds a uniform UV grid for the interactively selected face.",
+    //
+    __FILE__, group, ENGINE_BuildFaceGrid);
 }

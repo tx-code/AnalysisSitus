@@ -38,6 +38,7 @@
 #include <asiData_BoundaryEdgesNode.h>
 #include <asiData_CurvatureCombsNode.h>
 #include <asiData_DeviationNode.h>
+#include <asiData_Grid2dNode.h>
 #include <asiData_IVCurve2dNode.h>
 #include <asiData_IVCurveNode.h>
 #include <asiData_IVCurves2dNode.h>
@@ -229,6 +230,13 @@ public:
   Handle(asiData_Partition<asiData_FaceContourNode>) GetFaceContourPartition() const
   {
     return Handle(asiData_Partition<asiData_FaceContourNode>)::DownCast( this->Partition(Partition_FaceContour) );
+  }
+
+  //! Accessor for a Partition instance dedicated to Grid 2D Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_Grid2dNode>) GetGrid2dPartition() const
+  {
+    return Handle(asiData_Partition<asiData_Grid2dNode>)::DownCast( this->Partition(Partition_Grid2d) );
   }
 
   //! Accessor for a Partition instance dedicated to Edge Nodes.
@@ -553,6 +561,7 @@ protected:
     Partition_Face,
     Partition_FaceNorms,
     Partition_FaceContour,
+    Partition_Grid2d,
     Partition_Surf,
     Partition_Edge,
     Partition_Curve,

@@ -626,6 +626,41 @@ Handle(asiData_FeatureNode) asiEngine_Part::FindFeature(const int  featureId,
 
 //-----------------------------------------------------------------------------
 
+Handle(asiData_Grid2dNode) asiEngine_Part::CreateFaceGrid2d()
+{
+  Handle(asiData_Grid2dNode)
+    node = Handle(asiData_Grid2dNode)::DownCast( asiData_Grid2dNode::Instance() );
+  //
+  m_model->GetGrid2dPartition()->AddNode(node);
+
+  // Initialize.
+  node->Init();
+  node->SetName("UV grid");
+
+  Handle(asiData_PartNode) partNode = this->GetPart();
+
+  // Set as child for the Part Node.
+  partNode->AddChildNode(node);
+
+  return node;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_Grid2dNode)
+  asiEngine_Part::FindFaceGrid2d(const bool create)
+{
+  Handle(asiData_PartNode)   partNode = this->GetPart();
+  Handle(asiData_Grid2dNode) gridNode = partNode->GetGrid2d();
+
+  if ( gridNode.IsNull() && create )
+    return this->CreateFaceGrid2d();
+
+  return gridNode;
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            model,
                                                 const Handle(asiAlgo_History)& history,
                                                 const bool                     doResetTessParams)

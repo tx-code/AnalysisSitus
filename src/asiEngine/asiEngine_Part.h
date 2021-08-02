@@ -191,6 +191,19 @@ public:
 
 public:
 
+  //! Creates Grid 2D Node.
+  //! \return Grid 2D Node.
+  asiEngine_EXPORT Handle(asiData_Grid2dNode)
+    CreateFaceGrid2d();
+
+  //! Finds or creates a Grid 2D Node for the active face.
+  //! \param[in] create whether to create a Node if it does not exist.
+  //! \return found or newly created Grid 2D Node.
+  asiEngine_EXPORT Handle(asiData_Grid2dNode)
+    FindFaceGrid2d(const bool create = false);
+
+public:
+
   //! Updates part's geometry in a smart way, so all dependent attributes
   //! are also actualized.
   //! \param[in] model             CAD part to set.
