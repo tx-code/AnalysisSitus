@@ -11,7 +11,7 @@ proc __recognize-hull {} {
 
   clear
 
-  puts "Loading '$datadir/$datafile'..."
+  puts "...\t info: Loading '$datadir/$datafile'..."
 
   # Read input geometry.
   load-part $datadir/$datafile
@@ -22,10 +22,8 @@ proc __recognize-hull {} {
   # Recognize convex-hull faces.
   set fids [recognize-hull]
   #
-  puts "Recognized face IDs: $fids"
-  #
   if { [llength $fids] != [llength $refFids] } {
-    error "Unexpected number of recognized faces."
+    error "...\t error: Unexpected number of recognized faces."
   }
 
   set i 0
@@ -34,7 +32,7 @@ proc __recognize-hull {} {
     set index [lsearch $item $refItem]
 
     if { $index == -1 } {
-      error "Expected ${refItem} not found in the result list \{${fids}\}"
+      error "...\t error: Expected ${refItem} not found in the result list \{${fids}\}"
     }
     incr i
   }
