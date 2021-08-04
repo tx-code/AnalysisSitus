@@ -68,10 +68,12 @@ public:
     Nz       = nz;
     CellSize = cellSize;
 
+#if defined COUT_DEBUG
     std::cout << "Num. of cells along OX: " << nx << std::endl;
     std::cout << "Num. of cells along OY: " << ny << std::endl;
     std::cout << "Num. of cells along OZ: " << nz << std::endl;
     std::cout << "Memory threshold: " << uint64_t( sizeof(T)*(nx + 1)*(ny + 1)*(nz + 1) ) / (1024.*1024.) << "MiB" << std::endl;
+#endif
 
     pArray = new T**[nx + 1];
     //

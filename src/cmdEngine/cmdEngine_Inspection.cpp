@@ -56,6 +56,7 @@
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_RecognizeBlends.h>
 #include <asiAlgo_RecognizeCavities.h>
+#include <asiAlgo_RecognizeConvexHull.h>
 #include <asiAlgo_RecognizeDrillHoles.h>
 #include <asiAlgo_SampleFace.h>
 #include <asiAlgo_Timer.h>
@@ -3678,6 +3679,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
                                      interp->GetProgress(),
                                      interp->GetPlotter() );
       //
+      sampleFace.SetSquare( interp->HasKeyword(argc, argv, "square") );
+      //
       if ( !sampleFace.Perform(numBins) )
       {
         interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to sample the face.");
@@ -3734,7 +3737,96 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       // Draw the sampled points in 3D.
       interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);
     }
+    else
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select exactly one face to proceed with this command.");
+      return TCL_ERROR;
+    }
   }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  /* ==============
+   *  Get prepared.
+   * ============== */
+
+  // Get part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+
+  // Get part shape.
+  TopoDS_Shape shape = partNode->GetShape();
+  //
+  if ( shape.IsNull() ) // Contract check.
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The input shape is null.");
+    return TCL_ERROR;
+  }
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = partNode->GetAAG();
+
+  // Tolerance.
+  double tol = 0.1;
+  interp->GetKeyValue(argc, argv, "toler", tol);
+
+  // Number of probe points.
+  int numPts = 20;
+  interp->GetKeyValue(argc, argv, "num", numPts);
+
+  // Whether to draw the visual debugging entities.
+  const bool toDraw = interp->HasKeyword(argc, argv, "draw");
+
+  /* =====================
+   *  Perform recognition.
+   * ===================== */
+
+  asiAlgo_RecognizeConvexHull recognizer(aag,
+                                         interp->GetProgress(),
+                                         toDraw ? interp->GetPlotter() : nullptr);
+
+  // Configure the recognizer.
+  recognizer.SetGridResolution(numPts);
+  recognizer.SetTolerance(tol);
+
+  TIMER_NEW
+  TIMER_GO
+
+  if ( !recognizer.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to recognize convex-hull faces.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Convex-hull recognition")
+
+  // Access the recognized faces.
+  const asiAlgo_Feature& ids = recognizer.GetResultIndices();
+
+  // Highlight.
+  if ( !cmdEngine::cf.IsNull() )
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).HighlightFaces(ids);
+
+  // Return from Tcl function.
+  *interp << ids;
+
+  // Print out.
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Convex-hull faces: %1" << ids);
 
   return TCL_OK;
 }
@@ -4133,11 +4225,24 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-face-grid",
     //
-    "build-face-grid [-num <numBins>] [-filename <filename>]\n"
+    "build-face-grid [-num <numBins>] [-filename <filename>] [-square]\n"
     "\t Builds a uniform UV grid for the interactively selected face.\n"
     "\t Pass the number of bins to control how fine the discretization is.\n"
     "\t If the filename is passed, the sampled face is converted to vtkImageData\n"
-    "\t and dumped as a bitmap image.",
+    "\t and dumped as a bitmap image. Pass the '-square' keyword to force the\n"
+    "\t decomposition domain be of a squared shape.",
     //
     __FILE__, group, ENGINE_BuildFaceGrid);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("recognize-hull",
+    //
+    "recognize-hull [-toler <tol>] [-num <numPts>] [-draw]\n"
+    "\t Builds convex hull of the workpiece and selects all faces lying on it.\n"
+    "\t Pass tolerance with the '-toler' keyword to specify the precision of PMC\n"
+    "\t over the boundary. Use the '-num' keyword to specify the number of sampling\n"
+    "\t points for the faces. Pass the '-draw' keyword to dump visual debugging\n"
+    "\t entities, such as the convex hull, BVH, projection points, etc.",
+    //
+    __FILE__, group, ENGINE_RecognizeHull);
 }

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 01 August 2021
+// Created on: 03 August 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,83 +28,77 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_SampleFace_h
-#define asiAlgo_SampleFace_h
+#ifndef asiAlgo_RecognizeConvexHull_h
+#define asiAlgo_RecognizeConvexHull_h
 
 // asiAlgo includes
-#include <asiAlgo_BaseCloud.h>
-#include <asiAlgo_Membership.h>
-#include <asiAlgo_UniformGrid.h>
-
-// Active Data includes
-#include <ActAPI_IAlgorithm.h>
-
-// OpenCascade includes
-#include <IntTools_FClass2d.hxx>
-#include <TopoDS_Face.hxx>
+#include <asiAlgo_Recognizer.h>
 
 //-----------------------------------------------------------------------------
 
-//! Samples the UV domain of a face by overlaying a uniform grid.
-class asiAlgo_SampleFace : public ActAPI_IAlgorithm
+//! Recognizes all faces lying on a convex hull of the CAD part.
+class asiAlgo_RecognizeConvexHull : public asiAlgo_Recognizer
 {
 public:
 
-  //! Ctor.
-  //! \param[in] face     the face in question.
-  //! \param[in] progress the progress notifier.
-  //! \param[in] plotter  the imperative plotter.
-  asiAlgo_EXPORT
-    asiAlgo_SampleFace(const TopoDS_Face&   face,
-                       ActAPI_ProgressEntry progress = nullptr,
-                       ActAPI_PlotterEntry  plotter  = nullptr);
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeConvexHull, asiAlgo_Recognizer)
 
 public:
 
-  //! Sets a Boolean flag indicating whether the planar decomposition
-  //! we are constructing should be a square.
-  //! \param[in] square the Boolean value to set.
-  asiAlgo_EXPORT void
-    SetSquare(const bool square);
+  //! Ctor with a shape.
+  //! \param[in] shape    the shape to recognize.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_RecognizeConvexHull(const TopoDS_Shape&  shape,
+                                ActAPI_ProgressEntry progress = nullptr,
+                                ActAPI_PlotterEntry  plotter  = nullptr);
 
-  //! Performs face sampling.
-  //! \param[in] numBins the number of discretization steps.
+  //! Ctor with AAG.
+  //! \param[in] aag      the AAG instance for the shape to recognize.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_RecognizeConvexHull(const Handle(asiAlgo_AAG)& aag,
+                                ActAPI_ProgressEntry       progress = nullptr,
+                                ActAPI_PlotterEntry        plotter  = nullptr);
+
+public:
+
+  //! Sets the resolution of a Cartesian grid that will be constructed
+  //! in the parametric spaces of faces.
+  //! \param[in] numSlices the number of slices along U and V axes.
+  asiAlgo_EXPORT void
+    SetGridResolution(const int numSlices);
+
+  //! \return the grid resolution.
+  asiAlgo_EXPORT int
+    GetGridResolution() const;
+
+  //! Sets the tolerance for point-on-surface classification.
+  //! \param[in] tol the tolerance to set.
+  asiAlgo_EXPORT void
+    SetTolerance(const double tol);
+
+  //! \return point-on-surface classification tolerance.
+  asiAlgo_EXPORT double
+    GetTolerance() const;
+
+public:
+
+  //! Performs recognition.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform(const int numBins);
-
-  //! \return resulting grid.
-  asiAlgo_EXPORT const Handle(asiAlgo_UniformGrid<float>)&
-    GetResult() const;
-
-  //! \return the sampled points in the modeling space.
-  asiAlgo_EXPORT Handle(asiAlgo_BaseCloud<double>)
-    GetResult3d() const;
+    Perform();
 
 protected:
 
-  //! Performs point-face classification.
-  //! \param[in] PonS the point to classify.
-  //! \return classification result.
-  asiAlgo_Membership
-    classify(const gp_Pnt2d& PonS);
+  //! Cartesian grid resolution.
+  int m_iGridPts;
 
-protected:
-
-  //! Indicates whether the uniform grid we construct should be a square.
-  bool m_bSquare;
-
-  //! Face to sample.
-  TopoDS_Face m_face;
-
-  //! Parametric bounds of the sampled face.
-  double m_fUmin, m_fUmax, m_fVmin, m_fVmax;
-
-  //! Classifier.
-  IntTools_FClass2d m_class;
-
-  //! Uniform grid which is the result of the uniform sampling.
-  Handle(asiAlgo_UniformGrid<float>) m_grid;
+  //! Tolerance for checking if a point is on a surface.
+  double m_fToler;
 
 };
 

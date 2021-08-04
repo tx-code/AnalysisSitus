@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 03 August 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,44 +28,48 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+#ifndef asiAlgo_FeatureAttrConvexHull_h
+#define asiAlgo_FeatureAttrConvexHull_h
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
+// asiAlgo includes
+#include <asiAlgo_FeatureAttrFace.h>
 
-// asiTestEngine includes
-#include <asiTestEngine.h>
+//-----------------------------------------------------------------------------
 
-//! IDs for Test Cases.
-enum test_CaseID
+//! Attribute to mark a face as belonging to the convex hull.
+class asiAlgo_FeatureAttrConvexHull : public asiAlgo_FeatureAttrFace
 {
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
+public:
 
-/* ------------------------------------------------------------------------ */
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrConvexHull, asiAlgo_FeatureAttrFace)
 
-  CaseID_DataDictionary,
-  CaseID_Utils,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! Creates attribute with feature ID.
+  //! \param[in] featureId 1-based feature ID.
+  asiAlgo_FeatureAttrConvexHull(const int featureId = 0) : asiAlgo_FeatureAttrFace(featureId)
+  {}
 
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
-  CaseID_RecognizeCavities,
-  CaseID_RecognizeConvexHull,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! \return static GUID associated with this type of attribute.
+  static const Standard_GUID& GUID()
+  {
+    static Standard_GUID guid("7D64A5BE-8A8E-420F-B9CC-8874CC0E7A3A");
+    return guid;
+  }
 
-  CaseID_XdeDoc,
+  //! \return GUID associated with this type of attribute.
+  virtual const Standard_GUID& GetGUID() const override
+  {
+    return GUID();
+  }
 
-/* ------------------------------------------------------------------------ */
-
-  CaseID_LAST
+  //! \return human-readable name of the attribute.
+  virtual const char* GetName() const override
+  {
+    return "Convex-hull face";
+  }
 
 };
 

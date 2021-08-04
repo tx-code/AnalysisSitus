@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 04 August 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,45 +28,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+// Own include
+#include <asiTest_RecognizeConvexHull.h>
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
+//-----------------------------------------------------------------------------
 
-// asiTestEngine includes
-#include <asiTestEngine.h>
-
-//! IDs for Test Cases.
-enum test_CaseID
+outcome asiTest_RecognizeConvexHull::testAll(const int /*funcID*/)
 {
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
+  // Get filename of script to execute.
+  TCollection_AsciiString fullFilename = GetPath("inspection/recognize-hull");
 
-/* ------------------------------------------------------------------------ */
+  // Execute test script.
+  outcome res = evaluateAll(fullFilename);
 
-  CaseID_DataDictionary,
-  CaseID_Utils,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
-  CaseID_RecognizeCavities,
-  CaseID_RecognizeConvexHull,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_XdeDoc,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_LAST
-
-};
-
-#endif
+  // Return status.
+  return res;
+}

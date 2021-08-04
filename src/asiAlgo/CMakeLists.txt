@@ -20,6 +20,7 @@ set (CPP_FILES
 
 set (aux_H_FILES
   auxiliary/asiAlgo_AttrFaceColor.h
+  auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
   auxiliary/asiAlgo_BullardRNG.h
   auxiliary/asiAlgo_BVHAlgo.h
@@ -47,6 +48,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_IntersectSS.h
   auxiliary/asiAlgo_Membership.h
   auxiliary/asiAlgo_ProjectPointOnMesh.h
+  auxiliary/asiAlgo_QuickHull.h
   auxiliary/asiAlgo_ReapproxContour.h
   auxiliary/asiAlgo_ResampleADF.h
   auxiliary/asiAlgo_SampleFace.h
@@ -55,6 +57,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_Utils.h
 )
 set (aux_CPP_FILES
+  auxiliary/asiAlgo_BuildConvexHull.cpp
   auxiliary/asiAlgo_BuildHLR.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp
   auxiliary/asiAlgo_BVHFacets.cpp
@@ -75,6 +78,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_IntersectCS.cpp
   auxiliary/asiAlgo_IntersectSS.cpp
   auxiliary/asiAlgo_ProjectPointOnMesh.cpp
+  auxiliary/asiAlgo_QuickHull.cpp
   auxiliary/asiAlgo_ReapproxContour.cpp
   auxiliary/asiAlgo_ResampleADF.cpp
   auxiliary/asiAlgo_SampleFace.cpp
@@ -243,6 +247,7 @@ set (features_H_FILES
   features/asiAlgo_ExtractFeaturesResult.h
   features/asiAlgo_FeatureAngleType.h
   features/asiAlgo_FeatureAttrBaseFace.h
+  features/asiAlgo_FeatureAttrConvexHull.h
   features/asiAlgo_FeatureAttr.h
   features/asiAlgo_FeatureAttrAdjacency.h
   features/asiAlgo_FeatureAttrAngle.h
@@ -254,6 +259,7 @@ set (features_H_FILES
   features/asiAlgo_RecognitionRule.h
   features/asiAlgo_RecognizeCavities.h
   features/asiAlgo_RecognizeCavitiesRule.h
+  features/asiAlgo_RecognizeConvexHull.h
   features/asiAlgo_RecognizeDrillHoles.h
   features/asiAlgo_RecognizeDrillHolesRule.h
   features/asiAlgo_RecognizeIsolated.h
@@ -277,6 +283,7 @@ set (features_CPP_FILES
   features/asiAlgo_Isomorphism.cpp
   features/asiAlgo_RecognizeCavities.cpp
   features/asiAlgo_RecognizeCavitiesRule.cpp
+  features/asiAlgo_RecognizeConvexHull.cpp
   features/asiAlgo_RecognizeDrillHoles.cpp
   features/asiAlgo_RecognizeDrillHolesRule.cpp
   features/asiAlgo_RecognizeIsolated.cpp

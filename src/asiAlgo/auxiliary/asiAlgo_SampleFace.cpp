@@ -51,6 +51,7 @@ asiAlgo_SampleFace::asiAlgo_SampleFace(const TopoDS_Face&   face,
                                        ActAPI_ProgressEntry progress,
                                        ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm (progress, plotter),
+  m_bSquare         (false),
   m_face            (face),
   m_fUmin           (0.),
   m_fUmax           (0.),
@@ -61,6 +62,13 @@ asiAlgo_SampleFace::asiAlgo_SampleFace(const TopoDS_Face&   face,
 
   if ( !m_face.IsNull() )
     BRepTools::UVBounds(m_face, m_fUmin, m_fUmax, m_fVmin, m_fVmax);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_SampleFace::SetSquare(const bool square)
+{
+  m_bSquare = square;
 }
 
 //-----------------------------------------------------------------------------
@@ -91,28 +99,44 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
 #endif
 
   // Steps along axes.
-  const double xStep = (xMax - xMin) / numBins;
-  const double yStep = (yMax - yMin) / numBins;
-  const double step  = Max(xStep, yStep);
+  double xStep, yStep, step;
+  int nx, ny;
+  //
+  if ( m_bSquare )
+  {
+    xStep = (xMax - xMin) / numBins;
+    yStep = (yMax - yMin) / numBins;
+    step  = Max(xStep, yStep);
 
-  // Number of cells in each dimension.
-  const int nx = int( (xMax - xMin) / step );
-  const int ny = int( (yMax - yMin) / step );
-  const int n  = Max(nx, ny);
+    const int _nx = int( (xMax - xMin) / step );
+    const int _ny = int( (yMax - yMin) / step );
+    const int n   = Max(_nx, _ny);
+
+    nx = ny = n;
+  }
+  else
+  {
+    xStep = (numBins + 1) * (xMax - xMin) / (numBins*numBins);
+    yStep = (numBins + 1) * (yMax - yMin) / (numBins*numBins);
+    step  = Min(xStep, yStep);
+
+    nx = int( (xMax - xMin) / step ) + 1;
+    ny = int( (yMax - yMin) / step ) + 1;
+  }
 
   // Prepare the output grid.
   m_grid = new asiAlgo_UniformGrid<float>( (float) xMin,
                                            (float) yMin,
                                             0.f,
-                                            n, n, 0,
+                                            nx, ny, 0,
                                            (float) step );
 
   // Process the block of data.
   double x, y;
-  for ( int i = 0; i <= n; ++i )
+  for ( int i = 0; i <= nx; ++i )
   {
     x = xMin + step*i;
-    for ( int j = 0; j <= n; ++j )
+    for ( int j = 0; j <= ny; ++j )
     {
       y = yMin + step*j;
 

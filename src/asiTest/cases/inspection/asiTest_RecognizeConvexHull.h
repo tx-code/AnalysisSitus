@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 04 August 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,44 +28,50 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+#ifndef asiTest_RecognizeConvexHull_HeaderFile
+#define asiTest_RecognizeConvexHull_HeaderFile
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
+// asiTest includes
+#include <asiTest_CaseIDs.h>
+#include <asiTest_TclTestCase.h>
 
-// asiTestEngine includes
-#include <asiTestEngine.h>
-
-//! IDs for Test Cases.
-enum test_CaseID
+//! Test functions for convex-hull faces recognition.
+class asiTest_RecognizeConvexHull : public asiTest_TclTestCase
 {
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! Returns Test Case ID.
+  //! \return ID of the Test Case.
+  static int ID()
+  {
+    return CaseID_RecognizeConvexHull;
+  }
 
-  CaseID_DataDictionary,
-  CaseID_Utils,
+  //! Returns filename for the description.
+  //! \return filename for the description of the Test Case.
+  static std::string DescriptionFn()
+  {
+    return "asiTest_RecognizeConvexHull";
+  }
 
-/* ------------------------------------------------------------------------ */
+  //! Returns Test Case description directory.
+  //! \return description directory for the Test Case.
+  static std::string DescriptionDir()
+  {
+    return "inspection";
+  }
 
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
-  CaseID_RecognizeCavities,
-  CaseID_RecognizeConvexHull,
+  //! Returns pointers to the Test Functions to launch.
+  //! \param[out] functions output collection of pointers.
+  static void Functions(asiTestFunctions& functions)
+  {
+    functions << &testAll
+    ; // Put semicolon here for convenient adding new functions above ;)
+  }
 
-/* ------------------------------------------------------------------------ */
+private:
 
-  CaseID_XdeDoc,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_LAST
+  static outcome testAll(const int funcID);
 
 };
 
