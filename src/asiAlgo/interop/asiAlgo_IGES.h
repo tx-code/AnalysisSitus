@@ -28,26 +28,62 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_IGES_h
-#define asiAlgo_IGES_h
+#pragma once
 
 // A-Situs includes
 #include <asiAlgo.h>
 
-// OCCT includes
-#include <Precision.hxx>
-#include <TCollection_AsciiString.hxx>
-#include <TopoDS_Shape.hxx>
+// Active Data includes
+#include <ActAPI_IAlgorithm.h>
+
+class Interface_InterfaceModel;
+class Interface_CheckIterator;
+class XSControl_WorkSession;
+class TCollection_AsciiString;
+class TopoDS_Shape;
 
 //-----------------------------------------------------------------------------
 
 //! IGES interoperability tool.
-namespace asiAlgo_IGES
+class asiAlgo_IGES : public ActAPI_IAlgorithm
 {
+public:
+
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IGES, ActAPI_IAlgorithm)
+
+public:
+
+  //! Ctor accepting progress notifier and imperative plotter.
+  //! \param[in] progress progress notifier.
+  //! \param[in] plotter  imperative plotter.
+  asiAlgo_IGES(ActAPI_ProgressEntry progress,
+               ActAPI_PlotterEntry  plotter = nullptr)
+    //
+    : ActAPI_IAlgorithm(progress, plotter) {}
+
+public:
+  
+  //! Performs IGES import.
+  //! \param filename  [in]  file to read.
+  //! \param result    [out] retrieved shape.
+  //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     Read(const TCollection_AsciiString& filename,
-         const bool                     doHealing,
          TopoDS_Shape&                  result);
+
+private:
+
+  //! Prints statistics of warnings and fails.
+  //! \param[in] model conversion model to populate problem messages.
+  //! \param[in] checkIterator list of problems.
+  //! \param[in] name title for set of problems.
+  asiAlgo_EXPORT void printCheckStats(const Handle(Interface_InterfaceModel)& model,
+                                      const Interface_CheckIterator&          checkIterator);
+
+  //! Clears the passed Work Session object.
+  //! \param[in] WS Work Session to release.
+  asiAlgo_EXPORT void
+    clearSession(const Handle(XSControl_WorkSession)& WS);
 };
 
-#endif

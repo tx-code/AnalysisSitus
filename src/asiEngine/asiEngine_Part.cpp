@@ -48,6 +48,7 @@
 #include <asiAlgo_MeshGen.h>
 #include <asiAlgo_ReadSTEPWithMeta.h>
 #include <asiAlgo_STEP.h>
+#include <asiAlgo_IGES.h>
 #include <asiAlgo_Utils.h>
 
 // Active Data includes
@@ -283,6 +284,20 @@ bool asiEngine_Part::Import(const TCollection_AsciiString& filename)
 
       // Update geometric data structures.
       this->Update( shape, nullptr, !partNode->IsKeepTessParams() );
+
+      break;
+    }
+    case FileFormat_IGES:
+    {
+      TopoDS_Shape shape;
+      asiAlgo_IGES reader(m_progress, m_plotter);
+      if ( !reader.Read(filename, shape) )
+      {
+        return false;
+      }
+
+      // Update geometric data structures.
+      this->Update(shape, nullptr, !partNode->IsKeepTessParams());
 
       break;
     }
