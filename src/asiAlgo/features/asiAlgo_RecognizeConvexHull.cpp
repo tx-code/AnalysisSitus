@@ -41,6 +41,7 @@
 
 // OpenCascade includes
 #include <BRepAdaptor_Surface.hxx>
+#include <BRepTools.hxx>
 #include <TopExp_Explorer.hxx>
 
 #undef COUT_DEBUG
@@ -287,23 +288,10 @@ bool asiAlgo_RecognizeConvexHull::Perform()
 
     Handle(asiAlgo_BaseCloud<double>) pts3d = sampleFace.GetResult3d();
 
-    // In the case of undersampling, we do not want to make the overlay grid
-    // finer (it's bad for performance). We rather fall back to vertices on
-    // a face and use them as the probe points.
-    int numProbes = pts3d->GetNumberOfElements();
-    //
-    if ( !numProbes && ::IsPlanar(face, 5.*M_PI/180.) )
-    {
-      TopTools_IndexedMapOfShape verts;
-      TopExp::MapShapes(face, TopAbs_VERTEX, verts);
-      //
-      for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
-      {
-        pts3d->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
-        numProbes++;
-      }
-    }
+    // Add feature points complementary to the overlay grid.
+    this->addFeaturePts(face, pts3d);
 
+    const int numProbes = pts3d->GetNumberOfElements();
     numPointsProcessed += numProbes;
 
     if ( toDraw )
@@ -333,7 +321,7 @@ bool asiAlgo_RecognizeConvexHull::Perform()
       }
     }
 
-    if ( numOk > numProbes / 2 )
+    if ( numOk == numProbes )
       convexHullFaces.Add(f);
   }
 
@@ -372,38 +360,24 @@ bool asiAlgo_RecognizeConvexHull::Perform()
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_RecognizeConvexHull::sampleSpecialCases(const TopoDS_Face&                       face,
-                                                     const Handle(asiAlgo_BaseCloud<double>)& pts)
+void asiAlgo_RecognizeConvexHull::addFeaturePts(const TopoDS_Face&                       face,
+                                                const Handle(asiAlgo_BaseCloud<double>)& pts) const
 {
-  double r = 0., angMin = 0., angMax = 0., hMin = 0., hMax = 0.;
-  gp_Ax1 ax;
-
   BRepAdaptor_Surface bas(face);
 
   TopTools_IndexedMapOfShape verts;
   TopExp::MapShapes(face, TopAbs_VERTEX, verts);
 
-  /* Planar face */
-  if ( ::IsPlanar(face, 5.*M_PI/180.) )
+  // Add vertices.
+  for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
   {
-    // Add vertices.
-    for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
-    {
-      pts->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
-    }
+    pts->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
   }
 
-  /* Cylindrical face */
-  else if ( asiAlgo_Utils::IsCylindrical(face, r, ax, true, angMin, angMax, hMin, hMax) )
-  {
-    // Add vertices.
-    for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
-    {
-      pts->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
-    }
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
 
-    // Add midpoint.
-    gp_Pnt2d midPt( (angMin + angMax)*0.5, (hMin + hMax)*0.5 );
-    pts->AddElement(midPt);
-  }
+  // Add midpoint.
+  gp_Pnt2d midPt( (uMin + uMax)*0.5, (vMin + vMax)*0.5 );
+  pts->AddElement( bas.Value( midPt.X(), midPt.Y() ) );
 }

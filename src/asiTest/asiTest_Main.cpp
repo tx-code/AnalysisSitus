@@ -95,18 +95,18 @@ int main(int argc, char* argv[])
   std::cout << "asiTest : main()" << std::endl;
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
   //
-  /*CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>        );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>        );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>         );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeBlends>     );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeCavities>   );*/
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeCavities>   );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeConvexHull> );
-  /*CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>      );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AAG>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>          );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>     );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );*/
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
 
   // Launcher of entire test suite
   asiTestEngine_Launcher Launcher;

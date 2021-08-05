@@ -32,7 +32,10 @@
 #define asiAlgo_RecognizeConvexHull_h
 
 // asiAlgo includes
+#include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Recognizer.h>
+
+class TopoDS_Face;
 
 //-----------------------------------------------------------------------------
 
@@ -101,6 +104,11 @@ public:
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     Perform();
+
+protected:
+
+  void addFeaturePts(const TopoDS_Face&                       face,
+                     const Handle(asiAlgo_BaseCloud<double>)& pts) const;
 
 protected:
 
