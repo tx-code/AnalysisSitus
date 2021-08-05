@@ -100,7 +100,7 @@ void asiVisu_PCurveSource::SetEdgeOnFace(const TopoDS_Edge& edge,
     return;
   }
 
-  // Discretize with different methods (if onw fails, try another).
+  // Discretize with different methods (if one fails, try another).
   std::vector<gp_Pnt> points;
   int nPts = 0;
   //

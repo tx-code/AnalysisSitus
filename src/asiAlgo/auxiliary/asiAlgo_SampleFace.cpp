@@ -34,16 +34,141 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_CheckValidity.h>
+#include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_Timer.h>
+#include <asiAlgo_Utils.h>
 
 // OpenCascade includes
+#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <GCPnts_QuasiUniformDeflection.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+
+#define TOT_VERTS 10000
+
+static double pgon[TOT_VERTS][2];
 
 #undef DRAW_DEBUG
 #if defined DRAW_DEBUG
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
+
+namespace
+{
+  //! Discretizes the passed parametric curve `c2d`.
+  bool DiscretizePCurve(const Handle(Geom2d_Curve)& c2d,
+                        const double                f,
+                        const double                l,
+                        std::vector<gp_XY>&         points)
+  {
+    // Discretize with different methods (if one fails, try another).
+    int nPts = 0;
+    //
+    try
+    {
+      const bool revOrder = (f > l ? true : false);
+      //
+      Geom2dAdaptor_Curve gac(c2d, revOrder ? l : f, revOrder ? f : l);
+      GCPnts_QuasiUniformDeflection QUDefl(gac, 1e-4);
+      //
+      if ( !QUDefl.IsDone() )
+      {
+        GCPnts_TangentialDeflection TDefl(gac, 1.0, 1e-4);
+        //
+        if ( !TDefl.NbPoints() )
+        {
+          return false;
+        }
+        else
+        {
+          nPts = TDefl.NbPoints();
+
+          for ( int p = 1; p <= nPts; ++p )
+          {
+            gp_XY point = gac.Value( TDefl.Parameter(p) ).XY();
+            points.push_back(point);
+          }
+        }
+      }
+      else
+      {
+        nPts = QUDefl.NbPoints();
+
+        if ( revOrder )
+          for ( int p = nPts; p >= 1; --p )
+            points.push_back( gac.Value( QUDefl.Parameter(p) ).XY() );
+        else
+          for ( int p = 1; p <= nPts; ++p )
+            points.push_back( gac.Value( QUDefl.Parameter(p) ).XY() );
+
+      }
+    }
+    catch ( ... )
+    {
+      return false;
+    }
+
+    return nPts > 0;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_SampleFace::Wire2Polygon(const TopoDS_Wire&  wire,
+                                      const TopoDS_Face&  face,
+                                      std::vector<gp_XY>& polygon)
+{
+  TopTools_IndexedMapOfShape edges;
+  TopExp::MapShapes(wire, TopAbs_EDGE, edges);
+
+  for ( BRepTools_WireExplorer wexp(wire); wexp.More(); wexp.Next() )
+  {
+    const TopoDS_Edge& edge = wexp.Current();
+
+    if ( (edge.Orientation() == TopAbs_INTERNAL) || (edge.Orientation() == TopAbs_EXTERNAL) )
+      continue;
+
+    // Access p-curve.
+    double f, l;
+    Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(edge, face, f, l);
+    //
+    if ( c2d.IsNull() )
+    {
+      return false;
+    }
+
+    std::vector<gp_XY> pts;
+
+    if ( !::DiscretizePCurve(c2d, f, l, pts) )
+    {
+      return false;
+    }
+
+    if ( edge.Orientation() == TopAbs_FORWARD )
+    {
+      for ( auto pit = pts.cbegin(); pit != pts.cend(); ++pit )
+        polygon.push_back(*pit);
+    }
+    else
+    {
+      for ( auto pit = pts.rbegin(); pit != pts.rend(); ++pit )
+        polygon.push_back(*pit);
+    }
+  }
+
+#if defined COUT_DEBUG
+  std::cout << "--" << std::endl;
+  for ( const auto& pt : polygon )
+  {
+    std::cout << "Next UV point: " << pt.X() << ", " << pt.Y() << std::endl;
+  }
+#endif
+
+  return true;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -52,6 +177,7 @@ asiAlgo_SampleFace::asiAlgo_SampleFace(const TopoDS_Face&   face,
                                        ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm (progress, plotter),
   m_bSquare         (false),
+  m_bHaines         (false),
   m_face            (face),
   m_fUmin           (0.),
   m_fUmax           (0.),
@@ -73,6 +199,13 @@ void asiAlgo_SampleFace::SetSquare(const bool square)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_SampleFace::SetUseHaines(const bool on)
+{
+  m_bHaines = on;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_SampleFace::Perform(const int numBins)
 {
   if ( m_face.IsNull() )
@@ -80,6 +213,14 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
 
   if ( numBins < 2 )
     return false;
+
+  if ( m_bHaines && m_polygon.empty() )
+  {
+    TopoDS_Wire wire = asiAlgo_Utils::OuterWire(m_face);
+
+    m_polygon.clear();
+    Wire2Polygon(wire, m_face, m_polygon);
+  }
 
   // Domain.
   const double xMin = m_fUmin;
@@ -191,14 +332,38 @@ Handle(asiAlgo_BaseCloud<double>) asiAlgo_SampleFace::GetResult3d() const
 asiAlgo_Membership
   asiAlgo_SampleFace::classify(const gp_Pnt2d& PonS)
 {
-  const TopAbs_State state = m_class.Perform(PonS);
+  if ( m_bHaines )
+  {
+    if ( m_polygon.empty() || (m_polygon.size() >= TOT_VERTS) )
+      return Membership_Unknown;
 
-  if ( state == TopAbs_IN )
-    return Membership_In;
-  if ( state == TopAbs_ON )
-    return Membership_On;
-  if ( state == TopAbs_OUT )
-    return Membership_Out;
+    int idx = 0;
+    for ( const auto& uv : m_polygon )
+    {
+      pgon[idx][0] = uv.X();
+      pgon[idx][1] = uv.Y();
+      idx++;
+    }
+
+    double point[2] = { PonS.X(), PonS.Y() };
+    const int state = CrossingsTest(pgon, int( m_polygon.size() ), point);
+
+    if ( state == 1 )
+      return Membership_In;
+    if ( state == 0 )
+      return Membership_Out;
+  }
+  else
+  {
+    const TopAbs_State state = m_class.Perform(PonS);
+
+    if ( state == TopAbs_IN )
+      return Membership_In;
+    if ( state == TopAbs_ON )
+      return Membership_On;
+    if ( state == TopAbs_OUT )
+      return Membership_Out;
+  }
 
   return Membership_Unknown;
 }

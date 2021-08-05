@@ -40,12 +40,88 @@
 #include <asiAlgo_SampleFace.h>
 
 // OpenCascade includes
+#include <BRepAdaptor_Surface.hxx>
 #include <TopExp_Explorer.hxx>
 
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
+
+namespace
+{
+  bool IsPlanar(const TopoDS_Face& face,
+                const double       angTolRad)
+  {
+    if ( asiAlgo_Utils::IsPlanar(face) )
+      return true;
+
+    std::vector<gp_Dir> norms;
+
+    // Get triangulation.
+    TopLoc_Location loc;
+    Handle(Poly_Triangulation) tris = BRep_Tool::Triangulation(face, loc);
+
+    // Iterate over triangles.
+    const Poly_Array1OfTriangle& triangles = tris->Triangles();
+    const TColgp_Array1OfPnt&    nodes     = tris->Nodes();
+    //
+    for ( int elemId = triangles.Lower(); elemId <= triangles.Upper(); ++elemId )
+    {
+      const Poly_Triangle& tri = triangles(elemId);
+
+      int n1, n2, n3;
+      tri.Get(n1, n2, n3);
+
+      gp_Pnt P0 = nodes(n1);
+      P0.Transform(loc);
+      //
+      gp_Pnt P1 = nodes(n2);
+      P1.Transform(loc);
+      //
+      gp_Pnt P2 = nodes(n3);
+      P2.Transform(loc);
+
+      /* Initialize normal */
+
+      gp_Vec V1(P0, P1);
+      //
+      if ( V1.SquareMagnitude() < 1e-8 )
+        continue; // Skip invalid facet.
+
+      gp_Vec V2(P0, P2);
+      //
+      if ( V2.SquareMagnitude() < 1e-8 )
+        continue; // Skip invalid facet.
+
+      // Compute norm
+      gp_Vec normVec = V1.Crossed(V2);
+      //
+      if ( normVec.SquareMagnitude() < 1e-8 )
+        continue; // Skip invalid facet
+
+      norms.push_back(normVec);
+    }
+
+    if ( norms.empty() )
+      return false;
+
+    if ( norms.size() == 1 )
+      return true;
+
+    const gp_Dir& refNorm = norms[0];
+
+    for ( size_t i = 1; i < norms.size(); ++i )
+    {
+      const double ang = norms[i].Angle(refNorm);
+      //
+      if ( Abs(ang) > angTolRad )
+        return false;
+    }
+
+    return true;
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -54,8 +130,9 @@ asiAlgo_RecognizeConvexHull::asiAlgo_RecognizeConvexHull(const TopoDS_Shape&  sh
                                                          ActAPI_PlotterEntry  plotter)
 //
 : asiAlgo_Recognizer ( shape, nullptr, progress, plotter ),
-  m_iGridPts         ( 5 ),
-  m_fToler           ( 0.1 ) // mm
+  m_iGridPts         ( 20 ),
+  m_fToler           ( 0.1 ), // mm
+  m_bHaines          ( true )
 {}
 
 //-----------------------------------------------------------------------------
@@ -65,8 +142,9 @@ asiAlgo_RecognizeConvexHull::asiAlgo_RecognizeConvexHull(const Handle(asiAlgo_AA
                                                          ActAPI_PlotterEntry        plotter)
 //
 : asiAlgo_Recognizer ( aag, progress, plotter ),
-  m_iGridPts         ( 5 ),
-  m_fToler           ( 0.1 ) // mm
+  m_iGridPts         ( 20 ),
+  m_fToler           ( 0.1 ), // mm
+  m_bHaines          ( true )
 {}
 
 //-----------------------------------------------------------------------------
@@ -95,6 +173,20 @@ void asiAlgo_RecognizeConvexHull::SetTolerance(const double tol)
 double asiAlgo_RecognizeConvexHull::GetTolerance() const
 {
   return m_fToler;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeConvexHull::SetUseHaines(const bool on)
+{
+  m_bHaines = on;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeConvexHull::GetUseHaines() const
+{
+  return m_bHaines;
 }
 
 //-----------------------------------------------------------------------------
@@ -187,14 +279,32 @@ bool asiAlgo_RecognizeConvexHull::Perform()
     // Sample face in its UV domain.
     asiAlgo_SampleFace sampleFace(face);
     //
-    sampleFace.SetSquare(false);
+    sampleFace.SetUseHaines (m_bHaines);
+    sampleFace.SetSquare    (true);
     //
     if ( !sampleFace.Perform(m_iGridPts) )
       continue;
 
     Handle(asiAlgo_BaseCloud<double>) pts3d = sampleFace.GetResult3d();
 
-    numPointsProcessed += pts3d->GetNumberOfElements();
+    // In the case of undersampling, we do not want to make the overlay grid
+    // finer (it's bad for performance). We rather fall back to vertices on
+    // a face and use them as the probe points.
+    int numProbes = pts3d->GetNumberOfElements();
+    //
+    if ( !numProbes && ::IsPlanar(face, 5.*M_PI/180.) )
+    {
+      TopTools_IndexedMapOfShape verts;
+      TopExp::MapShapes(face, TopAbs_VERTEX, verts);
+      //
+      for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
+      {
+        pts3d->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
+        numProbes++;
+      }
+    }
+
+    numPointsProcessed += numProbes;
 
     if ( toDraw )
     {
@@ -206,8 +316,7 @@ bool asiAlgo_RecognizeConvexHull::Perform()
     }
 
     // Project points.
-    int numProbes = pts3d->GetNumberOfElements();
-    int numOk     = 0;
+    int numOk = 0;
     //
     for ( int p = 0; p < numProbes; ++p )
     {
@@ -259,4 +368,42 @@ bool asiAlgo_RecognizeConvexHull::Perform()
   }
 
   return true; // Success.
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeConvexHull::sampleSpecialCases(const TopoDS_Face&                       face,
+                                                     const Handle(asiAlgo_BaseCloud<double>)& pts)
+{
+  double r = 0., angMin = 0., angMax = 0., hMin = 0., hMax = 0.;
+  gp_Ax1 ax;
+
+  BRepAdaptor_Surface bas(face);
+
+  TopTools_IndexedMapOfShape verts;
+  TopExp::MapShapes(face, TopAbs_VERTEX, verts);
+
+  /* Planar face */
+  if ( ::IsPlanar(face, 5.*M_PI/180.) )
+  {
+    // Add vertices.
+    for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
+    {
+      pts->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
+    }
+  }
+
+  /* Cylindrical face */
+  else if ( asiAlgo_Utils::IsCylindrical(face, r, ax, true, angMin, angMax, hMin, hMax) )
+  {
+    // Add vertices.
+    for ( int vidx = 1; vidx <= verts.Extent(); ++vidx )
+    {
+      pts->AddElement( BRep_Tool::Pnt( TopoDS::Vertex( verts(vidx) ) ) );
+    }
+
+    // Add midpoint.
+    gp_Pnt2d midPt( (angMin + angMax)*0.5, (hMin + hMax)*0.5 );
+    pts->AddElement(midPt);
+  }
 }

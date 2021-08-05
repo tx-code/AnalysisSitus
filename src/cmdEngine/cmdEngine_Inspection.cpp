@@ -54,6 +54,7 @@
 #include <asiAlgo_FeatureType.h>
 #include <asiAlgo_FindVisibleFaces.h>
 #include <asiAlgo_MeshConvert.h>
+#include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_RecognizeBlends.h>
 #include <asiAlgo_RecognizeCavities.h>
 #include <asiAlgo_RecognizeConvexHull.h>
@@ -3671,6 +3672,17 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
     {
       const TopoDS_Face& face = G->GetFace( selected.GetMinimalMapped() );
 
+      /* Experiment with discrete classifier */
+
+      TopoDS_Wire wire = asiAlgo_Utils::OuterWire(face);
+
+      std::vector<gp_XY> polygon;
+      asiAlgo_SampleFace::Wire2Polygon(wire, face, polygon);
+
+      interp->GetPlotter().REDRAW_CURVE2D("polygon", asiAlgo_Utils::PolylineAsSpline(polygon), Color_Yellow);
+
+      /* Sampling */
+
       int numBins = 10;
       interp->GetKeyValue(argc, argv, "num", numBins);
 
@@ -3679,7 +3691,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
                                      interp->GetProgress(),
                                      interp->GetPlotter() );
       //
-      sampleFace.SetSquare( interp->HasKeyword(argc, argv, "square") );
+      sampleFace.SetSquare    ( interp->HasKeyword(argc, argv, "square") );
+      sampleFace.SetUseHaines ( interp->HasKeyword(argc, argv, "haines") );
       //
       if ( !sampleFace.Perform(numBins) )
       {
@@ -3799,8 +3812,9 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
                                          toDraw ? interp->GetPlotter() : nullptr);
 
   // Configure the recognizer.
-  recognizer.SetGridResolution(numPts);
-  recognizer.SetTolerance(tol);
+  recognizer.SetGridResolution ( numPts );
+  recognizer.SetTolerance      ( tol );
+  recognizer.SetUseHaines      ( interp->HasKeyword(argc, argv, "haines") );
 
   TIMER_NEW
   TIMER_GO

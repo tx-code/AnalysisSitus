@@ -85,6 +85,16 @@ public:
   asiAlgo_EXPORT double
     GetTolerance() const;
 
+  //! Sets the Boolean flag indicating whether to use Eric Haines' algorithm
+  //! for PMC tests instead of the good old OpenCascade's classifier.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetUseHaines(const bool on);
+
+  //! \return true if the Haines' classification mode is enabled.
+  asiAlgo_EXPORT bool
+    GetUseHaines() const;
+
 public:
 
   //! Performs recognition.
@@ -99,6 +109,9 @@ protected:
 
   //! Tolerance for checking if a point is on a surface.
   double m_fToler;
+
+  //! Alternative classification approach.
+  bool m_bHaines;
 
 };
 

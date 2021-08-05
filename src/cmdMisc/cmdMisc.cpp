@@ -39,6 +39,7 @@
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_PlaneOnPoints.h>
+#include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_ProjectPointOnMesh.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_TopoKill.h>
@@ -3775,6 +3776,30 @@ int MISC_GenHeightMap(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
+
+//-----------------------------------------------------------------------------
+
+int MISC_TestPointInPoly(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, pass two arguments for the UV point being tested.");
+    return TCL_ERROR;
+  }
+
+  //// Create polygon.
+  //double polygon[][2] = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
+  //double point[2]     = { Atof(argv[1]), Atof(argv[2]) };
+
+  //const int res = CrossingsTest(polygon, 4, point);
+
+  //interp->GetProgress().SendLogMessage(LogInfo(Normal) << "PMC result for the point (u,v) = (%1,%2): %3."
+  //                                                     << point[0] << point[1] << (res ? "in" : "out"));
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
@@ -4030,6 +4055,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Generates height map.",
     //
     __FILE__, group, MISC_GenHeightMap);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-test-point-in-poly",
+    //
+    "misc-test-point-in-poly\n"
+    "\t Tests point-in-poly tools by Eric Haines.",
+    //
+    __FILE__, group, MISC_TestPointInPoly);
 
   // Load sub-modules.
   Commands_Coons(interp, data);

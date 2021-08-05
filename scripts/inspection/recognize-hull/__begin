@@ -20,7 +20,7 @@ proc __recognize-hull {} {
   print-summary
 
   # Recognize convex-hull faces.
-  set fids [recognize-hull]
+  set fids [recognize-hull -haines]
   #
   if { [llength $fids] != [llength $refFids] } {
     error "...\t error: Unexpected number of recognized faces."

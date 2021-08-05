@@ -42,12 +42,21 @@
 // OpenCascade includes
 #include <IntTools_FClass2d.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Wire.hxx>
 
 //-----------------------------------------------------------------------------
 
 //! Samples the UV domain of a face by overlaying a uniform grid.
 class asiAlgo_SampleFace : public ActAPI_IAlgorithm
 {
+public:
+
+  //! Converts the passed wire of the given face to a polygon.
+  asiAlgo_EXPORT static bool
+    Wire2Polygon(const TopoDS_Wire&  wire,
+                 const TopoDS_Face&  face,
+                 std::vector<gp_XY>& polygon);
+
 public:
 
   //! Ctor.
@@ -66,6 +75,12 @@ public:
   //! \param[in] square the Boolean value to set.
   asiAlgo_EXPORT void
     SetSquare(const bool square);
+
+  //! Sets the Boolean flag indicating whether to use Eric Haines' algorithm
+  //! for PMC tests instead of the good old OpenCascade's classifier.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetUseHaines(const bool on);
 
   //! Performs face sampling.
   //! \param[in] numBins the number of discretization steps.
@@ -94,6 +109,9 @@ protected:
   //! Indicates whether the uniform grid we construct should be a square.
   bool m_bSquare;
 
+  //! Alternative classification approach.
+  bool m_bHaines;
+
   //! Face to sample.
   TopoDS_Face m_face;
 
@@ -105,6 +123,9 @@ protected:
 
   //! Uniform grid which is the result of the uniform sampling.
   Handle(asiAlgo_UniformGrid<float>) m_grid;
+
+  //! Discretized polygon.
+  std::vector<gp_XY> m_polygon;
 
 };
 
