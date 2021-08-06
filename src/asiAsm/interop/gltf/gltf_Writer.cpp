@@ -257,7 +257,7 @@ bool gltf_Writer::Perform(const Handle(gltf_IDataSourceProvider)&     dataProvid
 {
   if (dataProvider.IsNull() )
     return false;
-  
+
   m_dataProvider = dataProvider;
   m_dataProvider->Process(m_progress);
 

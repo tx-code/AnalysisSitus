@@ -217,12 +217,12 @@ void gltf_FacePropertyExtractor::initFace()
   m_pNodeUVs      = nullptr;
 
   m_pNodes = &m_polyTriang->Nodes();
-  if ( m_polyTriang->HasNormals() )
+  if ( !m_polyTriang.IsNull() && m_polyTriang->HasNormals() )
   {
     m_pNormals    = &m_polyTriang->Normals();
     m_bHasNormals = true;
   }
-  if ( m_polyTriang->HasUVNodes() )
+  if ( !m_polyTriang.IsNull() && m_polyTriang->HasUVNodes() )
   {
     m_pNodeUVs = &m_polyTriang->UVNodes();
     if ( !m_bHasNormals )
