@@ -3686,6 +3686,9 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       int numBins = 10;
       interp->GetKeyValue(argc, argv, "num", numBins);
 
+      TIMER_NEW
+      TIMER_GO
+
       // Sample the face.
       asiAlgo_SampleFace sampleFace( face,
                                      interp->GetProgress(),
@@ -3701,6 +3704,9 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       }
       //
       const Handle(asiAlgo_UniformGrid<float>)& grid = sampleFace.GetResult();
+
+      TIMER_FINISH
+      TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Build face grid")
 
       // Proceed with image dump.
       std::string filename;
