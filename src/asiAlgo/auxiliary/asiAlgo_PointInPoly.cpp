@@ -1577,7 +1577,8 @@ int GridTest(pGridSet p_gs, double point[2])
     int j, count, init_flag;
     pGridCell p_gc;
     pGridRec p_gr;
-    double tx, ty, xcell, ycell, bx, by, cx, cy, cornerx, cornery;
+    double tx, ty, xcell, ycell, cx, cy, cornerx, cornery;
+    double bx = 0, by = 0;
     double alpha, beta, denom;
     unsigned short gc_flags;
     int inside_flag = FALSE;
