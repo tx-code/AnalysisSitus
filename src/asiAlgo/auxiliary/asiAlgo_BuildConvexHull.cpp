@@ -93,7 +93,7 @@ bool asiAlgo_BuildConvexHull::Perform(const std::vector<gp_Pnt>&  data,
 
   // Prepare data.
   std::vector<double> convertedData;
-  for( int i = 0; i < data.size(); ++i )
+  for( int i = 0; i < int( data.size() ); ++i )
   {
     convertedData.push_back(data[i].Coord(1));
     convertedData.push_back(data[i].Coord(2));
