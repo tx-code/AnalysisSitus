@@ -1631,6 +1631,12 @@ int RE_ApproxSurf(const Handle(asiTcl_Interp)& interp,
     TIMER_NEW
     TIMER_GO
 
+    if ( argc < 5 )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Insufficient number of arguments.");
+      return TCL_ERROR;
+    }
+
     // Approximate.
     geom_ApproxBSurf approx( mobPts, atoi(argv[3]), atoi(argv[4]) );
     //
