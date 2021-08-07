@@ -60,7 +60,7 @@ bool asiAlgo_BuildConvexHull::Perform(const TopoDS_Shape&         shape,
                                     meshInfo) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "Failed to mesh body shape.");
-      return nullptr;
+      return false;
     }
 
     m_progress.SendLogMessage(LogInfo(Normal) << "The body shape was tessellated with "
