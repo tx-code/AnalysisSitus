@@ -49,6 +49,8 @@
 
 <h2>Overview</h2>
 
+<h3>Least-squares with smoothing</h3>
+
 <p>
 Surface fitting is an essential part of reverse engineering. Many approaches to surface approximation from a point cloud were presented in the literature. The simplest method consists of solving the least-squares problem, starting from a base surface with all properties such as U and V degrees and knot vectors predefined. If the only remaining variables are the coordinates of the control points, the least-squares approximation reduces to a linear problem solved by Gauss elimination. At the same time, the pure least-squares formulation is impractical due to the following main obstacles:
 </p>
@@ -64,7 +66,7 @@ Surface fitting is an essential part of reverse engineering. Many approaches to 
 <p>The problems outlined above are partially solved by switching to a more sophisticated functional which aggregates a smoothing term with the least-squares one <a href="..\references.html#weiss-2002">[Weiss et al, 2002]</a>. The additional smoothing term constraints all the control points of the surface. As a result, the matrix becomes regular, and the 2nd problem does not occur. Minimization of the approximate bending energy smooths out the undesired oscillations and yields a more aesthetically pleasing form (3rd problem). Still, the remaining question is how to choose the B-spline basis functions so that the surface is flexible enough while not overcomplicated. The attempts to solve the latter problem of unknown knots distribution led to the adoption of sequential fitting approaches. Such methods employ several fitting attempts followed by the local control of surface deviation. In the areas where the approximation error exceeds the prescribed tolerance, additional knots are inserted, thus making the base surface more flexible in the problematic zones.
 </p>
 
-<h2>Curve network fitting</h2>
+<h3>Curve network fitting</h3>
 
 <p>
 The problem of the surface fitting is of high inherent complexity. At the same time, there are well-proven approaches which simplify the reverse engineering task by specific preparation of input. The following two requirements are especially practical for the reconstruction of organic shapes:
@@ -82,6 +84,15 @@ Topologizing the initial mesh serves the purpose of segmentation, which is the c
 </p>
 <p>
 The rectangular structure of the curve network is beneficial when selecting the base surfaces for fitting. Each cell of the network allows filling with a Coons patch which in its turn has a precise B-surface representation <a href="..\references.html#lin-hewitt-1994">[Lin and Hewitt, 1994]</a>. Coons patches are often adequate for a valid surface parameterization, especially if the target surface is not so much curved. At the next stage, the base surfaces need to be deformed so that to follow the corresponding region of mesh. The reverse engineering approach based on Coons fillings is briefly outlined in <a href="..\references.html#hoschek-dietz-1996">[Hoschek and Dietz, 1996]</a> where some general considerations on the surface fitting process are given. Their approach appears to be very close to what Analysis Situs does (linear least squares with an energy term).
+</p>
+<p>
+  You can read more about our approach to curve-based surface fitting in the paper <a href="..\references.html#slyadnev-re-2019">[Slyadnev and Turlapov, 2019]</a>. It describes a reverse engineering algorithm for a turbomachinery application.
+</p>
+
+<h2>Incremental least-squares with smoothing</h2>
+
+<p>
+  Incremental surface fitting is probably the most obvious approach to approximation of an unstructured point cloud with a B-spline surface.
 </p>
 
 <!-- [END] contents -->
