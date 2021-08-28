@@ -1734,6 +1734,132 @@ int RE_ApproxSurf(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int RE_ApproxSurfInc(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Find Points Node by name.
+  Handle(asiData_IVPointSetNode)
+    pointsNode = Handle(asiData_IVPointSetNode)::DownCast( interp->GetModel()->FindNodeByName(argv[2]) );
+  //
+  if ( pointsNode.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a point cloud."
+                                                        << argv[2]);
+    return TCL_ERROR;
+  }
+
+  // Get fairing coefficient.
+  double lambda = 1.e-5;
+  TCollection_AsciiString lambdaStr;
+  //
+  if ( interp->GetKeyValue(argc, argv, "lambda", lambdaStr) )
+    lambda = lambdaStr.RealValue();
+
+  // Has init surf.
+  const bool hasInitSurf = interp->HasKeyword(argc, argv, "init");
+
+  // Get point cloud.
+  Handle(asiAlgo_BaseCloud<double>) pts = pointsNode->GetPoints();
+
+  // Convert to Mobius point cloud.
+  t_ptr<t_pcloud> mobPts = new t_pcloud;
+  //
+  for ( int k = 0; k < pts->GetNumberOfElements(); ++k )
+    mobPts->AddPoint( cascade::GetMobiusPnt( pts->GetElement(k) ) );
+
+  /* =========================
+   *  Prepare initial surface.
+   * ========================= */
+
+  t_ptr<t_bsurf> initSurf;
+
+  if ( !hasInitSurf )
+  {
+    t_ptr<t_plane> mobPlane;
+
+    // Build average plane.
+    geom_BuildAveragePlane planeAlgo;
+    //
+    if ( !planeAlgo.Build(mobPts, mobPlane) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build average plane.");
+      return TCL_ERROR;
+    }
+
+    // Project point cloud to plane to determine the parametric bounds.
+    mobPlane->TrimByPoints(mobPts);
+
+    // Convert plane to B-surf.
+    initSurf = mobPlane->ToBSurface(3, 3);
+  }
+  else
+  {
+    // Find Surface Node by name.
+    Handle(asiData_IVSurfaceNode)
+      surfNode = Handle(asiData_IVSurfaceNode)::DownCast( interp->GetModel()->FindNodeByName(argv[4]) );
+    //
+    if ( surfNode.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a surface."
+                                                          << argv[4]);
+      return TCL_ERROR;
+    }
+
+    // Get surface.
+    Handle(Geom_BSplineSurface)
+      bsurfOcc = Handle(Geom_BSplineSurface)::DownCast( surfNode->GetSurface() );
+    //
+    if ( bsurfOcc.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The passed surface is not a B-surface.");
+      return TCL_ERROR;
+    }
+
+    // Convert to Mobius form.
+    initSurf = cascade::GetMobiusBSurface(bsurfOcc);
+  }
+
+  /* =============
+   *  Approximate.
+   * ============= */
+
+  t_ptr<t_bsurf> resSurf;
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Prepare approximation tool.
+  geom_ApproxBSurf approx(mobPts, initSurf);
+
+  // Approximate.
+  if ( !approx.Perform(lambda) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Approximation failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Approximate (passed initial surface)")
+
+  // Get result.
+  resSurf = approx.GetResult();
+
+  // Set the result.
+  interp->GetPlotter().REDRAW_SURFACE(argv[1], cascade::GetOpenCascadeBSurface(resSurf), Color_Default);
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 int RE_GetTriangulationNodes(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
@@ -2310,9 +2436,17 @@ void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("re-approx-surf",
     //
     "re-approx-surf <resSurf> <ptsName> {<uDegree> <vDegree> | -init <initSurf>} [-lambda <coeff>] [{-pinned | -pinned2}]\n"
-    "\t Approximates point cloud with B-surface.",
+    "\t Approximates point cloud with a B-surface.",
     //
     __FILE__, group, RE_ApproxSurf);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("re-approx-surf-inc",
+    //
+    "re-approx-surf-inc <resSurf> <ptsName> [{<uDegree> <vDegree> | -init <initSurf>}] [-lambda <coeff>]\n"
+    "\t Approximates point cloud with a B-surface incrementally.",
+    //
+    __FILE__, group, RE_ApproxSurfInc);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("re-get-triangulation-nodes",
