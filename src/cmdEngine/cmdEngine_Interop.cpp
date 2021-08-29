@@ -60,8 +60,8 @@
 #include <asiUI_XdeBrowser.h>
 
 // glTF includes
-#include <gltf_Writer.h>
-#include <gltf_XdeDataSourceProvider.h>
+#include <asiAsm_GLTFWriter.h>
+#include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // DF Browser includes
 #include <DFBrowser.hxx>

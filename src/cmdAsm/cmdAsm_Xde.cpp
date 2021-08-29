@@ -44,8 +44,8 @@
 #include <asiEngine_Part.h>
 
 // glTF includes
-#include <gltf_Writer.h>
-#include <gltf_XdeDataSourceProvider.h>
+#include <asiAsm_GLTFWriter.h>
+#include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // FBX includes
 #include <fbx_XdeWriter.h>
