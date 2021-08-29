@@ -15,12 +15,11 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_MaterialMap_HeaderFile
-#define gltf_MaterialMap_HeaderFile
+#pragma once
 
 // glTF includes
-#include <gltf_Entities.h>
-#include <gltf_MaterialMapBase.h>
+#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GlTFMaterialMapBase.h>
 
 namespace asiAsm {
 namespace xde {
@@ -111,4 +110,3 @@ protected:
 } // xde
 } // asiAsm
 
-#endif

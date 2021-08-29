@@ -16,19 +16,18 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_Writer.h>
+#include <asiAsm_GlTFWriter.h>
+
+// GlTF includes
+#include <asiAsm_GlTFMaterialMap.h>
+#include <asiAsm_GlTFFacePropertyExtractor.h>
+//
+#if defined USE_RAPIDJSON
+  #include <asiAsm_GlTFJsonSerializer.h>
+#endif
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
-
-// glTF includes
-#include <gltf_MaterialMap.h>
-#include <gltf_FacePropertyExtractor.h>
-
-//
-#if defined USE_RAPIDJSON
-  #include <gltf_JsonSerializer.h>
-#endif
 
 // OpenCascade includes
 #include <gp_Quaternion.hxx>

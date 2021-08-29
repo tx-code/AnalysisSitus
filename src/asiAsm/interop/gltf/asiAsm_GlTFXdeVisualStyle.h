@@ -15,11 +15,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_XdeVisualStyle_HeaderFile
-#define gltf_XdeVisualStyle_HeaderFile
+#pragma once
 
 // glTF includes
-#include <gltf_MaterialAttr.h>
+#include <asiAsm_GlTFMaterialAttr.h>
 
 // OpenCascade includes
 #include <XCAFPrs_Style.hxx>
@@ -156,4 +155,3 @@ protected:
 } // xde
 } // asiAsm
 
-#endif

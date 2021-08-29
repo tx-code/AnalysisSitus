@@ -31,7 +31,7 @@
 #pragma once
 
 // glTF includes
-#include <gltf_IDataSourceProvider.h>
+#include <asiAsm_GlTFIDataSourceProvider.h>
 
 // STL includes
 #include <memory>

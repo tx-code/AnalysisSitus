@@ -15,13 +15,12 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_Writer_HeaderFiler
-#define gltf_Writer_HeaderFiler
+#pragma once
 
 // glTF includes
-#include <gltf_CSysConverter.h>
-#include <gltf_XdeVisualStyle.h>
-#include <gltf_IDataSourceProvider.h>
+#include <asiAsm_GlTFCSysConverter.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GlTFIDataSourceProvider.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -334,4 +333,3 @@ protected:
 } // xde
 } // asiAsm
 
-#endif

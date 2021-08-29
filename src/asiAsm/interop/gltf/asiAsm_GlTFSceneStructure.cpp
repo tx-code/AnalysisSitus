@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 03 July 2021
+// Created on: 12 July 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Julia Slyadneva
 // All rights reserved.
@@ -28,59 +28,68 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#pragma once
+#include <asiAsm_GlTFSceneStructure.h>
 
-// glTF includes
-#include <gltf_XdeVisualStyle.h>
+using namespace asiAsm::xde;
 
-// Active Data includes
-#include <ActAPI_IPlotter.h>
-#include <ActAPI_IProgressNotifier.h>
-
-// OpenCascade includes
-#include <BRepLProp_SLProps.hxx>
-#include <gp_Trsf.hxx>
-#include <NCollection_DataMap.hxx>
-#include <Poly_Array1OfTriangle.hxx>
-#include <Poly_Triangulation.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-
-class TDF_Label;
-
-namespace asiAsm {
-namespace xde {
-
-//! Auxiliary class to iterate over triangulated faces.
-struct gltf_Primitive
+//-----------------------------------------------------------------------------
+gltf_SceneStructure::~gltf_SceneStructure()
 {
-  gltf_Primitive()
+  for (auto n : m_nodes)
   {
-    Name = "";
-    Mode = gltf_PrimitiveMode::gltf_PrimitiveMode_Triangles;
-    NodePos = gltf_Accessor();
-    NodeNorm = gltf_Accessor();
-    NodeUV = gltf_Accessor();
-    Indices = gltf_Accessor();
-  };
+    delete n;
+    n = nullptr;
+  }
+  m_nodes.clear();
+}
 
-  TCollection_AsciiString Name;
+//-----------------------------------------------------------------------------
+void gltf_SceneStructure::MarkNodeAsRoot(gltf_Node* N)
+{
+  m_roots.push_back(N);
+}
 
-  gltf_PrimitiveMode Mode;
-  gltf_Accessor NodePos;  //!< accessor for nodal positions
-  gltf_Accessor NodeNorm; //!< accessor for nodal normals
-  gltf_Accessor NodeUV;   //!< accessor for nodal UV texture coordinates
-  gltf_Accessor Indices;  //!< accessor for indexes
+//-----------------------------------------------------------------------------
+gltf_Node* gltf_SceneStructure::PrependNode()
+{
+  gltf_Node* n = new gltf_Node();
+  m_nodes.push_back(n);
 
-  gltf_XdeVisualStyle Style;
+  return n;
+}
 
-  NCollection_Vector<gp_XYZ> MeshNodes;
-  NCollection_Vector<Graphic3d_Vec3> Normals;
-  NCollection_Vector<gp_Pnt2d>  Textures;
-  NCollection_Vector<Poly_Triangle> Triangles;
-};
+//-----------------------------------------------------------------------------
+void gltf_SceneStructure::Clear()
+{
+  m_nodes.clear();
+  m_nodes.shrink_to_fit();
 
-} // xde
-} // asiAsm
+  m_roots.clear();
+  m_roots.shrink_to_fit();
+}
 
+//-----------------------------------------------------------------------------
+const std::vector<gltf_Node*>& gltf_SceneStructure::GetRoots() const
+{
+  return m_roots;
+}
+
+//-----------------------------------------------------------------------------
+const std::vector<gltf_Node*>& gltf_SceneStructure::GetNodes() const
+{
+  return m_nodes;
+}
+
+//-----------------------------------------------------------------------------
+int gltf_SceneStructure::GetIndex(gltf_Node* N) const
+{
+  int _index = 0;
+  for (const gltf_Node* _n : m_nodes)
+  {
+    if (_n == N)
+      return _index;
+    _index++;
+  }
+
+  return INVALID_ID;
+}

@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_MaterialMapBase.h>
+#include <asiAsm_GlTFMaterialMapBase.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>

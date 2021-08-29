@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_FacePropertyExtractor.h>
+#include <asiAsm_GlTFFacePropertyExtractor.h>
 
 // OpenCascade includes
 #include <BRepAdaptor_Surface.hxx>
