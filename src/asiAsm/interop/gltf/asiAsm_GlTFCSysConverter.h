@@ -15,11 +15,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_CSysConverter_HeaderFile
-#define gltf_CSysConverter_HeaderFile
+#pragma once
 
 // glTF includes
-#include <gltf_Entities.h>
+#include <asiAsm_GlTFEntities.h>
 
 // OpenCascade includes
 #include <gp.hxx>
@@ -203,5 +202,3 @@ private:
 
 } // xde
 } // asiAsm
-
-#endif

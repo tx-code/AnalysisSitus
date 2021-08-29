@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_MaterialAttr.h>
+#include <asiAsm_GlTFMaterialAttr.h>
 
 // OpenCascade includes
 #include <Graphic3d_Aspects.hxx>

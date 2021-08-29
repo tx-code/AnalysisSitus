@@ -15,8 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_Entities_HeaderFile
-#define gltf_Entities_HeaderFile
+#pragma once
 
 // asiAsm includes
 #include <asiAsm.h>
@@ -410,4 +409,3 @@ struct gltf_MaterialPbr
 } // xde
 } // asiAsm
 
-#endif

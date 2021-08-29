@@ -15,11 +15,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_MaterialAttr_HeaderFile
-#define gltf_MaterialAttr_HeaderFile
+#pragma once
 
 // glTF includes
-#include <gltf_Entities.h>
+#include <asiAsm_GlTFEntities.h>
 
 // OpenCascade includes
 #include <Graphic3d_AlphaMode.hxx>
@@ -159,5 +158,3 @@ private:
 
 } // xde
 } // asiAsm
-
-#endif

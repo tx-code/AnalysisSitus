@@ -29,17 +29,17 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <gltf_XdeDataSourceProvider.h>
+#include <asiAsm_GlTFXdeDataSourceProvider.h>
+
+// GlTF includes
+#include <asiAsm_GlTFMaterialMap.h>
+#include <asiAsm_GlTFFacePropertyExtractor.h>
+#include <asiAsm_GlTFCSysConverter.h>
+#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
-
-// glTF includes
-#include <gltf_MaterialMap.h>
-#include <gltf_FacePropertyExtractor.h>
-#include <gltf_CSysConverter.h>
-#include <gltf_Entities.h>
-#include <gltf_XdeVisualStyle.h>
 
 // OpenCascade includes
 #include <NCollection_DataMap.hxx>

@@ -16,11 +16,11 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_MaterialMap.h>
+#include <asiAsm_GlTFMaterialMap.h>
 
-// glTF includes
+// GlTF includes
 #if defined USE_RAPIDJSON
-  #include <gltf_JsonSerializer.h>
+  #include <asiAsm_GlTFJsonSerializer.h>
 #endif
 
 using namespace asiAsm::xde;

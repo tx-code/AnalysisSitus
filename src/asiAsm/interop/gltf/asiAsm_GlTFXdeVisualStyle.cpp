@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_XdeVisualStyle.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
 
 using namespace asiAsm::xde;
 

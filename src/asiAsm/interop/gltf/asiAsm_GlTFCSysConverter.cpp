@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <gltf_CSysConverter.h>
+#include <asiAsm_GlTFCSysConverter.h>
 
 // OpenCascade includes
 #include <gp_Quaternion.hxx>

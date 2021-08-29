@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <gltf_XdeVisualStyle.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>

@@ -15,11 +15,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef gltf_MaterialMapBase_HeaderFile
-#define gltf_MaterialMapBase_HeaderFile
+#pragma once
 
 // glTF includes
-#include <gltf_XdeVisualStyle.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
 
 // OpenCascade includes
 #include <NCollection_DoubleMap.hxx>
@@ -111,4 +110,3 @@ protected:
 } // xde
 } // asiAsm
 
-#endif

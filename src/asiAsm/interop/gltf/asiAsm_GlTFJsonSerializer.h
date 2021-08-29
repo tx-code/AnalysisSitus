@@ -1,7 +1,8 @@
 //-----------------------------------------------------------------------------
-// Created on: 12 July 2021
+// Created on: 08 January 2021
+// Created by: Sergey SLYADNEV
 //-----------------------------------------------------------------------------
-// Copyright (c) 2021-present, Julia Slyadneva
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,68 +29,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include <gltf_SceneStructure.h>
+#pragma once
 
-using namespace asiAsm::xde;
+// asiAsm includes
+#include <asiAsm.h>
 
-//-----------------------------------------------------------------------------
-gltf_SceneStructure::~gltf_SceneStructure()
+// Rapidjson includes (should be hidden in cpp)
+#if defined USE_RAPIDJSON
+  #include <rapidjson/prettywriter.h>
+  #include <rapidjson/ostreamwrapper.h>
+#endif
+
+namespace asiAsm {
+namespace xde {
+
+//! JSON serializer declared in AS header to avoid inclusion of rapidjson header
+//! files in the dependent libs. This `gltf_JsonSerializer.h` should be
+//! included in cpp files only.
+//!
+//! We use "pretty writer" here to make glTF's JSON files human-readable (i.e.,
+//! have all these whitespaces and newlines).
+class gltf_JsonSerializer : public rapidjson::PrettyWriter<rapidjson::OStreamWrapper>
 {
-  for (auto n : m_nodes)
-  {
-    delete n;
-    n = nullptr;
-  }
-  m_nodes.clear();
-}
+public:
 
-//-----------------------------------------------------------------------------
-void gltf_SceneStructure::MarkNodeAsRoot(gltf_Node* N)
-{
-  m_roots.push_back(N);
-}
+  //! Ctor accepting the output stream.
+  //! \param[in,out] ostr the output stream to serialize data into.
+  gltf_JsonSerializer(rapidjson::OStreamWrapper& ostr)
+  : rapidjson::PrettyWriter<rapidjson::OStreamWrapper>(ostr)
+  {}
 
-//-----------------------------------------------------------------------------
-gltf_Node* gltf_SceneStructure::PrependNode()
-{
-  gltf_Node* n = new gltf_Node();
-  m_nodes.push_back(n);
+};
 
-  return n;
-}
+} // xde
+} // asiAsm
 
-//-----------------------------------------------------------------------------
-void gltf_SceneStructure::Clear()
-{
-  m_nodes.clear();
-  m_nodes.shrink_to_fit();
-
-  m_roots.clear();
-  m_roots.shrink_to_fit();
-}
-
-//-----------------------------------------------------------------------------
-const std::vector<gltf_Node*>& gltf_SceneStructure::GetRoots() const
-{
-  return m_roots;
-}
-
-//-----------------------------------------------------------------------------
-const std::vector<gltf_Node*>& gltf_SceneStructure::GetNodes() const
-{
-  return m_nodes;
-}
-
-//-----------------------------------------------------------------------------
-int gltf_SceneStructure::GetIndex(gltf_Node* N) const
-{
-  int _index = 0;
-  for (const gltf_Node* _n : m_nodes)
-  {
-    if (_n == N)
-      return _index;
-    _index++;
-  }
-
-  return INVALID_ID;
-}

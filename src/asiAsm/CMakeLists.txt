@@ -54,30 +54,30 @@ set (interop_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (interop_gltf_H_FILES
-  interop/gltf/gltf_CSysConverter.h
-  interop/gltf/gltf_Entities.h
-  interop/gltf/gltf_JsonSerializer.h
-  interop/gltf/gltf_MaterialAttr.h
-  interop/gltf/gltf_MaterialMap.h
-  interop/gltf/gltf_MaterialMapBase.h
-  interop/gltf/gltf_XdeVisualStyle.h
-  interop/gltf/gltf_Writer.h
-  interop/gltf/gltf_Primitive.h
-  interop/gltf/gltf_SceneStructure.h 
-  interop/gltf/gltf_FacePropertyExtractor.h
-  interop/gltf/gltf_IDataSourceProvider.h
-  interop/gltf/gltf_XdeDataSourceProvider.h
+  interop/gltf/asiAsm_GlTFCSysConverter.h
+  interop/gltf/asiAsm_GlTFEntities.h
+  interop/gltf/asiAsm_GlTFJsonSerializer.h
+  interop/gltf/asiAsm_GlTFMaterialAttr.h
+  interop/gltf/asiAsm_GlTFMaterialMap.h
+  interop/gltf/asiAsm_GlTFMaterialMapBase.h
+  interop/gltf/asiAsm_GlTFXdeVisualStyle.h
+  interop/gltf/asiAsm_GlTFWriter.h
+  interop/gltf/asiAsm_GlTFPrimitive.h
+  interop/gltf/asiAsm_GlTFSceneStructure.h 
+  interop/gltf/asiAsm_GlTFFacePropertyExtractor.h
+  interop/gltf/asiAsm_GlTFIDataSourceProvider.h
+  interop/gltf/asiAsm_GlTFXdeDataSourceProvider.h
 )
 set (interop_gltf_CPP_FILES
-  interop/gltf/gltf_CSysConverter.cpp
-  interop/gltf/gltf_MaterialAttr.cpp
-  interop/gltf/gltf_MaterialMap.cpp
-  interop/gltf/gltf_MaterialMapBase.cpp
-  interop/gltf/gltf_XdeVisualStyle.cpp
-  interop/gltf/gltf_Writer.cpp
-  interop/gltf/gltf_SceneStructure.cpp
-  interop/gltf/gltf_FacePropertyExtractor.cpp
-  interop/gltf/gltf_XdeDataSourceProvider.cpp
+  interop/gltf/asiAsm_GlTFCSysConverter.cpp
+  interop/gltf/asiAsm_GlTFMaterialAttr.cpp
+  interop/gltf/asiAsm_GlTFMaterialMap.cpp
+  interop/gltf/asiAsm_GlTFMaterialMapBase.cpp
+  interop/gltf/asiAsm_GlTFXdeVisualStyle.cpp
+  interop/gltf/asiAsm_GlTFWriter.cpp
+  interop/gltf/asiAsm_GlTFSceneStructure.cpp
+  interop/gltf/asiAsm_GlTFFacePropertyExtractor.cpp
+  interop/gltf/asiAsm_GlTFXdeDataSourceProvider.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 05 July 2021
+// Created on: 03 July 2021
 //-----------------------------------------------------------------------------
 // Copyright (c) 2021-present, Julia Slyadneva
 // All rights reserved.
@@ -31,41 +31,56 @@
 #pragma once
 
 // glTF includes
-#include <gltf_Entities.h>
-#include <gltf_SceneStructure.h>
-#include <gltf_Primitive.h>
+#include <asiAsm_GlTFXdeVisualStyle.h>
 
-//-----------------------------------------------------------------------------
+// Active Data includes
+#include <ActAPI_IPlotter.h>
+#include <ActAPI_IProgressNotifier.h>
 
-typedef NCollection_IndexedDataMap <asiAsm::xde::gltf_Node*, NCollection_Vector<asiAsm::xde::gltf_Primitive>> t_Meshes2Primitives;
+// OpenCascade includes
+#include <BRepLProp_SLProps.hxx>
+#include <gp_Trsf.hxx>
+#include <NCollection_DataMap.hxx>
+#include <Poly_Array1OfTriangle.hxx>
+#include <Poly_Triangulation.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
-//-----------------------------------------------------------------------------
+class TDF_Label;
 
 namespace asiAsm {
 namespace xde {
 
-//! This class is used to feed glTF writer with scene structure and definition of meshes.
-//! This class is considered to be inherited when a custom scene structure is needed.
-class gltf_IDataSourceProvider : public Standard_Transient
+//! Auxiliary class to iterate over triangulated faces.
+struct gltf_Primitive
 {
-public:
+  gltf_Primitive()
+  {
+    Name = "";
+    Mode = gltf_PrimitiveMode::gltf_PrimitiveMode_Triangles;
+    NodePos = gltf_Accessor();
+    NodeNorm = gltf_Accessor();
+    NodeUV = gltf_Accessor();
+    Indices = gltf_Accessor();
+  };
 
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_IDataSourceProvider, Standard_Transient)
+  TCollection_AsciiString Name;
 
-public:
-  //! This method is called to prepare the scene tree and meshes definition.
-  virtual 
-    void Process(ActAPI_ProgressEntry progress = nullptr) = 0;
+  gltf_PrimitiveMode Mode;
+  gltf_Accessor NodePos;  //!< accessor for nodal positions
+  gltf_Accessor NodeNorm; //!< accessor for nodal normals
+  gltf_Accessor NodeUV;   //!< accessor for nodal UV texture coordinates
+  gltf_Accessor Indices;  //!< accessor for indexes
 
-  //! Gets the scene tree.
-  virtual
-    const gltf_SceneStructure& GetSceneStructure() const = 0;
+  gltf_XdeVisualStyle Style;
 
-  //! Gets the map of meshes nodes with the corresponding 3D definition also known as primitives.
-  virtual
-    const t_Meshes2Primitives& GetSceneMeshes() const = 0;
+  NCollection_Vector<gp_XYZ> MeshNodes;
+  NCollection_Vector<Graphic3d_Vec3> Normals;
+  NCollection_Vector<gp_Pnt2d>  Textures;
+  NCollection_Vector<Poly_Triangle> Triangles;
 };
+
 } // xde
 } // asiAsm
 
