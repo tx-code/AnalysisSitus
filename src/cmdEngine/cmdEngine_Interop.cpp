@@ -476,7 +476,7 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
   // Export to glTF.
   asiAsm::xde::gltf_Writer cafWriter(TCollection_AsciiString( filename.c_str() ),
-                                    ext.EndsWith(".glb"), nullptr, nullptr);
+                                     ext.EndsWith(".glb"), nullptr, nullptr);
   //
   cafWriter.SetTransformationFormat(asiAsm::xde::gltf_WriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);

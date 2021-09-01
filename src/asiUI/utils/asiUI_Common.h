@@ -136,7 +136,7 @@ public:
   static TCollection_AsciiString ToAsciiString(const QString& theStr)
   {
     return ( !theStr.isEmpty() ) ?
-      TCollection_AsciiString( theStr.toLatin1().data() ) : TCollection_AsciiString();
+      TCollection_AsciiString( theStr.toUtf8().data() ) : TCollection_AsciiString();
   }
 
   //! Converts QString to std::string

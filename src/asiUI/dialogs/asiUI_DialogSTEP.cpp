@@ -366,7 +366,6 @@ void asiUI_DialogSTEP::proceed_Read()
   {
     if ( !partApi.Import(filename) )
     {
-      m_notifier.SendLogMessage(LogErr(Normal) << "STEP reader failed.");
       QApplication::restoreOverrideCursor();
 
       m_model->AbortCommand();
