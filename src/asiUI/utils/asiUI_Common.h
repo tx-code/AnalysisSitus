@@ -133,10 +133,10 @@ public:
 
   //! Converts QString to TCollection_AsciiString
   //! \return converted string
-  static TCollection_AsciiString ToAsciiString(const QString& theStr)
+  static TCollection_AsciiString ToAsciiString(const QString& qstr)
   {
-    return ( !theStr.isEmpty() ) ?
-      TCollection_AsciiString( theStr.toUtf8().data() ) : TCollection_AsciiString();
+    return ( !qstr.isEmpty() ) ?
+      TCollection_AsciiString( qstr.toUtf8().data() ) : TCollection_AsciiString();
   }
 
   //! Converts QString to std::string

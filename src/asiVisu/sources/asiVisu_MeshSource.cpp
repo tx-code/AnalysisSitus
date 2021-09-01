@@ -142,6 +142,12 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
                                     vtkInformationVector** theInputVector,
                                     vtkInformationVector*  theOutputVector)
 {
+  if ( m_mesh.IsNull() )
+  {
+    vtkErrorMacro( << "Invalid input: null mesh" );
+    return 0;
+  }
+
   /* ==============================
    *  Prepare involved collections
    * ============================== */

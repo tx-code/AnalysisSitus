@@ -115,7 +115,9 @@ bool asiAlgo_MeshConvert::ToPersistent(const TopoDS_Shape&   source,
 bool asiAlgo_MeshConvert::ToPersistent(const Handle(Poly_Triangulation)& source,
                                        Handle(ActData_Mesh)&             result)
 {
-  result = new ActData_Mesh(source);
+  if ( !source.IsNull() )
+    result = new ActData_Mesh(source);
+
   return true;
 }
 

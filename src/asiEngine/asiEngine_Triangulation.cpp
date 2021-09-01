@@ -77,6 +77,13 @@ t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Triangulation::Clean_All()
+{
+  m_model->GetTriangulationNode()->Init();
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiAlgo_BVHFacets) asiEngine_Triangulation::BuildBVH(const bool store)
 {
 #if defined USE_MOBIUS

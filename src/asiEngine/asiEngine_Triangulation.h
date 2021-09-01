@@ -90,6 +90,10 @@ public:
 
 #endif
 
+  //! Cleans up Triangulation Node.
+  asiEngine_EXPORT void
+    Clean_All();
+
   //! Constructs BVH structure for the facets stored in the Triangulation Node.
   //! \param[in] store specifies whether to store BVH in the Node.
   //! \return constructed BVH.

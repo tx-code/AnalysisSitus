@@ -180,6 +180,9 @@ void asiEngine_Model::Clear()
     // Delete all tolerant ranges.
     asiEngine_TolerantShapes(this, nullptr).Clean_All();
 
+    // Clean up triangulation.
+    asiEngine_Triangulation(this).Clean_All();
+
     // Delete all Nodes serving imperative visualization
     asiEngine_IV(this).Clean_All();
 

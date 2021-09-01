@@ -1710,9 +1710,6 @@ void asiUI_IV::draw_triangulation(const Handle(Poly_Triangulation)& tris,
                                   const TCollection_AsciiString&    name,
                                   const bool                        newPrimitive)
 {
-  if ( tris.IsNull() )
-    return;
-
   // Open transaction
   bool isTx = false;
   if ( !m_model->HasOpenCommand() )

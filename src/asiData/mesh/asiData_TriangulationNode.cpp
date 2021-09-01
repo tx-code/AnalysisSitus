@@ -74,12 +74,13 @@ void asiData_TriangulationNode::Init()
   this->InitParameter(PID_Name, "Name");
 
   // Set default values.
-  this->SetOptions     (nullptr);
-  this->SetBVH         (nullptr);
-  this->SetUseScalars  (true);
-  this->SetColor       (120 << 16 | 120 << 8 | 120); // Initial color.
-  this->SetDisplayMode (1);
-  this->SetHasVertices (false);
+  this->SetTriangulation (nullptr);
+  this->SetOptions       (nullptr);
+  this->SetBVH           (nullptr);
+  this->SetUseScalars    (true);
+  this->SetColor         (120 << 16 | 120 << 8 | 120); // Initial color.
+  this->SetDisplayMode   (1);
+  this->SetHasVertices   (false);
 
   // Initialize Parameter flags.
   this->InitParameter(PID_GroupPrs,    "Presentation",  "",                   ParameterFlag_IsVisible, true);
