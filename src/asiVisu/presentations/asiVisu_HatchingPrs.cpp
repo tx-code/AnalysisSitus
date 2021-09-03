@@ -63,6 +63,7 @@ asiVisu_HatchingPrs::asiVisu_HatchingPrs(const Handle(ActAPI_INode)& N)
   // Configure presentation
   pl -> Actor()->GetProperty()->SetLineWidth(1.0f);
   pl -> Actor()->GetProperty()->SetLighting(false);
+  pl -> Actor()->SetPickable(0);
   
   // Make hatching be visualized always on top of the scene
   pl->Mapper()->SetResolveCoincidentTopologyToPolygonOffset();
