@@ -181,7 +181,7 @@ void asiVisu_FaceSurfaceIsosPipeline::SetInput(const Handle(asiVisu_DataProvider
         std::cout << "Crash on constructing u-isoline" << std::endl;
       }
 
-       if ( uIso.IsNull() )
+      if ( uIso.IsNull() )
         continue;
 
       // Allocate Data Source

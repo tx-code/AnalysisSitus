@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 05 September 2017
+// Created on: 03 September 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,11 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiVisu_GeomFaceContourPrs.h>
+#include <asiVisu_HatchingPrs.h>
 
 // asiVisu includes
-#include <asiVisu_FaceContourDataProvider.h>
-#include <asiVisu_FaceContourPipeline.h>
+#include <asiVisu_HatchingDataProvider.h>
+#include <asiVisu_HatchingPipeline.h>
 #include <asiVisu_Utils.h>
 
 // VTK includes
@@ -42,29 +42,29 @@
 
 //-----------------------------------------------------------------------------
 
-//! Creates a Presentation object for the passed Face Contour Node.
+//! Creates a Presentation object for the passed Hatching Node.
 //! \param N [in] Face Contour Node to create a Presentation for.
-asiVisu_GeomFaceContourPrs::asiVisu_GeomFaceContourPrs(const Handle(ActAPI_INode)& N)
+asiVisu_HatchingPrs::asiVisu_HatchingPrs(const Handle(ActAPI_INode)& N)
 : asiVisu_Prs(N)
 {
-  Handle(asiData_FaceContourNode)
-    contour_n = Handle(asiData_FaceContourNode)::DownCast(N);
+  Handle(asiData_HatchingNode)
+    hatching_n = Handle(asiData_HatchingNode)::DownCast(N);
 
-  // Create Data Provider for face contour
-  Handle(asiVisu_FaceContourDataProvider)
-    dp = new asiVisu_FaceContourDataProvider(contour_n);
+  // Create Data Provider for face hatching
+  Handle(asiVisu_HatchingDataProvider)
+    dp = new asiVisu_HatchingDataProvider(hatching_n);
 
-  // Pipeline for face contour
-  Handle(asiVisu_FaceContourPipeline) pl = new asiVisu_FaceContourPipeline;
+  // Pipeline for face hatching
+  Handle(asiVisu_HatchingPipeline) pl = new asiVisu_HatchingPipeline;
   //
   this->addPipeline        (Pipeline_Main, pl);
   this->assignDataProvider (Pipeline_Main, dp);
 
   // Configure presentation
-  pl -> Actor()->GetProperty()->SetLineWidth(2.0f);
+  pl -> Actor()->GetProperty()->SetLineWidth(1.0f);
   pl -> Actor()->GetProperty()->SetLighting(false);
   
-  // Make contour be visualized always on top of the scene
+  // Make hatching be visualized always on top of the scene
   pl->Mapper()->SetResolveCoincidentTopologyToPolygonOffset();
   pl->Mapper()->SetRelativeCoincidentTopologyLineOffsetParameters(0,-66000);
   pl->Mapper()->SetRelativeCoincidentTopologyPolygonOffsetParameters(0,-66000);
@@ -72,16 +72,16 @@ asiVisu_GeomFaceContourPrs::asiVisu_GeomFaceContourPrs(const Handle(ActAPI_INode
 }
 
 //! Factory method for Presentation.
-//! \param N [in] Node to create a Presentation for.
+//! \param[in] N Node to create a Presentation for.
 //! \return new Presentation instance.
-Handle(asiVisu_Prs) asiVisu_GeomFaceContourPrs::Instance(const Handle(ActAPI_INode)& N)
+Handle(asiVisu_Prs) asiVisu_HatchingPrs::Instance(const Handle(ActAPI_INode)& N)
 {
-  return new asiVisu_GeomFaceContourPrs(N);
+  return new asiVisu_HatchingPrs(N);
 }
 
 //! Returns true if the Presentation is visible, false -- otherwise.
 //! \return true/false.
-bool asiVisu_GeomFaceContourPrs::IsVisible() const
+bool asiVisu_HatchingPrs::IsVisible() const
 {
   return m_node->HasUserFlags(NodeFlag_IsPresentationVisible);
 }
@@ -89,46 +89,46 @@ bool asiVisu_GeomFaceContourPrs::IsVisible() const
 //-----------------------------------------------------------------------------
 
 //! Callback for initialization of Presentation pipelines.
-void asiVisu_GeomFaceContourPrs::beforeInitPipelines()
+void asiVisu_HatchingPrs::beforeInitPipelines()
 {
   // Do nothing...
 }
 
 //! Callback for initialization of Presentation pipelines.
-void asiVisu_GeomFaceContourPrs::afterInitPipelines()
+void asiVisu_HatchingPrs::afterInitPipelines()
 {
   // Do nothing...
 }
 
 //! Callback for updating of Presentation pipelines invoked before the
 //! kernel update routine starts.
-void asiVisu_GeomFaceContourPrs::beforeUpdatePipelines() const
+void asiVisu_HatchingPrs::beforeUpdatePipelines() const
 {
   // Do nothing...
 }
 
 //! Callback for updating of Presentation pipelines invoked after the
 //! kernel update routine completes.
-void asiVisu_GeomFaceContourPrs::afterUpdatePipelines() const
+void asiVisu_HatchingPrs::afterUpdatePipelines() const
 {
   // Do nothing...
 }
 
 //! Callback for highlighting.
-void asiVisu_GeomFaceContourPrs::highlight(vtkRenderer*,
-                                           const Handle(asiVisu_PickerResult)&,
-                                           const asiVisu_SelectionNature) const
+void asiVisu_HatchingPrs::highlight(vtkRenderer*,
+                                    const Handle(asiVisu_PickerResult)&,
+                                    const asiVisu_SelectionNature) const
 {}
 
 //! Callback for highlighting reset.
-void asiVisu_GeomFaceContourPrs::unHighlight(vtkRenderer*,
-                                             const asiVisu_SelectionNature) const
+void asiVisu_HatchingPrs::unHighlight(vtkRenderer*,
+                                      const asiVisu_SelectionNature) const
 {}
 
 //! Callback for rendering.
-void asiVisu_GeomFaceContourPrs::renderPipelines(vtkRenderer*) const
+void asiVisu_HatchingPrs::renderPipelines(vtkRenderer*) const
 {}
 
 //! Callback for de-rendering.
-void asiVisu_GeomFaceContourPrs::deRenderPipelines(vtkRenderer*) const
+void asiVisu_HatchingPrs::deRenderPipelines(vtkRenderer*) const
 {}

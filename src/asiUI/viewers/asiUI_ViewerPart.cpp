@@ -381,19 +381,21 @@ void asiUI_ViewerPart::onSubShapesPicked()
       // Store index of the active face
       if ( picked_face_IDs.size() )
       {
-        geom_n->GetFaceRepresentation()    ->SetSelectedFaces(picked_face_IDs);
-        geom_n->GetNormsRepresentation()   ->SetSelectedFaces(picked_face_IDs);
-        geom_n->GetSurfaceRepresentation() ->SetSelectedFaces(picked_face_IDs);
-        geom_n->GetContourRepresentation() ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetFaceRepresentation()     ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetNormsRepresentation()    ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetSurfaceRepresentation()  ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetContourRepresentation()  ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetHatchingRepresentation() ->SetSelectedFaces(picked_face_IDs);
         //
         std::cout << "Active face has been stored..." << std::endl;
       }
       else // Reset stored indices
       {
-        geom_n->GetFaceRepresentation()    ->SetSelectedFace(0);
-        geom_n->GetNormsRepresentation()   ->SetSelectedFace(0);
-        geom_n->GetSurfaceRepresentation() ->SetSelectedFace(0);
-        geom_n->GetContourRepresentation() ->SetSelectedFace(0);
+        geom_n->GetFaceRepresentation()     ->SetSelectedFace(0);
+        geom_n->GetNormsRepresentation()    ->SetSelectedFace(0);
+        geom_n->GetSurfaceRepresentation()  ->SetSelectedFace(0);
+        geom_n->GetContourRepresentation()  ->SetSelectedFace(0);
+        geom_n->GetHatchingRepresentation() ->SetSelectedFace(0);
         //
         std::cout << "Active face has been reset..." << std::endl;
       }

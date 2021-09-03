@@ -632,6 +632,21 @@ Handle(asiData_FaceContourNode) asiData_PartNode::GetContourRepresentation() con
   return nullptr;
 }
 
+//! \return underlying Hatching Node.
+Handle(asiData_HatchingNode) asiData_PartNode::GetHatchingRepresentation() const
+{
+  Handle(asiData_HatchingNode) hatching_n;
+  for ( Handle(ActAPI_IChildIterator) cit = this->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    hatching_n = Handle(asiData_HatchingNode)::DownCast( cit->Value() );
+
+    if ( !hatching_n.IsNull() && hatching_n->IsWellFormed() )
+      return hatching_n;
+  }
+
+  return nullptr;
+}
+
 //! \return underlying boundary edges representation Node.
 Handle(asiData_BoundaryEdgesNode) asiData_PartNode::GetBoundaryEdgesRepresentation() const
 {

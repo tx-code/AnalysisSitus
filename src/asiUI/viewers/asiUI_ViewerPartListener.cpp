@@ -195,6 +195,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pShowNormsAction      (nullptr),
   m_pInvertFacesAction    (nullptr),
   m_pShowOriContourAction (nullptr),
+  m_pShowHatchingAction   (nullptr),
   m_pCopyAsStringAction   (nullptr),
   m_pSetAsVariableAction  (nullptr),
   m_pFindIsolated         (nullptr),
@@ -437,9 +438,17 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       menu.addSeparator();
       //
       if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_FaceNormsNode) ) )
+      {
         m_pShowNormsAction = menu.addAction("Show face normals");
+      }
       if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_FaceContourNode) ) )
+      {
         m_pShowOriContourAction = menu.addAction("Show face oriented contour");
+      }
+      if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_HatchingNode) ) )
+      {
+        m_pShowHatchingAction = menu.addAction("Show hatching");
+      }
       //
       m_pInvertFacesAction = menu.addAction("Invert faces");
       m_pFindIsolated      = menu.addAction("Find isolated");
@@ -627,6 +636,20 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
 
     TIMER_FINISH
     TIMER_COUT_RESULT_MSG("Visualization of oriented contour")
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: show face hatching
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pShowHatchingAction )
+  {
+    TIMER_NEW
+    TIMER_GO
+
+    m_pViewer->PrsMgr()->Actualize( m_model->GetPartNode()->GetHatchingRepresentation() );
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_MSG("Visualization of face hatching")
   }
 
   //---------------------------------------------------------------------------

@@ -38,6 +38,7 @@ set (part_H_FILES
   part/asiData_FeatureNode.h
   part/asiData_FeaturesNode.h
   part/asiData_Grid2dNode.h
+  part/asiData_HatchingNode.h
   part/asiData_MetadataNode.h
   part/asiData_NamingAttr.h
   part/asiData_NamingParameter.h
@@ -66,6 +67,7 @@ set (part_CPP_FILES
   part/asiData_FeatureNode.cpp
   part/asiData_FeaturesNode.cpp
   part/asiData_Grid2dNode.cpp
+  part/asiData_HatchingNode.cpp
   part/asiData_MetadataNode.cpp
   part/asiData_NamingAttr.cpp
   part/asiData_NamingParameter.cpp

@@ -54,6 +54,7 @@
 #include <asiVisu_GeomFaceNormsPrs.h>
 #include <asiVisu_GeomSurfPrs.h>
 #include <asiVisu_Grid2dPrs.h>
+#include <asiVisu_HatchingPrs.h>
 #include <asiVisu_IVCurve2dPrs.h>
 #include <asiVisu_IVCurvePrs.h>
 #include <asiVisu_IVPointSet2dPrs.h>
@@ -265,6 +266,7 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_GeomFaceContourPrs)
   REGISTER_PRESENTATION(asiVisu_GeomSurfPrs)
   REGISTER_PRESENTATION(asiVisu_Grid2dPrs)
+  REGISTER_PRESENTATION(asiVisu_HatchingPrs)
   REGISTER_PRESENTATION(asiVisu_CalculusLawPrs)
   REGISTER_PRESENTATION(asiVisu_CurvatureCombsPrs)
   REGISTER_PRESENTATION(asiVisu_SurfDeviationPrs)

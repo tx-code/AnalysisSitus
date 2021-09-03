@@ -145,6 +145,21 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     geom_n->AddChildNode(geom_face_contour_n);
   }
 
+  // Create underlying hatching representation Node
+  {
+    Handle(ActAPI_INode) geom_face_hatching_base = asiData_HatchingNode::Instance();
+    m_model->GetHatchingPartition()->AddNode(geom_face_hatching_base);
+
+    // Initialize
+    Handle(asiData_HatchingNode) geom_face_hatching_n = Handle(asiData_HatchingNode)::DownCast(geom_face_hatching_base);
+    geom_face_hatching_n->Init();
+    geom_face_hatching_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_face_hatching_n->SetName("Face hatching");
+
+    // Set as child
+    geom_n->AddChildNode(geom_face_hatching_n);
+  }
+
   // Create underlying edge representation Node
   {
     Handle(ActAPI_INode) geom_edge_base = asiData_EdgeNode::Instance();

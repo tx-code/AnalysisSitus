@@ -232,6 +232,13 @@ public:
     return Handle(asiData_Partition<asiData_FaceContourNode>)::DownCast( this->Partition(Partition_FaceContour) );
   }
 
+  //! Accessor for a Partition instance dedicated to Face Hatching Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_HatchingNode>) GetHatchingPartition() const
+  {
+    return Handle(asiData_Partition<asiData_HatchingNode>)::DownCast( this->Partition(Partition_Hatching) );
+  }
+
   //! Accessor for a Partition instance dedicated to Grid 2D Nodes.
   //! \return requested Partition.
   Handle(asiData_Partition<asiData_Grid2dNode>) GetGrid2dPartition() const
@@ -561,6 +568,7 @@ protected:
     Partition_Face,
     Partition_FaceNorms,
     Partition_FaceContour,
+    Partition_Hatching,
     Partition_Grid2d,
     Partition_Surf,
     Partition_Edge,

@@ -62,6 +62,7 @@ set (pipelines_H_FILES
   pipelines/asiVisu_FuncLevelsPipeline3d.h
   pipelines/asiVisu_FuncUnivariatePipeline.h
   pipelines/asiVisu_Grid2dPipeline.h
+  pipelines/asiVisu_HatchingPipeline.h
   pipelines/asiVisu_IVSurfacePipeline.h
   pipelines/asiVisu_MeshContourPipeline.h
   pipelines/asiVisu_MeshENScalarPipeline.h
@@ -103,6 +104,7 @@ set (pipelines_CPP_FILES
   pipelines/asiVisu_FaceSurfaceShadedPipeline.cpp
   pipelines/asiVisu_FuncUnivariatePipeline.cpp
   pipelines/asiVisu_Grid2dPipeline.cpp
+  pipelines/asiVisu_HatchingPipeline.cpp
   pipelines/asiVisu_IVSurfacePipeline.cpp
   pipelines/asiVisu_MeshContourPipeline.cpp
   pipelines/asiVisu_MeshENScalarPipeline.cpp
@@ -145,6 +147,7 @@ set (presentations_H_FILES
   presentations/asiVisu_GeomFaceNormsPrs.h
   presentations/asiVisu_GeomSurfPrs.h
   presentations/asiVisu_Grid2dPrs.h
+  presentations/asiVisu_HatchingPrs.h
   presentations/asiVisu_IVCurve2dPrs.h
   presentations/asiVisu_IVCurvePrs.h
   presentations/asiVisu_IVPointSet2dPrs.h
@@ -182,6 +185,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_GeomFaceNormsPrs.cpp
   presentations/asiVisu_GeomSurfPrs.cpp
   presentations/asiVisu_Grid2dPrs.cpp
+  presentations/asiVisu_HatchingPrs.cpp
   presentations/asiVisu_IVCurve2dPrs.cpp
   presentations/asiVisu_IVCurvePrs.cpp
   presentations/asiVisu_IVPointSet2dPrs.cpp
@@ -226,6 +230,7 @@ set (providers_H_FILES
   providers/asiVisu_FuncDataProvider.h
   providers/asiVisu_FuncUnivariateDataProvider.h
   providers/asiVisu_Grid2dDataProvider.h
+  providers/asiVisu_HatchingDataProvider.h
   providers/asiVisu_IVCurve2dDataProvider.h
   providers/asiVisu_IVCurveDataProvider.h
   providers/asiVisu_IVPointSet2dDataProvider.h
@@ -265,6 +270,7 @@ set (providers_CPP_FILES
   providers/asiVisu_FaceDataProvider.cpp
   providers/asiVisu_FaceNormalsDataProvider.cpp
   providers/asiVisu_Grid2dDataProvider.cpp
+  providers/asiVisu_HatchingDataProvider.cpp
   providers/asiVisu_IVCurve2dDataProvider.cpp
   providers/asiVisu_IVCurveDataProvider.cpp
   providers/asiVisu_IVPointSet2dDataProvider.cpp
@@ -442,6 +448,7 @@ set (OCCT_LIB_FILES
   TKIGES
   TKXDESTEP
   TKXDEIGES
+  TKDraw
 )
 #------------------------------------------------------------------------------
 set (TBB_LIB_FILES

@@ -85,7 +85,6 @@ void asiVisu_FaceContourPipeline::SetInput(const Handle(asiVisu_DataProvider)& D
 
   if ( faceProvider->MustExecute( this->GetMTime() ) )
   {
-    // Append filter
     vtkSmartPointer<asiVisu_PDomainSource>
       source = vtkSmartPointer<asiVisu_PDomainSource>::New();
     //

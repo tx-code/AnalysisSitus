@@ -69,6 +69,7 @@ REGISTER_NODE_TYPE(asiData_PartNode)
 REGISTER_NODE_TYPE(asiData_FaceNode)
 REGISTER_NODE_TYPE(asiData_FaceNormsNode)
 REGISTER_NODE_TYPE(asiData_FaceContourNode)
+REGISTER_NODE_TYPE(asiData_HatchingNode)
 REGISTER_NODE_TYPE(asiData_SurfNode)
 REGISTER_NODE_TYPE(asiData_Grid2dNode)
 REGISTER_NODE_TYPE(asiData_SurfDeviationNode)
@@ -166,13 +167,14 @@ void asiEngine_Model::Clear()
   this->OpenCommand(); // tx start
   {
     // Clean up persistent selection
-    this->GetPartNode()->GetFaceRepresentation()    ->SetSelectedFace   (0);
-    this->GetPartNode()->GetNormsRepresentation()   ->SetSelectedFace   (0);
-    this->GetPartNode()->GetSurfaceRepresentation() ->SetSelectedFace   (0);
-    this->GetPartNode()->GetContourRepresentation() ->SetSelectedFace   (0);
-    this->GetPartNode()->GetEdgeRepresentation()    ->SetSelectedEdge   (0);
-    this->GetPartNode()->GetCurveRepresentation()   ->SetSelectedEdge   (0);
-    this->GetPartNode()->GetVertexRepresentation()  ->SetSelectedVertex (0);
+    this->GetPartNode()->GetFaceRepresentation()     ->SetSelectedFace   (0);
+    this->GetPartNode()->GetNormsRepresentation()    ->SetSelectedFace   (0);
+    this->GetPartNode()->GetSurfaceRepresentation()  ->SetSelectedFace   (0);
+    this->GetPartNode()->GetContourRepresentation()  ->SetSelectedFace   (0);
+    this->GetPartNode()->GetHatchingRepresentation() ->SetSelectedFace   (0);
+    this->GetPartNode()->GetEdgeRepresentation()     ->SetSelectedEdge   (0);
+    this->GetPartNode()->GetCurveRepresentation()    ->SetSelectedEdge   (0);
+    this->GetPartNode()->GetVertexRepresentation()   ->SetSelectedVertex (0);
 
     // Delete nodes under the Curve
     asiEngine_Curve(this).Clean_All( this->GetPartNode()->GetCurveRepresentation() );
@@ -328,6 +330,7 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_FaceNode>,           Partition_Face);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceNormsNode>,      Partition_FaceNorms);
   REGISTER_PARTITION(asiData_Partition<asiData_FaceContourNode>,    Partition_FaceContour);
+  REGISTER_PARTITION(asiData_Partition<asiData_HatchingNode>,       Partition_Hatching);
   REGISTER_PARTITION(asiData_Partition<asiData_SurfNode>,           Partition_Surf);
   REGISTER_PARTITION(asiData_Partition<asiData_Grid2dNode>,         Partition_Grid2d);
   REGISTER_PARTITION(asiData_Partition<asiData_EdgeNode>,           Partition_Edge);

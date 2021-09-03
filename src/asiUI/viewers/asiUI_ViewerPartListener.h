@@ -114,6 +114,7 @@ protected:
   QAction* m_pShowNormsAction;
   QAction* m_pInvertFacesAction;
   QAction* m_pShowOriContourAction;
+  QAction* m_pShowHatchingAction;
   QAction* m_pCopyAsStringAction;
   QAction* m_pSetAsVariableAction;
   QAction* m_pFindIsolated;

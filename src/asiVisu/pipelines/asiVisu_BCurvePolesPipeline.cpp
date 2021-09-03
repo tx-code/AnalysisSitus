@@ -40,7 +40,6 @@
 #include <ActData_ParameterFactory.h>
 
 // VTK includes
-#include <vtkAppendPolyData.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>

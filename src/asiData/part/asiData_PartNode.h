@@ -43,6 +43,7 @@
 #include <asiData_FaceNormsNode.h>
 #include <asiData_FeaturesNode.h>
 #include <asiData_Grid2dNode.h>
+#include <asiData_HatchingNode.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_NamingParameter.h>
 #include <asiData_SurfNode.h>
@@ -302,6 +303,9 @@ public:
 
   asiData_EXPORT Handle(asiData_FaceContourNode)
     GetContourRepresentation() const;
+
+  asiData_EXPORT Handle(asiData_HatchingNode)
+    GetHatchingRepresentation() const;
 
   asiData_EXPORT Handle(asiData_EdgeNode)
     GetEdgeRepresentation() const;
