@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
+#include <asiAlgo_BorderTrihedron.h>
 #include <asiAlgo_Collections.h>
 #include <asiAlgo_FeatureAngleType.h>
 #include <asiAlgo_FeatureFaces.h>
@@ -1507,6 +1508,19 @@ namespace asiAlgo_Utils
     GetLocalFrame(const TopoDS_Face& face,
                   const bool         alongEdges,
                   gp_Ax3&            axes);
+
+  //! Calculates border trihedron for the given face.
+  //! \param[in]  face     face to analyze.
+  //! \param[in]  edge     border edge lying on the `face` to calculate
+  //!                      the trihedron for.
+  //! \param[out] btri     border axes.
+  //! \param[in]  progress progress notifier.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ComputeBorderTrihedron(const TopoDS_Face&       face,
+                           const TopoDS_Edge&       edge,
+                           asiAlgo_BorderTrihedron& btri,
+                           ActAPI_ProgressEntry     progress = nullptr);
 
 } // asiAlgo_Utils namespace.
 
