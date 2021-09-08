@@ -3245,6 +3245,53 @@ int ENGINE_RebuildBounds(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConnectEdgesToWires(const Handle(asiTcl_Interp)& interp,
+                               int                          argc,
+                               const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape shape = partNode->GetShape();
+  //
+  if ( shape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is empty.");
+    return TCL_ERROR;
+  }
+
+  // Get all edges from the Part and collect them to a sequence expected by ShapeAnalysis.
+  const TopTools_IndexedMapOfShape& edgesMap = partNode->GetAAG()->RequestMapOfEdges();
+  Handle(TopTools_HSequenceOfShape) edges    = new TopTools_HSequenceOfShape;
+  //
+  for ( int e = 1; e <= edgesMap.Extent(); ++e )
+    edges->Append( edgesMap(e) );
+
+  // Connect to wires.
+  Handle(TopTools_HSequenceOfShape) wires;
+  ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, 1e-3, 0, wires);
+
+  // Add to the scene.
+  if ( !wires.IsNull() )
+  {
+    for ( TopTools_HSequenceOfShape::Iterator wit(*wires); wit.More(); wit.Next() )
+      interp->GetPlotter().DRAW_SHAPE( wit.Value(), Color_Red, "wire" );
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3683,4 +3730,13 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Rebuilds 3D representations of edges from their pcurves.",
     //
     __FILE__, group, ENGINE_RebuildBounds);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("connect-edges-to-wires",
+    //
+    "connect-edges-to-wires\n"
+    "\t Constructs as many wires as possible from the active set of edges taken\n"
+    "\t from the Part Node.",
+    //
+    __FILE__, group, ENGINE_ConnectEdgesToWires);
 }

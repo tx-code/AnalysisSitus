@@ -71,9 +71,6 @@ include (${CMAKE_SOURCE_DIR}/cmake/asitus_Rapidjson.cmake)
 # OCCT
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_OCCT.cmake)
 
-# Active Data
-include (${CMAKE_SOURCE_DIR}/cmake/asitus_ActiveData.cmake)
-
 # TBB is optional
 set (USE_THREADING ON CACHE BOOL "TBB is optional 3-rd party. Building with TBB will allow to run algorithms in multi-threaded mode.")
 
@@ -134,10 +131,6 @@ if (3RDPARTY_OCCT_DLL_DIR_DEBUG AND EXISTS "${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
   set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_DEB_PATH};${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
 endif()
 
-if (3RDPARTY_active_data_DLL_DIR_DEBUG AND EXISTS "${3RDPARTY_active_data_DLL_DIR_DEBUG}")
-  set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_DEB_PATH};${3RDPARTY_active_data_DLL_DIR_DEBUG}")
-endif()
-
 if (3RDPARTY_vtk_DLL_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_DLL_DIR_DEBUG}")
   set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_DEB_PATH};${3RDPARTY_vtk_DLL_DIR_DEBUG}")
 endif()
@@ -160,7 +153,6 @@ endif()
 
 set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};\
 ${3RDPARTY_OCCT_DLL_DIR};\
-${3RDPARTY_active_data_DLL_DIR};\
 ${3RDPARTY_vtk_DLL_DIR};")
 
 #-------------------------------------------------------------------------------
@@ -215,6 +207,7 @@ endif()
 # Sub-projects
 #-------------------------------------------------------------------------------
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiActiveData)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiAlgo)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiAsm)
 
@@ -256,6 +249,7 @@ endif()
 if (NOT BUILD_ALGO_ONLY)
   set_property(TARGET asiAlgo       PROPERTY FOLDER Framework)
   set_property(TARGET asiAsm        PROPERTY FOLDER Framework)
+  set_property(TARGET asiActiveData PROPERTY FOLDER Framework)
   set_property(TARGET asiData       PROPERTY FOLDER Framework)
   set_property(TARGET asiVisu       PROPERTY FOLDER Framework)
   set_property(TARGET asiEngine     PROPERTY FOLDER Framework)

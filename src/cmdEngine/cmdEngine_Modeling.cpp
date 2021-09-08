@@ -439,7 +439,7 @@ int ENGINE_MakeFace(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 3 && argc != 4 )
+  if ( argc < 3 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
@@ -455,7 +455,7 @@ int ENGINE_MakeFace(const Handle(asiTcl_Interp)& interp,
     if ( node.IsNull() )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a Surface object with name %1." << argv[2]);
-      return TCL_OK;
+      return TCL_ERROR;
     }
 
     // Get geometry of a surface.
@@ -464,43 +464,62 @@ int ENGINE_MakeFace(const Handle(asiTcl_Interp)& interp,
     if ( surface.IsNull() )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface in question is null.");
-      return TCL_OK;
+      return TCL_ERROR;
     }
 
     // Make face.
     F = BRepBuilderAPI_MakeFace( surface, Precision::Confusion() );
   }
-  else if ( argc == 4 )
+  else if ( argc >= 4 )
   {
-    std::string wireName;
+    int wIdx = 0;
 
-    if ( !interp->GetKeyValue(argc, argv, "w", wireName) )
+    if ( !interp->HasKeyword(argc, argv, "w", wIdx) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "No -w argument is passed.");
-      return TCL_OK;
-    }
-
-    // Get Topology Item Node.
-    Handle(asiData_IVTopoItemNode)
-      node = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName( wireName.c_str() ) );
-    //
-    if ( node.IsNull() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name %1." << wireName);
       return TCL_ERROR;
     }
 
-    TopoDS_Shape sh = node->GetShape();
+    // Collect wires.
+    std::vector<TopoDS_Wire> wires;
     //
-    if ( sh.ShapeType() != TopAbs_WIRE )
+    for ( int w = wIdx + 1; w < argc; ++w )
     {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The shape %1 is not a wire." << wireName);
+      // Get Topology Item Node.
+      Handle(asiData_IVTopoItemNode)
+        node = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(argv[w]) );
+      //
+      if ( node.IsNull() )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find object with name %1." << argv[w]);
+        return TCL_ERROR;
+      }
+
+      TopoDS_Shape sh = node->GetShape();
+      //
+      if ( sh.ShapeType() != TopAbs_WIRE )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "The shape %1 is not a wire." << argv[w]);
+        return TCL_ERROR;
+      }
+
+      wires.push_back( TopoDS::Wire(sh) );
+    }
+
+    if ( wires.empty() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "No wires to construct a face from.");
       return TCL_ERROR;
     }
 
-    TopoDS_Wire W = TopoDS::Wire(sh);
-
-    F = BRepBuilderAPI_MakeFace(W);
+    // Build face from wires.
+    BRepBuilderAPI_MakeFace mkFace(wires[0]);
+    //
+    for ( size_t w = 1; w < wires.size(); ++w )
+    {
+      mkFace.Add( TopoDS::Wire( wires[w].Reversed() ) );
+    }
+    F = mkFace.Face();
   }
 
   if ( !F.IsNull() )
@@ -1863,7 +1882,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("make-face",
     //
     "make-face <result> <surfaceName>\n"
-    "make-face <result> -w <wireName>\n"
+    "make-face <result> -w [<wireName1> <wireName2> ...]\n"
     "\n"
     "\t Creates face from a surface or wire. The <surfaceName>/<wireName> variables\n"
     "\t should exist in the scene graph of the imperative plotter.",

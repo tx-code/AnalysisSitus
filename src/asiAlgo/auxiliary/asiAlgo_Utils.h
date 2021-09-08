@@ -1510,6 +1510,21 @@ namespace asiAlgo_Utils
                   gp_Ax3&            axes);
 
   //! Calculates border trihedron for the given face.
+  //! \param[in]  face     the face to analyze.
+  //! \param[in]  edge     the border edge lying on the `face` to calculate
+  //!                      the trihedron for.
+  //! \param[in]           the parameter along the edge.
+  //! \param[out] btri     the border axes.
+  //! \param[in]  progress the progress notifier.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ComputeBorderTrihedron(const TopoDS_Face&       face,
+                           const TopoDS_Edge&       edge,
+                           const double             t,
+                           asiAlgo_BorderTrihedron& btri,
+                           ActAPI_ProgressEntry     progress = nullptr);
+
+  //! Calculates border trihedron for the given face.
   //! \param[in]  face     face to analyze.
   //! \param[in]  edge     border edge lying on the `face` to calculate
   //!                      the trihedron for.

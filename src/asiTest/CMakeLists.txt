@@ -142,6 +142,7 @@ set (asiTest_include_dir ${asiTest_include_dir_loc} PARENT_SCOPE)
 
 include_directories ( SYSTEM
                       ${asiTest_include_dir_loc}
+                      ${asiActiveData_include_dir}
                       ${asiAlgo_include_dir}
                       ${asiAsm_include_dir}
                       ${asiData_include_dir}
@@ -151,7 +152,6 @@ include_directories ( SYSTEM
                       ${asiTcl_include_dir}
                       ${asiTestEngine_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
-                      ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_vtk_INCLUDE_DIR} )
 

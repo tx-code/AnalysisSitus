@@ -62,10 +62,10 @@ set (asiTcl_include_dir ${asiTcl_include_dir_loc} PARENT_SCOPE)
 
 include_directories ( SYSTEM
                       ${asiTcl_include_dir_loc}
+                      ${asiActiveData_include_dir}
                       ${asiAlgo_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
-                      ${3RDPARTY_tcl_INCLUDE_DIR}
-                      ${3RDPARTY_active_data_INCLUDE_DIR} )
+                      ${3RDPARTY_tcl_INCLUDE_DIR} )
 
 #------------------------------------------------------------------------------
 # Create library

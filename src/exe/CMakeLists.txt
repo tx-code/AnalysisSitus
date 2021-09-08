@@ -27,12 +27,6 @@ set (ui_CPP_FILES
 )
 
 #------------------------------------------------------------------------------
-set (AD_LIB_FILES
-  ActiveDataAPI
-  ActiveData
-  ActiveDataAux
-)
-#------------------------------------------------------------------------------
 set (OCCT_LIB_FILES
   TKernel
   TKMath
@@ -153,6 +147,7 @@ set (exe_include_dir ${exe_include_dir_loc} PARENT_SCOPE)
 
 include_directories ( SYSTEM
                       ${exe_include_dir_loc}
+                      ${asiActiveData_include_dir}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
                       ${asiData_include_dir}
@@ -160,7 +155,6 @@ include_directories ( SYSTEM
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
-                      ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_vtk_INCLUDE_DIR}
                       ${3RDPARTY_tbb_INCLUDE_DIR} )
@@ -229,21 +223,6 @@ foreach (LIB_FILE ${OCCT_LIB_FILES})
     target_link_libraries (asiExe optimized ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
   else()
     target_link_libraries (asiExe ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
-  endif()
-endforeach()
-
-foreach (LIB_FILE ${AD_LIB_FILES})
-  if (WIN32)
-    set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  else()
-    set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  endif()
-
-  if (3RDPARTY_active_data_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_active_data_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiExe debug ${3RDPARTY_active_data_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiExe optimized ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
-  else()
-    target_link_libraries (asiExe ${3RDPARTY_active_data_LIBRARY_DIR}/${LIB_FILENAME})
   endif()
 endforeach()
 

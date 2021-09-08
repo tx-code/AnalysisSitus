@@ -52,6 +52,7 @@ set (cmdMobius_include_dir ${cmdMobius_include_dir_loc} PARENT_SCOPE)
 
 include_directories ( SYSTEM
                       ${cmdMobius_include_dir_loc}
+                      ${asiActiveData_include_dir}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
                       ${asiAsm_include_dir}
@@ -60,7 +61,6 @@ include_directories ( SYSTEM
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
-                      ${3RDPARTY_active_data_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_vtk_INCLUDE_DIR} )
 

@@ -35,7 +35,7 @@
 #include <asiTestEngine.h>
 
 // Active Data (auxiliary) includes
-#include <ActAux.h>
+#include <ActData.h>
 #include <ActAux_Utils.h>
 
 //-----------------------------------------------------------------------------
