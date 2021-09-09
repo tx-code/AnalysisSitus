@@ -110,6 +110,8 @@ REGISTER_NODE_TYPE(asiData_IVPoints2dNode)
 REGISTER_NODE_TYPE(asiData_IVPointsNode)
 REGISTER_NODE_TYPE(asiData_IVPointSet2dNode)
 REGISTER_NODE_TYPE(asiData_IVPointSetNode)
+REGISTER_NODE_TYPE(asiData_IVVectorsNode)
+REGISTER_NODE_TYPE(asiData_IVVectorFieldNode)
 REGISTER_NODE_TYPE(asiData_IVSurfaceNode)
 REGISTER_NODE_TYPE(asiData_IVSurfacesNode)
 REGISTER_NODE_TYPE(asiData_IVTessItemNode)
@@ -361,6 +363,8 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_IVPointsNode>,       Partition_IV_Points);
   REGISTER_PARTITION(asiData_Partition<asiData_IVPointSet2dNode>,   Partition_IV_PointSet2d);
   REGISTER_PARTITION(asiData_Partition<asiData_IVPointSetNode>,     Partition_IV_PointSet);
+  REGISTER_PARTITION(asiData_Partition<asiData_IVVectorsNode>,      Partition_IV_Vectors);
+  REGISTER_PARTITION(asiData_Partition<asiData_IVVectorFieldNode>,  Partition_IV_VectorField);
   REGISTER_PARTITION(asiData_Partition<asiData_IVCurvesNode>,       Partition_IV_Curves);
   REGISTER_PARTITION(asiData_Partition<asiData_IVCurveNode>,        Partition_IV_Curve);
   REGISTER_PARTITION(asiData_Partition<asiData_IVCurves2dNode>,     Partition_IV_Curves2d);

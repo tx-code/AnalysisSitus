@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Created on: 08 April 2016
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2016-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,18 @@ Handle(asiData_IVPointsNode) asiData_IVNode::Points()
   //
   if ( !points_n.IsNull() && points_n->IsWellFormed() )
     return points_n;
+  //
+  return nullptr;
+}
+
+//! \return underlying vectors.
+Handle(asiData_IVVectorsNode) asiData_IVNode::Vectors()
+{
+  Handle(asiData_IVVectorsNode)
+    vectors_n = Handle(asiData_IVVectorsNode)::DownCast( this->GetChildNode(Child_Vectors) );
+  //
+  if ( !vectors_n.IsNull() && vectors_n->IsWellFormed() )
+    return vectors_n;
   //
   return nullptr;
 }

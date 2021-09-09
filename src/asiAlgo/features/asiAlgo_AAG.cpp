@@ -95,6 +95,10 @@ Handle(asiAlgo_AAG) asiAlgo_AAG::Copy() const
   copy->m_tEdges            = this->m_tEdges;
   copy->m_vertices          = this->m_vertices;
   copy->m_tVertices         = this->m_tVertices;
+  copy->m_verticesEdges     = this->m_verticesEdges;
+  copy->m_tVerticesEdges    = this->m_tVerticesEdges;
+  copy->m_verticesFaces     = this->m_verticesFaces;
+  copy->m_tVerticesFaces    = this->m_tVerticesFaces;
   copy->m_edgesFaces        = this->m_edgesFaces;
   copy->m_tEdgesFaces       = this->m_tEdgesFaces;
   copy->m_neighborsStack    = this->m_neighborsStack;
@@ -524,6 +528,27 @@ const asiAlgo_IndexedDataMapOfTShapeListOfShape&
   return m_tVerticesEdges;
 }
 
+//-----------------------------------------------------------------------------
+
+const TopTools_IndexedDataMapOfShapeListOfShape&
+  asiAlgo_AAG::RequestMapOfVerticesFaces()
+{
+  if ( m_verticesFaces.IsEmpty() )
+    TopExp::MapShapesAndAncestors(m_master, TopAbs_VERTEX, TopAbs_FACE, m_verticesFaces);
+
+  return m_verticesFaces;
+}
+
+//-----------------------------------------------------------------------------
+
+const asiAlgo_IndexedDataMapOfTShapeListOfShape&
+  asiAlgo_AAG::RequestTMapOfVerticesFaces()
+{
+  if ( m_tVerticesFaces.IsEmpty() )
+    asiAlgo_Utils::MapTShapesAndAncestors(m_master, TopAbs_VERTEX, TopAbs_FACE, m_tVerticesFaces);
+
+  return m_tVerticesFaces;
+}
 //-----------------------------------------------------------------------------
 
 const TopTools_IndexedDataMapOfShapeListOfShape&

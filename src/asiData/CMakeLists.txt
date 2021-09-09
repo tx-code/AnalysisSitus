@@ -120,6 +120,8 @@ set (iv_H_FILES
   iv/asiData_IVTextNode.h
   iv/asiData_IVTopoItemNode.h
   iv/asiData_IVTopoNode.h
+  iv/asiData_IVVectorFieldNode.h
+  iv/asiData_IVVectorsNode.h
 )
 set (iv_CPP_FILES
   iv/asiData_IVCurve2dNode.cpp
@@ -139,6 +141,8 @@ set (iv_CPP_FILES
   iv/asiData_IVTextNode.cpp
   iv/asiData_IVTopoItemNode.cpp
   iv/asiData_IVTopoNode.cpp
+  iv/asiData_IVVectorFieldNode.cpp
+  iv/asiData_IVVectorsNode.cpp
 )
 
 #------------------------------------------------------------------------------

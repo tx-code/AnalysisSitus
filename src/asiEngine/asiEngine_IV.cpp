@@ -89,6 +89,20 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     iv_n->AddChildNode(iv_points_n);
   }
 
+  // Create underlying Vectors
+  {
+    Handle(ActAPI_INode) iv_vectors_base = asiData_IVVectorsNode::Instance();
+    m_model->GetIVVectorsPartition()->AddNode(iv_vectors_base);
+
+    // Initialize
+    Handle(asiData_IVVectorsNode) iv_vectors_n = Handle(asiData_IVVectorsNode)::DownCast(iv_vectors_base);
+    iv_vectors_n->Init();
+    iv_vectors_n->SetName("Vectors");
+
+    // Add as child
+    iv_n->AddChildNode(iv_vectors_n);
+  }
+
   // Create underlying Curves 2D
   {
     Handle(ActAPI_INode) iv_curves2d_base = asiData_IVCurves2dNode::Instance();
@@ -186,6 +200,7 @@ void asiEngine_IV::Clean_All()
   this->Clean_Curves2d();
   this->Clean_Points();
   this->Clean_Points2d();
+  this->Clean_Vectors();
   this->Clean_Surfaces();
   this->Clean_Tess();
   this->Clean_Text();
@@ -387,6 +402,86 @@ void asiEngine_IV::Clean_Points()
 {
   Handle(asiData_IVPointsNode)
     IV_Parent = m_model->GetIVNode()->Points();
+  //
+  this->_cleanChildren(IV_Parent);
+}
+///
+
+//-----------------------------------------------------------------------------
+
+//! Finds Node with the given name. Returns nullptr if nothing is found.
+//! \param name [in] target name.
+//! \return found Node (the first one if several exist) or nullptr.
+Handle(asiData_IVVectorFieldNode)
+  asiEngine_IV::Find_VectorField(const TCollection_AsciiString& name)
+{
+  Handle(asiData_IVVectorsNode) parent = m_model->GetIVNode()->Vectors();
+
+  // Find the first Node with the given name
+  for ( Handle(ActAPI_IChildIterator) cit = parent->GetChildIterator(true); cit->More(); cit->Next() )
+  {
+    Handle(ActAPI_INode) node = cit->Value();
+    //
+    if ( node.IsNull() || !node->IsWellFormed() )
+      continue;
+
+    TCollection_ExtendedString nodeName = node->GetName();
+    //
+    if ( nodeName.IsEqual(name) )
+      return Handle(asiData_IVVectorFieldNode)::DownCast(node);
+  }
+
+  return nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Creates Vector Field Node.
+//! \param points        [in] target point cloud.
+//! \param vectors       [in] vector field.
+//! \param name          [in] name to set (auto-generated if empty).
+//! \param useAutoNaming [in] indicates whether to auto-name entities.
+//! \return Point Set Node.
+Handle(asiData_IVVectorFieldNode)
+  asiEngine_IV::Create_VectorField(const Handle(asiAlgo_BaseCloud<double>)& points,
+                                   const Handle(asiAlgo_BaseCloud<double>)& vectors,
+                                   const TCollection_AsciiString&           name,
+                                   const bool                               useAutoNaming)
+{
+  // Access Model and parent Node
+  Handle(asiData_IVVectorsNode) IV_Parent = m_model->GetIVNode()->Vectors();
+
+  // Add Vector Field Node to Partition
+  Handle(asiData_IVVectorFieldNode)
+    item_n = Handle(asiData_IVVectorFieldNode)::DownCast( asiData_IVVectorFieldNode::Instance() );
+  //
+  m_model->GetIVVectorFieldPartition()->AddNode(item_n);
+
+  // Generate unique name
+  TCollection_ExtendedString item_name = ( name.IsEmpty() ? "Vector Field" : name );
+  if ( useAutoNaming )
+    item_name = ActData_UniqueNodeName::Generate(ActData_SiblingNodes::CreateForChild(item_n, IV_Parent), item_name);
+
+  // Initialize
+  item_n->Init();
+  item_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  item_n->SetName(item_name);
+  item_n->SetPoints(points);
+
+  // Add as child
+  IV_Parent->AddChildNode(item_n);
+
+  // Return the just created Node
+  return item_n;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Deletes all Vector Field Nodes.
+void asiEngine_IV::Clean_Vectors()
+{
+  Handle(asiData_IVVectorsNode)
+    IV_Parent = m_model->GetIVNode()->Vectors();
   //
   this->_cleanChildren(IV_Parent);
 }

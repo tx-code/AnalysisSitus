@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 08 April 2016
+// Created on: 09 September 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,32 +28,28 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_IVNode_h
-#define asiData_IVNode_h
+#ifndef asiData_IVVectorFieldNode_h
+#define asiData_IVVectorFieldNode_h
 
-// Visualization includes
-#include <asiData_IVCurves2dNode.h>
-#include <asiData_IVCurvesNode.h>
-#include <asiData_IVPoints2dNode.h>
-#include <asiData_IVPointsNode.h>
-#include <asiData_IVVectorsNode.h>
-#include <asiData_IVSurfacesNode.h>
-#include <asiData_IVTessNode.h>
-#include <asiData_IVTextNode.h>
-#include <asiData_IVTopoNode.h>
+// asiData includes
+#include <asiData.h>
 
-//-----------------------------------------------------------------------------
+// asiAlgo includes
+#include <asiAlgo_BaseCloud.h>
 
-//! Root Node for all items visualized in the imperative viewer.
-class asiData_IVNode : public ActData_BaseNode
+// Active Data includes
+#include <ActData_BaseNode.h>
+
+//! Data Node representing a vector field in IV (Imperative Viewer).
+class asiData_IVVectorFieldNode : public ActData_BaseNode
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiData_IVNode, ActData_BaseNode)
+  DEFINE_STANDARD_RTTI_INLINE(asiData_IVVectorFieldNode, ActData_BaseNode)
 
   // Automatic registration of Node type in global factory
-  DEFINE_NODE_FACTORY(asiData_IVNode, Instance)
+  DEFINE_NODE_FACTORY(asiData_IVVectorFieldNode, Instance)
 
 public:
 
@@ -64,6 +60,9 @@ public:
   // Common           //
   //------------------//
     PID_Name,         //!< Name of the Node.
+  //------------------//
+    PID_Points,       //!< Coordinates of vector positions.
+    PID_Vectors,      //!< Coordinates of vectors.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -85,32 +84,17 @@ public:
 // Handy accessors to the stored data:
 public:
 
-  asiData_EXPORT Handle(asiData_IVPoints2dNode)
-    Points2d();
+  asiData_EXPORT Handle(asiAlgo_BaseCloud<double>)
+    GetPoints() const;
 
-  asiData_EXPORT Handle(asiData_IVPointsNode)
-    Points();
+  asiData_EXPORT void
+    SetPoints(const Handle(asiAlgo_BaseCloud<double>)& pointCloud);
 
-  asiData_EXPORT Handle(asiData_IVVectorsNode)
-    Vectors();
+  asiData_EXPORT Handle(asiAlgo_BaseCloud<double>)
+    GetVectors() const;
 
-  asiData_EXPORT Handle(asiData_IVCurves2dNode)
-    Curves2d();
-
-  asiData_EXPORT Handle(asiData_IVCurvesNode)
-    Curves();
-
-  asiData_EXPORT Handle(asiData_IVSurfacesNode)
-    Surfaces();
-
-  asiData_EXPORT Handle(asiData_IVTopoNode)
-    Topology();
-
-  asiData_EXPORT Handle(asiData_IVTessNode)
-    Tessellation();
-
-  asiData_EXPORT Handle(asiData_IVTextNode)
-    Text();
+  asiData_EXPORT void
+    SetVectors(const Handle(asiAlgo_BaseCloud<double>)& vectorCloud);
 
 // Initialization:
 public:
@@ -122,22 +106,7 @@ protected:
 
   //! Allocation is allowed only via Instance() method.
   asiData_EXPORT
-    asiData_IVNode();
-
-private:
-
-  enum Child
-  {
-    Child_Points2d = 1,
-    Child_Points,
-    Child_Vectors,
-    Child_Curves2d,
-    Child_Curves,
-    Child_Surfaces,
-    Child_Topology,
-    Child_Tessellation,
-    Child_Text
-  };
+    asiData_IVVectorFieldNode();
 
 };
 

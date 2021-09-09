@@ -99,6 +99,20 @@ public:
 
 //---------------------------------------------------------------------------//
 
+  asiEngine_EXPORT Handle(asiData_IVVectorFieldNode)
+    Find_VectorField(const TCollection_AsciiString& name);
+
+  asiEngine_EXPORT Handle(asiData_IVVectorFieldNode)
+    Create_VectorField(const Handle(asiAlgo_BaseCloud<double>)& points,
+                       const Handle(asiAlgo_BaseCloud<double>)& vectors,
+                       const TCollection_AsciiString&           name,
+                       const bool                               useAutoNaming);
+
+  asiEngine_EXPORT void
+    Clean_Vectors();
+
+//---------------------------------------------------------------------------//
+
   asiEngine_EXPORT Handle(asiData_IVCurveNode)
     Get_LastCurve();
 

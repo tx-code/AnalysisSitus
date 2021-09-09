@@ -593,6 +593,18 @@ public:
   asiAlgo_EXPORT const asiAlgo_IndexedDataMapOfTShapeListOfShape&
     RequestTMapOfVerticesEdges();
 
+  //! Returns vertices and their owner faces.
+  //! If the map is empty, it is constructed.
+  //! \return map of vertices and their owner faces.
+  asiAlgo_EXPORT const TopTools_IndexedDataMapOfShapeListOfShape&
+    RequestMapOfVerticesFaces();
+
+  //! Returns vertices with unique TShape pointers and their owner faces.
+  //! If the map is empty, it is constructed.
+  //! \return map of vertices and their owner faces.
+  asiAlgo_EXPORT const asiAlgo_IndexedDataMapOfTShapeListOfShape&
+    RequestTMapOfVerticesFaces();
+
   //! Returns edges and their owner faces.
   //! If the map is empty, it is constructed.
   //! \return map of edges and their owner faces.
@@ -909,6 +921,12 @@ protected:
 
   //! Map of vertices with distinct TShape pointers versus edges.
   asiAlgo_IndexedDataMapOfTShapeListOfShape m_tVerticesEdges;
+
+  //! Map of vertices versus faces.
+  TopTools_IndexedDataMapOfShapeListOfShape m_verticesFaces;
+
+  //! Map of vertices with distinct TShape pointers versus faces.
+  asiAlgo_IndexedDataMapOfTShapeListOfShape m_tVerticesFaces;
 
   //! Map of edges versus faces.
   TopTools_IndexedDataMapOfShapeListOfShape m_edgesFaces;

@@ -428,6 +428,20 @@ public:
     return Handle(asiData_Partition<asiData_IVPointSetNode>)::DownCast( this->Partition(Partition_IV_PointSet) );
   }
 
+  //! Accessor for a Partition instance dedicated to IV Vectors Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_IVVectorsNode>) GetIVVectorsPartition() const
+  {
+    return Handle(asiData_Partition<asiData_IVVectorsNode>)::DownCast( this->Partition(Partition_IV_Vectors) );
+  }
+
+  //! Accessor for a Partition instance dedicated to IV Vector Field Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_IVVectorFieldNode>) GetIVVectorFieldPartition() const
+  {
+    return Handle(asiData_Partition<asiData_IVVectorFieldNode>)::DownCast( this->Partition(Partition_IV_VectorField) );
+  }
+
   //! Accessor for a Partition instance dedicated to IV Curves Nodes.
   //! \return requested Partition.
   Handle(asiData_Partition<asiData_IVCurvesNode>) GetIVCurvesPartition() const
@@ -600,6 +614,8 @@ protected:
     Partition_IV_Points,
     Partition_IV_PointSet2d,
     Partition_IV_PointSet,
+    Partition_IV_Vectors,
+    Partition_IV_VectorField,
     Partition_IV_Curves,
     Partition_IV_Curve,
     Partition_IV_Curves2d,

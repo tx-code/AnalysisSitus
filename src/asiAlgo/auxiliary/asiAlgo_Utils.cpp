@@ -4362,7 +4362,7 @@ bool asiAlgo_Utils::ComputeBorderTrihedron(const TopoDS_Face&       face,
   }
 
   // Pick up two points on the curve.
-  const double midParam  = (f + l)*0.5;
+  const double midParam  = t;
   const double paramStep = (l - f)*0.01;
   const double A_param   = midParam;
   const double B_param   = midParam + paramStep;
@@ -4455,26 +4455,6 @@ bool asiAlgo_Utils::ComputeBorderTrihedron(const TopoDS_Face&       face,
                                            asiAlgo_BorderTrihedron& btri,
                                            ActAPI_ProgressEntry     progress)
 {
-  // Check whether the edge of interest possesses "same parameter" property.
-  // If so, we may use its host spatial curves in conjunction with p-curves
-  // to sample points on adjacent surfaces. If not, then direction evaluation
-  // is not legal anymore, so point inversion problem has to be solved. The
-  // latter is quite heavy operation, so it is good that we run it for
-  // invalid model only.
-  const bool isSameParam = BRep_Tool::SameParameter(edge) && BRep_Tool::SameRange(edge);
-
-  // Get orientation of co-edge on the face of interest.
-  TopAbs_Orientation CumulOriOnFace = TopAbs_EXTERNAL;
-  //
-  for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
-  {
-    if ( exp.Current().IsSame(edge) )
-    {
-      CumulOriOnFace = exp.Current().Orientation();
-      break;
-    }
-  }
-
   // Get host (shared) curve.
   double f, l;
   Handle(Geom_Curve) probeCurve = BRep_Tool::Curve(edge, f, l);
@@ -4487,87 +4467,5 @@ bool asiAlgo_Utils::ComputeBorderTrihedron(const TopoDS_Face&       face,
 
   // Pick up two points on the curve.
   const double midParam  = (f + l)*0.5;
-  const double paramStep = (l - f)*0.01;
-  const double A_param   = midParam;
-  const double B_param   = midParam + paramStep;
-  //
-  gp_Pnt A = probeCurve->Value(A_param);
-  gp_Pnt B = probeCurve->Value(B_param);
-
-  //this->Plotter().DRAW_POINT(A, Color_Red,  "A");
-  //this->Plotter().DRAW_POINT(B, Color_Blue, "B");
-
-  // Get host surface.
-  Handle(Geom_Surface) S = BRep_Tool::Surface(face);
-  Handle(Geom2d_Curve) c2d;
-
-  gp_Pnt2d UV;
-  gp_Vec TF; // Tangent for F.
-
-  // Vx.
-  gp_Vec VX = B.XYZ() - A.XYZ();
-  if ( VX.Magnitude() < RealEpsilon() )
-  {
-    progress.SendLogMessage( LogErr(Normal) << "Zero Vx." );
-    return false;
-  }
-  //
-  if ( CumulOriOnFace == TopAbs_REVERSED )
-    VX.Reverse();
-
-  //this->Plotter().DRAW_VECTOR_AT(A, VX, Color_Red, "Vx");
-
-  // Say (u, v) is the parametric space of S. Now we take parameters
-  // of the point A on this surface.
-  if ( isSameParam )
-  {
-    double cons_f, cons_l;
-    c2d = BRep_Tool::CurveOnSurface(edge, face, cons_f, cons_l);
-    //
-    if ( c2d.IsNull() )
-    {
-      progress.SendLogMessage( LogErr(Normal) << "Null p-curve in the border edge." );
-      return false; // Face is invalid.
-    }
-
-    UV = c2d->Value(A_param);
-  }
-  else
-  {
-    ShapeAnalysis_Surface SAS(S);
-    UV = SAS.ValueOfUV(A, 1.0e-7);
-  }
-
-  // N (Vz).
-  gp_Pnt P;
-  gp_Vec D1U, D1V;
-  S->D1(UV.X(), UV.Y(), P, D1U, D1V);
-  //
-  gp_Vec N = D1U.Crossed(D1V);
-  if ( N.Magnitude() < RealEpsilon() )
-  {
-    progress.SendLogMessage( LogErr(Normal) << "Zero Vz." );
-    return false;
-  }
-  //
-  if ( face.Orientation() == TopAbs_REVERSED )
-    N.Reverse();
-
-  //this->Plotter().DRAW_VECTOR_AT(A, N, Color_Blue, "Vz");
-
-  // Vy.
-  gp_Vec VY = N.Crossed(VX);
-  if ( VY.Magnitude() < RealEpsilon() )
-  {
-    progress.SendLogMessage( LogErr(Normal) << "Zero Vy." );
-    return false;
-  }
-
-  // Set output.
-  btri.V_origin = A;
-  btri.V_x      = VX;
-  btri.V_y      = VY;
-  btri.V_z      = N;
-  //
-  return true;
+  return ComputeBorderTrihedron(face, edge, midParam, btri, progress);
 }
