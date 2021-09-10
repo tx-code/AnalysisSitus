@@ -74,7 +74,9 @@ void asiData_TriangulationNode::Init()
   this->InitParameter(PID_Name, "Name");
 
   // Set default values.
+#if defined USE_MOBIUS
   this->SetTriangulation (nullptr);
+#endif
   this->SetOptions       (nullptr);
   this->SetBVH           (nullptr);
   this->SetUseScalars    (true);
