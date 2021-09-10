@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: April 2016
+// Created on: 19 September 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, OPEN CASCADE SAS
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
 //    * Redistributions in binary form must reproduce the above copyright
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
-//    * Neither the name of OPEN CASCADE SAS nor the
+//    * Neither the name of the copyright holder(s) nor the
 //      names of all contributors may be used to endorse or promote products
 //      derived from this software without specific prior written permission.
 //
@@ -26,8 +26,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Web: http://dev.opencascade.org
 //-----------------------------------------------------------------------------
 
 #ifndef ActAPI_IPlotter_HeaderFile
@@ -48,6 +46,7 @@ class Geom_Curve;
 class Geom_Plane;
 class Geom_Surface;
 class Poly_Triangulation;
+class ActData_Mesh;
 
 //-----------------------------------------------------------------------------
 
@@ -205,6 +204,20 @@ public:
                      const gp_Pnt&,
                      const gp_Vec&,
                      const ActAPI_Color&) {}
+
+  //-------------------------------------------------------------------------//
+
+  virtual void
+    DRAW_VECTORS(const Handle(HRealArray)&,
+                 const Handle(HRealArray)&,
+                 const ActAPI_Color&,
+                 const TCollection_AsciiString&) {}
+
+  virtual void
+    REDRAW_VECTORS(const TCollection_AsciiString&,
+                   const Handle(HRealArray)&,
+                   const Handle(HRealArray)&,
+                   const ActAPI_Color&) {}
 
   //-------------------------------------------------------------------------//
 
@@ -506,6 +519,21 @@ public:
                          const ActAPI_Color&,
                          const double) {} // opacity
 
+  //-------------------------------------------------------------------------//
+
+  virtual void
+    DRAW_MESH(const Handle(ActData_Mesh)&,
+              const ActAPI_Color&,
+              const double, // opacity
+              const double, // edge width
+              const TCollection_AsciiString&) {}
+
+  virtual void
+    REDRAW_MESH(const TCollection_AsciiString&,
+                const Handle(ActData_Mesh)&,
+                const ActAPI_Color&,
+                const double, // opacity
+                const double) {} // edge width
 // TEXT
 public:
 
@@ -694,6 +722,32 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_POINTS(name, coords, color);
+  }
+
+//-------------------------------------------------------------------------//
+
+  virtual void
+    DRAW_VECTORS(const Handle(HRealArray)&      points,
+                 const Handle(HRealArray)&      vectors,
+                 const ActAPI_Color&            color,
+                 const TCollection_AsciiString& name)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_VECTORS(points, vectors, color, name);
+  }
+
+//-------------------------------------------------------------------------//
+
+  virtual void
+    REDRAW_VECTORS(const TCollection_AsciiString& name,
+                   const Handle(HRealArray)&      points,
+                   const Handle(HRealArray)&      vectors,
+                   const ActAPI_Color&            color)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_VECTORS(name, points, vectors, color);
   }
 
 //---------------------------------------------------------------------------//
@@ -1324,6 +1378,34 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_TRIANGULATION(name, tess, color, opacity);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    DRAW_MESH(const Handle(ActData_Mesh)&    tess,
+              const ActAPI_Color&            color,
+              const double                   opacity,
+              const double                   edgeWidth,
+              const TCollection_AsciiString& name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_MESH(tess, color, opacity, edgeWidth, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    REDRAW_MESH(const TCollection_AsciiString& name,
+                const Handle(ActData_Mesh)&    tess,
+                const ActAPI_Color&            color,
+                const double                   opacity,
+                const double                   edgeWidth)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_MESH(name, tess, color, opacity, edgeWidth);
   }
 
 //---------------------------------------------------------------------------//

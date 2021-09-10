@@ -467,6 +467,7 @@ Handle(asiData_IVVectorFieldNode)
   item_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
   item_n->SetName(item_name);
   item_n->SetPoints(points);
+  item_n->SetVectors(vectors);
 
   // Add as child
   IV_Parent->AddChildNode(item_n);
@@ -1148,6 +1149,21 @@ Handle(asiData_IVTessItemNode)
                                 const TCollection_AsciiString&    name,
                                 const bool                        useAutoNaming)
 {
+  // Convert to AD mesh
+  Handle(ActData_Mesh) mesh;
+  if ( !asiAlgo_MeshConvert::ToPersistent(tess, mesh) )
+    return nullptr;
+
+  return Create_TessItem(mesh, name, useAutoNaming);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_IVTessItemNode)
+  asiEngine_IV::Create_TessItem(const Handle(ActData_Mesh)&    tess,
+                                const TCollection_AsciiString& name,
+                                const bool                     useAutoNaming)
+{
   // Access Model and parent Node
   Handle(asiData_IVTessNode) IV_Parent = m_model->GetIVNode()->Tessellation();
 
@@ -1185,10 +1201,21 @@ void asiEngine_IV::Update_TessItem(const Handle(asiData_IVTessItemNode)& node,
   if ( !asiAlgo_MeshConvert::ToPersistent(tess, mesh) )
     return;
 
+  Update_TessItem(node, mesh);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Updates Tessellation Item Node.
+//! \param node [in] Data Node to update.
+//! \param tess [in] mesh to store.
+void asiEngine_IV::Update_TessItem(const Handle(asiData_IVTessItemNode)& node,
+                                   const Handle(ActData_Mesh)&           tess)
+{
   // Initialize
   node->Init();
   node->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
-  node->SetMesh(mesh);
+  node->SetMesh(tess);
 }
 
 //-----------------------------------------------------------------------------

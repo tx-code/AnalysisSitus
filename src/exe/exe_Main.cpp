@@ -63,6 +63,7 @@
 #include <asiVisu_IVTessItemPrs.h>
 #include <asiVisu_IVTextItemPrs.h>
 #include <asiVisu_IVTopoItemPrs.h>
+#include <asiVisu_IVVectorFieldPrs.h>
 #include <asiVisu_OctreePrs.h>
 #include <asiVisu_PartPrs.h>
 #include <asiVisu_ReCoedgePrs.h>
@@ -289,6 +290,7 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_IVTessItemPrs)
   REGISTER_PRESENTATION(asiVisu_IVTextItemPrs)
   REGISTER_PRESENTATION(asiVisu_IVTopoItemPrs)
+  REGISTER_PRESENTATION(asiVisu_IVVectorFieldPrs)
 
   //---------------------------------------------------------------------------
   // Configure main window

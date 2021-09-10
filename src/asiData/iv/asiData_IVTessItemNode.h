@@ -40,10 +40,6 @@
 // Active Data includes
 #include <ActData_Mesh.h>
 
-//-----------------------------------------------------------------------------
-// Data Node representing a single tessellation item in IV (Imperative Viewer)
-//-----------------------------------------------------------------------------
-
 //! Data Node representing a single tessellation item in IV (Imperative Viewer).
 class asiData_IVTessItemNode : public ActData_BaseNode
 {

@@ -156,6 +156,7 @@ set (presentations_H_FILES
   presentations/asiVisu_IVTessItemPrs.h
   presentations/asiVisu_IVTextItemPrs.h
   presentations/asiVisu_IVTopoItemPrs.h
+  presentations/asiVisu_IVVectorFieldPrs.h
   presentations/asiVisu_OctreePrs.h
   presentations/asiVisu_PartPrs.h
   presentations/asiVisu_Prs.h
@@ -194,6 +195,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_IVTessItemPrs.cpp
   presentations/asiVisu_IVTextItemPrs.cpp
   presentations/asiVisu_IVTopoItemPrs.cpp
+  presentations/asiVisu_IVVectorFieldPrs.cpp
   presentations/asiVisu_OctreePrs.cpp
   presentations/asiVisu_PartPrs.cpp
   presentations/asiVisu_Prs.cpp
@@ -236,6 +238,7 @@ set (providers_H_FILES
   providers/asiVisu_IVPointSet2dDataProvider.h
   providers/asiVisu_IVPointSetDataProvider.h
   providers/asiVisu_IVSurfaceDataProvider.h
+  providers/asiVisu_IVVectorFieldDataProvider.h
   providers/asiVisu_LawDataProvider.h
   providers/asiVisu_MeshDataProvider.h
   providers/asiVisu_MeshEScalarDataProvider.h
@@ -276,6 +279,7 @@ set (providers_CPP_FILES
   providers/asiVisu_IVPointSet2dDataProvider.cpp
   providers/asiVisu_IVPointSetDataProvider.cpp
   providers/asiVisu_IVSurfaceDataProvider.cpp
+  providers/asiVisu_IVVectorFieldDataProvider.cpp
   providers/asiVisu_LawDataProvider.cpp
   providers/asiVisu_MeshDataProvider.cpp
   providers/asiVisu_OctreeDataProvider.cpp

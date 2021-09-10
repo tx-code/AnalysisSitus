@@ -229,9 +229,18 @@ public:
                     const TCollection_AsciiString&    name,
                     const bool                        useAutoNaming);
 
+  asiEngine_EXPORT Handle(asiData_IVTessItemNode)
+    Create_TessItem(const Handle(ActData_Mesh)&    tess,
+                    const TCollection_AsciiString& name,
+                    const bool                     useAutoNaming);
+
   asiEngine_EXPORT void
     Update_TessItem(const Handle(asiData_IVTessItemNode)& node,
                     const Handle(Poly_Triangulation)&     tess);
+
+  asiEngine_EXPORT void
+    Update_TessItem(const Handle(asiData_IVTessItemNode)& node,
+                    const Handle(ActData_Mesh)&           tess);
 
   asiEngine_EXPORT void
     Clean_Tess();

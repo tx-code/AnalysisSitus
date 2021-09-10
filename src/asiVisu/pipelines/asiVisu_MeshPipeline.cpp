@@ -53,10 +53,7 @@ asiVisu_MeshPipeline::asiVisu_MeshPipeline()
 {
   this->EmptyGroupForAllModeOn();
 
-  /* ===========================
-   *  Initialize custom filters
-   * =========================== */
-
+  // Adjust lights.
   asiVisu_Utils::ApplyLightingRules( this->Actor() );
 }
 

@@ -61,6 +61,16 @@ class asiAlgo_BVHFacets : public BVH_PrimitiveSet<double, 3>
 {
 public:
 
+  //! Structure representing a single link.
+  struct t_link
+  {
+    t_link()               : EdgeIndex(-1) {}
+    t_link(const int eidx) : EdgeIndex(eidx) {}
+
+    BVH_Vec3d P0, P1;    //!< Segment nodes.
+    int       EdgeIndex; //!< Index of the host edge.
+  };
+
   //! Structure representing a single facet.
   struct t_facet
   {

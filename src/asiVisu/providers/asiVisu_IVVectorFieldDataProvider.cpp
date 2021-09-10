@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 2012-2015
+// Created on: 10 September 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, OPEN CASCADE SAS
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -12,7 +12,7 @@
 //    * Redistributions in binary form must reproduce the above copyright
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
-//    * Neither the name of OPEN CASCADE SAS nor the
+//    * Neither the name of the copyright holder(s) nor the
 //      names of all contributors may be used to endorse or promote products
 //      derived from this software without specific prior written permission.
 //
@@ -26,9 +26,53 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Web: http://analysissitus.org
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <ActAPI_Variables.h>
+#include <asiVisu_IVVectorFieldDataProvider.h>
+
+//-----------------------------------------------------------------------------
+
+//! Ctor.
+asiVisu_IVVectorFieldDataProvider::asiVisu_IVVectorFieldDataProvider(const Handle(asiData_IVVectorFieldNode)& node)
+: asiVisu_VectorsDataProvider(node)
+{}
+
+//-----------------------------------------------------------------------------
+
+//! \return points where vectors are located.
+Handle(asiAlgo_BaseCloud<double>) asiVisu_IVVectorFieldDataProvider::GetPointsd()
+{
+  return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetPoints();
+}
+
+//-----------------------------------------------------------------------------
+
+//! \return vectors to visualize.
+Handle(asiAlgo_BaseCloud<double>) asiVisu_IVVectorFieldDataProvider::GetVectorsd()
+{
+  return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetVectors();
+}
+
+//-----------------------------------------------------------------------------
+
+//! \return max modulus for a vector.
+double asiVisu_IVVectorFieldDataProvider::GetMaxVectorModulus() const
+{
+  return 1.0;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
+//! translation process.
+//! \return source Parameters.
+Handle(ActAPI_HParameterList) asiVisu_IVVectorFieldDataProvider::translationSources() const
+{
+  ActParamStream out;
+
+  out << m_source->Parameter(asiData_IVVectorFieldNode::PID_Points)
+      << m_source->Parameter(asiData_IVVectorFieldNode::PID_Vectors);
+
+  return out;
+}

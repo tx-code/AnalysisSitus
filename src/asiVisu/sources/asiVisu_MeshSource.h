@@ -32,7 +32,7 @@
 #define asiVisu_MeshSource_h
 
 // asiVisu includes
-#include <asiVisu.h>
+#include <asiVisu_MeshPrimitive.h>
 
 // VTK includes
 #include <vtkPolyDataAlgorithm.h>
@@ -87,11 +87,17 @@ private:
 
   void
     translateElement(const Handle(ActData_Mesh_Element)& theElem,
-                     vtkPolyData*                thePolyData);
+                     vtkPolyData*                        polyData);
 
   vtkIdType
     registerMeshNode(const int    theNodeID,
                      vtkPolyData* thePolyData);
+
+  vtkIdType
+    registerMeshLink(const int                   nodeID1,
+                     const int                   nodeID2,
+                     const asiVisu_MeshPrimitive type,
+                     vtkPolyData*                polyData);
 
   vtkIdType
     registerMeshFace(const int    theFaceID,

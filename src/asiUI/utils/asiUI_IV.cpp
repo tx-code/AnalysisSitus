@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Created on: 11 April 2016
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2016-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -442,6 +442,26 @@ void asiUI_IV::REDRAW_POINTS(const TCollection_AsciiString& name,
                              const ActAPI_Color&            color)
 {
   this->draw_points(coords, color, name, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::DRAW_VECTORS(const Handle(HRealArray)&      points,
+                            const Handle(HRealArray)&      vectors,
+                            const ActAPI_Color&            color,
+                            const TCollection_AsciiString& name)
+{
+  this->draw_vectors(points, vectors, color, name, true);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_VECTORS(const TCollection_AsciiString& name,
+                              const Handle(HRealArray)&      points,
+                              const Handle(HRealArray)&      vectors,
+                              const ActAPI_Color&            color)
+{
+  this->draw_vectors(points, vectors, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -976,6 +996,28 @@ void asiUI_IV::REDRAW_TRIANGULATION(const TCollection_AsciiString&    name,
 
 //---------------------------------------------------------------------------//
 
+void asiUI_IV::DRAW_MESH(const Handle(ActData_Mesh)&    mesh,
+                         const ActAPI_Color&            color,
+                         const double                   opacity,
+                         const double                   edgeWidth,
+                         const TCollection_AsciiString& name)
+{
+  this->draw_mesh(mesh, color, opacity, edgeWidth, name, true);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_MESH(const TCollection_AsciiString& name,
+                           const Handle(ActData_Mesh)&    mesh,
+                           const ActAPI_Color&            color,
+                           const double                   opacity,
+                           const double                   edgeWidth)
+{
+  this->draw_mesh(mesh, color, opacity, edgeWidth, name, false);
+}
+
+//---------------------------------------------------------------------------//
+
 void asiUI_IV::DRAW_TEXT(const TCollection_AsciiString& text,
                          const TCollection_AsciiString& name)
 {
@@ -1107,7 +1149,8 @@ void asiUI_IV::visualize(const bool                  is2d,
                          const bool                  hasColor,
                          const ActAPI_Color&         color,
                          const double                opacity,
-                         const bool                  isWireframe) const
+                         const bool                  isWireframe,
+                         const double                edgeWidth) const
 {
   if ( m_bBrowserOn && m_pBrowser )
     m_pBrowser->Populate();
@@ -1160,6 +1203,9 @@ void asiUI_IV::visualize(const bool                  is2d,
       pl->Actor()->GetProperty()->SetDiffuse(0.2);
       pl->Actor()->GetProperty()->SetSpecular(0.0);
     }
+
+    if ( edgeWidth )
+      pl->Actor()->GetProperty()->SetLineWidth(edgeWidth);
   }
   else
   {
@@ -1167,15 +1213,20 @@ void asiUI_IV::visualize(const bool                  is2d,
     Handle(asiVisu_HPipelineList) pipelines = prs->GetPipelineList();
     for ( int p = 1; p <= pipelines->Length(); ++p )
     {
+      const Handle(asiVisu_Pipeline)& pl = pipelines->Value(p);
+
       if ( colorize )
       {
-        pipelines->Value(p)->Mapper()->ScalarVisibilityOff();
-        pipelines->Value(p)->Actor()->GetProperty()->SetColor( color.Red(),
-                                                               color.Green(),
-                                                               color.Blue() );
+        pl->Mapper()->ScalarVisibilityOff();
+        pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                              color.Green(),
+                                              color.Blue() );
       }
       //
-      pipelines->Value(p)->Actor()->GetProperty()->SetOpacity(opacity);
+      pl->Actor()->GetProperty()->SetOpacity(opacity);
+
+      if ( edgeWidth )
+        pl->Actor()->GetProperty()->SetLineWidth(edgeWidth);
     }
   }
 
@@ -1289,6 +1340,64 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
 
   // Visualize
   this->visualize(false, points_n, true, color, 1.0, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::draw_vectors(const Handle(HRealArray)&      points,
+                            const Handle(HRealArray)&      vectors,
+                            const ActAPI_Color&            color,
+                            const TCollection_AsciiString& name,
+                            const bool                     newPrimitive)
+{
+  if ( points.IsNull() || vectors.IsNull() )
+    return;
+
+  // Open transaction
+  bool isTx = false;
+  if ( !m_model->HasOpenCommand() )
+  {
+    m_model->OpenCommand();
+    isTx = true;
+  }
+
+  // Modify data
+  Handle(asiData_IVVectorFieldNode) vf_n;
+  //
+  bool doCreate = newPrimitive;
+  //
+  if ( !doCreate )
+  {
+    vf_n = asiEngine_IV(m_model).Find_VectorField(name);
+    //
+    if ( !vf_n.IsNull() )
+    {
+      vf_n->SetPoints  ( asiAlgo_PointCloudUtils::AsCloudd(points) );
+      vf_n->SetVectors ( asiAlgo_PointCloudUtils::AsCloudd(vectors) );
+    }
+    else
+    {
+      doCreate = true;
+    }
+  }
+
+  if ( doCreate )
+  {
+    vf_n = asiEngine_IV(m_model).Create_VectorField(asiAlgo_PointCloudUtils::AsCloudd(points),
+                                                    asiAlgo_PointCloudUtils::AsCloudd(vectors),
+                                                    name,
+                                                    newPrimitive);
+
+    // Update the last created object
+    m_lastObj = vf_n;
+  }
+
+  // Commit transaction
+  if ( isTx )
+    m_model->CommitCommand();
+
+  // Visualize
+  this->visualize(false, vf_n, true, color, 1.0, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -1747,6 +1856,56 @@ void asiUI_IV::draw_triangulation(const Handle(Poly_Triangulation)& tris,
 
   // Visualize
   this->visualize(false, item_n, true, color, opacity, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::draw_mesh(const Handle(ActData_Mesh)&    mesh,
+                         const ActAPI_Color&            color,
+                         const double                   opacity,
+                         const double                   edgeWidth,
+                         const TCollection_AsciiString& name,
+                         const bool                     newPrimitive)
+{
+  // Open transaction
+  bool isTx = false;
+  if ( !m_model->HasOpenCommand() )
+  {
+    m_model->OpenCommand();
+    isTx = true;
+  }
+
+  // Modify data
+  Handle(asiData_IVTessItemNode) item_n;
+  //
+  bool doCreate = newPrimitive;
+  //
+  if ( !doCreate )
+  {
+    item_n = asiEngine_IV(m_model).Find_TessItem(name);
+    //
+    if ( !item_n.IsNull() )
+      asiEngine_IV(m_model).Update_TessItem(item_n, mesh);
+    else
+      doCreate = true;
+  }
+
+  if ( doCreate )
+  {
+    item_n = asiEngine_IV(m_model).Create_TessItem(mesh, name, newPrimitive);
+    //
+    item_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+
+    // Update the last created object
+    m_lastObj = item_n;
+  }
+
+  // Commit transaction
+  if ( isTx )
+    m_model->CommitCommand();
+
+  // Visualize
+  this->visualize(false, item_n, true, color, opacity, false, edgeWidth);
 }
 
 //---------------------------------------------------------------------------//

@@ -159,6 +159,18 @@ public:
                   const ActAPI_Color&);
 
   asiUI_EXPORT virtual void
+    DRAW_VECTORS(const Handle(HRealArray)&,
+                 const Handle(HRealArray)&,
+                 const ActAPI_Color&,
+                 const TCollection_AsciiString&);
+
+  asiUI_EXPORT virtual void
+    REDRAW_VECTORS(const TCollection_AsciiString&,
+                   const Handle(HRealArray)&,
+                   const Handle(HRealArray)&,
+                   const ActAPI_Color&);
+
+  asiUI_EXPORT virtual void
     DRAW_VECTOR_AT(const gp_Pnt&,
                    const gp_Vec&,
                    const ActAPI_Color&,
@@ -458,6 +470,20 @@ public:
                          const ActAPI_Color&,
                          const double); // opacity
 
+  asiUI_EXPORT virtual void
+    DRAW_MESH(const Handle(ActData_Mesh)&,
+              const ActAPI_Color&,
+              const double, // opacity
+              const double, // edge width
+              const TCollection_AsciiString&);
+
+  asiUI_EXPORT virtual void
+    REDRAW_MESH(const TCollection_AsciiString&,
+                const Handle(ActData_Mesh)&,
+                const ActAPI_Color&,
+                const double, // opacity
+                const double); // edge width
+
 // TEXT
 public:
 
@@ -557,7 +583,8 @@ protected:
               const bool                  hasColor,
               const ActAPI_Color&         color,
               const double                opacity,
-              const bool                  isWireframe) const;
+              const bool                  isWireframe,
+              const double                edgeWidth = 0.) const;
 
   asiUI_EXPORT const vtkSmartPointer<asiVisu_PrsManager>&
     prsManager(const bool is2d) const;
@@ -575,6 +602,13 @@ protected:
                 const ActAPI_Color&            color,
                 const TCollection_AsciiString& name,
                 const bool                     newPrimitive);
+
+  asiUI_EXPORT void
+    draw_vectors(const Handle(HRealArray)&      points,
+                 const Handle(HRealArray)&      vectors,
+                 const ActAPI_Color&            color,
+                 const TCollection_AsciiString& name,
+                 const bool                     newPrimitive);
 
   asiUI_EXPORT void
     draw_curve(const Handle(Geom_Curve)&      curve,
@@ -675,6 +709,14 @@ protected:
                        const double                      opacity,
                        const TCollection_AsciiString&    name,
                        const bool                        newPrimitive);
+
+  asiUI_EXPORT void
+    draw_mesh(const Handle(ActData_Mesh)&    mesh,
+              const ActAPI_Color&            color,
+              const double                   opacity,
+              const double                   edgeWidth,
+              const TCollection_AsciiString& name,
+              const bool                     newPrimitive);
 
   asiUI_EXPORT void
     draw_text(const TCollection_AsciiString& text,

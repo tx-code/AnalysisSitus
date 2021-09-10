@@ -32,7 +32,6 @@
 #include <asiVisu_MeshSource.h>
 
 // asiVisu includes
-#include <asiVisu_MeshPrimitive.h>
 #include <asiVisu_MeshUtils.h>
 #include <asiVisu_Utils.h>
 
@@ -152,14 +151,14 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
    *  Prepare involved collections
    * ============================== */
 
-  vtkPolyData* aPolyOutput = vtkPolyData::GetData(theOutputVector);
-  aPolyOutput->Allocate();
+  vtkPolyData* polyOutput = vtkPolyData::GetData(theOutputVector);
+  polyOutput->Allocate();
 
-  vtkPointData* aPD = aPolyOutput->GetPointData();
-  vtkCellData*  aCD = aPolyOutput->GetCellData();
+  vtkPointData* PD = polyOutput->GetPointData();
+  vtkCellData*  CD = polyOutput->GetCellData();
 
-  vtkSmartPointer<vtkPoints> aPoints = vtkSmartPointer<vtkPoints>::New();
-  aPolyOutput->SetPoints(aPoints);
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  polyOutput->SetPoints(points);
 
   /* ==================================
    *  Initialize necessary data arrays
@@ -168,17 +167,17 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
   // Array for mesh item types
   vtkSmartPointer<vtkIntArray>
     aTypeArr = asiVisu_Utils::InitIntArray(ARRNAME_MESH_ITEM_TYPE);
-  aCD->AddArray(aTypeArr);
+  CD->AddArray(aTypeArr);
 
   // Array for mesh node IDs
   vtkSmartPointer<vtkIntArray>
     aNodeIDsArr = asiVisu_Utils::InitIntArray(ARRNAME_MESH_NODE_IDS);
-  aPD->AddArray(aNodeIDsArr);
+  PD->AddArray(aNodeIDsArr);
 
   // Array for mesh element IDs
   vtkSmartPointer<vtkIntArray>
     aFaceIDsArr = asiVisu_Utils::InitIntArray(ARRNAME_MESH_ELEM_IDS);
-  aCD->AddArray(aFaceIDsArr);
+  CD->AddArray(aFaceIDsArr);
 
   /* ==============================================================
    *  Take care of free nodes by collecting them into a dedicated
@@ -207,7 +206,7 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
     aFreeNodeIDs.Append( aNode->GetID() );
   }
   //
-  this->registerFreeNodesCell(aFreeNodeIDs, aPolyOutput);
+  this->registerFreeNodesCell(aFreeNodeIDs, polyOutput);
 
   /* =======================================
    *  Pass mesh elements to VTK data source
@@ -215,16 +214,18 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
 
   if ( m_elemGroup.IsNull() && m_bIsEmptyGroupForAll ) // No filtering by group enabled
   {
-    ActData_Mesh_ElementsIterator aMeshElemsIt(m_mesh, ActData_Mesh_ET_Face);
-    for ( ; aMeshElemsIt.More(); aMeshElemsIt.Next() )
-      this->translateElement(aMeshElemsIt.GetValue(), aPolyOutput);
+    // Faces.
+    for ( ActData_Mesh_ElementsIterator eit(m_mesh, ActData_Mesh_ET_Face); eit.More(); eit.Next() )
+      this->translateElement(eit.GetValue(), polyOutput);
+
+    // Explicitly defined edges.
+    for ( ActData_Mesh_ElementsIterator eit(m_mesh, ActData_Mesh_ET_Edge); eit.More(); eit.Next() )
+      this->translateElement(eit.GetValue(), polyOutput);
   }
   else if ( !m_elemGroup.IsNull() )
   {
-    const ActData_Mesh_MapOfElements& aGroupElems = m_elemGroup->Elements();
-    ActData_Mesh_MapOfElements::Iterator aGroupIt(aGroupElems);
-    for ( ; aGroupIt.More(); aGroupIt.Next() )
-      this->translateElement(aGroupIt.Key(), aPolyOutput);
+    for ( ActData_Mesh_MapOfElements::Iterator git( m_elemGroup->Elements() ); git.More(); git.Next() )
+      this->translateElement(git.Key(), polyOutput);
   }
 
   return Superclass::RequestData(theRequest, theInputVector, theOutputVector);
@@ -236,8 +237,19 @@ int asiVisu_MeshSource::RequestData(vtkInformation*        theRequest,
 //! \param theElem     [in]     Mesh element to translate.
 //! \param thePolyData [in/out] output polygonal data.
 void asiVisu_MeshSource::translateElement(const Handle(ActData_Mesh_Element)& theElem,
-                                          vtkPolyData*                thePolyData)
+                                          vtkPolyData*                        thePolyData)
 {
+  // Proceed with EDGE elements
+  if ( theElem->IsInstance( STANDARD_TYPE(ActData_Mesh_Edge) ) )
+  {
+    // Access element data
+    Handle(ActData_Mesh_Edge) edgeElem = Handle(ActData_Mesh_Edge)::DownCast(theElem);
+    int edgeNodeIds[2];
+    edgeElem->GetEdgeDefinedByNodes(2, edgeNodeIds[0], edgeNodeIds[1]);
+
+    // Transfer element to VTK polygonal source
+    this->registerMeshLink(edgeNodeIds[0], edgeNodeIds[1], MeshPrimitive_FreeLink, thePolyData);
+  }
   // Proceed with TRIANGLE elements
   if ( theElem->IsInstance( STANDARD_TYPE(ActData_Mesh_Triangle) ) )
   {
@@ -295,6 +307,40 @@ vtkIdType asiVisu_MeshSource::registerMeshNode(const int    theNodeID,
     aResPid = m_regPoints.Find(theNodeID);
 
   return aResPid;
+}
+
+//-----------------------------------------------------------------------------
+
+vtkIdType
+  asiVisu_MeshSource::registerMeshLink(const int                   nodeID1,
+                                       const int                   nodeID2,
+                                       const asiVisu_MeshPrimitive type,
+                                       vtkPolyData*                polyData)
+{
+  if ( nodeID1 == VTK_BAD_ID || nodeID2 == VTK_BAD_ID )
+    return VTK_BAD_ID;
+
+  std::vector<vtkIdType> pids;
+  pids.push_back( this->registerMeshNode(nodeID1, polyData) );
+  pids.push_back( this->registerMeshNode(nodeID2, polyData) );
+
+  // Register VTK cell
+  vtkIdType cellID =
+    polyData->InsertNextCell( VTK_LINE, (int) pids.size(), &pids[0] );
+
+  // Set type of the mesh element
+  vtkIntArray*
+    typeArr = vtkIntArray::SafeDownCast( polyData->GetCellData()->GetArray(ARRNAME_MESH_ITEM_TYPE) );
+  //
+  typeArr->InsertNextValue(type);
+
+  // Store element ID
+  vtkIntArray*
+    elemIDsArr = vtkIntArray::SafeDownCast( polyData->GetCellData()->GetArray(ARRNAME_MESH_ELEM_IDS) );
+  //
+  elemIDsArr->InsertNextValue(VTK_BAD_ID);
+
+  return cellID;
 }
 
 //-----------------------------------------------------------------------------
