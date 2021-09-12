@@ -69,7 +69,6 @@ set (LIBS
   TKV3d
   TKOpenGl
   TKService
-  TKDraw
 )
 
 ASITUS_INSTALL_3RDPARTY (LIBS "OCCT")

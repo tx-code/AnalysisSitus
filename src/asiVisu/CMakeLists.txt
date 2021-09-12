@@ -446,7 +446,6 @@ set (OCCT_LIB_FILES
   TKIGES
   TKXDESTEP
   TKXDEIGES
-  TKDraw
 )
 #------------------------------------------------------------------------------
 set (TBB_LIB_FILES
