@@ -483,8 +483,8 @@ bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo
   m_jsonWriter.reset();
 
   const int binDatbufferId = 0;
-  const int defSamplerId    = 0;
-  const int defSceneId      = 0;
+  const int defSamplerId   = 0;
+  const int defSceneId     = 0;
 
   const TCollection_AsciiString fileNameGltf = m_filename;
   std::ofstream gltfContentFile;
@@ -1019,7 +1019,7 @@ void gltf_Writer::writeExtensions()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeImages(gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeImages(gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeImages()");
@@ -1051,7 +1051,7 @@ void gltf_Writer::writeImages(gltf_MaterialMap&        materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeMaterials(gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeMaterials(gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMaterials()");
@@ -1084,7 +1084,7 @@ void gltf_Writer::writeMaterials(gltf_MaterialMap&        materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeMeshes(const gltf_MaterialMap&  materialMap)
+void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMeshes()");
@@ -1393,7 +1393,7 @@ void gltf_Writer::writeSkins()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeTextures(gltf_MaterialMap&        materialMap)
+void gltf_Writer::writeTextures(gltf_MaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextures()");

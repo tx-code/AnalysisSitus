@@ -394,9 +394,9 @@ void gltf_XdeDataSourceProvider::readStyles(const TDF_Label&  label,
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&    edge,
-                                                      const t_Shape2Style&  styles,
-                                                      gltf_Primitive&       edgePrimitive)
+bool gltf_XdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&   edge,
+                                                      const t_Shape2Style& styles,
+                                                      gltf_Primitive&      edgePrimitive)
 {
   TopLoc_Location                       loc;
   Handle(Poly_Triangulation)            tri;
