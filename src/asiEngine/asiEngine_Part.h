@@ -350,7 +350,7 @@ public:
   //! Finds a pair face for the given seed face.
   //! \param[in]  aag         the attributed adjacency graph to access faces by IDs.
   //! \param[in]  seedId      the ID of the seed face.
-  //! \param[in]  excludedIds the IDs of the faces which are acceptable as mates.
+  //! \param[in]  excludedIds the IDs of the faces which are not acceptable as mates.
   //! \param[in]  numSamples  the number of sampled points for checking mates.
   //! \param[in]  inside      indicates whether to cast a ray inside material.
   //! \param[out] mateId      the ID of the found mate face.

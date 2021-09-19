@@ -54,10 +54,63 @@
   using namespace mobius;
 #endif
 
+// OpenCascade includes
+#include <gp_Pln.hxx>
+#include <Intf_InterferencePolygon2d.hxx>
+#include <Intf_Polygon2d.hxx>
+
 typedef std::unordered_set<int> t_domain;
 
 namespace
 {
+  //! The derived polygon class.
+  class SimplePolygon : public Intf_Polygon2d
+  {
+  public:
+
+    //! Ctor with initializer list.
+    SimplePolygon(const std::initializer_list<std::pair<double, double>>& poles)
+    {
+      for ( const auto& P : poles )
+      {
+        gp_Pnt2d P2d(P.first, P.second);
+
+        m_poles.push_back( gp_Pnt2d(P.first, P.second) );
+
+        // One thing which is pretty inconvenient is the necessity to
+        // update the AABB of a polygon manually. If you forget doing that,
+        // the intersection check will return nothing.
+        myBox.Add(P2d);
+      }
+    }
+
+  public:
+
+    //! Returns the tolerance of the polygon.
+    virtual double DeflectionOverEstimation() const
+    {
+      return Precision::Confusion();
+    }
+
+    //! Returns the number of segments in the polyline.
+    virtual int NbSegments() const
+    {
+      return int( m_poles.size() - 1 );
+    }
+
+    //! Returns the points of the segment <index> in the Polygon.
+    virtual void Segment(const int index, gp_Pnt2d& beg, gp_Pnt2d& end) const
+    {
+      beg = m_poles[index - 1];
+      end = m_poles[index];
+    }
+
+  protected:
+ 
+    std::vector<gp_Pnt2d> m_poles;
+
+  };
+
   //! Composes the index domain for all planar faces in the active part.
   //! \return planar domain.
   t_domain ComposePlanarDomain()
@@ -97,6 +150,93 @@ namespace
       mesh = cmdMobius::model->GetTriangulationNode()->GetTriangulation()->DeepCopy();
 
     return mesh;
+  }
+
+  void DrawLinks(const std::vector<poly_EdgeHandle>& innerEdges,
+                 const std::vector<poly_EdgeHandle>& bndEdges,
+                 const t_ptr<t_mesh>&                mesh,
+                 const t_ptr<t_plane>&               pln,
+                 ActAPI_PlotterEntry                 plotter)
+  {
+    for ( auto eh : innerEdges )
+    {
+      poly_Edge edge;
+      if ( !mesh->GetEdge(eh, edge) ) continue;
+
+      t_xyz edgeVertices[2];
+      if ( !mesh->GetVertex(edge.hVertices[0], edgeVertices[0]) ) continue;
+      if ( !mesh->GetVertex(edge.hVertices[1], edgeVertices[1]) ) continue;
+
+      t_uv edgeUVs[2];
+      pln->InvertPoint(edgeVertices[0], edgeUVs[0]);
+      pln->InvertPoint(edgeVertices[1], edgeUVs[1]);
+
+      plotter.DRAW_LINK( cascade::GetOpenCascadePnt2d(edgeUVs[0]), cascade::GetOpenCascadePnt2d(edgeUVs[1]), Color_Yellow, "link" );
+    }
+
+    for ( auto eh : bndEdges )
+    {
+      poly_Edge edge;
+      if ( !mesh->GetEdge(eh, edge) ) continue;
+
+      t_xyz edgeVertices[2];
+      if ( !mesh->GetVertex(edge.hVertices[0], edgeVertices[0]) ) continue;
+      if ( !mesh->GetVertex(edge.hVertices[1], edgeVertices[1]) ) continue;
+
+      t_uv edgeUVs[2];
+      pln->InvertPoint(edgeVertices[0], edgeUVs[0]);
+      pln->InvertPoint(edgeVertices[1], edgeUVs[1]);
+
+      plotter.DRAW_LINK( cascade::GetOpenCascadePnt2d(edgeUVs[0]), cascade::GetOpenCascadePnt2d(edgeUVs[1]), Color_Green, "link" );
+    }
+  }
+
+  bool HasIntersections(const poly_EdgeHandle eh0,
+                        const poly_EdgeHandle eh1,
+                        const t_ptr<t_mesh>&  mesh,
+                        const t_ptr<t_plane>& pln,
+                        ActAPI_ProgressEntry  progress,
+                        ActAPI_PlotterEntry   plotter)
+  {
+    poly_Edge edges[2];
+    if ( !mesh->GetEdge(eh0, edges[0]) ) return false;
+    if ( !mesh->GetEdge(eh1, edges[1]) ) return false;
+
+    t_xyz edge0Vertices[2], edge1Vertices[2];
+    if ( !mesh->GetVertex(edges[0].hVertices[0], edge0Vertices[0]) ) return false;
+    if ( !mesh->GetVertex(edges[0].hVertices[1], edge0Vertices[1]) ) return false;
+    if ( !mesh->GetVertex(edges[1].hVertices[0], edge1Vertices[0]) ) return false;
+    if ( !mesh->GetVertex(edges[1].hVertices[1], edge1Vertices[1]) ) return false;
+
+    t_uv edge0UVs[2], edge1UVs[2];
+    pln->InvertPoint(edge0Vertices[0], edge0UVs[0]);
+    pln->InvertPoint(edge0Vertices[1], edge0UVs[1]);
+    pln->InvertPoint(edge1Vertices[0], edge1UVs[0]);
+    pln->InvertPoint(edge1Vertices[1], edge1UVs[1]);
+
+    SimplePolygon poly0 = { {edge0UVs[0].U(), edge0UVs[0].V()}, {edge0UVs[1].U(), edge0UVs[1].V()} };
+    SimplePolygon poly1 = { {edge1UVs[0].U(), edge1UVs[0].V()}, {edge1UVs[1].U(), edge1UVs[1].V()} };
+
+    Intf_InterferencePolygon2d algo(poly0, poly1);
+    const int numPts = algo.NbSectionPoints();
+
+    int numInters = 0;
+    for ( int isol = 1; isol <= numPts; ++isol )
+    {
+      const double p[2] = { algo.PntValue(isol).ParamOnFirst(),
+                            algo.PntValue(isol).ParamOnSecond() };
+
+      if ( ( (p[0] > 0) && (p[0] < 1) ) || ( (p[1] > 0) && (p[1] < 1) ) )
+      {
+        gp_Pnt P = algo.PntValue(isol).Pnt();
+        progress.SendLogMessage(LogNotice(Normal) << "Intersection p[0] = %1." << p[0]);
+        progress.SendLogMessage(LogNotice(Normal) << "Intersection p[1] = %1." << p[1]);
+        plotter.DRAW_POINT( gp_Pnt2d( P.X(), P.Y() ), Color_Red, "intersection" );
+        numInters++;
+      }
+    }
+
+    return numInters > 0;
   }
 #endif
 }
@@ -1547,6 +1687,206 @@ int MOBIUS_POLY_SplitBoundary(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_FindDomainEdges(const Handle(asiTcl_Interp)& interp,
+                                int                          argc,
+                                const char**                 argv)
+{
+#if defined USE_MOBIUS
+  int domainId = -1;
+  if ( !interp->GetKeyValue(argc, argv, "domain", domainId) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The domain ID is not specified.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  TIMER_RESET
+  TIMER_GO
+
+  // Find boundary.
+  std::vector<poly_EdgeHandle> innerEdges, bndEdges;
+  //
+  mesh->FindDomainEdges(domainId, innerEdges, bndEdges);
+
+  if ( interp->HasKeyword(argc, argv, "draw") )
+  {
+    for ( const auto he : innerEdges )
+    {
+      poly_Edge e;
+      mesh->GetEdge(he, e);
+
+      t_xyz V[2];
+      mesh->GetVertex(e.hVertices[0], V[0]);
+      mesh->GetVertex(e.hVertices[1], V[1]);
+
+      gp_XYZ P[2] = { gp_XYZ( V[0].X(), V[0].Y(), V[0].Z() ),
+                      gp_XYZ( V[1].X(), V[1].Y(), V[1].Z() ) };
+
+      interp->GetPlotter().DRAW_LINK(P[0], P[1], Color_Blue, "innerEdge");
+    }
+
+    for ( const auto he : bndEdges )
+    {
+      poly_Edge e;
+      mesh->GetEdge(he, e);
+
+      t_xyz V[2];
+      mesh->GetVertex(e.hVertices[0], V[0]);
+      mesh->GetVertex(e.hVertices[1], V[1]);
+
+      gp_XYZ P[2] = { gp_XYZ( V[0].X(), V[0].Y(), V[0].Z() ),
+                      gp_XYZ( V[1].X(), V[1].Y(), V[1].Z() ) };
+
+      interp->GetPlotter().DRAW_LINK(P[0], P[1], Color_Magenta, "bndEdge");
+    }
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find domain edges")
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of inner edges found: %1."
+                                                        << int( innerEdges.size() ) );
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of boundary edges found: %1."
+                                                        << int( bndEdges.size() ) );
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_CheckDomainInter(const Handle(asiTcl_Interp)& interp,
+                                 int                          argc,
+                                 const char**                 argv)
+{
+#if defined USE_MOBIUS
+  int domainId = -1;
+  if ( !interp->GetKeyValue(argc, argv, "domain", domainId) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The domain ID is not specified.");
+    return TCL_ERROR;
+  }
+
+  Handle(asiAlgo_AAG) aag = cmdMobius::model->GetPartNode()->GetAAG();
+  //
+  if ( aag.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "AAG is null, so we cannot access the host surface for a domain.");
+    return TCL_ERROR;
+  }
+  //
+  if ( !aag->HasFace(domainId) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find a face with the ID %1." << domainId);
+    return TCL_ERROR;
+  }
+
+  Handle(Geom_Plane) occPlane;
+  t_ptr<t_plane>     pln;
+  //
+  if ( asiAlgo_Utils::IsPlanar(aag->GetFace(domainId), occPlane) )
+  {
+    pln = cascade::GetMobiusPlane(occPlane);
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The face with the ID %1 is not planar." << domainId);
+    return TCL_ERROR;
+  }
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  // Find edges.
+  std::vector<poly_EdgeHandle> innerEdges, bndEdges;
+  //
+  mesh->FindDomainEdges(domainId, innerEdges, bndEdges);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of inner edges found: %1."
+                                                        << int( innerEdges.size() ) );
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of boundary edges found: %1."
+                                                        << int( bndEdges.size() ) );
+
+  if ( interp->HasKeyword(argc, argv, "draw") )
+    ::DrawLinks( innerEdges, bndEdges, mesh, pln, interp->GetPlotter() );
+
+  TIMER_RESET
+  TIMER_GO
+
+  bool hasInters = false;
+  for ( const auto he_inner : innerEdges )
+  {
+    for ( const auto he_bnd : bndEdges )
+    {
+      if ( ::HasIntersections( he_inner, he_bnd, mesh, pln, interp->GetProgress(), interp->GetPlotter() ) )
+      {
+        hasInters = true;
+        break;
+      }
+    }
+
+    if ( hasInters )
+      break;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find domain intersections")
+
+  if ( hasInters )
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Intersections detected.");
+  else
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "No intersections detected.");
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -1708,6 +2048,24 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Splits boundary triangles.",
     //
     __FILE__, group, MOBIUS_POLY_SplitBoundary);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-find-domain-edges",
+    //
+    "poly-domain-edges -domain <id> [-draw]\n"
+    "\n"
+    "\t Finds edges belonging to the given domain.",
+    //
+    __FILE__, group, MOBIUS_POLY_FindDomainEdges);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-check-domain-inter",
+    //
+    "poly-check-domain-inter -domain <id>\n"
+    "\n"
+    "\t Checks self-intersections in the given domain.",
+    //
+    __FILE__, group, MOBIUS_POLY_CheckDomainInter);
 }
 
 // Declare entry point PLUGINFACTORY

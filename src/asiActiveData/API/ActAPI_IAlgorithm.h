@@ -110,7 +110,7 @@ protected:
 
 private:
 
-  ActAPI_IAlgorithm() : Standard_Transient() {} //!< Default ctor.
+  ActAPI_IAlgorithm() : Standard_Transient(), m_iStatusCode(0) {} //!< Default ctor.
 
 };
 
