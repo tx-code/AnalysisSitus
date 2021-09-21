@@ -50,6 +50,7 @@
   #include <mobius/cascade.h>
   #include <mobius/cascade_Triangulation.h>
   #include <mobius/poly_Mesh.h>
+  #include <mobius/poly_SurfAdapter.h>
 
   using namespace mobius;
 #endif
@@ -238,6 +239,61 @@ namespace
 
     return numInters > 0;
   }
+
+  class SurfAdapter : public poly_SurfAdapter
+  {
+  public:
+
+    SurfAdapter(const Handle(asiAlgo_AAG)&     aag,
+                const std::unordered_set<int>& domain)
+    {
+      m_aag    = aag;
+      m_domain = domain;
+
+      for ( auto tag : domain )
+      {
+        const TopoDS_Face& face = m_aag->GetFace(tag);
+
+        Handle(Geom_Plane) occPlane;
+        if ( !asiAlgo_Utils::IsPlanar(face, occPlane) )
+          continue;
+
+        t_ptr<t_plane> pln = cascade::GetMobiusPlane(occPlane);
+        m_planarDomains.Bind(tag, pln);
+      }
+    }
+
+  public:
+
+    //! Inverts the passed `xyz` point onto an analytical surface corresponding
+    //! to the curved domain with the `tag` ID.
+    //! \param[in]  tag the domain ID.
+    //! \param[in]  xyz the point to invert.
+    //! \param[out] uv  the UV coordinates of the projection point.
+    //! \return false if inversion is not done or not successful.
+    virtual bool
+      InvertPoint(const int    tag,
+                  const t_xyz& xyz,
+                  t_uv&        uv)
+    {
+      if ( !m_planarDomains.IsBound(tag) )
+        return false;
+
+      t_ptr<t_plane> pln = m_planarDomains(tag);
+
+      pln->InvertPoint(xyz, uv);
+      return true;
+    }
+
+  protected:
+
+    Handle(asiAlgo_AAG)     m_aag;    //!< AAG instance.
+    std::unordered_set<int> m_domain; //!< Domain of interest.
+
+    //! Planar domains.
+    NCollection_DataMap< int, t_ptr<t_plane> > m_planarDomains;
+
+  };
 #endif
 }
 
@@ -290,6 +346,13 @@ int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
 
   asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
   const t_ptr<poly_Mesh>& mesh = meshMerge.GetMobiusMesh();
+
+  // Compose the domain of interest.
+  t_domain domain = ::ComposePlanarDomain();
+  //
+  t_ptr<SurfAdapter> surfAdt = new SurfAdapter(part_n->GetAAG(), domain);
+  //
+  mesh->SetSurfAdapter(surfAdt);
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
                                                         << mesh->GetNumTriangles() );
@@ -1423,8 +1486,14 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
   /* Next stage: smooth mesh */
 
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
+                                                        << mesh->AreIntersecting(domain) );
+
   mesh->ComputeEdges();
-  mesh->Smooth(1, domain);
+  mesh->Smooth(1, domain, true);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
+                                                        << mesh->AreIntersecting(domain) );
 
   /* Next stage: flip edges */
 
@@ -1438,7 +1507,10 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
   /* Next stage: smooth mesh */
 
   mesh->ComputeEdges();
-  mesh->Smooth(10, domain);
+  mesh->Smooth(1, domain, true);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
+                                                        << mesh->AreIntersecting(domain) );
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Incremental refine")
@@ -1887,6 +1959,56 @@ int MOBIUS_POLY_CheckDomainInter(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_CheckInter(const Handle(asiTcl_Interp)& interp,
+                           int                          argc,
+                           const char**                 argv)
+{
+#if defined USE_MOBIUS
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Compute links.
+  mesh->ComputeEdges();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
+
+  std::unordered_set<int> domain = ::ComposePlanarDomain();
+
+  TIMER_RESET
+  TIMER_GO
+
+  const bool areIntersecting = mesh->AreIntersecting(domain);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find domain intersections")
+
+  if ( areIntersecting )
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Intersections detected.");
+  else
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "No intersections detected.");
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -2066,6 +2188,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Checks self-intersections in the given domain.",
     //
     __FILE__, group, MOBIUS_POLY_CheckDomainInter);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-check-inter",
+    //
+    "poly-check-inter\n"
+    "\n"
+    "\t Checks self-intersections.",
+    //
+    __FILE__, group, MOBIUS_POLY_CheckInter);
 }
 
 // Declare entry point PLUGINFACTORY
