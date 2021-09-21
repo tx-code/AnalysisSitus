@@ -134,16 +134,16 @@ void gltf_Writer::writeBinDataNodes(std::ostream&           binFile,
     NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
-      itPrm.ChangeValue().NodePos.Id = accessorNb++;
-      itPrm.ChangeValue().NodePos.ByteOffset = (int64_t)binFile.tellp() - m_buffViewPos.ByteOffset;
+      itPrm.ChangeValue().PosAccessor.Id = accessorNb++;
+      itPrm.ChangeValue().PosAccessor.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNodalPos.ByteOffset;
 
-      NCollection_Vector<gp_XYZ>::Iterator itNodes(itPrm.Value().MeshNodes);
+      NCollection_Vector<gp_XYZ>::Iterator itNodes(itPrm.Value().NodePositions);
       for (; itNodes.More(); itNodes.Next())
       {
         gp_XYZ& node = itNodes.ChangeValue();
         //gp_XYZ node(itNodes.Value());
         m_CSTrsf.TransformPosition(node);
-        itPrm.ChangeValue().NodePos.BndBox.Add(Graphic3d_Vec3d(node.X(), node.Y(), node.Z()));
+        itPrm.ChangeValue().PosAccessor.BndBox.Add(Graphic3d_Vec3d(node.X(), node.Y(), node.Z()));
         writeVec3(binFile, node);
       }
     }
@@ -161,12 +161,12 @@ void gltf_Writer::writeBinDataNormals(std::ostream&      binFile,
     NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
-      if (itPrm.Value().Normals.Size() == 0)
+      if (itPrm.Value().NodeNormals.Size() == 0)
         continue;
 
-      itPrm.ChangeValue().NodeNorm.Id = accessorNb++;
-      itPrm.ChangeValue().NodeNorm.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNorm.ByteOffset;
-      NCollection_Vector<Graphic3d_Vec3>::Iterator itNormals(itPrm.Value().Normals);
+      itPrm.ChangeValue().NormAccessor.Id = accessorNb++;
+      itPrm.ChangeValue().NormAccessor.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNodalNorm.ByteOffset;
+      NCollection_Vector<Graphic3d_Vec3>::Iterator itNormals(itPrm.Value().NodeNormals);
       for (; itNormals.More(); itNormals.Next())
       {
         //Graphic3d_Vec3 vecNormal(itNormals.Value());
@@ -180,7 +180,7 @@ void gltf_Writer::writeBinDataNormals(std::ostream&      binFile,
 //-----------------------------------------------------------------------------
 
 void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
-                                        int&                     accessorNb) const
+                                         int&                     accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -188,12 +188,12 @@ void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
     NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
-      if (itPrm.Value().Textures.Size() == 0)
+      if (itPrm.Value().NodeTextures.Size() == 0)
         continue;
 
-      itPrm.ChangeValue().NodeUV.Id = accessorNb++;
-      itPrm.ChangeValue().NodeUV.ByteOffset = (int64_t)binFile.tellp() - m_buffViewTextCoord.ByteOffset;
-      NCollection_Vector<gp_Pnt2d>::Iterator itTextures(itPrm.Value().Textures);
+      itPrm.ChangeValue().UVAccessor.Id = accessorNb++;
+      itPrm.ChangeValue().UVAccessor.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNodalTextCoord.ByteOffset;
+      NCollection_Vector<gp_Pnt2d>::Iterator itTextures(itPrm.Value().NodeTextures);
       for (; itTextures.More(); itTextures.Next())
       {
         writeVec2(binFile, itTextures.Value().XY());
@@ -204,8 +204,8 @@ void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
-                                     int&             accessorNb)
+void gltf_Writer::writeBinDataNodalColors(std::ostream& binFile,
+                                          int& accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -213,28 +213,53 @@ void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
     NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
-      if (itPrm.Value().Triangles.Size() == 0)
+      if (itPrm.Value().NodeColors.Size() == 0)
         continue;
 
-      itPrm.ChangeValue().Indices.Id = accessorNb++;
-      itPrm.ChangeValue().Indices.ByteOffset = (int64_t)binFile.tellp() - m_buffViewInd.ByteOffset;
-      NCollection_Vector<Poly_Triangle>::Iterator itTriangles(itPrm.Value().Triangles);
+      itPrm.ChangeValue().ColorAccessor.Id = accessorNb++;
+      itPrm.ChangeValue().ColorAccessor.ByteOffset = (int64_t)binFile.tellp() - m_buffViewNodalColor.ByteOffset;
+      NCollection_Vector<Graphic3d_Vec3>::Iterator itColors(itPrm.Value().NodeColors);
+      for (; itColors.More(); itColors.Next())
+      {
+        writeVec3(binFile, itColors.Value());
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
+                                      int&             accessorNb)
+{
+  t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
+  for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
+  {
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
+    {
+      if (itPrm.Value().NodeIndices.Size() == 0)
+        continue;
+
+      itPrm.ChangeValue().IndAccessor.Id = accessorNb++;
+      itPrm.ChangeValue().IndAccessor.ByteOffset = (int64_t)binFile.tellp() - m_buffViewIndices.ByteOffset;
+      NCollection_Vector<Poly_Triangle>::Iterator itTriangles(itPrm.Value().NodeIndices);
       for (; itTriangles.More(); itTriangles.Next())
       {
         Poly_Triangle tri = itTriangles.Value();
-        if (itPrm.Value().Indices.ComponentType == gltf_AccessorComponentType_UInt16)
+        if (itPrm.Value().IndAccessor.ComponentType == gltf_AccessorComponentType_UInt16)
         {
           writeTriangle16(binFile,
             NCollection_Vec3<uint16_t>((uint16_t)tri(1),
-              (uint16_t)tri(2),
-              (uint16_t)tri(3)));
+                                       (uint16_t)tri(2),
+                                       (uint16_t)tri(3)));
         }
         else
         {
           writeTriangle32(binFile, Graphic3d_Vec3i(tri(1), tri(2), tri(3)));
         }
       }
-      if (itPrm.Value().Indices.ComponentType == gltf_AccessorComponentType_UInt16)
+      if (itPrm.Value().IndAccessor.ComponentType == gltf_AccessorComponentType_UInt16)
       {
         // alignment by 4 bytes
         int64_t contentLen64 = (int64_t)binFile.tellp();
@@ -344,21 +369,30 @@ void gltf_Writer::SetDefaultStyle(const gltf_XdeVisualStyle& style)
 
 bool gltf_Writer::writeBinData()
 {
-  m_buffViewPos.ByteOffset       = 0;
-  m_buffViewPos.ByteLength       = 0;
-  m_buffViewPos.ByteStride       = 12;
-  m_buffViewPos.Target           = gltf_BufferViewTarget_ARRAY_BUFFER;
-  m_buffViewNorm.ByteOffset      = 0;
-  m_buffViewNorm.ByteLength      = 0;
-  m_buffViewNorm.ByteStride      = 12;
-  m_buffViewNorm.Target          = gltf_BufferViewTarget_ARRAY_BUFFER;
-  m_buffViewTextCoord.ByteOffset = 0;
-  m_buffViewTextCoord.ByteLength = 0;
-  m_buffViewTextCoord.ByteStride = 8;
-  m_buffViewTextCoord.Target     = gltf_BufferViewTarget_ARRAY_BUFFER;
-  m_buffViewInd.ByteOffset       = 0;
-  m_buffViewInd.ByteLength       = 0;
-  m_buffViewInd.Target           = gltf_BufferViewTarget_ELEMENT_ARRAY_BUFFER;
+  m_buffViewNodalPos.ByteOffset       = 0;
+  m_buffViewNodalPos.ByteLength       = 0;
+
+  m_buffViewNodalPos.ByteStride       = 12;
+  m_buffViewNodalPos.Target           = gltf_BufferViewTarget_ARRAY_BUFFER;
+
+  m_buffViewNodalNorm.ByteOffset      = 0;
+  m_buffViewNodalNorm.ByteLength      = 0;
+  m_buffViewNodalNorm.ByteStride      = 12;
+  m_buffViewNodalNorm.Target          = gltf_BufferViewTarget_ARRAY_BUFFER;
+
+  m_buffViewNodalTextCoord.ByteOffset = 0;
+  m_buffViewNodalTextCoord.ByteLength = 0;
+  m_buffViewNodalTextCoord.ByteStride = 8;
+  m_buffViewNodalTextCoord.Target     = gltf_BufferViewTarget_ARRAY_BUFFER;
+
+  m_buffViewNodalColor.ByteOffset     = 0;
+  m_buffViewNodalColor.ByteLength     = 0;
+  m_buffViewNodalColor.ByteStride     = 12;
+  m_buffViewNodalColor.Target         = gltf_BufferViewTarget_ARRAY_BUFFER;
+
+  m_buffViewIndices.ByteOffset       = 0;
+  m_buffViewIndices.ByteLength       = 0;
+  m_buffViewIndices.Target           = gltf_BufferViewTarget_ELEMENT_ARRAY_BUFFER;
 
   m_binDataLen64 = 0;
 
@@ -378,7 +412,7 @@ bool gltf_Writer::writeBinData()
    *  Write positions.
    * ================= */
 
-  m_buffViewPos.ByteOffset = binFile.tellp();
+  m_buffViewNodalPos.ByteOffset = binFile.tellp();
   //
 
   this->writeBinDataNodes(binFile, nbAccessors);
@@ -389,13 +423,13 @@ bool gltf_Writer::writeBinData()
     return false;
   }
 
-  m_buffViewPos.ByteLength = (int64_t) binFile.tellp() - m_buffViewPos.ByteOffset;
+  m_buffViewNodalPos.ByteLength = (int64_t) binFile.tellp() - m_buffViewNodalPos.ByteOffset;
 
   /* ===============
    *  Write normals.
    * =============== */
 
-  m_buffViewNorm.ByteOffset = binFile.tellp();
+  m_buffViewNodalNorm.ByteOffset = binFile.tellp();
 
   this->writeBinDataNormals(binFile, nbAccessors);
 
@@ -405,13 +439,13 @@ bool gltf_Writer::writeBinData()
     return false;
   }
 
-  m_buffViewNorm.ByteLength = (int64_t) binFile.tellp() - m_buffViewNorm.ByteOffset;
+  m_buffViewNodalNorm.ByteLength = (int64_t) binFile.tellp() - m_buffViewNodalNorm.ByteOffset;
 
   /* ===========================
    *  Write texture coordinates.
    * =========================== */
 
-  m_buffViewTextCoord.ByteOffset = binFile.tellp();
+  m_buffViewNodalTextCoord.ByteOffset = binFile.tellp();
 
   if (!m_bIsForcedUVExport)
   {
@@ -424,13 +458,29 @@ bool gltf_Writer::writeBinData()
     return false;
   }
 
-  m_buffViewTextCoord.ByteLength = (int64_t) binFile.tellp() - m_buffViewTextCoord.ByteOffset;
+  m_buffViewNodalTextCoord.ByteLength = (int64_t) binFile.tellp() - m_buffViewNodalTextCoord.ByteOffset;
+
+  /* ====================
+   *  Write nodal colors.
+   * ==================== */
+
+  m_buffViewNodalColor.ByteOffset = binFile.tellp();
+
+  this->writeBinDataNodalColors(binFile, nbAccessors);
+
+  if (!binFile.good())
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' cannot be written." << m_binFilenameFull);
+    return false;
+  }
+
+  m_buffViewNodalColor.ByteLength = (int64_t)binFile.tellp() - m_buffViewNodalColor.ByteOffset;
 
   /* ===============
    *  Write indices.
    * =============== */
 
-  m_buffViewInd.ByteOffset = binFile.tellp();
+  m_buffViewIndices.ByteOffset = binFile.tellp();
 
   this->writeBinDataIndices(binFile, nbAccessors);
 
@@ -440,28 +490,32 @@ bool gltf_Writer::writeBinData()
     return false;
   }
 
-  m_buffViewInd.ByteLength = (int64_t )binFile.tellp() - m_buffViewInd.ByteOffset;
+  m_buffViewIndices.ByteLength = (int64_t )binFile.tellp() - m_buffViewIndices.ByteOffset;
 
   /* ==========
    *  Finalize.
    * ========== */
 
   int buffViewId = 0;
-  if ( m_buffViewPos.ByteLength > 0 )
+  if ( m_buffViewNodalPos.ByteLength > 0 )
   {
-    m_buffViewPos.Id = buffViewId++;
+    m_buffViewNodalPos.Id = buffViewId++;
   }
-  if ( m_buffViewNorm.ByteLength > 0 )
+  if ( m_buffViewNodalNorm.ByteLength > 0 )
   {
-    m_buffViewNorm.Id = buffViewId++;
+    m_buffViewNodalNorm.Id = buffViewId++;
   }
-  if ( m_buffViewTextCoord.ByteLength > 0 )
+  if ( m_buffViewNodalTextCoord.ByteLength > 0 )
   {
-    m_buffViewTextCoord.Id = buffViewId++;
+    m_buffViewNodalTextCoord.Id = buffViewId++;
   }
-  if ( m_buffViewInd.ByteLength > 0 )
+  if (m_buffViewNodalColor.ByteLength > 0)
   {
-    m_buffViewInd.Id = buffViewId++;
+    m_buffViewNodalColor.Id = buffViewId++;
+  }
+  if (m_buffViewIndices.ByteLength > 0 )
+  {
+    m_buffViewIndices.Id = buffViewId++;
   }
 
   m_binDataLen64 = binFile.tellp();
@@ -654,7 +708,7 @@ void gltf_Writer::writeAccessors()
     for (; itPrm.More(); itPrm.Next())
     {
       //
-      this->writePositions(itPrm.Value());
+      this->writeNodalPositions(itPrm.Value());
     }
   }
 
@@ -669,7 +723,7 @@ void gltf_Writer::writeAccessors()
     for (; itPrm.More(); itPrm.Next())
     {
       //
-      this->writeNormals(itPrm.Value());
+      this->writeNodalNormals(itPrm.Value());
     }
   }
 
@@ -684,7 +738,22 @@ void gltf_Writer::writeAccessors()
     for (; itPrm.More(); itPrm.Next())
     {
       //
-      this->writeTextCoords(itPrm.Value());
+      this->writeNodalTextCoords(itPrm.Value());
+    }
+  }
+
+  /* =============
+   *  Write colors.
+   * ============= */
+
+   //
+  for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
+  {
+    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    for (; itPrm.More(); itPrm.Next())
+    {
+      //
+      this->writeNodalColors(itPrm.Value());
     }
   }
 
@@ -701,7 +770,7 @@ void gltf_Writer::writeAccessors()
     for (; itPrm.More(); itPrm.Next())
     {
       //
-      this->writeIndices(itPrm.Value());
+      this->writeNodalIndices(itPrm.Value());
     }
   }
 
@@ -714,44 +783,45 @@ void gltf_Writer::writeAccessors()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writePositions(const gltf_Primitive& gltfPrm)
+void gltf_Writer::writeNodalPositions(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
-  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writePositions()");
+  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalPositions()");
 
-  if (gltfPrm.NodePos.Id == gltf_Accessor::INVALID_ID )
-  {
+  if (gltfPrm.PosAccessor.Id == gltf_Accessor::INVALID_ID )
     return;
-  }
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key   ("bufferView");
-  m_jsonWriter->Int   (m_buffViewPos.Id);
+  m_jsonWriter->Int   (m_buffViewNodalPos.Id);
   m_jsonWriter->Key   ("byteOffset");
-  m_jsonWriter->Int64 (gltfPrm.NodePos.ByteOffset);
+  m_jsonWriter->Int64 (gltfPrm.PosAccessor.ByteOffset);
   m_jsonWriter->Key   ("componentType");
-  m_jsonWriter->Int   (gltfPrm.NodePos.ComponentType);
+  m_jsonWriter->Int   (gltfPrm.PosAccessor.ComponentType);
   m_jsonWriter->Key   ("count");
-  m_jsonWriter->Int64 (gltfPrm.NodePos.Count);
+  m_jsonWriter->Int64 (gltfPrm.PosAccessor.Count);
 
-  if (gltfPrm.NodePos.BndBox.IsValid() )
+  if (gltfPrm.PosAccessor.BndBox.IsValid() )
   {
     m_jsonWriter->Key ("max");
     m_jsonWriter->StartArray();
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().x() );
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().y() );
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMax().z() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMax().x() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMax().y() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMax().z() );
     m_jsonWriter->EndArray();
 
     m_jsonWriter->Key("min");
     m_jsonWriter->StartArray();
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().x() );
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().y() );
-    m_jsonWriter->Double (gltfPrm.NodePos.BndBox.CornerMin().z() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMin().x() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMin().y() );
+    m_jsonWriter->Double (gltfPrm.PosAccessor.BndBox.CornerMin().z() );
     m_jsonWriter->EndArray();
   }
   m_jsonWriter->Key    ("type");
   m_jsonWriter->String ("VEC3");
+
+  m_jsonWriter->Key    ("name");
+  m_jsonWriter->String ("Positions Accessor");
 
   m_jsonWriter->EndObject();
 #else
@@ -762,29 +832,32 @@ void gltf_Writer::writePositions(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNormals(const gltf_Primitive& gltfPrm)
+void gltf_Writer::writeNodalNormals(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
-  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNormals()");
+  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalNormals()");
 
-  if (gltfPrm.NodeNorm.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.NormAccessor.Id == gltf_Accessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
-  m_jsonWriter->Int    (m_buffViewNorm.Id);
+  m_jsonWriter->Int    (m_buffViewNodalNorm.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfPrm.NodeNorm.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.NormAccessor.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfPrm.NodeNorm.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.NormAccessor.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfPrm.NodeNorm.Count);
+  m_jsonWriter->Int64  (gltfPrm.NormAccessor.Count);
 
   /* min/max values are optional, and not very useful for normals - skip them */
 
   m_jsonWriter->Key    ("type");
   m_jsonWriter->String ("VEC3");
 
+  m_jsonWriter->Key("name");
+  m_jsonWriter->String("Normals Accessor");
+
   m_jsonWriter->EndObject();
 #else
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
@@ -794,29 +867,32 @@ void gltf_Writer::writeNormals(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeTextCoords(const gltf_Primitive& gltfPrm)
+void gltf_Writer::writeNodalTextCoords(const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
-  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextCoords()");
+  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalTextCoords()");
 
-  if (gltfPrm.NodeUV.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.UVAccessor.Id == gltf_Accessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
-  m_jsonWriter->Int    (m_buffViewTextCoord.Id);
+  m_jsonWriter->Int    (m_buffViewNodalTextCoord.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfPrm.NodeUV.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.UVAccessor.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfPrm.NodeUV.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.UVAccessor.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfPrm.NodeUV.Count);
+  m_jsonWriter->Int64  (gltfPrm.UVAccessor.Count);
 
   /* min/max values are optional, and not very useful for UV coordinates - skip them */
 
   m_jsonWriter->Key    ("type");
   m_jsonWriter->String ("VEC2");
 
+  m_jsonWriter->Key   ("name");
+  m_jsonWriter->String("Textures Accessor");
+
   m_jsonWriter->EndObject();
 #else
   m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
@@ -826,26 +902,62 @@ void gltf_Writer::writeTextCoords(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeIndices (const gltf_Primitive& gltfPrm)
+void gltf_Writer::writeNodalColors(const gltf_Primitive& gltfPrm)
+{
+#if defined USE_RAPIDJSON
+  Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalColors()");
+
+  if (gltfPrm.ColorAccessor.Id == gltf_Accessor::INVALID_ID)
+    return;
+
+  m_jsonWriter->StartObject();
+  m_jsonWriter->Key("bufferView");
+  m_jsonWriter->Int(m_buffViewNodalColor.Id);
+  m_jsonWriter->Key("byteOffset");
+  m_jsonWriter->Int64(gltfPrm.ColorAccessor.ByteOffset);
+  m_jsonWriter->Key("componentType");
+  m_jsonWriter->Int(gltfPrm.ColorAccessor.ComponentType);
+  m_jsonWriter->Key("count");
+  m_jsonWriter->Int64(gltfPrm.ColorAccessor.Count);
+
+  m_jsonWriter->Key("type");
+  m_jsonWriter->String("VEC3");
+
+  m_jsonWriter->Key("name");
+  m_jsonWriter->String("Colors Accessor");
+
+  m_jsonWriter->EndObject();
+#else
+  m_progress.SendLogMessage(LogErr(High) << "glTF export is impossible: you have to build "
+    "Analysis Situs with rapidjson.");
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+void gltf_Writer::writeNodalIndices (const gltf_Primitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeIndices()");
 
-  if (gltfPrm.Indices.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.IndAccessor.Id == gltf_Accessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("bufferView");
-  m_jsonWriter->Int    (m_buffViewInd.Id);
+  m_jsonWriter->Int    (m_buffViewIndices.Id);
   m_jsonWriter->Key    ("byteOffset");
-  m_jsonWriter->Int64  (gltfPrm.Indices.ByteOffset);
+  m_jsonWriter->Int64  (gltfPrm.IndAccessor.ByteOffset);
   m_jsonWriter->Key    ("componentType");
-  m_jsonWriter->Int    (gltfPrm.Indices.ComponentType);
+  m_jsonWriter->Int    (gltfPrm.IndAccessor.ComponentType);
   m_jsonWriter->Key    ("count");
-  m_jsonWriter->Int64  (gltfPrm.Indices.Count);
+  m_jsonWriter->Int64  (gltfPrm.IndAccessor.Count);
 
   m_jsonWriter->Key    ("type");
   m_jsonWriter->String ("SCALAR");
+
+  m_jsonWriter->Key("name");
+  m_jsonWriter->String("Indices Accessor");
 
   m_jsonWriter->EndObject();
 #else
@@ -912,62 +1024,87 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
   m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_BufferViews) );
   m_jsonWriter->StartArray();
 
-  if ( m_buffViewPos.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalPos.Id != gltf_Accessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
     m_jsonWriter->Int    (binDataBufferId);
     m_jsonWriter->Key    ("byteLength");
-    m_jsonWriter->Int64  (m_buffViewPos.ByteLength);
+    m_jsonWriter->Int64  (m_buffViewNodalPos.ByteLength);
     m_jsonWriter->Key    ("byteOffset");
-    m_jsonWriter->Int64  (m_buffViewPos.ByteOffset);
+    m_jsonWriter->Int64  (m_buffViewNodalPos.ByteOffset);
     m_jsonWriter->Key    ("byteStride");
-    m_jsonWriter->Int64  (m_buffViewPos.ByteStride);
+    m_jsonWriter->Int64  (m_buffViewNodalPos.ByteStride);
     m_jsonWriter->Key    ("target");
-    m_jsonWriter->Int    (m_buffViewPos.Target);
+    m_jsonWriter->Int    (m_buffViewNodalPos.Target);
+    m_jsonWriter->Key    ("name");
+    m_jsonWriter->String ("Positions");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewNorm.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalNorm.Id != gltf_Accessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
     m_jsonWriter->Int    (binDataBufferId);
     m_jsonWriter->Key    ("byteLength");
-    m_jsonWriter->Int64  (m_buffViewNorm.ByteLength);
+    m_jsonWriter->Int64  (m_buffViewNodalNorm.ByteLength);
     m_jsonWriter->Key    ("byteOffset");
-    m_jsonWriter->Int64  (m_buffViewNorm.ByteOffset);
+    m_jsonWriter->Int64  (m_buffViewNodalNorm.ByteOffset);
     m_jsonWriter->Key    ("byteStride");
-    m_jsonWriter->Int64  (m_buffViewNorm.ByteStride);
+    m_jsonWriter->Int64  (m_buffViewNodalNorm.ByteStride);
     m_jsonWriter->Key    ("target");
-    m_jsonWriter->Int    (m_buffViewNorm.Target);
+    m_jsonWriter->Int    (m_buffViewNodalNorm.Target);
+    m_jsonWriter->Key    ("name");
+    m_jsonWriter->String ("Normals");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewTextCoord.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalTextCoord.Id != gltf_Accessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
     m_jsonWriter->Int    (binDataBufferId);
     m_jsonWriter->Key    ("byteLength");
-    m_jsonWriter->Int64  (m_buffViewTextCoord.ByteLength);
+    m_jsonWriter->Int64  (m_buffViewNodalTextCoord.ByteLength);
     m_jsonWriter->Key    ("byteOffset");
-    m_jsonWriter->Int64  (m_buffViewTextCoord.ByteOffset);
+    m_jsonWriter->Int64  (m_buffViewNodalTextCoord.ByteOffset);
     m_jsonWriter->Key    ("byteStride");
-    m_jsonWriter->Int64  (m_buffViewTextCoord.ByteStride);
+    m_jsonWriter->Int64  (m_buffViewNodalTextCoord.ByteStride);
     m_jsonWriter->Key    ("target");
-    m_jsonWriter->Int    (m_buffViewTextCoord.Target);
+    m_jsonWriter->Int    (m_buffViewNodalTextCoord.Target);
+    m_jsonWriter->Key    ("name");
+    m_jsonWriter->String ("Textures");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewInd.Id != gltf_Accessor::INVALID_ID )
+  if (m_buffViewNodalColor.Id != gltf_Accessor::INVALID_ID)
   {
     m_jsonWriter->StartObject();
-    m_jsonWriter->Key    ("buffer");
-    m_jsonWriter->Int    (binDataBufferId);
-    m_jsonWriter->Key    ("byteLength");
-    m_jsonWriter->Int64  (m_buffViewInd.ByteLength);
-    m_jsonWriter->Key    ("byteOffset");
-    m_jsonWriter->Int64  (m_buffViewInd.ByteOffset);
-    m_jsonWriter->Key    ("target");
-    m_jsonWriter->Int    (m_buffViewInd.Target);
+    m_jsonWriter->Key     ("buffer");
+    m_jsonWriter->Int     (binDataBufferId);
+    m_jsonWriter->Key     ("byteLength");
+    m_jsonWriter->Int64   (m_buffViewNodalColor.ByteLength);
+    m_jsonWriter->Key     ("byteOffset");
+    m_jsonWriter->Int64   (m_buffViewNodalColor.ByteOffset);
+    m_jsonWriter->Key     ("byteStride");
+    m_jsonWriter->Int64   (m_buffViewNodalColor.ByteStride);
+    m_jsonWriter->Key     ("target");
+    m_jsonWriter->Int     (m_buffViewNodalColor.Target);
+    m_jsonWriter->Key     ("name");
+    m_jsonWriter->String  ("Colors");
+    m_jsonWriter->EndObject();
+  }
+  if ( m_buffViewIndices.Id != gltf_Accessor::INVALID_ID )
+  {
+    m_jsonWriter->StartObject();
+    m_jsonWriter->Key     ("buffer");
+    m_jsonWriter->Int     (binDataBufferId);
+    m_jsonWriter->Key     ("byteLength");
+    m_jsonWriter->Int64   (m_buffViewIndices.ByteLength);
+    m_jsonWriter->Key     ("byteOffset");
+    m_jsonWriter->Int64   (m_buffViewIndices.ByteOffset);
+    m_jsonWriter->Key     ("target");
+    m_jsonWriter->Int     (m_buffViewIndices.Target);
+    m_jsonWriter->Key     ("name");
+    m_jsonWriter->String  ("Indices");
     m_jsonWriter->EndObject();
   }
   m_jsonWriter->EndArray();
@@ -993,8 +1130,8 @@ void gltf_Writer::writeBuffers()
     m_jsonWriter->StartObject();
     {
       m_jsonWriter->Key   ("byteLength");
-      m_jsonWriter->Int64 (m_buffViewPos.ByteLength + m_buffViewNorm.ByteLength +
-                           m_buffViewTextCoord.ByteLength + m_buffViewInd.ByteLength);
+      m_jsonWriter->Int64 (m_buffViewNodalPos.ByteLength + m_buffViewNodalNorm.ByteLength +
+                           m_buffViewNodalTextCoord.ByteLength + m_buffViewIndices.ByteLength);
       if ( !m_bIsBinary )
       {
         m_jsonWriter->Key    ("uri");
@@ -1120,26 +1257,31 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
         m_jsonWriter->Key("attributes");
         m_jsonWriter->StartObject();
         {
-          if (primitive.NodeNorm.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.NormAccessor.Id != gltf_Accessor::INVALID_ID )
           {
             m_jsonWriter->Key("NORMAL");
-            m_jsonWriter->Int(primitive.NodeNorm.Id);
+            m_jsonWriter->Int(primitive.NormAccessor.Id);
           }
           m_jsonWriter->Key("POSITION");
-          m_jsonWriter->Int(primitive.NodePos.Id);
+          m_jsonWriter->Int(primitive.PosAccessor.Id);
 
-          if (primitive.NodeUV.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.UVAccessor.Id != gltf_Accessor::INVALID_ID )
           {
             m_jsonWriter->Key("TEXCOORD_0");
-            m_jsonWriter->Int(primitive.NodeUV.Id);
+            m_jsonWriter->Int(primitive.UVAccessor.Id);
+          }
+          if (primitive.ColorAccessor.Id != gltf_Accessor::INVALID_ID)
+          {
+            m_jsonWriter->Key("COLOR_0");
+            m_jsonWriter->Int(primitive.ColorAccessor.Id);
           }
         }
         m_jsonWriter->EndObject();
 
-        if (primitive.Indices.Id != gltf_Accessor::INVALID_ID)
+        if (primitive.IndAccessor.Id != gltf_Accessor::INVALID_ID)
         {
           m_jsonWriter->Key("indices");
-          m_jsonWriter->Int(primitive.Indices.Id);
+          m_jsonWriter->Int(primitive.IndAccessor.Id);
         }
 
         if ( !matId.IsEmpty() )
