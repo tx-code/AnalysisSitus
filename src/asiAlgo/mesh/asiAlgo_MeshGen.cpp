@@ -225,8 +225,6 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
   geom.changed = 1;
   geom.PrintNrShapes();
 
-  geom.PrintNrShapes();
-
   netgen::OCCSetLocalMeshSize (geom, ngMesh, ngParam, occParam);
   netgen::OCCFindEdges        (geom, ngMesh, ngParam);
   netgen::OCCMeshSurface      (geom, ngMesh, ngParam);
