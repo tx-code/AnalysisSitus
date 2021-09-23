@@ -516,6 +516,13 @@ if (USE_MOBIUS)
   )
 endif()
 #------------------------------------------------------------------------------
+if (USE_NETGEN)
+  set (NETGEN_LIB_FILES
+    ngcore
+    nglib
+  )
+endif()
+#------------------------------------------------------------------------------
 if (NOT BUILD_ALGO_ONLY)
   set (VTK_LIB_FILES
     vtkCommonCore-8.2
@@ -693,6 +700,22 @@ if (USE_MOBIUS)
   include_directories(SYSTEM ${3RDPARTY_mobius_INCLUDE_DIR})
 endif()
 
+if (USE_NETGEN)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR})
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/core)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/csg)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/general)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/geom2d)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/gprim)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/include)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/interface)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/linalg)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/meshing)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/occ)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/stlgeom)
+  include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/visualization)
+endif()
+
 #------------------------------------------------------------------------------
 # Add target
 #------------------------------------------------------------------------------
@@ -756,6 +779,23 @@ if (USE_MOBIUS)
       target_link_libraries (asiAlgo optimized ${3RDPARTY_mobius_LIBRARY_DIR}/${LIB_FILENAME})
     else()
       target_link_libraries (asiAlgo ${3RDPARTY_mobius_LIBRARY_DIR}/${LIB_FILENAME})
+    endif()
+  endforeach()
+endif()
+
+if (USE_NETGEN)
+  foreach (LIB_FILE ${NETGEN_LIB_FILES})
+    if (WIN32)
+      set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
+
+    if (3RDPARTY_netgen_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_netgen_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+      target_link_libraries (asiAlgo debug ${3RDPARTY_netgen_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+      target_link_libraries (asiAlgo optimized ${3RDPARTY_netgen_LIBRARY_DIR}/${LIB_FILENAME})
+    else()
+      target_link_libraries (asiAlgo ${3RDPARTY_netgen_LIBRARY_DIR}/${LIB_FILENAME})
     endif()
   endforeach()
 endif()

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Created on: 15 February 2016
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2016-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 #ifndef asiAlgo_MeshGen_h
 #define asiAlgo_MeshGen_h
 
-// A-Situs includes
-#include <asiAlgo.h>
-
-// Mesh includes
+// asiAlgo includes
 #include <asiAlgo_MeshInfo.h>
+
+// Active Data includes
+#include <ActAPI_IProgressNotifier.h>
 
 // OCCT includes
 #include <TopoDS_Shape.hxx>
@@ -96,6 +96,16 @@ namespace asiAlgo_MeshGen
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     DoNative(const TopoDS_Shape& shape);
+
+  //! Generates surface mesh using NetGen grid generator (https://gitlab.com/ssv/netgen).
+  //! \param[in,out] shape    shape to tessellate.
+  //! \param[out]    mesh     generate mesh.
+  //! \param[in,out] progress progress entry.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    DoNetGen(const TopoDS_Shape&         shape,
+             Handle(Poly_Triangulation)& mesh,
+             ActAPI_ProgressEntry        progress);
 
 };
 

@@ -39,6 +39,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshComputeNorms.h>
+#include <asiAlgo_MeshGen.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_MeshSmooth.h>
 #include <asiAlgo_Timer.h>
@@ -1486,14 +1487,15 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
 
   /* Next stage: smooth mesh */
 
-  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
-                                                        << mesh->AreIntersecting(domain) );
-
   mesh->ComputeEdges();
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
+                                                        << mesh->AreSelfIntersecting(domain) );
+
   mesh->Smooth(1, domain, true);
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
-                                                        << mesh->AreIntersecting(domain) );
+                                                        << mesh->AreSelfIntersecting(domain) );
 
   /* Next stage: flip edges */
 
@@ -1507,10 +1509,10 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
   /* Next stage: smooth mesh */
 
   mesh->ComputeEdges();
-  mesh->Smooth(1, domain, true);
+  mesh->Smooth(10, domain, true);
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Are intersecting: %1."
-                                                        << mesh->AreIntersecting(domain) );
+                                                        << mesh->AreSelfIntersecting(domain) );
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Incremental refine")
@@ -1986,7 +1988,7 @@ int MOBIUS_POLY_CheckInter(const Handle(asiTcl_Interp)& interp,
   TIMER_RESET
   TIMER_GO
 
-  const bool areIntersecting = mesh->AreIntersecting(domain);
+  const bool areIntersecting = mesh->AreSelfIntersecting(domain);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Find domain intersections")
@@ -1995,6 +1997,81 @@ int MOBIUS_POLY_CheckInter(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Intersections detected.");
   else
     interp->GetProgress().SendLogMessage(LogInfo(Normal) << "No intersections detected.");
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get shape.
+  Handle(asiData_PartNode) part_n = cmdMobius::model->GetPartNode();
+  TopoDS_Shape             shape  = part_n->GetShape();
+  //
+  if ( shape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part shape is null.");
+    return TCL_ERROR;
+  }
+
+  // Generate mesh.
+  Handle(Poly_Triangulation) occMesh;
+  //
+  try
+  {
+    if ( !asiAlgo_MeshGen::DoNetGen( shape, occMesh, interp->GetProgress() ) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to generate mesh with NetGen.");
+      return TCL_ERROR;
+    }
+  }
+  catch ( ... )
+  {
+  }
+
+  const t_ptr<poly_Mesh>& mesh = cascade::GetMobiusMesh(occMesh);
+
+  if ( mesh.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mesh is null.");
+    return TCL_ERROR;
+  }
+
+  // Compose the domain of interest.
+  t_domain domain = ::ComposePlanarDomain();
+  //
+  t_ptr<SurfAdapter> surfAdt = new SurfAdapter(part_n->GetAAG(), domain);
+  //
+  mesh->SetSurfAdapter(surfAdt);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles: %1."
+                                                        << mesh->GetNumTriangles() );
+
+  // Get triangulation node.
+  Handle(asiData_TriangulationNode) tris_n = cmdMobius::model->GetTriangulationNode();
+
+  // Update data model.
+  cmdMobius::model->OpenCommand();
+  {
+    tris_n->SetTriangulation(mesh);
+  }
+  cmdMobius::model->CommitCommand();
+
+  // Update UI.
+  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+  cmdMobius::cf->ObjectBrowser->Populate();
 
   return TCL_OK;
 #else
@@ -2197,6 +2274,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Checks self-intersections.",
     //
     __FILE__, group, MOBIUS_POLY_CheckInter);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-netgen",
+    //
+    "poly-netgen\n"
+    "\n"
+    "\t Generates surface mesh with NetGen.",
+    //
+    __FILE__, group, MOBIUS_POLY_NetGen);
 }
 
 // Declare entry point PLUGINFACTORY

@@ -172,3 +172,102 @@ bool asiAlgo_MeshGen::DoNative(const TopoDS_Shape& shape)
 
   return DoNative(shape, linDefl, angDefl, info);
 }
+
+//-----------------------------------------------------------------------------
+
+#if defined USE_NETGEN
+  #pragma warning(push,0)
+
+  #ifndef OCCGEOMETRY
+  #define OCCGEOMETRY
+  #endif
+
+  #define NO_PARALLEL_THREADS
+
+  #include <occgeom.hpp>
+
+  namespace nglib
+  {
+  #include "nglib.h"
+  }
+
+  #pragma warning(pop)
+#endif
+
+bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
+                               Handle(Poly_Triangulation)& mesh,
+                               ActAPI_ProgressEntry        progress)
+{
+#if defined USE_NETGEN
+
+  TopoDS_Shape sh = shape;
+
+  const double linDefl = AutoSelectLinearDeflection(shape);
+
+  netgen::MeshingParameters ngParam;
+  ngParam.minh        = linDefl;
+  ngParam.maxh        = linDefl*100;
+  ngParam.uselocalh   = true;
+  ngParam.secondorder = false;
+  ngParam.grading     = 0.3;
+
+  netgen::OCCParameters occParam;
+
+  nglib::Ng_Init();
+
+  static netgen::Mesh ngMesh;
+
+  netgen::OCCGeometry geom;
+  geom.shape = sh;
+  geom.BuildFMap();
+  geom.BuildVisualizationMesh(linDefl);
+  geom.CalcBoundingBox();
+  geom.changed = 1;
+  geom.PrintNrShapes();
+
+  geom.PrintNrShapes();
+
+  netgen::OCCSetLocalMeshSize (geom, ngMesh, ngParam, occParam);
+  netgen::OCCFindEdges        (geom, ngMesh, ngParam);
+  netgen::OCCMeshSurface      (geom, ngMesh, ngParam);
+
+  const int nbNodes     = (int) ngMesh.GetNP();
+  const int nbTriangles = (int) ngMesh.GetNSE();
+
+  progress.SendLogMessage(LogNotice(Normal) << "Num. of mesh nodes     generated: %1." << nbNodes);
+  progress.SendLogMessage(LogNotice(Normal) << "Num. of mesh triangles generated: %1." << nbTriangles);
+
+  std::cout << "Num. of mesh nodes     generated: " << nbNodes << std::endl;
+  std::cout << "Num. of mesh triangles generated: " << nbTriangles << std::endl;
+
+  if ( !nbNodes || !nbTriangles )
+  {
+    nglib::Ng_Exit();
+    return false;
+  }
+
+  // Populate the result.
+  mesh = new Poly_Triangulation(nbNodes, nbTriangles, false);
+  //
+  for ( int i = 1; i <= nbNodes; ++i )
+  {
+    const netgen::MeshPoint& point = ngMesh.Point(netgen::PointIndex(i));
+    mesh->ChangeNode(i).SetCoord(point[0], point[1], point[2]);
+  }
+
+  for (int i = 1; i <= nbTriangles; ++i)
+  {
+    const netgen::Element2d& elem = ngMesh.SurfaceElement(netgen::ElementIndex(i));
+    mesh->ChangeTriangle(i).Set(elem[0], elem[1], elem[2]);
+  }
+
+  std::cout << "Mesh was generated." << std::endl;
+  ngMesh.DeleteMesh();
+
+  nglib::Ng_Exit();
+  return true;
+#else
+  progress.SendLogMessage(LogErr(Normal) << "NetGen is not available. Consider turning on the USE_NETGEN cmake flag.");
+  return false;
+#endif
+}

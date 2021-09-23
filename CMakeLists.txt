@@ -1,5 +1,10 @@
 cmake_minimum_required (VERSION 3.0.0 FATAL_ERROR)
 
+# Enable C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Project name
 project (AnalysisSitus CXX)
 
@@ -79,6 +84,11 @@ set (USE_MOBIUS OFF CACHE BOOL "Mobius is optional 3-rd party. It gives alternat
 #
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Mobius.cmake)
 
+# NetGen
+set (USE_NETGEN OFF CACHE BOOL "NetGen mesh generator.")
+#
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_NetGen.cmake)
+
 # FBX SDK is optional
 set (USE_FBX_SDK OFF CACHE BOOL "FBX SDK is optional 3-rd party. Building with FBX SDK will allow to export assemblies into FBX file format.")
 
@@ -141,6 +151,14 @@ if (USE_MOBIUS)
   endif()
 
   set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};${3RDPARTY_mobius_DLL_DIR}")
+endif()
+
+if (USE_NETGEN)
+  if (3RDPARTY_netgen_DLL_DIR_DEBUG AND EXISTS "${3RDPARTY_netgen_DLL_DIR_DEBUG}")
+    set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_DEB_PATH};${3RDPARTY_netgen_DLL_DIR_DEBUG}")
+  endif()
+
+  set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};${3RDPARTY_netgen_DLL_DIR}")
 endif()
 
 if (USE_FBX_SDK)
