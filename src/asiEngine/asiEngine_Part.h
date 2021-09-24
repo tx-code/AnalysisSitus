@@ -404,6 +404,9 @@ public:
       //
       if ( isReversed )
         N.Reverse(); // Reversed face norm.
+      //
+      if ( N.Magnitude() > gp::Resolution() )
+        N.Normalize();
 
       // Sample ray.
       gp_Lin sampleRay(P, N);
