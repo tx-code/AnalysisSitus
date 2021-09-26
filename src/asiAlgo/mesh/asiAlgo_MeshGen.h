@@ -107,6 +107,22 @@ namespace asiAlgo_MeshGen
              Handle(Poly_Triangulation)& mesh,
              ActAPI_ProgressEntry        progress);
 
+  //! Generates surface mesh using NetGen grid generator (https://gitlab.com/ssv/netgen).
+  //! \param[in,out] shape    shape to tessellate.
+  //! \param[in]     minh     min element size.
+  //! \param[in]     maxh     max element size.
+  //! \param[in]     grading  grading coefficient for element size.
+  //! \param[out]    mesh     generate mesh.
+  //! \param[in,out] progress progress entry.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    DoNetGen(const TopoDS_Shape&         shape,
+             const double                minh,
+             const double                maxh,
+             const double                grading,
+             Handle(Poly_Triangulation)& mesh,
+             ActAPI_ProgressEntry        progress);
+
 };
 
 #endif
