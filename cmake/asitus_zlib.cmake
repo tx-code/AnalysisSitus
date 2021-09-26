@@ -17,3 +17,13 @@ set (3RDPARTY_zlib_DLL_DIR_DEBUG "${3RDPARTY_zlib_DLL_DIR}" CACHE INTERNAL "" FO
 
 message (STATUS "... zlib Debug Library dirs: ${3RDPARTY_zlib_LIBRARY_DIR_DEBUG}")
 message (STATUS "... zlib Debug Binary  dirs: ${3RDPARTY_zlib_DLL_DIR_DEBUG}")
+
+#--------------------------------------------------------------------------
+# Installation
+#--------------------------------------------------------------------------
+
+set (LIBS
+  zlib
+)
+
+ASITUS_INSTALL_3RDPARTY (LIBS "zlib")
