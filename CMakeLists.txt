@@ -89,6 +89,12 @@ set (USE_NETGEN OFF CACHE BOOL "NetGen mesh generator.")
 #
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_NetGen.cmake)
 
+if (USE_NETGEN)
+  include (${CMAKE_SOURCE_DIR}/cmake/asitus_zlib.cmake)
+else()
+  ASITUS_UNSET_3RDPARTY("zlib")
+endif()
+
 # FBX SDK is optional
 set (USE_FBX_SDK OFF CACHE BOOL "FBX SDK is optional 3-rd party. Building with FBX SDK will allow to export assemblies into FBX file format.")
 
@@ -133,6 +139,7 @@ endif()
 set (3RDPARTY_DLL_PATH "${3RDPARTY_tcl_DLL_DIR};\
 ${3RDPARTY_tbb_DLL_DIR};\
 ${3RDPARTY_freetype_DLL_DIR};\
+${3RDPARTY_zlib_DLL_DIR};\
 ${3RDPARTY_QT_DIR}/bin;")
 
 set (3RDPARTY_DLL_DEB_PATH "${3RDPARTY_DLL_PATH}")
