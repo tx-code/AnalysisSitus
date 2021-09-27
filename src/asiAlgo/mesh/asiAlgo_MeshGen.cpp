@@ -199,17 +199,38 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
                                ActAPI_ProgressEntry        progress)
 {
 #if defined USE_NETGEN
+  const double linDefl = AutoSelectLinearDeflection(shape);
+  const double minh    = linDefl*0.05;
+  const double maxh    = linDefl*5.5;
+  const double grading = 0.8;
+
+  return DoNetGen(shape, minh, maxh, grading, mesh, progress);
+#else
+  progress.SendLogMessage(LogErr(Normal) << "NetGen is not available. Consider turning on the USE_NETGEN cmake flag.");
+  return false;
+#endif
+}
+
+
+bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
+                               const double                minh,
+                               const double                maxh,
+                               const double                grading,
+                               Handle(Poly_Triangulation)& mesh,
+                               ActAPI_ProgressEntry        progress)
+{
+#if defined USE_NETGEN
 
   TopoDS_Shape sh = shape;
 
   const double linDefl = AutoSelectLinearDeflection(shape);
 
   netgen::MeshingParameters ngParam;
-  ngParam.minh        = linDefl;
-  ngParam.maxh        = linDefl*100;
+  ngParam.minh        = minh;
+  ngParam.maxh        = maxh;
   ngParam.uselocalh   = true;
   ngParam.secondorder = false;
-  ngParam.grading     = 0.3;
+  ngParam.grading     = grading;
 
   netgen::OCCParameters occParam;
 
@@ -253,7 +274,7 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
     mesh->ChangeNode(i).SetCoord(point[0], point[1], point[2]);
   }
 
-  for (int i = 1; i <= nbTriangles; ++i)
+  for ( int i = 1; i <= nbTriangles; ++i )
   {
     const netgen::Element2d& elem = ngMesh.SurfaceElement(netgen::ElementIndex(i));
     mesh->ChangeTriangle(i).Set(elem[0], elem[1], elem[2]);

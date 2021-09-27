@@ -76,6 +76,7 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const t_ptr<poly_Mesh>& tris,
                                                ActAPI_ProgressEntry    progress,
                                                ActAPI_PlotterEntry     plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
+  m_bIsCustomDir    ( false ),
   m_fMinThick       ( 0. ),
   m_fMaxThick       ( 0. )
 {

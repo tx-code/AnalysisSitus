@@ -205,6 +205,9 @@ protected:
     writeBinDataTextCoords(std::ostream&            binFile,
                            int&                     accessorNb) const;
 
+  gltf_EXPORT virtual void writeBinDataNodalColors(std::ostream& binFile,
+                                                   int& accessorNb) const;
+
   //! Writes meshes indexes into binary file.
   //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
@@ -219,22 +222,27 @@ protected:
   //! Writes bufferView for vertex positions within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writePositions(const gltf_Primitive& gltfPrm);
+    writeNodalPositions(const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for vertex normals within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNormals(const gltf_Primitive& gltfPrm);
+    writeNodalNormals(const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for vertex texture coordinates within "accessors" section
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeTextCoords (const gltf_Primitive& gltfPrm);
+    writeNodalTextCoords (const gltf_Primitive& gltfPrm);
+
+  //! Writes bufferView for vertex colors within "accessors" section
+  //! \param[in] gltfFace face definition to write
+  gltf_EXPORT virtual void
+    writeNodalColors(const gltf_Primitive& gltfPrm);
 
   //! Writes bufferView for triangle indexes within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeIndices(const gltf_Primitive& gltfPrm);
+    writeNodalIndices(const gltf_Primitive& gltfPrm);
 
 protected:
 
@@ -322,10 +330,13 @@ protected:
   gltf_CSysConverter        m_CSTrsf;            //!< Transformation from OCCT to glTF coordinate system.
   gltf_XdeVisualStyle       m_defaultStyle;      //!< Default material definition to be used for nodes with only color defined.
   gltf_JsonSerializerPtr    m_jsonWriter;        //!< JSON writer.
-  gltf_BufferView           m_buffViewPos;       //!< Current buffer view with nodes positions.
-  gltf_BufferView           m_buffViewNorm;      //!< Current buffer view with nodes normals.
-  gltf_BufferView           m_buffViewTextCoord; //!< Current buffer view with nodes UV coordinates.
-  gltf_BufferView           m_buffViewInd;       //!< Current buffer view with triangulation indexes.
+
+  gltf_BufferView           m_buffViewNodalPos;       //!< Current buffer view with nodes positions.
+  gltf_BufferView           m_buffViewNodalNorm;      //!< Current buffer view with nodes normals.
+  gltf_BufferView           m_buffViewNodalTextCoord; //!< Current buffer view with nodes UV coordinates.
+  gltf_BufferView           m_buffViewNodalColor;     //!< Current buffer view with nodes UV coordinates.
+  gltf_BufferView           m_buffViewIndices;        //!< Current buffer view with triangulation indexes.
+
   int64_t                   m_binDataLen64;      //!< Length of binary file.
 
   Handle(gltf_IDataSourceProvider) m_dataProvider;

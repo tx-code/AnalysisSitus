@@ -41,3 +41,14 @@ endif()
 
 message (STATUS "... netgen Debug Library dirs: ${3RDPARTY_netgen_LIBRARY_DIR_DEBUG}")
 message (STATUS "... netgen Debug Binary  dirs: ${3RDPARTY_netgen_DLL_DIR_DEBUG}")
+
+#--------------------------------------------------------------------------
+# Installation
+#--------------------------------------------------------------------------
+
+set (LIBS
+  ngcore
+  nglib
+)
+
+ASITUS_INSTALL_3RDPARTY (LIBS "netgen")

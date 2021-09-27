@@ -57,28 +57,30 @@ struct gltf_Primitive
 {
   gltf_Primitive()
   {
-    Name = "";
-    Mode = gltf_PrimitiveMode::gltf_PrimitiveMode_Triangles;
-    NodePos = gltf_Accessor();
-    NodeNorm = gltf_Accessor();
-    NodeUV = gltf_Accessor();
-    Indices = gltf_Accessor();
+    Name                              = "";
+    Mode                              = gltf_PrimitiveMode::gltf_PrimitiveMode_Triangles;
+    PosAccessor                       = gltf_Accessor();
+    NormAccessor                      = gltf_Accessor();
+    UVAccessor                        = gltf_Accessor();
+    ColorAccessor                     = gltf_Accessor();
+    IndAccessor                       = gltf_Accessor();
   };
 
-  TCollection_AsciiString Name;
+  gltf_PrimitiveMode                    Mode;           //! how to interpret the vertex data: points, lines or triangles
+  TCollection_AsciiString               Name;           //! primitive name
+  gltf_XdeVisualStyle                   Style;          //! primitive material
 
-  gltf_PrimitiveMode Mode;
-  gltf_Accessor NodePos;  //!< accessor for nodal positions
-  gltf_Accessor NodeNorm; //!< accessor for nodal normals
-  gltf_Accessor NodeUV;   //!< accessor for nodal UV texture coordinates
-  gltf_Accessor Indices;  //!< accessor for indexes
+  gltf_Accessor                         PosAccessor;    //!< accessor for nodal positions
+  gltf_Accessor                         NormAccessor;   //!< accessor for nodal normals
+  gltf_Accessor                         UVAccessor;     //!< accessor for nodal UV texture coordinates
+  gltf_Accessor                         ColorAccessor;  //!< accessor for nodal colors
+  gltf_Accessor                         IndAccessor;    //!< accessor for indices
 
-  gltf_XdeVisualStyle Style;
-
-  NCollection_Vector<gp_XYZ> MeshNodes;
-  NCollection_Vector<Graphic3d_Vec3> Normals;
-  NCollection_Vector<gp_Pnt2d>  Textures;
-  NCollection_Vector<Poly_Triangle> Triangles;
+  NCollection_Vector<gp_XYZ>            NodePositions;  //! vertex positions
+  NCollection_Vector<Graphic3d_Vec3>    NodeNormals;    //! vertex normals
+  NCollection_Vector<gp_Pnt2d>          NodeTextures;   //! UV texture coordinates per vertex
+  NCollection_Vector<Graphic3d_Vec3>    NodeColors;     //! vertex colors
+  NCollection_Vector<Poly_Triangle>     NodeIndices;    //! vertex indices
 };
 
 } // xde
