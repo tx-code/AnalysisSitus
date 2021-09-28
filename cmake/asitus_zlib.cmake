@@ -26,10 +26,6 @@ if (WIN32)
   set (LIBS
     zlib
   )
-else()
-  set (LIBS
-    z
-  )
-endif()
 
-ASITUS_INSTALL_3RDPARTY (LIBS "zlib")
+  ASITUS_INSTALL_3RDPARTY (LIBS "zlib")
+endif()
