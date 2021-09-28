@@ -22,8 +22,14 @@ message (STATUS "... zlib Debug Binary  dirs: ${3RDPARTY_zlib_DLL_DIR_DEBUG}")
 # Installation
 #--------------------------------------------------------------------------
 
-set (LIBS
-  zlib
-)
+if (WIN32)
+  set (LIBS
+    zlib
+  )
+else()
+  set (LIBS
+    libz
+  )
+endif()
 
 ASITUS_INSTALL_3RDPARTY (LIBS "zlib")
