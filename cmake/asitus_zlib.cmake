@@ -28,7 +28,7 @@ if (WIN32)
   )
 else()
   set (LIBS
-    libz
+    z
   )
 endif()
 
