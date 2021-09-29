@@ -211,7 +211,6 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
 #endif
 }
 
-
 bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
                                const double                minh,
                                const double                maxh,
