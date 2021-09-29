@@ -944,6 +944,88 @@ void asiAlgo_AAG::Remove(const asiAlgo_Feature& faceIndices)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
+{
+  /*
+   * Collect all the links that should be restored upon eliminating
+   * the target `fx` face from the graph. E.g. for the following
+   * graph...
+   *
+   *              o f2
+   *             /|\
+   *            / | \
+   *           /  |  \
+   *       f1 o   |   o f3
+   *           \  |  / \
+   *            \ | /   \
+   *             \|/     \
+   *           fx o-------o f4
+   *
+   * ... we collect the following links:
+   *
+   * fx : (1, 2); (1, 3); (1, 4); (2, 3); (2, 4); (3, 4)
+   * fy : ...
+   */
+  typedef NCollection_DataMap<int, NCollection_Map<t_arc>> t_collapseMap;
+  //
+  t_collapseMap fxIncidentArcs;
+  //
+  for ( asiAlgo_Feature::Iterator fit(faceIndices); fit.More(); fit.Next() )
+  {
+    const int              fx   = fit.Key();
+    const asiAlgo_Feature& nids = m_neighborsStack.top().mx.Find(fx);
+
+    // Add all links.
+    NCollection_Map<t_arc> incidentArcs;
+    for ( asiAlgo_Feature::Iterator nit1(nids); nit1.More(); nit1.Next() )
+    {
+      const int nid1 = nit1.Key();
+      for ( asiAlgo_Feature::Iterator nit2(nids); nit2.More(); nit2.Next() )
+      {
+        const int nid2 = nit2.Key();
+        //
+        if ( nid1 == nid2 )
+          continue;
+
+        incidentArcs.Add( t_arc(nid1, nid2) );
+      }
+    }
+
+    // Bind the arcs for `fx`.
+    fxIncidentArcs.Bind(fx, incidentArcs);
+  }
+
+  /* Remove `fx` faces from the incidence matrix. */
+  this->Remove(faceIndices);
+
+  /* Add incidence relations to restore. */
+  for ( t_collapseMap::Iterator it(fxIncidentArcs); it.More(); it.Next() )
+  {
+    const NCollection_Map<t_arc>& arcs = it.Value();
+
+    for ( NCollection_Map<t_arc>::Iterator ait(arcs); ait.More(); ait.Next() )
+    {
+      const t_arc& arc = ait.Key();
+
+      // Add F2 to F1 incidence list.
+      {
+        asiAlgo_Feature* mapPtr = m_neighborsStack.top().mx.ChangeSeek(arc.F1);
+        if ( mapPtr != nullptr )
+          mapPtr->Add(arc.F2);
+      }
+
+      // Add F1 to F2 incidence list.
+      {
+        asiAlgo_Feature* mapPtr = m_neighborsStack.top().mx.ChangeSeek(arc.F2);
+        if ( mapPtr != nullptr )
+          mapPtr->Add(arc.F1);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 int asiAlgo_AAG::GetConnectedComponentsNb()
 {
   std::vector<asiAlgo_Feature> ccomps;

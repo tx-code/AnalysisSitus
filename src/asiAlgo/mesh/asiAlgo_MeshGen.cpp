@@ -204,22 +204,24 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
   const double maxh    = linDefl*5.5;
   const double grading = 0.8;
 
-  return DoNetGen(shape, minh, maxh, grading, mesh, progress);
+  std::unordered_map<int, std::unordered_set<int>> faceElems;
+
+  return DoNetGen(shape, minh, maxh, grading, mesh, faceElems, progress);
 #else
   progress.SendLogMessage(LogErr(Normal) << "NetGen is not available. Consider turning on the USE_NETGEN cmake flag.");
   return false;
 #endif
 }
 
-bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
-                               const double                minh,
-                               const double                maxh,
-                               const double                grading,
-                               Handle(Poly_Triangulation)& mesh,
-                               ActAPI_ProgressEntry        progress)
+bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&                               shape,
+                               const double                                      minh,
+                               const double                                      maxh,
+                               const double                                      grading,
+                               Handle(Poly_Triangulation)&                       mesh,
+                               std::unordered_map<int, std::unordered_set<int>>& faceElems,
+                               ActAPI_ProgressEntry                              progress)
 {
 #if defined USE_NETGEN
-
   TopoDS_Shape sh = shape;
 
   const double linDefl = AutoSelectLinearDeflection(shape);
@@ -280,6 +282,23 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
   }
 
   std::cout << "Mesh was generated." << std::endl;
+
+  for ( int fidx = 1; fidx <= geom.fmap.Extent(); ++fidx )
+  {
+    ngcore::Array<netgen::SurfaceElementIndex> elemIds;
+    ngMesh.GetSurfaceElementsOfFace(fidx, elemIds);
+
+    // Collect element IDs.
+    std::unordered_set<int> eids;
+    //
+    for ( const auto& elem : elemIds )
+    {
+      eids.insert(elem);
+    }
+
+    faceElems.insert({fidx, eids});
+  }
+
   ngMesh.DeleteMesh();
 
   nglib::Ng_Exit();

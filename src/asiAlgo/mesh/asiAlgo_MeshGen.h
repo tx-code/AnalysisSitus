@@ -40,6 +40,10 @@
 // OCCT includes
 #include <TopoDS_Shape.hxx>
 
+// Standard includes
+#include <unordered_map>
+#include <unordered_set>
+
 //-----------------------------------------------------------------------------
 
 //! Services related to mesh generation.
@@ -108,20 +112,22 @@ namespace asiAlgo_MeshGen
              ActAPI_ProgressEntry        progress);
 
   //! Generates surface mesh using NetGen grid generator (https://gitlab.com/ssv/netgen).
-  //! \param[in,out] shape    shape to tessellate.
-  //! \param[in]     minh     min element size.
-  //! \param[in]     maxh     max element size.
-  //! \param[in]     grading  grading coefficient for element size.
-  //! \param[out]    mesh     generate mesh.
-  //! \param[in,out] progress progress entry.
+  //! \param[in,out] shape     shape to tessellate.
+  //! \param[in]     minh      min element size.
+  //! \param[in]     maxh      max element size.
+  //! \param[in]     grading   grading coefficient for element size.
+  //! \param[out]    mesh      generate mesh.
+  //! \param[out]    faceElems face IDs versus mesh element IDs.
+  //! \param[in,out] progress  progress entry.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    DoNetGen(const TopoDS_Shape&         shape,
-             const double                minh,
-             const double                maxh,
-             const double                grading,
-             Handle(Poly_Triangulation)& mesh,
-             ActAPI_ProgressEntry        progress);
+    DoNetGen(const TopoDS_Shape&                               shape,
+             const double                                      minh,
+             const double                                      maxh,
+             const double                                      grading,
+             Handle(Poly_Triangulation)&                       mesh,
+             std::unordered_map<int, std::unordered_set<int>>& faceElems,
+             ActAPI_ProgressEntry                              progress);
 
 };
 

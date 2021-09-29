@@ -739,6 +739,12 @@ public:
   asiAlgo_EXPORT void
     Remove(const asiAlgo_Feature& faceIndices);
 
+  //! Collapses the graph by eliminating the passed faces while keeping
+  //! the incident arcs in the adjacency matrix.
+  //! \param[in] faceIndices indices of faces to collapse.
+  asiAlgo_EXPORT void
+    Collapse(const asiAlgo_Feature& faceIndices);
+
   //! Calculates number of the connected components.
   //! \return number of connected components in a graph.
   asiAlgo_EXPORT int

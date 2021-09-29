@@ -2026,15 +2026,44 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  t_ptr<t_mesh> mbRegion;
+
+  // Meshing parameters.
+  const double linDefl = asiAlgo_MeshGen::AutoSelectLinearDeflection(shape);
+  const double minh    = linDefl*0.05;
+  const double maxh    = linDefl*5.5;
+  const double grading = 0.8;
+
+  // Face IDs versus mesh element IDs.
+  std::unordered_map<int, std::unordered_set<int>> faceElems;
+
+  int domainId = 0;
+  //
+  interp->GetKeyValue<int>(argc, argv, "domain", domainId);
+
   // Generate mesh.
   Handle(Poly_Triangulation) occMesh;
   //
   try
   {
-    if ( !asiAlgo_MeshGen::DoNetGen( shape, occMesh, interp->GetProgress() ) )
+    if ( !asiAlgo_MeshGen::DoNetGen( shape, minh, maxh, grading, occMesh, faceElems, interp->GetProgress() ) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to generate mesh with NetGen.");
       return TCL_ERROR;
+    }
+
+    if ( domainId )
+    {
+      const auto& domainInfo = faceElems.find(domainId);
+
+      if ( domainInfo == faceElems.end() )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Could not find a mapping for the face %1." << domainId);
+        return TCL_ERROR;
+      }
+
+      t_ptr<t_mesh> mbMesh   = cascade::GetMobiusMesh(occMesh);
+      mbRegion = mbMesh->ExtractRegion(domainInfo->second);
     }
   }
   catch ( ... )
@@ -2072,6 +2101,11 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   // Update UI.
   cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
   cmdMobius::cf->ObjectBrowser->Populate();
+
+  if ( !mbRegion.IsNull() )
+  {
+    interp->GetPlotter().REDRAW_TRIANGULATION("region", cascade::GetOpenCascadeMesh(mbRegion), Color_Red, 1.);
+  }
 
   return TCL_OK;
 #else
@@ -2278,9 +2312,10 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-netgen",
     //
-    "poly-netgen\n"
+    "poly-netgen [-domain <faceId>]\n"
     "\n"
-    "\t Generates surface mesh with NetGen.",
+    "\t Generates surface mesh with NetGen. If the '-domain' key is passed,\n"
+    "\t it is expected to be followed by the face ID to extract as a subdomain.",
     //
     __FILE__, group, MOBIUS_POLY_NetGen);
 }
