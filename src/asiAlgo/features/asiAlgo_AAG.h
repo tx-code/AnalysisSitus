@@ -362,6 +362,11 @@ public:
   asiAlgo_EXPORT Handle(asiAlgo_AAG)
     Copy() const;
 
+  //! \brief Captures sub-graph being equal the original graph.
+  //! \sa PopSubgraph() method to pop the created sub-graph from the stack.
+  asiAlgo_EXPORT void
+    PushSubgraph();
+
   //! \brief Captures sub-graph.
   //!
   //! Prepares a sub-graph containing the passed faces only. This sub-graph
@@ -637,6 +642,12 @@ public:
   //! \return true/false.
   asiAlgo_EXPORT bool
     HasArc(const t_arc& arc) const;
+
+  //! Checks whether the given arc has any attributes or not.
+  //! \param[in] arc the arc to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    HasArcAttribute(const t_arc& arc) const;
 
   //! \return attributes associated with graph arcs.
   asiAlgo_EXPORT const t_arc_attributes&

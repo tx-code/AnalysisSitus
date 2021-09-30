@@ -160,13 +160,21 @@ vtkSmartPointer<vtkMutableUndirectedGraph>
       // Add link
       result->AddEdge(v_idx, neighbor_v_idx);
 
-      // Check angle
       asiAlgo_AAG::t_arc arc(f_idx, neighbor_f_idx);
-      Handle(asiAlgo_FeatureAttrAngle)
-        attr = Handle(asiAlgo_FeatureAttrAngle)::DownCast( aag->GetArcAttribute(arc) );
-      //
-      if ( !attr.IsNull() )
-        angleArr->InsertNextValue( attr->GetAngleType() );
+
+      if ( aag->HasArcAttribute(arc) )
+      {
+        // Check angle
+        Handle(asiAlgo_FeatureAttrAngle)
+          attr = Handle(asiAlgo_FeatureAttrAngle)::DownCast( aag->GetArcAttribute(arc) );
+        //
+        if ( !attr.IsNull() )
+          angleArr->InsertNextValue( attr->GetAngleType() );
+      }
+      else
+      {
+        angleArr->InsertNextValue(FeatureAngleType_Undefined);
+      }
     }
   }
 

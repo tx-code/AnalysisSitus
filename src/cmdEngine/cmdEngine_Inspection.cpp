@@ -2918,8 +2918,9 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
     return TCL_OK;
   }
 
-  // Get option.
-  const bool excludeSelected = interp->HasKeyword(argc, argv, "nosel");
+  // Get option [-remove-sel] [-collapse-sel].
+  const bool removeSelected   = interp->HasKeyword(argc, argv, "remove-sel");
+  const bool collapseSelected = interp->HasKeyword(argc, argv, "collapse-sel");
 
   // Get part.
   Handle(asiData_PartNode) part_n;
@@ -2938,9 +2939,15 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
   TColStd_PackedMapOfInteger selected;
   asiEngine_Part( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
 
-  if ( excludeSelected )
+  if ( removeSelected )
   {
     aag->PushSubgraphX(selected);
+  }
+
+  if ( collapseSelected )
+  {
+    aag->PushSubgraph(); // Make a copy of the adjacency matrix.
+    aag->Collapse(selected);
   }
 
   // Show graph.
@@ -2950,7 +2957,7 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
   //
   pGraphView->RenderAdjacency(aag);
 
-  if ( excludeSelected )
+  if ( removeSelected || collapseSelected )
   {
     aag->PopSubgraph();
   }
@@ -4145,9 +4152,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("show-aag",
     //
-    "show-aag [-nosel]\n"
-    "\t Visualizes AAG for the active part. If the '-nosel' flag is passed,\n"
-    "\t the selected faces will be excluded from the AAG.",
+    "show-aag [-remove-sel] [-collapse-sel]\n"
+    "\t Visualizes AAG for the active part. If the '-remove-sel' flag is passed,\n"
+    "\t the selected faces will be excluded from the AAG with all their incident\n"
+    "\t arcs. If the '-collapse-sel' flag is passed, the AAG nodes of the selected\n"
+    "\t faces will be collapsed while all neighbor relations will be transmitted\n"
+    "\t to the surrounding nodes of the collapsed face.",
     //
     __FILE__, group, ENGINE_ShowAAG);
 
