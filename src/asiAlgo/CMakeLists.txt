@@ -701,6 +701,7 @@ if (USE_MOBIUS)
 endif()
 
 if (USE_NETGEN)
+  include_directories(SYSTEM ${3RDPARTY_zlib_INCLUDE_DIR})
   include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR})
   include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/core)
   include_directories(SYSTEM ${3RDPARTY_netgen_INCLUDE_DIR}/csg)
