@@ -45,6 +45,32 @@
 #include <TopoDS.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
+namespace
+{
+  //! Returns the dihedral angle type for the given arc.
+  //! \param[in] fx   the 1-based ID of a face being collapsed.
+  //! \param[in] nid  the 1-based ID of the neighbor face.
+  //! \param[in] pAAG the AAG instance.
+  //! \return dihedral angle type.
+  asiAlgo_FeatureAngleType GetAngleType(const int    fx,
+                                        const int    nid,
+                                        asiAlgo_AAG* pAAG)
+  {
+    // Get dihedral angle for the 1-st neighbor.
+    asiAlgo_AAG::t_arc          fxn(fx, nid);
+    Handle(asiAlgo_FeatureAttr) fxnAttr;
+    asiAlgo_FeatureAngleType    fxnAngle = FeatureAngleType_Undefined;
+    //
+    if ( pAAG->HasArcAttribute(fxn, fxnAttr) )
+    {
+      Handle(asiAlgo_FeatureAttrAngle) attrAngle = Handle(asiAlgo_FeatureAttrAngle)::DownCast(fxnAttr);
+      fxnAngle = attrAngle->GetAngleType();
+    }
+
+    return fxnAngle;
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 asiAlgo_AAG::asiAlgo_AAG(const TopoDS_Shape&               masterCAD,
@@ -623,6 +649,18 @@ bool asiAlgo_AAG::HasArcAttribute(const t_arc& arc) const
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_AAG::HasArcAttribute(const t_arc&                 arc,
+                                  Handle(asiAlgo_FeatureAttr)& attr) const
+{
+  if ( !this->HasArcAttribute(arc) )
+    return false;
+
+  attr = this->GetArcAttribute(arc);
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 const asiAlgo_AAG::t_arc_attributes&
   asiAlgo_AAG::GetArcAttributes() const
 {
@@ -958,6 +996,16 @@ void asiAlgo_AAG::Remove(const asiAlgo_Feature& faceIndices)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AAG::Collapse(const int fid)
+{
+  asiAlgo_Feature fids;
+  fids.Add(fid);
+
+  this->Collapse(fids);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
 {
   asiAlgo_AdjacencyMx::t_mx& mx = m_neighborsStack.top().mx;
@@ -1007,17 +1055,22 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
    *                     \
    *                      o f4
    */
-  typedef NCollection_DataMap<int, NCollection_Map<t_arc, t_arc>> t_collapseMap;
+  typedef NCollection_DataMap<t_arc, asiAlgo_FeatureAngleType, t_arc> t_arcAngle;
+  typedef NCollection_DataMap<int, t_arcAngle>                        t_faceArcs;
   //
-  t_collapseMap fxIncidentArcs;
+  t_faceArcs fxIncidentArcs;
   //
   for ( asiAlgo_Feature::Iterator fit(faceIndices); fit.More(); fit.Next() )
   {
-    const int              fx   = fit.Key();
+    const int fx = fit.Key();
+    //
+    if ( !mx.IsBound(fx) )
+      continue;
+
     const asiAlgo_Feature& nids = mx.Find(fx);
 
     // Add all links.
-    NCollection_Map<t_arc, t_arc> incidentArcs;
+    t_arcAngle incidentArcs;
     for ( asiAlgo_Feature::Iterator nit1(nids); nit1.More(); nit1.Next() )
     {
       const int nid1 = nit1.Key();
@@ -1025,6 +1078,9 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
       // Skip other faces requested for collapse.
       if ( faceIndices.Contains(nid1) )
         continue;
+
+      // Get dihedral angle for the 1-st neighbor.
+      asiAlgo_FeatureAngleType fxn1Angle = ::GetAngleType(fx, nid1, this);
 
       for ( asiAlgo_Feature::Iterator nit2(nids); nit2.More(); nit2.Next() )
       {
@@ -1034,10 +1090,29 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
           continue;
 
         // Skip other faces requested for collapse.
-      if ( faceIndices.Contains(nid2) )
-        continue;
+        if ( faceIndices.Contains(nid2) )
+          continue;
 
-        incidentArcs.Add( t_arc(nid1, nid2) );
+        // Get dihedral angle for the 2-nd neighbor.
+        asiAlgo_FeatureAngleType fxn2Angle = ::GetAngleType(fx, nid2, this);
+
+        // Check for common angle.
+        asiAlgo_FeatureAngleType cmnAngle = FeatureAngleType_Undefined;
+        //
+        if ( asiAlgo_FeatureAngle::IsConcave(fxn1Angle) && asiAlgo_FeatureAngle::IsConcave(fxn2Angle) )
+        {
+          cmnAngle = FeatureAngleType_Concave;
+        }
+        else if ( asiAlgo_FeatureAngle::IsConvex(fxn1Angle) && asiAlgo_FeatureAngle::IsConvex(fxn2Angle) )
+        {
+          cmnAngle = FeatureAngleType_Convex;
+        }
+        else if ( asiAlgo_FeatureAngle::IsSmooth(fxn1Angle) && asiAlgo_FeatureAngle::IsSmooth(fxn2Angle) )
+        {
+          cmnAngle = FeatureAngleType_Smooth;
+        }
+
+        incidentArcs.Bind( t_arc(nid1, nid2), cmnAngle );
       }
     }
 
@@ -1066,13 +1141,14 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
   }
 
   /* Add incidence relations to restore. */
-  for ( t_collapseMap::Iterator it(fxIncidentArcs); it.More(); it.Next() )
+  for ( t_faceArcs::Iterator it(fxIncidentArcs); it.More(); it.Next() )
   {
-    const NCollection_Map<t_arc, t_arc>& arcs = it.Value();
+    const t_arcAngle& arcs = it.Value();
 
-    for ( NCollection_Map<t_arc, t_arc>::Iterator ait(arcs); ait.More(); ait.Next() )
+    for ( t_arcAngle::Iterator ait(arcs); ait.More(); ait.Next() )
     {
-      const t_arc& arc = ait.Key();
+      const t_arc&                   arc     = ait.Key();
+      const asiAlgo_FeatureAngleType angType = ait.Value();
 
       // Add F2 to F1 incidence list.
       {
@@ -1086,6 +1162,17 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
         asiAlgo_Feature* mapPtr = mx.ChangeSeek(arc.F2);
         if ( mapPtr != nullptr )
           mapPtr->Add(arc.F1);
+      }
+
+      // Create attribute.
+      if ( !m_arcAttributes.IsBound(arc) )
+      {
+        Handle(asiAlgo_FeatureAttr)
+          attrAngle = new asiAlgo_FeatureAttrAngle(angType, 0.);
+        //
+        attrAngle->setAAG(this);
+        //
+        m_arcAttributes.Bind(arc, attrAngle);
       }
     }
   }

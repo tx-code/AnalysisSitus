@@ -649,6 +649,15 @@ public:
   asiAlgo_EXPORT bool
     HasArcAttribute(const t_arc& arc) const;
 
+  //! Checks whether the given arc has any attributes or not. If yes, an
+  //! arc attribute is returned.
+  //! \param[in]  arc  the arc to check.
+  //! \param[out] attr the returned attribute.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    HasArcAttribute(const t_arc&                 arc,
+                    Handle(asiAlgo_FeatureAttr)& attr) const;
+
   //! \return attributes associated with graph arcs.
   asiAlgo_EXPORT const t_arc_attributes&
     GetArcAttributes() const;
@@ -750,9 +759,27 @@ public:
   asiAlgo_EXPORT void
     Remove(const asiAlgo_Feature& faceIndices);
 
+  //! Collapses the graph by eliminating the passed face ID while keeping
+  //! the incident arcs in the adjacency matrix. The dihedral angle types
+  //! will be propagated for the newly inserted transition links in the
+  //! cases when dihedral angles are equal.
+  //!
+  //! CAUTION: the newly inserted dihedral angle attributes are not
+  //!          automatically cleaned up from the graph in the
+  //!          calls like `PopSubgraph()`, so make sure to ignore them.
+  //! \param[in] fid the face index to collapse.
+  asiAlgo_EXPORT void
+    Collapse(const int fid);
+
   //! Collapses the graph by eliminating the passed faces while keeping
-  //! the incident arcs in the adjacency matrix.
-  //! \param[in] faceIndices indices of faces to collapse.
+  //! the incident arcs in the adjacency matrix. The dihedral angle types
+  //! will be propagated for the newly inserted transition links in the
+  //! cases when dihedral angles are equal.
+  //!
+  //! CAUTION: the newly inserted dihedral angle attributes are not
+  //!          automatically cleaned up from the graph in the
+  //!          calls like `PopSubgraph()`, so make sure to ignore them.
+  //! \param[in] faceIndices the indices of faces to collapse.
   asiAlgo_EXPORT void
     Collapse(const asiAlgo_Feature& faceIndices);
 
