@@ -160,7 +160,7 @@ Standard_Boolean
   {
     readerStatus = anApp->Open(theFilename, aDoc);
   }
-  catch ( Standard_Failure exc )
+  catch ( const Standard_Failure& exc )
   {
     std::cout << "OCCT exception:"         << std::endl;
     std::cout << exc.DynamicType()->Name() << std::endl;
@@ -274,7 +274,7 @@ Standard_Boolean
   {
     writerStatus = anApp->SaveAs(m_doc, theFilename);
   }
-  catch ( Standard_Failure exc )
+  catch ( const Standard_Failure& exc )
   {
     std::cout << "OCCT exception:"         << std::endl;
     std::cout << exc.DynamicType()->Name() << std::endl;
