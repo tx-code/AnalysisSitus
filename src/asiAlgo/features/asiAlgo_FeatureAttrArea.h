@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 02 March 2016
+// Created on: 01 October 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2021, Julia Slyadneva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,66 +28,70 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_SuppressFaces_h
-#define asiAlgo_SuppressFaces_h
+#pragma once
 
-// asiAlgo includes
-#include <asiAlgo.h>
-
-// OCCT includes
-#include <BRepTools_ReShape.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
-#include <TopTools_ListOfShape.hxx>
+// Feature includes
+#include <asiAlgo_FeatureAttrAdjacency.h>
+#include <asiAlgo_FeatureAngleType.h>
 
 //-----------------------------------------------------------------------------
 
-//! Utility to delete faces.
-class asiAlgo_SuppressFaces
+//! Attribute storing information about feature area.
+class asiAlgo_FeatureAttrArea : public asiAlgo_FeatureAttr
 {
 public:
 
-  asiAlgo_EXPORT
-    asiAlgo_SuppressFaces(const TopoDS_Shape& masterCAD);
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrArea, asiAlgo_FeatureAttr)
 
 public:
 
-  asiAlgo_EXPORT virtual bool
-    Perform(const TColStd_PackedMapOfInteger& faceIndices,
-            const bool                        facesOnly);
+  //! Creates feature area attribute.
+  asiAlgo_FeatureAttrArea()
+  //
+  : asiAlgo_FeatureAttr(),
+    m_fArea (0.)
+  {}
 
-  asiAlgo_EXPORT virtual bool
-    Perform(const TopTools_ListOfShape& faces,
-            const bool                  facesOnly);
-
-  asiAlgo_EXPORT virtual bool
-    Perform(const TopTools_IndexedMapOfShape& faces,
-            const bool                        facesOnly);
+  //! \param[in] area  angle in radians.
+  asiAlgo_FeatureAttrArea(const double area)
+  //
+  : asiAlgo_FeatureAttr(),
+    m_fArea (area)
+  {}
 
 public:
 
-  //! \return result shape.
-  const TopoDS_Shape& GetResult() const
+  //! \return static GUID associated with this type of attribute.
+  static const Standard_GUID& GUID()
   {
-    return m_result;
+    static Standard_GUID guid("AB797114-E456-476F-B897-D1D9B5CEEB97");
+    return guid;
   }
 
-  //! \return instance of Re-Shape utility used for topological reduction.
-  const Handle(BRepTools_ReShape)& GetReShape() const
+  //! \return GUID associated with this type of attribute.
+  virtual const Standard_GUID& GetGUID() const
   {
-    return m_reShape;
+    return GUID();
   }
 
-private:
+  //! \return human-readable name of the attribute.
+  virtual const char* GetName() const override
+  {
+    return "Area";
+  }
 
-  void suppressFace(const TopoDS_Shape& face,
-                    const bool          facesOnly);
+public:
+
+  //! \return area value.
+  double GetArea() const { return m_fArea; }
+
+  //! Sets the area value.
+  void SetArea(const double area) { m_fArea = area; }
 
 protected:
 
-  TopoDS_Shape              m_master;  //!< Master model.
-  TopoDS_Shape              m_result;  //!< Result.
-  Handle(BRepTools_ReShape) m_reShape; //!< Re-Shape tool.
+  double    m_fArea; //!< Area.
 
 };
 
-#endif

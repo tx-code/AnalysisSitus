@@ -91,32 +91,53 @@ bool asiAlgo_SuppressFaces::Perform(const TopTools_ListOfShape& faces,
   // Remove requested faces
   for ( TopTools_ListIteratorOfListOfShape fit(faces); fit.More(); fit.Next() )
   {
-    const TopoDS_Shape& face = fit.Value();
-
-    m_reShape->Remove(face);
-
-    if ( !facesOnly )
-    {
-      // Get rid of wires
-      for ( TopExp_Explorer exp(face, TopAbs_WIRE); exp.More(); exp.Next() )
-      {
-        m_reShape->Remove( exp.Current() );
-      }
-
-      // Get rid of edges
-      for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
-      {
-        m_reShape->Remove( exp.Current() );
-      }
-
-      // Get rid of vertices
-      for ( TopExp_Explorer exp(face, TopAbs_VERTEX); exp.More(); exp.Next() )
-      {
-        m_reShape->Remove( exp.Current() );
-      }
-    }
+    //const TopoDS_Shape& face = fit.Value();
+    suppressFace(fit.Value(), facesOnly);
   }
   m_result = m_reShape->Apply(m_master);
 
   return true; // Success
+}
+
+//-----------------------------------------------------------------------------
+bool asiAlgo_SuppressFaces::Perform(const TopTools_IndexedMapOfShape& faces,
+                                    const bool                        facesOnly)
+{
+  TopTools_IndexedMapOfShape::Iterator it(faces);
+  for (; it.More(); it.Next())
+  {
+    suppressFace(it.Value(), facesOnly);
+  }
+
+  m_result = m_reShape->Apply(m_master);
+
+  return true; // Success
+}
+
+//-----------------------------------------------------------------------------
+void asiAlgo_SuppressFaces::suppressFace(const TopoDS_Shape& face,
+                                         const bool          facesOnly)
+{
+  m_reShape->Remove(face);
+
+  if (!facesOnly)
+  {
+    // Get rid of wires
+    for (TopExp_Explorer exp(face, TopAbs_WIRE); exp.More(); exp.Next())
+    {
+      m_reShape->Remove(exp.Current());
+    }
+
+    // Get rid of edges
+    for (TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next())
+    {
+      m_reShape->Remove(exp.Current());
+    }
+
+    // Get rid of vertices
+    for (TopExp_Explorer exp(face, TopAbs_VERTEX); exp.More(); exp.Next())
+    {
+      m_reShape->Remove(exp.Current());
+    }
+  }
 }
