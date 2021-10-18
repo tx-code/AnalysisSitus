@@ -1776,6 +1776,7 @@ int ENGINE_CheckLength(const Handle(asiTcl_Interp)& interp,
   }
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Length: %1." << len);
+  *interp << len;
 
   return TCL_OK;
 }
@@ -1824,6 +1825,63 @@ int ENGINE_CheckArea(const Handle(asiTcl_Interp)& interp,
   }
 
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Area: %1." << area);
+  *interp << area;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_CheckVolume(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get part.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape partShape = partNode->GetShape();
+
+  // Get all solids of the part.
+  TopTools_IndexedMapOfShape allSolids;
+  TopExp::MapShapes(partShape, TopAbs_SOLID, allSolids);
+
+  if ( allSolids.Extent() > 1 )
+  {
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "The active part contains more than one solid. "
+                                                            "Try 'explode' command.");
+  }
+  else if ( !allSolids.Extent() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The active part does not contain any solid.");
+    return TCL_ERROR;
+  }
+
+  // Get total volume.
+  double volume = 0.0;
+  for ( int k = 1; k <= allSolids.Extent(); ++k )
+  {
+    TopoDS_Solid solid = TopoDS::Solid( allSolids(k) );
+
+    // Calculate global properties.
+    GProp_GProps props;
+    BRepGProp::VolumeProperties(solid, props);
+    volume += props.Mass();
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Volume: %1." << volume);
+  *interp << volume;
 
   return TCL_OK;
 }
@@ -3995,6 +4053,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks area of the selected faces.",
     //
     __FILE__, group, ENGINE_CheckArea);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-volume",
+    //
+    "check-volume\n"
+    "\t Checks volume of the active part.",
+    //
+    __FILE__, group, ENGINE_CheckVolume);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-aabb",
