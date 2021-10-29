@@ -635,7 +635,7 @@ bool asiAlgo_SuppressBlendChain::isValidFace(const TopoDS_Face& face) const
 
   // This calibrated value is used to compensate weird tolerances which
   // happen to be insufficient to cover tiny contour gaps.
-  const double tol = checker.MaxTolerance(face)*5.0;
+  const double tol = checker.GetMaxTolerance(face)*5.0;
 
   // Perform basic check.
   bool ok = checker.HasAllClosedWires(face, tol) &&

@@ -421,6 +421,90 @@ int ENGINE_GetSummary(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_PrintSummaryGeom(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node and shape.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape partShape = partNode->GetShape();
+
+  asiAlgo_GeomSummary summary;
+  //
+  asiAlgo_Utils::GeomSummary(partShape,
+                             summary);
+
+  summary.Print( "Summary of part's geometric contents", interp->GetProgress() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_GetSummaryGeom(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  if ( argc != 19 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node and shape.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape partShape = partNode->GetShape();
+
+  asiAlgo_GeomSummary summary;
+  //
+  asiAlgo_Utils::GeomSummary(partShape,
+                             summary);
+
+  // Set Tcl variables.
+  int varIdx = 0;
+  //
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfBezier);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfSpl);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfConical);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfCyl);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfOffset);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfSph);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfLinExtr);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfOfRevol);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfToroidal);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbSurfPlane);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveBezier);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveSpline);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveCircle);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveEllipse);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveHyperbola);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveLine);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveOffset);
+  interp->SetVarFundamental<int>(argv[++varIdx], summary.nbCurveParabola);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_FaceAddr(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
@@ -909,15 +993,15 @@ int ENGINE_EvalCurve(const Handle(asiTcl_Interp)& interp,
   // Find Curve Node by name.
   Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[1]);
   //
-  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+  Handle(asiData_IVCurveNode)
+    curveNode = Handle(asiData_IVCurveNode)::DownCast(node);
+  //
+  if ( curveNode.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a curve."
                                                         << argv[1]);
     return TCL_OK;
   }
-  //
-  Handle(asiData_IVCurveNode)
-    curveNode = Handle(asiData_IVCurveNode)::DownCast(node);
 
   // Get curve.
   double f, l;
@@ -2017,7 +2101,7 @@ int ENGINE_CheckContours(const Handle(asiTcl_Interp)& interp,
     if ( globTolerance )
       locTolerance = globTolerance;
     else
-      locTolerance = checker.MaxTolerance(face)*5.0;
+      locTolerance = checker.GetMaxTolerance(face)*5.0;
 
     // Check closeness.
     if ( !checker.HasAllClosedWires(face, locTolerance) )
@@ -2052,7 +2136,7 @@ int ENGINE_GetTolerance(const Handle(asiTcl_Interp)& interp,
   Handle(asiData_PartNode) part_n = cmdEngine::model->GetPartNode();
 
   // Return max tolerance to the interpreter.
-  *interp << asiAlgo_CheckValidity().MaxTolerance( part_n->GetShape() );
+  *interp << asiAlgo_CheckValidity::MaxTolerance( part_n->GetShape() );
 
   return TCL_OK;
 }
@@ -3891,6 +3975,32 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Returns summary (number of sub-shapes) to the specified output variables.",
     //
     __FILE__, group, ENGINE_GetSummary);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("print-summary-geom",
+    //
+    "print-summary-geom\n"
+    "\t Prints the summary of geometric entities for the active part.",
+    //
+    __FILE__, group, ENGINE_PrintSummaryGeom);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-summary-geom",
+    //
+    "get-summary-geom <nbSurfBezier>   <nbSurfSpl>        <nbSurfConical>  \n"
+    "                 <nbSurfCyl>      <nbSurfOffset>     <nbSurfSph>      \n"
+    "                 <nbSurfLinExtr>  <nbSurfOfRevol>    <nbSurfToroidal> \n"
+    "                 <nbSurfPlane>                                        \n"
+    "                 <nbCurveBezier>  <nbCurveSpline>    <nbCurveCircle>  \n"
+    "                 <nbCurveEllipse> <nbCurveHyperbola> <nbCurveLine>    \n"
+    "                 <nbCurveOffset>  <nbCurveParabola>                   \n"
+    //
+    "\t Returns the summary of geometric entities to the specified output variables.\n"
+    "\t The rectangular trimmed surfaces are not accounted directly and rather inspected\n"
+    "\t deeper for their basic surfaces. The same applies to the trimmed curves. This\n"
+    "\t function helps to identify how canonical the input geometry is.",
+    //
+    __FILE__, group, ENGINE_GetSummaryGeom);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("face-addr",

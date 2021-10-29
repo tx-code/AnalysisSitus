@@ -235,6 +235,9 @@ namespace
         progress.SendLogMessage(LogNotice(Normal) << "Intersection p[1] = %1." << p[1]);
         plotter.DRAW_POINT( gp_Pnt2d( P.X(), P.Y() ), Color_Red, "intersection" );
         numInters++;
+
+        plotter.DRAW_LINK( cascade::GetOpenCascadePnt(edge0Vertices[0]), cascade::GetOpenCascadePnt(edge0Vertices[1]), Color_Red, "interLink" );
+        plotter.DRAW_LINK( cascade::GetOpenCascadePnt(edge1Vertices[0]), cascade::GetOpenCascadePnt(edge1Vertices[1]), Color_Red, "interLink" );
       }
     }
 

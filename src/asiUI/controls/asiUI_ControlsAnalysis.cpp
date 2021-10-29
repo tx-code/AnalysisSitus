@@ -276,7 +276,7 @@ void asiUI_ControlsAnalysis::onCheckToler()
 
   // Output max tolerance.
   m_notifier.SendLogMessage( LogInfo(Normal) << "Max tolerance: %1."
-                                             << asiAlgo_CheckValidity().MaxTolerance(shape2Check) );
+                                             << asiAlgo_CheckValidity::MaxTolerance(shape2Check) );
 
   // Update UI.
   m_browser->Populate();

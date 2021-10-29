@@ -3122,13 +3122,10 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_AddInternalVertex(const Handle(asiTcl_Interp)& interp,
-                             int                          argc,
-                             const char**                 argv)
+int ENGINE_ConvertToCanonical(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
 {
-  (void) argc;
-  (void) argv;
-
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -3140,56 +3137,23 @@ int ENGINE_AddInternalVertex(const Handle(asiTcl_Interp)& interp,
   //
   TopoDS_Shape shape = partNode->GetShape();
 
-  TopoDS_Face face;
+  // Use the default tolerance.
+  const double tol = asiAlgo_CheckValidity::MaxTolerance(shape);
 
-  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
-  {
-    // Access selected faces (if any).
-    TColStd_PackedMapOfInteger selected;
-    asiEngine_Part( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
-
-    if ( !selected.IsEmpty() )
-    {
-      for ( TColStd_PackedMapOfInteger::Iterator fit(selected); fit.More(); fit.Next() )
-      {
-        face = partNode->GetAAG()->GetFace( fit.Key() );
-
-        face.TShape()->Free(true);
-
-        double uMin, uMax, vMin, vMax;
-        BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
-
-        {
-          const double u = 0.75*(uMin + uMax);
-          const double v = 0.35*(vMin + vMax);
-          BRepAdaptor_Surface bas(face);
-          gp_Pnt P = bas.Value(u, v);
-          TopoDS_Vertex V = BRepBuilderAPI_MakeVertex(P);
-          V.Orientation(TopAbs_EXTERNAL);
-          BRep_Builder().UpdateVertex( V, u, v, face, Precision::Confusion() );
-          BRep_Builder().Add(face, V);
-        }
-
-        {
-          const double u = 0.15*(uMin + uMax);
-          const double v = 0.65*(vMin + vMax);
-          BRepAdaptor_Surface bas(face);
-          gp_Pnt P = bas.Value(u, v);
-          TopoDS_Vertex V = BRepBuilderAPI_MakeVertex(P);
-          V.Orientation(TopAbs_EXTERNAL);
-          BRep_Builder().UpdateVertex( V, u, v, face, Precision::Confusion() );
-          BRep_Builder().Add(face, V);
-        }
-
-        interp->GetPlotter().REDRAW_SHAPE("face", face);
-      }
-    }
-  }
-
-  // Modify Data Model.
+  // Modify shape.
   cmdEngine::model->OpenCommand();
   {
-    asiEngine_Part(cmdEngine::model).Update(face);
+    asiAlgo_ConvertCanonicalSummary summary;
+    //
+    if ( !asiAlgo_Utils::ConvertCanonical( shape, tol, true, summary, interp->GetProgress() ) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Face maximization failed.");
+      //
+      cmdEngine::model->AbortCommand();
+      return TCL_ERROR;
+    }
+    //
+    asiEngine_Part(cmdEngine::model).Update(shape);
   }
   cmdEngine::model->CommitCommand();
 
@@ -3716,12 +3680,12 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_ConvertToBRep);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("add-internal-vertex",
+  interp->AddCommand("convert-to-canonical",
     //
-    "add-internal-vertex\n"
-    "\t Test command.",
+    "convert-to-canonical\n"
+    "\t Attempts to convert a shape to a canonical form.",
     //
-    __FILE__, group, ENGINE_AddInternalVertex);
+    __FILE__, group, ENGINE_ConvertToCanonical);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("rebuild-bounds",

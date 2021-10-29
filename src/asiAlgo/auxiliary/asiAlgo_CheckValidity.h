@@ -50,6 +50,14 @@ class asiAlgo_CheckValidity : public ActAPI_IAlgorithm
 {
 public:
 
+  //! Returns maximum tolerance value bound to the passed shape.
+  //! \param[in] shape shape to check.
+  //! \return maximum tolerance value.
+  asiAlgo_EXPORT static double
+    MaxTolerance(const TopoDS_Shape& shape);
+
+public:
+
   //! Ctor accepting diagnostic tools.
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
@@ -113,7 +121,7 @@ public:
   //! \param[in] shape shape to check.
   //! \return maximum tolerance value.
   asiAlgo_EXPORT double
-    MaxTolerance(const TopoDS_Shape& shape);
+    GetMaxTolerance(const TopoDS_Shape& shape) const;
 
   //! Checks for the given edge if it has distinct orientations of its
   //! vertices. In a valid edge, there should be one vertex with FORWARD

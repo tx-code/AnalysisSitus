@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 29 October 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,29 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+#ifndef asiAlgo_JsonDict_HeaderFile
+#define asiAlgo_JsonDict_HeaderFile
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
-
-// asiTestEngine includes
-#include <asiTestEngine.h>
-
-//! IDs for Test Cases.
-enum test_CaseID
-{
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
-  CaseID_ConvertCanonical,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_DataDictionary,
-  CaseID_Utils,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
-  CaseID_RecognizeCavities,
-  CaseID_RecognizeConvexHull,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_XdeDoc,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_LAST
-
-};
+// JSON properties
+#define asiPropName_ExtrasCanRecSummary            "canrecSummary"
+#define asiPropName_ExtrasCanRecSurfBezier         "nbSurfBezier"
+#define asiPropName_ExtrasCanRecSurfSpl            "nbSurfSpl"
+#define asiPropName_ExtrasCanRecSurfConical        "nbSurfConical"
+#define asiPropName_ExtrasCanRecSurfCyl            "nbSurfCyl"
+#define asiPropName_ExtrasCanRecSurfOffset         "nbSurfOffset"
+#define asiPropName_ExtrasCanRecSurfSph            "nbSurfSph"
+#define asiPropName_ExtrasCanRecSurfLinExtr        "nbSurfLinExtr"
+#define asiPropName_ExtrasCanRecSurfOfRevol        "nbSurfOfRevol"
+#define asiPropName_ExtrasCanRecSurfToroidal       "nbSurfToroidal"
+#define asiPropName_ExtrasCanRecSurfPlane          "nbSurfPlane"
+#define asiPropName_ExtrasCanRecCurveBezier        "nbCurveBezier"
+#define asiPropName_ExtrasCanRecCurveSpline        "nbCurveSpline"
+#define asiPropName_ExtrasCanRecCurveCircle        "nbCurveCircle"
+#define asiPropName_ExtrasCanRecCurveEllipse       "nbCurveEllipse"
+#define asiPropName_ExtrasCanRecCurveHyperbola     "nbCurveHyperbola"
+#define asiPropName_ExtrasCanRecCurveLine          "nbCurveLine"
+#define asiPropName_ExtrasCanRecCurveOffset        "nbCurveOffset"
+#define asiPropName_ExtrasCanRecCurveParabola      "nbCurveParabola"
+#define asiPropName_ExtrasCanRecIsValid            "isValidAfterConversion"
 
 #endif

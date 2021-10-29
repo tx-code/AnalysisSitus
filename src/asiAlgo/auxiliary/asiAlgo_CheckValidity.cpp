@@ -603,6 +603,16 @@ namespace CheckShapeAux
 
 //-----------------------------------------------------------------------------
 
+double asiAlgo_CheckValidity::MaxTolerance(const TopoDS_Shape& shape)
+{
+  ShapeAnalysis_ShapeTolerance TolerChecker;
+  const double maxToler = TolerChecker.Tolerance(shape, 1); // 1 means max
+
+  return maxToler;
+}
+
+//-----------------------------------------------------------------------------
+
 asiAlgo_CheckValidity::asiAlgo_CheckValidity(ActAPI_ProgressEntry progress,
                                              ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm(progress, plotter)
@@ -906,12 +916,9 @@ bool asiAlgo_CheckValidity::HasEdgesWithoutVertices(const TopoDS_Face& face)
 
 //-----------------------------------------------------------------------------
 
-double asiAlgo_CheckValidity::MaxTolerance(const TopoDS_Shape& shape)
+double asiAlgo_CheckValidity::GetMaxTolerance(const TopoDS_Shape& shape) const
 {
-  ShapeAnalysis_ShapeTolerance TolerChecker;
-  const double maxToler = TolerChecker.Tolerance(shape, 1); // 1 means max
-
-  return maxToler;
+  return MaxTolerance(shape);
 }
 
 //-----------------------------------------------------------------------------

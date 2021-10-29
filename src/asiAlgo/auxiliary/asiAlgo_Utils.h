@@ -35,6 +35,7 @@
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_BorderTrihedron.h>
 #include <asiAlgo_Collections.h>
+#include <asiAlgo_ConvertCanonicalSummary.h>
 #include <asiAlgo_FeatureAngleType.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_Naming.h>
@@ -267,6 +268,13 @@ namespace asiAlgo_Utils
       ReadFeatures(void*                         pJsonBlock,
                    std::vector<asiAlgo_Feature>& features);
 
+    //! Reads the passed JSON block as a pair of integers.
+    //! \param[in]  jsonBlock the JSON block to interpret.
+    //! \param[out] pair      the pair to compose.
+    asiAlgo_EXPORT void
+      ReadPair(void*                                 pJsonBlock,
+               std::optional< std::pair<int, int> >& pair);
+
     //! Dumps the passed feature as a JSON array.
     //! \param[in] map the map to dump.
     //! \return a JSON array containing the elements of the map.
@@ -278,6 +286,12 @@ namespace asiAlgo_Utils
     //! \return `[X(), Y(), Z()]`.
     asiAlgo_EXPORT std::string
       FromDirAsTuple(const gp_Dir& dir);
+
+    //! Dumps the passed pair as a JSON array.
+    //! \param[in] pair the pair to dump.
+    //! \return a JSON array containing the elements of the pair.
+    asiAlgo_EXPORT std::string
+      FromPair(const std::optional< std::pair<int, int> >& pair);
   }
 
   //! Returns geometry of a face as a string label.
@@ -364,6 +378,56 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT std::string
     ShapeAddr(const TopoDS_Shape& shape);
 
+  //! Checks edge type.
+  //! \param[in]  edge      edge to check.
+  //! \param[out] basecurve base curve.
+  //! \return true/false.
+  template<typename TCurve>
+  bool IsTypeOf(const TopoDS_Edge& edge,
+                Handle(TCurve)&    basecurve)
+  {
+    if ( edge.IsNull() )
+      return false;
+
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+    //
+    if ( curve.IsNull() )
+      return false;
+
+    // Check host curve directly.
+    if ( curve->IsInstance( STANDARD_TYPE(TCurve) ) )
+    {
+      basecurve = Handle(TCurve)::DownCast(curve);
+      return true;
+    }
+
+    // Check trimmed curve which may encapsulate the curve type we're looking for.
+    if ( curve->IsInstance( STANDARD_TYPE(Geom_TrimmedCurve) ) )
+    {
+      Handle(Geom_TrimmedCurve)
+        TC = Handle(Geom_TrimmedCurve)::DownCast(curve);
+
+      // Check basis curve.
+      basecurve = Handle(TCurve)::DownCast( TC->BasisCurve() );
+      //
+      if ( !basecurve.IsNull() )
+        return true;
+    }
+
+    return false;
+  }
+
+  //! Checks edge type.
+  //! \param[in] edge edge to check.
+  //! \return true/false.
+  template<typename TCurve>
+  bool IsTypeOf(const TopoDS_Edge& edge)
+  {
+    Handle(TCurve) basecurve;
+    return IsTypeOf<TCurve>(edge, basecurve);
+  }
+
   //! Checks face type.
   //! \param[in]  face     face to check.
   //! \param[out] basesurf base surface.
@@ -384,7 +448,7 @@ namespace asiAlgo_Utils
       return true;
     }
 
-    // Check trimmed surface which may encapsulate the surface we're looking for.
+    // Check trimmed surface which may encapsulate the surface type we're looking for.
     if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
     {
       Handle(Geom_RectangularTrimmedSurface)
@@ -808,6 +872,21 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     MaximizeFaces(TopoDS_Shape&              shape,
                   Handle(BRepTools_History)& history);
+
+  //! Converts the passed shape to a canonical form.
+  //! \param[in,out] shape         the shape to convert.
+  //! \param[in]     tol           the tolerance to use.
+  //! \param[in]     checkValidity the Boolean flag indicating whether to check for validity
+  //!                              after the conversion is done.
+  //! \param[out]    summary       the conversion summary.
+  //! \param[in]     progress      the progress notifier.
+  //! \return true in the case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ConvertCanonical(TopoDS_Shape&                    shape,
+                     const double                     tol,
+                     const bool                       checkValidity,
+                     asiAlgo_ConvertCanonicalSummary& summary,
+                     ActAPI_ProgressEntry             progress = nullptr);
 
   //! Interpolates the given collection of points with B-curve of the
   //! desired degree.
@@ -1536,6 +1615,11 @@ namespace asiAlgo_Utils
                            const TopoDS_Edge&       edge,
                            asiAlgo_BorderTrihedron& btri,
                            ActAPI_ProgressEntry     progress = nullptr);
+
+  //! Extract geometry summary for the passed shape.
+  asiAlgo_EXPORT void
+    GeomSummary(const TopoDS_Shape&  shape,
+                asiAlgo_GeomSummary& summary);
 
 } // asiAlgo_Utils namespace.
 
