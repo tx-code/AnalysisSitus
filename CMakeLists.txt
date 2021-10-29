@@ -77,7 +77,7 @@ include (${CMAKE_SOURCE_DIR}/cmake/asitus_Rapidjson.cmake)
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_OCCT.cmake)
 
 # TBB is optional
-set (USE_THREADING ON CACHE BOOL "TBB is optional 3-rd party. Building with TBB will allow to run algorithms in multi-threaded mode.")
+set (USE_THREADING OFF CACHE BOOL "TBB is optional 3-rd party. Building with TBB will allow to run algorithms in multi-threaded mode.")
 
 # Mobius is optional
 set (USE_MOBIUS OFF CACHE BOOL "Mobius is optional 3-rd party. It gives alternative tools for CAGD.")

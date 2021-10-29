@@ -1,0 +1,118 @@
+set datadir $env(ASI_TEST_DATA)
+
+# This procedure is used to perform recognition job and this way avoid
+# code duplication in Tcl scripts that are supposed to run this procedure
+# for specific shapes.
+proc __convert-canonical {} {
+  global datadir
+  global datafile
+  global ref_nbSurfBezier
+  global ref_nbSurfSpl
+  global ref_nbSurfConical
+  global ref_nbSurfCyl
+  global ref_nbSurfOffset
+  global ref_nbSurfSph
+  global ref_nbSurfLinExtr
+  global ref_nbSurfOfRevol
+  global ref_nbSurfToroidal
+  global ref_nbSurfPlane
+  global ref_nbCurveBezier
+  global ref_nbCurveSpline
+  global ref_nbCurveCircle
+  global ref_nbCurveEllipse
+  global ref_nbCurveHyperbola
+  global ref_nbCurveLine
+  global ref_nbCurveOffset
+  global ref_nbCurveParabola
+
+  clear
+
+  puts "Loading '$datadir/$datafile'..."
+
+  # Read input geometry.
+  load-part $datadir/$datafile
+  fit
+  #
+  if { [check-validity] != 1 } {
+    error "...      error: Initial part is not valid."
+  }
+  #
+  print-summary-geom
+  #
+  set initialToler [get-tolerance]
+
+  # Perform conversion.
+  convert-to-canonical
+  #
+  if { [check-validity] != 1 } {
+    error "...      error: Final part is not valid."
+  }
+  #
+  print-summary-geom
+
+  # Verify cardinal numbers.
+  get-summary-geom nbSurfBezier nbSurfSpl nbSurfConical nbSurfCyl nbSurfOffset nbSurfSph nbSurfLinExtr nbSurfOfRevol nbSurfToroidal nbSurfPlane nbCurveBezier nbCurveSpline nbCurveCircle nbCurveEllipse nbCurveHyperbola nbCurveLine nbCurveOffset nbCurveParabola
+  #
+  if { $nbSurfBezier != $ref_nbSurfBezier } {
+    error "Unexpected number of bezier surfaces."
+  }
+  if { $nbSurfSpl != $ref_nbSurfSpl } {
+    error "Unexpected number of spline surfaces."
+  }
+  if { $nbSurfConical != $ref_nbSurfConical } {
+    error "Unexpected number of conical surfaces."
+  }
+  if { $nbSurfCyl != $ref_nbSurfCyl } {
+    error "Unexpected number of cylindrical surfaces."
+  }
+  if { $nbSurfOffset != $ref_nbSurfOffset } {
+    error "Unexpected number of offset surfaces."
+  }
+  if { $nbSurfSph != $ref_nbSurfSph } {
+    error "Unexpected number of spherical surfaces."
+  }
+  if { $nbSurfLinExtr != $ref_nbSurfLinExtr } {
+    error "Unexpected number of linear extrusion surfaces."
+  }
+  if { $nbSurfOfRevol != $ref_nbSurfOfRevol } {
+    error "Unexpected number of surfaces of revolution."
+  }
+  if { $nbSurfToroidal != $ref_nbSurfToroidal } {
+    error "Unexpected number of toroidal surfaces."
+  }
+  if { $nbSurfPlane != $ref_nbSurfPlane } {
+    error "Unexpected number of planar surfaces."
+  }
+  if { $nbCurveBezier != $ref_nbCurveBezier } {
+    error "Unexpected number of bezier curves."
+  }
+  if { $nbCurveSpline != $ref_nbCurveSpline } {
+    error "Unexpected number of spline curves."
+  }
+  if { $nbCurveCircle != $ref_nbCurveCircle } {
+    error "Unexpected number of circular curves."
+  }
+  if { $nbCurveEllipse != $ref_nbCurveEllipse } {
+    error "Unexpected number of elliptical curves."
+  }
+  if { $nbCurveHyperbola != $ref_nbCurveHyperbola } {
+    error "Unexpected number of hyperbolic curves."
+  }
+  if { $nbCurveLine != $ref_nbCurveLine } {
+    error "Unexpected number of straight linear curves."
+  }
+  if { $nbCurveOffset != $ref_nbCurveOffset } {
+    error "Unexpected number of offset curves."
+  }
+  if { $nbCurveParabola != $ref_nbCurveParabola } {
+    error "Unexpected number of parabolic curves."
+  }
+
+  # Check that tolernace has not significantly degraded.
+  set finalToler [get-tolerance]
+  puts "...      info: Final tolerance ($finalToler) vs initial tolerance ($initialToler)"
+  #
+  if { [expr $finalToler - $initialToler] > 1e-3 } {
+    error "Significant tolerance degradation."
+  }
+}

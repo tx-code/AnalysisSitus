@@ -39,6 +39,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_DivideByContinuity.h
   auxiliary/asiAlgo_FindVisibleFaces.h
   auxiliary/asiAlgo_FuncUnivariate.h
+  auxiliary/asiAlgo_GeomSummary.h
   auxiliary/asiAlgo_HitFacet.h
   auxiliary/asiAlgo_IntersectCC.h
   auxiliary/asiAlgo_IntersectCS.h
@@ -132,10 +133,20 @@ set (blends_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (canrec_H_FILES
-  canrec/asiAlgo_CanRecTools.h
+  canrec/asiAlgo_ConvertCanonical.h
+  canrec/asiAlgo_ConvertCanonicalCurve.h
+  canrec/asiAlgo_ConvertCanonicalMod.h
+  canrec/asiAlgo_ConvertCanonicalSummary.h
+  canrec/asiAlgo_ConvertCanonicalSurface.h
+  canrec/asiAlgo_RecognizeCanonical.h
 )
 set (canrec_CPP_FILES
-  canrec/asiAlgo_CanRecTools.cpp
+  canrec/asiAlgo_ConvertCanonical.cpp
+  canrec/asiAlgo_ConvertCanonicalCurve.cpp
+  canrec/asiAlgo_ConvertCanonicalMod.cpp
+  canrec/asiAlgo_ConvertCanonicalSummary.cpp
+  canrec/asiAlgo_ConvertCanonicalSurface.cpp
+  canrec/asiAlgo_RecognizeCanonical.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -301,6 +312,7 @@ set (interop_H_FILES
   interop/asiAlgo_FileFormat.h
   interop/asiAlgo_IGES.h
   interop/asiAlgo_InteropVars.h
+  interop/asiAlgo_JsonDict.h
   interop/asiAlgo_OBJ.h
   interop/asiAlgo_PLY.h
   interop/asiAlgo_ReadSTEPWithMeta.h

@@ -61,6 +61,7 @@
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
@@ -291,6 +292,49 @@ int ENGINE_OffsetTess(const Handle(asiTcl_Interp)& interp,
 
   // Update UI.
   cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(tessNode.get(), false, false);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_MakeVertex(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::vector<TopoDS_Vertex> Vs;
+
+  if ( argc == 3 )
+  {
+    // Get Points Node.
+    Handle(asiData_IVPointSetNode)
+      node = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find Points object with name %1." << argv[2]);
+      return TCL_OK;
+    }
+
+    Handle(asiAlgo_BaseCloud<double>) pts = node->GetPoints();
+
+    // Make vertex.
+    for ( int ipt = 0; ipt < pts->GetNumberOfElements(); ++ipt )
+    {
+      Vs.push_back( BRepBuilderAPI_MakeVertex( pts->GetElement(ipt) ) );
+    }
+  }
+
+  // Draw in IV.
+  for ( const auto& V : Vs )
+  {
+    interp->GetPlotter().DRAW_SHAPE(V, Color_Default, 1.0, true, argv[1]);
+  }
 
   return TCL_OK;
 }
@@ -1834,7 +1878,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("offset-shell",
     //
-    "offset-shell <offset> [-simple] [-solid] [-keep] [-toler <val>] [-faces]\n"
+    "offset-shell <offset-positive-or-negative> [-simple] [-solid] [-keep] [-toler <val>] [-faces]\n"
     "\t Offsets part (it should be a topological shell) on the given offset\n"
     "\t value. Offsetting is performed in the direction of face normals. If the\n"
     "\t option '-simple' is passed, this operation will attempt to preserve\n"
@@ -1858,6 +1902,15 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_OffsetTess);
 
   //-------------------------------------------------------------------------//
+  interp->AddCommand("make-vertex",
+    //
+    "make-vertex <result> <ptName>\n"
+    "\n"
+    "\t Creates a vertex from the point named 'ptName'.",
+    //
+    __FILE__, group, ENGINE_MakeVertex);
+
+  //-------------------------------------------------------------------------//
   interp->AddCommand("make-edge",
     //
     "make-edge <result> <curveName>\n"
@@ -1867,7 +1920,6 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t variables should exist in the scene graph of the imperative plotter.",
     //
     __FILE__, group, ENGINE_MakeEdge);
-
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-wire",

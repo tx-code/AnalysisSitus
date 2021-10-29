@@ -69,7 +69,7 @@ bool asiAlgo_FindFeatureHints::IsPuzzled()
 
   // Check parametric portrait. The following check is simple for polygonal
   // domains. For the curved ones we have to apply something different
-  const double prec              = asiAlgo_CheckValidity().MaxTolerance(m_face)*0.1;
+  const double prec              = asiAlgo_CheckValidity::MaxTolerance(m_face)*0.1;
   int          iter              = 0;
   int          nCorners          = 0;
   bool         isPolygonalDomain = true;

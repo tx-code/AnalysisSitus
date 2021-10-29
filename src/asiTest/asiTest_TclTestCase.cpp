@@ -53,10 +53,6 @@ outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilen
   // Execute script.
   const int ret = cf->Interp->Eval( asiTcl_SourceCmd(scriptFilename) );
 
-  // Check result.
-  if ( ret != TCL_OK )
-    cf->Interp->PrintLastError();
-
   return (ret == TCL_OK) ? res.success() : res.failure();
 }
 

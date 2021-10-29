@@ -31,6 +31,7 @@
 // asiTest includes
 #include <asiTest_AAG.h>
 #include <asiTest_CommonFacilities.h>
+#include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
 #include <asiTest_InvertShells.h>
 #include <asiTest_IsContourClosed.h>
@@ -62,6 +63,11 @@
 
 #define PRINT_DECOR \
   std::cout << "------------------------------------------------------------" << std::endl;
+
+#define TEST_DEBUG
+#if defined TEST_DEBUG
+  #pragma message("===== warning: TEST_DEBUG is enabled")
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -95,6 +101,7 @@ int main(int argc, char* argv[])
   std::cout << "asiTest : main()" << std::endl;
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
   //
+#if !defined TEST_DEBUG
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>        );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>         );
@@ -107,6 +114,8 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>     );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
+#endif
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>    );
 
   // Launcher of entire test suite
   asiTestEngine_Launcher Launcher;

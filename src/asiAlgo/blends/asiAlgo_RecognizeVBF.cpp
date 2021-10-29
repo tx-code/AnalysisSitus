@@ -34,7 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_AttrBlendCandidate.h>
 #include <asiAlgo_AttrBlendSupport.h>
-#include <asiAlgo_CanRecTools.h>
+#include <asiAlgo_RecognizeCanonical.h>
 #include <asiAlgo_FeatureAttrAdjacency.h>
 
 // OpenCascade includes
@@ -312,7 +312,7 @@ bool asiAlgo_RecognizeVBF::treatToroidalCase(const Handle(asiAlgo_AttrBlendCandi
       Handle(Geom2d_BSplineCurve) spl = GAC.BSpline();
 
       double dev = 0.;
-      if ( !asiAlgo_CanRecTools::IsLinear(spl->Poles(), Precision::Confusion(), dev, lin) )
+      if ( !asiAlgo_RecognizeCanonical::IsLinear(spl->Poles(), Precision::Confusion(), dev, lin) )
         continue;
     }
     else

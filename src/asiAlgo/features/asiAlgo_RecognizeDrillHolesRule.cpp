@@ -30,9 +30,9 @@
 #include <asiAlgo_RecognizeDrillHolesRule.h>
 
 // asiAlgo includes
-#include <asiAlgo_CanRecTools.h>
 #include <asiAlgo_FeatureAttrAngle.h>
 #include <asiAlgo_FindFeatureHints.h>
+#include <asiAlgo_RecognizeCanonical.h>
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
@@ -363,11 +363,13 @@ bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const TopoDS_Face& face,
       // non-freeform types, such as planes, conical surfaces, etc. For splines,
       // it will attempt to recognize a cylinder with some extra geometric checks.
       gp_Cylinder cyl;
-      if ( !asiAlgo_CanRecTools::IsCylindrical(BRep_Tool::Surface(face),
-                                               uMin, uMax, vMin, vMax,
-                                               m_fCanRecPrec, cyl,
-                                               uMinRec, uMaxRec, vMinRec, vMaxRec,
-                                               m_progress, m_plotter) )
+      if ( !asiAlgo_RecognizeCanonical::CheckIsCylindrical(BRep_Tool::Surface(face),
+                                                           uMin, uMax, vMin, vMax,
+                                                           m_fCanRecPrec,
+                                                           true, // Extract parametric ranges.
+                                                           cyl,
+                                                           uMinRec, uMaxRec, vMinRec, vMaxRec,
+                                                           m_progress, m_plotter) )
         return false;
 
       // Get the props.

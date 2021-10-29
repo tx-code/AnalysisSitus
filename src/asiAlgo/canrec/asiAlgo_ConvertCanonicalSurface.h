@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 29 October 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,45 +28,43 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_CaseIDs_HeaderFile
-#define asiTest_CaseIDs_HeaderFile
+#ifndef asiAlgo_ConvertCanonicalSurface_HeaderFile
+#define asiAlgo_ConvertCanonicalSurface_HeaderFile
 
-// Tests includes
-#include <asiTest_CommonFacilities.h>
+// asiAlgo includes
+#include <asiAlgo.h>
 
-// asiTestEngine includes
-#include <asiTestEngine.h>
+// OpenCascade includes
+#include <Geom_Surface.hxx>
 
-//! IDs for Test Cases.
-enum test_CaseID
+//-----------------------------------------------------------------------------
+
+//! Utility to recognize B-spline and Bezier surfaces as canonical surfaces,
+//! such as planes, cylinders, cones, spheres, toruses.
+class asiAlgo_ConvertCanonicalSurface
 {
-  CaseID_InvertShells = 1,
-  CaseID_KEV,
-  CaseID_RebuildEdge,
-  CaseID_RecognizeBlends,
-  CaseID_SuppressBlends,
-  CaseID_ConvertCanonical,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! Ctor accepting the surface to convert.
+  //! \param[in] S the surface to convert.
+  asiAlgo_EXPORT
+    asiAlgo_ConvertCanonicalSurface(const Handle(Geom_Surface)& S);
 
-  CaseID_DataDictionary,
-  CaseID_Utils,
+public:
 
-/* ------------------------------------------------------------------------ */
+  //! \return the max deviation of the converted surface
+  //!         from the original surface.
+  asiAlgo_EXPORT double
+    GetFitError() const;
 
-  CaseID_AAG,
-  CaseID_IsContourClosed,
-  CaseID_EdgeVexity,
-  CaseID_RecognizeCavities,
-  CaseID_RecognizeConvexHull,
+  //! Performs conversion.
+  asiAlgo_EXPORT Handle(Geom_Surface)
+    Perform(const double tol);
 
-/* ------------------------------------------------------------------------ */
+private:
 
-  CaseID_XdeDoc,
-
-/* ------------------------------------------------------------------------ */
-
-  CaseID_LAST
+  Handle(Geom_Surface) m_surf; //!< Surface to convert.
+  double               m_fGap; //!< Fitting error.
 
 };
 

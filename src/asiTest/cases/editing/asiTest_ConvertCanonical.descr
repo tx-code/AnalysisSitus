@@ -1,0 +1,15 @@
+[TITLE]
+
+  Canonical conversion
+
+[1-*:OVERVIEW]
+
+  Convert splines to canonical shapes.
+
+[1-*:DETAILS]
+
+  <b>Run to reproduce:</b>
+  <br>
+  <tt>source %%filename%%</tt>
+  <br><br>
+  Elapsed time [s]: %%time%%

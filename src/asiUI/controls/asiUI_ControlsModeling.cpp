@@ -77,7 +77,7 @@ asiUI_ControlsModeling::asiUI_ControlsModeling(const Handle(asiEngine_Model)& mo
   //
   m_widgets.Healing.pSew            = new QPushButton("Sew");
   m_widgets.Healing.pAutoRepair     = new QPushButton("Auto-repair");
-  m_widgets.Healing.pMaximizeFaces  = new QPushButton("Maximize faces");
+  m_widgets.Healing.pMaximizeFaces  = new QPushButton("Maximize faces & edges");
   m_widgets.Healing.pHealSmallEdges = new QPushButton("Merge small edges");
   m_widgets.Healing.pFillGap        = new QPushButton("Fill gap");
 

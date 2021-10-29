@@ -38,10 +38,12 @@
 
 // asiAlgo includes
 #include <asiAlgo_BuildCoonsSurf.h>
-#include <asiAlgo_CanRecTools.h>
+#include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_ClassifyPointFace.h>
+#include <asiAlgo_ConvertCanonical.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
+#include <asiAlgo_RecognizeCanonical.h>
 #include <asiAlgo_Timer.h>
 
 #if defined USE_MOBIUS
@@ -631,6 +633,30 @@ void asiAlgo_Utils::Json::ReadFeatures(void*                         pJsonBlock,
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_Utils::Json::ReadPair(void*                                 pJsonBlock,
+                                   std::optional< std::pair<int, int> >& pair)
+{
+  pair = std::make_optional< std::pair<int, int> >();
+
+  t_jsonArray*
+    jsonBlock = reinterpret_cast<t_jsonArray*>(pJsonBlock);
+
+  int idx = 0;
+
+  for ( t_jsonValue::ValueIterator vit = jsonBlock->Begin();
+        vit != jsonBlock->End(); vit++, idx++ )
+  {
+    if ( idx == 0 )
+      pair->first = vit->GetInt();
+    else if ( idx == 1 )
+      pair->second = vit->GetInt();
+    else
+      break;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 std::string
   asiAlgo_Utils::Json::FromFeature(const asiAlgo_Feature& feature)
 {
@@ -662,6 +688,21 @@ std::string asiAlgo_Utils::Json::FromDirAsTuple(const gp_Dir& dir)
   out << ", " << dir.Y();
   out << ", " << dir.Z();
   out << "]";
+
+  return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
+std::string
+  asiAlgo_Utils::Json::FromPair(const std::optional< std::pair<int, int> >& pair)
+{
+  std::stringstream out;
+  //
+  if ( pair.has_value() )
+    out << "[" << pair->first << ", " << pair->second << "]";
+  else
+    out << "null";
 
   return out.str();
 }
@@ -1216,7 +1257,7 @@ bool asiAlgo_Utils::IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
       gp_Lin2d linFit;
       double   dev = 0.;
       //
-      if ( asiAlgo_CanRecTools::IsLinear(spl->Poles(), 1.e-2, dev, linFit) )
+      if ( asiAlgo_RecognizeCanonical::IsLinear(spl->Poles(), 1.e-2, dev, linFit) )
       {
         lin = linFit;
         return true;
@@ -2037,6 +2078,48 @@ bool asiAlgo_Utils::MaximizeFaces(TopoDS_Shape&              shape,
   shape   = Unify.Shape();
   history = Unify.History();
   //
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::ConvertCanonical(TopoDS_Shape&                    shape,
+                                     const double                     tol,
+                                     const bool                       checkValidity,
+                                     asiAlgo_ConvertCanonicalSummary& summary,
+                                     ActAPI_ProgressEntry             progress)
+{
+  TIMER_NEW
+  TIMER_GO
+
+  // Convert.
+  asiAlgo_ConvertCanonical converter(progress);
+  //
+  shape   = converter.Perform(shape, tol);
+  summary = converter.GetSummary();
+  //
+  summary.Print("Conversion results", progress);
+
+  // Check validity.
+  if ( checkValidity )
+  {
+    asiAlgo_CheckValidity checker(progress);
+    //
+    if ( !checker.CheckBasic(shape) )
+    {
+      progress.SendLogMessage(LogErr(Normal) << "Basic validity checker returns false "
+                                                "after canonical conversion.");
+      summary.isValid = false;
+    }
+    else
+    {
+      summary.isValid = true;
+    }
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(progress, "CR")
+
   return true;
 }
 
@@ -4468,4 +4551,67 @@ bool asiAlgo_Utils::ComputeBorderTrihedron(const TopoDS_Face&       face,
   // Pick up two points on the curve.
   const double midParam  = (f + l)*0.5;
   return ComputeBorderTrihedron(face, edge, midParam, btri, progress);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::GeomSummary(const TopoDS_Shape&  shape,
+                                asiAlgo_GeomSummary& summary)
+{
+  summary.Reset();
+
+  TopTools_IndexedMapOfShape allFaces, allEdges;
+  //
+  TopExp::MapShapes(shape, TopAbs_FACE, allFaces);
+  TopExp::MapShapes(shape, TopAbs_EDGE, allEdges);
+
+  // Check surfaces.
+  for ( int fidx = 1; fidx <= allFaces.Extent(); ++fidx )
+  {
+    const TopoDS_Face& face = TopoDS::Face( allFaces(fidx) );
+
+    if ( IsTypeOf<Geom_BezierSurface>(face) )
+      summary.nbSurfBezier++;
+    else if ( IsTypeOf<Geom_BSplineSurface>(face) )
+      summary.nbSurfSpl++;
+    else if ( IsTypeOf<Geom_ConicalSurface>(face) )
+      summary.nbSurfConical++;
+    else if ( IsTypeOf<Geom_CylindricalSurface>(face) )
+      summary.nbSurfCyl++;
+    else if ( IsTypeOf<Geom_OffsetSurface>(face) )
+      summary.nbSurfOffset++;
+    else if ( IsTypeOf<Geom_SphericalSurface>(face) )
+      summary.nbSurfSph++;
+    else if ( IsTypeOf<Geom_SurfaceOfLinearExtrusion>(face) )
+      summary.nbSurfLinExtr++;
+    else if ( IsTypeOf<Geom_SurfaceOfRevolution>(face) )
+      summary.nbSurfOfRevol++;
+    else if ( IsTypeOf<Geom_ToroidalSurface>(face) )
+      summary.nbSurfToroidal++;
+    else if ( IsTypeOf<Geom_Plane>(face) )
+      summary.nbSurfPlane++;
+  }
+
+  // Check curves.
+  for ( int eidx = 1; eidx <= allEdges.Extent(); ++eidx )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( allEdges(eidx) );
+
+    if ( IsTypeOf<Geom_BezierCurve>(edge) )
+      summary.nbCurveBezier++;
+    else if ( IsTypeOf<Geom_BSplineCurve>(edge) )
+      summary.nbCurveSpline++;
+    else if ( IsTypeOf<Geom_Circle>(edge) )
+      summary.nbCurveCircle++;
+    else if ( IsTypeOf<Geom_Ellipse>(edge) )
+      summary.nbCurveEllipse++;
+    else if ( IsTypeOf<Geom_Hyperbola>(edge) )
+      summary.nbCurveHyperbola++;
+    else if ( IsTypeOf<Geom_Line>(edge) )
+      summary.nbCurveLine++;
+    else if ( IsTypeOf<Geom_OffsetCurve>(edge) )
+      summary.nbCurveOffset++;
+    else if ( IsTypeOf<Geom_Parabola>(edge) )
+      summary.nbCurveParabola++;
+  }
 }
