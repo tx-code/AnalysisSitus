@@ -80,12 +80,14 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepTools.hxx>
+#include <GCE2d_MakeSegment.hxx>
 #include <GCPnts_QuasiUniformAbscissa.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include <GeomAPI.hxx>
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <gp_Circ.hxx>
+#include <gp_Lin2d.hxx>
 #include <gp_Pln.hxx>
 #include <GProp_GProps.hxx>
 #include <GProp_PrincipalProps.hxx>
@@ -3776,7 +3778,6 @@ int MISC_GenHeightMap(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
-
 //-----------------------------------------------------------------------------
 
 int MISC_TestPointInPoly(const Handle(asiTcl_Interp)& interp,
@@ -3797,6 +3798,36 @@ int MISC_TestPointInPoly(const Handle(asiTcl_Interp)& interp,
 
   //interp->GetProgress().SendLogMessage(LogInfo(Normal) << "PMC result for the point (u,v) = (%1,%2): %3."
   //                                                     << point[0] << point[1] << (res ? "in" : "out"));
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int MISC_TestHelix(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  const double d         = 30;
+  const double r         = 5;
+  const int    fullTurns = 10;
+  const double pitch     = 3;
+
+  gp_Pnt center = gp::Origin();
+  gp_Dir axis   = gp::DZ();
+
+  Handle(Geom_CylindricalSurface)
+    cyl = new Geom_CylindricalSurface(gp_Ax2(center, axis), r);
+
+  gp_Lin2d                    helixLine(gp::Origin2d(), gp_Dir2d(r, pitch));
+  Handle(Geom2d_TrimmedCurve) segs = GCE2d_MakeSegment(helixLine, 0, 2.0 * M_PI).Value();
+  TopoDS_Edge                 helixEdge = BRepBuilderAPI_MakeEdge(segs,
+                                                                  cyl,
+                                                                  0,
+                                                                  fullTurns * 2 * M_PI);
+
+  interp->GetPlotter().DRAW_SURFACE(cyl, 0, 2*M_PI, 0, d, Color_Default, "cyl");
+  interp->GetPlotter().DRAW_SHAPE(helixEdge, Color_Red, 1., true, "helixEdge");
+
   return TCL_OK;
 }
 
@@ -4063,6 +4094,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Tests point-in-poly tools by Eric Haines.",
     //
     __FILE__, group, MISC_TestPointInPoly);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-test-helix",
+    //
+    "misc-test-helix\n"
+    "\t Constructs a helical curve.",
+    //
+    __FILE__, group, MISC_TestHelix);
 
   // Load sub-modules.
   Commands_Coons(interp, data);
