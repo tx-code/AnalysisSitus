@@ -95,6 +95,7 @@
 #include <NCollection_CellFilter.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeAnalysis_Surface.hxx>
+#include <ShapeFix_Edge.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
@@ -3824,6 +3825,9 @@ int MISC_TestHelix(const Handle(asiTcl_Interp)& interp,
                                                                   cyl,
                                                                   0,
                                                                   fullTurns * 2 * M_PI);
+
+  ShapeFix_Edge sae;
+  sae.FixAddCurve3d(helixEdge);
 
   interp->GetPlotter().DRAW_SURFACE(cyl, 0, 2*M_PI, 0, d, Color_Default, "cyl");
   interp->GetPlotter().DRAW_SHAPE(helixEdge, Color_Red, 1., true, "helixEdge");

@@ -44,6 +44,7 @@
 // OpenCascade includes
 #include <BRep_Builder.hxx>
 #include <CDM_MetaData.hxx>
+#include <IGESCAFControl_Reader.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <TColStd_HSequenceOfExtendedString.hxx>
@@ -246,7 +247,7 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
     // Transfer data.
     if ( !xdeReader.Transfer(m_doc) )
     {
-      m_progress.SendLogMessage(LogErr(Normal) << "STEP reader failed (error occurred transferring STEP file to XDE)." );
+      m_progress.SendLogMessage(LogErr(Normal) << "STEP reader failed (error occurred transferring STEP model to XDE)." );
       //
       this->clearSession(WS);
       return false;
@@ -262,6 +263,55 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
     return false;
   }
 
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::LoadIGES(const TCollection_AsciiString& filename,
+                   const double                   sewingTol)
+{
+  if ( m_doc.IsNull() )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot load into null Document.");
+    return false;
+  }
+
+  IGESCAFControl_Reader reader;
+  Handle(XSControl_WorkSession) WS = reader.WS();
+
+  // Read CAD and associated data from file.
+  try
+  {
+    // Read file.
+    IFSelect_ReturnStatus outcome = reader.ReadFile( filename.ToCString() );
+    //
+    if ( outcome != IFSelect_RetDone )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Cannot read IGES file from disk." );
+      //
+      this->clearSession(WS);
+      return false;
+    }
+
+    // Transfer data.
+    if ( !reader.Transfer(m_doc) )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "IGES reader failed (error occurred transferring IGES model to XDE)." );
+      //
+      this->clearSession(WS);
+      return false;
+    }
+
+    this->clearSession(WS);
+    //
+    m_progress.SendLogMessage(LogInfo(Normal) << "File '%1' loaded." << filename);
+  }
+  catch ( ... )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "IGES reader failed (exception occurred).");
+    return false;
+  }
   return true;
 }
 
