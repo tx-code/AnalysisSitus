@@ -35,12 +35,16 @@
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
 
-// Rapidjson includes
-#include <rapidjson/document.h>
+#if defined USE_RAPIDJSON
+  // Rapidjson includes
+  #include <rapidjson/document.h>
 
-typedef rapidjson::Document::Array     t_jsonArray;
-typedef rapidjson::Document::ValueType t_jsonValue;
-typedef rapidjson::Document::Object    t_jsonObject;
+  typedef rapidjson::Document::Array     t_jsonArray;
+  typedef rapidjson::Document::ValueType t_jsonValue;
+  typedef rapidjson::Document::Object    t_jsonObject;
+#endif
+
+//-----------------------------------------------------------------------------
 
 namespace
 {
@@ -116,6 +120,7 @@ bool asiAlgo_ConvertCanonicalSummary::IsEqual(const asiAlgo_ConvertCanonicalSumm
 void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            pJsonGenericObj,
                                                asiAlgo_ConvertCanonicalSummary& ccSummary)
 {
+#if defined USE_RAPIDJSON
   t_jsonValue*
     pJsonObj = reinterpret_cast<t_jsonValue*>(pJsonGenericObj);
 
@@ -293,6 +298,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
   }
+#endif
 }
 
 //-----------------------------------------------------------------------------

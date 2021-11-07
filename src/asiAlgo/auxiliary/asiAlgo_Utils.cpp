@@ -636,6 +636,7 @@ void asiAlgo_Utils::Json::ReadFeatures(void*                         pJsonBlock,
 void asiAlgo_Utils::Json::ReadPair(void*                                 pJsonBlock,
                                    std::optional< std::pair<int, int> >& pair)
 {
+#if defined USE_RAPIDJSON
   pair = std::make_optional< std::pair<int, int> >();
 
   t_jsonArray*
@@ -653,6 +654,7 @@ void asiAlgo_Utils::Json::ReadPair(void*                                 pJsonBl
     else
       break;
   }
+#endif
 }
 
 //-----------------------------------------------------------------------------
