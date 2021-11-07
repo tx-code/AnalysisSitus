@@ -36,6 +36,8 @@
 
 // Qt includes
 #pragma warning(push, 0)
+#include <QDropEvent>
+#include <QMimeData>
 #include <QTextEdit>
 #pragma warning(pop)
 
@@ -56,6 +58,27 @@ public:
 protected:
 
   void stylize();
+
+  void dropEvent(QDropEvent *event)
+  {
+    //QTextEdit::dropEvent(event);
+      /*textBrowser->setPlainText(event->mimeData()->text());
+      mimeTypeCombo->clear();
+      mimeTypeCombo->addItems(event->mimeData()->formats());
+      */
+      /*event->acceptProposedAction();*/
+    QMimeData* mimeData = new QMimeData();
+    mimeData->setText("");
+    //
+    QDropEvent*
+      dummyEvent = new QDropEvent( event->posF(),
+                                   event->possibleActions(),
+                                   mimeData,
+                                   event->mouseButtons(),
+                                   event->keyboardModifiers() );
+
+    QTextEdit::dropEvent(dummyEvent);
+  }
 
 };
 
