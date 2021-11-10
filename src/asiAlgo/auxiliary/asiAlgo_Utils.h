@@ -200,12 +200,6 @@ namespace asiAlgo_Utils
       std::string AsiTestDumping();
 
     asiAlgo_EXPORT
-      std::string AsiTestDescr();
-
-    asiAlgo_EXPORT
-      std::string AsiTestScripts();
-
-    asiAlgo_EXPORT
       std::string GetVariable(const char* varName);
   } // Env namespace.
 
