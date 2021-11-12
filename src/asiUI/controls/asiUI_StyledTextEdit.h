@@ -41,6 +41,8 @@
 #include <QTextEdit>
 #pragma warning(pop)
 
+#define FileLoadPrefix "file:///"
+
 //! Editor with some cool styling.
 class asiUI_EXPORT asiUI_StyledTextEdit : public QTextEdit
 {
@@ -61,14 +63,25 @@ protected:
 
   void dropEvent(QDropEvent *event)
   {
-    //QTextEdit::dropEvent(event);
-      /*textBrowser->setPlainText(event->mimeData()->text());
-      mimeTypeCombo->clear();
-      mimeTypeCombo->addItems(event->mimeData()->formats());
-      */
-      /*event->acceptProposedAction();*/
+    QString text = event->mimeData()->text();
+
+    // Decorate the dragged in filenames to ease loading.
+    if ( text.contains(FileLoadPrefix) )
+    {
+      text.replace(FileLoadPrefix, "");
+      //
+      if ( text.contains(" ") )
+      {
+        text.prepend("\"");
+        text.append("\"");
+      }
+      //
+      text.prepend("load-part ");
+    }
+
+    // Reassemble an event with the new text.
     QMimeData* mimeData = new QMimeData();
-    mimeData->setText("");
+    mimeData->setText(text);
     //
     QDropEvent*
       dummyEvent = new QDropEvent( event->posF(),
@@ -77,6 +90,7 @@ protected:
                                    event->mouseButtons(),
                                    event->keyboardModifiers() );
 
+    // Let QTextEdit react as it's used to.
     QTextEdit::dropEvent(dummyEvent);
   }
 
