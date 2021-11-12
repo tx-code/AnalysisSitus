@@ -258,6 +258,7 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
     plMain->GetDisplayModeFilter()->SetAllowExtraScalars(true);
 
     // Configure actors.
+    plMain     ->Actor() -> SetVisibility(1);
     plMain     ->Actor() -> SetPickable(1);
     plBackside ->Actor() -> SetVisibility(showBackface);
     plContour  ->Actor() -> SetVisibility(displayMode == ShapeDisplayMode_ShadedAndWireframe);
@@ -267,14 +268,11 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
   if ( displayMode == ShapeDisplayMode_Wireframe ||
        displayMode == ShapeDisplayMode_WireframeAndVertices )
   {
-    // Configure filter.
-    plMain->GetDisplayModeFilter()->SetDisplayMode(ShapeDisplayMode_Wireframe);
-    plMain->GetDisplayModeFilter()->SetAllowExtraScalars(false);
-
     // Configure actors.
+    plMain     ->Actor() -> SetVisibility(0);
     plMain     ->Actor() -> SetPickable(0);
     plBackside ->Actor() -> SetVisibility(0);
-    plContour  ->Actor() -> SetVisibility(0);
+    plContour  ->Actor() -> SetVisibility(1);
   }
 
   // Wireframe.
