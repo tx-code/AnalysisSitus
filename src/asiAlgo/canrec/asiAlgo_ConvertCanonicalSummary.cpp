@@ -48,24 +48,6 @@
 
 namespace
 {
-  bool AreEqual(const std::optional<bool>& a,
-                const std::optional<bool>& b)
-  {
-    if ( !a.has_value() && !b.has_value() )
-      return true;
-
-    if ( !a.has_value() && b.has_value() )
-      return false;
-
-    if ( a.has_value() && !b.has_value() )
-      return false;
-
-    if ( *a == *b )
-      return true;
-
-    return false;
-  }
-
   bool AreEqual(const std::optional< std::pair<int, int> >& a,
                 const std::optional< std::pair<int, int> >& b)
   {
