@@ -80,6 +80,7 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepTools.hxx>
+#include <ElCLib.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GCPnts_QuasiUniformAbscissa.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
@@ -1562,56 +1563,22 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   (void) argc;
   (void) argv;
 
-  // Control points.
-  TColgp_Array1OfPnt poles(1, 5);
-  poles(1) = gp_Pnt(0.,  0.,  0.);
-  poles(2) = gp_Pnt(1.,  0.5, 0.);
-  poles(3) = gp_Pnt(2.,  1.5, 1.);
-  poles(4) = gp_Pnt(2.5, 2.5, 1.5);
-  poles(5) = gp_Pnt(3.5, 1.,  0.5);
-  //
-  const int n = poles.Upper() - 1;
+  const double arcAngleInRadians = -M_PI/4.;
+  gp_Circ myArc(gp_Ax2(gp::Origin(), gp::DZ()), 10.);
 
-  // Basis spline degree.
-  const int p = 3;
+  double firstParam = arcAngleInRadians;
+  double lastParam = 0;
+  double Step = (10* 2 * M_PI) / 360; // tessellate the arc with 10 degree step
+  double param = 0;
+  gp_Pnt P1, P2;
 
-  // Knots.
-  TColStd_Array1OfReal knots(1, 3);
-  knots(1) = 0.;
-  knots(2) = 0.5;
-  knots(3) = 1.;
+  P1 = ElCLib::Value(firstParam, myArc);
+  for (param = firstParam+Step; param < lastParam; param += Step)
+  {
+    interp->GetPlotter().DRAW_POINT(P1, Color_Yellow, "P");
+    P1 = ElCLib::Value(param, myArc);
+  }
 
-  // Multiplicities.
-  TColStd_Array1OfInteger mults(1, 3);
-  mults(1) = 4;
-  mults(2) = 1;
-  mults(3) = 4;
-
-  // Create B-spline curve
-  Handle(Geom_BSplineCurve)
-    bcurve = new Geom_BSplineCurve(poles, knots, mults, p);
-
-  interp->GetPlotter().REDRAW_CURVE("bcurve", bcurve, Color_White);
-
-  bcurve->InsertKnot(0.25, 1);
-
-  interp->GetPlotter().REDRAW_CURVE("bcurve_ins1", bcurve, Color_White);
-
-  bcurve->InsertKnot(0.25, 1);
-
-  interp->GetPlotter().REDRAW_CURVE("bcurve_ins2", bcurve, Color_White);
-
-  bcurve->InsertKnot(0.25, 1);
-
-  interp->GetPlotter().REDRAW_CURVE("bcurve_ins3", bcurve, Color_White);
-
-  bcurve->InsertKnot(0.25, 1);
-
-  interp->GetPlotter().REDRAW_CURVE("bcurve_ins4", bcurve, Color_White);
-
-  // Test anything here.
-
-  // RETURN_TCL_ERROR_MSG(interp, "test function is empty");
 
   return TCL_OK;
 }
