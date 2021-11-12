@@ -43,6 +43,12 @@
 
 #define FileLoadPrefix "file:///"
 
+#ifdef _WIN32
+  #define FileLoadPrefixSubst ""
+#else
+  #define FileLoadPrefixSubst "/"
+#endif
+
 //! Editor with some cool styling.
 class asiUI_EXPORT asiUI_StyledTextEdit : public QTextEdit
 {
@@ -68,7 +74,7 @@ protected:
     // Decorate the dragged in filenames to ease loading.
     if ( text.contains(FileLoadPrefix) )
     {
-      text.replace(FileLoadPrefix, "");
+      text.replace(FileLoadPrefix, FileLoadPrefixSubst);
       //
       if ( text.contains(" ") )
       {
