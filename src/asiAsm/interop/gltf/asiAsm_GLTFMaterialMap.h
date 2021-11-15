@@ -19,43 +19,43 @@
 
 // glTF includes
 #include <asiAsm_GlTFEntities.h>
-#include <asiAsm_GlTFMaterialMapBase.h>
+#include <asiAsm_GLTFMaterialMapBase.h>
 
 namespace asiAsm {
 namespace xde {
 
 //! Material manager for exporting into glTF format.
-class gltf_MaterialMap : public gltf_MaterialMapBase
+class glTFMaterialMap : public glTFMaterialMapBase
 {
 public:
 
   //! Ctor.
   gltf_EXPORT
-    gltf_MaterialMap(const TCollection_AsciiString& theFile,
+    glTFMaterialMap(const TCollection_AsciiString& theFile,
                      const int                      theDefSamplerId);
 
   //! Dtor.
   gltf_EXPORT virtual
-    ~gltf_MaterialMap();
+    ~glTFMaterialMap();
 
 public:
 
   //! Add material images.
   gltf_EXPORT void
-    AddImages(gltf_JsonSerializer*       theWriter,
-              const gltf_XdeVisualStyle& theStyle,
+    AddImages(glTFJsonSerializer*       theWriter,
+              const glTFXdeVisualStyle& theStyle,
               bool&                      theIsStarted);
 
   //! Add material.
   gltf_EXPORT void
-    AddMaterial(gltf_JsonSerializer*       theWriter,
-                const gltf_XdeVisualStyle& theStyle,
+    AddMaterial(glTFJsonSerializer*       theWriter,
+                const glTFXdeVisualStyle& theStyle,
                 bool&                      theIsStarted);
 
   //! Add material textures.
   gltf_EXPORT void
-    AddTextures(gltf_JsonSerializer*       theWriter,
-                const gltf_XdeVisualStyle& theStyle,
+    AddTextures(glTFJsonSerializer*       theWriter,
+                const glTFXdeVisualStyle& theStyle,
                 bool&                      theIsStarted);
 
 public:
@@ -70,43 +70,43 @@ public:
 
   //! Return base color texture.
   gltf_EXPORT static const Handle(Image_Texture)&
-    baseColorTexture(const Handle(gltf_MaterialAttr)& theMat);
+    baseColorTexture(const Handle(glTFMaterialAttr)& theMat);
 
 protected:
 
   //! Add texture image.
   gltf_EXPORT void
-    addImage(gltf_JsonSerializer*         theWriter,
+    addImage(glTFJsonSerializer*         theWriter,
              const Handle(Image_Texture)& theTexture,
              bool&                        theIsStarted);
 
   //! Add texture.
   gltf_EXPORT void
-    addTexture(gltf_JsonSerializer*         theWriter,
+    addTexture(glTFJsonSerializer*          theWriter,
                const Handle(Image_Texture)& theTexture,
                bool&                        theIsStarted);
 
   //! Add material
   gltf_EXPORT virtual TCollection_AsciiString
-    AddMaterial(const gltf_XdeVisualStyle& theStyle) Standard_OVERRIDE;
+    AddMaterial(const glTFXdeVisualStyle& theStyle) Standard_OVERRIDE;
 
   //! Virtual method actually defining the material (e.g. export to the file).
   gltf_EXPORT virtual void
-    DefineMaterial(const gltf_XdeVisualStyle&     theStyle,
+    DefineMaterial(const glTFXdeVisualStyle&      theStyle,
                    const TCollection_AsciiString& theKey,
                    const TCollection_AsciiString& theName) Standard_OVERRIDE;
 
 protected:
 
-  gltf_JsonSerializer* myWriter;
+  glTFJsonSerializer* myWriter;
   NCollection_DoubleMap<Handle(Image_Texture), TCollection_AsciiString,
                         Image_Texture, TCollection_AsciiString> myImageMap;
+
   NCollection_Map<Handle(Image_Texture), Image_Texture> myTextureMap;
+
   int myDefSamplerId;
   int myNbImages;
-
 };
-
 } // xde
 } // asiAsm
 

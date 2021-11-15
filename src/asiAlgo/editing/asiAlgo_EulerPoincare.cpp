@@ -45,39 +45,16 @@ bool asiAlgo_EulerPoincare::Check(const TopoDS_Shape&  shape,
                                   const int            genus,
                                   ActAPI_ProgressEntry progress)
 {
-  // Summary
-  int nbCompsolids = 0,
-      nbCompounds  = 0,
-      nbSolids     = 0,
-      nbShells     = 0,
-      nbFaces      = 0,
-      nbWires      = 0,
-      nbOuterWires = 0,
-      nbInnerWires = 0,
-      nbEdges      = 0,
-      nbDegenEdges = 0,
-      nbVertexes   = 0;
-
   // Extract summary
-  asiAlgo_Utils::ShapeSummary(shape,
-                              nbCompsolids,
-                              nbCompounds,
-                              nbSolids,
-                              nbShells,
-                              nbFaces,
-                              nbWires,
-                              nbOuterWires,
-                              nbInnerWires,
-                              nbEdges,
-                              nbDegenEdges,
-                              nbVertexes);
+  asiAlgo_TopoSummary props;
+  asiAlgo_Utils::ShapeSummary(shape, props);
 
-  const int v = nbVertexes;
-  const int e = nbEdges - nbDegenEdges;
-  const int f = nbFaces;
-  const int s = nbShells;
+  const int v = props.nbVertexes;
+  const int e = props.nbVertexes - props.nbDegenEdges;
+  const int f = props.nbFaces;
+  const int s = props.nbShells;
   const int h = genus;
-  const int r = nbInnerWires;
+  const int r = props.nbInnerWires;
 
   const int res = v - e + f - 2*(s - h) - r;
 

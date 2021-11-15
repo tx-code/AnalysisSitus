@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 // Own include
-#include <asiAsm_GlTFMaterialMapBase.h>
+#include <asiAsm_GLTFMaterialMapBase.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
@@ -35,7 +35,7 @@ using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-gltf_MaterialMapBase::gltf_MaterialMapBase(const TCollection_AsciiString& theFile)
+glTFMaterialMapBase::glTFMaterialMapBase(const TCollection_AsciiString& theFile)
 : myFileName (theFile),
   myKeyPrefix ("mat_"),
   myNbMaterials (0),
@@ -49,7 +49,7 @@ gltf_MaterialMapBase::gltf_MaterialMapBase(const TCollection_AsciiString& theFil
 
 //-----------------------------------------------------------------------------
 
-gltf_MaterialMapBase::~gltf_MaterialMapBase()
+glTFMaterialMapBase::~glTFMaterialMapBase()
 {
   //
 }
@@ -57,7 +57,7 @@ gltf_MaterialMapBase::~gltf_MaterialMapBase()
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
-  gltf_MaterialMapBase::AddMaterial(const gltf_XdeVisualStyle& style)
+  glTFMaterialMapBase::AddMaterial(const glTFXdeVisualStyle& style)
 {
   if ( myStyles.IsBound1(style) )
   {
@@ -125,7 +125,7 @@ TCollection_AsciiString
 
 //-----------------------------------------------------------------------------
 
-bool gltf_MaterialMapBase::copyFileTo(const TCollection_AsciiString& theFileSrc,
+bool glTFMaterialMapBase::copyFileTo(const TCollection_AsciiString& theFileSrc,
                                       const TCollection_AsciiString& theFileDst)
 {
   if ( theFileSrc.IsEmpty() || theFileDst.IsEmpty() )
@@ -159,7 +159,7 @@ bool gltf_MaterialMapBase::copyFileTo(const TCollection_AsciiString& theFileSrc,
 
 //-----------------------------------------------------------------------------
 
-bool gltf_MaterialMapBase::CopyTexture(TCollection_AsciiString&       theResTexture,
+bool glTFMaterialMapBase::CopyTexture(TCollection_AsciiString&       theResTexture,
                                        const Handle(Image_Texture)&   theTexture,
                                        const TCollection_AsciiString& theKey)
 {
@@ -192,7 +192,7 @@ bool gltf_MaterialMapBase::CopyTexture(TCollection_AsciiString&       theResText
 
 //-----------------------------------------------------------------------------
 
-bool gltf_MaterialMapBase::CreateTextureFolder()
+bool glTFMaterialMapBase::CreateTextureFolder()
 {
   if (!myTexFolder.IsEmpty())
   {

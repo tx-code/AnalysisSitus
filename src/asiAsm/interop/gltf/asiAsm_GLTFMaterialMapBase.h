@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
 
 // OpenCascade includes
 #include <NCollection_DoubleMap.hxx>
@@ -30,24 +30,24 @@ namespace xde {
 //! Material manager.
 //! Provides an interface for collecting all materials within the document before writing it into file,
 //! and for copying associated image files (textures) into sub-folder near by exported model.
-class gltf_MaterialMapBase
+class glTFMaterialMapBase
 {
 public:
 
   //! Main constructor.
-  gltf_EXPORT gltf_MaterialMapBase (const TCollection_AsciiString& theFile);
+  gltf_EXPORT glTFMaterialMapBase (const TCollection_AsciiString& theFile);
 
   //! Destructor.
-  gltf_EXPORT virtual ~gltf_MaterialMapBase();
+  gltf_EXPORT virtual ~glTFMaterialMapBase();
 
   //! Return default material definition to be used for nodes with only color defined.
-  const gltf_XdeVisualStyle& DefaultStyle() const { return myDefaultStyle; }
+  const glTFXdeVisualStyle& DefaultStyle() const { return myDefaultStyle; }
 
   //! Set default material definition to be used for nodes with only color defined.
-  void SetDefaultStyle (const gltf_XdeVisualStyle& theStyle) { myDefaultStyle = theStyle; }
+  void SetDefaultStyle (const glTFXdeVisualStyle& theStyle) { myDefaultStyle = theStyle; }
 
   //! Find already registered material
-  TCollection_AsciiString FindMaterial (const gltf_XdeVisualStyle& theStyle) const
+  TCollection_AsciiString FindMaterial (const glTFXdeVisualStyle& theStyle) const
   {
     if (myStyles.IsBound1 (theStyle))
     {
@@ -57,7 +57,7 @@ public:
   }
 
   //! Register material and return its name identifier.
-  gltf_EXPORT virtual TCollection_AsciiString AddMaterial (const gltf_XdeVisualStyle& theStyle);
+  gltf_EXPORT virtual TCollection_AsciiString AddMaterial (const glTFXdeVisualStyle& theStyle);
 
   //! Create texture folder "modelName/textures"; for example:
   //! MODEL:  Path/ModelName.gltf
@@ -74,7 +74,7 @@ public:
                                             const TCollection_AsciiString& theKey);
 
   //! Virtual method actually defining the material (e.g. export to the file).
-  virtual void DefineMaterial (const gltf_XdeVisualStyle& theStyle,
+  virtual void DefineMaterial (const glTFXdeVisualStyle& theStyle,
                                const TCollection_AsciiString& theKey,
                                const TCollection_AsciiString& theName) = 0;
 
@@ -95,15 +95,15 @@ protected:
   TCollection_AsciiString myFileName;          //!< output glTF file path
   TCollection_AsciiString myShortFileNameBase; //!< output glTF file name without extension
   TCollection_AsciiString myKeyPrefix;         //!< prefix for generated keys
-  NCollection_DoubleMap<gltf_XdeVisualStyle, TCollection_AsciiString,
-                        gltf_XdeVisualStyle::Hasher, TCollection_AsciiString>
+  NCollection_DoubleMap<glTFXdeVisualStyle, TCollection_AsciiString,
+                        glTFXdeVisualStyle::Hasher, TCollection_AsciiString>
                           myStyles;            //!< map of processed styles
   NCollection_Map<Handle(Image_Texture), Image_Texture>
                           myImageFailMap;      //!< map of images failed to be copied
-  gltf_XdeVisualStyle           myDefaultStyle;      //!< default material definition to be used for nodes with only color defined
-  int        myNbMaterials;       //!< number of registered materials
-  bool        myIsFailed;          //!< flag indicating failure
-  bool        myMatNameAsKey;      //!< flag indicating usage of material name as key
+  glTFXdeVisualStyle      myDefaultStyle;      //!< default material definition to be used for nodes with only color defined
+  int                     myNbMaterials;       //!< number of registered materials
+  bool                    myIsFailed;          //!< flag indicating failure
+  bool                    myMatNameAsKey;      //!< flag indicating usage of material name as key
 
 };
 

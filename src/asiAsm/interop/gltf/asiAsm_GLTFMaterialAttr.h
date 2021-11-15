@@ -33,12 +33,12 @@ namespace xde {
 //! Attribute storing Material definition for visualization purposes.
 //!
 //! Copied from `XCAFDoc_VisMaterial` class of OpenCascade 7.5.0.
-class gltf_MaterialAttr : public TDF_Attribute
+class glTFMaterialAttr : public TDF_Attribute
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_MaterialAttr, TDF_Attribute)
+  DEFINE_STANDARD_RTTI_INLINE(glTFMaterialAttr, TDF_Attribute)
 
 public:
 
@@ -50,7 +50,7 @@ public:
 
   //! Default ctor.
   gltf_EXPORT
-    gltf_MaterialAttr();
+    glTFMaterialAttr();
 
 public:
 
@@ -61,25 +61,25 @@ public:
   bool HasPbrMaterial() const { return myPbrMat.IsDefined; }
 
   //! Return metal-roughness PBR material.
-  const gltf_MaterialPbr& PbrMaterial() const { return myPbrMat; }
+  const glTFMaterialPbr& PbrMaterial() const { return myPbrMat; }
 
   //! Setup metal-roughness PBR material.
-  gltf_EXPORT void SetPbrMaterial (const gltf_MaterialPbr& theMaterial);
+  gltf_EXPORT void SetPbrMaterial (const glTFMaterialPbr& theMaterial);
 
   //! Setup undefined metal-roughness PBR material.
-  void UnsetPbrMaterial() { SetPbrMaterial (gltf_MaterialPbr()); }
+  void UnsetPbrMaterial() { SetPbrMaterial (glTFMaterialPbr()); }
 
   //! Return TRUE if common material is defined.
   bool HasCommonMaterial() const { return myCommonMat.IsDefined; }
 
   //! Return common material.
-  const gltf_MaterialCommon& CommonMaterial() const { return myCommonMat; }
+  const glTFMaterialCommon& CommonMaterial() const { return myCommonMat; }
 
   //! Setup common material.
-  gltf_EXPORT void SetCommonMaterial (const gltf_MaterialCommon& theMaterial);
+  gltf_EXPORT void SetCommonMaterial (const glTFMaterialCommon& theMaterial);
 
   //! Setup undefined common material.
-  void UnsetCommonMaterial() { SetCommonMaterial (gltf_MaterialCommon()); }
+  void UnsetCommonMaterial() { SetCommonMaterial (glTFMaterialCommon()); }
 
   //! Return base color.
   gltf_EXPORT Quantity_ColorRGBA BaseColor() const;
@@ -108,7 +108,7 @@ public:
 
   //! Compare two materials.
   //! Performs deep comparison by actual values - e.g. can be useful for merging materials.
-  bool IsEqual(const Handle(gltf_MaterialAttr)& other) const
+  bool IsEqual(const Handle(glTFMaterialAttr)& other) const
   {
     if ( other.get() == this )
     {
@@ -122,10 +122,10 @@ public:
   }
 
   //! Return Common material or convert PBR into Common material.
-  gltf_EXPORT gltf_MaterialCommon ConvertToCommonMaterial();
+  gltf_EXPORT glTFMaterialCommon ConvertToCommonMaterial();
 
   //! Return PBR material or convert Common into PBR material.
-  gltf_EXPORT gltf_MaterialPbr ConvertToPbrMaterial();
+  gltf_EXPORT glTFMaterialPbr ConvertToPbrMaterial();
 
 public: //! @name interface implementation
 
@@ -148,8 +148,8 @@ public: //! @name interface implementation
 private:
 
   Handle(TCollection_HAsciiString) myRawName;       //!< material name / tag (transient data)
-  gltf_MaterialPbr                 myPbrMat;        //!< metal-roughness material definition
-  gltf_MaterialCommon              myCommonMat;     //!< common material definition
+  glTFMaterialPbr                  myPbrMat;        //!< metal-roughness material definition
+  glTFMaterialCommon               myCommonMat;     //!< common material definition
   Graphic3d_AlphaMode              myAlphaMode;     //!< alpha mode; Graphic3d_AlphaMode_BlendAuto by default
   float                            myAlphaCutOff;   //!< alpha cutoff value; 0.5 by default
   bool                             myIsDoubleSided; //!< specifies whether the material is double sided; TRUE by default

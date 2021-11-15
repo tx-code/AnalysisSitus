@@ -31,7 +31,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFIDataSourceProvider.h>
+#include <asiAsm_GLTFIDataSourceProvider.h>
 
 // STL includes
 #include <memory>
@@ -66,25 +66,26 @@ namespace xde {
 //!      Edge_1    <------ mesh primitive, presents if a colored sub-shape exists
 //!      Edge_2
 //!      ...
-class gltf_XdeDataSourceProvider : public gltf_IDataSourceProvider
+class glTFXdeDataSourceProvider : public glTFIDataSourceProvider
 {
-  typedef NCollection_DataMap<TopoDS_Shape, asiAsm::xde::gltf_XdeVisualStyle, TopTools_ShapeMapHasher> t_Shape2Style;
-
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_XdeDataSourceProvider, gltf_IDataSourceProvider)
+  DEFINE_STANDARD_RTTI_INLINE(glTFXdeDataSourceProvider, glTFIDataSourceProvider)
+
+  typedef NCollection_DataMap<TopoDS_Shape, glTFXdeVisualStyle, TopTools_ShapeMapHasher> t_Shape2Style;
+  typedef NCollection_IndexedDataMap<glTFNode*, TDF_Label>                               t_Node2Label;
 
 public:
 
   //! Ctor.
   gltf_EXPORT
-    gltf_XdeDataSourceProvider(const Handle(TDocStd_Document)& doc,
-                               const TColStd_MapOfAsciiString& filter = TColStd_MapOfAsciiString());
+    glTFXdeDataSourceProvider(const Handle(TDocStd_Document)& doc,
+                              const TColStd_MapOfAsciiString& filter = TColStd_MapOfAsciiString());
 
   //! Dtor.
   gltf_EXPORT virtual
-    ~gltf_XdeDataSourceProvider();
+    ~glTFXdeDataSourceProvider();
 
 public:
 
@@ -94,36 +95,43 @@ public:
 public:
 
   virtual
-    const gltf_SceneStructure& GetSceneStructure() const { return m_sceneStructure; }
+    const glTFSceneStructure& GetSceneStructure() const { return m_sceneStructure; }
 
   virtual
     const t_Meshes2Primitives& GetSceneMeshes() const { return m_meshes; }
 
-private:
+protected:
 
-  void processSceneStructure(NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher>&   meshes,
-                             ActAPI_ProgressEntry              progress = nullptr);
+  gltf_EXPORT virtual
+    void createSceneStructure(t_Node2Label&        solids,
+                              ActAPI_ProgressEntry progress = nullptr);
 
-  void processSceneMeshes(NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher >&   meshes,
-                          ActAPI_ProgressEntry              progress = nullptr);
+  gltf_EXPORT virtual
+    void processSceneMeshes(t_Node2Label&          solids,
+                            ActAPI_ProgressEntry   progress = nullptr);
 
-  bool processEdgePrimitive(const TopoDS_Edge&    edge,
-                            const t_Shape2Style&  styles,
-                            gltf_Primitive&       edgePrimitive);
+  gltf_EXPORT 
+    bool processFacePrimitive(const TopoDS_Face&    face,
+                              glTFPrimitive& facePrimitive);
+
+  gltf_EXPORT
+  bool processEdgePrimitive(const TopoDS_Edge&      edge,
+                            const t_Shape2Style&    styles,
+                            glTFPrimitive&   edgePrimitive);
 
   //! Reads styles from OCAF document to internal map. As a result, each face
   //! gets an associated style.
-  void
-    readStyles(const TDF_Label& label,
-               t_Shape2Style& shapeStyles);
+  gltf_EXPORT
+    void readStyles(const TDF_Label&                label,
+                    t_Shape2Style&                  shapeStyles);
 
-private:
+protected:
 
-  Handle(TDocStd_Document)   m_doc;
-  TColStd_MapOfAsciiString   m_filter;
+  Handle(TDocStd_Document)  m_doc;
+  TColStd_MapOfAsciiString  m_filter;
 
-  gltf_SceneStructure        m_sceneStructure;
-  t_Meshes2Primitives        m_meshes;
+  glTFSceneStructure        m_sceneStructure;
+  t_Meshes2Primitives       m_meshes;
 };
 } // xde
 } // asiAsm

@@ -16,13 +16,13 @@
  ***************************************************************************/
 
 // Own include
-#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
 
 using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-gltf_XdeVisualStyle::gltf_XdeVisualStyle()
+glTFXdeVisualStyle::glTFXdeVisualStyle()
 //
 : m_bHasColorSurf  (false),
   m_bHasColorCurve (false),
@@ -31,7 +31,7 @@ gltf_XdeVisualStyle::gltf_XdeVisualStyle()
 
 //-----------------------------------------------------------------------------
 
-gltf_XdeVisualStyle::gltf_XdeVisualStyle(const XCAFPrs_Style& other)
+glTFXdeVisualStyle::glTFXdeVisualStyle(const XCAFPrs_Style& other)
 {
   m_colorSurf.SetRGB( other.GetColorSurf() );
   //
@@ -43,50 +43,50 @@ gltf_XdeVisualStyle::gltf_XdeVisualStyle(const XCAFPrs_Style& other)
 
 //-----------------------------------------------------------------------------
 
-const Handle(gltf_MaterialAttr)&
-  gltf_XdeVisualStyle::GetMaterial() const
+const Handle(glTFMaterialAttr)&
+  glTFXdeVisualStyle::GetMaterial() const
 {
   return m_material;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::SetMaterial(const Handle(gltf_MaterialAttr)& material)
+void glTFXdeVisualStyle::SetMaterial(const Handle(glTFMaterialAttr)& material)
 {
   m_material = material;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::IsSetColorSurf() const
+bool glTFXdeVisualStyle::IsSetColorSurf() const
 {
   return m_bHasColorSurf;
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_Color& gltf_XdeVisualStyle::GetColorSurf() const
+const Quantity_Color& glTFXdeVisualStyle::GetColorSurf() const
 {
   return m_colorSurf.GetRGB();
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::SetColorSurf(const Quantity_Color& color)
+void glTFXdeVisualStyle::SetColorSurf(const Quantity_Color& color)
 {
   this->SetColorSurf( Quantity_ColorRGBA(color) );
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_ColorRGBA& gltf_XdeVisualStyle::GetColorSurfRGBA() const
+const Quantity_ColorRGBA& glTFXdeVisualStyle::GetColorSurfRGBA() const
 {
   return m_colorSurf;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
+void glTFXdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
 {
   m_colorSurf     = color;
   m_bHasColorSurf = true;
@@ -94,7 +94,7 @@ void gltf_XdeVisualStyle::SetColorSurf(const Quantity_ColorRGBA& color)
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::UnSetColorSurf()
+void glTFXdeVisualStyle::UnSetColorSurf()
 {
   m_bHasColorSurf = false;
   m_colorSurf.ChangeRGB().SetValues(Quantity_NOC_YELLOW);
@@ -103,21 +103,21 @@ void gltf_XdeVisualStyle::UnSetColorSurf()
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::IsSetColorCurve() const
+bool glTFXdeVisualStyle::IsSetColorCurve() const
 {
   return m_bHasColorCurve;
 }
 
 //-----------------------------------------------------------------------------
 
-const Quantity_Color& gltf_XdeVisualStyle::GetColorCurve() const
+const Quantity_Color& glTFXdeVisualStyle::GetColorCurve() const
 {
   return m_colorCurve;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::SetColorCurve(const Quantity_Color& color)
+void glTFXdeVisualStyle::SetColorCurve(const Quantity_Color& color)
 {
   m_colorCurve     = color;
   m_bHasColorCurve = true;
@@ -125,7 +125,7 @@ void gltf_XdeVisualStyle::SetColorCurve(const Quantity_Color& color)
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::UnSetColorCurve()
+void glTFXdeVisualStyle::UnSetColorCurve()
 {
   m_bHasColorCurve = false;
   m_colorCurve.SetValues(Quantity_NOC_YELLOW);
@@ -133,21 +133,21 @@ void gltf_XdeVisualStyle::UnSetColorCurve()
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeVisualStyle::SetVisibility(const bool on)
+void glTFXdeVisualStyle::SetVisibility(const bool on)
 {
   m_bIsVisible = on;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::IsVisible() const
+bool glTFXdeVisualStyle::IsVisible() const
 {
   return m_bIsVisible;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::IsEqual(const gltf_XdeVisualStyle& other) const
+bool glTFXdeVisualStyle::IsEqual(const glTFXdeVisualStyle& other) const
 {
   if ( m_bIsVisible != other.m_bIsVisible )
   {
@@ -167,14 +167,14 @@ bool gltf_XdeVisualStyle::IsEqual(const gltf_XdeVisualStyle& other) const
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::operator==(const gltf_XdeVisualStyle& other) const
+bool glTFXdeVisualStyle::operator==(const glTFXdeVisualStyle& other) const
 {
   return this->IsEqual(other);
 }
 
 //-----------------------------------------------------------------------------
 
-int gltf_XdeVisualStyle::Hasher::HashCode(const gltf_XdeVisualStyle& style,
+int glTFXdeVisualStyle::Hasher::HashCode(const glTFXdeVisualStyle& style,
                                           const int                  upper)
 {
   if ( !style.m_bIsVisible )
@@ -198,8 +198,8 @@ int gltf_XdeVisualStyle::Hasher::HashCode(const gltf_XdeVisualStyle& style,
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeVisualStyle::Hasher::IsEqual(const gltf_XdeVisualStyle& S1,
-                                          const gltf_XdeVisualStyle& S2)
+bool glTFXdeVisualStyle::Hasher::IsEqual(const glTFXdeVisualStyle& S1,
+                                          const glTFXdeVisualStyle& S2)
 {
   return S1.IsEqual(S2);
 }

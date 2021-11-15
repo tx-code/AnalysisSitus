@@ -55,6 +55,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_ResampleADF.h
   auxiliary/asiAlgo_SampleFace.h
   auxiliary/asiAlgo_ShapeSerializer.h
+  auxiliary/asiAlgo_TopoSummary.h
   auxiliary/asiAlgo_UniformGrid.h
   auxiliary/asiAlgo_Utils.h
 )

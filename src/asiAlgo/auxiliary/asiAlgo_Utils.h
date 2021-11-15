@@ -39,6 +39,7 @@
 #include <asiAlgo_FeatureAngleType.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_Naming.h>
+#include <asiAlgo_TopoSummary.h>
 
 // Active Data (API) includes
 #include <ActAPI_ILogger.h>
@@ -805,30 +806,11 @@ namespace asiAlgo_Utils
              ActAPI_ProgressEntry              progress);
 
   //! Collects summary information for the given shape.
-  //! \param shape        [in]  input shape.
-  //! \param nbCompsolids [out] number of compsolids.
-  //! \param nbCompounds  [out] number of compounds.
-  //! \param nbSolids     [out] number of solids.
-  //! \param nbShells     [out] number of shells.
-  //! \param nbFaces      [out] number of faces.
-  //! \param nbWires      [out] number of wires.
-  //! \param nbOuterWires [out] number of outer wires.
-  //! \param nbInnerWires [out] number of inner wires.
-  //! \param nbEdges      [out] number of edges.
-  //! \param nbVertexes   [out] number of vertices.
+  //! \param shape   [in]  input shape.
+  //! \param summary [out] shape summary.
   asiAlgo_EXPORT void
-    ShapeSummary(const TopoDS_Shape& shape,
-                 int&                nbCompsolids,
-                 int&                nbCompounds,
-                 int&                nbSolids,
-                 int&                nbShells,
-                 int&                nbFaces,
-                 int&                nbWires,
-                 int&                nbOuterWires,
-                 int&                nbInnerWires,
-                 int&                nbEdges,
-                 int&                nbDegenEdges,
-                 int&                nbVertexes);
+    ShapeSummary(const TopoDS_Shape&  shape,
+                 asiAlgo_TopoSummary& summary);
 
   //! Collects summary information of the given shape: returns the number
   //! of sub-shapes of each type.

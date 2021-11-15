@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>
@@ -40,13 +40,13 @@ namespace asiAsm {
 namespace xde {
 
 //! Auxiliary class to iterate over triangulated faces.
-class gltf_FacePropertyExtractor
+class glTFFacePropertyExtractor
 {
 public:
 
   //! Ctor.
   gltf_EXPORT
-    gltf_FacePropertyExtractor(const TopoDS_Face& face);
+    glTFFacePropertyExtractor(const TopoDS_Face& face);
 
 public:
 

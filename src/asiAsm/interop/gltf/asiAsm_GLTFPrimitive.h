@@ -31,7 +31,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>
@@ -53,28 +53,28 @@ namespace asiAsm {
 namespace xde {
 
 //! Auxiliary class to iterate over triangulated faces.
-struct gltf_Primitive
+struct glTFPrimitive
 {
-  gltf_Primitive()
+  glTFPrimitive()
   {
     Name                              = "";
-    Mode                              = gltf_PrimitiveMode::gltf_PrimitiveMode_Triangles;
-    PosAccessor                       = gltf_Accessor();
-    NormAccessor                      = gltf_Accessor();
-    UVAccessor                        = gltf_Accessor();
-    ColorAccessor                     = gltf_Accessor();
-    IndAccessor                       = gltf_Accessor();
+    Mode                              = glTFPrimitiveMode::glTFPrimitiveMode_Triangles;
+    PosAccessor                       = glTFAccessor();
+    NormAccessor                      = glTFAccessor();
+    UVAccessor                        = glTFAccessor();
+    ColorAccessor                     = glTFAccessor();
+    IndAccessor                       = glTFAccessor();
   };
 
-  gltf_PrimitiveMode                    Mode;           //! how to interpret the vertex data: points, lines or triangles
+  glTFPrimitiveMode              Mode;           //! how to interpret the vertex data: points, lines or triangles
   TCollection_AsciiString               Name;           //! primitive name
-  gltf_XdeVisualStyle                   Style;          //! primitive material
+  glTFXdeVisualStyle             Style;          //! primitive material
 
-  gltf_Accessor                         PosAccessor;    //!< accessor for nodal positions
-  gltf_Accessor                         NormAccessor;   //!< accessor for nodal normals
-  gltf_Accessor                         UVAccessor;     //!< accessor for nodal UV texture coordinates
-  gltf_Accessor                         ColorAccessor;  //!< accessor for nodal colors
-  gltf_Accessor                         IndAccessor;    //!< accessor for indices
+  glTFAccessor                   PosAccessor;    //!< accessor for nodal positions
+  glTFAccessor                   NormAccessor;   //!< accessor for nodal normals
+  glTFAccessor                   UVAccessor;     //!< accessor for nodal UV texture coordinates
+  glTFAccessor                   ColorAccessor;  //!< accessor for nodal colors
+  glTFAccessor                   IndAccessor;    //!< accessor for indices
 
   NCollection_Vector<gp_XYZ>            NodePositions;  //! vertex positions
   NCollection_Vector<Graphic3d_Vec3>    NodeNormals;    //! vertex normals

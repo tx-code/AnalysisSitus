@@ -60,8 +60,8 @@
 #include <asiUI_XdeBrowser.h>
 
 // glTF includes
-#include <asiAsm_GlTFWriter.h>
-#include <asiAsm_GlTFXdeDataSourceProvider.h>
+#include <asiAsm_GLTFWriter.h>
+#include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // DF Browser includes
 #include <DFBrowser.hxx>
@@ -428,21 +428,25 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
   //
-  if ( partSolids.Extent() > 1 )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "One single-solid parts are supported right now.");
-    return TCL_ERROR;
-  }
+  //if ( partSolids.Extent() > 1 )
+  //{
+  //  interp->GetProgress().SendLogMessage(LogErr(Normal) << "One single-solid parts are supported right now.");
+  //  return TCL_ERROR;
+  //}
 
   // Prepare XDE document.
   Handle(asiAsm::xde::Doc) xdeDoc = new asiAsm::xde::Doc;
   //
-  const asiAsm::xde::PartId pid = xdeDoc->AddPart( partSolids(1) );
+  TopTools_IndexedMapOfShape::Iterator pIt(partSolids);
+  for ( ; pIt.More(); pIt.Next() )
+  {
+    const asiAsm::xde::PartId pid = xdeDoc->AddPart(pIt.Value());
 
-  // Transfer metadata.
-  asiEngine_Part partApi(cmdEngine::model);
-  //
-  partApi.TransferMetadata(pid, xdeDoc);
+    // Transfer metadata.
+    asiEngine_Part partApi(cmdEngine::model);
+    //
+    partApi.TransferMetadata(pid, xdeDoc);
+  }
   xdeDoc->UpdateAssemblies();
 
   // Browse XDE document if requested.
@@ -475,21 +479,21 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   }
 
   // Export to glTF.
-  asiAsm::xde::gltf_Writer cafWriter(TCollection_AsciiString( filename.c_str() ),
+  asiAsm::xde::glTFWriter cafWriter(TCollection_AsciiString( filename.c_str() ),
                                      ext.EndsWith(".glb"), nullptr, nullptr);
   //
-  cafWriter.SetTransformationFormat(asiAsm::xde::gltf_WriterTrsfFormat_TRS);
+  cafWriter.SetTransformationFormat(asiAsm::xde::glTFWriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);
   //
   //const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
   //cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
-  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(asiAsm::xde::gltf_CoordinateSystem_Zup);
+  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(asiAsm::xde::glTFCoordinateSystem_Zup);
   //
   TColStd_IndexedDataMapOfStringString fileInfo;
   fileInfo.Add("Author", "Analysis Situs");
   fileInfo.Add("Organization", "Analysis Situs");
 
-  Handle(asiAsm::xde::gltf_XdeDataSourceProvider) dataProvider = new asiAsm::xde::gltf_XdeDataSourceProvider(xdeDoc->GetDocument());
+  Handle(asiAsm::xde::glTFXdeDataSourceProvider) dataProvider = new asiAsm::xde::glTFXdeDataSourceProvider(xdeDoc->GetDocument());
   if ( !cafWriter.Perform(dataProvider, fileInfo) )
   {
     xdeDoc->Release();

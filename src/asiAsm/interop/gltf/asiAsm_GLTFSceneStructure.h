@@ -46,20 +46,20 @@ namespace asiAsm {
 //! The node may have a name and own transformation. If the node is a container of other nodes, keep them as children array.
 //! If the node is a mesh leaf of the scene, it must point to the index of the corresponding mesh item under "meshes" element.
 //! For getting a better idea follow this : https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_004_ScenesNodes.md
-struct gltf_Node
+struct glTFNode
 {
-  friend class gltf_SceneStructure;
+  friend class glTFSceneStructure;
 
   static const int INVALID_ID = -1;
 
   TCollection_AsciiString  Name;
   TopLoc_Location          Trsf;
-  std::vector<gltf_Node*>  Children;
+  std::vector<glTFNode*>  Children;
   int                      MeshIndex;
 
   private:
 
-    gltf_Node()
+    glTFNode()
       : MeshIndex(INVALID_ID) {}
 };
 
@@ -116,7 +116,7 @@ struct gltf_Node
 //! https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_002_BasicGltfStructure.md#the-basic-structure-of-gltf
 //! https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_004_ScenesNodes.md#scenes-and-nodes
 
-class gltf_SceneStructure
+class glTFSceneStructure
 {
 public:
 
@@ -126,16 +126,16 @@ public:
 
   //! Destructor.
   asiAsm_EXPORT 
-    ~gltf_SceneStructure();
+    ~glTFSceneStructure();
 
   //! Adds a new node to the end of array.
   asiAsm_EXPORT 
-    gltf_Node* PrependNode();
+    glTFNode* PrependNode();
 
   //! Sets the node as root.
   //! \param[in] n the node to set as root.
   asiAsm_EXPORT 
-    void MarkNodeAsRoot(gltf_Node* N);
+    void MarkNodeAsRoot(glTFNode* N);
 
   //! Removes all nodes.
   asiAsm_EXPORT 
@@ -145,21 +145,21 @@ public:
 
   //! Gets the top-level nodes.
   asiAsm_EXPORT 
-    const std::vector<gltf_Node*>& GetRoots() const;
+    const std::vector<glTFNode*>& GetRoots() const;
 
   //! Gets all nodes of scene structure.
   asiAsm_EXPORT 
-    const std::vector<gltf_Node*>& GetNodes() const;
+    const std::vector<glTFNode*>& GetNodes() const;
 
   //! Gets the index of a certain node.
   //! \param[in] n the node which index is in question.
   asiAsm_EXPORT 
-    int GetIndex(gltf_Node* N) const;
+    int GetIndex(glTFNode* N) const;
 
 private:
 
-  std::vector<gltf_Node*> m_nodes;
-  std::vector<gltf_Node*> m_roots;
+  std::vector<glTFNode*> m_nodes;
+  std::vector<glTFNode*> m_roots;
 };
 } // xde
 } // asiAsm

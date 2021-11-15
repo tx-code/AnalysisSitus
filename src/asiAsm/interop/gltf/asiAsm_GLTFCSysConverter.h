@@ -52,18 +52,18 @@ namespace xde {
 //! This allows passing tool through several initialization steps,
 //! so that a reader can initialize input length units (only if file format defines such information),
 //! while application specifies output length units, and conversion will be done only when both defined.
-class gltf_CSysConverter
+class glTFCSysConverter
 {
 public:
 
   //! Return a standard coordinate system definition.
-  static gp_Ax3 StandardCoordinateSystem(gltf_CoordinateSystem theSys)
+  static gp_Ax3 StandardCoordinateSystem(glTFCoordinateSystem theSys)
   {
     switch (theSys)
     {
-      case gltf_CoordinateSystem_posYfwd_posZup: return gp_Ax3 (gp::Origin(), gp::DZ(), gp::DX());
-      case gltf_CoordinateSystem_negZfwd_posYup: return gp_Ax3 (gp::Origin(), gp::DY(), gp::DX());
-      case gltf_CoordinateSystem_Undefined: break;
+      case glTFCoordinateSystem_posYfwd_posZup: return gp_Ax3 (gp::Origin(), gp::DZ(), gp::DX());
+      case glTFCoordinateSystem_negZfwd_posYup: return gp_Ax3 (gp::Origin(), gp::DY(), gp::DX());
+      case glTFCoordinateSystem_Undefined: break;
     }
     return gp_Ax3();
   }
@@ -71,7 +71,7 @@ public:
 public:
 
   //! Empty constructor.
-  gltf_EXPORT gltf_CSysConverter();
+  gltf_EXPORT glTFCSysConverter();
 
   //! Return TRUE if there is no transformation (target and current coordinates systems are same).
   bool IsEmpty() const { return myIsEmpty; }
@@ -110,9 +110,9 @@ public:
   }
 
   //! Set source coordinate system.
-  void SetInputCoordinateSystem (gltf_CoordinateSystem theSysFrom)
+  void SetInputCoordinateSystem (glTFCoordinateSystem theSysFrom)
   {
-    myHasInputAx3 = theSysFrom != gltf_CoordinateSystem_Undefined;
+    myHasInputAx3 = theSysFrom != glTFCoordinateSystem_Undefined;
     Init (StandardCoordinateSystem (theSysFrom), myInputLengthUnit, myOutputAx3, myOutputLengthUnit);
   }
 
@@ -130,9 +130,9 @@ public:
   }
 
   //! Set destination coordinate system.
-  void SetOutputCoordinateSystem (gltf_CoordinateSystem theSysTo)
+  void SetOutputCoordinateSystem (glTFCoordinateSystem theSysTo)
   {
-    myHasOutputAx3 = theSysTo != gltf_CoordinateSystem_Undefined;
+    myHasOutputAx3 = theSysTo != glTFCoordinateSystem_Undefined;
     Init (myInputAx3, myInputLengthUnit, StandardCoordinateSystem (theSysTo), myOutputLengthUnit);
   }
 
@@ -184,12 +184,12 @@ public:
 
 private:
 
-  gp_Ax3 myInputAx3;         //!< source      coordinate system
-  gp_Ax3 myOutputAx3;        //!< destination coordinate system
-  double myInputLengthUnit;  //!< source      length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
-  double myOutputLengthUnit; //!< destination length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
-  bool   myHasInputAx3;      //!< flag indicating if source coordinate system is defined or not
-  bool   myHasOutputAx3;     //!< flag indicating if destination coordinate system is defined or not
+  gp_Ax3         myInputAx3;         //!< source      coordinate system
+  gp_Ax3         myOutputAx3;        //!< destination coordinate system
+  double         myInputLengthUnit;  //!< source      length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
+  double         myOutputLengthUnit; //!< destination length units, defined as scale factor to m (meters); -1.0 by default which means UNDEFINED
+  bool           myHasInputAx3;      //!< flag indicating if source coordinate system is defined or not
+  bool           myHasOutputAx3;     //!< flag indicating if destination coordinate system is defined or not
 
   gp_Trsf        myTrsf;       //!< transformation from input Ax3 to output Ax3
   gp_Trsf        myTrsfInv;    //!< inversed transformation from input Ax3 to output Ax3

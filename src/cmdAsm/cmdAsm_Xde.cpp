@@ -44,8 +44,8 @@
 #include <asiEngine_Part.h>
 
 // glTF includes
-#include <asiAsm_GlTFWriter.h>
-#include <asiAsm_GlTFXdeDataSourceProvider.h>
+#include <asiAsm_GLTFWriter.h>
+#include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // FBX includes
 #include <fbx_XdeWriter.h>
@@ -858,19 +858,19 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  gltf_Writer cafWriter( filename,
+  glTFWriter cafWriter( filename,
                         ext.EndsWith(".glb"),
                         interp->GetProgress(),
                         interp->GetPlotter() );
   //
-  cafWriter.SetTransformationFormat(gltf_WriterTrsfFormat_TRS);
+  cafWriter.SetTransformationFormat(glTFWriterTrsfFormat_TRS);
   cafWriter.SetForcedUVExport(false);
   //
   //const double systemUnitFactor = UnitsMethods::GetCasCadeLengthUnit() * 0.001;
   //cafWriter.ChangeCoordinateSystemConverter().SetInputLengthUnit(systemUnitFactor);
-  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(gltf_CoordinateSystem_Zup);
+  cafWriter.ChangeCoordinateSystemConverter().SetInputCoordinateSystem(glTFCoordinateSystem_Zup);
 
-  Handle(gltf_XdeDataSourceProvider) dataProvider = new gltf_XdeDataSourceProvider(doc->GetDocument());
+  Handle(glTFXdeDataSourceProvider) dataProvider = new glTFXdeDataSourceProvider(doc->GetDocument());
   if ( !cafWriter.Perform(dataProvider) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "glTF export failed.");
