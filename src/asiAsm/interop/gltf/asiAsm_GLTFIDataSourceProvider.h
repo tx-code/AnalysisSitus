@@ -1,8 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 08 January 2021
-// Created by: Sergey SLYADNEV
+// Created on: 05 July 2021
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2021-present, Julia Slyadneva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,36 +30,41 @@
 
 #pragma once
 
-// asiAsm includes
-#include <asiAsm.h>
+// glTF includes
+#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GlTFSceneStructure.h>
+#include <asiAsm_GLTFPrimitive.h>
 
-// Rapidjson includes (should be hidden in cpp)
-#if defined USE_RAPIDJSON
-  #include <rapidjson/prettywriter.h>
-  #include <rapidjson/ostreamwrapper.h>
-#endif
+//-----------------------------------------------------------------------------
+
+typedef NCollection_IndexedDataMap <asiAsm::xde::glTFNode*, NCollection_Vector<asiAsm::xde::glTFPrimitive>> t_Meshes2Primitives;
+
+//-----------------------------------------------------------------------------
 
 namespace asiAsm {
 namespace xde {
 
-//! JSON serializer declared in AS header to avoid inclusion of rapidjson header
-//! files in the dependent libs. This `gltf_JsonSerializer.h` should be
-//! included in cpp files only.
-//!
-//! We use "pretty writer" here to make glTF's JSON files human-readable (i.e.,
-//! have all these whitespaces and newlines).
-class gltf_JsonSerializer : public rapidjson::PrettyWriter<rapidjson::OStreamWrapper>
+//! This class is used to feed glTF writer with scene structure and definition of meshes.
+//! This class is considered to be inherited when a custom scene structure is needed.
+class glTFIDataSourceProvider : public Standard_Transient
 {
 public:
 
-  //! Ctor accepting the output stream.
-  //! \param[in,out] ostr the output stream to serialize data into.
-  gltf_JsonSerializer(rapidjson::OStreamWrapper& ostr)
-  : rapidjson::PrettyWriter<rapidjson::OStreamWrapper>(ostr)
-  {}
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(glTFIDataSourceProvider, Standard_Transient)
 
+public:
+  //! This method is called to prepare the scene tree and meshes definition.
+  virtual 
+    void Process(ActAPI_ProgressEntry progress = nullptr) = 0;
+
+  //! Gets the scene tree.
+  virtual
+    const glTFSceneStructure& GetSceneStructure() const = 0;
+
+  //! Gets the map of meshes nodes with the corresponding 3D definition also known as primitives.
+  virtual
+    const t_Meshes2Primitives& GetSceneMeshes() const = 0;
 };
-
 } // xde
 } // asiAsm
-

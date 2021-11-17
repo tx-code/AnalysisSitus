@@ -33,7 +33,7 @@
 using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
-gltf_SceneStructure::~gltf_SceneStructure()
+glTFSceneStructure::~glTFSceneStructure()
 {
   for (auto n : m_nodes)
   {
@@ -44,22 +44,22 @@ gltf_SceneStructure::~gltf_SceneStructure()
 }
 
 //-----------------------------------------------------------------------------
-void gltf_SceneStructure::MarkNodeAsRoot(gltf_Node* N)
+void glTFSceneStructure::MarkNodeAsRoot(glTFNode* N)
 {
   m_roots.push_back(N);
 }
 
 //-----------------------------------------------------------------------------
-gltf_Node* gltf_SceneStructure::PrependNode()
+glTFNode* glTFSceneStructure::PrependNode()
 {
-  gltf_Node* n = new gltf_Node();
+  glTFNode* n = new glTFNode();
   m_nodes.push_back(n);
 
   return n;
 }
 
 //-----------------------------------------------------------------------------
-void gltf_SceneStructure::Clear()
+void glTFSceneStructure::Clear()
 {
   m_nodes.clear();
   m_nodes.shrink_to_fit();
@@ -69,22 +69,22 @@ void gltf_SceneStructure::Clear()
 }
 
 //-----------------------------------------------------------------------------
-const std::vector<gltf_Node*>& gltf_SceneStructure::GetRoots() const
+const std::vector<glTFNode*>& glTFSceneStructure::GetRoots() const
 {
   return m_roots;
 }
 
 //-----------------------------------------------------------------------------
-const std::vector<gltf_Node*>& gltf_SceneStructure::GetNodes() const
+const std::vector<glTFNode*>& glTFSceneStructure::GetNodes() const
 {
   return m_nodes;
 }
 
 //-----------------------------------------------------------------------------
-int gltf_SceneStructure::GetIndex(gltf_Node* N) const
+int glTFSceneStructure::GetIndex(glTFNode* N) const
 {
   int _index = 0;
-  for (const gltf_Node* _n : m_nodes)
+  for (const glTFNode* _n : m_nodes)
   {
     if (_n == N)
       return _index;

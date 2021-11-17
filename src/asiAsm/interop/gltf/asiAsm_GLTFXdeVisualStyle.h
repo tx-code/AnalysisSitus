@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFMaterialAttr.h>
+#include <asiAsm_GLTFMaterialAttr.h>
 
 // OpenCascade includes
 #include <XCAFPrs_Style.hxx>
@@ -29,30 +29,30 @@ namespace asiAsm {
 namespace xde {
 
 //! Data transfer object for visual styles taken out from XDE document.
-class gltf_XdeVisualStyle
+class glTFXdeVisualStyle
 {
 public:
 
   //! Default ctor.
   gltf_EXPORT
-    gltf_XdeVisualStyle();
+    glTFXdeVisualStyle();
 
   //! Conversion ctor. Accepts the OpenCascade-ish data structure for
   //! XDE styles and converts it to our own thing.
   //! \param[in] the data structure to convert.
   gltf_EXPORT
-    gltf_XdeVisualStyle(const XCAFPrs_Style& other);
+    glTFXdeVisualStyle(const XCAFPrs_Style& other);
 
 public:
 
   //! \return material OCAF attribute.
-  gltf_EXPORT const Handle(gltf_MaterialAttr)&
+  gltf_EXPORT const Handle(glTFMaterialAttr)&
     GetMaterial() const;
 
   //! Sets material OCAF attribute.
   //! \param[in] material the material attribute to set.
   gltf_EXPORT void
-    SetMaterial(const Handle(gltf_MaterialAttr)& material);
+    SetMaterial(const Handle(glTFMaterialAttr)& material);
 
   //! \return true if the surface color is set.
   gltf_EXPORT bool
@@ -112,13 +112,13 @@ public:
   //! \param[in] other the style to compare with.
   //! \return true in case of equality, false -- otherwise.
   gltf_EXPORT bool
-    IsEqual(const gltf_XdeVisualStyle& other) const;
+    IsEqual(const glTFXdeVisualStyle& other) const;
 
   //! Checks if this style is equal to the passed one.
   //! \param[in] other the style to compare with.
   //! \return true in case of equality, false -- otherwise.
   gltf_EXPORT bool
-    operator==(const gltf_XdeVisualStyle& other) const;
+    operator==(const glTFXdeVisualStyle& other) const;
 
 public:
 
@@ -130,20 +130,20 @@ public:
     //! \param[in] upper the upper bound for the hash code being computed.
     //! \return the computed hash code.
     gltf_EXPORT static int
-      HashCode(const gltf_XdeVisualStyle& style,
+      HashCode(const glTFXdeVisualStyle& style,
                const int                  upper);
 
     //! Checks if the passed styles are equal.
     //! \param[in] S1 the first style to check.
     //! \param[in] S2 the second style to check.
     gltf_EXPORT static bool
-      IsEqual(const gltf_XdeVisualStyle& S1,
-              const gltf_XdeVisualStyle& S2);
+      IsEqual(const glTFXdeVisualStyle& S1,
+              const glTFXdeVisualStyle& S2);
   };
 
 protected:
 
-  Handle(gltf_MaterialAttr) m_material;       //!< Material definition.
+  Handle(glTFMaterialAttr)  m_material;       //!< Material definition.
   Quantity_ColorRGBA        m_colorSurf;      //!< Surface color.
   Quantity_Color            m_colorCurve;     //!< Curve color.
   bool                      m_bHasColorSurf;  //!< Indicates whether surface color is set.
@@ -154,4 +154,3 @@ protected:
 
 } // xde
 } // asiAsm
-

@@ -1,7 +1,8 @@
 //-----------------------------------------------------------------------------
-// Created on: 05 July 2021
+// Created on: 08 January 2021
+// Created by: Sergey SLYADNEV
 //-----------------------------------------------------------------------------
-// Copyright (c) 2021-present, Julia Slyadneva
+// Copyright (c) 2020-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,42 +31,35 @@
 
 #pragma once
 
-// glTF includes
-#include <asiAsm_GlTFEntities.h>
-#include <asiAsm_GlTFSceneStructure.h>
-#include <asiAsm_GlTFPrimitive.h>
+// asiAsm includes
+#include <asiAsm.h>
 
-//-----------------------------------------------------------------------------
-
-typedef NCollection_IndexedDataMap <asiAsm::xde::gltf_Node*, NCollection_Vector<asiAsm::xde::gltf_Primitive>> t_Meshes2Primitives;
-
-//-----------------------------------------------------------------------------
+// Rapidjson includes (should be hidden in cpp)
+#if defined USE_RAPIDJSON
+  #include <rapidjson/prettywriter.h>
+  #include <rapidjson/ostreamwrapper.h>
+#endif
 
 namespace asiAsm {
 namespace xde {
 
-//! This class is used to feed glTF writer with scene structure and definition of meshes.
-//! This class is considered to be inherited when a custom scene structure is needed.
-class gltf_IDataSourceProvider : public Standard_Transient
+//! JSON serializer declared in AS header to avoid inclusion of rapidjson header
+//! files in the dependent libs. This `glTFJsonSerializer.h` should be
+//! included in cpp files only.
+//!
+//! We use "pretty writer" here to make glTF's JSON files human-readable (i.e.,
+//! have all these whitespaces and newlines).
+class glTFJsonSerializer : public rapidjson::PrettyWriter<rapidjson::OStreamWrapper>
 {
 public:
 
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_IDataSourceProvider, Standard_Transient)
+  //! Ctor accepting the output stream.
+  //! \param[in,out] ostr the output stream to serialize data into.
+  glTFJsonSerializer(rapidjson::OStreamWrapper& ostr)
+  : rapidjson::PrettyWriter<rapidjson::OStreamWrapper>(ostr)
+  {}
 
-public:
-  //! This method is called to prepare the scene tree and meshes definition.
-  virtual 
-    void Process(ActAPI_ProgressEntry progress = nullptr) = 0;
-
-  //! Gets the scene tree.
-  virtual
-    const gltf_SceneStructure& GetSceneStructure() const = 0;
-
-  //! Gets the map of meshes nodes with the corresponding 3D definition also known as primitives.
-  virtual
-    const t_Meshes2Primitives& GetSceneMeshes() const = 0;
 };
+
 } // xde
 } // asiAsm
-

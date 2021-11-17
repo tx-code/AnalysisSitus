@@ -16,14 +16,14 @@
  ***************************************************************************/
 
 // Own include
-#include <asiAsm_GlTFWriter.h>
+#include <asiAsm_GLTFWriter.h>
 
 // GlTF includes
-#include <asiAsm_GlTFMaterialMap.h>
-#include <asiAsm_GlTFFacePropertyExtractor.h>
+#include <asiAsm_GLTFMaterialMap.h>
+#include <asiAsm_GLTFFacePropertyExtractor.h>
 //
 #if defined USE_RAPIDJSON
-  #include <asiAsm_GlTFJsonSerializer.h>
+  #include <asiAsm_GLTFJsonSerializer.h>
 #endif
 
 // asiAlgo includes
@@ -94,19 +94,19 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-gltf_Writer::gltf_Writer(const TCollection_AsciiString& filename,
+glTFWriter::glTFWriter(const TCollection_AsciiString& filename,
                        const bool                     isBinary,
                        ActAPI_ProgressEntry           progress,
                        ActAPI_PlotterEntry            plotter)
 //
 : ActAPI_IAlgorithm (progress, plotter),
   m_filename        (filename),
-  m_trsfFormat      (gltf_WriterTrsfFormat_Compact),
+  m_trsfFormat      (glTFWriterTrsfFormat_Compact),
   m_bIsBinary       (isBinary),
   m_binDataLen64    (0)
 {
   m_CSTrsf.SetOutputLengthUnit(1.0); // meters
-  m_CSTrsf.SetOutputCoordinateSystem(gltf_CoordinateSystem_glTF);
+  m_CSTrsf.SetOutputCoordinateSystem(glTFCoordinateSystem_glTF);
 
   TCollection_AsciiString dir, filenameShort, filenameShortBase, filenameExt;
   OSD_Path::FolderAndFileFromPath(filename, dir, filenameShort);
@@ -118,20 +118,20 @@ gltf_Writer::gltf_Writer(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
-gltf_Writer::~gltf_Writer()
+glTFWriter::~glTFWriter()
 {
   m_jsonWriter.reset();
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataNodes(std::ostream&           binFile,
+void glTFWriter::writeBinDataNodes(std::ostream&           binFile,
                                    int&                     accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives (m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       itPrm.ChangeValue().PosAccessor.Id = accessorNb++;
@@ -152,13 +152,13 @@ void gltf_Writer::writeBinDataNodes(std::ostream&           binFile,
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataNormals(std::ostream&      binFile,
+void glTFWriter::writeBinDataNormals(std::ostream&      binFile,
                                      int&               accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       if (itPrm.Value().NodeNormals.Size() == 0)
@@ -179,13 +179,13 @@ void gltf_Writer::writeBinDataNormals(std::ostream&      binFile,
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
+void glTFWriter::writeBinDataTextCoords(std::ostream&            binFile,
                                          int&                     accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       if (itPrm.Value().NodeTextures.Size() == 0)
@@ -204,13 +204,13 @@ void gltf_Writer::writeBinDataTextCoords(std::ostream&            binFile,
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataNodalColors(std::ostream& binFile,
+void glTFWriter::writeBinDataNodalColors(std::ostream& binFile,
                                           int& accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       if (itPrm.Value().NodeColors.Size() == 0)
@@ -229,13 +229,13 @@ void gltf_Writer::writeBinDataNodalColors(std::ostream& binFile,
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
+void glTFWriter::writeBinDataIndices(std::ostream&    binFile,
                                       int&             accessorNb)
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       if (itPrm.Value().NodeIndices.Size() == 0)
@@ -247,7 +247,7 @@ void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
       for (; itTriangles.More(); itTriangles.Next())
       {
         Poly_Triangle tri = itTriangles.Value();
-        if (itPrm.Value().IndAccessor.ComponentType == gltf_AccessorComponentType_UInt16)
+        if (itPrm.Value().IndAccessor.ComponentType == glTFAccessorComponentType_UInt16)
         {
           writeTriangle16(binFile,
             NCollection_Vec3<uint16_t>((uint16_t)tri(1),
@@ -259,7 +259,7 @@ void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
           writeTriangle32(binFile, Graphic3d_Vec3i(tri(1), tri(2), tri(3)));
         }
       }
-      if (itPrm.Value().IndAccessor.ComponentType == gltf_AccessorComponentType_UInt16)
+      if (itPrm.Value().IndAccessor.ComponentType == glTFAccessorComponentType_UInt16)
       {
         // alignment by 4 bytes
         int64_t contentLen64 = (int64_t)binFile.tellp();
@@ -276,7 +276,7 @@ void gltf_Writer::writeBinDataIndices(std::ostream&    binFile,
 
 //-----------------------------------------------------------------------------
 
-bool gltf_Writer::Perform(const Handle(gltf_IDataSourceProvider)&     dataProvider,
+bool glTFWriter::Perform(const Handle(glTFIDataSourceProvider)&     dataProvider,
                          const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
   if (dataProvider.IsNull() )
@@ -293,106 +293,106 @@ bool gltf_Writer::Perform(const Handle(gltf_IDataSourceProvider)&     dataProvid
 
 //-----------------------------------------------------------------------------
 
-const gltf_CSysConverter&
-  gltf_Writer::CoordinateSystemConverter() const
+const glTFCSysConverter&
+  glTFWriter::CoordinateSystemConverter() const
 {
   return m_CSTrsf;
 }
 
 //-----------------------------------------------------------------------------
 
-gltf_CSysConverter&
-  gltf_Writer::ChangeCoordinateSystemConverter()
+glTFCSysConverter&
+  glTFWriter::ChangeCoordinateSystemConverter()
 {
   return m_CSTrsf;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::SetCoordinateSystemConverter(const gltf_CSysConverter& converter)
+void glTFWriter::SetCoordinateSystemConverter(const glTFCSysConverter& converter)
 {
   m_CSTrsf = converter;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_Writer::IsBinary() const
+bool glTFWriter::IsBinary() const
 {
   return m_bIsBinary;
 }
 
 //-----------------------------------------------------------------------------
 
-gltf_WriterTrsfFormat
-  gltf_Writer::TransformationFormat() const
+glTFWriterTrsfFormat
+  glTFWriter::TransformationFormat() const
 {
   return m_trsfFormat;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::SetTransformationFormat(const gltf_WriterTrsfFormat fmt)
+void glTFWriter::SetTransformationFormat(const glTFWriterTrsfFormat fmt)
 {
   m_trsfFormat = fmt;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_Writer::IsForcedUVExport() const
+bool glTFWriter::IsForcedUVExport() const
 {
   return m_bIsForcedUVExport;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::SetForcedUVExport(const bool toForce)
+void glTFWriter::SetForcedUVExport(const bool toForce)
 {
   m_bIsForcedUVExport = toForce;
 }
 
 //-----------------------------------------------------------------------------
 
-const gltf_XdeVisualStyle&
-  gltf_Writer::DefaultStyle() const
+const glTFXdeVisualStyle&
+  glTFWriter::DefaultStyle() const
 {
   return m_defaultStyle;
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::SetDefaultStyle(const gltf_XdeVisualStyle& style)
+void glTFWriter::SetDefaultStyle(const glTFXdeVisualStyle& style)
 {
   m_defaultStyle = style;
 }
 
 //-----------------------------------------------------------------------------
 
-bool gltf_Writer::writeBinData()
+bool glTFWriter::writeBinData()
 {
   m_buffViewNodalPos.ByteOffset       = 0;
   m_buffViewNodalPos.ByteLength       = 0;
 
   m_buffViewNodalPos.ByteStride       = 12;
-  m_buffViewNodalPos.Target           = gltf_BufferViewTarget_ARRAY_BUFFER;
+  m_buffViewNodalPos.Target           = glTFBufferViewTarget_ARRAY_BUFFER;
 
   m_buffViewNodalNorm.ByteOffset      = 0;
   m_buffViewNodalNorm.ByteLength      = 0;
   m_buffViewNodalNorm.ByteStride      = 12;
-  m_buffViewNodalNorm.Target          = gltf_BufferViewTarget_ARRAY_BUFFER;
+  m_buffViewNodalNorm.Target          = glTFBufferViewTarget_ARRAY_BUFFER;
 
   m_buffViewNodalTextCoord.ByteOffset = 0;
   m_buffViewNodalTextCoord.ByteLength = 0;
   m_buffViewNodalTextCoord.ByteStride = 8;
-  m_buffViewNodalTextCoord.Target     = gltf_BufferViewTarget_ARRAY_BUFFER;
+  m_buffViewNodalTextCoord.Target     = glTFBufferViewTarget_ARRAY_BUFFER;
 
   m_buffViewNodalColor.ByteOffset     = 0;
   m_buffViewNodalColor.ByteLength     = 0;
   m_buffViewNodalColor.ByteStride     = 12;
-  m_buffViewNodalColor.Target         = gltf_BufferViewTarget_ARRAY_BUFFER;
+  m_buffViewNodalColor.Target         = glTFBufferViewTarget_ARRAY_BUFFER;
 
   m_buffViewIndices.ByteOffset       = 0;
   m_buffViewIndices.ByteLength       = 0;
-  m_buffViewIndices.Target           = gltf_BufferViewTarget_ELEMENT_ARRAY_BUFFER;
+  m_buffViewIndices.Target           = glTFBufferViewTarget_ELEMENT_ARRAY_BUFFER;
 
   m_binDataLen64 = 0;
 
@@ -531,7 +531,7 @@ bool gltf_Writer::writeBinData()
 
 //-----------------------------------------------------------------------------
 
-bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo)
+bool glTFWriter::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   m_jsonWriter.reset();
@@ -566,7 +566,7 @@ bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo
   }
 
   // Prepare material map.
-  gltf_MaterialMap materialMap(m_filename, defSamplerId);
+  glTFMaterialMap materialMap(m_filename, defSamplerId);
   materialMap.SetDefaultStyle(m_defaultStyle);
 
   // Root nodes indices start from 0.
@@ -574,7 +574,7 @@ bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo
 
   // Prepare JSON writer.
   rapidjson::OStreamWrapper fileStream(gltfContentFile);
-  m_jsonWriter.reset( new gltf_JsonSerializer(fileStream) );
+  m_jsonWriter.reset( new glTFJsonSerializer(fileStream) );
 
   // Start writing.
   m_jsonWriter->StartObject();
@@ -689,12 +689,12 @@ bool gltf_Writer::writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeAccessors()
+void glTFWriter::writeAccessors()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAccessors()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Accessors) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Accessors) );
   m_jsonWriter->StartArray();
 
   /* =================
@@ -704,7 +704,7 @@ void gltf_Writer::writeAccessors()
   //
   for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       //
@@ -719,7 +719,7 @@ void gltf_Writer::writeAccessors()
   //
   for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       //
@@ -734,7 +734,7 @@ void gltf_Writer::writeAccessors()
   //
   for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       //
@@ -749,7 +749,7 @@ void gltf_Writer::writeAccessors()
    //
   for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       //
@@ -764,9 +764,9 @@ void gltf_Writer::writeAccessors()
   //
   for (t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes()); itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive> primitives = itNodes2Primitives.Value();
+    NCollection_Vector<glTFPrimitive> primitives = itNodes2Primitives.Value();
 
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(primitives);
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(primitives);
     for (; itPrm.More(); itPrm.Next())
     {
       //
@@ -783,12 +783,12 @@ void gltf_Writer::writeAccessors()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodalPositions(const gltf_Primitive& gltfPrm)
+void glTFWriter::writeNodalPositions(const glTFPrimitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalPositions()");
 
-  if (gltfPrm.PosAccessor.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.PosAccessor.Id == glTFAccessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
@@ -832,12 +832,12 @@ void gltf_Writer::writeNodalPositions(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodalNormals(const gltf_Primitive& gltfPrm)
+void glTFWriter::writeNodalNormals(const glTFPrimitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalNormals()");
 
-  if (gltfPrm.NormAccessor.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.NormAccessor.Id == glTFAccessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
@@ -867,12 +867,12 @@ void gltf_Writer::writeNodalNormals(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodalTextCoords(const gltf_Primitive& gltfPrm)
+void glTFWriter::writeNodalTextCoords(const glTFPrimitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalTextCoords()");
 
-  if (gltfPrm.UVAccessor.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.UVAccessor.Id == glTFAccessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
@@ -902,12 +902,12 @@ void gltf_Writer::writeNodalTextCoords(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodalColors(const gltf_Primitive& gltfPrm)
+void glTFWriter::writeNodalColors(const glTFPrimitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodalColors()");
 
-  if (gltfPrm.ColorAccessor.Id == gltf_Accessor::INVALID_ID)
+  if (gltfPrm.ColorAccessor.Id == glTFAccessor::INVALID_ID)
     return;
 
   m_jsonWriter->StartObject();
@@ -935,12 +935,12 @@ void gltf_Writer::writeNodalColors(const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodalIndices (const gltf_Primitive& gltfPrm)
+void glTFWriter::writeNodalIndices (const glTFPrimitive& gltfPrm)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeIndices()");
 
-  if (gltfPrm.IndAccessor.Id == gltf_Accessor::INVALID_ID )
+  if (gltfPrm.IndAccessor.Id == glTFAccessor::INVALID_ID )
     return;
 
   m_jsonWriter->StartObject();
@@ -968,19 +968,19 @@ void gltf_Writer::writeNodalIndices (const gltf_Primitive& gltfPrm)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeAnimations()
+void glTFWriter::writeAnimations()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo)
+void glTFWriter::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if (m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeAsset()");
 
-  m_jsonWriter->Key    ( gltf_RootElementName(gltf_RootElement_Asset) );
+  m_jsonWriter->Key    ( glTFRootElementName(glTFRootElement_Asset) );
   m_jsonWriter->StartObject();
   m_jsonWriter->Key    ("generator");
   m_jsonWriter->String (gltf_VendorName);
@@ -1016,15 +1016,15 @@ void gltf_Writer::writeAsset(const TColStd_IndexedDataMapOfStringString& fileInf
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBufferViews(const int binDataBufferId)
+void glTFWriter::writeBufferViews(const int binDataBufferId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBufferViews()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_BufferViews) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_BufferViews) );
   m_jsonWriter->StartArray();
 
-  if ( m_buffViewNodalPos.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalPos.Id != glTFAccessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
@@ -1041,7 +1041,7 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
     m_jsonWriter->String ("Positions");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewNodalNorm.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalNorm.Id != glTFAccessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
@@ -1058,7 +1058,7 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
     m_jsonWriter->String ("Normals");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewNodalTextCoord.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewNodalTextCoord.Id != glTFAccessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key    ("buffer");
@@ -1075,7 +1075,7 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
     m_jsonWriter->String ("Textures");
     m_jsonWriter->EndObject();
   }
-  if (m_buffViewNodalColor.Id != gltf_Accessor::INVALID_ID)
+  if (m_buffViewNodalColor.Id != glTFAccessor::INVALID_ID)
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key     ("buffer");
@@ -1092,7 +1092,7 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
     m_jsonWriter->String  ("Colors");
     m_jsonWriter->EndObject();
   }
-  if ( m_buffViewIndices.Id != gltf_Accessor::INVALID_ID )
+  if ( m_buffViewIndices.Id != glTFAccessor::INVALID_ID )
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key     ("buffer");
@@ -1119,12 +1119,12 @@ void gltf_Writer::writeBufferViews(const int binDataBufferId)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeBuffers()
+void glTFWriter::writeBuffers()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeBuffers()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Buffers) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Buffers) );
   m_jsonWriter->StartArray();
   {
     m_jsonWriter->StartObject();
@@ -1149,14 +1149,14 @@ void gltf_Writer::writeBuffers()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeExtensions()
+void glTFWriter::writeExtensions()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeImages(gltf_MaterialMap& materialMap)
+void glTFWriter::writeImages(glTFMaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeImages()");
@@ -1167,7 +1167,7 @@ void gltf_Writer::writeImages(gltf_MaterialMap& materialMap)
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       materialMap.AddImages(m_jsonWriter.get(), itPrm.Value().Style, isStarted);
@@ -1188,7 +1188,7 @@ void gltf_Writer::writeImages(gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeMaterials(gltf_MaterialMap& materialMap)
+void glTFWriter::writeMaterials(glTFMaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMaterials()");
@@ -1199,7 +1199,7 @@ void gltf_Writer::writeMaterials(gltf_MaterialMap& materialMap)
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       materialMap.AddMaterial(m_jsonWriter.get(), itPrm.Value().Style, isStarted);
@@ -1221,12 +1221,12 @@ void gltf_Writer::writeMaterials(gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
+void glTFWriter::writeMeshes(const glTFMaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeMeshes()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Meshes) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Meshes) );
   m_jsonWriter->StartArray();
 
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
@@ -1236,7 +1236,7 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
 
     bool toStartPrims = true;
 
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       if ( toStartPrims )
@@ -1249,7 +1249,7 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
         m_jsonWriter->StartArray();
       }
 
-      const gltf_Primitive& primitive = itPrm.Value();
+      const glTFPrimitive& primitive = itPrm.Value();
       const TCollection_AsciiString matId    = materialMap.FindMaterial(primitive.Style );
 
       m_jsonWriter->StartObject();
@@ -1257,7 +1257,7 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
         m_jsonWriter->Key("attributes");
         m_jsonWriter->StartObject();
         {
-          if (primitive.NormAccessor.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.NormAccessor.Id != glTFAccessor::INVALID_ID )
           {
             m_jsonWriter->Key("NORMAL");
             m_jsonWriter->Int(primitive.NormAccessor.Id);
@@ -1265,12 +1265,12 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
           m_jsonWriter->Key("POSITION");
           m_jsonWriter->Int(primitive.PosAccessor.Id);
 
-          if (primitive.UVAccessor.Id != gltf_Accessor::INVALID_ID )
+          if (primitive.UVAccessor.Id != glTFAccessor::INVALID_ID )
           {
             m_jsonWriter->Key("TEXCOORD_0");
             m_jsonWriter->Int(primitive.UVAccessor.Id);
           }
-          if (primitive.ColorAccessor.Id != gltf_Accessor::INVALID_ID)
+          if (primitive.ColorAccessor.Id != glTFAccessor::INVALID_ID)
           {
             m_jsonWriter->Key("COLOR_0");
             m_jsonWriter->Int(primitive.ColorAccessor.Id);
@@ -1278,7 +1278,7 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
         }
         m_jsonWriter->EndObject();
 
-        if (primitive.IndAccessor.Id != gltf_Accessor::INVALID_ID)
+        if (primitive.IndAccessor.Id != glTFAccessor::INVALID_ID)
         {
           m_jsonWriter->Key("indices");
           m_jsonWriter->Int(primitive.IndAccessor.Id);
@@ -1319,16 +1319,16 @@ void gltf_Writer::writeMeshes(const gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeNodes()
+void glTFWriter::writeNodes()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeNodes()");
 
   //* Write scene nodes using prepared map for correct order of array members
-  m_jsonWriter->Key(gltf_RootElementName(gltf_RootElement_Nodes));
+  m_jsonWriter->Key(glTFRootElementName(glTFRootElement_Nodes));
   m_jsonWriter->StartArray();
 
-  const gltf_SceneStructure& sceneNodeStrt = m_dataProvider->GetSceneStructure();
+  const glTFSceneStructure& sceneNodeStrt = m_dataProvider->GetSceneStructure();
   for (auto node : sceneNodeStrt.GetNodes())
   {
     m_jsonWriter->StartObject();
@@ -1365,15 +1365,15 @@ void gltf_Writer::writeNodes()
         const gp_XYZ& translPart = trsf.TranslationPart();
         const bool    hasTranslation = translPart.SquareModulus() > gp::Resolution();
 
-        gltf_WriterTrsfFormat trsfFormat = m_trsfFormat;
-        if (m_trsfFormat == gltf_WriterTrsfFormat_Compact)
+        glTFWriterTrsfFormat trsfFormat = m_trsfFormat;
+        if (m_trsfFormat == glTFWriterTrsfFormat_Compact)
         {
           trsfFormat = hasRotation && hasScale && hasTranslation
-            ? gltf_WriterTrsfFormat_Mat4
-            : gltf_WriterTrsfFormat_TRS;
+            ? glTFWriterTrsfFormat_Mat4
+            : glTFWriterTrsfFormat_TRS;
         }
 
-        if (trsfFormat == gltf_WriterTrsfFormat_Mat4)
+        if (trsfFormat == glTFWriterTrsfFormat_Mat4)
         {
           // write full matrix
           Graphic3d_Mat4 mat4;
@@ -1428,7 +1428,7 @@ void gltf_Writer::writeNodes()
         }
       }
     }
-    if (node->MeshIndex != gltf_Node::INVALID_ID)
+    if (node->MeshIndex != glTFNode::INVALID_ID)
     {
       m_jsonWriter->Key("mesh");
       m_jsonWriter->Int(node->MeshIndex);
@@ -1448,7 +1448,7 @@ void gltf_Writer::writeNodes()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeSamplers(const gltf_MaterialMap& materialMap)
+void glTFWriter::writeSamplers(const glTFMaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeSamplers()");
@@ -1456,7 +1456,7 @@ void gltf_Writer::writeSamplers(const gltf_MaterialMap& materialMap)
   if ( materialMap.NbImages() == 0 )
     return;
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Samplers) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Samplers) );
   m_jsonWriter->StartArray();
   {
     m_jsonWriter->StartObject();
@@ -1480,12 +1480,12 @@ void gltf_Writer::writeSamplers(const gltf_MaterialMap& materialMap)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeScene(const int defSceneId)
+void glTFWriter::writeScene(const int defSceneId)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScene()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Scene) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Scene) );
   m_jsonWriter->Int(defSceneId);
 #else
   // Suppress `unreferenced formal parameter` warning (C4100).
@@ -1498,19 +1498,19 @@ void gltf_Writer::writeScene(const int defSceneId)
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeScenes()
+void glTFWriter::writeScenes()
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeScenes()");
 
-  m_jsonWriter->Key( gltf_RootElementName(gltf_RootElement_Scenes) );
+  m_jsonWriter->Key( glTFRootElementName(glTFRootElement_Scenes) );
   m_jsonWriter->StartArray();
   {
     m_jsonWriter->StartObject();
     m_jsonWriter->Key("nodes");
     m_jsonWriter->StartArray();
     //
-    const gltf_SceneStructure& structure = m_dataProvider->GetSceneStructure();
+    const glTFSceneStructure& structure = m_dataProvider->GetSceneStructure();
     for (auto root : structure.GetRoots())
     {
       m_jsonWriter->Int(structure.GetIndex(root));
@@ -1528,14 +1528,14 @@ void gltf_Writer::writeScenes()
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeSkins()
+void glTFWriter::writeSkins()
 {
   // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_Writer::writeTextures(gltf_MaterialMap& materialMap)
+void glTFWriter::writeTextures(glTFMaterialMap& materialMap)
 {
 #if defined USE_RAPIDJSON
   Standard_ProgramError_Raise_if(m_jsonWriter.get() == nullptr, "Internal error: gltf_XdeWriter::writeTextures()");
@@ -1546,7 +1546,7 @@ void gltf_Writer::writeTextures(gltf_MaterialMap& materialMap)
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
   {
-    NCollection_Vector<gltf_Primitive>::Iterator itPrm(itNodes2Primitives.Value());
+    NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
       materialMap.AddTextures( m_jsonWriter.get(), itPrm.Value().Style, isStarted );

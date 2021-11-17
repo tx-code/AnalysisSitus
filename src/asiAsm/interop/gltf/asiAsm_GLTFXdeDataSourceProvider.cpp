@@ -29,14 +29,14 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiAsm_GlTFXdeDataSourceProvider.h>
+#include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // GlTF includes
-#include <asiAsm_GlTFMaterialMap.h>
-#include <asiAsm_GlTFFacePropertyExtractor.h>
-#include <asiAsm_GlTFCSysConverter.h>
+#include <asiAsm_GLTFMaterialMap.h>
+#include <asiAsm_GLTFFacePropertyExtractor.h>
+#include <asiAsm_GLTFCSysConverter.h>
 #include <asiAsm_GlTFEntities.h>
-#include <asiAsm_GlTFXdeVisualStyle.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
 
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
@@ -91,7 +91,7 @@ static TCollection_AsciiString readNameAttribute(const Handle(XCAFDoc_ShapeTool)
 
 //-----------------------------------------------------------------------------
 
-gltf_XdeDataSourceProvider::gltf_XdeDataSourceProvider(const Handle(TDocStd_Document)& doc,
+glTFXdeDataSourceProvider::glTFXdeDataSourceProvider(const Handle(TDocStd_Document)& doc,
                                                        const TColStd_MapOfAsciiString& filter)
   : m_doc(doc),
     m_filter(filter),
@@ -102,23 +102,23 @@ gltf_XdeDataSourceProvider::gltf_XdeDataSourceProvider(const Handle(TDocStd_Docu
 
 //-----------------------------------------------------------------------------
 
-gltf_XdeDataSourceProvider::~gltf_XdeDataSourceProvider()
+glTFXdeDataSourceProvider::~glTFXdeDataSourceProvider()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeDataSourceProvider::Process(ActAPI_ProgressEntry progress)
+void glTFXdeDataSourceProvider::Process(ActAPI_ProgressEntry progress)
 {
-  NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher> meshes;
-  processSceneStructure(meshes, progress);
-  processSceneMeshes(meshes, progress);
+  t_Node2Label solids;
+  createSceneStructure(solids, progress);
+  processSceneMeshes(solids, progress);
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeDataSourceProvider::processSceneStructure(NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher>&  meshes,
-                                                       ActAPI_ProgressEntry                                             progress)
+void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids,
+                                                            ActAPI_ProgressEntry progress)
 {
   m_sceneStructure.Clear();
 
@@ -128,15 +128,14 @@ void gltf_XdeDataSourceProvider::processSceneStructure(NCollection_DataMap<TDF_L
 
   // Prepare full indexed map of scene nodes in correct order.
   gltf_SceneNodeMap scNodeMapWithChildren; // indexes starting from 1
-  gltf_SceneNodeMap scNodeMeshes;
 
-  NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher> label2Node;
+  NCollection_DataMap<TDF_Label, glTFNode*, TDF_LabelMapHasher> label2Node;
   //
-  for (XCAFPrs_DocumentExplorer docExp(m_doc, rootLabs, XCAFPrs_DocumentExplorerFlags_None);
-    docExp.More(); docExp.Next())
+  XCAFPrs_DocumentExplorer docExp(m_doc, rootLabs, XCAFPrs_DocumentExplorerFlags_None);
+  for (; docExp.More(); docExp.Next())
   {
     const XCAFPrs_DocumentNode& docNode = docExp.Current();
-    gltf_Node* node = m_sceneStructure.PrependNode();
+    glTFNode* node = m_sceneStructure.PrependNode();
 
     if (!label2Node.IsBound(docNode.Label))
       label2Node.Bind(docNode.Label, node);
@@ -151,7 +150,7 @@ void gltf_XdeDataSourceProvider::processSceneStructure(NCollection_DataMap<TDF_L
   for (gltf_SceneNodeMap::Iterator snIt(scNodeMapWithChildren); snIt.More(); snIt.Next())
   {
     const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    gltf_Node* node = label2Node.Find(docNode.Label);
+    glTFNode* node = label2Node.Find(docNode.Label);
     if (!node)
       continue;
 
@@ -169,7 +168,7 @@ void gltf_XdeDataSourceProvider::processSceneStructure(NCollection_DataMap<TDF_L
         if (childLab.IsNull())
           continue;
 
-        gltf_Node* childNode = label2Node.Find(childLab);
+        glTFNode* childNode = label2Node.Find(childLab);
         if (childNode)
           node->Children.push_back(childNode);
       }
@@ -180,181 +179,100 @@ void gltf_XdeDataSourceProvider::processSceneStructure(NCollection_DataMap<TDF_L
     }
     if (!docNode.IsAssembly)
     {
-      scNodeMeshes.Add(docNode);
-
       // Mesh order of current node is equal to order of this node in scene nodes map
       int meshIdx = scNodeMapWithChildren.FindIndex(docNode.Id);
       if (meshIdx > 0)
       {
         node->MeshIndex = meshIdx - 1;
       }
-      meshes.Bind(docNode.RefLabel, node);
+      solids.Add( node, docNode.RefLabel );
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeDataSourceProvider::processSceneMeshes(NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher>&   meshes,
-                                                    ActAPI_ProgressEntry                                              progress)
+void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
+                                                          ActAPI_ProgressEntry  progress)
 {
   m_meshes.Clear();
 
   Handle(XCAFDoc_ShapeTool) shapeTool = XCAFDoc_DocumentTool::ShapeTool(m_doc->Main());
-  NCollection_DataMap<TopoDS_Shape, gltf_XdeVisualStyle, TopTools_ShapeMapHasher> styles;
+  NCollection_DataMap<TopoDS_Shape, glTFXdeVisualStyle, TopTools_ShapeMapHasher> styles;
 
-  NCollection_DataMap<TDF_Label, gltf_Node*, TDF_LabelMapHasher>::Iterator itM(meshes);
+  t_Node2Label::Iterator itM(solids);
   for (; itM.More(); itM.Next())
   {
-    readStyles(itM.Key(), styles);
+    readStyles(itM.Value(), styles);
 
     TopoDS_Shape shape;
 
     // If there's no shape in the XDE for the host label, we do nothing.
-    if (!XCAFDoc_ShapeTool::GetShape(itM.Key(), shape) || shape.IsNull())
+    if (!XCAFDoc_ShapeTool::GetShape(itM.Value(), shape) || shape.IsNull())
       continue;
 
     //* Gather 'face' primitives
     TopExp_Explorer expl(shape, TopAbs_FACE);
     for (; expl.More(); expl.Next())
     {
-      gltf_FacePropertyExtractor faceProperty(TopoDS::Face(expl.Current()));
+      glTFFacePropertyExtractor faceProperty(TopoDS::Face(expl.Current()));
       if (faceProperty.IsEmptyMesh())
       {
         // glTF does not permit empty meshes / primitive arrays.
         progress.SendLogMessage(LogWarn(Normal) << "gltf_XdeWriter skips node '%1' without meshes."
-          << ::readNameAttribute(shapeTool, itM.Key()));
+          << ::readNameAttribute(shapeTool, itM.Value()));
 
         continue;
       }
 
-      gltf_Primitive facePrimitive;
+      glTFPrimitive facePrimitive;
+      processFacePrimitive(faceProperty.Face(), facePrimitive);
 
       if (styles.IsBound(faceProperty.Face()))
       {
         facePrimitive.Style = styles(faceProperty.Face());
       }
 
-      /* ====================
-       *  Fill-in nodes data.
-       * ==================== */
-      facePrimitive.PosAccessor.Count = faceProperty.NbNodes();
-      facePrimitive.PosAccessor.Type = gltf_AccessorLayout_Vec3;
-      facePrimitive.PosAccessor.ComponentType = gltf_AccessorComponentType_Float32;
-
-      const int nodeUpper = faceProperty.NodeUpper();
-      for (int nit = faceProperty.NodeLower(); nit <= nodeUpper; ++nit)
+      if (!m_meshes.Contains(itM.Key()))
       {
-        gp_XYZ node = faceProperty.NodeTransformed(nit).XYZ();
-        //facePrimitive.NodePos.BndBox.Add(Graphic3d_Vec3d(node.X(), node.Y(), node.Z()));
-        facePrimitive.NodePositions.Append(node);
+        m_meshes.Add(itM.Key(), NCollection_Vector<glTFPrimitive>());
       }
 
-      /* ======================
-       *  Fill-in normals data.
-       * ====================== */
-      facePrimitive.NormAccessor.Count = facePrimitive.PosAccessor.Count;
-      facePrimitive.NormAccessor.Type = gltf_AccessorLayout_Vec3;
-      facePrimitive.NormAccessor.ComponentType = gltf_AccessorComponentType_Float32;
-
-      for (int nit = faceProperty.NodeLower(); nit <= nodeUpper; ++nit)
-      {
-        const gp_Dir norm = faceProperty.NormalTransformed(nit);
-        Graphic3d_Vec3 vecNormal((float)norm.X(), (float)norm.Y(), (float)norm.Z());
-        facePrimitive.NodeNormals.Append(vecNormal);
-      }
-
-      /* ======================
-       *  Fill-in texture data.
-       * ====================== */
-      if (faceProperty.HasTexCoords() && styles.IsBound(faceProperty.Face()))
-      {
-        gltf_XdeVisualStyle style = facePrimitive.Style;
-        if (!style.GetMaterial().IsNull())
-        {
-          if (!gltf_MaterialMap::baseColorTexture(style.GetMaterial()).IsNull()
-            && !style.GetMaterial()->PbrMaterial().MetallicRoughnessTexture.IsNull()
-            && !style.GetMaterial()->PbrMaterial().EmissiveTexture.IsNull()
-            && !style.GetMaterial()->PbrMaterial().OcclusionTexture.IsNull()
-            && !style.GetMaterial()->PbrMaterial().NormalTexture.IsNull())
-          {
-            facePrimitive.UVAccessor.Count = faceProperty.NbNodes();
-            facePrimitive.UVAccessor.Type = gltf_AccessorLayout_Vec2;
-            facePrimitive.UVAccessor.ComponentType = gltf_AccessorComponentType_Float32;
-
-            const int nodeUpper1 = faceProperty.NodeUpper();
-            for (int nit = faceProperty.NodeLower(); nit <= nodeUpper1; ++nit)
-            {
-              gp_Pnt2d texCoord = faceProperty.NodeTexCoord(nit);
-              texCoord.SetY(1.0 - texCoord.Y());
-              facePrimitive.NodeTextures.Append(texCoord);
-            }
-          }
-        }
-      }
-
-      /* =================
-       *  Fill-in indices.
-       * ================= */
-      facePrimitive.IndAccessor.Count = faceProperty.NbTriangles() * 3;
-      facePrimitive.IndAccessor.Type = gltf_AccessorLayout_Scalar;
-      facePrimitive.IndAccessor.ComponentType = facePrimitive.PosAccessor.Count > std::numeric_limits<uint16_t>::max()
-        ? gltf_AccessorComponentType_UInt32
-        : gltf_AccessorComponentType_UInt16;
-
-      const int elemLower = faceProperty.ElemLower();
-      const int elemUpper = faceProperty.ElemUpper();
-      for (int eit = elemLower; eit <= elemUpper; ++eit)
-      {
-        Poly_Triangle tri = faceProperty.TriangleOriented(eit);
-        tri(1) -= elemLower;
-        tri(2) -= elemLower;
-        tri(3) -= elemLower;
-        facePrimitive.NodeIndices.Append(tri);
-      }
-
-      if (!m_meshes.Contains(itM.Value()))
-      {
-        m_meshes.Add(itM.Value(), NCollection_Vector<gltf_Primitive>());
-      }
-
-      m_meshes.ChangeFromKey(itM.Value()).Append(facePrimitive);
+      m_meshes.ChangeFromKey(itM.Key()).Append(facePrimitive);
     }
 
     /* =========================
      *  Process edge primitives.
      * ========================= */
     TDF_LabelSequence subLabels;
-    XCAFDoc_ShapeTool::GetSubShapes(itM.Key(), subLabels);
+    XCAFDoc_ShapeTool::GetSubShapes(itM.Value(), subLabels);
     for (TDF_LabelSequence::Iterator labelsIt(subLabels); labelsIt.More(); labelsIt.Next())
     {
       const TDF_Label& subShapeLabel = labelsIt.Value();
 
       // If there's no shape in the XDE for the host label, we do nothing.
       if (!XCAFDoc_ShapeTool::GetShape(subShapeLabel, shape) ||
-        shape.IsNull() || shape.ShapeType() != TopAbs_EDGE)
+           shape.IsNull() || shape.ShapeType() != TopAbs_EDGE)
         continue;
 
-      TopoDS_Edge& e = TopoDS::Edge(shape);
-      gltf_Primitive edgePrimitive;
-      bool result = processEdgePrimitive(e, styles, edgePrimitive);
-
-      if (!result)
+      TopoDS_Edge&         e = TopoDS::Edge(shape);
+      glTFPrimitive edgePrimitive;
+      if (!processEdgePrimitive(e, styles, edgePrimitive) )
         continue;
 
-      if (!m_meshes.Contains(itM.Value()))
+      if (!m_meshes.Contains(itM.Key()))
       {
-        m_meshes.Add(itM.Value(), NCollection_Vector<gltf_Primitive>());
+        m_meshes.Add(itM.Key(), NCollection_Vector<glTFPrimitive>());
       }
 
-      m_meshes.ChangeFromKey(itM.Value()).Append(edgePrimitive);
+      m_meshes.ChangeFromKey(itM.Key()).Append(edgePrimitive);
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void gltf_XdeDataSourceProvider::readStyles(const TDF_Label&  label,
+void glTFXdeDataSourceProvider::readStyles(const TDF_Label&  label,
                                             t_Shape2Style&    shapeStyles)
 {
   // Get styles out of OCAF.
@@ -381,7 +299,7 @@ void gltf_XdeDataSourceProvider::readStyles(const TDF_Label&  label,
       if (tit != keyShapeType)
         continue;
 
-      gltf_XdeVisualStyle cafStyle = sit.Value();
+      glTFXdeVisualStyle cafStyle = sit.Value();
       TopoDS_Shape keyShapeLocated = keyShape.Located(TopLoc_Location());
       //
       if (keyShapeType >= TopAbs_FACE)
@@ -401,12 +319,104 @@ void gltf_XdeDataSourceProvider::readStyles(const TDF_Label&  label,
     }
   }
 }
+//-----------------------------------------------------------------------------
+
+bool glTFXdeDataSourceProvider::processFacePrimitive(const TopoDS_Face&    face,
+                                                            glTFPrimitive& facePrimitive)
+{
+  if ( face.IsNull() )
+    return false;
+
+  glTFFacePropertyExtractor faceProperty(face);
+  if ( faceProperty.IsEmptyMesh() )
+    return false;
+
+  /* ====================
+   *  Fill-in nodes data.
+   * ==================== */
+  facePrimitive.PosAccessor.Count         = faceProperty.NbNodes();
+  facePrimitive.PosAccessor.Type          = glTFAccessorLayout_Vec3;
+  facePrimitive.PosAccessor.ComponentType = glTFAccessorComponentType_Float32;
+
+  const int nodeUpper = faceProperty.NodeUpper();
+  for ( int nit = faceProperty.NodeLower(); nit <= nodeUpper; ++nit )
+  {
+    gp_XYZ node = faceProperty.NodeTransformed(nit).XYZ();
+    //facePrimitive.NodePos.BndBox.Add(Graphic3d_Vec3d(node.X(), node.Y(), node.Z()));
+    facePrimitive.NodePositions.Append(node);
+  }
+
+  /* ======================
+   *  Fill-in normals data.
+   * ====================== */
+  facePrimitive.NormAccessor.Count          = facePrimitive.PosAccessor.Count;
+  facePrimitive.NormAccessor.Type           = glTFAccessorLayout_Vec3;
+  facePrimitive.NormAccessor.ComponentType  = glTFAccessorComponentType_Float32;
+
+  for ( int nit = faceProperty.NodeLower(); nit <= nodeUpper; ++nit )
+  {
+    const gp_Dir norm = faceProperty.NormalTransformed(nit);
+    Graphic3d_Vec3 vecNormal((float) norm.X(), (float) norm.Y(), (float) norm.Z());
+    facePrimitive.NodeNormals.Append(vecNormal);
+  }
+
+  /* ======================
+   *  Fill-in texture data.
+   * ====================== */
+  if ( faceProperty.HasTexCoords() )
+  {
+    glTFXdeVisualStyle style = facePrimitive.Style;
+    if ( !style.GetMaterial().IsNull() )
+    {
+      if ( !glTFMaterialMap::baseColorTexture(style.GetMaterial()).IsNull()
+        && !style.GetMaterial()->PbrMaterial().MetallicRoughnessTexture.IsNull()
+        && !style.GetMaterial()->PbrMaterial().EmissiveTexture.IsNull()
+        && !style.GetMaterial()->PbrMaterial().OcclusionTexture.IsNull()
+        && !style.GetMaterial()->PbrMaterial().NormalTexture.IsNull() )
+      {
+        facePrimitive.UVAccessor.Count          = faceProperty.NbNodes();
+        facePrimitive.UVAccessor.Type           = glTFAccessorLayout_Vec2;
+        facePrimitive.UVAccessor.ComponentType  = glTFAccessorComponentType_Float32;
+
+        const int nodeUpper1 = faceProperty.NodeUpper();
+        for ( int nit = faceProperty.NodeLower(); nit <= nodeUpper1; ++nit )
+        {
+          gp_Pnt2d texCoord = faceProperty.NodeTexCoord(nit);
+          texCoord.SetY(1.0 - texCoord.Y());
+          facePrimitive.NodeTextures.Append(texCoord);
+        }
+      }
+    }
+  }
+
+  /* =================
+   *  Fill-in indices.
+   * ================= */
+  facePrimitive.IndAccessor.Count         = faceProperty.NbTriangles() * 3;
+  facePrimitive.IndAccessor.Type          = glTFAccessorLayout_Scalar;
+  facePrimitive.IndAccessor.ComponentType = facePrimitive.PosAccessor.Count > std::numeric_limits<uint16_t>::max()
+                                            ? glTFAccessorComponentType_UInt32
+                                            : glTFAccessorComponentType_UInt16;
+
+  const int elemLower = faceProperty.ElemLower();
+  const int elemUpper = faceProperty.ElemUpper();
+  for ( int eit = elemLower; eit <= elemUpper; ++eit )
+  {
+    Poly_Triangle tri = faceProperty.TriangleOriented(eit);
+    tri(1) -= elemLower;
+    tri(2) -= elemLower;
+    tri(3) -= elemLower;
+    facePrimitive.NodeIndices.Append(tri);
+  }
+
+  return true;
+}
 
 //-----------------------------------------------------------------------------
 
-bool gltf_XdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&   edge,
-                                                      const t_Shape2Style& styles,
-                                                      gltf_Primitive&      edgePrimitive)
+bool glTFXdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&    edge,
+                                                            const t_Shape2Style&  styles,
+                                                            glTFPrimitive& edgePrimitive)
 {
   TopLoc_Location                       loc;
   Handle(Poly_Triangulation)            tri;
@@ -416,15 +426,15 @@ bool gltf_XdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&   edge,
   if (polygon.IsNull())
     return false;
 
-  edgePrimitive.Mode = gltf_PrimitiveMode::gltf_PrimitiveMode_LineStrip;
+  edgePrimitive.Mode = glTFPrimitiveMode::glTFPrimitiveMode_LineStrip;
   if (styles.IsBound(edge))
   {
     edgePrimitive.Style = styles(edge);
   }
 
   edgePrimitive.PosAccessor.Count = polygon->Nodes().Size();
-  edgePrimitive.PosAccessor.Type = gltf_AccessorLayout_Vec3;
-  edgePrimitive.PosAccessor.ComponentType = gltf_AccessorComponentType_Float32;
+  edgePrimitive.PosAccessor.Type = glTFAccessorLayout_Vec3;
+  edgePrimitive.PosAccessor.ComponentType = glTFAccessorComponentType_Float32;
 
   const TColStd_Array1OfInteger& indices = polygon->Nodes();
   int index = indices.Lower();

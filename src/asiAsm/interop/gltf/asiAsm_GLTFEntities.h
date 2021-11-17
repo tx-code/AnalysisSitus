@@ -40,38 +40,38 @@ namespace asiAsm {
 namespace xde {
 
 //! Root elements within glTF JSON document.
-enum gltf_RootElement
+enum glTFRootElement
 {
   /* Mandatory elements */
-  gltf_RootElement_Asset,       //!< "asset"       element, mandatory.
-  gltf_RootElement_Scenes,      //!< "scenes"      element, mandatory.
-  gltf_RootElement_Scene,       //!< "scene"       element, mandatory.
-  gltf_RootElement_Nodes,       //!< "nodes"       element, mandatory.
-  gltf_RootElement_Meshes,      //!< "meshes"      element, mandatory.
-  gltf_RootElement_Accessors,   //!< "accessors"   element, mandatory.
-  gltf_RootElement_BufferViews, //!< "bufferViews" element, mandatory.
-  gltf_RootElement_Buffers,     //!< "buffers"     element, mandatory.
-  NB_MANDATORY,                 //!< number of mandatory elements.
+  glTFRootElement_Asset,       //!< "asset"       element, mandatory.
+  glTFRootElement_Scenes,      //!< "scenes"      element, mandatory.
+  glTFRootElement_Scene,       //!< "scene"       element, mandatory.
+  glTFRootElement_Nodes,       //!< "nodes"       element, mandatory.
+  glTFRootElement_Meshes,      //!< "meshes"      element, mandatory.
+  glTFRootElement_Accessors,   //!< "accessors"   element, mandatory.
+  glTFRootElement_BufferViews, //!< "bufferViews" element, mandatory.
+  glTFRootElement_Buffers,     //!< "buffers"     element, mandatory.
+  NB_MANDATORY,                //!< number of mandatory elements.
 
   /* Optional elements */
-  gltf_RootElement_Animations = NB_MANDATORY, //!< "animations" element.
-  gltf_RootElement_Materials,                 //!< "materials"  element.
-  gltf_RootElement_Programs,                  //!< "programs"   element.
-  gltf_RootElement_Samplers,                  //!< "samplers"   element.
-  gltf_RootElement_Shaders,                   //!< "shaders"    element.
-  gltf_RootElement_Skins,                     //!< "skins"      element.
-  gltf_RootElement_Techniques,                //!< "techniques" element.
-  gltf_RootElement_Textures,                  //!< "textures"   element.
-  gltf_RootElement_Images,                    //!< "images"     element.
-  gltf_RootElement_ExtensionsUsed,            //!< "extensionsUsed"     element.
-  gltf_RootElement_ExtensionsRequired,        //!< "extensionsRequired" element.
+  glTFRootElement_Animations = NB_MANDATORY, //!< "animations" element.
+  glTFRootElement_Materials,                 //!< "materials"  element.
+  glTFRootElement_Programs,                  //!< "programs"   element.
+  glTFRootElement_Samplers,                  //!< "samplers"   element.
+  glTFRootElement_Shaders,                   //!< "shaders"    element.
+  glTFRootElement_Skins,                     //!< "skins"      element.
+  glTFRootElement_Techniques,                //!< "techniques" element.
+  glTFRootElement_Textures,                  //!< "textures"   element.
+  glTFRootElement_Images,                    //!< "images"     element.
+  glTFRootElement_ExtensionsUsed,            //!< "extensionsUsed"     element.
+  glTFRootElement_ExtensionsRequired,        //!< "extensionsRequired" element.
 
   NB //!< overall number of elements.
 };
 
-inline const char* gltf_RootElementName(gltf_RootElement elem)
+inline const char* glTFRootElementName(glTFRootElement elem)
 {
-  static const char* ROOT_NAMES[gltf_RootElement::NB] =
+  static const char* ROOT_NAMES[glTFRootElement::NB] =
   {
     "asset",
     "scenes",
@@ -108,74 +108,74 @@ inline const char* gltf_RootElementName(gltf_RootElement elem)
 //! 2. Components are the numeric values within an element, e.g. x and y for "VEC2".
 //!    Various component types are available: BYTE, UNSIGNED_BYTE, SHORT, UNSIGNED_SHORT,
 //!    UNSIGNED_INT, and FLOAT.
-enum gltf_AccessorComponentType
+enum glTFAccessorComponentType
 {
-  gltf_AccessorComponentType_UNKNOWN,
-  gltf_AccessorComponentType_Int8    = 5120, //!< GL_BYTE
-  gltf_AccessorComponentType_UInt8   = 5121, //!< GL_UNSIGNED_BYTE
-  gltf_AccessorComponentType_Int16   = 5122, //!< GL_SHORT
-  gltf_AccessorComponentType_UInt16  = 5123, //!< GL_UNSIGNED_SHORT
-  gltf_AccessorComponentType_UInt32  = 5125, //!< GL_UNSIGNED_INT
-  gltf_AccessorComponentType_Float32 = 5126  //!< GL_FLOAT
+  glTFAccessorComponentType_UNKNOWN,
+  glTFAccessorComponentType_Int8    = 5120, //!< GL_BYTE
+  glTFAccessorComponentType_UInt8   = 5121, //!< GL_UNSIGNED_BYTE
+  glTFAccessorComponentType_Int16   = 5122, //!< GL_SHORT
+  glTFAccessorComponentType_UInt16  = 5123, //!< GL_UNSIGNED_SHORT
+  glTFAccessorComponentType_UInt32  = 5125, //!< GL_UNSIGNED_INT
+  glTFAccessorComponentType_Float32 = 5126  //!< GL_FLOAT
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF enumeration defining Accessor layout.
 //! Similar to Graphic3d_TypeOfData but does not define actual type and includes matrices.
-enum gltf_AccessorLayout
+enum glTFAccessorLayout
 {
-  gltf_AccessorLayout_UNKNOWN, //!< unknown or invalid type
-  gltf_AccessorLayout_Scalar,  //!< "SCALAR"
-  gltf_AccessorLayout_Vec2,    //!< "VEC2"
-  gltf_AccessorLayout_Vec3,    //!< "VEC3"
-  gltf_AccessorLayout_Vec4,    //!< "VEC4"
-  gltf_AccessorLayout_Mat2,    //!< "MAT2"
-  gltf_AccessorLayout_Mat3,    //!< "MAT3"
-  gltf_AccessorLayout_Mat4     //!< "MAT4"
+  glTFAccessorLayout_UNKNOWN, //!< unknown or invalid type
+  glTFAccessorLayout_Scalar,  //!< "SCALAR"
+  glTFAccessorLayout_Vec2,    //!< "VEC2"
+  glTFAccessorLayout_Vec3,    //!< "VEC3"
+  glTFAccessorLayout_Vec4,    //!< "VEC4"
+  glTFAccessorLayout_Mat2,    //!< "MAT2"
+  glTFAccessorLayout_Mat3,    //!< "MAT3"
+  glTFAccessorLayout_Mat4     //!< "MAT4"
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF data structure defining Accessor.
-struct gltf_Accessor
+struct glTFAccessor
 {
   static const int INVALID_ID = -1;
 
 public:
 
-  int                        Id;            //!< identifier
-  int64_t                    ByteOffset;    //!< byte offset
-  int64_t                    Count;         //!< size
-  int32_t                    ByteStride;    //!< [0, 255] for glTF 1.0
-  gltf_AccessorLayout        Type;          //!< layout type
-  gltf_AccessorComponentType ComponentType; //!< component type
-  Graphic3d_BndBox3d         BndBox;        //!< bounding box
+  int                       Id;            //!< identifier
+  int64_t                   ByteOffset;    //!< byte offset
+  int64_t                   Count;         //!< size
+  int32_t                   ByteStride;    //!< [0, 255] for glTF 1.0
+  glTFAccessorLayout        Type;          //!< layout type
+  glTFAccessorComponentType ComponentType; //!< component type
+  Graphic3d_BndBox3d        BndBox;        //!< bounding box
 
   //! Default ctor.
-  gltf_Accessor()
+  glTFAccessor()
   : Id            (INVALID_ID),
     ByteOffset    (0),
     Count         (0),
     ByteStride    (0),
-    Type          (gltf_AccessorLayout_UNKNOWN),
-    ComponentType (gltf_AccessorComponentType_UNKNOWN) {}
+    Type          (glTFAccessorLayout_UNKNOWN),
+    ComponentType (glTFAccessorComponentType_UNKNOWN) {}
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF enumeration defining Primitive type.
 //! Similar to Graphic3d_TypeOfData but does not define actual type and includes matrices.
-enum class gltf_PrimitiveMode
+enum class glTFPrimitiveMode
 {
-  gltf_PrimitiveMode_UNKNOWN       = -1, //!< unknown or invalid type
-  gltf_PrimitiveMode_Points        =  0, //!< GL_POINTS
-  gltf_PrimitiveMode_Lines         =  1, //!< GL_LINES
-  gltf_PrimitiveMode_LineLoop      =  2, //!< GL_LINE_LOOP
-  gltf_PrimitiveMode_LineStrip     =  3, //!< GL_LINE_STRIP
-  gltf_PrimitiveMode_Triangles     =  4, //!< GL_TRIANGLES
-  gltf_PrimitiveMode_TriangleStrip =  5, //!< GL_TRIANGLE_STRIP
-  gltf_PrimitiveMode_TriangleFan   =  6  //!< GL_TRIANGLE_FAN
+  glTFPrimitiveMode_UNKNOWN       = -1, //!< unknown or invalid type
+  glTFPrimitiveMode_Points        =  0, //!< GL_POINTS
+  glTFPrimitiveMode_Lines         =  1, //!< GL_LINES
+  glTFPrimitiveMode_LineLoop      =  2, //!< GL_LINE_LOOP
+  glTFPrimitiveMode_LineStrip     =  3, //!< GL_LINE_STRIP
+  glTFPrimitiveMode_Triangles     =  4, //!< GL_TRIANGLES
+  glTFPrimitiveMode_TriangleStrip =  5, //!< GL_TRIANGLE_STRIP
+  glTFPrimitiveMode_TriangleFan   =  6  //!< GL_TRIANGLE_FAN
 };
 
 //-----------------------------------------------------------------------------
@@ -184,32 +184,32 @@ enum class gltf_PrimitiveMode
 //! Open CASCADE does not force application using specific coordinate system,
 //! although Draw Harness and samples define +Z-up +Y-forward coordinate system for camera view manipulation.
 //! This enumeration defines two commonly used conventions: Z-up and Y-up.
-enum gltf_CoordinateSystem
+enum glTFCoordinateSystem
 {
-  gltf_CoordinateSystem_Undefined      = -1, //!< undefined
-  gltf_CoordinateSystem_posYfwd_posZup =  0, //!< +YForward+Zup+Xright
-  gltf_CoordinateSystem_negZfwd_posYup,      //!< -ZForward+Yup+Xright
+  glTFCoordinateSystem_Undefined      = -1, //!< undefined
+  glTFCoordinateSystem_posYfwd_posZup =  0, //!< +YForward+Zup+Xright
+  glTFCoordinateSystem_negZfwd_posYup,      //!< -ZForward+Yup+Xright
 
-  gltf_CoordinateSystem_Blender = gltf_CoordinateSystem_posYfwd_posZup, //!< coordinate system used by Blender (+YForward+Zup+Xright)
-  gltf_CoordinateSystem_glTF    = gltf_CoordinateSystem_negZfwd_posYup, //!< coordinate system used by glTF    (-ZForward+Yup+Xright)
-  gltf_CoordinateSystem_Zup     = gltf_CoordinateSystem_Blender,        //!< Z-up coordinate system (+YForward+Zup+Xright)
-  gltf_CoordinateSystem_Yup     = gltf_CoordinateSystem_glTF            //!< Y-up coordinate system (-ZForward+Yup+Xright)
+  glTFCoordinateSystem_Blender = glTFCoordinateSystem_posYfwd_posZup, //!< coordinate system used by Blender (+YForward+Zup+Xright)
+  glTFCoordinateSystem_glTF    = glTFCoordinateSystem_negZfwd_posYup, //!< coordinate system used by glTF    (-ZForward+Yup+Xright)
+  glTFCoordinateSystem_Zup     = glTFCoordinateSystem_Blender,        //!< Z-up coordinate system (+YForward+Zup+Xright)
+  glTFCoordinateSystem_Yup     = glTFCoordinateSystem_glTF            //!< Y-up coordinate system (-ZForward+Yup+Xright)
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF enumeration defining BufferView target.
-enum gltf_BufferViewTarget
+enum glTFBufferViewTarget
 {
-  gltf_BufferViewTarget_UNKNOWN,                      //!< unknown or invalid type
-  gltf_BufferViewTarget_ARRAY_BUFFER         = 34962, //!< GL_ARRAY_BUFFER
-  gltf_BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963  //!< GL_ELEMENT_ARRAY_BUFFER
+  glTFBufferViewTarget_UNKNOWN,                      //!< unknown or invalid type
+  glTFBufferViewTarget_ARRAY_BUFFER         = 34962, //!< GL_ARRAY_BUFFER
+  glTFBufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963  //!< GL_ELEMENT_ARRAY_BUFFER
 };
 
 //-----------------------------------------------------------------------------
 
 //! Low-level glTF data structure defining BufferView.
-struct gltf_BufferView
+struct glTFBufferView
 {
   static const int INVALID_ID = -1;
 
@@ -219,32 +219,32 @@ public:
   int64_t               ByteOffset;
   int64_t               ByteLength;
   int32_t               ByteStride; //!< [0, 255]
-  gltf_BufferViewTarget Target;
+  glTFBufferViewTarget Target;
 
-  gltf_BufferView() //!< Default ctor.
+  glTFBufferView() //!< Default ctor.
   : Id         (INVALID_ID),
     ByteOffset (0),
     ByteLength (0),
     ByteStride (0),
-    Target     (gltf_BufferViewTarget_UNKNOWN)
+    Target     (glTFBufferViewTarget_UNKNOWN)
   {}
 
 };
 
 //-----------------------------------------------------------------------------
 
-class gltf_JsonSerializer;
+class glTFJsonSerializer;
 
 //-----------------------------------------------------------------------------
 
 //! Transformation format.
-enum gltf_WriterTrsfFormat
+enum glTFWriterTrsfFormat
 {
-  gltf_WriterTrsfFormat_Compact = 0, //!< automatically choose most compact representation between Mat4 and TRS
-  gltf_WriterTrsfFormat_Mat4    = 1, //!< 4x4 transformation Matrix
-  gltf_WriterTrsfFormat_TRS     = 2, //!< transformation decomposed into Translation vector, Rotation quaternion and Scale factor (T * R * S)
+  glTFWriterTrsfFormat_Compact = 0, //!< automatically choose most compact representation between Mat4 and TRS
+  glTFWriterTrsfFormat_Mat4    = 1, //!< 4x4 transformation Matrix
+  glTFWriterTrsfFormat_TRS     = 2, //!< transformation decomposed into Translation vector, Rotation quaternion and Scale factor (T * R * S)
 };
-enum { gltf_WriterTrsfFormat_LOWER = 0, gltf_WriterTrsfFormat_UPPER = gltf_WriterTrsfFormat_TRS }; // aliases
+enum { glTFWriterTrsfFormat_LOWER = 0, glTFWriterTrsfFormat_UPPER = glTFWriterTrsfFormat_TRS }; // aliases
 
 //-----------------------------------------------------------------------------
 
@@ -302,7 +302,7 @@ public:
 //-----------------------------------------------------------------------------
 
 //! Common (obsolete) material definition.
-struct gltf_MaterialCommon
+struct glTFMaterialCommon
 {
   Handle(Image_Texture) DiffuseTexture; //!< image defining diffuse color
   Quantity_Color        AmbientColor;   //!< ambient  color
@@ -314,7 +314,7 @@ struct gltf_MaterialCommon
   bool                  IsDefined;      //!< defined flag; FALSE by default
 
   //! Default ctor.
-  gltf_MaterialCommon()
+  glTFMaterialCommon()
   : AmbientColor  (0.1, 0.1, 0.1, Quantity_TOC_RGB),
     DiffuseColor  (0.8, 0.8, 0.8, Quantity_TOC_RGB),
     SpecularColor (0.2, 0.2, 0.2, Quantity_TOC_RGB),
@@ -325,7 +325,7 @@ struct gltf_MaterialCommon
   {}
 
   //! Compare two materials.
-  bool IsEqual(const gltf_MaterialCommon& other) const
+  bool IsEqual(const glTFMaterialCommon& other) const
   {
     if ( &other == this )
     {
@@ -340,20 +340,20 @@ struct gltf_MaterialCommon
       return true;
     }
 
-    return other.DiffuseTexture  == this->DiffuseTexture
-        && other.AmbientColor    == this->AmbientColor
-        && other.DiffuseColor    == this->DiffuseColor
-        && other.SpecularColor   == this->SpecularColor
-        && other.EmissiveColor   == this->EmissiveColor
-        && other.Shininess       == this->Shininess
-        && other.Transparency    == this->Transparency;
+    return other.DiffuseTexture == this->DiffuseTexture
+        && other.AmbientColor   == this->AmbientColor
+        && other.DiffuseColor   == this->DiffuseColor
+        && other.SpecularColor  == this->SpecularColor
+        && other.EmissiveColor  == this->EmissiveColor
+        && other.Shininess      == this->Shininess
+        && other.Transparency   == this->Transparency;
   }
 };
 
 //-----------------------------------------------------------------------------
 
 //! Metallic-roughness PBR material definition.
-struct gltf_MaterialPbr
+struct glTFMaterialPbr
 {
   Handle(Image_Texture) BaseColorTexture;         //!< RGB texture for the base color
   Handle(Image_Texture) MetallicRoughnessTexture; //!< RG texture packing the metallic and roughness properties together
@@ -368,7 +368,7 @@ struct gltf_MaterialPbr
   bool                  IsDefined;                //!< defined flag; FALSE by default
 
   //! Default constructor.
-  gltf_MaterialPbr()
+  glTFMaterialPbr()
   : BaseColor       (1.0f, 1.0f, 1.0f, 1.0f),
     EmissiveFactor  (0.0f, 0.0f, 0.0f),
     Metallic        (1.0f),
@@ -378,7 +378,7 @@ struct gltf_MaterialPbr
   {}
 
   //! Compares two materials.
-  bool IsEqual(const gltf_MaterialPbr& other) const
+  bool IsEqual(const glTFMaterialPbr& other) const
   {
     if ( &other == this )
     {

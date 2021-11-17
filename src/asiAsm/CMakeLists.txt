@@ -54,30 +54,30 @@ set (interop_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (interop_gltf_H_FILES
-  interop/gltf/asiAsm_GlTFCSysConverter.h
-  interop/gltf/asiAsm_GlTFEntities.h
-  interop/gltf/asiAsm_GlTFJsonSerializer.h
-  interop/gltf/asiAsm_GlTFMaterialAttr.h
-  interop/gltf/asiAsm_GlTFMaterialMap.h
-  interop/gltf/asiAsm_GlTFMaterialMapBase.h
-  interop/gltf/asiAsm_GlTFXdeVisualStyle.h
-  interop/gltf/asiAsm_GlTFWriter.h
-  interop/gltf/asiAsm_GlTFPrimitive.h
+  interop/gltf/asiAsm_GLTFCSysConverter.h
+  interop/gltf/asiAsm_GLTFEntities.h
+  interop/gltf/asiAsm_GLTFJsonSerializer.h
+  interop/gltf/asiAsm_GLTFMaterialAttr.h
+  interop/gltf/asiAsm_GLTFMaterialMap.h
+  interop/gltf/asiAsm_GLTFMaterialMapBase.h
+  interop/gltf/asiAsm_GLTFXdeVisualStyle.h
+  interop/gltf/asiAsm_GLTFWriter.h
+  interop/gltf/asiAsm_GLTFPrimitive.h
   interop/gltf/asiAsm_GlTFSceneStructure.h 
-  interop/gltf/asiAsm_GlTFFacePropertyExtractor.h
-  interop/gltf/asiAsm_GlTFIDataSourceProvider.h
-  interop/gltf/asiAsm_GlTFXdeDataSourceProvider.h
+  interop/gltf/asiAsm_GLTFFacePropertyExtractor.h
+  interop/gltf/asiAsm_GLTFIDataSourceProvider.h
+  interop/gltf/asiAsm_GLTFXdeDataSourceProvider.h
 )
 set (interop_gltf_CPP_FILES
-  interop/gltf/asiAsm_GlTFCSysConverter.cpp
-  interop/gltf/asiAsm_GlTFMaterialAttr.cpp
-  interop/gltf/asiAsm_GlTFMaterialMap.cpp
-  interop/gltf/asiAsm_GlTFMaterialMapBase.cpp
-  interop/gltf/asiAsm_GlTFXdeVisualStyle.cpp
-  interop/gltf/asiAsm_GlTFWriter.cpp
-  interop/gltf/asiAsm_GlTFSceneStructure.cpp
-  interop/gltf/asiAsm_GlTFFacePropertyExtractor.cpp
-  interop/gltf/asiAsm_GlTFXdeDataSourceProvider.cpp
+  interop/gltf/asiAsm_GLTFCSysConverter.cpp
+  interop/gltf/asiAsm_GLTFMaterialAttr.cpp
+  interop/gltf/asiAsm_GLTFMaterialMap.cpp
+  interop/gltf/asiAsm_GLTFMaterialMapBase.cpp
+  interop/gltf/asiAsm_GLTFXdeVisualStyle.cpp
+  interop/gltf/asiAsm_GLTFWriter.cpp
+  interop/gltf/asiAsm_GLTFSceneStructure.cpp
+  interop/gltf/asiAsm_GLTFFacePropertyExtractor.cpp
+  interop/gltf/asiAsm_GLTFXdeDataSourceProvider.cpp
 )
 
 #------------------------------------------------------------------------------

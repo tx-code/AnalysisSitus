@@ -1852,18 +1852,8 @@ bool asiAlgo_Utils::WritePly(const Handle(Poly_Triangulation)& triangulation,
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape& shape,
-                                 int&                nbCompsolids,
-                                 int&                nbCompounds,
-                                 int&                nbSolids,
-                                 int&                nbShells,
-                                 int&                nbFaces,
-                                 int&                nbWires,
-                                 int&                nbOuterWires,
-                                 int&                nbInnerWires,
-                                 int&                nbEdges,
-                                 int&                nbDegenEdges,
-                                 int&                nbVertexes)
+void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape&  shape,
+                                 asiAlgo_TopoSummary& summary)
 {
   if ( shape.IsNull() )
     return;
@@ -1893,31 +1883,31 @@ void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape& shape,
       M.Add( currentShape.Located( TopLoc_Location() ) );
 
     if ( currentShape.ShapeType() == TopAbs_COMPSOLID )
-      nbCompsolids++;
+      summary.nbCompsolids++;
     else if ( currentShape.ShapeType() == TopAbs_COMPOUND )
-      nbCompounds++;
+      summary.nbCompounds++;
     else if ( currentShape.ShapeType() == TopAbs_SOLID )
-      nbSolids++;
+      summary.nbSolids++;
     else if ( currentShape.ShapeType() == TopAbs_SHELL )
-      nbShells++;
+      summary.nbShells++;
     else if ( currentShape.ShapeType() == TopAbs_FACE )
-      nbFaces++;
+      summary.nbFaces++;
     else if ( currentShape.ShapeType() == TopAbs_WIRE )
     {
-      nbWires++;
+      summary.nbWires++;
       if ( outerWires.Contains(currentShape) )
-        nbOuterWires++;
+        summary.nbOuterWires++;
       else
-        nbInnerWires++;
+        summary.nbInnerWires++;
     }
     else if ( currentShape.ShapeType() == TopAbs_EDGE )
     {
-      nbEdges++;
+      summary.nbEdges++;
       if ( BRep_Tool::Degenerated( TopoDS::Edge(currentShape) ) )
-        nbDegenEdges++;
+        summary.nbDegenEdges++;
     }
     else if ( currentShape.ShapeType() == TopAbs_VERTEX )
-      nbVertexes++;
+      summary.nbVertexes++;
 
     // Iterate over the direct children of a shape
     for ( TopoDS_Iterator sub_it(currentShape); sub_it.More(); sub_it.Next() )
@@ -1935,43 +1925,20 @@ void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape& shape,
 void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape&      shape,
                                  TCollection_AsciiString& info)
 {
-  // Summary
-  int nbCompsolids = 0,
-      nbCompounds  = 0,
-      nbSolids     = 0,
-      nbShells     = 0,
-      nbFaces      = 0,
-      nbWires      = 0,
-      nbOuterWires = 0,
-      nbInnerWires = 0,
-      nbEdges      = 0,
-      nbDegenEdges = 0,
-      nbVertexes   = 0;
-
   // Extract summary
-  ShapeSummary(shape,
-               nbCompsolids,
-               nbCompounds,
-               nbSolids,
-               nbShells,
-               nbFaces,
-               nbWires,
-               nbOuterWires,
-               nbInnerWires,
-               nbEdges,
-               nbDegenEdges,
-               nbVertexes);
+  asiAlgo_TopoSummary props;
+  ShapeSummary(shape, props);
 
   // Prepare output string with the gathered summary
   info += "PART SUMMARY (EQ TSHAPE, ANY TRSF, ANY ORI):\n";
-  info += "- nb compsolids: "; info += nbCompsolids; info += "\n";
-  info += "- nb compounds: ";  info += nbCompounds;  info += "\n";
-  info += "- nb solids: ";     info += nbSolids;     info += "\n";
-  info += "- nb shells: ";     info += nbShells;     info += "\n";
-  info += "- nb faces: ";      info += nbFaces;      info += "\n";
-  info += "- nb wires: ";      info += nbWires;      info += "\n";
-  info += "- nb edges: ";      info += nbEdges;      info += "\n";
-  info += "- nb vertices: ";   info += nbVertexes;   info += "\n";
+  info += "- nb compsolids: "; info += props.nbCompsolids; info += "\n";
+  info += "- nb compounds: ";  info += props.nbCompounds;  info += "\n";
+  info += "- nb solids: ";     info += props.nbSolids;     info += "\n";
+  info += "- nb shells: ";     info += props.nbShells;     info += "\n";
+  info += "- nb faces: ";      info += props.nbFaces;      info += "\n";
+  info += "- nb wires: ";      info += props.nbWires;      info += "\n";
+  info += "- nb edges: ";      info += props.nbEdges;      info += "\n";
+  info += "- nb vertices: ";   info += props.nbVertexes;   info += "\n";
 }
 
 //-----------------------------------------------------------------------------

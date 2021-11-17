@@ -18,9 +18,9 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFCSysConverter.h>
-#include <asiAsm_GlTFXdeVisualStyle.h>
-#include <asiAsm_GlTFIDataSourceProvider.h>
+#include <asiAsm_GLTFCSysConverter.h>
+#include <asiAsm_GLTFXdeVisualStyle.h>
+#include <asiAsm_GLTFIDataSourceProvider.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -45,7 +45,7 @@ namespace asiAsm {
 namespace xde {
 
 // Forward declarations from the `asiAsm` namespace.
-class gltf_MaterialMap;
+class glTFMaterialMap;
 
 //! Writes the passed XDE document to glTF/glb format. All B-rep shapes in the
 //! document should have undergone meshing to get facets for export.
@@ -70,12 +70,12 @@ class gltf_MaterialMap;
 //!    rest of OpenCascade kernel. This version is our attempt to make it more
 //!    compact in its code base.
 //! To know more about glTF format follow this: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_001_Introduction.md
-class gltf_Writer : public ActAPI_IAlgorithm
+class glTFWriter : public ActAPI_IAlgorithm
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(gltf_Writer, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(glTFWriter, ActAPI_IAlgorithm)
 
 public:
 
@@ -86,14 +86,14 @@ public:
   //! \param[in] progress the progress notifier.
   //! \param[in] plotter  the imperative plotter.
   gltf_EXPORT
-    gltf_Writer(const TCollection_AsciiString& filename,
-               const bool                     isBinary,
-               ActAPI_ProgressEntry           progress = nullptr,
-               ActAPI_PlotterEntry            plotter  = nullptr);
+    glTFWriter(const TCollection_AsciiString& filename,
+               const bool                            isBinary,
+               ActAPI_ProgressEntry                  progress = nullptr,
+               ActAPI_PlotterEntry                   plotter  = nullptr);
 
   //! Dtor.
   gltf_EXPORT virtual
-    ~gltf_Writer();
+    ~glTFWriter();
 
 public:
 
@@ -116,25 +116,25 @@ public:
   //!
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
-    Perform(const Handle(gltf_IDataSourceProvider)& dataProvider,
+    Perform(const Handle(glTFIDataSourceProvider)& dataProvider,
             const TColStd_IndexedDataMapOfStringString& fileInfo = TColStd_IndexedDataMapOfStringString());
 
 public:
 
   //! \return const reference to the transformation from OCCT to glTF
   //!         coordinate system.
-  gltf_EXPORT const gltf_CSysConverter&
+  gltf_EXPORT const glTFCSysConverter&
     CoordinateSystemConverter() const;
 
   //! \return non-const reference to the transformation from OCCT to glTF
   //!         coordinate system.
-  gltf_EXPORT gltf_CSysConverter&
+  gltf_EXPORT glTFCSysConverter&
     ChangeCoordinateSystemConverter();
 
   //! Set the coordinate system converter to use.
   //! \param[in] converter the converter to set.
   gltf_EXPORT void
-    SetCoordinateSystemConverter(const gltf_CSysConverter& converter);
+    SetCoordinateSystemConverter(const glTFCSysConverter& converter);
 
   //! \return the Boolean flag indicating whether to write into binary glTF
   //!         format (.glb), specified within class constructor.
@@ -142,13 +142,13 @@ public:
     IsBinary() const;
 
   //! \return the preferred transformation format for writing into glTF file.
-  gltf_EXPORT gltf_WriterTrsfFormat
+  gltf_EXPORT glTFWriterTrsfFormat
     TransformationFormat() const;
 
   //! Sets the preferred transformation format for writing into glTF file.
   //! \param[in] fmt the format to set.
   gltf_EXPORT void
-    SetTransformationFormat(const gltf_WriterTrsfFormat fmt);
+    SetTransformationFormat(const glTFWriterTrsfFormat fmt);
 
   //! \return true to export UV coordinates even if there are no mapped texture.
   gltf_EXPORT bool
@@ -159,14 +159,14 @@ public:
     SetForcedUVExport(const bool toForce);
 
   //! \return the default material definition to be used for nodes with only color defined.
-  gltf_EXPORT const gltf_XdeVisualStyle&
+  gltf_EXPORT const glTFXdeVisualStyle&
     DefaultStyle() const;
 
   //! Sets the default material definition to be used for nodes with
   //! only color defined.
   //! \param[in] style the style to set as a default one.
   gltf_EXPORT void
-    SetDefaultStyle(const gltf_XdeVisualStyle& style);
+    SetDefaultStyle(const glTFXdeVisualStyle& style);
 
 protected:
 
@@ -222,27 +222,27 @@ protected:
   //! Writes bufferView for vertex positions within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNodalPositions(const gltf_Primitive& gltfPrm);
+    writeNodalPositions(const glTFPrimitive& gltfPrm);
 
   //! Writes bufferView for vertex normals within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNodalNormals(const gltf_Primitive& gltfPrm);
+    writeNodalNormals(const glTFPrimitive& gltfPrm);
 
   //! Writes bufferView for vertex texture coordinates within "accessors" section
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNodalTextCoords (const gltf_Primitive& gltfPrm);
+    writeNodalTextCoords (const glTFPrimitive& gltfPrm);
 
   //! Writes bufferView for vertex colors within "accessors" section
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNodalColors(const gltf_Primitive& gltfPrm);
+    writeNodalColors(const glTFPrimitive& gltfPrm);
 
   //! Writes bufferView for triangle indexes within "accessors" section.
   //! \param[in] gltfFace face definition to write
   gltf_EXPORT virtual void
-    writeNodalIndices(const gltf_Primitive& gltfPrm);
+    writeNodalIndices(const glTFPrimitive& gltfPrm);
 
 protected:
 
@@ -276,17 +276,17 @@ protected:
   //! Writes "images" section.
   //! \param[out] materialMap map of materials, filled with image files used by textures.
   gltf_EXPORT virtual void
-    writeImages(gltf_MaterialMap&        materialMap);
+    writeImages(glTFMaterialMap&        materialMap);
 
   //! Writes "materials" section.
   //! \param[out] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMaterials(gltf_MaterialMap&        materialMap);
+    writeMaterials(glTFMaterialMap&        materialMap);
 
   //! Writes "meshes" section.
   //! \param[in] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMeshes(const gltf_MaterialMap&  materialMap);
+    writeMeshes(const glTFMaterialMap&  materialMap);
 
   //! Writes "nodes" section for the scene nodes.
   gltf_EXPORT virtual void
@@ -295,7 +295,7 @@ protected:
   //! Writes "samplers" section.
   //! \param[in] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeSamplers(const gltf_MaterialMap& materialMap);
+    writeSamplers(const glTFMaterialMap& materialMap);
 
   //! Writes "scene" section.
   //! \param[in] defSceneId index of default scene (0).
@@ -314,32 +314,32 @@ protected:
   //! Writes "textures" section.
   //! \param[out] materialMap map of materials, filled with textures.
   gltf_EXPORT virtual void
-    writeTextures(gltf_MaterialMap&        materialMap);
+    writeTextures(glTFMaterialMap&        materialMap);
 
 protected:
 
-  typedef std::shared_ptr<gltf_JsonSerializer> gltf_JsonSerializerPtr;
+  typedef std::shared_ptr<glTFJsonSerializer> glTFJsonSerializerPtr;
 
   Handle(XCAFDoc_ShapeTool) m_shapeTool;         //!< Shape Tool of XCAF.
   TCollection_AsciiString   m_filename;          //!< Output glTF file.
   TCollection_AsciiString   m_binFilenameFull;   //!< Output file with binary data (full path).
   TCollection_AsciiString   m_binFilenameShort;  //!< Output file with binary data (short path).
-  gltf_WriterTrsfFormat     m_trsfFormat;        //!< Transformation format to use in glTF file.
+  glTFWriterTrsfFormat      m_trsfFormat;        //!< Transformation format to use in glTF file.
   bool                      m_bIsBinary;         //!< Flag to write into binary glTF format (.glb).
   bool                      m_bIsForcedUVExport; //!< Export UV coordinates even if there are no mapped texture.
-  gltf_CSysConverter        m_CSTrsf;            //!< Transformation from OCCT to glTF coordinate system.
-  gltf_XdeVisualStyle       m_defaultStyle;      //!< Default material definition to be used for nodes with only color defined.
-  gltf_JsonSerializerPtr    m_jsonWriter;        //!< JSON writer.
+  glTFCSysConverter         m_CSTrsf;            //!< Transformation from OCCT to glTF coordinate system.
+  glTFXdeVisualStyle        m_defaultStyle;      //!< Default material definition to be used for nodes with only color defined.
+  glTFJsonSerializerPtr     m_jsonWriter;        //!< JSON writer.
 
-  gltf_BufferView           m_buffViewNodalPos;       //!< Current buffer view with nodes positions.
-  gltf_BufferView           m_buffViewNodalNorm;      //!< Current buffer view with nodes normals.
-  gltf_BufferView           m_buffViewNodalTextCoord; //!< Current buffer view with nodes UV coordinates.
-  gltf_BufferView           m_buffViewNodalColor;     //!< Current buffer view with nodes UV coordinates.
-  gltf_BufferView           m_buffViewIndices;        //!< Current buffer view with triangulation indexes.
+  glTFBufferView            m_buffViewNodalPos;       //!< Current buffer view with nodes positions.
+  glTFBufferView            m_buffViewNodalNorm;      //!< Current buffer view with nodes normals.
+  glTFBufferView            m_buffViewNodalTextCoord; //!< Current buffer view with nodes UV coordinates.
+  glTFBufferView            m_buffViewNodalColor;     //!< Current buffer view with nodes UV coordinates.
+  glTFBufferView            m_buffViewIndices;        //!< Current buffer view with triangulation indexes.
 
-  int64_t                   m_binDataLen64;      //!< Length of binary file.
+  int64_t                   m_binDataLen64;           //!< Length of binary file.
 
-  Handle(gltf_IDataSourceProvider) m_dataProvider;
+  Handle(glTFIDataSourceProvider) m_dataProvider;
 };
 } // xde
 } // asiAsm
