@@ -337,7 +337,7 @@ protected:
   glTFBufferView            m_buffViewNodalColor;     //!< Current buffer view with nodes UV coordinates.
   glTFBufferView            m_buffViewIndices;        //!< Current buffer view with triangulation indexes.
 
-  int64_t                   m_binDataLen64;      //!< Length of binary file.
+  int64_t                   m_binDataLen64;           //!< Length of binary file.
 
   Handle(glTFIDataSourceProvider) m_dataProvider;
 };

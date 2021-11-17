@@ -138,9 +138,9 @@ public:
 
   //! Initialize transformation.
   gltf_EXPORT void Init(const gp_Ax3& theInputSystem,
-                        double theInputLengthUnit,
+                        double        theInputLengthUnit,
                         const gp_Ax3& theOutputSystem,
-                        double theOutputLengthUnit);
+                        double        theOutputLengthUnit);
 
 public:
 

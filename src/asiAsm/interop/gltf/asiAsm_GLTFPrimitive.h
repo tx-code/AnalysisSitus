@@ -57,24 +57,24 @@ struct glTFPrimitive
 {
   glTFPrimitive()
   {
-    Name                              = "";
-    Mode                              = glTFPrimitiveMode::glTFPrimitiveMode_Triangles;
-    PosAccessor                       = glTFAccessor();
-    NormAccessor                      = glTFAccessor();
-    UVAccessor                        = glTFAccessor();
-    ColorAccessor                     = glTFAccessor();
-    IndAccessor                       = glTFAccessor();
+    Name          = "";
+    Mode          = glTFPrimitiveMode::glTFPrimitiveMode_Triangles;
+    PosAccessor   = glTFAccessor();
+    NormAccessor  = glTFAccessor();
+    UVAccessor    = glTFAccessor();
+    ColorAccessor = glTFAccessor();
+    IndAccessor   = glTFAccessor();
   };
 
-  glTFPrimitiveMode              Mode;           //! how to interpret the vertex data: points, lines or triangles
+  glTFPrimitiveMode                     Mode;           //! how to interpret the vertex data: points, lines or triangles
   TCollection_AsciiString               Name;           //! primitive name
-  glTFXdeVisualStyle             Style;          //! primitive material
+  glTFXdeVisualStyle                    Style;          //! primitive material
 
-  glTFAccessor                   PosAccessor;    //!< accessor for nodal positions
-  glTFAccessor                   NormAccessor;   //!< accessor for nodal normals
-  glTFAccessor                   UVAccessor;     //!< accessor for nodal UV texture coordinates
-  glTFAccessor                   ColorAccessor;  //!< accessor for nodal colors
-  glTFAccessor                   IndAccessor;    //!< accessor for indices
+  glTFAccessor                          PosAccessor;    //!< accessor for nodal positions
+  glTFAccessor                          NormAccessor;   //!< accessor for nodal normals
+  glTFAccessor                          UVAccessor;     //!< accessor for nodal UV texture coordinates
+  glTFAccessor                          ColorAccessor;  //!< accessor for nodal colors
+  glTFAccessor                          IndAccessor;    //!< accessor for indices
 
   NCollection_Vector<gp_XYZ>            NodePositions;  //! vertex positions
   NCollection_Vector<Graphic3d_Vec3>    NodeNormals;    //! vertex normals

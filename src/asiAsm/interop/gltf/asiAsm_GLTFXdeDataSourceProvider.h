@@ -107,23 +107,23 @@ protected:
                               ActAPI_ProgressEntry progress = nullptr);
 
   gltf_EXPORT virtual
-    void processSceneMeshes(t_Node2Label&          solids,
-                            ActAPI_ProgressEntry   progress = nullptr);
+    void processSceneMeshes(t_Node2Label&        solids,
+                            ActAPI_ProgressEntry progress = nullptr);
 
   gltf_EXPORT 
-    bool processFacePrimitive(const TopoDS_Face&    face,
-                              glTFPrimitive& facePrimitive);
+    bool processFacePrimitive(const TopoDS_Face& face,
+                              glTFPrimitive&     facePrimitive);
 
   gltf_EXPORT
-  bool processEdgePrimitive(const TopoDS_Edge&      edge,
-                            const t_Shape2Style&    styles,
-                            glTFPrimitive&   edgePrimitive);
+  bool processEdgePrimitive(const TopoDS_Edge&   edge,
+                            const t_Shape2Style& styles,
+                            glTFPrimitive&       edgePrimitive);
 
   //! Reads styles from OCAF document to internal map. As a result, each face
   //! gets an associated style.
   gltf_EXPORT
-    void readStyles(const TDF_Label&                label,
-                    t_Shape2Style&                  shapeStyles);
+    void readStyles(const TDF_Label& label,
+                    t_Shape2Style&   shapeStyles);
 
 protected:
 

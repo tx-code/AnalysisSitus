@@ -44,19 +44,19 @@ public:
   gltf_EXPORT void
     AddImages(glTFJsonSerializer*       theWriter,
               const glTFXdeVisualStyle& theStyle,
-              bool&                      theIsStarted);
+              bool&                     theIsStarted);
 
   //! Add material.
   gltf_EXPORT void
     AddMaterial(glTFJsonSerializer*       theWriter,
                 const glTFXdeVisualStyle& theStyle,
-                bool&                      theIsStarted);
+                bool&                     theIsStarted);
 
   //! Add material textures.
   gltf_EXPORT void
     AddTextures(glTFJsonSerializer*       theWriter,
                 const glTFXdeVisualStyle& theStyle,
-                bool&                      theIsStarted);
+                bool&                     theIsStarted);
 
 public:
 
@@ -76,7 +76,7 @@ protected:
 
   //! Add texture image.
   gltf_EXPORT void
-    addImage(glTFJsonSerializer*         theWriter,
+    addImage(glTFJsonSerializer*          theWriter,
              const Handle(Image_Texture)& theTexture,
              bool&                        theIsStarted);
 
@@ -109,4 +109,3 @@ protected:
 };
 } // xde
 } // asiAsm
-

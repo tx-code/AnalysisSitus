@@ -50,7 +50,7 @@ bool asiAlgo_EulerPoincare::Check(const TopoDS_Shape&  shape,
   asiAlgo_Utils::ShapeSummary(shape, props);
 
   const int v = props.nbVertexes;
-  const int e = props.nbVertexes - props.nbDegenEdges;
+  const int e = props.nbEdges - props.nbDegenEdges;
   const int f = props.nbFaces;
   const int s = props.nbShells;
   const int h = genus;

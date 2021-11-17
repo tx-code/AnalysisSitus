@@ -40,7 +40,7 @@
 #include <vector>
 
 namespace asiAsm {
-  namespace xde {
+namespace xde {
 
 //! This structure represents a node of glTF scene which contains of array of such nodes placed under "nodes" element.
 //! The node may have a name and own transformation. If the node is a container of other nodes, keep them as children array.
@@ -52,10 +52,10 @@ struct glTFNode
 
   static const int INVALID_ID = -1;
 
-  TCollection_AsciiString  Name;
-  TopLoc_Location          Trsf;
+  TCollection_AsciiString Name;
+  TopLoc_Location         Trsf;
   std::vector<glTFNode*>  Children;
-  int                      MeshIndex;
+  int                     MeshIndex;
 
   private:
 
@@ -163,4 +163,3 @@ private:
 };
 } // xde
 } // asiAsm
-

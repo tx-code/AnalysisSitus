@@ -51,7 +51,7 @@ enum glTFRootElement
   glTFRootElement_Accessors,   //!< "accessors"   element, mandatory.
   glTFRootElement_BufferViews, //!< "bufferViews" element, mandatory.
   glTFRootElement_Buffers,     //!< "buffers"     element, mandatory.
-  NB_MANDATORY,                 //!< number of mandatory elements.
+  NB_MANDATORY,                //!< number of mandatory elements.
 
   /* Optional elements */
   glTFRootElement_Animations = NB_MANDATORY, //!< "animations" element.
@@ -144,13 +144,13 @@ struct glTFAccessor
 
 public:
 
-  int                               Id;            //!< identifier
-  int64_t                           ByteOffset;    //!< byte offset
-  int64_t                           Count;         //!< size
-  int32_t                           ByteStride;    //!< [0, 255] for glTF 1.0
-  glTFAccessorLayout         Type;          //!< layout type
-  glTFAccessorComponentType  ComponentType; //!< component type
-  Graphic3d_BndBox3d                BndBox;        //!< bounding box
+  int                       Id;            //!< identifier
+  int64_t                   ByteOffset;    //!< byte offset
+  int64_t                   Count;         //!< size
+  int32_t                   ByteStride;    //!< [0, 255] for glTF 1.0
+  glTFAccessorLayout        Type;          //!< layout type
+  glTFAccessorComponentType ComponentType; //!< component type
+  Graphic3d_BndBox3d        BndBox;        //!< bounding box
 
   //! Default ctor.
   glTFAccessor()
@@ -340,13 +340,13 @@ struct glTFMaterialCommon
       return true;
     }
 
-    return other.DiffuseTexture  == this->DiffuseTexture
-        && other.AmbientColor    == this->AmbientColor
-        && other.DiffuseColor    == this->DiffuseColor
-        && other.SpecularColor   == this->SpecularColor
-        && other.EmissiveColor   == this->EmissiveColor
-        && other.Shininess       == this->Shininess
-        && other.Transparency    == this->Transparency;
+    return other.DiffuseTexture == this->DiffuseTexture
+        && other.AmbientColor   == this->AmbientColor
+        && other.DiffuseColor   == this->DiffuseColor
+        && other.SpecularColor  == this->SpecularColor
+        && other.EmissiveColor  == this->EmissiveColor
+        && other.Shininess      == this->Shininess
+        && other.Transparency   == this->Transparency;
   }
 };
 
