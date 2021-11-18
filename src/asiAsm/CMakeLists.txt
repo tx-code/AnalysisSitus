@@ -63,7 +63,7 @@ set (interop_gltf_H_FILES
   interop/gltf/asiAsm_GLTFXdeVisualStyle.h
   interop/gltf/asiAsm_GLTFWriter.h
   interop/gltf/asiAsm_GLTFPrimitive.h
-  interop/gltf/asiAsm_GlTFSceneStructure.h 
+  interop/gltf/asiAsm_GLTFSceneStructure.h
   interop/gltf/asiAsm_GLTFFacePropertyExtractor.h
   interop/gltf/asiAsm_GLTFIDataSourceProvider.h
   interop/gltf/asiAsm_GLTFXdeDataSourceProvider.h

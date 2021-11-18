@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GLTFEntities.h>
 #include <asiAsm_GLTFMaterialMapBase.h>
 
 namespace asiAsm {

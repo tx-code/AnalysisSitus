@@ -31,8 +31,8 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFEntities.h>
-#include <asiAsm_GlTFSceneStructure.h>
+#include <asiAsm_GLTFEntities.h>
+#include <asiAsm_GLTFSceneStructure.h>
 #include <asiAsm_GLTFPrimitive.h>
 
 //-----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ public:
 
 public:
   //! This method is called to prepare the scene tree and meshes definition.
-  virtual 
+  virtual
     void Process(ActAPI_ProgressEntry progress = nullptr) = 0;
 
   //! Gets the scene tree.

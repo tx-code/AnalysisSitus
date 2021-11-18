@@ -18,7 +18,7 @@
 #pragma once
 
 // glTF includes
-#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GLTFEntities.h>
 
 // OpenCascade includes
 #include <gp.hxx>

@@ -35,7 +35,7 @@
 #include <asiAsm_GLTFMaterialMap.h>
 #include <asiAsm_GLTFFacePropertyExtractor.h>
 #include <asiAsm_GLTFCSysConverter.h>
-#include <asiAsm_GlTFEntities.h>
+#include <asiAsm_GLTFEntities.h>
 #include <asiAsm_GLTFXdeVisualStyle.h>
 
 // asiAlgo includes
@@ -283,7 +283,7 @@ void glTFXdeDataSourceProvider::readStyles(const TDF_Label&  label,
   int nbTypes[TopAbs_SHAPE] = {};
   for (int tit = TopAbs_EDGE; tit >= TopAbs_COMPOUND; --tit)
   {
-    // if during the first interation, the current shape type wasn't there, skip it. 
+    // if during the first interation, the current shape type wasn't there, skip it.
     if ((tit < TopAbs_FACE) && (nbTypes[tit] == 0))
       continue;
 

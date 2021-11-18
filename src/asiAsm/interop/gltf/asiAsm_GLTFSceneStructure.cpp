@@ -28,7 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include <asiAsm_GlTFSceneStructure.h>
+#include <asiAsm_GLTFSceneStructure.h>
 
 using namespace asiAsm::xde;
 
