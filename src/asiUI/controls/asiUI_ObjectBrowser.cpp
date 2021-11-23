@@ -667,15 +667,16 @@ void asiUI_ObjectBrowser::onExploreShape()
   Handle(ActAPI_INode) selected_n;
   if ( !this->selectedNode(selected_n) ) return;
 
-  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
-    return;
+  TopoDS_Shape shape;
 
-  // Convert to the only supported type.
-  Handle(asiData_IVTopoItemNode)
-    topoNode = Handle(asiData_IVTopoItemNode)::DownCast(selected_n);
-
-  // Get shape to explore.
-  TopoDS_Shape shape = topoNode->GetShape();
+  if ( selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
+  {
+    shape = Handle(asiData_IVTopoItemNode)::DownCast(selected_n)->GetShape();
+  }
+  else if ( selected_n->IsKind( STANDARD_TYPE(asiData_PartNode) ) )
+  {
+    shape = Handle(asiData_PartNode)::DownCast(selected_n)->GetShape();
+  }
 
   // Prepare browser.
   asiUI_ShapeBrowser*
@@ -1171,6 +1172,7 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
         pMenu->addAction( "Hide edges",         this, SLOT( onHidePartEdges () ) );
         pMenu->addAction( "Show edges",         this, SLOT( onShowPartEdges () ) );
         pMenu->addAction( "Reset presentation", this, SLOT( onResetPartPrs  () ) );
+        pMenu->addAction( "Explore...",         this, SLOT( onExploreShape () ) );
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) ||
