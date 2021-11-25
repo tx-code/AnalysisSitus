@@ -313,7 +313,17 @@
 "\
  Defines a unit in which the STEP file should be written. If set to unit other\n\
  than MM, the model is converted to these units during the translation.\n\
- Default value is MM."
+ Default value is MM. Other options include\n\
+ - INCH\n\
+ - FT\n\
+ - MI\n\
+ - M\n\
+ - KM\n\
+ - MIL\n\
+ - UM\n\
+ - CM\n\
+ - UI\
+"
 
 //-----------------------------------------------------------------------------
 

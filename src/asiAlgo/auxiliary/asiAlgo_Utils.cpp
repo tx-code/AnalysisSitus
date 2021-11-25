@@ -633,11 +633,11 @@ void asiAlgo_Utils::Json::ReadFeatures(void*                         pJsonBlock,
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_Utils::Json::ReadPair(void*                                 pJsonBlock,
-                                   std::optional< std::pair<int, int> >& pair)
+void asiAlgo_Utils::Json::ReadPair(void*                                pJsonBlock,
+                                   tl::optional< std::pair<int, int> >& pair)
 {
 #if defined USE_RAPIDJSON
-  pair = std::make_optional< std::pair<int, int> >();
+  pair = tl::make_optional< std::pair<int, int> >();
 
   t_jsonArray*
     jsonBlock = reinterpret_cast<t_jsonArray*>(pJsonBlock);
@@ -697,7 +697,7 @@ std::string asiAlgo_Utils::Json::FromDirAsTuple(const gp_Dir& dir)
 //-----------------------------------------------------------------------------
 
 std::string
-  asiAlgo_Utils::Json::FromPair(const std::optional< std::pair<int, int> >& pair)
+  asiAlgo_Utils::Json::FromPair(const tl::optional< std::pair<int, int> >& pair)
 {
   std::stringstream out;
   //

@@ -48,6 +48,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_IntersectionPointCS.h
   auxiliary/asiAlgo_IntersectSS.h
   auxiliary/asiAlgo_Membership.h
+  auxiliary/asiAlgo_Optional.h
   auxiliary/asiAlgo_PointInPoly.h
   auxiliary/asiAlgo_ProjectPointOnMesh.h
   auxiliary/asiAlgo_QuickHull.h

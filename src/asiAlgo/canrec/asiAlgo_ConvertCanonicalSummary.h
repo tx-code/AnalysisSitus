@@ -33,37 +33,35 @@
 
 // asiAlgo includes
 #include <asiAlgo_GeomSummary.h>
-
-// Standard includes
-#include <optional>
+#include <asiAlgo_Optional.h>
 
 //-----------------------------------------------------------------------------
 
 //! Summary on canonical conversion.
 struct asiAlgo_ConvertCanonicalSummary
 {
-  std::optional< std::pair<int, int> > nbSurfBezier;
-  std::optional< std::pair<int, int> > nbSurfSpl;
-  std::optional< std::pair<int, int> > nbSurfConical;
-  std::optional< std::pair<int, int> > nbSurfCyl;
-  std::optional< std::pair<int, int> > nbSurfOffset;
-  std::optional< std::pair<int, int> > nbSurfSph;
-  std::optional< std::pair<int, int> > nbSurfLinExtr;
-  std::optional< std::pair<int, int> > nbSurfOfRevol;
-  std::optional< std::pair<int, int> > nbSurfToroidal;
-  std::optional< std::pair<int, int> > nbSurfPlane;
-  std::optional< std::pair<int, int> > nbCurveBezier;
-  std::optional< std::pair<int, int> > nbCurveSpline;
-  std::optional< std::pair<int, int> > nbCurveCircle;
-  std::optional< std::pair<int, int> > nbCurveEllipse;
-  std::optional< std::pair<int, int> > nbCurveHyperbola;
-  std::optional< std::pair<int, int> > nbCurveLine;
-  std::optional< std::pair<int, int> > nbCurveOffset;
-  std::optional< std::pair<int, int> > nbCurveParabola;
+  tl::optional< std::pair<int, int> > nbSurfBezier;
+  tl::optional< std::pair<int, int> > nbSurfSpl;
+  tl::optional< std::pair<int, int> > nbSurfConical;
+  tl::optional< std::pair<int, int> > nbSurfCyl;
+  tl::optional< std::pair<int, int> > nbSurfOffset;
+  tl::optional< std::pair<int, int> > nbSurfSph;
+  tl::optional< std::pair<int, int> > nbSurfLinExtr;
+  tl::optional< std::pair<int, int> > nbSurfOfRevol;
+  tl::optional< std::pair<int, int> > nbSurfToroidal;
+  tl::optional< std::pair<int, int> > nbSurfPlane;
+  tl::optional< std::pair<int, int> > nbCurveBezier;
+  tl::optional< std::pair<int, int> > nbCurveSpline;
+  tl::optional< std::pair<int, int> > nbCurveCircle;
+  tl::optional< std::pair<int, int> > nbCurveEllipse;
+  tl::optional< std::pair<int, int> > nbCurveHyperbola;
+  tl::optional< std::pair<int, int> > nbCurveLine;
+  tl::optional< std::pair<int, int> > nbCurveOffset;
+  tl::optional< std::pair<int, int> > nbCurveParabola;
 
   //! Indicates whether the resulting shape is valid once the canonical
   //! conversion is done.
-  std::optional<bool> isValid;
+  tl::optional<bool> isValid;
 
   //! Default ctor.
   asiAlgo_ConvertCanonicalSummary() = default;
@@ -74,7 +72,7 @@ struct asiAlgo_ConvertCanonicalSummary
   {
     if ( sum1.nbSurfBezier != sum2.nbSurfBezier )
     {
-      nbSurfBezier = std::make_optional< std::pair<int, int> >();
+      nbSurfBezier = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfBezier->first  = sum1.nbSurfBezier;
       nbSurfBezier->second = sum2.nbSurfBezier;
@@ -82,7 +80,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfSpl != sum2.nbSurfSpl )
     {
-      nbSurfSpl = std::make_optional< std::pair<int, int> >();
+      nbSurfSpl = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfSpl->first  = sum1.nbSurfSpl;
       nbSurfSpl->second = sum2.nbSurfSpl;
@@ -90,7 +88,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfConical != sum2.nbSurfConical )
     {
-      nbSurfConical = std::make_optional< std::pair<int, int> >();
+      nbSurfConical = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfConical->first  = sum1.nbSurfConical;
       nbSurfConical->second = sum2.nbSurfConical;
@@ -98,7 +96,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfCyl != sum2.nbSurfCyl )
     {
-      nbSurfCyl = std::make_optional< std::pair<int, int> >();
+      nbSurfCyl = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfCyl->first  = sum1.nbSurfCyl;
       nbSurfCyl->second = sum2.nbSurfCyl;
@@ -106,7 +104,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfOffset != sum2.nbSurfOffset )
     {
-      nbSurfOffset = std::make_optional< std::pair<int, int> >();
+      nbSurfOffset = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfOffset->first  = sum1.nbSurfOffset;
       nbSurfOffset->second = sum2.nbSurfOffset;
@@ -114,7 +112,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfSph != sum2.nbSurfSph )
     {
-      nbSurfSph = std::make_optional< std::pair<int, int> >();
+      nbSurfSph = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfSph->first  = sum1.nbSurfSph;
       nbSurfSph->second = sum2.nbSurfSph;
@@ -122,7 +120,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfLinExtr != sum2.nbSurfLinExtr )
     {
-      nbSurfLinExtr = std::make_optional< std::pair<int, int> >();
+      nbSurfLinExtr = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfLinExtr->first  = sum1.nbSurfLinExtr;
       nbSurfLinExtr->second = sum2.nbSurfLinExtr;
@@ -130,7 +128,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfOfRevol != sum2.nbSurfOfRevol )
     {
-      nbSurfOfRevol = std::make_optional< std::pair<int, int> >();
+      nbSurfOfRevol = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfOfRevol->first  = sum1.nbSurfOfRevol;
       nbSurfOfRevol->second = sum2.nbSurfOfRevol;
@@ -138,7 +136,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfToroidal != sum2.nbSurfToroidal )
     {
-      nbSurfToroidal = std::make_optional< std::pair<int, int> >();
+      nbSurfToroidal = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfToroidal->first  = sum1.nbSurfToroidal;
       nbSurfToroidal->second = sum2.nbSurfToroidal;
@@ -146,7 +144,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbSurfPlane != sum2.nbSurfPlane )
     {
-      nbSurfPlane = std::make_optional< std::pair<int, int> >();
+      nbSurfPlane = tl::make_optional< std::pair<int, int> >();
       //
       nbSurfPlane->first  = sum1.nbSurfPlane;
       nbSurfPlane->second = sum2.nbSurfPlane;
@@ -154,7 +152,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveBezier != sum2.nbCurveBezier )
     {
-      nbCurveBezier = std::make_optional< std::pair<int, int> >();
+      nbCurveBezier = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveBezier->first  = sum1.nbCurveBezier;
       nbCurveBezier->second = sum2.nbCurveBezier;
@@ -162,7 +160,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveSpline != sum2.nbCurveSpline )
     {
-      nbCurveSpline = std::make_optional< std::pair<int, int> >();
+      nbCurveSpline = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveSpline->first  = sum1.nbCurveSpline;
       nbCurveSpline->second = sum2.nbCurveSpline;
@@ -170,7 +168,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveCircle != sum2.nbCurveCircle )
     {
-      nbCurveCircle = std::make_optional< std::pair<int, int> >();
+      nbCurveCircle = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveCircle->first  = sum1.nbCurveCircle;
       nbCurveCircle->second = sum2.nbCurveCircle;
@@ -178,7 +176,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveEllipse != sum2.nbCurveEllipse )
     {
-      nbCurveEllipse = std::make_optional< std::pair<int, int> >();
+      nbCurveEllipse = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveEllipse->first  = sum1.nbCurveEllipse;
       nbCurveEllipse->second = sum2.nbCurveEllipse;
@@ -186,7 +184,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveHyperbola != sum2.nbCurveHyperbola )
     {
-      nbCurveHyperbola = std::make_optional< std::pair<int, int> >();
+      nbCurveHyperbola = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveHyperbola->first  = sum1.nbCurveHyperbola;
       nbCurveHyperbola->second = sum2.nbCurveHyperbola;
@@ -194,7 +192,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveLine != sum2.nbCurveLine )
     {
-      nbCurveLine = std::make_optional< std::pair<int, int> >();
+      nbCurveLine = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveLine->first  = sum1.nbCurveLine;
       nbCurveLine->second = sum2.nbCurveLine;
@@ -202,7 +200,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveOffset != sum2.nbCurveOffset )
     {
-      nbCurveOffset = std::make_optional< std::pair<int, int> >();
+      nbCurveOffset = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveOffset->first  = sum1.nbCurveOffset;
       nbCurveOffset->second = sum2.nbCurveOffset;
@@ -210,7 +208,7 @@ struct asiAlgo_ConvertCanonicalSummary
 
     if ( sum1.nbCurveParabola != sum2.nbCurveParabola )
     {
-      nbCurveParabola = std::make_optional< std::pair<int, int> >();
+      nbCurveParabola = tl::make_optional< std::pair<int, int> >();
       //
       nbCurveParabola->first  = sum1.nbCurveParabola;
       nbCurveParabola->second = sum2.nbCurveParabola;

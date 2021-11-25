@@ -273,8 +273,8 @@ namespace asiAlgo_Utils
     //! \param[in]  jsonBlock the JSON block to interpret.
     //! \param[out] pair      the pair to compose.
     asiAlgo_EXPORT void
-      ReadPair(void*                                 pJsonBlock,
-               std::optional< std::pair<int, int> >& pair);
+      ReadPair(void*                                pJsonBlock,
+               tl::optional< std::pair<int, int> >& pair);
 
     //! Dumps the passed feature as a JSON array.
     //! \param[in] map the map to dump.
@@ -292,7 +292,7 @@ namespace asiAlgo_Utils
     //! \param[in] pair the pair to dump.
     //! \return a JSON array containing the elements of the pair.
     asiAlgo_EXPORT std::string
-      FromPair(const std::optional< std::pair<int, int> >& pair);
+      FromPair(const tl::optional< std::pair<int, int> >& pair);
   }
 
   //! Returns geometry of a face as a string label.

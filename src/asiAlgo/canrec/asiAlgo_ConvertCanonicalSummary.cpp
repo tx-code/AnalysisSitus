@@ -48,8 +48,8 @@
 
 namespace
 {
-  bool AreEqual(const std::optional< std::pair<int, int> >& a,
-                const std::optional< std::pair<int, int> >& b)
+  bool AreEqual(const tl::optional< std::pair<int, int> >& a,
+                const tl::optional< std::pair<int, int> >& b)
   {
     if ( !a.has_value() && !b.has_value() )
       return true;

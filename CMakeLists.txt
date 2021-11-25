@@ -1,10 +1,5 @@
 cmake_minimum_required (VERSION 3.0.0 FATAL_ERROR)
 
-# Enable C++17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Project name
 project (AnalysisSitus CXX)
 
@@ -85,13 +80,27 @@ set (USE_MOBIUS OFF CACHE BOOL "Mobius is optional 3-rd party. It gives alternat
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Mobius.cmake)
 
 # NetGen
-set (USE_NETGEN OFF CACHE BOOL "NetGen mesh generator.")
+set (USE_NETGEN OFF CACHE BOOL "NetGen mesh generator. Requires C++17 support.")
 #
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_NetGen.cmake)
 
 if (USE_NETGEN)
+  # Enable C++17
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+
+  message (NOTICE "... C++17 standard is enforced as required by NetGen.")
+
   include (${CMAKE_SOURCE_DIR}/cmake/asitus_zlib.cmake)
 else()
+  # Enable C++11
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+
+  message (STATUS "... C++11 standard is enforced.")
+
   ASITUS_UNSET_3RDPARTY("zlib")
 endif()
 
