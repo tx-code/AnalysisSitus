@@ -34,6 +34,7 @@
 // OpenCascade includes
 #include <Interface_EntityIterator.hxx>
 #include <Interface_Graph.hxx>
+#include <StepBasic_ProductDefinition.hxx>
 #include <STEPControl_Controller.hxx>
 #include <STEPConstruct.hxx>
 #include <STEPConstruct_Styles.hxx>
@@ -46,10 +47,13 @@
 #include <StepVisual_PresentationStyleByContext.hxx>
 #include <StepVisual_StyledItem.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <TransferBRep.hxx>
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
+
+typedef NCollection_DataMap<TopoDS_Shape, Handle(StepBasic_ProductDefinition), TopTools_ShapeMapHasher> DataMapOfShapePD;
 
 //-----------------------------------------------------------------------------
 
@@ -89,7 +93,6 @@ IFSelect_ReturnStatus asiAlgo_ReadSTEPWithMeta::ReadFile(const char* filename)
   return m_reader.ReadFile(filename);
 }
 
-
 //-----------------------------------------------------------------------------
 
 int asiAlgo_ReadSTEPWithMeta::GetNbRootsForTransfer()
@@ -101,7 +104,6 @@ int asiAlgo_ReadSTEPWithMeta::GetNbRootsForTransfer()
 
 bool asiAlgo_ReadSTEPWithMeta::TransferOneRoot(const int num)
 {
-  TDF_LabelSequence Lseq;
   return this->transfer(m_reader, num);
 }
 
@@ -109,7 +111,6 @@ bool asiAlgo_ReadSTEPWithMeta::TransferOneRoot(const int num)
 
 bool asiAlgo_ReadSTEPWithMeta::Transfer()
 {
-  TDF_LabelSequence Lseq;
   return this->transfer(m_reader, 0);
 }
 
@@ -186,11 +187,13 @@ bool asiAlgo_ReadSTEPWithMeta::transfer(STEPControl_Reader& reader,
   // Read all shapes
   int num = reader.NbRootsForTransfer();
   if (num <= 0) return false;
-  if (nroot) {
+  if (nroot)
+  {
     if (nroot > num) return false;
     reader.TransferOneRoot(nroot);
   }
-  else {
+  else
+  {
     for (i = 1; i <= num; i++) reader.TransferOneRoot(i);
   }
   num = reader.NbShapes();
@@ -204,8 +207,7 @@ bool asiAlgo_ReadSTEPWithMeta::transfer(STEPControl_Reader& reader,
   // Collect information on shapes originating from SDRs
   // this will be used to distinguish compounds representing assemblies
   // from the ones representing hybrid models and shape sets
-  STEPCAFControl_DataMapOfShapePD ShapePDMap;
-  STEPCAFControl_DataMapOfPDExternFile PDFileMap;
+  DataMapOfShapePD ShapePDMap;
   Handle(Interface_InterfaceModel) Model = reader.Model();
   const Handle(Transfer_TransientProcess) &TP = reader.WS()->TransferReader()->TransientProcess();
   int nb = Model->NbEntities();
@@ -214,26 +216,28 @@ bool asiAlgo_ReadSTEPWithMeta::transfer(STEPControl_Reader& reader,
 
   for (i = 1; i <= nb; i++) {
     Handle(Standard_Transient) enti = Model->Value(i);
-    if (enti->IsKind(STANDARD_TYPE(StepRepr_ProductDefinitionShape))) {
+    if (enti->IsKind(STANDARD_TYPE(StepRepr_ProductDefinitionShape)))
+    {
       // sequence for acceleration ReadMaterials
       SeqPDS->Append(enti);
     }
-    if (enti->IsKind(STANDARD_TYPE(StepBasic_ProductDefinition))) {
+    if (enti->IsKind(STANDARD_TYPE(StepBasic_ProductDefinition)))
+    {
       Handle(StepBasic_ProductDefinition) PD =
         Handle(StepBasic_ProductDefinition)::DownCast(enti);
       int index = TP->MapIndex(PD);
       if (index > 0) {
         Handle(Transfer_Binder) binder = TP->MapItem(index);
         TopoDS_Shape S = TransferBRep::ShapeResult(binder);
-        if (!S.IsNull() && ShapesMap.Contains(S)) {
+        if (!S.IsNull() && ShapesMap.Contains(S))
+        {
           NewShapesMap.Add(S);
           ShapePDMap.Bind(S, PD);
-          //Handle(STEPCAFControl_ExternFile) EF;
-          //PDFileMap.Bind(PD, EF);
         }
       }
     }
-    if (enti->IsKind(STANDARD_TYPE(StepShape_ShapeRepresentation))) {
+    if (enti->IsKind(STANDARD_TYPE(StepShape_ShapeRepresentation)))
+    {
       int index = TP->MapIndex(enti);
       if (index > 0) {
         Handle(Transfer_Binder) binder = TP->MapItem(index);
@@ -262,7 +266,7 @@ bool asiAlgo_ReadSTEPWithMeta::transfer(STEPControl_Reader& reader,
 //-----------------------------------------------------------------------------
 
 static void findStyledSR(const Handle(StepVisual_StyledItem)&   style,
-                         Handle(StepShape_ShapeRepresentation)& aSR)
+                         Handle(StepShape_ShapeRepresentation)& SR)
 {
   // search Shape Represenatation for component styled item
   for (int j = 1; j <= style->NbStyles(); j++) {
@@ -275,7 +279,7 @@ static void findStyledSR(const Handle(StepVisual_StyledItem)&   style,
       Handle(StepShape_ShapeRepresentation)::DownCast(aStyleCntxSlct.Representation());
     if (aCurrentSR.IsNull())
       continue;
-    aSR = aCurrentSR;
+    SR = aCurrentSR;
     break;
   }
 }
@@ -313,9 +317,8 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
     }
 
     Handle(StepVisual_Colour) SurfCol, BoundCol, CurveCol, RenderCol;
-    //double RenderTransp;
     bool IsComponent = false;
-    //if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, RenderCol, RenderTransp, IsComponent) && IsVisible )
+
     if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, IsComponent) && IsVisible )
       continue;
 
@@ -332,8 +335,8 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
         anItems.Append(aRepr->Items()->Value(j));
     }
     for (int itemIt = 0; itemIt < anItems.Length(); itemIt++) {
-      TopoDS_Shape S = STEPConstruct::FindShape(Styles.TransientProcess(),
-        Handle(StepRepr_RepresentationItem)::DownCast(anItems.Value(itemIt)));
+      TopoDS_Shape S = STEPConstruct::FindShape( Styles.TransientProcess(),
+                                                 Handle(StepRepr_RepresentationItem)::DownCast(anItems.Value(itemIt)) );
       bool isSkipSHUOstyle = false;
       // take shape with real location.
       while (IsComponent) {
@@ -377,7 +380,6 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
 
       if (S.IsNull())
         continue;
-
 
       if (!SurfCol.IsNull() || !BoundCol.IsNull() || !CurveCol.IsNull())
       {

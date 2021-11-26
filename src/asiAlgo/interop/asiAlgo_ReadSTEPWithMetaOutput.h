@@ -54,7 +54,7 @@ public:
     SetShape(const TopoDS_Shape& shape) = 0;
 
   virtual void
-    SetColor(const TopoDS_Shape&   subshape,
+    SetColor(const TopoDS_Shape&   shape,
              const Quantity_Color& color) = 0;
 
 };

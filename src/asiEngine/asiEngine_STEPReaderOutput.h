@@ -42,8 +42,6 @@
 //! Input data adaptor for the STEP reader with metadata.
 class asiEngine_STEPReaderOutput : public asiAlgo_ReadSTEPWithMetaOutput
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiEngine_STEPReaderOutput, asiAlgo_ReadSTEPWithMetaOutput)
 

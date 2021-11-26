@@ -59,19 +59,26 @@ void asiEngine_STEPReaderOutput::SetShape(const TopoDS_Shape& shape)
 void asiEngine_STEPReaderOutput::SetColor(const TopoDS_Shape&   subshape,
                                           const Quantity_Color& color)
 {
-  if ( subshape.ShapeType() < TopAbs_FACE )
-    return; // Skip sub-shapes other than faces, edges, and vertices.
-
-  Handle(asiData_ElemMetadataNode) elemNode = this->elemByShape(subshape);
-  //
-  if ( elemNode.IsNull() || !elemNode->IsWellFormed() )
-    return;
-
   // Convert color to a persistent form.
   const int iCol = asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() );
 
-  // Store color.
-  elemNode->SetColor(iCol);
+  // Part color.
+  if ( subshape.ShapeType() < TopAbs_FACE )
+  {
+    m_model->GetPartNode()->SetColor(iCol);
+  }
+
+  // Feature color.
+  else
+  {
+    Handle(asiData_ElemMetadataNode) elemNode = this->elemByShape(subshape);
+    //
+    if ( elemNode.IsNull() || !elemNode->IsWellFormed() )
+      return;
+
+    // Store color.
+    elemNode->SetColor(iCol);
+  }
 }
 
 //-----------------------------------------------------------------------------

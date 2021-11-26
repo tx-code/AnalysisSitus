@@ -41,32 +41,6 @@
 #include <STEPControl_Reader.hxx>
 #include <XSControl_WorkSession.hxx>
 
-///
-#include <IFSelect_ReturnStatus.hxx>
-#include <Standard_CString.hxx>
-#include <TDF_LabelSequence.hxx>
-#include <TopTools_MapOfShape.hxx>
-#include <STEPCAFControl_DataMapOfShapePD.hxx>
-#include <STEPCAFControl_DataMapOfPDExternFile.hxx>
-#include <XCAFDoc_DataMapOfShapeLabel.hxx>
-#include <TColStd_HSequenceOfTransient.hxx>
-#include <XCAFDimTolObjects_DatumModifiersSequence.hxx>
-#include <XCAFDimTolObjects_DatumModifWithValue.hxx>
-class XSControl_WorkSession;
-class TDocStd_Document;
-class TCollection_AsciiString;
-class STEPCAFControl_ExternFile;
-class STEPControl_Reader;
-class TDF_Label;
-class TopoDS_Shape;
-class XCAFDoc_ShapeTool;
-class StepRepr_RepresentationItem;
-class Transfer_TransientProcess;
-class StepShape_ConnectedFaceSet;
-class StepRepr_NextAssemblyUsageOccurrence;
-class STEPConstruct_Tool;
-class StepDimTol_Datum;
-
 //! STEP reader enriched with possibility to read not only shapes but
 //! also some metadata such as colors.
 class asiAlgo_ReadSTEPWithMeta : public ActAPI_IAlgorithm
