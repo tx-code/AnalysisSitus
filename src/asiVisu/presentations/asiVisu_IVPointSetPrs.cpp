@@ -96,6 +96,18 @@ Handle(asiVisu_Prs)
 
 //-----------------------------------------------------------------------------
 
+void asiVisu_IVPointSetPrs::Colorize(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_PointsPipeline)
+    pl = Handle(asiVisu_PointsPipeline)::DownCast( this->GetPipeline(PrimaryPipeline_Main) );
+
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
+}
+
+//-----------------------------------------------------------------------------
+
 void asiVisu_IVPointSetPrs::highlight(vtkRenderer*,
                                       const Handle(asiVisu_PickerResult)& pickRes,
                                       const asiVisu_SelectionNature       selNature) const
@@ -218,14 +230,6 @@ void asiVisu_IVPointSetPrs::afterInitPipelines()
   Handle(asiVisu_IVPointSetDataProvider)
     DP = Handle(asiVisu_IVPointSetDataProvider)::DownCast( this->dataProvider(PrimaryPipeline_Main) );
 
-  /* Adjust point sizes */
-
-  const double psz = DP->GetPointSize();
-
-  this->GetPipeline          (PrimaryPipeline_Main)->Actor()->GetProperty()->SetPointSize(psz);
-  this->GetDetectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
-  this->GetSelectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
-
   /* Adjust title bar */
 
   const int nPts = DP->GetPoints()->GetNumberOfElements();
@@ -292,4 +296,35 @@ void asiVisu_IVPointSetPrs::deRenderPipelines(vtkRenderer* renderer) const
   /* Take care of annotation widget */
 
   m_textWidget->Off();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for updating of Presentation pipelines invoked after the
+//! kernel update routine completes.
+void asiVisu_IVPointSetPrs::afterUpdatePipelines() const
+{
+  Handle(asiData_IVPointSetNode)
+    N = Handle(asiData_IVPointSetNode)::DownCast( this->GetNode() );
+
+  Handle(asiVisu_IVPointSetDataProvider)
+    DP = Handle(asiVisu_IVPointSetDataProvider)::DownCast( this->dataProvider(PrimaryPipeline_Main) );
+
+  /* Adjust point sizes */
+
+  const double psz = DP->GetPointSize();
+
+  this->GetPipeline          (PrimaryPipeline_Main)->Actor()->GetProperty()->SetPointSize(psz);
+  this->GetDetectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
+  this->GetSelectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
+
+  /* Actualize color */
+
+  if ( N->HasColor() )
+  {
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
+    this->Colorize(color);
+  }
+  else
+    this->Colorize( ActAPI_Color(Quantity_NOC_WHITE) );
 }

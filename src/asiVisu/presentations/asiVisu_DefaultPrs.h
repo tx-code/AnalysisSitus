@@ -38,8 +38,6 @@
 //! Base class for default non-interactive presentations.
 class asiVisu_DefaultPrs : public asiVisu_Prs
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_DefaultPrs, asiVisu_Prs)
 

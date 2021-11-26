@@ -75,6 +75,13 @@ public:
   asiVisu_EXPORT static Handle(asiVisu_Prs)
     Instance(const Handle(ActAPI_INode)& N);
 
+public:
+
+  //! Sets custom color.
+  //! \param[in] color color to set.
+  asiVisu_EXPORT void
+    Colorize(const ActAPI_Color& color) const;
+
 // Callbacks:
 private:
 
@@ -102,6 +109,9 @@ private:
   //! \param[in] renderer VTK renderer.
   virtual void
     deRenderPipelines(vtkRenderer* renderer) const;
+
+  virtual void
+    afterUpdatePipelines() const;
 
 private:
 
