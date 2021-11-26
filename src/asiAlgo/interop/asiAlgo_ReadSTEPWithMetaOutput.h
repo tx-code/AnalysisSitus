@@ -43,10 +43,18 @@
 //! Output data adaptor for the STEP read with metadata.
 class asiAlgo_ReadSTEPWithMetaOutput : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ReadSTEPWithMetaOutput, Standard_Transient)
+
+public:
+
+  //! Indicates where a color coming from a STEP file is attached.
+  enum ColorAttachment
+  {
+    ColorAttachment_SURFACE,
+    ColorAttachment_CURVE,
+    ColorAttachment_POINT
+  };
 
 public:
 
@@ -55,7 +63,8 @@ public:
 
   virtual void
     SetColor(const TopoDS_Shape&   shape,
-             const Quantity_Color& color) = 0;
+             const Quantity_Color& color,
+             const ColorAttachment attch) = 0;
 
 };
 

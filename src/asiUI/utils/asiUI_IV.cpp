@@ -1303,7 +1303,7 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
   if ( coords.IsNull() )
     return;
 
-  // Open transaction
+  // Open transaction.
   bool isTx = false;
   if ( !m_model->HasOpenCommand() )
   {
@@ -1311,7 +1311,7 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
     isTx = true;
   }
 
-  // Modify data
+  // Modify data.
   Handle(asiData_IVPointSetNode) points_n;
   //
   bool doCreate = newPrimitive;
@@ -1330,15 +1330,19 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
   {
     points_n = asiEngine_IV(m_model).Create_PointSet(asiAlgo_PointCloudUtils::AsCloudd(coords), name, newPrimitive);
 
-    // Update the last created object
+    // Update the last created object.
     m_lastObj = points_n;
   }
 
-  // Commit transaction
+  // Update persistent color.
+  points_n->SetHasColor(true);
+  points_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+
+  // Commit transaction.
   if ( isTx )
     m_model->CommitCommand();
 
-  // Visualize
+  // Visualize.
   this->visualize(false, points_n, true, color, 1.0, false);
 }
 

@@ -57,20 +57,30 @@ void asiEngine_STEPReaderOutput::SetShape(const TopoDS_Shape& shape)
 //-----------------------------------------------------------------------------
 
 void asiEngine_STEPReaderOutput::SetColor(const TopoDS_Shape&   subshape,
-                                          const Quantity_Color& color)
+                                          const Quantity_Color& color,
+                                          const ColorAttachment attch)
 {
   // Convert color to a persistent form.
   const int iCol = asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() );
 
   // Part color.
-  if ( subshape.ShapeType() < TopAbs_FACE )
+  if ( (subshape.ShapeType() < TopAbs_FACE) && (attch == ColorAttachment_SURFACE) )
   {
     m_model->GetPartNode()->SetColor(iCol);
   }
 
   // Feature color.
-  else
+  else if ( subshape.ShapeType() >= TopAbs_FACE )
   {
+    if ( (subshape.ShapeType() == TopAbs_FACE) && (attch != ColorAttachment_SURFACE) )
+      return;
+
+    if ( (subshape.ShapeType() == TopAbs_EDGE) && (attch != ColorAttachment_CURVE) )
+      return;
+
+    if ( (subshape.ShapeType() == TopAbs_VERTEX) && (attch != ColorAttachment_POINT) )
+      return;
+
     Handle(asiData_ElemMetadataNode) elemNode = this->elemByShape(subshape);
     //
     if ( elemNode.IsNull() || !elemNode->IsWellFormed() )

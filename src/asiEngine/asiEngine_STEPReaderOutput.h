@@ -59,7 +59,8 @@ public:
 
   asiEngine_EXPORT virtual void
     SetColor(const TopoDS_Shape&   subshape,
-             const Quantity_Color& color);
+             const Quantity_Color& color,
+             const ColorAttachment attch);
 
 protected:
 
