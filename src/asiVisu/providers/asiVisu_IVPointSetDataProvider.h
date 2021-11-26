@@ -58,6 +58,9 @@ public:
   asiVisu_EXPORT virtual Handle(TColStd_HPackedMapOfInteger)
     GetIndices() const;
 
+  asiVisu_EXPORT double
+    GetPointSize() const;
+
 private:
 
   virtual Handle(ActAPI_HParameterList)

@@ -69,6 +69,19 @@ Handle(TColStd_HPackedMapOfInteger) asiVisu_IVPointSetDataProvider::GetIndices()
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_IVPointSetDataProvider::GetPointSize() const
+{
+  Handle(asiData_IVPointSetNode)
+    points_n = Handle(asiData_IVPointSetNode)::DownCast(m_node);
+  //
+  if ( points_n.IsNull() || !points_n->IsWellFormed() )
+    return 0.;
+
+  return points_n->GetPointSize();
+}
+
+//-----------------------------------------------------------------------------
+
 //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
 //! translation process.
 //! \return source Parameters.

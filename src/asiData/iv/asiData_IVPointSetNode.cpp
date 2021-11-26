@@ -45,6 +45,7 @@ asiData_IVPointSetNode::asiData_IVPointSetNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Name,      PID_Name);
   REGISTER_PARAMETER(RealArray, PID_Geometry);
   REGISTER_PARAMETER(Selection, PID_Filter);
+  REGISTER_PARAMETER(Real,      PID_PointSize);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -59,10 +60,12 @@ Handle(ActAPI_INode) asiData_IVPointSetNode::Instance()
 void asiData_IVPointSetNode::Init()
 {
   // Initialize name Parameter
-  this->InitParameter(PID_Name, "Name");
+  this->InitParameter(PID_Name,      "Name",       "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PointSize, "Point size", "", ParameterFlag_IsVisible, true);
   //
   this->SetPoints(nullptr);
   this->SetFilter(nullptr);
+  this->SetPointSize(4);
 }
 
 //-----------------------------------------------------------------------------
@@ -77,10 +80,10 @@ TCollection_ExtendedString asiData_IVPointSetNode::GetName()
 }
 
 //! Sets name for the Node.
-//! \param theName [in] name to set.
-void asiData_IVPointSetNode::SetName(const TCollection_ExtendedString& theName)
+//! \param[in] name the name to set.
+void asiData_IVPointSetNode::SetName(const TCollection_ExtendedString& name)
 {
-  ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(theName);
+  ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(name);
 }
 
 //-----------------------------------------------------------------------------
@@ -116,4 +119,17 @@ Handle(TColStd_HPackedMapOfInteger) asiData_IVPointSetNode::GetFilter() const
 void asiData_IVPointSetNode::SetFilter(const Handle(TColStd_HPackedMapOfInteger)& filter)
 {
   ActParamTool::AsSelection( this->Parameter(PID_Filter) )->SetMask(filter);
+}
+
+//! \return the stored point size.
+double asiData_IVPointSetNode::GetPointSize() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_PointSize) )->GetValue();
+}
+
+//! Sets the point size to store.
+//! \param[in] sz the value to set.
+void asiData_IVPointSetNode::SetPointSize(const double sz)
+{
+  ActParamTool::AsReal( this->Parameter(PID_PointSize) )->SetValue(sz);
 }

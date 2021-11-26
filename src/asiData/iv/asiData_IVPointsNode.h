@@ -34,19 +34,13 @@
 // Visualization includes
 #include <asiData_IVPointSetNode.h>
 
-//-----------------------------------------------------------------------------
-// Data Node representing a set of point clouds in IV (Imperative Viewer)
-//-----------------------------------------------------------------------------
-
-DEFINE_STANDARD_HANDLE(asiData_IVPointsNode, ActData_BaseNode)
-
 //! Data Node representing a set of point clouds in IV (Imperative Viewer).
 class asiData_IVPointsNode : public ActData_BaseNode
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiData_IVPointsNode, ActData_BaseNode)
+
+public:
 
   // Automatic registration of Node type in global factory
   DEFINE_NODE_FACTORY(asiData_IVPointsNode, Instance)

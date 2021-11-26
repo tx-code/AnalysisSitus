@@ -78,7 +78,6 @@ asiVisu_IVPointSetPrs::asiVisu_IVPointSetPrs(const Handle(ActAPI_INode)& N)
   }
 
   // Adjust visual properties.
-  this->GetPipeline(PrimaryPipeline_Main)->Actor()->GetProperty()->SetPointSize(4.0);
   this->GetPipeline(PrimaryPipeline_Main)->Actor()->GetProperty()->RenderPointsAsSpheresOn();
   this->GetPipeline(PrimaryPipeline_Main)->Actor()->SetPickable(1);
 
@@ -219,9 +218,19 @@ void asiVisu_IVPointSetPrs::afterInitPipelines()
   Handle(asiVisu_IVPointSetDataProvider)
     DP = Handle(asiVisu_IVPointSetDataProvider)::DownCast( this->dataProvider(PrimaryPipeline_Main) );
 
-  const int nPts = DP->GetPoints()->GetNumberOfElements();
+  /* Adjust point sizes */
 
-  if ( nPts > 1 )
+  const double psz = DP->GetPointSize();
+
+  this->GetPipeline          (PrimaryPipeline_Main)->Actor()->GetProperty()->SetPointSize(psz);
+  this->GetDetectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
+  this->GetSelectionPipeline ()                    ->Actor()->GetProperty()->SetPointSize(psz + 6);
+
+  /* Adjust title bar */
+
+  const int nPts = DP->GetPoints()->GetNumberOfElements();
+  //
+  if ( nPts > 1 ) // Single points do not deserve titles.
   {
     TCollection_AsciiString title("Num. of points: "); title += nPts;
 

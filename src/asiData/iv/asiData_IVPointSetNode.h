@@ -40,17 +40,13 @@
 // Active Data includes
 #include <ActData_BaseNode.h>
 
-//-----------------------------------------------------------------------------
-// Data Node representing a point cloud in IV (Imperative Viewer)
-//-----------------------------------------------------------------------------
-
 //! Data Node representing a point cloud in IV (Imperative Viewer).
 class asiData_IVPointSetNode : public ActData_BaseNode
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiData_IVPointSetNode, ActData_BaseNode)
+
+public:
 
   // Automatic registration of Node type in global factory
   DEFINE_NODE_FACTORY(asiData_IVPointSetNode, Instance)
@@ -67,6 +63,7 @@ public:
   //------------------//
     PID_Geometry,     //!< Point cloud.
     PID_Filter,       //!< Filter of indices.
+    PID_PointSize,    //!< Point size for visualization.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -99,6 +96,12 @@ public:
 
   asiData_EXPORT void
     SetFilter(const Handle(TColStd_HPackedMapOfInteger)& filter);
+
+  asiData_EXPORT double
+    GetPointSize() const;
+
+  asiData_EXPORT void
+    SetPointSize(const double sz);
 
 // Initialization:
 public:
