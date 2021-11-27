@@ -145,6 +145,18 @@ Handle(asiVisu_Prs) asiVisu_IVCurvePrs::Instance(const Handle(ActAPI_INode)& N)
 
 //-----------------------------------------------------------------------------
 
+void asiVisu_IVCurvePrs::Colorize(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_CurvePipeline)
+    pl = Handle(asiVisu_CurvePipeline)::DownCast( this->GetPipeline(PrimaryPipeline_Main) );
+
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
+}
+
+//-----------------------------------------------------------------------------
+
 void asiVisu_IVCurvePrs::highlight(vtkRenderer*,
                                    const Handle(asiVisu_PickerResult)& pickRes,
                                    const asiVisu_SelectionNature       selNature) const
@@ -269,4 +281,23 @@ void asiVisu_IVCurvePrs::deRenderPipelines(vtkRenderer* renderer) const
   //
   for ( asiVisu_HPipelineList::Iterator it(*pickPls); it.More(); it.Next() )
     it.Value()->RemoveFromRenderer(renderer);
+}
+//-----------------------------------------------------------------------------
+
+//! Callback for updating of Presentation pipelines invoked after the
+//! kernel update routine completes.
+void asiVisu_IVCurvePrs::afterUpdatePipelines() const
+{
+  Handle(asiData_IVCurveNode)
+    N = Handle(asiData_IVCurveNode)::DownCast( this->GetNode() );
+
+  /* Actualize color */
+
+  if ( N->HasColor() )
+  {
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
+    this->Colorize(color);
+  }
+  else
+    this->Colorize( ActAPI_Color(Quantity_NOC_WHITE) );
 }

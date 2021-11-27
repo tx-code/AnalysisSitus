@@ -45,10 +45,10 @@
 //! Presentation class for a single point cloud in IV.
 class asiVisu_IVPointSetPrs : public asiVisu_DefaultPrs
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_IVPointSetPrs, asiVisu_DefaultPrs)
+
+public:
 
   // Allows to register this Presentation class
   DEFINE_PRESENTATION_FACTORY(asiData_IVPointSetNode, Instance)
@@ -110,6 +110,7 @@ private:
   virtual void
     deRenderPipelines(vtkRenderer* renderer) const;
 
+  //! Callback for pipeline update.
   virtual void
     afterUpdatePipelines() const;
 

@@ -51,6 +51,9 @@ asiData_IVCurveNode::asiData_IVCurveNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Int,       PID_ActiveHandle);
   REGISTER_PARAMETER(RealArray, PID_ReperPoints);
   REGISTER_PARAMETER(Int,       PID_ActiveReper);
+  REGISTER_PARAMETER(Group,     PID_GroupPrs);
+  REGISTER_PARAMETER(Bool,      PID_HasColor);
+  REGISTER_PARAMETER(Int,       PID_Color);
   REGISTER_PARAMETER(Bool,      PID_DrawOriTip);
 }
 
@@ -70,12 +73,17 @@ void asiData_IVCurveNode::Init()
   this->SetActiveHandle       ( -1 );
   this->SetActiveReper        ( -1 );
   this->SetDrawOrientationTip ( true );
+  this->SetHasColor           ( false );
+  this->SetColor              ( 16777215 );
 
   ActParamTool::AsRealArray( this->Parameter(PID_ReperPoints) )->SetArray(nullptr);
 
   // Initialize properties.
-  this->InitParameter (PID_Name,       "Name",             "", ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_DrawOriTip, "Orientation tip",  "", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name,       "Name",             "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,   "Presentation",     "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,   "Colorized",        "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,      "Color",            "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawOriTip, "Orientation tip",  "",               ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -275,4 +283,32 @@ void asiData_IVCurveNode::SetDrawOrientationTip(const bool on)
 bool asiData_IVCurveNode::GetDrawOrientationTip() const
 {
   return ActParamTool::AsBool( this->Parameter(PID_DrawOriTip) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVCurveNode::SetHasColor(const bool hasColor)
+{
+  ActParamTool::AsBool( this->Parameter(PID_HasColor) )->SetValue(hasColor);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVCurveNode::HasColor() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_HasColor) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVCurveNode::SetColor(const int color)
+{
+  ActParamTool::AsInt( this->Parameter(PID_Color) )->SetValue(color);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_IVCurveNode::GetColor() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
 }

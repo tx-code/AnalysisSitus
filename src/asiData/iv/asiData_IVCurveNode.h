@@ -45,10 +45,10 @@
 //! Data Node representing a single curve in IV (Imperative Viewer).
 class asiData_IVCurveNode : public ActData_BaseNode
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiData_IVCurveNode, ActData_BaseNode)
+
+public:
 
   // Automatic registration of Node type in global factory
   DEFINE_NODE_FACTORY(asiData_IVCurveNode, Instance)
@@ -83,7 +83,10 @@ public:
   //------------------//
   // Presentation     //
   //------------------//
+    PID_GroupPrs,     //!< Presentation group.
     PID_DrawOriTip,   //!< Whether to draw orientation tip for the curve.
+    PID_HasColor,     //!< Indicates whether the Color Parameter is active.
+    PID_Color,        //!< Color.
 
   //------------------//
   // ...              //
@@ -205,6 +208,18 @@ public:
   //! \return stored value of orientation tip flag.
   asiData_EXPORT bool
     GetDrawOrientationTip() const;
+
+  asiData_EXPORT void
+    SetHasColor(const bool);
+
+  asiData_EXPORT bool
+    HasColor() const;
+
+  asiData_EXPORT void
+    SetColor(const int);
+
+  asiData_EXPORT int
+    GetColor() const;
 
 // Initialization:
 public:

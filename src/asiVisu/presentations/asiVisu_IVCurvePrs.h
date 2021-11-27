@@ -42,10 +42,10 @@
 //! Presentation class for curves in IV.
 class asiVisu_IVCurvePrs : public asiVisu_DefaultPrs
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_IVCurvePrs, asiVisu_DefaultPrs)
+
+public:
 
   // Allows to register this Presentation class
   DEFINE_PRESENTATION_FACTORY(asiData_IVCurveNode, Instance)
@@ -76,6 +76,13 @@ public:
   asiVisu_EXPORT static Handle(asiVisu_Prs)
     Instance(const Handle(ActAPI_INode)& N);
 
+public:
+
+  //! Sets custom color.
+  //! \param[in] color color to set.
+  asiVisu_EXPORT void
+    Colorize(const ActAPI_Color& color) const;
+
 protected:
 
   //! Highlights curve presentation.
@@ -96,6 +103,10 @@ protected:
   //! Callback on removing presentation pipelines from renderer.
   virtual void
     deRenderPipelines(vtkRenderer* renderer) const;
+
+  //! Callback for pipeline update.
+  virtual void
+    afterUpdatePipelines() const;
 
 private:
 
