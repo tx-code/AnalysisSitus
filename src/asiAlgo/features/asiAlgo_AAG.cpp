@@ -1180,6 +1180,20 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AAG::GetAllFaces(asiAlgo_Feature& allFaces) const
+{
+  // Gather all present face indices into a single map.
+  for ( asiAlgo_AdjacencyMx::t_mx::Iterator it( m_neighborsStack.top().mx );
+        it.More(); it.Next() )
+  {
+    const t_topoId face = it.Key();
+    //
+    allFaces.Add(face);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 int asiAlgo_AAG::GetConnectedComponentsNb()
 {
   std::vector<asiAlgo_Feature> ccomps;

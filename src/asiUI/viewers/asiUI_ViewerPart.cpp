@@ -45,6 +45,9 @@
 #include <asiUI_DialogFindFace.h>
 #include <asiUI_DialogRefineTessellation.h>
 
+// asiEngine includes
+#include <asiEngine_Part.h>
+
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkAssembly.h>
@@ -194,6 +197,10 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_REFINE_TESSELLATION) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_REFINE_TESSELLATION, m_partCallback);
 
+    // Set observer for selecting all faces
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_SELECT_ALL) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_SELECT_ALL, m_partCallback);
+
     // Set observer for HLR
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR, m_partCallback);
@@ -212,6 +219,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_partCallback, SIGNAL( refineTessellation() ), this, SLOT( onRefineTessellation() ) );
     connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
     connect( m_partCallback, SIGNAL( buildHLRDiscr() ),      this, SLOT( onBuildHLRDiscr() ) );
+    connect( m_partCallback, SIGNAL( selectAll() ),          this, SLOT( onSelectAll() ) );
 
     /* ===============================
      *  Setting up rotation callbacks
@@ -675,6 +683,23 @@ void asiUI_ViewerPart::onTopView()
   asiVisu_Utils::AdjustCamera( m_prs_mgr->GetRenderer(), m_prs_mgr->PropsByTrihedron() );
   //
   this->Repaint();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPart::onSelectAll()
+{
+  asiEngine_Part partApi(m_model, m_prs_mgr, m_progress, m_plotter);
+
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+    return;
+
+  asiAlgo_Feature fids;
+  aag->GetAllFaces(fids);
+
+  partApi.HighlightFaces(fids);
 }
 
 //-----------------------------------------------------------------------------

@@ -75,6 +75,7 @@ signals:
   void refineTessellation();
   void buildHLR();
   void buildHLRDiscr();
+  void selectAll();
 
 private:
 

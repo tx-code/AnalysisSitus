@@ -206,6 +206,9 @@ void asiVisu_InteractorStylePick::OnKeyPress()
   if ( this->Interactor->GetControlKey() && key == "t" )
     this->InvokeEvent(EVENT_REFINE_TESSELLATION);
   //
+  if ( this->Interactor->GetControlKey() && key == "a" )
+    this->InvokeEvent(EVENT_SELECT_ALL);
+  //
   if ( key == "h" )
     this->Interactor->GetAltKey() ? this->InvokeEvent(EVENT_BUILD_HLR_DISCR) :
                                     this->InvokeEvent(EVENT_BUILD_HLR);

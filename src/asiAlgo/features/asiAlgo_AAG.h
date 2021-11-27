@@ -783,6 +783,11 @@ public:
   asiAlgo_EXPORT void
     Collapse(const asiAlgo_Feature& faceIndices);
 
+  //! Returns all face IDs to the passed outcome collection.
+  //! \param[out] allFaces the output to populate.
+  asiAlgo_EXPORT void
+    GetAllFaces(asiAlgo_Feature& allFaces) const;
+
   //! Calculates number of the connected components.
   //! \return number of connected components in a graph.
   asiAlgo_EXPORT int

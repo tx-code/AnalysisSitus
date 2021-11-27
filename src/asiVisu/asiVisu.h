@@ -90,6 +90,7 @@
 #define EVENT_REFINE_TESSELLATION (vtkCommand::UserEvent + 1009)
 #define EVENT_BUILD_HLR           (vtkCommand::UserEvent + 1010)
 #define EVENT_BUILD_HLR_DISCR     (vtkCommand::UserEvent + 1011)
+#define EVENT_SELECT_ALL          (vtkCommand::UserEvent + 1012)
 
 // For interactive picking:
 #define EVENT_DETECT_WORLD_POINT  (vtkCommand::UserEvent + 2010) // World picker.
