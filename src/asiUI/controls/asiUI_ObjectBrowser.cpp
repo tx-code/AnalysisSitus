@@ -90,6 +90,26 @@ namespace
     for ( int c = 0; c < pItem->childCount(); ++c )
       PropagateFlag(pItem->child(c), state);
   }
+
+  QTreeWidgetItem*
+    GetItem(QTreeWidget*               pTreeWidget,
+            const ActAPI_DataObjectId& nodeId)
+  {
+    QTreeWidgetItemIterator it(pTreeWidget);
+    //
+    while ( *it )
+    {
+      QString itemData = (*it)->data(0, BrowserRoleNodeId).toString();
+      if ( QStr2AsciiStr(itemData) == nodeId )
+      {
+        return *it;
+      }
+      else
+        ++it;
+    }
+
+    return nullptr;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -644,8 +664,29 @@ void asiUI_ObjectBrowser::onSetAsPart()
     //
     part_n->SetLinearDeflection(linDefl);
     part_n->SetAngularDeflection(angDefl);
+    part_n->AddUserFlags(NodeFlag_IsPresentationVisible);
   }
   m_model->CommitCommand();
+
+  // Check the part item.
+  QTreeWidgetItem*
+    pPartItem = ::GetItem( this, part_n->GetId() );
+  //
+  if ( pPartItem )
+  {
+    if ( pPartItem->flags() & Qt::ItemIsUserCheckable )
+      pPartItem->setCheckState(1, Qt::Checked);
+  }
+
+  // Uncheck the topo item.
+  QTreeWidgetItem*
+    pTopoItem = ::GetItem( this, topoNode->GetId() );
+  //
+  if ( pTopoItem )
+  {
+    if ( pTopoItem->flags() & Qt::ItemIsUserCheckable )
+      pTopoItem->setCheckState(1, Qt::Unchecked);
+  }
 
   // Update UI.
   for ( size_t k = 0; k < m_viewers.size(); ++k )

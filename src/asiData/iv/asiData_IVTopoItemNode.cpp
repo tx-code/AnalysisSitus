@@ -88,7 +88,7 @@ void asiData_IVTopoItemNode::Init()
   //
   this->InitParameter(PID_GroupPrs,    "Presentation",  "",                 ParameterFlag_IsVisible, true);
   this->InitParameter(PID_DisplayMode, "Display mode",  "IVPrsDisplayMode", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasColor,    "Colorized",     "",                 ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasColor,    "Colorized",     "",                 0,                       true);
   this->InitParameter(PID_Color,       "Color",         "PrsCustomColor",   ParameterFlag_IsVisible, true);
 }
 
