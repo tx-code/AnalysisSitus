@@ -127,9 +127,11 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
   shapeTool->GetFreeShapes(rootLabs);
 
   // Prepare full indexed map of scene nodes in correct order.
+  // This map contains all items of document including sub-assemblies.
+  // The index is important as nodes of scene tree will refer to each other by the index.
   gltf_SceneNodeMap scNodeMapWithChildren; // indexes starting from 1
 
-  NCollection_DataMap<TDF_Label, glTFNode*, TDF_LabelMapHasher> label2Node;
+  t_DocPrs2Node docPrs2Node;
   //
   XCAFPrs_DocumentExplorer docExp(m_doc, rootLabs, XCAFPrs_DocumentExplorerFlags_None);
   for (; docExp.More(); docExp.Next())
@@ -137,8 +139,8 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
     const XCAFPrs_DocumentNode& docNode = docExp.Current();
     glTFNode* node = m_sceneStructure.PrependNode();
 
-    if (!label2Node.IsBound(docNode.Label))
-      label2Node.Bind(docNode.Label, node);
+    if (!docPrs2Node.IsBound(docNode))
+      docPrs2Node.Bind(docNode, node);
 
     if (docExp.CurrentDepth() == 0)
       m_sceneStructure.MarkNodeAsRoot(node);
@@ -147,10 +149,11 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
     scNodeMapWithChildren.Add(docNode);
   }
 
+  // Iterate through all items to set the parent-child links, set the names and locations.
   for (gltf_SceneNodeMap::Iterator snIt(scNodeMapWithChildren); snIt.More(); snIt.Next())
   {
     const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    glTFNode* node = label2Node.Find(docNode.Label);
+    glTFNode* node = docPrs2Node.Find(docNode);
     if (!node)
       continue;
 
@@ -168,9 +171,17 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
         if (childLab.IsNull())
           continue;
 
-        glTFNode* childNode = label2Node.Find(childLab);
-        if (childNode)
-          node->Children.push_back(childNode);
+        const TCollection_AsciiString childId = XCAFPrs_DocumentExplorer::DefineChildId(childLab, docNode.Id);
+        t_DocPrs2Node::Iterator nIt (docPrs2Node);
+        for ( ; nIt.More(); nIt.Next() )
+        {
+          if ( !nIt.Key().Id.IsEqual(childId) )
+            continue;
+
+          glTFNode* childNode = nIt.Value();
+          if ( childNode )
+            node->Children.push_back(childNode);
+        }
       }
     }
     if (!docNode.LocalTrsf.IsIdentity())
