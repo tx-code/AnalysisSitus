@@ -75,6 +75,7 @@ public:
 
   typedef NCollection_DataMap<TopoDS_Shape, glTFXdeVisualStyle, TopTools_ShapeMapHasher> t_Shape2Style;
   typedef NCollection_IndexedDataMap<glTFNode*, TDF_Label>                               t_Node2Label;
+  typedef NCollection_DataMap<XCAFPrs_DocumentNode, glTFNode*, gltf_DocumentNodeHasher>  t_DocPrs2Node;
 
 public:
 
