@@ -95,6 +95,7 @@ protected:
 #define Color_Purple    ActAPI_Color(Quantity_NOC_PURPLE)
 #define Color_Pink      ActAPI_Color(Quantity_NOC_PINK)
 #define Color_Green     ActAPI_Color(Quantity_NOC_GREEN)
+#define Color_Khaki     ActAPI_Color(Quantity_NOC_KHAKI)
 #define Color_Blue      ActAPI_Color(Quantity_NOC_BLUE1)
 #define Color_Yellow    ActAPI_Color(Quantity_NOC_YELLOW)
 #define Color_White     ActAPI_Color(Quantity_NOC_WHITE)

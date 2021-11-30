@@ -66,6 +66,18 @@ public:
   asiVisu_EXPORT static Handle(asiVisu_Prs)
     Instance(const Handle(ActAPI_INode)& N);
 
+public:
+
+  //! Colorizes this Presentation.
+  asiVisu_EXPORT void
+    Colorize(const ActAPI_Color& color) const;
+
+protected:
+
+  //! Callback for pipeline update.
+  virtual void
+    afterUpdatePipelines() const;
+
 private:
 
   //! \brief Creates a Presentation object for the passed Node.

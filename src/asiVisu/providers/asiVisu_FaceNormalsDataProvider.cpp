@@ -109,6 +109,13 @@ double asiVisu_FaceNormalsDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_FaceNormalsDataProvider::HasOrientationTip() const
+{
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 //! \return working face.
 TopoDS_Face asiVisu_FaceNormalsDataProvider::GetFace() const
 {

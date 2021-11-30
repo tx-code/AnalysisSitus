@@ -68,3 +68,35 @@ Handle(asiVisu_Prs) asiVisu_IVVectorFieldPrs::Instance(const Handle(ActAPI_INode
 {
   return new asiVisu_IVVectorFieldPrs(N);
 }
+
+//-----------------------------------------------------------------------------
+
+void asiVisu_IVVectorFieldPrs::Colorize(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_VectorsPipeline)
+    pl = Handle(asiVisu_VectorsPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
+
+  pl->Actor()->GetProperty()->SetColor( color.Red(),
+                                        color.Green(),
+                                        color.Blue() );
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for updating of Presentation pipelines invoked after the
+//! kernel update routine completes.
+void asiVisu_IVVectorFieldPrs::afterUpdatePipelines() const
+{
+  Handle(asiData_IVVectorFieldNode)
+    N = Handle(asiData_IVVectorFieldNode)::DownCast( this->GetNode() );
+
+  /* Actualize color */
+
+  if ( N->HasColor() )
+  {
+    ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
+    this->Colorize(color);
+  }
+  else
+    this->Colorize( ActAPI_Color(Quantity_NOC_WHITE) );
+}

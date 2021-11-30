@@ -209,15 +209,19 @@ public:
   asiData_EXPORT bool
     GetDrawOrientationTip() const;
 
+  //! Sets the property indicating whether this Node has the Color Parameter activated.
   asiData_EXPORT void
     SetHasColor(const bool);
 
+  //! \return the Boolean flag indicating whether this Node has the Color Parameter activated.
   asiData_EXPORT bool
     HasColor() const;
 
+  //! Sets the color.
   asiData_EXPORT void
     SetColor(const int);
 
+  //! \return color.
   asiData_EXPORT int
     GetColor() const;
 

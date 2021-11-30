@@ -79,11 +79,11 @@ void asiData_IVCurveNode::Init()
   ActParamTool::AsRealArray( this->Parameter(PID_ReperPoints) )->SetArray(nullptr);
 
   // Initialize properties.
-  this->InitParameter (PID_Name,       "Name",             "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_GroupPrs,   "Presentation",     "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_HasColor,   "Colorized",        "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_Color,      "Color",            "PrsCustomColor", ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_DrawOriTip, "Orientation tip",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name,       "Name",            "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,   "Presentation",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,   "Colorized",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,      "Color",           "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawOriTip, "Orientation tip", "",               ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------

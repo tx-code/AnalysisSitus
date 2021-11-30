@@ -282,6 +282,7 @@ void asiVisu_IVCurvePrs::deRenderPipelines(vtkRenderer* renderer) const
   for ( asiVisu_HPipelineList::Iterator it(*pickPls); it.More(); it.Next() )
     it.Value()->RemoveFromRenderer(renderer);
 }
+
 //-----------------------------------------------------------------------------
 
 //! Callback for updating of Presentation pipelines invoked after the

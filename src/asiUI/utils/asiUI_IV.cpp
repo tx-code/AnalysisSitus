@@ -1474,6 +1474,10 @@ void asiUI_IV::draw_vectors(const Handle(HRealArray)&      points,
     m_lastObj = vf_n;
   }
 
+  // Update persistent color.
+  vf_n->SetHasColor(true);
+  vf_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+
   // Commit transaction
   if ( isTx )
     m_model->CommitCommand();

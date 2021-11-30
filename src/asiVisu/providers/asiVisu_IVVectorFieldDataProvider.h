@@ -40,8 +40,6 @@
 //! Data provider for IV vector fields.
 class asiVisu_IVVectorFieldDataProvider : public asiVisu_VectorsDataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_IVVectorFieldDataProvider, asiVisu_VectorsDataProvider)
 
@@ -60,6 +58,9 @@ public:
 
   asiVisu_EXPORT virtual double
     GetMaxVectorModulus() const;
+
+  asiVisu_EXPORT virtual bool
+    HasOrientationTip() const;
 
 private:
 

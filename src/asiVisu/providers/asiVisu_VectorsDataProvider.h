@@ -66,6 +66,9 @@ public:
   virtual double
     GetMaxVectorModulus() const = 0;
 
+  virtual bool
+    HasOrientationTip() const = 0;
+
 protected:
 
   Handle(ActAPI_INode) m_source; //!< Source Node.

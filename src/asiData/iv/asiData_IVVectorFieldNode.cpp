@@ -45,6 +45,10 @@ asiData_IVVectorFieldNode::asiData_IVVectorFieldNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Name,      PID_Name);
   REGISTER_PARAMETER(RealArray, PID_Points);
   REGISTER_PARAMETER(RealArray, PID_Vectors);
+  REGISTER_PARAMETER(Group,     PID_GroupPrs);
+  REGISTER_PARAMETER(Bool,      PID_HasColor);
+  REGISTER_PARAMETER(Int,       PID_Color);
+  REGISTER_PARAMETER(Bool,      PID_DrawTip);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -58,11 +62,18 @@ Handle(ActAPI_INode) asiData_IVVectorFieldNode::Instance()
 //! Performs initial actions required to make Node WELL-FORMED.
 void asiData_IVVectorFieldNode::Init()
 {
-  // Initialize name Parameter
-  this->InitParameter(PID_Name, "Name");
+  // Initialize properties.
+  this->InitParameter (PID_Name,     "Name",             "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs, "Presentation",     "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor, "Colorized",        "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,    "Color",            "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawTip,  "Orientation tip",  "",               ParameterFlag_IsVisible, true);
   //
-  this->SetPoints(nullptr);
-  this->SetVectors(nullptr);
+  this->SetPoints   ( nullptr );
+  this->SetVectors  ( nullptr );
+  this->SetDrawTip  ( true );
+  this->SetHasColor ( false );
+  this->SetColor    ( 16777215 );
 }
 
 //-----------------------------------------------------------------------------
@@ -96,6 +107,8 @@ Handle(asiAlgo_BaseCloud<double>) asiData_IVVectorFieldNode::GetPoints() const
   return asiAlgo_PointCloudUtils::AsCloudd(coords);
 }
 
+//-----------------------------------------------------------------------------
+
 //! Sets point cloud to store.
 //! \param[in] points the points to store.
 void asiData_IVVectorFieldNode::SetPoints(const Handle(asiAlgo_BaseCloud<double>)& points)
@@ -104,6 +117,8 @@ void asiData_IVVectorFieldNode::SetPoints(const Handle(asiAlgo_BaseCloud<double>
   //
   ActParamTool::AsRealArray( this->Parameter(PID_Points) )->SetArray( points.IsNull() ? nullptr : arr );
 }
+
+//-----------------------------------------------------------------------------
 
 //! \return stored vector field as a base cloud of coordinate triples.
 Handle(asiAlgo_BaseCloud<double>) asiData_IVVectorFieldNode::GetVectors() const
@@ -114,6 +129,8 @@ Handle(asiAlgo_BaseCloud<double>) asiData_IVVectorFieldNode::GetVectors() const
   return asiAlgo_PointCloudUtils::AsCloudd(coords);
 }
 
+//-----------------------------------------------------------------------------
+
 //! Sets vector field to store.
 //! \param[in] vectors the vector field to store.
 void asiData_IVVectorFieldNode::SetVectors(const Handle(asiAlgo_BaseCloud<double>)& vectors)
@@ -121,4 +138,46 @@ void asiData_IVVectorFieldNode::SetVectors(const Handle(asiAlgo_BaseCloud<double
   Handle(TColStd_HArray1OfReal) arr = asiAlgo_PointCloudUtils::AsRealArray(vectors);
   //
   ActParamTool::AsRealArray( this->Parameter(PID_Vectors) )->SetArray( vectors.IsNull() ? nullptr : arr );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVVectorFieldNode::SetDrawTip(const bool on)
+{
+  ActParamTool::AsBool( this->Parameter(PID_DrawTip) )->SetValue(on);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVVectorFieldNode::GetDrawTip() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_DrawTip) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVVectorFieldNode::SetHasColor(const bool hasColor)
+{
+  ActParamTool::AsBool( this->Parameter(PID_HasColor) )->SetValue(hasColor);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVVectorFieldNode::HasColor() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_HasColor) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVVectorFieldNode::SetColor(const int color)
+{
+  ActParamTool::AsInt( this->Parameter(PID_Color) )->SetValue(color);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_IVVectorFieldNode::GetColor() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
 }

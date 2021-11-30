@@ -64,6 +64,13 @@ double asiVisu_IVVectorFieldDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_IVVectorFieldDataProvider::HasOrientationTip() const
+{
+  return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetDrawTip();
+}
+
+//-----------------------------------------------------------------------------
+
 //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
 //! translation process.
 //! \return source Parameters.
@@ -72,7 +79,8 @@ Handle(ActAPI_HParameterList) asiVisu_IVVectorFieldDataProvider::translationSour
   ActParamStream out;
 
   out << m_source->Parameter(asiData_IVVectorFieldNode::PID_Points)
-      << m_source->Parameter(asiData_IVVectorFieldNode::PID_Vectors);
+      << m_source->Parameter(asiData_IVVectorFieldNode::PID_Vectors)
+      << m_source->Parameter(asiData_IVVectorFieldNode::PID_DrawTip);
 
   return out;
 }

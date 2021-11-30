@@ -195,12 +195,17 @@ void asiVisu_MeshResultUtils::InitScalarBarWidget(vtkScalarBarWidget* scalarBarW
 
 //! Returns polygonal source for VTK glyph representing vectorial data.
 //! \return polygonal source of the mentioned glyph.
-vtkSmartPointer<vtkPolyDataAlgorithm> asiVisu_MeshResultUtils::GetVectorGlyph()
+vtkSmartPointer<vtkPolyDataAlgorithm>
+  asiVisu_MeshResultUtils::GetVectorGlyph(const bool hasTip)
 {
-  vtkSmartPointer<vtkGlyphSource2D> aResult = vtkSmartPointer<vtkGlyphSource2D>::New();
-  aResult->SetGlyphTypeToArrow();
-  aResult->SetFilled(0);
-  return aResult;
+  vtkSmartPointer<vtkGlyphSource2D> glyph2d = vtkSmartPointer<vtkGlyphSource2D>::New();
+  glyph2d->SetGlyphTypeToArrow();
+  glyph2d->SetFilled(0);
+
+  if ( !hasTip )
+    glyph2d->SetGlyphTypeToDash();
+
+  return glyph2d;
 }
 
 //-----------------------------------------------------------------------------

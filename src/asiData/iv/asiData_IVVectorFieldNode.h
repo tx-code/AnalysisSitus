@@ -61,8 +61,17 @@ public:
   //------------------//
     PID_Name,         //!< Name of the Node.
   //------------------//
+  // Geometry         //
+  //------------------//
     PID_Points,       //!< Coordinates of vector positions.
     PID_Vectors,      //!< Coordinates of vectors.
+  //------------------//
+  // Presentation     //
+  //------------------//
+    PID_GroupPrs,     //!< Presentation group.
+    PID_DrawTip,      //!< Whether to draw tip for the vectors.
+    PID_HasColor,     //!< Indicates whether the Color Parameter is active.
+    PID_Color,        //!< Color.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -95,6 +104,32 @@ public:
 
   asiData_EXPORT void
     SetVectors(const Handle(asiAlgo_BaseCloud<double>)& vectorCloud);
+
+  //! Sets the property indicating whether to draw the orientation tip
+  //! for the vectors.
+  //! \param[in] on true/false.
+  asiData_EXPORT void
+    SetDrawTip(const bool on);
+
+  //! \return stored value of orientation tip flag.
+  asiData_EXPORT bool
+    GetDrawTip() const;
+
+  //! Sets the property indicating whether this Node has the Color Parameter activated.
+  asiData_EXPORT void
+    SetHasColor(const bool);
+
+  //! \return the Boolean flag indicating whether this Node has the Color Parameter activated.
+  asiData_EXPORT bool
+    HasColor() const;
+
+  //! Sets the color.
+  asiData_EXPORT void
+    SetColor(const int);
+
+  //! \return color.
+  asiData_EXPORT int
+    GetColor() const;
 
 // Initialization:
 public:

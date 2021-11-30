@@ -40,8 +40,6 @@
 //! Visualization pipeline for vectors.
 class asiVisu_VectorsPipeline : public asiVisu_Pipeline
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_VectorsPipeline, asiVisu_Pipeline)
 

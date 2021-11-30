@@ -45,8 +45,6 @@
 //! Data provider for mesh normals.
 class asiVisu_TessNormalsDataProvider : public asiVisu_VectorsDataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_TessNormalsDataProvider, asiVisu_VectorsDataProvider)
 
@@ -65,6 +63,9 @@ public:
 
   asiVisu_EXPORT virtual double
     GetMaxVectorModulus() const;
+
+  asiVisu_EXPORT virtual bool
+    HasOrientationTip() const;
 
 private:
 

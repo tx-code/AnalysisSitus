@@ -1563,10 +1563,10 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   (void) argc;
   (void) argv;
 
-  std::vector<gp_Dir>
-    dirs = { gp_Dir(-1, 0, 0),
-             gp_Dir(-1, 1, 0),
-             gp_Dir(-1, -1, 0) };
+  std::vector<gp_Vec>
+    dirs = { gp_Vec(-1, 0, 0),
+             gp_Vec(-1, 1, 0),
+             gp_Vec(-1, -1, 0) };
 
   const double arcAngRad = asiAlgo_Utils::MinArcAngle( dirs, gp_Dir(0, 0, 1) );
 

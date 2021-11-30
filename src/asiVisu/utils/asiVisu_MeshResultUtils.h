@@ -89,7 +89,7 @@ namespace asiVisu_MeshResultUtils
                         const int           orientation);
 
   asiVisu_EXPORT vtkSmartPointer<vtkPolyDataAlgorithm>
-    GetVectorGlyph();
+    GetVectorGlyph(const bool hasTip = true);
 
   asiVisu_EXPORT vtkSmartPointer<vtkTransform>
     GetVectorGlyphTransform();

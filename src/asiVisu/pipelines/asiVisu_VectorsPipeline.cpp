@@ -114,7 +114,8 @@ void asiVisu_VectorsPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataP
     // Transform glyphs
     vtkTransformPolyDataFilter*
       trsfFilter = vtkTransformPolyDataFilter::SafeDownCast( m_filterMap.Find(Filter_Trsf) );
-    trsfFilter->SetInputConnection( asiVisu_MeshResultUtils::GetVectorGlyph()->GetOutputPort() );
+    //
+    trsfFilter->SetInputConnection( asiVisu_MeshResultUtils::GetVectorGlyph( DP->HasOrientationTip() )->GetOutputPort() );
     trsfFilter->SetTransform( asiVisu_MeshResultUtils::GetVectorGlyphTransform() );
 
     // Adjust glyph filter
@@ -123,7 +124,7 @@ void asiVisu_VectorsPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataP
     glyphFilter->SetVectorModeToUseVector();
     glyphFilter->SetScaleModeToScaleByVector();
     glyphFilter->SetInputArrayToProcess(1, 0, 0, 0, ARRNAME_POINTCLOUD_VECTORS);
-    glyphFilter->SetScaleFactor(1.0); // No global scaling
+    glyphFilter->SetScaleFactor(1.0);
 
     // Complete pipeline
     this->SetInputConnection( pointsSource->GetOutputPort() );

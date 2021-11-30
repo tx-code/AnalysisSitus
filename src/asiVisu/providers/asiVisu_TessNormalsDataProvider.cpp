@@ -226,6 +226,13 @@ double asiVisu_TessNormalsDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_TessNormalsDataProvider::HasOrientationTip() const
+{
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiVisu_TessNormalsDataProvider::elementNodes(const Handle(ActData_Mesh)&             mesh,
                                                    const Handle(ActData_Mesh_Element)&     elem,
                                                    std::vector<Handle(ActData_Mesh_Node)>& nodes) const
