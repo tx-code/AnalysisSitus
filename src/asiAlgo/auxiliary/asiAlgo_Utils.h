@@ -1603,6 +1603,14 @@ namespace asiAlgo_Utils
     GeomSummary(const TopoDS_Shape&  shape,
                 asiAlgo_GeomSummary& summary);
 
+  //! Computes the minimal-angle arc for the passed directions.
+  //! \param[in] dirs the directions to check.
+  //! \param[in] norm the normal vector to determine angle signs.
+  //! \return angle of the minimal arc spanned by the passed vectors.
+  asiAlgo_EXPORT double
+    MinArcAngle(const std::vector<gp_Vec>& dirs,
+                const gp_Dir&              norm);
+
 } // asiAlgo_Utils namespace.
 
 #endif

@@ -1563,22 +1563,15 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   (void) argc;
   (void) argv;
 
-  const double arcAngleInRadians = -M_PI/4.;
-  gp_Circ myArc(gp_Ax2(gp::Origin(), gp::DZ()), 10.);
+  std::vector<gp_Dir>
+    dirs = { gp_Dir(-1, 0, 0),
+             gp_Dir(-1, 1, 0),
+             gp_Dir(-1, -1, 0) };
 
-  double firstParam = arcAngleInRadians;
-  double lastParam = 0;
-  double Step = (10* 2 * M_PI) / 360; // tessellate the arc with 10 degree step
-  double param = 0;
-  gp_Pnt P1, P2;
+  const double arcAngRad = asiAlgo_Utils::MinArcAngle( dirs, gp_Dir(0, 0, 1) );
 
-  P1 = ElCLib::Value(firstParam, myArc);
-  for (param = firstParam+Step; param < lastParam; param += Step)
-  {
-    interp->GetPlotter().DRAW_POINT(P1, Color_Yellow, "P");
-    P1 = ElCLib::Value(param, myArc);
-  }
-
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Min arc angle: %1 deg."
+                                                       << arcAngRad*180/M_PI);
 
   return TCL_OK;
 }

@@ -66,8 +66,6 @@ class asiVisu_PrsManager;
 //! thanks to this tool.
 class asiUI_IV : public ActAPI_IPlotter
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiUI_IV, ActAPI_IPlotter)
 
@@ -154,8 +152,18 @@ public:
                 const TCollection_AsciiString&);
 
   asiUI_EXPORT virtual void
+    DRAW_POINTS(const std::vector<gp_XYZ>&,
+                const ActAPI_Color&,
+                const TCollection_AsciiString&);
+
+  asiUI_EXPORT virtual void
     REDRAW_POINTS(const TCollection_AsciiString&,
                   const Handle(HRealArray)&,
+                  const ActAPI_Color&);
+
+  asiUI_EXPORT virtual void
+    REDRAW_POINTS(const TCollection_AsciiString&,
+                  const std::vector<gp_XYZ>&,
                   const ActAPI_Color&);
 
   asiUI_EXPORT virtual void
@@ -181,6 +189,18 @@ public:
                      const gp_Pnt&,
                      const gp_Vec&,
                      const ActAPI_Color&);
+
+  asiUI_EXPORT virtual void
+    DRAW_VECTORS_AT(const gp_Pnt&,
+                    const std::vector<gp_Vec>&,
+                    const ActAPI_Color&,
+                    const TCollection_AsciiString&);
+
+  asiUI_EXPORT virtual void
+    REDRAW_VECTORS_AT(const TCollection_AsciiString&,
+                      const gp_Pnt&,
+                      const std::vector<gp_Vec>&,
+                      const ActAPI_Color&);
 
   asiUI_EXPORT virtual void
     DRAW_CURVE(const Handle(Geom_Curve)&,
@@ -599,6 +619,12 @@ protected:
 
   asiUI_EXPORT void
     draw_points(const Handle(HRealArray)&      coords,
+                const ActAPI_Color&            color,
+                const TCollection_AsciiString& name,
+                const bool                     newPrimitive);
+
+  asiUI_EXPORT void
+    draw_points(const std::vector<gp_XYZ>&     pts,
                 const ActAPI_Color&            color,
                 const TCollection_AsciiString& name,
                 const bool                     newPrimitive);

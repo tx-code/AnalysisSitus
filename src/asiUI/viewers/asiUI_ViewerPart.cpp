@@ -358,7 +358,6 @@ void asiUI_ViewerPart::onSubShapesPicked()
     else if ( pick_res->IsSelectionVertex() )
       emit vertexPicked( pick_res.get() );
 
-    std::cout << "Geometry Node is not accessible" << std::endl;
     return; // No target Node to proceed with
   }
 
@@ -394,8 +393,6 @@ void asiUI_ViewerPart::onSubShapesPicked()
         geom_n->GetSurfaceRepresentation()  ->SetSelectedFaces(picked_face_IDs);
         geom_n->GetContourRepresentation()  ->SetSelectedFaces(picked_face_IDs);
         geom_n->GetHatchingRepresentation() ->SetSelectedFaces(picked_face_IDs);
-        //
-        std::cout << "Active face has been stored..." << std::endl;
       }
       else // Reset stored indices
       {
@@ -404,8 +401,6 @@ void asiUI_ViewerPart::onSubShapesPicked()
         geom_n->GetSurfaceRepresentation()  ->SetSelectedFace(0);
         geom_n->GetContourRepresentation()  ->SetSelectedFace(0);
         geom_n->GetHatchingRepresentation() ->SetSelectedFace(0);
-        //
-        std::cout << "Active face has been reset..." << std::endl;
       }
     }
     if ( m_model->HasOpenCommand() )
@@ -437,15 +432,11 @@ void asiUI_ViewerPart::onSubShapesPicked()
       {
         geom_n->GetEdgeRepresentation()  ->SetSelectedEdge(picked_edge_IDs[0]);
         geom_n->GetCurveRepresentation() ->SetSelectedEdge(picked_edge_IDs[0]);
-        //
-        std::cout << "Active edge has been stored..." << std::endl;
       }
       else // Reset stored indices
       {
         geom_n->GetEdgeRepresentation()  ->SetSelectedEdge(0);
         geom_n->GetCurveRepresentation() ->SetSelectedEdge(0);
-        //
-        std::cout << "Active edge has been reset..." << std::endl;
       }
     }
     m_model->CommitCommand(); // tx commit
@@ -475,14 +466,10 @@ void asiUI_ViewerPart::onSubShapesPicked()
       if ( picked_vertex_IDs.size() )
       {
         geom_n->GetVertexRepresentation()->SetSelectedVertex(picked_vertex_IDs[0]);
-        //
-        std::cout << "Active vertex has been stored..." << std::endl;
       }
       else // Reset stored indices
       {
         geom_n->GetVertexRepresentation()->SetSelectedVertex(0);
-        //
-        std::cout << "Active vertex has been reset..." << std::endl;
       }
     }
     m_model->CommitCommand(); // tx commit

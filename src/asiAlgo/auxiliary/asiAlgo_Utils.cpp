@@ -4584,3 +4584,29 @@ void asiAlgo_Utils::GeomSummary(const TopoDS_Shape&  shape,
       summary.nbCurveParabola++;
   }
 }
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_Utils::MinArcAngle(const std::vector<gp_Vec>& dirs,
+                                  const gp_Dir&              norm)
+{
+  if ( dirs.empty() || dirs.size() == 1 )
+    return 0.;
+
+  const  gp_Dir& ref = dirs[0];
+  double positiveAng = 0.;
+  double negativeAng = 0.;
+
+  for ( size_t k = 1; k < dirs.size(); ++k )
+  {
+    const double ang = ref.AngleWithRef(dirs[k], norm);
+
+    if ( ang > positiveAng )
+      positiveAng = ang;
+
+    if ( ang < negativeAng )
+      negativeAng = ang;
+  }
+
+  return positiveAng - negativeAng;
+}

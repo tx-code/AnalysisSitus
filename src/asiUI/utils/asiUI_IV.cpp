@@ -437,11 +437,29 @@ void asiUI_IV::DRAW_POINTS(const Handle(HRealArray)&      coords,
 
 //---------------------------------------------------------------------------//
 
+void asiUI_IV::DRAW_POINTS(const std::vector<gp_XYZ>&     pts,
+                           const ActAPI_Color&            color,
+                           const TCollection_AsciiString& name)
+{
+  this->draw_points(pts, color, name, true);
+}
+
+//---------------------------------------------------------------------------//
+
 void asiUI_IV::REDRAW_POINTS(const TCollection_AsciiString& name,
                              const Handle(HRealArray)&      coords,
                              const ActAPI_Color&            color)
 {
   this->draw_points(coords, color, name, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_POINTS(const TCollection_AsciiString& name,
+                             const std::vector<gp_XYZ>&     pts,
+                             const ActAPI_Color&            color)
+{
+  this->draw_points(pts, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -482,6 +500,48 @@ void asiUI_IV::REDRAW_VECTOR_AT(const TCollection_AsciiString& name,
                                 const ActAPI_Color&            color)
 {
   this->REDRAW_LINK(name, P, P.XYZ() + V.XYZ(), color);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::DRAW_VECTORS_AT(const gp_Pnt&                  origin,
+                               const std::vector<gp_Vec>&     vectors,
+                               const ActAPI_Color&            color,
+                               const TCollection_AsciiString& name)
+{
+  Handle(asiAlgo_BaseCloud<double>) posCloud = new asiAlgo_BaseCloud<double>;
+  Handle(asiAlgo_BaseCloud<double>) vecCloud = new asiAlgo_BaseCloud<double>;
+
+  for ( const auto& vec : vectors )
+  {
+    posCloud->AddElement( origin.XYZ() );
+    vecCloud->AddElement( vec.XYZ() );
+  }
+
+  this->draw_vectors( posCloud->GetCoordsArray(),
+                      vecCloud->GetCoordsArray(),
+                      color, name, true );
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_VECTORS_AT(const TCollection_AsciiString& name,
+                                 const gp_Pnt&                  origin,
+                                 const std::vector<gp_Vec>&     vectors,
+                                 const ActAPI_Color&            color)
+{
+  Handle(asiAlgo_BaseCloud<double>) posCloud = new asiAlgo_BaseCloud<double>;
+  Handle(asiAlgo_BaseCloud<double>) vecCloud = new asiAlgo_BaseCloud<double>;
+
+  for ( const auto& vec : vectors )
+  {
+    posCloud->AddElement( origin.XYZ() );
+    vecCloud->AddElement( vec.XYZ() );
+  }
+
+  this->draw_vectors( posCloud->GetCoordsArray(),
+                      vecCloud->GetCoordsArray(),
+                      color, name, false );
 }
 
 //---------------------------------------------------------------------------//
@@ -1344,6 +1404,24 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
 
   // Visualize.
   this->visualize(false, points_n, true, color, 1.0, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::draw_points(const std::vector<gp_XYZ>&     pts,
+                           const ActAPI_Color&            color,
+                           const TCollection_AsciiString& name,
+                           const bool                     newPrimitive)
+{
+  if ( pts.empty() )
+    return;
+
+  Handle(asiAlgo_BaseCloud<double>) ptsCloud = new asiAlgo_BaseCloud<double>;
+  //
+  for ( const auto& pt : pts )
+    ptsCloud->AddElement(pt);
+
+  this->draw_points(ptsCloud->GetCoordsArray(), color, name, newPrimitive);
 }
 
 //---------------------------------------------------------------------------//

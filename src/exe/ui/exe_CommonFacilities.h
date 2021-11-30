@@ -43,8 +43,6 @@
 //! Common tools and objects for B-Rep inspector application.
 class exe_CommonFacilities : public asiUI_CommonFacilities
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(exe_CommonFacilities, asiUI_CommonFacilities)
 

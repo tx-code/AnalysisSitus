@@ -89,19 +89,23 @@ protected:
 
 //-----------------------------------------------------------------------------
 
-#define Color_Default ActAPI_Color()
-#define Color_Red     ActAPI_Color(Quantity_NOC_RED)
-#define Color_Green   ActAPI_Color(Quantity_NOC_GREEN)
-#define Color_Blue    ActAPI_Color(Quantity_NOC_BLUE1)
-#define Color_Yellow  ActAPI_Color(Quantity_NOC_YELLOW)
-#define Color_White   ActAPI_Color(Quantity_NOC_WHITE)
-#define Color_Black   ActAPI_Color(Quantity_NOC_BLACK)
-#define Color_Violet  ActAPI_Color(Quantity_NOC_VIOLET)
-#define Color_Magenta ActAPI_Color(Quantity_NOC_MAGENTA1)
+#define Color_Default   ActAPI_Color(Quantity_NOC_SNOW)
+#define Color_Red       ActAPI_Color(Quantity_NOC_RED)
+#define Color_Orange    ActAPI_Color(Quantity_NOC_ORANGE)
+#define Color_Purple    ActAPI_Color(Quantity_NOC_PURPLE)
+#define Color_Pink      ActAPI_Color(Quantity_NOC_PINK)
+#define Color_Green     ActAPI_Color(Quantity_NOC_GREEN)
+#define Color_Blue      ActAPI_Color(Quantity_NOC_BLUE1)
+#define Color_Yellow    ActAPI_Color(Quantity_NOC_YELLOW)
+#define Color_White     ActAPI_Color(Quantity_NOC_WHITE)
+#define Color_Snow      ActAPI_Color(Quantity_NOC_SNOW)
+#define Color_Black     ActAPI_Color(Quantity_NOC_BLACK)
+#define Color_Violet    ActAPI_Color(Quantity_NOC_VIOLET)
+#define Color_Magenta   ActAPI_Color(Quantity_NOC_MAGENTA1)
+#define Color_Maroon    ActAPI_Color(Quantity_NOC_MAROON)
+#define Color_LightGray ActAPI_Color(Quantity_NOC_LIGHTGRAY)
 
 //-----------------------------------------------------------------------------
-
-DEFINE_STANDARD_HANDLE(ActAPI_IPlotter, Standard_Transient)
 
 //! \ingroup AD_API
 //!
@@ -110,8 +114,6 @@ DEFINE_STANDARD_HANDLE(ActAPI_IPlotter, Standard_Transient)
 //! thanks to this abstract class.
 class ActAPI_IPlotter : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(ActAPI_IPlotter, Standard_Transient)
 
@@ -187,8 +189,18 @@ public:
                 const TCollection_AsciiString&) {}
 
   virtual void
+    DRAW_POINTS(const std::vector<gp_XYZ>&,
+                const ActAPI_Color&,
+                const TCollection_AsciiString&) {}
+
+  virtual void
     REDRAW_POINTS(const TCollection_AsciiString&,
                   const Handle(HRealArray)&,
+                  const ActAPI_Color&) {}
+
+  virtual void
+    REDRAW_POINTS(const TCollection_AsciiString&,
+                  const std::vector<gp_XYZ>&,
                   const ActAPI_Color&) {}
 
   //-------------------------------------------------------------------------//
@@ -204,6 +216,20 @@ public:
                      const gp_Pnt&,
                      const gp_Vec&,
                      const ActAPI_Color&) {}
+
+  //-------------------------------------------------------------------------//
+
+  virtual void
+    DRAW_VECTORS_AT(const gp_Pnt&,
+                    const std::vector<gp_Vec>&,
+                    const ActAPI_Color&,
+                    const TCollection_AsciiString&) {}
+
+  virtual void
+    REDRAW_VECTORS_AT(const TCollection_AsciiString&,
+                      const gp_Pnt&,
+                      const std::vector<gp_Vec>&,
+                      const ActAPI_Color&) {}
 
   //-------------------------------------------------------------------------//
 
@@ -715,6 +741,18 @@ public:
 //---------------------------------------------------------------------------//
 
   void
+    DRAW_POINTS(const std::vector<gp_XYZ>&     pts,
+                const ActAPI_Color&            color,
+                const TCollection_AsciiString& name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_POINTS(pts, color, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
     REDRAW_POINTS(const TCollection_AsciiString& name,
                   const Handle(HRealArray)&      coords,
                   const ActAPI_Color&            color)
@@ -722,6 +760,18 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_POINTS(name, coords, color);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    REDRAW_POINTS(const TCollection_AsciiString& name,
+                  const std::vector<gp_XYZ>&     pts,
+                  const ActAPI_Color&            color)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_POINTS(name, pts, color);
   }
 
 //-------------------------------------------------------------------------//
@@ -774,6 +824,32 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_VECTOR_AT(name, P, V, color);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    DRAW_VECTORS_AT(const gp_Pnt&                  origin,
+                    const std::vector<gp_Vec>&     vectors,
+                    const ActAPI_Color&            color,
+                    const TCollection_AsciiString& name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_VECTORS_AT(origin, vectors, color, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    REDRAW_VECTORS_AT(const TCollection_AsciiString& name,
+                      const gp_Pnt&                  origin,
+                      const std::vector<gp_Vec>&     vectors,
+                      const ActAPI_Color&            color)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_VECTORS_AT(name, origin, vectors, color);
   }
 
 //---------------------------------------------------------------------------//
