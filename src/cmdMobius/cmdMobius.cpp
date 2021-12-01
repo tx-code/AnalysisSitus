@@ -2032,10 +2032,15 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   t_ptr<t_mesh> mbRegion;
 
   // Meshing parameters.
-  const double linDefl = asiAlgo_MeshGen::AutoSelectLinearDeflection(shape);
-  const double minh    = linDefl*0.05;
-  const double maxh    = linDefl*5.5;
-  const double grading = 0.8;
+  double xMin, yMin, zMin, xMax, yMax, zMax;
+  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax);
+  //
+  const double
+    diag = gp_Pnt(xMin, yMin, zMin).Distance( gp_Pnt(xMax, yMax, zMax) );
+  //
+  const double ngMinh    = diag*0.001;
+  const double ngMaxh    = diag*0.01;
+  const double ngGrading = 0.8;
 
   // Face IDs versus mesh element IDs.
   std::unordered_map<int, std::unordered_set<int>> faceElems;
@@ -2044,12 +2049,15 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   //
   interp->GetKeyValue<int>(argc, argv, "domain", domainId);
 
+  TIMER_NEW
+  TIMER_GO
+
   // Generate mesh.
   Handle(Poly_Triangulation) occMesh;
   //
   try
   {
-    if ( !asiAlgo_MeshGen::DoNetGen( shape, minh, maxh, grading, occMesh, faceElems, interp->GetProgress() ) )
+    if ( !asiAlgo_MeshGen::DoNetGen( shape, ngMinh, ngMaxh, ngGrading, occMesh, faceElems, interp->GetProgress() ) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to generate mesh with NetGen.");
       return TCL_ERROR;
@@ -2065,13 +2073,16 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
         return TCL_ERROR;
       }
 
-      t_ptr<t_mesh> mbMesh   = cascade::GetMobiusMesh(occMesh);
+      t_ptr<t_mesh> mbMesh = cascade::GetMobiusMesh(occMesh);
       mbRegion = mbMesh->ExtractRegion(domainInfo->second);
     }
   }
   catch ( ... )
   {
   }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "poly-netgen")
 
   const t_ptr<poly_Mesh>& mesh = cascade::GetMobiusMesh(occMesh);
 
