@@ -1564,9 +1564,10 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   (void) argv;
 
   std::vector<gp_Vec>
-    dirs = { gp_Vec(-1, 0, 0),
-             gp_Vec(-1, 1, 0),
-             gp_Vec(-1, -1, 0) };
+    dirs = { gp_Vec(1, 0, 0),
+             gp_Vec(0, 1, 0),
+             gp_Vec(-1, 0, 0),
+             gp_Vec(0, -1, 0) };
 
   const double arcAngRad = asiAlgo_Utils::MinArcAngle( dirs, gp_Dir(0, 0, 1) );
 
@@ -3741,6 +3742,8 @@ int MISC_GenHeightMap(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+#define TestPointInPoly_TOT_VERTS 10000
+
 int MISC_TestPointInPoly(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
@@ -3751,14 +3754,30 @@ int MISC_TestPointInPoly(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  //// Create polygon.
-  //double polygon[][2] = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
-  //double point[2]     = { Atof(argv[1]), Atof(argv[2]) };
+  std::vector<gp_XY>
+    poles = { gp_XY(0, 0),
+              gp_XY(1, 0),
+              gp_XY(1, 1),
+              gp_XY(0, 1)
+            };
 
-  //const int res = CrossingsTest(polygon, 4, point);
+  double point[2]  = { Atof(argv[1]), Atof(argv[2]) };
 
-  //interp->GetProgress().SendLogMessage(LogInfo(Normal) << "PMC result for the point (u,v) = (%1,%2): %3."
-  //                                                     << point[0] << point[1] << (res ? "in" : "out"));
+  // Create polygon.
+  static double pgon[TestPointInPoly_TOT_VERTS][2];
+  int idx = 0;
+  //
+  for ( const auto& uv : poles )
+  {
+    pgon[idx][0] = uv.X();
+    pgon[idx][1] = uv.Y();
+    idx++;
+  }
+
+  const int res = CrossingsTest(pgon, (int) poles.size(), point);
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "PMC result for the point (u,v) = (%1,%2): %3."
+                                                       << point[0] << point[1] << (res ? "in" : "out"));
   return TCL_OK;
 }
 

@@ -4601,6 +4601,19 @@ double asiAlgo_Utils::MinArcAngle(const std::vector<gp_Vec>& dirs,
   {
     const double ang = ref.AngleWithRef(dirs[k], norm);
 
+    // PI can be attributed as both positive and negative.
+    bool isPi = false;
+    //
+    if ( Abs(Abs(ang) - M_PI) < Precision::Angular() )
+      isPi = true;
+    //
+    if ( isPi )
+    {
+      positiveAng =  M_PI;
+      negativeAng = -M_PI;
+      break;
+    }
+
     if ( ang > positiveAng )
       positiveAng = ang;
 

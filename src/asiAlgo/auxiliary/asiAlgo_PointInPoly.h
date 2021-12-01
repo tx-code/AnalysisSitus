@@ -1,5 +1,7 @@
 /* ptinpoly.h - point in polygon inside/outside algorithms header file.
  *
+ * https://erich.realtimerendering.com/ptinpoly/
+ *
  * by Eric Haines, 3D/Eye Inc, erich@eye.com
  */
 

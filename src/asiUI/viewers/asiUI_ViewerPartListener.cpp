@@ -57,6 +57,7 @@
 // OCCT includes
 #include <BRep_Builder.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
+#include <BRepTools.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
 // VTK includes
@@ -202,7 +203,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pCheckDihAngle        (nullptr),
   m_pAddAsFeature         (nullptr),
   m_pGetAsBLOB            (nullptr),
-  m_pMeasureLength        (nullptr)
+  m_pMeasureLength        (nullptr),
+  m_pGetSpannedAngle      (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -455,6 +457,20 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       m_pCheckDihAngle     = menu.addAction("Check dihedral angle");
       m_pAddAsFeature      = menu.addAction("Add as feature");
       m_pGetAsBLOB         = menu.addAction("Get as BLOB");
+
+      if ( faceIndices.Extent() == 1 )
+      {
+        const int          fid  = faceIndices.GetMinimalMapped();
+        const TopoDS_Face& face = partApi.GetAAG()->GetFace(fid);
+
+        BRepAdaptor_Surface bas(face);
+        //
+        if ( bas.GetType() == GeomAbs_Cylinder ||
+             bas.GetType() == GeomAbs_Cone )
+        {
+          m_pGetSpannedAngle = menu.addAction("Get spanned angle");
+        }
+      }
     }
 
     menu.addSeparator();
@@ -923,6 +939,40 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
         m_progress.SendLogMessage( LogInfo(Normal) << "Distance between shapes: %1."
                                                    << P1.Distance(P2) );
       }
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: get spanned angle
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pGetSpannedAngle )
+  {
+    // Get highlighted faces
+    TColStd_PackedMapOfInteger faceIndices;
+    asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedFaces(faceIndices);
+
+    // Get Part Node
+    Handle(asiData_PartNode) part_n = m_model->GetPartNode();
+    //
+    if ( part_n.IsNull() || !part_n->IsWellFormed() )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Part Node is null or bad-formed" );
+      return;
+    }
+
+    const int          fid  = faceIndices.GetMinimalMapped();
+    const TopoDS_Face& face = part_n->GetAAG()->GetFace(fid);
+
+    BRepAdaptor_Surface bas(face);
+    //
+    if ( bas.GetType() == GeomAbs_Cylinder ||
+         bas.GetType() == GeomAbs_Cone )
+    {
+      double uMin, uMax, vMin, vMax;
+      BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+      m_progress.SendLogMessage(LogInfo(Normal) << "Spanned angle: %1 deg."
+                                                << Abs(uMax - uMin)*180/M_PI);
     }
   }
 }

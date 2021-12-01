@@ -122,6 +122,7 @@ protected:
   QAction* m_pAddAsFeature;
   QAction* m_pGetAsBLOB;
   QAction* m_pMeasureLength;
+  QAction* m_pGetSpannedAngle;
 
 };
 
