@@ -168,6 +168,8 @@ int ENGINE_LoadStep(const Handle(asiTcl_Interp)& interp,
       cmdEngine::model->AbortCommand();
       return TCL_ERROR;
     }
+
+    cmdEngine::model->GetPartNode()->SetFilenameIn(filename);
   }
   cmdEngine::model->CommitCommand();
 

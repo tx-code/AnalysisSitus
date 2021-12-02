@@ -2081,15 +2081,19 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   {
   }
 
+  TCollection_AsciiString msg = "poly-netgen for '";
+  msg += part_n->GetFilenameIn();
+  msg += "'";
+
   TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "poly-netgen")
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), msg)
 
   const t_ptr<poly_Mesh>& mesh = cascade::GetMobiusMesh(occMesh);
 
   if ( mesh.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mesh is null.");
-    return TCL_ERROR;
+    return TCL_OK;
   }
 
   // Compose the domain of interest.
@@ -2112,13 +2116,16 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   }
   cmdMobius::model->CommitCommand();
 
-  // Update UI.
-  cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
-  cmdMobius::cf->ObjectBrowser->Populate();
-
-  if ( !mbRegion.IsNull() )
+  if ( !cmdMobius::cf.IsNull() )
   {
-    interp->GetPlotter().REDRAW_TRIANGULATION("region", cascade::GetOpenCascadeMesh(mbRegion), Color_Red, 1.);
+    // Update UI.
+    cmdMobius::cf->ViewerPart->PrsMgr()->Actualize(tris_n);
+    cmdMobius::cf->ObjectBrowser->Populate();
+
+    if ( !mbRegion.IsNull() )
+    {
+      interp->GetPlotter().REDRAW_TRIANGULATION("region", cascade::GetOpenCascadeMesh(mbRegion), Color_Red, 1.);
+    }
   }
 
   return TCL_OK;
