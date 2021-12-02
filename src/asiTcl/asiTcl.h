@@ -45,5 +45,6 @@
 #endif
 
 #define asiTcl_SourceCmd(filename) TCollection_AsciiString("source ").Cat(filename)
+#define asiTcl_AutoLogFilename "autoread.log"
 
 #endif

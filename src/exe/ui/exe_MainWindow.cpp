@@ -491,6 +491,7 @@ void exe_MainWindow::createDockWindows()
     pDockConsoleWindow->setAllowedAreas(Qt::AllDockWidgetAreas);
     //
     Widgets.wConsole = new asiUI_Console(cf->Interp, pDockLogWindow);
+    cf->Console      = Widgets.wConsole;
     //
     pDockConsoleWindow->setWidget(Widgets.wConsole);
     //

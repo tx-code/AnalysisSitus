@@ -45,6 +45,7 @@ asiUI_CommonFacilities::asiUI_CommonFacilities(const bool initBatch)
   ViewerPart            (nullptr),
   ViewerDomain          (nullptr),
   ViewerHost            (nullptr),
+  Console               (nullptr),
   UnitManager           (nullptr),
   ParamEditor           (nullptr),
   ProgressListener      (nullptr)

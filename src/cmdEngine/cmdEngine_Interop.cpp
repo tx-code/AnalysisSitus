@@ -79,6 +79,7 @@
 #pragma warning(push, 0)
 #include <QDialog>
 #include <QMainWindow>
+#include <QTextStream>
 #include <QVBoxLayout>
 #pragma warning(pop)
 
@@ -761,6 +762,40 @@ int ENGINE_DumpThicknessVTP(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_DumpAutoread(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  if ( cmdEngine::cf.IsNull() || !cmdEngine::cf->Console )
+    return TCL_OK;
+
+  // Get the contents of Active Script.
+  QString txt = cmdEngine::cf->Console->toPlainText();
+
+  // Save to file.
+  QFile qFile(asiTcl_AutoLogFilename);
+  //
+  if ( qFile.open(QIODevice::WriteOnly) )
+  {
+    QTextStream out(&qFile);
+    out << txt;
+    qFile.close();
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write autoread file.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
 //-----------------------------------------------------------------------------
 
 void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
@@ -869,4 +904,15 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t Dumps thickness field to the VTP file.",
     //
     __FILE__, group, ENGINE_DumpThicknessVTP);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("dump-autoread",
+    //
+    "dump-autoread\n"
+    "\t Dumps the Active Script commands currently entered to the\n"
+    "\t 'autoread.log' file located in the working direction of\n"
+    "\t application. If exists, this file will be automatically loaded\n"
+    "\t without execution on the next launch.",
+    //
+    __FILE__, group, ENGINE_DumpAutoread);
 }

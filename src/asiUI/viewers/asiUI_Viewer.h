@@ -42,6 +42,8 @@
 #include <QWidget>
 #pragma warning(pop)
 
+#pragma warning(disable : 4251)
+
 //-----------------------------------------------------------------------------
 
 //! Base class for all viewers.
@@ -91,5 +93,7 @@ protected:
   ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
 
 };
+
+#pragma warning(default : 4251)
 
 #endif

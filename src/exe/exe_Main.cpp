@@ -314,6 +314,21 @@ int main(int argc, char** argv)
   pMainWindow->Widgets.wConsole->setFocus();
 
   //---------------------------------------------------------------------------
+  // Check the autoread log
+  //---------------------------------------------------------------------------
+
+  QFile qFile(asiTcl_AutoLogFilename);
+  //
+  if ( qFile.exists() )
+  {
+    if ( qFile.open(QIODevice::ReadOnly | QFile::Text) )
+    {
+      QTextStream in(&qFile);
+      pMainWindow->Widgets.wConsole->setText( in.readAll() );
+    }
+  }
+
+  //---------------------------------------------------------------------------
   // Process the second argument to open the passed file
   //---------------------------------------------------------------------------
 

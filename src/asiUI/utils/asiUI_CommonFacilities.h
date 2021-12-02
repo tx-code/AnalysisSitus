@@ -33,6 +33,7 @@
 
 // asiUI includes
 #include <asiUI_BatchFacilities.h>
+#include <asiUI_Console.h>
 #include <asiUI_IParamEditor.h>
 #include <asiUI_ObjectBrowser.h>
 #include <asiUI_ProgressListener.h>
@@ -53,8 +54,6 @@ class QMainWindow;
 //! Base class for common facilities.
 class asiUI_CommonFacilities : public asiUI_BatchFacilities
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiUI_CommonFacilities, asiUI_BatchFacilities)
 
@@ -203,6 +202,7 @@ public:
   asiUI_ViewerPart*           ViewerPart;       //!< Viewer for part.
   asiUI_ViewerDomain*         ViewerDomain;     //!< Viewer for face parametric domain.
   asiUI_ViewerHost*           ViewerHost;       //!< Viewer for host geometry.
+  asiUI_Console*              Console;          //!< Scripting console.
   asiUI_UnitManager*          UnitManager;      //!< Utility to manage units.
   Handle(asiUI_WidgetFactory) WidgetFactory;    //!< Widget factory for datums.
   Handle(asiUI_IParamEditor)  ParamEditor;      //!< Parameter editor.
