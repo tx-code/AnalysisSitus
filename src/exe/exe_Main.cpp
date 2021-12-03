@@ -157,7 +157,11 @@ int main(int argc, char** argv)
   // Construct Qt application.
   QApplication app(argc, argv);
   //
+#ifdef _DEBUG
+  QApplication::setWindowIcon( QIcon(":icons/asitus/asitus-debug_icon_16x16.png") );
+#else
   QApplication::setWindowIcon( QIcon(":icons/asitus/asitus_icon_16x16.png") );
+#endif
 
   //---------------------------------------------------------------------------
   // Runtime path
