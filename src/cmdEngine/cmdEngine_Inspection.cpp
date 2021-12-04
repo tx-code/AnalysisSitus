@@ -872,7 +872,7 @@ int ENGINE_CheckContinuity(const Handle(asiTcl_Interp)& interp,
       isoName += " u=";
       isoName += u;
 
-      interp->GetPlotter().REDRAW_CURVE(isoName, iso, Color_Red);
+      interp->GetPlotter().REDRAW_CURVE(isoName, iso, Color_Red, true);
     }
   }
 
@@ -891,7 +891,7 @@ int ENGINE_CheckContinuity(const Handle(asiTcl_Interp)& interp,
       isoName += " v=";
       isoName += v;
 
-      interp->GetPlotter().REDRAW_CURVE(isoName, iso, Color_Red);
+      interp->GetPlotter().REDRAW_CURVE(isoName, iso, Color_Red, true);
     }
   }
 
@@ -1196,7 +1196,7 @@ int ENGINE_EvalCurve(const Handle(asiTcl_Interp)& interp,
         // Construct the osculating circle.
         interp->GetPlotter().REDRAW_CURVE( "osculatingCircle",
                                            new Geom_Circle(ax_ofCircle, r_onCurve),
-                                           Color_White );
+                                           Color_White, true );
       }
     }
   }
@@ -4002,6 +4002,52 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckFacets(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+
+  // Get part shape.
+  TopoDS_Shape shape = partNode->GetShape();
+  //
+  if ( shape.IsNull() ) // Contract check.
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The input shape is null.");
+    return TCL_ERROR;
+  }
+
+  asiAlgo_CheckValidity checker( interp->GetProgress(),
+                                 interp->GetPlotter() );
+
+  const bool isOk = checker.CheckTriangulation(shape);
+
+  if ( !isOk )
+  {
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Facets look invalid.");
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Facets look OK.");
+  }
+
+  *interp << isOk;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4451,4 +4497,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t entities, such as the convex hull, BVH, projection points, etc.",
     //
     __FILE__, group, ENGINE_RecognizeHull);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-facets",
+    //
+    "check-facets\n"
+    "\t Checks triangulation distributed by CAD faces. Returns 0 to the"
+    "\t Tcl interpreter if the facets are broken and 1 if the facets"
+    "\t are good.",
+    //
+    __FILE__, group, ENGINE_CheckFacets);
 }

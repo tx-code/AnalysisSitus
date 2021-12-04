@@ -268,8 +268,7 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool Doc::LoadIGES(const TCollection_AsciiString& filename,
-                   const double                   sewingTol)
+bool Doc::LoadIGES(const TCollection_AsciiString& filename)
 {
   if ( m_doc.IsNull() )
   {

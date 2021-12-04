@@ -666,7 +666,6 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
 
   TopTools_IndexedMapOfShape allFaces;
   TopExp::MapShapes(shape, TopAbs_FACE, allFaces);
-  const char* name = ".";
 
   // Perform topology check using the specialized tool.
   asiAlgo_MeshCheckTopology checker(shape, m_progress, m_plotter);
@@ -710,9 +709,9 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
         pnts(2) = points(n2).Transformed(trsf);
 
         m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts),
-                             Color_Red, name);
-        m_plotter.DRAW_POINT(pnts(1), Color_Red, name);
-        m_plotter.DRAW_POINT(pnts(2), Color_Red, name);
+                             Color_Red, "free-link");
+        m_plotter.DRAW_POINT(pnts(1), Color_Red, "free-link");
+        m_plotter.DRAW_POINT(pnts(2), Color_Red, "free-link");
 
         if ( tris->HasUVNodes() )
         {
@@ -722,9 +721,9 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
           pnts2d(2) = points2d(n2);
 
           m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d),
-                                 Color_Red, name);
-          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, name);
-          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, name);
+                                 Color_Red, "free-link");
+          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, "free-link");
+          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, "free-link");
         }
       }
     }
@@ -791,11 +790,11 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       const TColgp_Array1OfPnt&  points = tris->Nodes();
       const gp_Trsf&             trsf   = loc.Transformation();
 
-      m_plotter.DRAW_POINT(points(inode).Transformed(trsf), Color_Red, name);
+      m_plotter.DRAW_POINT(points(inode).Transformed(trsf), Color_Red, "free-node");
 
       if ( tris->HasUVNodes() )
       {
-        m_plotter.DRAW_POINT(tris->UVNodes()(inode), Color_Red, name);
+        m_plotter.DRAW_POINT(tris->UVNodes()(inode), Color_Red, "free-node");
       }
 
       m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}"
@@ -834,7 +833,7 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       poles(2) = points(N2).Transformed(trsf);
       poles(3) = points(N3).Transformed(trsf);
 
-      m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(poles), Color_Red, name);
+      m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(poles), Color_Red, "small-tri");
 
       if ( tris->HasUVNodes() )
       {
@@ -843,7 +842,7 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
         poles2d(2) = tris->UVNodes()(N2);
         poles2d(3) = tris->UVNodes()(N3);
 
-        m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(poles2d), Color_Red, name);
+        m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(poles2d), Color_Red, "small-tri");
       }
 
       m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}"
@@ -855,19 +854,7 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
    *  Finalize.
    * ========== */
 
-  bool isOk = true;
-
-  if ( nbFree > 0 || nbErr > 0 || nbAsync > 0 || nbFreeNodes > 0 || nbSmallTris > 0 )
-  {
-    isOk = false;
-    m_progress.SendLogMessage(LogNotice(Normal) << "\nFree links:        %1"
-                                                   "\nCross-face errors: %2"
-                                                   "\nAsync edges:       %3"
-                                                   "\nFree nodes:        %4"
-                                                   "\nSmall triangles:   %5"
-                                                << nbFree << nbErr << nbAsync
-                                                << nbFreeNodes << nbSmallTris);
-  }
+  int nbFreeEdges = 0;
 
   for ( int fidx = 1; fidx <= allFaces.Extent(); ++fidx )
   {
@@ -934,7 +921,9 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       }
     }
 
-    if ( freeEdgeMap.Size() != 0 )
+    nbFreeEdges += freeEdgeMap.Size();
+
+    if ( freeEdgeMap.Size() )
     {
       m_progress.SendLogMessage(LogNotice(Normal) << "Not connected mesh inside face %1."
                                                   << fidx);
@@ -956,9 +945,9 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
         pnts(1) = points( link.FirstNode() ) .Transformed(trsf);
         pnts(2) = points( link.LastNode() )  .Transformed(trsf);
 
-        m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts), Color_Red, name);
-        m_plotter.DRAW_POINT(pnts(1), Color_Red, name);
-        m_plotter.DRAW_POINT(pnts(2), Color_Red, name);
+        m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts), Color_Red, false, "free-edge");
+        m_plotter.DRAW_POINT(pnts(1), Color_Red, "free-edge");
+        m_plotter.DRAW_POINT(pnts(2), Color_Red, "free-edge");
         //
         if ( tris->HasUVNodes() )
         {
@@ -966,12 +955,31 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
           pnts2d(1) = points2d( link.FirstNode() );
           pnts2d(2) = points2d( link.LastNode() );
 
-          m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d), Color_Red, name);
-          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, name);
-          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, name);
+          m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d), Color_Red, "free-edge");
+          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, "free-edge");
+          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, "free-edge");
         }
       }
     }
+  }
+
+  bool isOk = true;
+
+  if ( nbFreeEdges || nbFree || nbErr || nbAsync || nbFreeNodes || nbSmallTris )
+  {
+    isOk = false;
+    m_progress.SendLogMessage(LogNotice(Normal) << "\nFree edges:        %1"
+                                                   "\nFree links:        %2"
+                                                   "\nCross-face errors: %3"
+                                                   "\nAsync edges:       %4"
+                                                   "\nFree nodes:        %5"
+                                                   "\nSmall triangles:   %6"
+                                                << nbFreeEdges
+                                                << nbFree
+                                                << nbErr
+                                                << nbAsync
+                                                << nbFreeNodes
+                                                << nbSmallTris);
   }
 
   return isOk;

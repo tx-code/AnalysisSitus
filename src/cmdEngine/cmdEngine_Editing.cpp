@@ -1372,7 +1372,7 @@ int ENGINE_FairCurve(const Handle(asiTcl_Interp)& interp,
   result = toOpenCascade.GetOpenCascadeCurve();
 
   // Draw faired curve.
-  interp->GetPlotter().REDRAW_CURVE(argv[1], result, Color_Green);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], result, Color_Green, true);
 
   return TCL_OK;
 #else
@@ -1698,7 +1698,7 @@ int ENGINE_TrimCurve(const Handle(asiTcl_Interp)& interp,
     trimmedCurve = new Geom_TrimmedCurve(occtBCurve, u0, u1);
 
   // Create object.
-  interp->GetPlotter().REDRAW_CURVE(argv[1], trimmedCurve, Color_White);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], trimmedCurve, Color_White, true);
 
   return TCL_OK;
 }
@@ -2113,7 +2113,7 @@ int ENGINE_InsertKnotCurve(const Handle(asiTcl_Interp)& interp,
   // Draw result.
   interp->GetPlotter().REDRAW_CURVE(argv[1],
                                     cascade::GetOpenCascadeBCurve(mobResult),
-                                    Color_Default);
+                                    Color_Default, true);
 
   return TCL_OK;
 #else
@@ -2505,7 +2505,7 @@ int ENGINE_SplitCurveBezier(const Handle(asiTcl_Interp)& interp,
   // Draw results.
   for ( size_t ii = 0; ii < segments.size(); ++ii )
     interp->GetPlotter().DRAW_CURVE(cascade::GetOpenCascadeBCurve(segments[ii]),
-                                    Color_Default,
+                                    Color_Default, true,
                                     TCollection_AsciiString(argv[1]));
 
   return TCL_OK;
@@ -2573,7 +2573,7 @@ int ENGINE_MovePointCurve(const Handle(asiTcl_Interp)& interp,
   //
   resCurve->MovePoint(u, dest, index1, index2, resIndex1, resIndex2);
   //
-  interp->GetPlotter().REDRAW_CURVE(argv[1], resCurve, Color_Default);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], resCurve, Color_Default, true);
   return TCL_OK;
 }
 

@@ -314,7 +314,7 @@ void asiUI_ControlsMesh::onSaveFacetsToStl()
   // Save mesh to STL file.
   if ( !asiAlgo_Utils::WriteStl( meshMerge.GetResultPoly()->GetTriangulation(), QStr2AsciiStr(filename) ) )
   {
-    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot save mesh to PLY file.");
+    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot save facets to STL file.");
     return;
   }
 }

@@ -79,10 +79,10 @@ bool asiAlgo_BuildCoonsSurf::performBilinear()
   t_ptr<t_bcurve> b1 = cascade::GetMobiusBCurve(m_b1);
 
   // Draw.
-  m_plotter.REDRAW_CURVE("c0", m_c0, Color_Red);
-  m_plotter.REDRAW_CURVE("c1", m_c1, Color_Red);
-  m_plotter.REDRAW_CURVE("b0", m_b0, Color_Blue);
-  m_plotter.REDRAW_CURVE("b1", m_b1, Color_Blue);
+  m_plotter.REDRAW_CURVE("c0", m_c0, Color_Red, true);
+  m_plotter.REDRAW_CURVE("c1", m_c1, Color_Red, true);
+  m_plotter.REDRAW_CURVE("b0", m_b0, Color_Blue, true);
+  m_plotter.REDRAW_CURVE("b1", m_b1, Color_Blue, true);
 
   // Make `c` curves compatible.
   {

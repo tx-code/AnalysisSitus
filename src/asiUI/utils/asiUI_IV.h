@@ -905,7 +905,7 @@ public:
       return;
 
     m_plotter->DRAW_CURVE( mobius::cascade::GetOpenCascadeBCurve(bc),
-                           this->getColor(color),
+                           this->getColor(color), true,
                            name.c_str() );
   }
 
@@ -922,7 +922,7 @@ public:
 
     m_plotter->REDRAW_CURVE( name.c_str(),
                              mobius::cascade::GetOpenCascadeBCurve(bc),
-                             this->getColor(color) );
+                             this->getColor(color), true );
   }
 
 // TESSELLATION:

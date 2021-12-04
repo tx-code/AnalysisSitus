@@ -215,7 +215,7 @@ void asiUI_DialogGeomDef::onApply()
       return;
     }
 
-    m_plotter.REDRAW_CURVE(varName, curve, Color_Default);
+    m_plotter.REDRAW_CURVE(varName, curve, Color_Default, true);
   }
 
   // Create/update surface.

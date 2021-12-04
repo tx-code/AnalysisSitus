@@ -965,8 +965,8 @@ int MISC_TestPipe1(const Handle(asiTcl_Interp)& interp,
   Handle(Geom_Curve)
     c2 = GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(new Geom_Circle(gp_Ax2( gp::Origin(), gp::DX() ), 20.0), 0, 2*M_PI), Convert_Polynomial);
 
-  interp->GetPlotter().REDRAW_CURVE("c1", c1, Color_Red);
-  interp->GetPlotter().REDRAW_CURVE("c2", c2, Color_Red);
+  interp->GetPlotter().REDRAW_CURVE("c1", c1, Color_Red, true);
+  interp->GetPlotter().REDRAW_CURVE("c2", c2, Color_Red, true);
 
   // Make pipe.
   GeomFill_Pipe Pipe(path, c1, c2);
@@ -2276,8 +2276,8 @@ int MISC_TestCoons1(const Handle(asiTcl_Interp)& interp,
       c0 = multiInterp.GetResult(0);
       c1 = multiInterp.GetResult(1);
       //
-      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default);
+      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default, true);
     }
     else
     {
@@ -2318,8 +2318,8 @@ int MISC_TestCoons1(const Handle(asiTcl_Interp)& interp,
       b0 = multiInterp.GetResult(0);
       b1 = multiInterp.GetResult(1);
       //
-      interp->GetPlotter().REDRAW_CURVE("b0", cascade::GetOpenCascadeBCurve(b0), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("b1", cascade::GetOpenCascadeBCurve(b1), Color_Default);
+      interp->GetPlotter().REDRAW_CURVE("b0", cascade::GetOpenCascadeBCurve(b0), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("b1", cascade::GetOpenCascadeBCurve(b1), Color_Default, true);
     }
     else
     {
@@ -2833,8 +2833,8 @@ int MISC_TestCoons2(const Handle(asiTcl_Interp)& interp,
 
     // Build sample curves.
     geom_InterpolateMultiCurve multiInterp(3,
-                                                   ParamsSelection_Centripetal,
-                                                   KnotsSelection_Average);
+                                           ParamsSelection_Centripetal,
+                                           KnotsSelection_Average);
     //
     multiInterp.AddRow(c0_pts);
     multiInterp.AddRow(c1_pts);
@@ -2849,10 +2849,10 @@ int MISC_TestCoons2(const Handle(asiTcl_Interp)& interp,
       c2 = multiInterp.GetResult(2);
       c3 = multiInterp.GetResult(3);
       //
-      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("c2", cascade::GetOpenCascadeBCurve(c2), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("c3", cascade::GetOpenCascadeBCurve(c3), Color_Default);
+      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("c2", cascade::GetOpenCascadeBCurve(c2), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("c3", cascade::GetOpenCascadeBCurve(c3), Color_Default, true);
     }
     else
     {
@@ -2935,9 +2935,9 @@ int MISC_TestCoons2(const Handle(asiTcl_Interp)& interp,
       b1 = multiInterp.GetResult(1);
       b2 = multiInterp.GetResult(2);
       //
-      interp->GetPlotter().REDRAW_CURVE("b0", cascade::GetOpenCascadeBCurve(b0), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("b1", cascade::GetOpenCascadeBCurve(b1), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("b2", cascade::GetOpenCascadeBCurve(b2), Color_Default);
+      interp->GetPlotter().REDRAW_CURVE("b0", cascade::GetOpenCascadeBCurve(b0), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("b1", cascade::GetOpenCascadeBCurve(b1), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("b2", cascade::GetOpenCascadeBCurve(b2), Color_Default, true);
     }
     else
     {
@@ -3354,9 +3354,9 @@ int MISC_TestSkinning1(const Handle(asiTcl_Interp)& interp,
       c1 = multiInterp.GetResult(1);
       cn = multiInterp.GetResult(2);
       //
-      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default);
-      interp->GetPlotter().REDRAW_CURVE("cn", cascade::GetOpenCascadeBCurve(cn), Color_Default);
+      interp->GetPlotter().REDRAW_CURVE("c0", cascade::GetOpenCascadeBCurve(c0), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("c1", cascade::GetOpenCascadeBCurve(c1), Color_Default, true);
+      interp->GetPlotter().REDRAW_CURVE("cn", cascade::GetOpenCascadeBCurve(cn), Color_Default, true);
     }
     else
     {

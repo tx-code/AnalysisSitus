@@ -119,12 +119,10 @@ public:
     LoadSTEP(const TCollection_AsciiString& filename);
 
   //! Loads IGES file to populate the internal XDE Document.
-  //! \param[in] filename  name of the IGES file to load.
-  //! #param[in] sewingTol sewing tolerance.
+  //! \param[in] filename name of the IGES file to load.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
-    LoadIGES(const TCollection_AsciiString& filename,
-             const double                   sewingTol);
+    LoadIGES(const TCollection_AsciiString& filename);
 
   //! Saves the document to file.
   //! \param[in] filename target filename.

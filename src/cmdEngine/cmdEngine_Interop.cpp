@@ -46,6 +46,7 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_ReadSTEPWithMeta.h>
 #include <asiAlgo_STEP.h>
 #include <asiAlgo_STEPReduce.h>
@@ -509,6 +510,62 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  // Get Part Node to access shape.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_ERROR;
+  }
+
+  // Get part shape.
+  TopoDS_Shape shape = partNode->GetShape();
+  //
+  if ( shape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part shape is null.");
+    return TCL_ERROR;
+  }
+
+  // Get the output filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not provided.");
+    return TCL_ERROR;
+  }
+
+  asiAlgo_MeshMerge meshMerge(shape);
+
+  // Convert shape's inherent mesh to a storable mesh.
+  if ( meshMerge.GetResultPoly().IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot create mesh from shape.");
+    return TCL_ERROR;
+  }
+
+  // Save mesh to STL file.
+  if ( !asiAlgo_Utils::WriteStl( meshMerge.GetResultPoly()->GetTriangulation(),
+                                 filename.c_str() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save facets to STL file '%1'."
+                                                        << filename);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Saved to '%1'."
+                                                       << filename);
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
@@ -850,6 +907,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t Exports the part shape to glTF file <filename> with all assigned colors.",
     //
     __FILE__, group, ENGINE_SaveGLTF);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-facets-stl",
+    //
+    "save-facets-stl -filename <filename>\n"
+    "\t Exports the part shape's facets to STL file <filename>.",
+    //
+    __FILE__, group, ENGINE_SaveFacetsStl);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-brep",

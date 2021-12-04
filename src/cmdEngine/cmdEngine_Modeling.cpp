@@ -838,7 +838,7 @@ int ENGINE_MakeCurve(const Handle(asiTcl_Interp)& interp,
   Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
 
   // Set result.
-  interp->GetPlotter().REDRAW_CURVE(argv[1], curve, Color_White);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], curve, Color_White, true);
 
   return TCL_OK;
 }
@@ -991,7 +991,7 @@ int ENGINE_InterpolateCurve(const Handle(asiTcl_Interp)& interp,
   }
 
   // Set result.
-  interp->GetPlotter().REDRAW_CURVE(argv[1], interpolant, Color_Red);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], interpolant, Color_Red, true);
 
   return TCL_OK;
 }

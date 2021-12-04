@@ -671,9 +671,9 @@ int RE_ApproxCurve(const Handle(asiTcl_Interp)& interp,
 
     // Set result.
     if ( ptsRegions.size() == 1 )
-      interp->GetPlotter().REDRAW_CURVE(TCollection_AsciiString(argv[1]), resCurve, Color_Red);
+      interp->GetPlotter().REDRAW_CURVE(TCollection_AsciiString(argv[1]), resCurve, Color_Red, true);
     else
-      interp->GetPlotter().DRAW_CURVE(resCurve, Color_Red, TCollection_AsciiString(argv[1]));
+      interp->GetPlotter().DRAW_CURVE(resCurve, Color_Red, true, TCollection_AsciiString(argv[1]));
   }
 
   return TCL_OK;
@@ -981,7 +981,7 @@ int RE_InterpMulticurve(const Handle(asiTcl_Interp)& interp,
     Handle(Geom_BSplineCurve)
       resCurve = cascade::GetOpenCascadeBCurve( interpTool.GetResult(k) );
 
-    interp->GetPlotter().REDRAW_CURVE(bCurveNames[k], resCurve, Color_Default);
+    interp->GetPlotter().REDRAW_CURVE(bCurveNames[k], resCurve, Color_Default, true);
   }
 
   return TCL_OK;
@@ -1056,7 +1056,7 @@ int RE_JoinCurves(const Handle(asiTcl_Interp)& interp,
   }
 
   // Set result.
-  interp->GetPlotter().REDRAW_CURVE(argv[1], jointCurve, Color_Default);
+  interp->GetPlotter().REDRAW_CURVE(argv[1], jointCurve, Color_Default, true);
 
   return TCL_OK;
 }
