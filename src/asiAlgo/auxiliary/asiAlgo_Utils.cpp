@@ -2816,7 +2816,21 @@ bool asiAlgo_Utils::InvertFace(const TopoDS_Face&    face,
 
 //-----------------------------------------------------------------------------
 
-Handle(Geom_BSplineCurve) asiAlgo_Utils::PolylineAsSpline(const std::vector<gp_XYZ>& trace)
+Handle(Geom_BSplineCurve)
+  asiAlgo_Utils::PolylineAsSpline(const TColgp_Array1OfPnt& trace)
+{
+  std::vector<gp_XYZ> poles;
+  //
+  for ( int i = trace.Lower(); i <= trace.Upper(); ++i )
+    poles.push_back( trace(i).XYZ() );
+
+  return PolylineAsSpline(poles);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Geom_BSplineCurve)
+  asiAlgo_Utils::PolylineAsSpline(const std::vector<gp_XYZ>& trace)
 {
   // Initialize properties for spline trajectories
   TColgp_Array1OfPnt poles( 1, (int) trace.size() );
@@ -2854,7 +2868,21 @@ Handle(Geom_BSplineCurve) asiAlgo_Utils::PolylineAsSpline(const std::vector<gp_X
 
 //-----------------------------------------------------------------------------
 
-Handle(Geom2d_BSplineCurve) asiAlgo_Utils::PolylineAsSpline(const std::vector<gp_XY>& trace)
+Handle(Geom2d_BSplineCurve)
+  asiAlgo_Utils::PolylineAsSpline(const TColgp_Array1OfPnt2d& trace)
+{
+  std::vector<gp_XY> poles;
+  //
+  for ( int i = trace.Lower(); i <= trace.Upper(); ++i )
+    poles.push_back( trace(i).XY() );
+
+  return PolylineAsSpline(poles);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Geom2d_BSplineCurve)
+  asiAlgo_Utils::PolylineAsSpline(const std::vector<gp_XY>& trace)
 {
   // Initialize properties for spline trajectories
   TColgp_Array1OfPnt2d poles( 1, (int) trace.size() );

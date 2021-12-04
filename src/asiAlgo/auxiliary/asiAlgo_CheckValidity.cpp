@@ -31,6 +31,10 @@
 // Own include
 #include <asiAlgo_CheckValidity.h>
 
+// asiAlgo includes
+#include <asiAlgo_MeshCheckTopology.h>
+#include <asiAlgo_Utils.h>
+
 // OCCT includes
 #include <Bnd_Box2d.hxx>
 #include <BndLib_Add2dCurve.hxx>
@@ -39,6 +43,8 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepMesh_Edge.hxx>
+#include <Geom_BSplineCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <IntRes2d_Domain.hxx>
@@ -646,6 +652,329 @@ bool asiAlgo_CheckValidity::CheckBasic(const TopoDS_Shape& shape)
   }
 
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
+                                               const bool          findSmall)
+{
+  if ( shape.IsNull() )
+    return false;
+
+  const bool isToFindSmallTriangles = findSmall;
+
+  TopTools_IndexedMapOfShape allFaces;
+  TopExp::MapShapes(shape, TopAbs_FACE, allFaces);
+  const char* name = ".";
+
+  // Perform topology check using the specialized tool.
+  asiAlgo_MeshCheckTopology checker(shape, m_progress, m_plotter);
+  checker.Perform();
+
+  /* =================
+   *  Dump free links.
+   * ================= */
+
+  int nbFree = 0;
+  int nbFac  = checker.NbFacesWithFL(), i, k;
+  //
+  if ( nbFac > 0 )
+  {
+    for ( k = 1; k <= nbFac; ++k )
+    {
+      int nbEdge = checker.NbFreeLinks(k);
+      int iF     = checker.GetFaceNumWithFL(k);
+
+      nbFree += nbEdge;
+
+      m_progress.SendLogMessage(LogNotice(Normal) << "Free links of the face %1:" << iF);
+
+      TopLoc_Location            loc;
+      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(iF) );
+      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
+      const gp_Trsf&             trsf   = loc.Transformation();
+      const TColgp_Array1OfPnt&  points = tris->Nodes();
+
+      TColgp_Array1OfPnt   pnts   (1, 2);
+      TColgp_Array1OfPnt2d pnts2d (1, 2);
+      //
+      for ( i = 1; i <= nbEdge; ++i )
+      {
+        int n1, n2;
+        checker.GetFreeLink(k, i, n1, n2);
+
+        m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}" << n1 << n2);
+
+        pnts(1) = points(n1).Transformed(trsf);
+        pnts(2) = points(n2).Transformed(trsf);
+
+        m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts),
+                             Color_Red, name);
+        m_plotter.DRAW_POINT(pnts(1), Color_Red, name);
+        m_plotter.DRAW_POINT(pnts(2), Color_Red, name);
+
+        if ( tris->HasUVNodes() )
+        {
+          const TColgp_Array1OfPnt2d& points2d = tris->UVNodes();
+          //
+          pnts2d(1) = points2d(n1);
+          pnts2d(2) = points2d(n2);
+
+          m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d),
+                                 Color_Red, name);
+          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, name);
+          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, name);
+        }
+      }
+    }
+  }
+
+  /* ========================
+   *  Dump cross-face errors.
+   * ======================== */
+
+  const int nbErr = checker.NbCrossFaceErrors();
+  //
+  if ( nbErr > 0 )
+  {
+    m_progress.SendLogMessage(LogNotice(Normal) << "Cross face errors: {face1, node1, face2, node2, distance}:");
+
+    for ( i = 1; i <= nbErr; ++i )
+    {
+      int iF1, n1, iF2, n2;
+      double val;
+      checker.GetCrossFaceError(i, iF1, n1, iF2, n2, val);
+
+      m_progress.SendLogMessage(LogNotice(Normal) << "{%1, %2, %3, %4, %5}:"
+                                                  << iF1 << n1 << iF2 << n2 << val);
+    }
+  }
+
+  /* ==================
+   *  Dump async edges.
+   * ================== */
+
+  const int nbAsync = checker.NbAsyncEdges();
+  //
+  if ( nbAsync > 0 )
+  {
+    TColStd_PackedMapOfInteger eids;
+    //
+    for ( i = 1; i <= nbAsync; ++i )
+    {
+      int ie = checker.GetAsyncEdgeNum(i);
+      eids.Add(ie);
+    }
+
+    m_progress.SendLogMessage(LogNotice(Normal) << "Async edges: %1." << eids);
+  }
+
+  /* =================
+   *  Dump free nodes.
+   * ================= */
+
+  const int nbFreeNodes = checker.NbFreeNodes();
+  //
+  if ( nbFreeNodes > 0 )
+  {
+    m_progress.SendLogMessage(LogNotice(Normal) << "Free nodes (in pairs: face / node):");
+
+    for ( i = 1; i <= nbFreeNodes; ++i )
+    {
+      int iface, inode;
+      checker.GetFreeNodeNum(i, iface, inode);
+
+      TopLoc_Location            loc;
+      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(iface) );
+      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
+      const TColgp_Array1OfPnt&  points = tris->Nodes();
+      const gp_Trsf&             trsf   = loc.Transformation();
+
+      m_plotter.DRAW_POINT(points(inode).Transformed(trsf), Color_Red, name);
+
+      if ( tris->HasUVNodes() )
+      {
+        m_plotter.DRAW_POINT(tris->UVNodes()(inode), Color_Red, name);
+      }
+
+      m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}"
+                                                  << iface << inode);
+    }
+  }
+
+  /* ======================
+   *  Dump small triangles.
+   * ====================== */
+
+  const int
+    nbSmallTris = isToFindSmallTriangles ? checker.NbSmallTriangles() : 0;
+  //
+  if ( nbSmallTris > 0 )
+  {
+    m_progress.SendLogMessage(LogNotice(Normal) << "Triangles with null area (in pairs: face / triangle):");
+
+    for ( i = 1; i <= nbSmallTris; ++i )
+    {
+      int faceId = 0, triId = 0;
+      checker.GetSmallTriangle(i, faceId, triId);
+
+      TopLoc_Location            loc;
+      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(faceId) );
+      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
+      const gp_Trsf&             trsf   = loc.Transformation();
+      const Poly_Triangle&       tri    = tris->Triangle(triId);
+      const TColgp_Array1OfPnt&  points = tris->Nodes();
+
+      int N1, N2, N3;
+      tri.Get(N1, N2, N3);
+
+      TColgp_Array1OfPnt poles(1, 4);
+      poles(1) = poles(4) = points(N1).Transformed(trsf);
+      poles(2) = points(N2).Transformed(trsf);
+      poles(3) = points(N3).Transformed(trsf);
+
+      m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(poles), Color_Red, name);
+
+      if ( tris->HasUVNodes() )
+      {
+        TColgp_Array1OfPnt2d poles2d(1, 4);
+        poles2d(1) = poles2d(4) = tris->UVNodes()(N1);
+        poles2d(2) = tris->UVNodes()(N2);
+        poles2d(3) = tris->UVNodes()(N3);
+
+        m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(poles2d), Color_Red, name);
+      }
+
+      m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}"
+                                                  << faceId << triId);
+    }
+  }
+
+  /* ==========
+   *  Finalize.
+   * ========== */
+
+  bool isOk = true;
+
+  if ( nbFree > 0 || nbErr > 0 || nbAsync > 0 || nbFreeNodes > 0 || nbSmallTris > 0 )
+  {
+    isOk = false;
+    m_progress.SendLogMessage(LogNotice(Normal) << "\nFree links:        %1"
+                                                   "\nCross-face errors: %2"
+                                                   "\nAsync edges:       %3"
+                                                   "\nFree nodes:        %4"
+                                                   "\nSmall triangles:   %5"
+                                                << nbFree << nbErr << nbAsync
+                                                << nbFreeNodes << nbSmallTris);
+  }
+
+  for ( int fidx = 1; fidx <= allFaces.Extent(); ++fidx )
+  {
+    TopLoc_Location            loc;
+    const TopoDS_Face&         face = TopoDS::Face( allFaces(fidx) );
+    Handle(Poly_Triangulation) tris = BRep_Tool::Triangulation(face, loc);
+
+    // Iterate boundary edges.
+    NCollection_Map<BRepMesh_Edge> bndEdgeMap;
+    //
+    for ( TopExp_Explorer eexp(shape, TopAbs_EDGE); eexp.More(); eexp.Next() )
+    {
+      TopLoc_Location                     edgeLoc;
+      const TopoDS_Edge&                  edge = TopoDS::Edge( eexp.Current() );
+      Handle(Poly_PolygonOnTriangulation) pgon = BRep_Tool::PolygonOnTriangulation(edge, tris, loc);
+      //
+      if ( pgon.IsNull() )
+        continue;
+
+      // Compose boundary links.
+      const TColStd_Array1OfInteger& pgonNodeIds = pgon->Nodes();
+      int                            prevNode    = -1;
+      //
+      for ( int j = pgonNodeIds.Lower(); j <= pgonNodeIds.Upper(); ++j )
+      {
+        const int nodeIdx = pgonNodeIds.Value(j);
+
+        // Take the previous node to compose a link.
+        if ( j != pgonNodeIds.Lower() )
+        {
+          BRepMesh_Edge link(prevNode, nodeIdx, BRepMesh_Frontier);
+          bndEdgeMap.Add(link);
+        }
+        prevNode = nodeIdx;
+      }
+    }
+
+    if ( bndEdgeMap.Size() == 0 )
+      break;
+
+    // Find free links.
+    const Poly_Array1OfTriangle&   triangles = tris->Triangles();
+    const int                      triNum    = triangles.Length();
+    NCollection_Map<BRepMesh_Edge> freeEdgeMap;
+    //
+    for ( int tidx = 1; tidx <= triNum; ++tidx )
+    {
+      const Poly_Triangle& tri = triangles(tidx);
+      int triNodes[3] = { tri.Value(1), tri.Value(2), tri.Value(3)};
+
+      for ( int j = 1; j <= 3; ++j )
+      {
+        int lastId  = triNodes[j % 3];
+        int firstId = triNodes[j - 1];
+
+        BRepMesh_Edge link(firstId, lastId, BRepMesh_Free);
+        if ( !bndEdgeMap.Contains(link) )
+        {
+          if ( !freeEdgeMap.Add(link) )
+          {
+            freeEdgeMap.Remove(link);
+          }
+        }
+      }
+    }
+
+    if ( freeEdgeMap.Size() != 0 )
+    {
+      m_progress.SendLogMessage(LogNotice(Normal) << "Not connected mesh inside face %1."
+                                                  << fidx);
+
+      const TColgp_Array1OfPnt& points = tris->Nodes();
+      const gp_Trsf&            trsf   = loc.Transformation();
+      TColgp_Array1OfPnt        pnts   (1, 2);
+      TColgp_Array1OfPnt2d      pnts2d (1, 2);
+      //
+      for ( NCollection_Map<BRepMesh_Edge>::Iterator mapIt(freeEdgeMap);
+            mapIt.More(); mapIt.Next())
+      {
+        const BRepMesh_Edge& link = mapIt.Key();
+
+        m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}."
+                                                    << link.FirstNode()
+                                                    << link.LastNode());
+
+        pnts(1) = points( link.FirstNode() ) .Transformed(trsf);
+        pnts(2) = points( link.LastNode() )  .Transformed(trsf);
+
+        m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts), Color_Red, name);
+        m_plotter.DRAW_POINT(pnts(1), Color_Red, name);
+        m_plotter.DRAW_POINT(pnts(2), Color_Red, name);
+        //
+        if ( tris->HasUVNodes() )
+        {
+          const TColgp_Array1OfPnt2d& points2d = tris->UVNodes();
+          pnts2d(1) = points2d( link.FirstNode() );
+          pnts2d(2) = points2d( link.LastNode() );
+
+          m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d), Color_Red, name);
+          m_plotter.DRAW_POINT(pnts2d(1), Color_Red, name);
+          m_plotter.DRAW_POINT(pnts2d(2), Color_Red, name);
+        }
+      }
+    }
+  }
+
+  return isOk;
 }
 
 //-----------------------------------------------------------------------------

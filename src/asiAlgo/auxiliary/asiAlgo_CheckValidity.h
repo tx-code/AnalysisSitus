@@ -73,6 +73,14 @@ public:
   asiAlgo_EXPORT bool
     CheckBasic(const TopoDS_Shape& shape);
 
+  //! Checks triangulation stored in the passed shape.
+  //! \param[in] shape     shape to check.
+  //! \param[in] findSmall indicates whether to find small triangles.
+  //! \return true if the triangulation is found to be valid.
+  asiAlgo_EXPORT bool
+    CheckTriangulation(const TopoDS_Shape& shape,
+                       const bool          findSmall = false);
+
 // Class-level API:
 public:
 
