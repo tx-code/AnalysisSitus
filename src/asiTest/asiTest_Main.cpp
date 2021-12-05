@@ -79,7 +79,7 @@ DEFINE_TEST_VARIABLES
 { \
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();\
   \
-  if ( !asiTcl_Plugin::Load(cf->Interp, cf, name) ) \
+  if ( asiTcl_Plugin::Load(cf->Interp, cf, name) != asiTcl_Plugin::Status_OK ) \
     cf->Progress.SendLogMessage(LogErr(Normal) << "Cannot load %1 commands." << name); \
   else \
     cf->Progress.SendLogMessage(LogInfo(Normal) << "Loaded %1 commands." << name); \
