@@ -52,12 +52,6 @@ public:
   virtual int
     CaseID() const = 0;
 
-  virtual std::string
-    CaseDescriptionDir() const = 0;
-
-  virtual std::string
-    CaseDescriptionFn() const = 0;
-
   virtual int
     NumberOfExecuted() const = 0;
 
@@ -70,8 +64,8 @@ public:
   virtual const std::map<std::string, std::string>&
     Variables() const = 0;
 
-  virtual bool
-    IsPassed(const int idx) const = 0;
+  virtual std::vector<outcome>
+    Results() const = 0;
 
 };
 
@@ -106,10 +100,11 @@ public:
     for ( int f = 0; f < (int) functions.Size(); ++f )
     {
       const AsiTestFunction& func = functions.Func(f);
-      const bool isOk = (*func)(f + 1).ok;
+      outcome res = ( *func )( f + 1 );
 
-      m_funcResults.push_back(isOk);
-      if ( !isOk && areAllOk )
+      m_funcResults.push_back(res);
+
+      if ( !res.ok && areAllOk )
         areAllOk = false;
     }
     return areAllOk;
@@ -120,20 +115,6 @@ public:
   virtual int CaseID() const
   {
     return CaseType::ID();
-  }
-
-  //! Returns description directory for the managed Test Case.
-  //! \return description directory for the managed Test Case.
-  virtual std::string CaseDescriptionDir() const
-  {
-    return CaseType::DescriptionDir();
-  }
-
-  //! Returns description filename for the managed Test Case.
-  //! \return description filename for the managed Test Case.
-  virtual std::string CaseDescriptionFn() const
-  {
-    return CaseType::DescriptionFn();
   }
 
   //! Returns the total number of executed Test Functions for the managed
@@ -152,7 +133,7 @@ public:
     int numFailed = 0;
     for ( int f = 0; f < (int) m_funcResults.size(); ++f )
     {
-      if ( !m_funcResults[f] )
+      if ( !m_funcResults[f].ok )
         numFailed++;
     }
     return numFailed;
@@ -179,13 +160,11 @@ public:
     return CaseType::ExpansionMap();
   }
 
-  //! Returns true if Test Function with the given index has passed, false --
-  //! otherwise.
-  //! \param idx [in] index of Test Function.
-  //! \return true/false.
-  virtual bool IsPassed(const int idx) const
+  //! Returns the results of Test Functions run.
+  //! \return the output statuses of all run test functions.
+  virtual std::vector<outcome> Results() const
   {
-    return m_funcResults[idx];
+    return m_funcResults;
   }
 
 private:
@@ -195,7 +174,7 @@ private:
 
 private:
 
-  std::vector<bool> m_funcResults; //!< Execution results.
+  std::vector<outcome> m_funcResults; //!< Execution results.
 
 };
 

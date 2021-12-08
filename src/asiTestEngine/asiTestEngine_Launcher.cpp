@@ -172,7 +172,7 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
   // Generate table header
   Rdr->StartTable("table_class")
      ->StartTableRow()
-     ->StartColSpanTableHCell(2, "table_class cell_class")
+     ->StartTableHCell("table_class cell_class")
      ->AddText(asiTestEngine_Macro_TEST)
      ->EndTableHCell()
      ->StartTableHCell("table_class cell_class")
@@ -194,36 +194,12 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
     const int    nFailed       = CaseLauncher->NumberOfFailed();
     const double passedPercent = (double) (nTotal-nFailed)/nTotal*100.0;
 
-    // Get filename for description
-    std::string descGroupDir = CaseLauncher->CaseDescriptionDir();
-    std::string descFilename = CaseLauncher->CaseDescriptionFn() + asiTestEngine_Macro_DOT + asiTestEngine_Macro_DESCR_EXT;
-    std::string descDir      = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestDescr() ) + descGroupDir;
-
-    // Description processing tool
-    std::string title;
-    std::vector<std::string> overviewBlocks, detailBlocks;
-    //
-    if ( !asiTestEngine_DescriptionProc::Process(descDir,
-                                                 descFilename,
-                                                 CaseLauncher->Variables(),
-                                                 CaseLauncher->CaseID(),
-                                                 nTotal,
-                                                 title,
-                                                 overviewBlocks,
-                                                 detailBlocks) )
-    {
-      if ( out )
-        *out << "\tFailed to read description from \"" << descFilename.c_str() << "\"\n";
-      return false;
-    }
-
     // Render header for Test Case
     Rdr->StartTableRow()
        ->StartTableHCell("table_class cell_class header_cell_class")
+       ->AddText( "Case ID: ")
        ->AddText( CaseLauncher->CaseID() )
        ->EndTableHCell()
-       ->StartTableHCell("table_class cell_class header_cell_class")
-       ->AddText(title)
        ->EndTableHCell();
 
     // Finish row with local statistics
@@ -232,47 +208,16 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
     Rdr->AddText(passedPercent)->AddText("%")->EndTableHCell();
     Rdr->EndTableRow();
 
-    // Check number of OVERVIEW blocks
-    if ( (int) overviewBlocks.size() < nTotal )
-    {
-      if ( out )
-        *out << "\tNot enough OVERVIEW blocks in \"" << descFilename.c_str() << "\"\n";
-      return false;
-    }
-
     // Add rows for Test Functions
-    for ( int f = 0; f < nTotal; ++f )
+    for ( auto& resFn: CaseLauncher->Results() )
     {
-      // Prepare global ID of Test Function
-      std::string GID = asiAlgo_Utils::Str::ToString( CaseLauncher->CaseID() ) +
-                        asiTestEngine_Macro_COLON +
-                        asiAlgo_Utils::Str::ToString(f+1);
-
       // Add table row
       Rdr->StartTableRow()
-         ->StartTableCell("table_class cell_class")->AddText(GID)->EndTableCell()
-         ->StartTableCell("table_class cell_class")
-         ->AddText( overviewBlocks[f] );
-
-      // Add section for details
-      if ( ( (int) detailBlocks.size() >= (f+1) ) && detailBlocks[f].length() )
-      {
-        const std::string& details = detailBlocks[f];
-
-        Rdr->BreakRow()->BreakRow()
-           ->AddText("<i>Details:</i>")
-           ->AddText("<div style='border: 1px dotted rgb(100, 100, 100); "
-                     "font-size: 11; background-color: rgb(250, 245, 160); "
-                     "padding: 5px; margin: 5px;'>")
-           ->AddText(details)
-           ->AddText("</div>");
-      }
-
-      // Finish description cell
-      Rdr->EndTableCell();
+         ->StartTableCell("table_class cell_class");
+      Rdr->AddText(resFn.name);
 
       // Result of Test Function
-      if ( CaseLauncher->IsPassed(f) )
+      if ( resFn.ok)
         Rdr->StartTableCell("table_class cell_class good_cell_class")->AddText(asiTestEngine_Macro_OK);
       else
         Rdr->StartTableCell("table_class cell_class bad_cell_class")->AddText(asiTestEngine_Macro_FAILED);
