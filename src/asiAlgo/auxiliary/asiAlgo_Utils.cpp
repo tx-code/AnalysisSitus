@@ -569,6 +569,16 @@ std::string asiAlgo_Utils::Env::AsiTestDumping()
 
 //-----------------------------------------------------------------------------
 
+//! Returns value of ASI_TEST_SCRIPTS environment variable. This variable is used
+//! to refer to the directory containing all Tcl scripts.
+//! \return value of ASI_TEST_SCRIPTS variable.
+std::string asiAlgo_Utils::Env::AsiTestScripts()
+{
+  return GetVariable(ASI_TEST_SCRIPTS);
+}
+
+//-----------------------------------------------------------------------------
+
 //! Returns value of the environment variable with the passed name.
 //! \param varName [in] variable name.
 //! \return value of the variable.
