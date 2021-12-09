@@ -188,6 +188,31 @@ namespace asiAlgo_Utils
       (is >> result) ? result : default_value;
       return result;
     }
+
+    //! Extracts the name of the last directory from the
+    //! given path.
+    asiAlgo_EXPORT std::string
+      LastDirname(const std::string& filename);
+
+    //! Extracts base filename with our without extension.1
+    asiAlgo_EXPORT TCollection_AsciiString
+      BaseFilename(const TCollection_AsciiString& filename,
+                   const bool                     doKeepExt);
+
+    //! Extracts base filename with our without extension.
+    asiAlgo_EXPORT std::string
+      BaseFilename(const std::string& filename,
+                   const bool         doKeepExt);
+
+    //! Given the full filename, this function transforms it to the
+    //! reference data filename as `<path>/<basename>.ref`.
+    //!
+    //! \param[in] filename input filename.
+    //! \param[in] refExt   extension of the reference file (normally it is "ref").
+    //! \return full filename for the reference data file.
+    asiAlgo_EXPORT std::string
+      RefFilename(const std::string& filename,
+                  const std::string& refExt);
   } // Str namespace.
 
   //! Functions for working with environment.
@@ -294,6 +319,67 @@ namespace asiAlgo_Utils
     //! \return a JSON array containing the elements of the pair.
     asiAlgo_EXPORT std::string
       FromPair(const tl::optional< std::pair<int, int> >& pair);
+  }
+
+  //! Functions for verification of results.
+  namespace Verify
+  {
+    //! Compares the two passed vectors by counting and matching occurrences
+    //! of each element.
+    //! \param[in] V1   the first vector.
+    //! \param[in] V2   the second vector.
+    //! \param[in] prec the precision to use.
+    //! \return true for matching vector, false -- otherwise.
+    asiAlgo_EXPORT bool
+      CompareOccurrences(const std::vector<double>& V1,
+                         const std::vector<double>& V2,
+                         const double               prec);
+
+    //! This method compares two optionals given that they can have different states, i.e. initialized (has value)
+    //! versus uninitialized. While on Windows direct comparison of the dereferenced values was quite Ok, on Linux
+    //! we have to take special care of the optionals' states to avoid surprises at runtime.
+    //! \param[in] a the first optional to compare.
+    //! \param[in] b the second optional to compare.
+    //! \return true in case of equality, false -- otherwise.
+    asiAlgo_EXPORT bool
+      AreEqual(const tl::optional<bool>& a,
+               const tl::optional<bool>& b);
+
+    //! This method compares two optionals given that they can have different states, i.e. initialized (has value)
+    //! versus uninitialized. While on Windows direct comparison of the dereferenced values was quite Ok, on Linux
+    //! we have to take special care of the optionals' states to avoid surprises at runtime.
+    //! \param[in] a    the first optional to compare.
+    //! \param[in] b    the second optional to compare.
+    //! \param[in] prec the numerical precision to use in the case when both optionals are initialized.
+    //! \return true in case of equality, false -- otherwise.
+    asiAlgo_EXPORT bool
+      AreEqual(const tl::optional<double>& a,
+               const tl::optional<double>& b,
+               const double                prec);
+
+    //! This method compares two optional axes given that they can have different states, i.e. initialized (has value)
+    //! versus uninitialized. While on Windows direct comparison of the dereferenced values was quite Ok, on Linux
+    //! we have to take special care of the optionals' states to avoid surprises at runtime.
+    //! \param[in] a           the first optional to compare.
+    //! \param[in] b           the second optional to compare.
+    //! \param[in] angTolerDeg the angular precision to use in the case when both optionals are initialized.
+    //! \return true in case of equality, false -- otherwise.
+    asiAlgo_EXPORT bool
+      AreEqualAxes(const tl::optional<gp_Ax1>& a,
+                   const tl::optional<gp_Ax1>& b,
+                   const double                angTolerDeg);
+
+    //! This method compares two optional dirs given that they can have different states, i.e. initialized (has value)
+    //! versus uninitialized. While on Windows direct comparison of the dereferenced values was quite Ok, on Linux
+    //! we have to take special care of the optionals' states to avoid surprises at runtime.
+    //! \param[in] a           the first optional to compare.
+    //! \param[in] b           the second optional to compare.
+    //! \param[in] angTolerDeg the angular precision to use in the case when both optionals are initialized.
+    //! \return true in case of equality, false -- otherwise.
+    asiAlgo_EXPORT bool
+      AreEqualDirs(const tl::optional<gp_Dir>& a,
+                   const tl::optional<gp_Dir>& b,
+                   const double                angTolerDeg);
   }
 
   //! Returns geometry of a face as a string label.

@@ -9,7 +9,10 @@ set (H_FILES
   asiTestEngine_Launcher.h
   asiTestEngine_FileComparator.h
   asiTestEngine_Macro.h
+  asiTestEngine_ResultGroup.h
+  asiTestEngine_Status.h
   asiTestEngine_TestCase.h
+  asiTestEngine_Utils.h
   outcome.h
 )
 
@@ -17,6 +20,7 @@ set (CPP_FILES
   asiTestEngine_FileComparator.cpp
   asiTestEngine_Launcher.cpp
   asiTestEngine_TestCase.cpp
+  asiTestEngine_Utils.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -69,6 +73,7 @@ include_directories ( SYSTEM
                       ${asiActiveData_include_dir}
                       ${asiData_include_dir_loc}
                       ${asiAlgo_include_dir}
+                      ${asiTcl_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_vtk_INCLUDE_DIR} )
@@ -81,7 +86,9 @@ add_library (asiTestEngine SHARED
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiTestEngine asiAlgo asiData)
+target_link_libraries(asiTestEngine asiAlgo asiData asiTcl)
+
+qt5_use_modules(asiTestEngine Core)
 
 #------------------------------------------------------------------------------
 # Installation

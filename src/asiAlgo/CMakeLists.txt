@@ -59,6 +59,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_TopoSummary.h
   auxiliary/asiAlgo_UniformGrid.h
   auxiliary/asiAlgo_Utils.h
+  auxiliary/asiAlgo_VisualSettings.h
 )
 set (aux_CPP_FILES
   auxiliary/asiAlgo_BuildConvexHull.cpp

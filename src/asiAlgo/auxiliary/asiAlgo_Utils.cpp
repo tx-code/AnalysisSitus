@@ -157,6 +157,9 @@
 #pragma warning(default : 4701 4702)
 #endif
 
+// Standard includes
+#include <map>
+
 //-----------------------------------------------------------------------------
 
 #undef DUMP_COUT
@@ -547,6 +550,108 @@ bool asiAlgo_Utils::Str::IsNumber(const std::string& str)
 
 //-----------------------------------------------------------------------------
 
+std::string
+  asiAlgo_Utils::Str::LastDirname(const std::string& filename)
+{
+  std::vector<std::string> chunks;
+  Split(filename, "\\/", chunks);
+
+  if ( chunks.size() > 1 )
+    return chunks[chunks.size() - 2];
+
+  return filename;
+}
+
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString
+  asiAlgo_Utils::Str::BaseFilename(const TCollection_AsciiString& filename,
+                                   const bool                     doKeepExt)
+{
+  std::string
+    basefilename = BaseFilename(std::string( filename.ToCString() ), doKeepExt);
+
+  return basefilename.c_str();
+}
+
+//-----------------------------------------------------------------------------
+
+std::string
+  asiAlgo_Utils::Str::BaseFilename(const std::string& filename,
+                                   const bool         doKeepExt)
+{
+  // Split path to directory names.
+  std::vector<std::string> chunks;
+  Split(filename, "\\/", chunks);
+
+  // Get base filename and change its extension.
+  std::string baseFn = chunks[chunks.size() - 1];
+  std::vector<std::string> baseFnChunks;
+  Split(baseFn, ".", baseFnChunks);
+
+  if ( baseFnChunks.size() == 1 )
+  {
+    // No extension
+    return baseFnChunks[0];
+  }
+  //
+  baseFn = "";
+  for ( size_t k = 0; k < baseFnChunks.size() - 1; ++k )
+  {
+    baseFn += baseFnChunks[k]; // Base filename without extension.
+
+    if ( (k == baseFnChunks.size() - 2) && doKeepExt )
+      baseFn += ".";
+  }
+  if ( doKeepExt )
+    baseFn += baseFnChunks[baseFnChunks.size() - 1];
+
+  return baseFn;
+}
+
+//-----------------------------------------------------------------------------
+
+std::string
+  asiAlgo_Utils::Str::RefFilename(const std::string& filename,
+                                  const std::string& refExt)
+{
+  // Split path to directory names.
+  std::vector<std::string> chunks;
+  Split(filename, "\\/", chunks);
+
+  // Get base filename and change its extension.
+  std::string baseFn = chunks[chunks.size() - 1];
+  std::vector<std::string> baseFnChunks;
+  Split(baseFn, ".", baseFnChunks);
+  //
+  baseFn = "";
+  for ( size_t k = 0; k < baseFnChunks.size() - 1; ++k )
+  {
+    baseFn += baseFnChunks[k]; // Base filename without extension.
+    baseFn += ".";
+  }
+  baseFn += refExt;
+
+  std::string resFilename;
+
+  // Add leading slash for the unix systems.
+  if ( filename[0] == '/' ) // unix
+    resFilename += "/";
+
+  // Compose full name.
+  for ( size_t k = 0; k < chunks.size() - 1; ++k )
+  {
+    resFilename += chunks[k];
+    resFilename += "/";
+  }
+  //
+  resFilename += baseFn;
+
+  return resFilename;
+}
+
+//-----------------------------------------------------------------------------
+
 //! Returns value of ASI_TEST_DATA environment variable. This variable is used to
 //! refer to the directory containing all data files playing as inputs for
 //! unit tests.
@@ -706,6 +811,154 @@ std::string
     out << "null";
 
   return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Verify::CompareOccurrences(const std::vector<double>& V1,
+                                               const std::vector<double>& V2,
+                                               const double               prec)
+{
+  if ( V1.size() != V2.size() )
+    return false;
+
+  std::map<double, int> uniques1, uniques2;
+
+  // Unique values in the first vector.
+  std::for_each(V1.begin(), V1.end(), [&](const double val) {
+    bool found = false;
+    for ( auto u : uniques1 )
+    {
+      if ( Abs(u.first - val) < prec )
+      {
+        uniques1[u.first]++;
+        found = true;
+        break;
+      }
+    }
+    //
+    if ( !found ) uniques1[val]++;
+  });
+
+  // Unique values in the second vector.
+  std::for_each(V2.begin(), V2.end(), [&](const double val) {
+    bool found = false;
+    for ( auto u : uniques2 )
+    {
+      if ( Abs(u.first - val) < prec )
+      {
+        uniques2[u.first]++;
+        found = true;
+        break;
+      }
+    }
+    //
+    if ( !found ) uniques2[val]++;
+  });
+
+  // Compare maps.
+  for ( auto u1 : uniques1 )
+  {
+    bool found = false;
+    for ( auto u2 : uniques2 )
+    {
+      if ( (u1.first - u2.first) < prec && (u1.second == u2.second) )
+      {
+        found = true;
+        break;
+      }
+    }
+
+    if ( !found )
+      return false;
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Verify::AreEqual(const tl::optional<bool>& a,
+                                     const tl::optional<bool>& b)
+{
+  if ( !a.has_value() && !b.has_value() )
+    return true;
+
+  if ( !a.has_value() && b.has_value() )
+    return false;
+
+  if ( a.has_value() && !b.has_value() )
+    return false;
+
+  if ( *a != *b )
+    return false;
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Verify::AreEqual(const tl::optional<double>& a,
+                                     const tl::optional<double>& b,
+                                     const double                prec)
+{
+  if ( !a.has_value() && !b.has_value() )
+    return true;
+
+  if ( !a.has_value() && b.has_value() )
+    return false;
+
+  if ( a.has_value() && !b.has_value() )
+    return false;
+
+  if ( Abs(*a - *b) > prec )
+    return false;
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Verify::AreEqualAxes(const tl::optional<gp_Ax1>& a,
+                                         const tl::optional<gp_Ax1>& b,
+                                         const double                angTolerDeg)
+{
+  if ( !a.has_value() && !b.has_value() )
+    return true;
+
+  if ( !a.has_value() && b.has_value() )
+    return false;
+
+  if ( a.has_value() && !b.has_value() )
+    return false;
+
+  if ( a->IsParallel(*b, angTolerDeg) || a->IsOpposite(*b, angTolerDeg) )
+    return true;
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Verify::AreEqualDirs(const tl::optional<gp_Dir>& a,
+                                         const tl::optional<gp_Dir>& b,
+                                         const double                angTolerDeg)
+{
+  if ( !a.has_value() && !b.has_value() )
+    return true;
+
+  if ( !a.has_value() && b.has_value() )
+    return false;
+
+  if ( a.has_value() && !b.has_value() )
+    return false;
+
+  const double angDeg = a->Angle(*b)*180./M_PI;
+
+  if ( Abs(angDeg) < angTolerDeg )
+    return true;
+
+  return false;
 }
 
 //-----------------------------------------------------------------------------
