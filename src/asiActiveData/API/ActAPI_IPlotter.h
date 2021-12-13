@@ -137,6 +137,9 @@ public:
   virtual void
     ERASE(const TCollection_AsciiString&) {}
 
+  virtual void
+    FIT3D() {}
+
 // GEOMETRY:
 public:
 
@@ -617,6 +620,16 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->ERASE(name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    FIT3D()
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->FIT3D();
   }
 
 public:

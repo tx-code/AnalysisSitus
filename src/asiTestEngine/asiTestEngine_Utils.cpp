@@ -78,7 +78,7 @@ std::string asiTestEngine_Utils::GetUniqueDirName()
 #endif
 
     dateTimeStr += "_";
-    dateTimeStr += counter;
+    dateTimeStr += QString::number(counter);
   }
 
   return dateTimeStr.toUtf8().constData();
