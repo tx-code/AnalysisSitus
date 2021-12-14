@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_MeshCheckTopology.h>
+#include <asiAlgo_MeshInfo.h>
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
@@ -660,6 +661,12 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
                                                const bool          findSmall)
 {
   if ( shape.IsNull() )
+    return false;
+
+  // Check if no facets are there.
+  asiAlgo_MeshInfo meshInfo = asiAlgo_MeshInfo::Extract(shape);
+  //
+  if ( !meshInfo.nFacets )
     return false;
 
   const bool isToFindSmallTriangles = findSmall;
