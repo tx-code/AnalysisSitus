@@ -110,4 +110,4 @@ set (LIBS
   vtkdoubleconversion-8.2
 )
 
-ASITUS_INSTALL_3RDPARTY (LIBS "vtk")
+ASITUS_INSTALL_3RDPARTY (LIBS "vtk" "" "1")

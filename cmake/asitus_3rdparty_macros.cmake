@@ -76,7 +76,7 @@ macro (ASITUS_THIRDPARTY_PRODUCT
   if (NOT DEFINED 3RDPARTY_${PRODUCT_NAME}_LIBRARY_DIR)
     set (3RDPARTY_${PRODUCT_NAME}_LIBRARY_DIR "" CACHE PATH "The directory containing ${PRODUCT_NAME} library")
   endif()
-  
+
   if (WIN32)
     if (NOT DEFINED 3RDPARTY_${PRODUCT_NAME}_DLL_DIR)
       set (3RDPARTY_${PRODUCT_NAME}_DLL_DIR "" CACHE PATH "The directory containing ${PRODUCT_NAME} dynamic library (DLL)")
@@ -86,7 +86,7 @@ macro (ASITUS_THIRDPARTY_PRODUCT
   #----------------------------------------------------------------------------
   # Headers
   if (NOT 3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR OR NOT EXISTS "${3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR}")
-  
+
     # set 3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR as not found, otherwise find_path can't assign a new value to 3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR
     set (3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR "3RDPARTY_${PRODUCT_NAME}_INCLUDE_DIR-NOTFOUND" CACHE FILEPATH "the path to ${HEADER_NAME}" FORCE)
 
@@ -142,7 +142,7 @@ macro (ASITUS_THIRDPARTY_PRODUCT
     endif()
 
     message (STATUS "... Hint suffix for searching of libraries is ${LIB_SUFFIX_HINT}")
-    
+
     set (3RDPARTY_${PRODUCT_NAME}_LIBRARY_DIR "3RDPARTY_${PRODUCT_NAME}_LIBRARY_DIR-NOTFOUND" CACHE FILEPATH "The path to ${PRODUCT_NAME} libraries" FORCE)
 
     if (3RDPARTY_${PRODUCT_NAME}_DIR AND EXISTS "${3RDPARTY_${PRODUCT_NAME}_DIR}")
@@ -165,7 +165,7 @@ macro (ASITUS_THIRDPARTY_PRODUCT
 
     set (3RDPARTY_${PRODUCT_NAME}_LIBRARY_DIR "" CACHE FILEPATH "The path to ${PRODUCT_NAME} libraries" FORCE)
   endif()
-  
+
   #----------------------------------------------------------------------------
   # DLLs for windows
   if (WIN32)
@@ -181,7 +181,7 @@ macro (ASITUS_THIRDPARTY_PRODUCT
       endif()
 
       message (STATUS "... Hint suffix for searching of DLLs is ${DLL_SUFFIX_HINT}")
-      
+
       set (3RDPARTY_${PRODUCT_NAME}_DLL_DIR "3RDPARTY_${PRODUCT_NAME}_DLL_DIR-NOTFOUND" CACHE FILEPATH "The path to ${PRODUCT_NAME} DLLs" FORCE)
 
       if (3RDPARTY_${PRODUCT_NAME}_DIR AND EXISTS "${3RDPARTY_${PRODUCT_NAME}_DIR}")
@@ -252,7 +252,7 @@ macro (ASITUS_INSTALL_3RDPARTY LIBRARIES_LIST_NAME 3RDPARTY_NAME)
   endif()
 
   if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}")
-    list (APPEND 3RDPARTY_DLL_PATH       "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}")
+    list (APPEND 3RDPARTY_DLL_PATH "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR}")
   endif()
   if (EXISTS "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}")
     list (APPEND 3RDPARTY_DLL_PATH_DEBUG "${3RDPARTY_${3RDPARTY_NAME}_DLL_DIR_DEBUG}")
@@ -319,7 +319,7 @@ macro (ASITUS_INSTALL_3RDPARTY LIBRARIES_LIST_NAME 3RDPARTY_NAME)
             set (SUF_CONCAT "${SUF_CONCAT}.${SUF_PART}")
           endif()
           if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so${SUF_CONCAT}" DESTINATION bin OPTIONAL)
+            install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so${SUF_CONCAT}" DESTINATION bind OPTIONAL)
           endif()
           if ( (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug") OR IS_USE_RELEASE_LIB )
             install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}.so${SUF_CONCAT}" DESTINATION bin OPTIONAL)
@@ -327,7 +327,7 @@ macro (ASITUS_INSTALL_3RDPARTY LIBRARIES_LIST_NAME 3RDPARTY_NAME)
         endforeach()
       else()
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so" DESTINATION bin)
+          install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}${LIBRARY_NAME_DEBUG_SUFFIX}.so" DESTINATION bind)
         endif()
         if ( (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug") OR IS_USE_RELEASE_LIB )
           install (FILES "${3RDPARTY_${3RDPARTY_NAME}_LIBRARY_DIR}/lib${LIB}.so" DESTINATION bin)

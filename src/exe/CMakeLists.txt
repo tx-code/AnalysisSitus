@@ -21,7 +21,7 @@ set (ui_H_FILES
 set (ui_H_UI_FILES
   ui/exe_MainWindow.h
 )
-set (ui_CPP_FILES 
+set (ui_CPP_FILES
   ui/exe_CommonFacilities.cpp
   ui/exe_MainWindow.cpp
 )
@@ -256,24 +256,45 @@ else()
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
-  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bind/asiExe DESTINATION bin
+  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bind/asiExe DESTINATION bind
            CONFIGURATIONS Debug
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
-  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bini/asiExe DESTINATION bin
+  install (FILES ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bini/asiExe DESTINATION bini
            CONFIGURATIONS RelWithDebInfo
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
 
   install (FILES ${CMAKE_SOURCE_DIR}/asiExe.sh DESTINATION bin
+           CONFIGURATIONS Release
            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
                        GROUP_EXECUTE GROUP_READ
                        WORLD_EXECUTE WORLD_READ)
+
+  install (FILES ${CMAKE_SOURCE_DIR}/asiExe.sh DESTINATION bini
+          CONFIGURATIONS RelWithDebInfo
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ
+          WORLD_EXECUTE WORLD_READ)
+
+  install (FILES ${CMAKE_SOURCE_DIR}/asiExe.sh DESTINATION bind
+          CONFIGURATIONS Debug
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ
+          WORLD_EXECUTE WORLD_READ)
 endif()
 
-install (FILES resources/asitus/icon.ico DESTINATION bin)
-install (FILES resources/asitus/icon64.ico DESTINATION bin)
-install (FILES resources/asiExeDictionary.xml DESTINATION bin/resources)
+install (FILES resources/asitus/icon.ico CONFIGURATIONS Release DESTINATION bin)
+install (FILES resources/asitus/icon64.ico CONFIGURATIONS Release DESTINATION bin)
+install (FILES resources/asiExeDictionary.xml CONFIGURATIONS Release DESTINATION bin/resources)
+
+install (FILES resources/asitus/icon.ico CONFIGURATIONS RelWithDebInfo DESTINATION bini)
+install (FILES resources/asitus/icon64.ico CONFIGURATIONS RelWithDebInfo DESTINATION bini)
+install (FILES resources/asiExeDictionary.xml CONFIGURATIONS RelWithDebInfo DESTINATION bini/resources)
+
+install (FILES resources/asitus/icon.ico CONFIGURATIONS Debug DESTINATION bind)
+install (FILES resources/asitus/icon64.ico CONFIGURATIONS Debug DESTINATION bind)
+install (FILES resources/asiExeDictionary.xml CONFIGURATIONS Debug DESTINATION bind/resources)

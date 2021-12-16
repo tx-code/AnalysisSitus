@@ -29,6 +29,8 @@ endif()
 message (STATUS "... OCCT Debug Library dirs: ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}")
 message (STATUS "... OCCT Debug Binary  dirs: ${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
 
+set (OCCT_VERSION "7.4.0")
+
 #--------------------------------------------------------------------------
 # Installation
 #--------------------------------------------------------------------------
@@ -73,5 +75,5 @@ set (LIBS
 )
 
 if (NOT BUILD_ALGO_ONLY)
-  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT")
+  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION}")
 endif()

@@ -437,5 +437,11 @@ install (FILES ${iv_H_FILES}   DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${re_H_FILES}   DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${misc_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
 
-install (FILES resources/Plugin    DESTINATION bin/resources)
-install (FILES resources/Resources DESTINATION bin/resources)
+install (FILES resources/Plugin    CONFIGURATIONS Release DESTINATION bin/resources)
+install (FILES resources/Resources CONFIGURATIONS Release DESTINATION bin/resources)
+
+install (FILES resources/Plugin    CONFIGURATIONS RelWithDebInfo DESTINATION bini/resources)
+install (FILES resources/Resources CONFIGURATIONS RelWithDebInfo DESTINATION bini/resources)
+
+install (FILES resources/Plugin    CONFIGURATIONS Debug DESTINATION bind/resources)
+install (FILES resources/Resources CONFIGURATIONS Debug DESTINATION bind/resources)
