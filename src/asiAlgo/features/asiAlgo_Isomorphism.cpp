@@ -232,6 +232,15 @@ TColStd_PackedMapOfInteger asiAlgo_Isomorphism::GetAllFeatures() const
 
 //-----------------------------------------------------------------------------
 
+int
+  asiAlgo_Isomorphism::GetDomainImage(const int              V_P,
+                                      const Eigen::MatrixXd& M) const
+{
+  return this->getDomainImage(m_P_eigenMapping.Find2(V_P), M);
+}
+
+//-----------------------------------------------------------------------------
+
 void
   asiAlgo_Isomorphism::GetDomainImages(const int                   V_P,
                                        TColStd_PackedMapOfInteger& images) const

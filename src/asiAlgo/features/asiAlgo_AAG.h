@@ -679,6 +679,29 @@ public:
   asiAlgo_EXPORT const t_node_attributes&
     GetNodeAttributes() const;
 
+  //! Iterate over the nodal attributes for the passed face attempting
+  //! to find an attribute of a certain type.
+  //! \param[in] node the 1-based ID of the node (a face).
+  //! \return the found attribute's handle or null if not found.
+  template <typename TAttrType>
+  Handle(TAttrType) FindNodeAttribute(const t_topoId node) const
+  {
+    Handle(TAttrType)              found;
+    const asiAlgo_AAG::t_attr_set& attrSet = this->GetNodeAttributes(node);
+    //
+    for ( asiAlgo_AAG::t_attr_set::Iterator nit(attrSet); nit.More(); nit.Next() )
+    {
+      const Handle(asiAlgo_FeatureAttr)& attr = nit.GetAttr();
+      //
+      if ( attr->IsKind( STANDARD_TYPE(TAttrType) ) )
+      {
+        found = Handle(TAttrType)::DownCast(attr);
+        break;
+      }
+    }
+    return found;
+  }
+
   //! Accessor for the collection of nodal attributes.
   //! \param[in] node ID of the graph node of interest.
   //! \return attributes associated with the given graph node.

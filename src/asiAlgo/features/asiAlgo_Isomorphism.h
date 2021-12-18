@@ -121,6 +121,16 @@ public:
   asiAlgo_EXPORT asiAlgo_Feature
     GetAllFeatures() const;
 
+  //! Returns the domain image (1-based face ID) of the passed `V_P`
+  //! vertex of the pattern graph for the given solution matrix.
+  //!
+  //! \param[in] V_P the 1-based index of a vertex in the pattern graph.
+  //! \param[in] M   the solution matrix.
+  //! \return the image ID in the problem graoh.
+  asiAlgo_EXPORT int
+    GetDomainImage(const int              V_P,
+                   const Eigen::MatrixXd& M) const;
+
   //! Returns the domain images (1-based face IDs) of the passed `V_P`
   //! vertex of the pattern graph.
   //!
