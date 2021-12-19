@@ -125,9 +125,13 @@ VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
 int main(int argc, char** argv)
 {
   // Check whether batch mode is requested.
-  std::string scriptFilename;
+  std::string scriptArg;
   const bool
-    isBatch = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runscript, scriptFilename);
+    isRunScript = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runscript, scriptArg);
+  const bool
+    isRunCommand = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runcommand, scriptArg);
+  const bool
+    isBatch = isRunScript || isRunCommand;
 
   //---------------------------------------------------------------------------
   // Create main window as (it will initialize all resources)
@@ -244,8 +248,18 @@ int main(int argc, char** argv)
   {
     std::cout << "Running Analysis Situs in batch mode..." << std::endl;
 
+    // Prepare common facilities for batch mode.
+    Handle(asiUI_BatchFacilities) cf = asiUI_BatchFacilities::Instance();
+
+    if ( isRunScript )
+      std::cout << "Exec: " << asiTcl_SourceCmd( scriptArg.c_str() ) << std::endl;
+    else
+      std::cout << "Exec: " << scriptArg.c_str() << std::endl;
+
     // Execute script.
-    const int ret = interp->Eval( asiTcl_SourceCmd( scriptFilename.c_str() ) );
+    const int
+      ret = interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
+             /* run single command */ : scriptArg.c_str() );
 
     // Check result.
     if ( ret != TCL_OK )
