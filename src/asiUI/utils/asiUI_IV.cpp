@@ -759,7 +759,7 @@ void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
                           const double                   opacity,
                           const TCollection_AsciiString& name)
 {
-  this->draw_shape(shape, false, ActAPI_Color(), opacity, false, name, true);
+  this->draw_shape(shape, true, Color_Default, opacity, false, name, true);
 }
 
 //---------------------------------------------------------------------------//
@@ -806,7 +806,7 @@ void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
                             const TopoDS_Shape&            shape,
                             const double                   opacity)
 {
-  this->draw_shape(shape, false, ActAPI_Color(), opacity, false, name, false);
+  this->draw_shape(shape, true, Color_Default, opacity, false, name, false);
 }
 
 //---------------------------------------------------------------------------//
