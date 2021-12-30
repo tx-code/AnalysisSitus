@@ -130,6 +130,12 @@ public:
   asiAsm_EXPORT bool
     SaveAs(const TCollection_AsciiString& filename);
 
+  //! Saves this document to a STEP file with the given name.
+  //! \param[in] filename name of the output STEP file.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    SaveSTEP(const TCollection_AsciiString& filename);
+
   //! \return true if the Assembly Document is empty, i.e. the XDE Document
   //!         is either null or contains no roots.
   asiAsm_EXPORT bool
@@ -780,6 +786,19 @@ public:
   //! \param[in] doUpdateAssemblies indicates whether to update assemblies at the end.
   asiAsm_EXPORT void
     UpdatePartShape(const TDF_Label&                 partLab,
+                    const TopoDS_Shape&              newShape,
+                    const Handle(BRepTools_History)& history,
+                    const bool                       doUpdateAssemblies = true);
+
+  //! Updates boundary representation (shape) of the given part. The passed
+  //! history is used to update the related metadata (e.g., colors of faces).
+  //! If no history is available, it is safe to pass `nullptr`.
+  //! \param[in] partId             ID of the part to update the shape for.
+  //! \param[in] newShape           new shape to set.
+  //! \param[in] history            modification history to update the related metadata.
+  //! \param[in] doUpdateAssemblies indicates whether to update assemblies at the end.
+  asiAsm_EXPORT void
+    UpdatePartShape(const PartId&                    partId,
                     const TopoDS_Shape&              newShape,
                     const Handle(BRepTools_History)& history,
                     const bool                       doUpdateAssemblies = true);

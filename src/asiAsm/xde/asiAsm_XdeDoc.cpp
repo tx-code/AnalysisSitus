@@ -40,13 +40,18 @@
 
 // asiAlgo includes
 #include <asiAlgo_FileFormat.h>
+#include <asiAlgo_Version.h>
 
 // OpenCascade includes
+#include <APIHeaderSection_MakeHeader.hxx>
 #include <BRep_Builder.hxx>
 #include <CDM_MetaData.hxx>
 #include <IGESCAFControl_Reader.hxx>
+#include <Interface_Static.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
+#include <STEPCAFControl_Writer.hxx>
+#include <STEPControl_Controller.hxx>
 #include <TColStd_HSequenceOfExtendedString.hxx>
 #include <TDataStd_ChildNodeIterator.hxx>
 #include <TDataStd_Name.hxx>
@@ -357,6 +362,78 @@ bool Doc::SaveAs(const TCollection_AsciiString& filename)
 
   // Success.
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::SaveSTEP(const TCollection_AsciiString& filename)
+{
+  STEPControl_Controller::Init();
+  try
+  {
+    STEPCAFControl_Writer writer;
+    {
+      // Save information
+      Handle(StepData_StepModel) stepModel = writer.ChangeWriter().Model();
+      if (stepModel.IsNull())
+        return false;
+
+      APIHeaderSection_MakeHeader headerMaker(stepModel);
+
+      Handle(TCollection_HAsciiString) author = new TCollection_HAsciiString(ASITUS_APP_NAME);
+      Handle(TCollection_HAsciiString) originatingSystem = new TCollection_HAsciiString(ASITUS_APP_NAME);
+      Handle(TCollection_HAsciiString) organization = new TCollection_HAsciiString(ASITUS_APP_NAME);
+
+      headerMaker.SetAuthorValue(1, author);
+      headerMaker.SetOriginatingSystem(originatingSystem);
+      headerMaker.SetOrganizationValue(1, organization);
+
+      STEPControl_StepModelType mode = STEPControl_AsIs;
+      switch (Interface_Static::IVal("write.step.mode"))
+      {
+        default:
+        case 0: mode = STEPControl_AsIs;                   break;
+        case 1: mode = STEPControl_FacetedBrep;            break;
+        case 2: mode = STEPControl_ShellBasedSurfaceModel; break;
+        case 3: mode = STEPControl_ManifoldSolidBrep;      break;
+        case 4: mode = STEPControl_GeometricCurveSet;      break;
+      }
+
+      Standard_CString multiFile = NULL;
+      int              extMode = Interface_Static::IVal("write.step.extern.mode");
+      //
+      if (extMode != 0)
+      {
+        // get prefix for file
+        multiFile = Interface_Static::CVal("write.step.extern.prefix");
+      }
+
+      // Disable writing of GDT if not AP242
+      int ap = Interface_Static::IVal("write.step.schema");
+      if (ap != 5)
+        writer.SetDimTolMode(0);
+
+      if (!writer.Transfer(m_doc, mode, multiFile))
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Transfer failed.");
+        return false;
+      }
+    }
+    {
+      m_progress.SetMessageKey("Flush model into file");
+      if (writer.Write(filename.ToCString()) != IFSelect_RetDone)
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "STEP writer failed (error while flushing produced model into file).");
+        return false;
+      }
+    }
+    return true;
+  }
+  catch ( ... )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "STEP writer failed (exception occurred).");
+    return false;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -2030,6 +2107,21 @@ void Doc::UpdatePartShape(const TDF_Label&                 partLab,
 
   if ( doUpdateAssemblies )
     this->UpdateAssemblies();
+}
+
+//-----------------------------------------------------------------------------
+
+void Doc::UpdatePartShape(const PartId&                    partId,
+                          const TopoDS_Shape&              newShape,
+                          const Handle(BRepTools_History)& history,
+                          const bool                       doUpdateAssemblies)
+{
+  TDF_Label partLab = this->GetLabel(partId);
+  //
+  if ( partLab.IsNull() )
+    return;
+
+  this->UpdatePartShape(partLab, newShape, history, doUpdateAssemblies);
 }
 
 //-----------------------------------------------------------------------------
