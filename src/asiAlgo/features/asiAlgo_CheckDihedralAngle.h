@@ -47,8 +47,6 @@
 //! Utility to analyze dihedral angles.
 class asiAlgo_CheckDihedralAngle : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_CheckDihedralAngle, ActAPI_IAlgorithm)
 
@@ -176,6 +174,24 @@ public:
   {
     m_commonEdge = commonEdge;
   }
+
+protected:
+
+  //! Given that the passed `face` is rotational and the vexity analysis is being
+  //! done at its seam edge, this method extracts the corresponding rotational diameter
+  //! and checks if this diameter increases or decreases along the face normal.
+  //! \param[in]  pt        the point on surface.
+  //! \param[in]  norm      the face norm including the orientation effect.
+  //! \param[in]  face      the face in question.
+  //! \param[out] isConcave the Boolean flag indicating whether the seam edge
+  //!                       is concave or convex.
+  //! \return false if the check fails, so the resulting `isConcave` flag should not
+  //!         be consulted in the caller code.
+  asiAlgo_EXPORT bool
+    checkSeamVexity(const gp_Pnt&      pt,
+                    const gp_Vec&      norm,
+                    const TopoDS_Face& face,
+                    bool&              isConcave) const;
 
 protected:
 

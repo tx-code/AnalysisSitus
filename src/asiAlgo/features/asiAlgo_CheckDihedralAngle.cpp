@@ -31,8 +31,13 @@
 // Own include
 #include <asiAlgo_CheckDihedralAngle.h>
 
+// asiAlgo includes
+#include <asiAlgo_Utils.h>
+
 // OCCT includes
 #include <BRep_Tool.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepLProp_SLProps.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
@@ -240,6 +245,20 @@ asiAlgo_FeatureAngleType
     Ref = Vx.Normalized();
   }
 
+  // Apply special rules for the seam edges on canonical rotational surfaces.
+  // For such cases, no point inversion is necessary as we can deduce the
+  // edge vexity right from the normal field.
+  if ( isSeam )
+  {
+    bool isConcave = false;
+    //
+    if ( this->checkSeamVexity(FP, FN, F, isConcave) )
+    {
+      angleRad = M_PI;
+      return isConcave ? FeatureAngleType_SmoothConcave : FeatureAngleType_SmoothConvex;
+    }
+  }
+
   gp_Pnt2d ST;
   gp_Vec TG; // Tangent for G
   {
@@ -440,4 +459,125 @@ asiAlgo_FeatureAngleType
 {
   TopTools_IndexedMapOfShape commonEdges;
   return this->AngleBetweenFaces(F, G, allowSmooth, smoothAngularTol, commonEdges, angRad);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
+                                                 const gp_Vec&      norm,
+                                                 const TopoDS_Face& face,
+                                                 bool&              isConcave) const
+{
+  tl::optional<gp_Vec> axis;
+  tl::optional<gp_Pnt> origin;
+  tl::optional<double> diameter;
+  GeomAbs_SurfaceType  surfType = GeomAbs_OtherSurface;
+  bool                 isLabeled = false;
+
+  /* Cylindrical surface */
+  {
+    Handle(Geom_CylindricalSurface) surfCyl;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_CylindricalSurface>(face, surfCyl) )
+    {
+      axis      = surfCyl->Axis().Direction();
+      origin    = surfCyl->Axis().Location();
+      diameter  = 2*surfCyl->Radius();
+      surfType  = GeomAbs_Cylinder;
+      isLabeled = true;
+    }
+  }
+
+  /* Conical surface */
+  if ( !isLabeled )
+  {
+    Handle(Geom_ConicalSurface) coneSurf;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_ConicalSurface>(face, coneSurf) )
+    {
+      axis      = coneSurf->Axis().Direction();
+      origin    = coneSurf->Axis().Location();
+      diameter  = 2*coneSurf->RefRadius();
+      surfType  = GeomAbs_Cone;
+      isLabeled = true;
+    }
+  }
+
+  /* Toroidal surface */
+  if ( !isLabeled )
+  {
+    Handle(Geom_ToroidalSurface) torusSurf;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_ToroidalSurface>(face, torusSurf) )
+    {
+      axis      = torusSurf->Axis().Direction();
+      origin    = torusSurf->Axis().Location();
+      diameter  = 2*( torusSurf->MajorRadius() + torusSurf->MinorRadius() );
+      surfType  = GeomAbs_Torus;
+      isLabeled = true;
+    }
+  }
+
+  /* Surface of revolution */
+  if ( !isLabeled )
+  {
+    Handle(Geom_SurfaceOfRevolution) revolSurf;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_SurfaceOfRevolution>(face, revolSurf) )
+    {
+      axis      = revolSurf->Axis().Direction();
+      origin    = revolSurf->Axis().Location();
+      surfType  = GeomAbs_SurfaceOfRevolution;
+      isLabeled = true;
+
+      // Derive the diameter from extreme values along generatrix.
+      gp_Lin             lin(*origin, *axis);
+      Handle(Geom_Curve) gnx      = revolSurf->BasisCurve();
+      const double       radii[2] = { lin.Distance( gnx->Value( gnx->FirstParameter() ) ),
+                                      lin.Distance( gnx->Value( gnx->LastParameter() ) ) };
+      //
+      diameter = 2*Max(radii[0], radii[1]);
+    }
+  }
+
+  /* Sphere */
+  if ( !isLabeled )
+  {
+    Handle(Geom_SphericalSurface) sphereSurf;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_SphericalSurface>(face, sphereSurf) )
+    {
+      axis      = sphereSurf->Axis().Direction();
+      origin    = sphereSurf->Axis().Location();
+      diameter  = 2*sphereSurf->Radius();
+      surfType  = GeomAbs_Sphere;
+      isLabeled = true;
+    }
+  }
+
+  if ( !isLabeled )
+    return false;
+
+  // Take a probe point along the normal.
+  gp_Pnt normProbe = pt.XYZ() + norm.Normalized().XYZ()*(*diameter)*0.05;
+
+  m_plotter.DRAW_POINT(pt, Color_Red, "pt");
+  m_plotter.DRAW_POINT(normProbe, Color_Green, "normProbe");
+
+  // Compute the distance to the axis.
+  gp_Lin axisLin(*origin, *axis);
+  //
+  const double probeDist = axisLin.Distance(normProbe);
+  const double origDist  = axisLin.Distance(pt);
+  //
+  if ( probeDist < origDist )
+  {
+    isConcave = true;
+  }
+  else
+  {
+    isConcave = false;
+  }
+
+  return true;
 }
