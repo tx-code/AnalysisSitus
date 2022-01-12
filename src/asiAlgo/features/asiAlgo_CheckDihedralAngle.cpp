@@ -38,6 +38,7 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepLProp_SLProps.hxx>
+#include <ElSLib.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
@@ -119,6 +120,13 @@ asiAlgo_FeatureAngleType
         }
       }
     }
+  }
+  else
+  {
+    // Common edge is defined, let's only check if it's a seam or not.
+    // We need this information to apply special rules for seam edges
+    // on rotational surfaces.
+    isSeam = ShapeAnalysis_Edge().IsSeam(commonEdge, F);
   }
 
   if ( commonEdge.IsNull() )
@@ -495,9 +503,24 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
     //
     if ( asiAlgo_Utils::IsTypeOf<Geom_ConicalSurface>(face, coneSurf) )
     {
+      gp_Cone cone = coneSurf->Cone();
+
+      // Invert point on a cone.
+      double ucone, vcone;
+      ElSLib::ConeParameters( cone.Position(),
+                              cone.RefRadius(),
+                              cone.SemiAngle(),
+                              pt,
+                              ucone, vcone );
+
+      Handle(Geom_Curve) viso = coneSurf->VIso(vcone);
+      //
+      if ( !viso->IsInstance( STANDARD_TYPE(Geom_Circle) ) )
+        return false;
+
       axis      = coneSurf->Axis().Direction();
       origin    = coneSurf->Axis().Location();
-      diameter  = 2*coneSurf->RefRadius();
+      diameter  = 2*Handle(Geom_Circle)::DownCast(viso)->Radius();
       surfType  = GeomAbs_Cone;
       isLabeled = true;
     }
