@@ -237,21 +237,54 @@ int ENGINE_SelectFaces(const Handle(asiTcl_Interp)& interp,
                        int                          argc,
                        const char**                 argv)
 {
-  if ( argc < 2 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
+  (void) interp;
 
   if ( cmdEngine::cf.IsNull() )
     return TCL_OK;
+
+  asiEngine_Part partApi( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
 
   asiAlgo_Feature feature;
   //
   for ( int k = 1; k < argc; ++k )
     feature.Add( atoi(argv[k]) );
 
-  asiEngine_Part partApi( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
+  if ( feature.IsEmpty() )
+    partApi.GetAAG()->GetAllFaces(feature);
+
   partApi.HighlightFaces(feature);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SelectEdges(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  (void) interp;
+
+  if ( cmdEngine::cf.IsNull() )
+    return TCL_OK;
+
+  asiEngine_Part partApi( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
+
+  TColStd_PackedMapOfInteger eids;
+  //
+  for ( int k = 1; k < argc; ++k )
+    eids.Add( atoi(argv[k]) );
+
+  if ( eids.IsEmpty() )
+  {
+    const TopTools_IndexedMapOfShape&
+      allEdges = partApi.GetAAG()->RequestMapOfEdges();
+    //
+    for ( int eidx = 1; eidx <= allEdges.Extent(); ++eidx )
+      eids.Add(eidx);
+  }
+
+  partApi.HighlightEdges(eids);
 
   return TCL_OK;
 }
@@ -340,8 +373,16 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("select-faces",
     //
-    "select-faces <fid1> [<fid2> ...]\n"
-    "\t Selects faces specified with their 1-based IDs.",
+    "select-faces [<fid1> [<fid2> ...]]\n"
+    "\t Selects faces specified with their 1-based IDs or all faces.",
     //
     __FILE__, group, ENGINE_SelectFaces);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("select-edges",
+    //
+    "select-edges [<eid1> [<eid2> ...]]\n"
+    "\t Selects edges specified with their 1-based IDs or all edges.",
+    //
+    __FILE__, group, ENGINE_SelectEdges);
 }
