@@ -126,6 +126,11 @@ protected:
     void readStyles(const TDF_Label& label,
                     t_Shape2Style&   shapeStyles);
 
+  gltf_EXPORT
+  TCollection_AsciiString readNameAttribute(const Handle(XCAFDoc_ShapeTool)& ST,
+                                            const TDF_Label& refLabel,
+                                            const bool                       usePrototypeNames = false);
+
 protected:
 
   Handle(TDocStd_Document)  m_doc;

@@ -57,38 +57,6 @@
 
 using namespace asiAsm::xde;
 
-//! Reads name attribute.
-static TCollection_AsciiString readNameAttribute(const Handle(XCAFDoc_ShapeTool)& ST,
-                                                 const TDF_Label&                 refLabel,
-                                                 const bool                       usePrototypeNames = false)
-{
-  TDF_Label lab;
-
-  if (usePrototypeNames)
-  {
-    if (ST->IsReference(refLabel))
-    {
-      ST->GetReferredShape(refLabel, lab);
-    }
-    else
-    {
-      lab = refLabel;
-    }
-  }
-  else
-  {
-    lab = refLabel;
-  }
-
-  Handle(TDataStd_Name) nodeName;
-  //
-  if (!lab.FindAttribute(TDataStd_Name::GetID(), nodeName))
-  {
-    return TCollection_AsciiString();
-  }
-  return TCollection_AsciiString(nodeName->Get());
-}
-
 //-----------------------------------------------------------------------------
 
 glTFXdeDataSourceProvider::glTFXdeDataSourceProvider(const Handle(TDocStd_Document)& doc,
@@ -110,6 +78,9 @@ glTFXdeDataSourceProvider::~glTFXdeDataSourceProvider()
 
 void glTFXdeDataSourceProvider::Process(ActAPI_ProgressEntry progress)
 {
+  m_sceneStructure.Clear();
+  m_meshes.Clear();
+
   t_Node2Label solids;
   createSceneStructure(solids, progress);
   processSceneMeshes(solids, progress);
@@ -118,10 +89,8 @@ void glTFXdeDataSourceProvider::Process(ActAPI_ProgressEntry progress)
 //-----------------------------------------------------------------------------
 
 void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids,
-                                                            ActAPI_ProgressEntry progress)
+                                                     ActAPI_ProgressEntry progress)
 {
-  m_sceneStructure.Clear();
-
   TDF_LabelSequence rootLabs;
   Handle(XCAFDoc_ShapeTool) shapeTool = XCAFDoc_DocumentTool::ShapeTool(m_doc->Main());
   shapeTool->GetFreeShapes(rootLabs);
@@ -149,18 +118,19 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
     scNodeMapWithChildren.Add(docNode);
   }
 
-  // Iterate through all items to set the parent-child links, set the names and locations.
+  // Iterate through all OCAF document items to set the parent-child links, names and locations for glTF tree nodes.
+  int meshIndex = 0;
   for (gltf_SceneNodeMap::Iterator snIt(scNodeMapWithChildren); snIt.More(); snIt.Next())
   {
     const XCAFPrs_DocumentNode& docNode = snIt.Value();
-    glTFNode* node = docPrs2Node.Find(docNode);
-    if (!node)
+    glTFNode* glTFTreeNode = docPrs2Node.Find(docNode);
+    if (!glTFTreeNode )
       continue;
 
-    node->Name = readNameAttribute(shapeTool, docNode.Label);
-    if (node->Name.IsEmpty())
+    glTFTreeNode->Name = readNameAttribute(shapeTool, docNode.Label);
+    if (glTFTreeNode->Name.IsEmpty())
     {
-      node->Name = readNameAttribute(shapeTool, docNode.RefLabel);
+      glTFTreeNode->Name = readNameAttribute(shapeTool, docNode.RefLabel);
     }
 
     if (docNode.IsAssembly)
@@ -180,23 +150,18 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
 
           glTFNode* childNode = nIt.Value();
           if ( childNode )
-            node->Children.push_back(childNode);
+            glTFTreeNode->Children.push_back(childNode);
         }
       }
     }
     if (!docNode.LocalTrsf.IsIdentity())
     {
-      node->Trsf = docNode.LocalTrsf.Transformation();
+      glTFTreeNode->Trsf = docNode.LocalTrsf.Transformation();
     }
     if (!docNode.IsAssembly)
     {
-      // Mesh order of current node is equal to order of this node in scene nodes map
-      int meshIdx = scNodeMapWithChildren.FindIndex(docNode.Id);
-      if (meshIdx > 0)
-      {
-        node->MeshIndex = meshIdx - 1;
-      }
-      solids.Add( node, docNode.RefLabel );
+      glTFTreeNode->MeshIndex = meshIndex++;
+      solids.Add(glTFTreeNode, docNode.RefLabel);
     }
   }
 }
@@ -204,11 +169,10 @@ void glTFXdeDataSourceProvider::createSceneStructure(t_Node2Label&        solids
 //-----------------------------------------------------------------------------
 
 void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
-                                                          ActAPI_ProgressEntry  progress)
+                                                   ActAPI_ProgressEntry  progress)
 {
-  m_meshes.Clear();
-
   Handle(XCAFDoc_ShapeTool) shapeTool = XCAFDoc_DocumentTool::ShapeTool(m_doc->Main());
+
   NCollection_DataMap<TopoDS_Shape, glTFXdeVisualStyle, TopTools_ShapeMapHasher> styles;
 
   t_Node2Label::Iterator itM(solids);
@@ -226,22 +190,21 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
     TopExp_Explorer expl(shape, TopAbs_FACE);
     for (; expl.More(); expl.Next())
     {
-      glTFFacePropertyExtractor faceProperty(TopoDS::Face(expl.Current()));
-      if (faceProperty.IsEmptyMesh())
-      {
-        // glTF does not permit empty meshes / primitive arrays.
-        progress.SendLogMessage(LogWarn(Normal) << "gltf_XdeWriter skips node '%1' without meshes."
-          << ::readNameAttribute(shapeTool, itM.Value()));
+      glTFPrimitive facePrimitive;
 
-        continue;
+      // set style before other stuff as texture coordinates relt on style existance
+      if ( styles.IsBound(expl.Current()) )
+      {
+        facePrimitive.Style = styles(expl.Current());
       }
 
-      glTFPrimitive facePrimitive;
-      processFacePrimitive(faceProperty.Face(), facePrimitive);
-
-      if (styles.IsBound(faceProperty.Face()))
+      bool isOk = processFacePrimitive(TopoDS::Face(expl.Current()), facePrimitive);
+      if ( !isOk )
       {
-        facePrimitive.Style = styles(faceProperty.Face());
+        // glTF does not permit empty meshes / primitive arrays.
+        progress.SendLogMessage(LogWarn(Normal) << "glTF writer skips node '%1' without meshes."
+                                                << readNameAttribute(shapeTool, itM.Value()));
+        continue;
       }
 
       if (!m_meshes.Contains(itM.Key()))
@@ -282,9 +245,41 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
 }
 
 //-----------------------------------------------------------------------------
+TCollection_AsciiString glTFXdeDataSourceProvider::readNameAttribute(const Handle(XCAFDoc_ShapeTool)& ST,
+                                                                      const TDF_Label&                refLabel,
+                                                                      const bool                      usePrototypeNames)
+{
+  TDF_Label lab;
+
+  if ( usePrototypeNames )
+  {
+    if ( ST->IsReference(refLabel) )
+    {
+      ST->GetReferredShape(refLabel, lab);
+    }
+    else
+    {
+      lab = refLabel;
+    }
+  }
+  else
+  {
+    lab = refLabel;
+  }
+
+  Handle(TDataStd_Name) nodeName;
+  //
+  if ( !lab.FindAttribute(TDataStd_Name::GetID(), nodeName) )
+  {
+    return TCollection_AsciiString();
+  }
+  return TCollection_AsciiString(nodeName->Get());
+}
+
+//-----------------------------------------------------------------------------
 
 void glTFXdeDataSourceProvider::readStyles(const TDF_Label&  label,
-                                            t_Shape2Style&    shapeStyles)
+                                           t_Shape2Style&    shapeStyles)
 {
   // Get styles out of OCAF.
   TopLoc_Location                     dummyLoc;
@@ -332,8 +327,8 @@ void glTFXdeDataSourceProvider::readStyles(const TDF_Label&  label,
 }
 //-----------------------------------------------------------------------------
 
-bool glTFXdeDataSourceProvider::processFacePrimitive(const TopoDS_Face&    face,
-                                                            glTFPrimitive& facePrimitive)
+bool glTFXdeDataSourceProvider::processFacePrimitive(const TopoDS_Face& face,
+                                                     glTFPrimitive&     facePrimitive)
 {
   if ( face.IsNull() )
     return false;
@@ -425,9 +420,9 @@ bool glTFXdeDataSourceProvider::processFacePrimitive(const TopoDS_Face&    face,
 
 //-----------------------------------------------------------------------------
 
-bool glTFXdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&    edge,
-                                                            const t_Shape2Style&  styles,
-                                                            glTFPrimitive& edgePrimitive)
+bool glTFXdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&   edge,
+                                                     const t_Shape2Style& styles,
+                                                     glTFPrimitive&       edgePrimitive)
 {
   TopLoc_Location                       loc;
   Handle(Poly_Triangulation)            tri;
