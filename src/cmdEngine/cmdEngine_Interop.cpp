@@ -69,6 +69,7 @@
 
 // OpenCascade includes
 #include <BRepTools.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
 #include <UnitsMethods.hxx>
 
 // VTK includes
@@ -431,27 +432,11 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "There are no solids in the part to export.");
     return TCL_ERROR;
   }
-  //
-  //if ( partSolids.Extent() > 1 )
-  //{
-  //  interp->GetProgress().SendLogMessage(LogErr(Normal) << "One single-solid parts are supported right now.");
-  //  return TCL_ERROR;
-  //}
 
   // Prepare XDE document.
   Handle(asiAsm::xde::Doc) xdeDoc = new asiAsm::xde::Doc;
   //
-  TopTools_IndexedMapOfShape::Iterator pIt(partSolids);
-  for ( ; pIt.More(); pIt.Next() )
-  {
-    const asiAsm::xde::PartId pid = xdeDoc->AddPart(pIt.Value());
-
-    // Transfer metadata.
-    asiEngine_Part partApi(cmdEngine::model);
-    //
-    partApi.TransferMetadata(pid, xdeDoc);
-  }
-  xdeDoc->UpdateAssemblies();
+  xdeDoc->GetShapeTool()->AddShape(partShape);
 
   // Browse XDE document if requested.
   if ( interp->HasKeyword(argc, argv, "browse") )
