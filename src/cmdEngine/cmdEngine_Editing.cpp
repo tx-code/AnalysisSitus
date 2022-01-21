@@ -82,6 +82,7 @@
 #include <Precision.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeAnalysis_Surface.hxx>
+#include <ShapeCustom.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <ShapeFix_ShapeTolerance.hxx>
 #include <ShapeUpgrade_ShapeDivideClosed.hxx>
@@ -2711,44 +2712,68 @@ int ENGINE_ConvertToBSurf(const Handle(asiTcl_Interp)& interp,
                           int                          argc,
                           const char**                 argv)
 {
-  if ( argc != 3 && argc != 4 )
+  if ( argc > 2 )
   {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
+    Handle(asiData_IVSurfaceNode)
+      node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
+    //
+    if ( node.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find surface object with name %1." << argv[2]);
+      return TCL_ERROR;
+    }
 
-  Handle(asiData_IVSurfaceNode)
-    node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[2]) );
-  //
-  if ( node.IsNull() )
+    double uMin, uMax, vMin, vMax;
+    node->GetLimits(uMin, uMax, vMin, vMax);
+
+    // Get shape to convert.
+    Handle(Geom_Surface) surf = node->GetSurface();
+    //
+    if ( surf.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
+      return TCL_ERROR;
+    }
+
+    // Apply limits.
+    Handle(Geom_RectangularTrimmedSurface)
+      tsurf = new Geom_RectangularTrimmedSurface(surf, uMin, uMax, vMin, vMax);
+
+    // Convert.
+    Handle(Geom_BSplineSurface) bsurf = GeomConvert::SurfaceToBSplineSurface(tsurf);
+
+    if ( interp->HasKeyword(argc, argv, "cubic") )
+      bsurf->IncreaseDegree(3, 3);
+
+    // Set as result.
+    interp->GetPlotter().REDRAW_SURFACE(argv[1], bsurf, Color_Default);
+  }
+  else if ( argc == 1 )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find surface object with name %1." << argv[2]);
-    return TCL_ERROR;
+    // Get shape from the Part Node.
+    TopoDS_Shape
+      shape = cmdEngine::model->GetPartNode()->GetShape();
+    //
+    if ( shape.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part shape is empty.");
+      return TCL_ERROR;
+    }
+
+    TopoDS_Shape
+      newShape = ShapeCustom::ConvertToBSpline(shape, true, true, true, true);
+
+    // Update Data Model.
+    cmdEngine::model->OpenCommand();
+    {
+      asiEngine_Part(cmdEngine::model).Update(newShape);
+    }
+    cmdEngine::model->CommitCommand();
+
+    // Actualize.
+    if ( cmdEngine::cf->ViewerPart )
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
   }
-
-  double uMin, uMax, vMin, vMax;
-  node->GetLimits(uMin, uMax, vMin, vMax);
-
-  // Get shape to convert.
-  Handle(Geom_Surface) surf = node->GetSurface();
-  //
-  if ( surf.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
-    return TCL_ERROR;
-  }
-
-  // Apply limits.
-  Handle(Geom_RectangularTrimmedSurface)
-    tsurf = new Geom_RectangularTrimmedSurface(surf, uMin, uMax, vMin, vMax);
-
-  // Convert.
-  Handle(Geom_BSplineSurface) bsurf = GeomConvert::SurfaceToBSplineSurface(tsurf);
-
-  if ( interp->HasKeyword(argc, argv, "cubic") )
-    bsurf->IncreaseDegree(3, 3);
-
-  // Set as result.
-  interp->GetPlotter().REDRAW_SURFACE(argv[1], bsurf, Color_Default);
 
   return TCL_OK;
 }
@@ -3617,9 +3642,10 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("convert-to-bsurf",
     //
-    "convert-to-bsurf <res> <surfName> [-cubic]\n"
+    "convert-to-bsurf [<res> <surfName> [-cubic]]\n"
     "\t Converts the surface with the given name to B-surface. The trimming\n"
-    "\t parameters are taken from the corresponding Data Node.",
+    "\t parameters are taken from the corresponding Data Node. If no surface\n"
+    "\t is specified, the entire part is converted.",
     //
     __FILE__, group, ENGINE_ConvertToBSurf);
 
