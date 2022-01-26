@@ -250,11 +250,16 @@ void asiUI_ViewerPartListener::onFacePicked(asiVisu_PickerResult* pickRes)
    *  Dump textual info to logger
    * ============================= */
 
-  // Get index of the active sub-shape.
+  // Get indices of the active sub-shapes.
   Handle(TColStd_HPackedMapOfInteger)
     gids = geom_n->GetFaceRepresentation()->GetSelectedFaces();
   //
-  if ( gids.IsNull() || gids->Map().IsEmpty() )
+  if ( gids.IsNull() )
+    return;
+
+  TColStd_PackedMapOfInteger sel = gids->Map();
+  //
+  if ( sel.IsEmpty() )
     return;
 
   // Get sub-shapes map.
@@ -268,7 +273,7 @@ void asiUI_ViewerPartListener::onFacePicked(asiVisu_PickerResult* pickRes)
   // Loop over the selected faces.
   TColStd_PackedMapOfInteger fids;
   //
-  for ( TColStd_PackedMapOfInteger::Iterator git( gids->Map() ); git.More(); git.Next() )
+  for ( TColStd_PackedMapOfInteger::Iterator git(sel); git.More(); git.Next() )
   {
     const int globalId = git.Key();
     //
