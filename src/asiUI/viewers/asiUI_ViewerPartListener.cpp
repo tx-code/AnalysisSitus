@@ -287,14 +287,17 @@ void asiUI_ViewerPartListener::onFacePicked(asiVisu_PickerResult* pickRes)
     const int pedigreeId = allFaces.FindIndex(subShape);
     fids.Add(pedigreeId);
 
-    // Send message to logger.
-    TCollection_AsciiString
-      msg = asiAlgo_Utils::NamedShapeToString( subShape,
-                                               pedigreeId,
-                                               globalId,
-                                               geom_n->GetNaming() );
-    //
-    m_progress.SendLogMessage( LogInfo(Normal) << msg.ToCString() );
+    if ( sel.Extent() == 1 ) // Do not print tons of messages.
+    {
+      // Send message to logger.
+      TCollection_AsciiString
+        msg = asiAlgo_Utils::NamedShapeToString( subShape,
+                                                 pedigreeId,
+                                                 globalId,
+                                                 geom_n->GetNaming() );
+      //
+      m_progress.SendLogMessage( LogInfo(Normal) << msg.ToCString() );
+    }
   }
 
   if ( fids.Extent() > 1 )
