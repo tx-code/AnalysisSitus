@@ -49,6 +49,7 @@ asiData_IVVectorFieldNode::asiData_IVVectorFieldNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,      PID_HasColor);
   REGISTER_PARAMETER(Int,       PID_Color);
   REGISTER_PARAMETER(Bool,      PID_DrawTip);
+  REGISTER_PARAMETER(Real,      PID_ScaleCoeff);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -63,17 +64,19 @@ Handle(ActAPI_INode) asiData_IVVectorFieldNode::Instance()
 void asiData_IVVectorFieldNode::Init()
 {
   // Initialize properties.
-  this->InitParameter (PID_Name,     "Name",             "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_GroupPrs, "Presentation",     "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_HasColor, "Colorized",        "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_Color,    "Color",            "PrsCustomColor", ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_DrawTip,  "Orientation tip",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name,       "Name",            "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,   "Presentation",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,   "Colorized",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,      "Color",           "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawTip,    "Orientation tip", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_ScaleCoeff, "Scale",           "",               ParameterFlag_IsVisible, true);
   //
-  this->SetPoints   ( nullptr );
-  this->SetVectors  ( nullptr );
-  this->SetDrawTip  ( true );
-  this->SetHasColor ( false );
-  this->SetColor    ( 16777215 );
+  this->SetPoints     ( nullptr );
+  this->SetVectors    ( nullptr );
+  this->SetDrawTip    ( true );
+  this->SetHasColor   ( false );
+  this->SetColor      ( 16777215 );
+  this->SetScaleCoeff ( 1 );
 }
 
 //-----------------------------------------------------------------------------
@@ -180,4 +183,18 @@ void asiData_IVVectorFieldNode::SetColor(const int color)
 int asiData_IVVectorFieldNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVVectorFieldNode::SetScaleCoeff(const double coeff)
+{
+  ActParamTool::AsReal( this->Parameter(PID_ScaleCoeff) )->SetValue(coeff);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiData_IVVectorFieldNode::GetScaleCoeff() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_ScaleCoeff) )->GetValue();
 }

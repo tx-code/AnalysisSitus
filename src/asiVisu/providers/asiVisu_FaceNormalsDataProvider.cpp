@@ -109,6 +109,13 @@ double asiVisu_FaceNormalsDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_FaceNormalsDataProvider::GetScaleCoeff() const
+{
+  return 1.0;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiVisu_FaceNormalsDataProvider::HasOrientationTip() const
 {
   return true;

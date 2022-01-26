@@ -64,6 +64,13 @@ double asiVisu_IVVectorFieldDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_IVVectorFieldDataProvider::GetScaleCoeff() const
+{
+  return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetScaleCoeff();
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiVisu_IVVectorFieldDataProvider::HasOrientationTip() const
 {
   return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetDrawTip();
@@ -80,7 +87,8 @@ Handle(ActAPI_HParameterList) asiVisu_IVVectorFieldDataProvider::translationSour
 
   out << m_source->Parameter(asiData_IVVectorFieldNode::PID_Points)
       << m_source->Parameter(asiData_IVVectorFieldNode::PID_Vectors)
-      << m_source->Parameter(asiData_IVVectorFieldNode::PID_DrawTip);
+      << m_source->Parameter(asiData_IVVectorFieldNode::PID_DrawTip)
+      << m_source->Parameter(asiData_IVVectorFieldNode::PID_ScaleCoeff);
 
   return out;
 }

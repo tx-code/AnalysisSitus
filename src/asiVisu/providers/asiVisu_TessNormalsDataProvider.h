@@ -64,6 +64,9 @@ public:
   asiVisu_EXPORT virtual double
     GetMaxVectorModulus() const;
 
+  asiVisu_EXPORT virtual double
+    GetScaleCoeff() const;
+
   asiVisu_EXPORT virtual bool
     HasOrientationTip() const;
 

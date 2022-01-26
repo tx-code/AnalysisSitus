@@ -124,7 +124,7 @@ void asiVisu_VectorsPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataP
     glyphFilter->SetVectorModeToUseVector();
     glyphFilter->SetScaleModeToScaleByVector();
     glyphFilter->SetInputArrayToProcess(1, 0, 0, 0, ARRNAME_POINTCLOUD_VECTORS);
-    glyphFilter->SetScaleFactor(1.0);
+    glyphFilter->SetScaleFactor( DP->GetScaleCoeff() );
 
     // Complete pipeline
     this->SetInputConnection( pointsSource->GetOutputPort() );

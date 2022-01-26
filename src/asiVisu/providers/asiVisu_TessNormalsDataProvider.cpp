@@ -226,6 +226,13 @@ double asiVisu_TessNormalsDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_TessNormalsDataProvider::GetScaleCoeff() const
+{
+  return 1.0;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiVisu_TessNormalsDataProvider::HasOrientationTip() const
 {
   return true;

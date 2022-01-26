@@ -72,6 +72,7 @@ public:
     PID_DrawTip,      //!< Whether to draw tip for the vectors.
     PID_HasColor,     //!< Indicates whether the Color Parameter is active.
     PID_Color,        //!< Color.
+    PID_ScaleCoeff,   //!< Scaling coefficient.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -130,6 +131,14 @@ public:
   //! \return color.
   asiData_EXPORT int
     GetColor() const;
+
+  //! Sets the scaling coefficient.
+  asiData_EXPORT void
+    SetScaleCoeff(const double);
+
+  //! \return scaling coefficient.
+  asiData_EXPORT double
+    GetScaleCoeff() const;
 
 // Initialization:
 public:
