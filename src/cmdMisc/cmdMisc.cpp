@@ -1554,6 +1554,219 @@ int MISC_TestEvalSurf(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 }
+
+#include <BOPAlgo_MakerVolume.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+
+  bool make_hose(double d_rohr,
+	              double d_1,
+	              double d_2,
+	              double h_1,
+	              double h_2,
+	              double l_1,
+	              double l_2,
+	              double del_y1,
+	              double del_y2,
+	              double alpha_1,
+	              double alpha_2,
+	              TopTools_ListOfShape & result,
+                ActAPI_PlotterEntry plotter)
+{
+	double r_rohr = d_rohr / 2;
+	double r_1 = d_1 / 2;
+	double r_2 = d_2 / 2;
+
+	/*xxxx*/
+	gp_Dir dir(0, 0, 1);
+	gp_Ax1 rot_dir;
+	gp_Dir dir_y(0, -1, 0);
+	rot_dir.SetDirection(dir_y);
+
+	gp_Ax2 ax1(gp_Pnt(0, 0, 0), dir);
+	gp_Circ cir1(ax1, r_rohr);
+
+	gp_Circ cir2(ax1, r_1);
+	cir2.Rotate(rot_dir, alpha_1 * M_PI / 180);
+	cir2.Translate(gp_Vec(-l_1, del_y1, h_1));
+
+	gp_Circ cir3(ax1, r_2);
+	cir3.Rotate(rot_dir, -alpha_2 * M_PI / 180);
+	cir3.Translate(gp_Vec(l_2, del_y2, h_2));
+	
+	/*Create Geom Object*/
+	Handle(Geom_Circle) c1 = new Geom_Circle(cir1);
+	Handle(Geom_Circle) c2 = new Geom_Circle(cir2);
+	Handle(Geom_Circle) c3 = new Geom_Circle(cir3);
+
+	/*Create Edges*/
+	BRepBuilderAPI_MakeEdge me1(c1), me2(c2), me3(c3);
+
+	TopoDS_Edge e1 = me1.Edge();
+	TopoDS_Edge e2 = me2.Edge();
+	TopoDS_Edge e3 = me3.Edge();
+
+  plotter.REDRAW_SHAPE("e1", e1, Color_Red, 1, true);
+  plotter.REDRAW_SHAPE("e2", e2, Color_Red, 1, true);
+  plotter.REDRAW_SHAPE("e3", e3, Color_Red, 1, true);
+
+	BRepBuilderAPI_MakeWire mw1(e1), mw2(e2), mw3(e3);
+
+	TopoDS_Wire we1 = mw1.Wire();
+	TopoDS_Wire we2 = mw2.Wire();
+	TopoDS_Wire we3 = mw3.Wire();
+
+	BRepBuilderAPI_MakeFace mf1(we1), mf2(we2), mf3(we3);
+
+	TopoDS_Face f1 = mf1.Face();
+	TopoDS_Face f2 = mf2.Face();
+	TopoDS_Face f3 = mf3.Face();
+
+  plotter.REDRAW_SHAPE("f1", f1, Color_Default);
+  plotter.REDRAW_SHAPE("f2", f2, Color_Default);
+  plotter.REDRAW_SHAPE("f3", f3, Color_Default);
+
+	/* Make 3D face*/
+	BRepOffsetAPI_ThruSections tr1_2(Standard_False, Standard_True);
+	BRepOffsetAPI_ThruSections tr1_3(Standard_False, Standard_True);
+
+
+	try {
+		OCC_CATCH_SIGNALS
+
+			tr1_2.AddWire(we1);
+		tr1_2.AddWire(we2);
+
+		tr1_3.AddWire(we1);
+		tr1_3.AddWire(we3);
+
+		tr1_2.Build();
+		tr1_3.Build();
+	}
+	catch (Standard_Failure) {
+		return false;
+	}
+
+
+	if (!tr1_2.IsDone() && !tr1_3.IsDone()) {
+		return false;
+	}
+
+	TopoDS_Shape s1_2 = tr1_2.Shape();
+	TopoDS_Shape s1_3 = tr1_3.Shape();
+
+  plotter.REDRAW_SHAPE("s1_2", s1_2, Color_Default);
+  plotter.REDRAW_SHAPE("s1_3", s1_3, Color_Default);
+
+	TopExp_Explorer exp(s1_2, TopAbs_FACE);
+	TopExp_Explorer exp2(s1_3, TopAbs_FACE);
+
+	/*for (; exp.More(); exp.Next()){
+	...exp.Current();
+	}*/
+	TopoDS_Face f1_2 = TopoDS::Face(exp.Current());
+	TopoDS_Face f1_3 = TopoDS::Face(exp2.Current());
+
+	/*Make Solid between from faces*/
+	BOPAlgo_MakerVolume aMV1;
+
+	aMV1.AddArgument(f1);	//add Face 1
+	aMV1.AddArgument(f2);	//add Face 2
+	aMV1.AddArgument(f1_2);	//add Face 1_2
+
+	//aMV1.SetRunParallel(bRunParallel); //parallel or single mode
+	aMV1.SetIntersect(Standard_True); //intersect or not the shapes from <aLS>
+
+	aMV1.Perform(); //perform the operation
+	if (aMV1.HasErrors()) { //check error status
+		return false;
+	}
+
+	TopoDS_Shape Solid_1 = aMV1.Shape();  //result of the operation
+
+
+	/*Make Solid between from faces*/
+	BOPAlgo_MakerVolume aMV2;
+
+	aMV2.AddArgument(f1);	//add Face 1
+	aMV2.AddArgument(f3);	//add Face 2
+	aMV2.AddArgument(f1_3);	//add Face 1_2
+
+	//aMV2.SetRunParallel(bRunParallel); //parallel or single mode
+	aMV2.SetIntersect(Standard_True); //intersect or not the shapes from <aLS>
+
+	aMV2.Perform(); //perform the operation
+	if (aMV2.HasErrors()) { //check error status
+		return false;
+	}
+
+	TopoDS_Shape Solid_2 = aMV2.Shape();  //result of the operation
+
+	BOPAlgo_PaveFiller pf;
+	TopTools_ListOfShape tls;
+	tls.Append(Solid_1);
+	tls.Append(Solid_2);
+	pf.SetArguments(tls);
+
+	pf.Perform(); //perform the operation
+	if (pf.HasErrors()) { //check error status
+		return false;
+	}
+
+	BRepAlgoAPI_Fuse fuse(pf);
+	TopTools_ListOfShape obj, tools;
+	obj.Append(Solid_1);
+	tools.Append(Solid_2);
+
+	fuse.SetArguments(obj);
+	fuse.SetTools(tools);
+	fuse.Build();
+
+	if (!fuse.IsDone()) {
+		return false;
+	}
+
+	TopoDS_Shape Solid_3 = fuse.Shape();  //result of the operation
+
+  plotter.REDRAW_SHAPE("Solid_3", Solid_3, Color_Default);
+
+	/*History of  modify*/
+	for (int i = 0; i < 2; i++)
+	{
+		const TopoDS_Shape& sh = !i ? f1_2 : f1_3;
+
+		/*Modification of f1_2 in mkVolume Operation*/
+		TopTools_ListOfShape f1_2_image1 = aMV1.Modified(sh);
+
+		if (f1_2_image1.IsEmpty())
+		{
+			f1_2_image1.Append(sh);
+		}
+		/*Make a temp List it_list */
+		TopTools_ListIteratorOfListOfShape it_list(f1_2_image1);
+
+		/*Itt of it_list */
+		for (; it_list.More(); it_list.Next()) {
+			TopoDS_Shape shape_tmp = it_list.Value();
+
+			/*Modification of f1_2 in boolean Operation (fuse) */
+			TopTools_ListOfShape f1_2_image_bop = fuse.Modified(shape_tmp);
+
+			if (f1_2_image_bop.IsEmpty())
+			{
+				f1_2_image_bop.Append(shape_tmp);
+			}
+
+			/*Make a temp List it_list */
+			TopTools_ListIteratorOfListOfShape it_list_bop(f1_2_image_bop);
+			for (; it_list_bop.More(); it_list_bop.Next()) {
+				TopoDS_Shape shape = it_list_bop.Value();
+				result.Append(shape);
+			}
+		}
+	}
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
@@ -1563,16 +1776,32 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   (void) argc;
   (void) argv;
 
-  std::vector<gp_Vec>
-    dirs = { gp_Vec(1, 0, 0),
-             gp_Vec(0, 1, 0),
-             gp_Vec(-1, 0, 0),
-             gp_Vec(0, -1, 0) };
+  double d_rohr = 1;
+	double d_1 = 1;
+	double d_2 = 1;
+	double h_1 = 1;
+	double h_2 = 1;
+	double l_1 = 1;
+	double l_2 = 1;
+	double del_y1 = 1;
+	double del_y2 = 1;
+	double alpha_1 = 1;
+	double alpha_2 = 1;
 
-  const double arcAngRad = asiAlgo_Utils::MinArcAngle( dirs, gp_Dir(0, 0, 1) );
+  TopTools_ListOfShape result;
 
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Min arc angle: %1 deg."
-                                                       << arcAngRad*180/M_PI);
+  make_hose(d_rohr,
+            d_1,
+            d_2,
+            h_1,
+            h_2,
+            l_1,
+            l_2,
+            del_y1,
+            del_y2,
+            alpha_1,
+            alpha_2,
+            result, interp->GetPlotter());
 
   return TCL_OK;
 }
