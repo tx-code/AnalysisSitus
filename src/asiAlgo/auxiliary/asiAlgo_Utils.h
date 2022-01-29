@@ -139,6 +139,15 @@ namespace asiAlgo_Utils
                  const std::string& what,
                  const std::string& with);
 
+    //! Replaces all occurrences of `what` with `with` in string `str`.
+    //! \param[in,out] str  target string.
+    //! \param[in]     what sub-string to replace.
+    //! \param[in]     with string to replace with.
+    asiAlgo_EXPORT void
+      ReplaceAll(TCollection_AsciiString&       str,
+                 const TCollection_AsciiString& what,
+                 const TCollection_AsciiString& with);
+
     //! Extracts substring from the passed source.
     //! \param source [in] input string to extract substring from.
     //! \param idx_F  [in] 0-based index to start extraction from (inclusively).
@@ -154,6 +163,12 @@ namespace asiAlgo_Utils
     //! \return modified string.
     asiAlgo_EXPORT std::string
       Slashed(const std::string& strIN);
+
+    //! Returns the passed string ensuring that it has a trailing slash.
+    //! \param[in] strIN input string.
+    //! \return modified string.
+    asiAlgo_EXPORT TCollection_AsciiString
+      Slashed(const TCollection_AsciiString& strIN);
 
     //! Checks whether the passed string is number or not.
     //! \param str [in] string to check.
@@ -301,6 +316,13 @@ namespace asiAlgo_Utils
     asiAlgo_EXPORT void
       ReadPair(void*                                pJsonBlock,
                tl::optional< std::pair<int, int> >& pair);
+
+    //! Reads the passed JSON block as a triple of coordinates.
+    //! \param[in]  pJsonBlock the JSON block to interpret.
+    //! \param[out] coords     the outcome coords.
+    asiAlgo_EXPORT void
+      ReadCoords(void*   pJsonBlock,
+                 gp_XYZ& coords);
 
     //! Dumps the passed feature as a JSON array.
     //! \param[in] map the map to dump.
@@ -1709,6 +1731,18 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT double
     MinArcAngle(const std::vector<gp_Vec>& dirs,
                 const gp_Dir&              norm);
+
+  //! Checks whether the passed two axes are coaxial.
+  //! \param[in] a1          the first axis.
+  //! \param[in] a2          the second axis.
+  //! \param[in] angTolerDeg the angular tolerance (in degrees).
+  //! \param[in] linToler    the linear tolerance (in model units).
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    AreCoaxial(const gp_Ax1& a1,
+               const gp_Ax1& a2,
+               const double  angTolerDeg,
+               const double  linToler);
 
 } // asiAlgo_Utils namespace.
 

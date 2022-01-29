@@ -516,6 +516,21 @@ void asiAlgo_Utils::Str::ReplaceAll(std::string&       str,
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_Utils::Str::ReplaceAll(TCollection_AsciiString&       str,
+                                    const TCollection_AsciiString& what,
+                                    const TCollection_AsciiString& with)
+{
+  std::string stdStr  ( str.ToCString() );
+  std::string stdWhat ( what.ToCString() );
+  std::string stdWith ( with.ToCString() );
+
+  ReplaceAll(stdStr, stdWhat, stdWith);
+
+  str = stdStr.c_str();
+}
+
+//-----------------------------------------------------------------------------
+
 std::string asiAlgo_Utils::Str::SubStr(const std::string& source,
                                        const int          idx_F,
                                        const int          length)
@@ -538,6 +553,26 @@ std::string asiAlgo_Utils::Str::Slashed(const std::string& strIN)
   strOUT.append(asiAlgo_SlashStr);
   return strOUT;
 }
+
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString
+  asiAlgo_Utils::Str::Slashed(const TCollection_AsciiString& strIN)
+{
+  std::string str( strIN.ToCString() );
+  //
+  if ( !str.length() )
+    return str.c_str();
+
+  char c = str.at(str.length() - 1);
+  if ( c == *asiAlgo_SlashStr )
+    return str.c_str();
+
+  std::string strOUT(str);
+  strOUT.append(fraAlgo_SlashStr);
+  return strOUT.c_str();
+}
+
 
 //-----------------------------------------------------------------------------
 
@@ -757,6 +792,24 @@ void asiAlgo_Utils::Json::ReadPair(void*                                pJsonBlo
       pair->second = vit->GetInt();
     else
       break;
+  }
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::Json::ReadCoords(void*   pJsonBlock,
+                                     gp_XYZ& coords)
+{
+#if defined USE_RAPIDJSON
+  t_jsonArray*
+    pJsonArr = reinterpret_cast<t_jsonArray*>(pJsonBlock);
+
+  int i = 1;
+  for ( t_jsonArray::ValueIterator it = pJsonArr->Begin();
+        it != pJsonArr->End(); it++ )
+  {
+    coords.SetCoord( i++, it->GetDouble() );
   }
 #endif
 }
@@ -4902,4 +4955,20 @@ double asiAlgo_Utils::MinArcAngle(const std::vector<gp_Vec>& dirs,
   }
 
   return positiveAng - negativeAng;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::AreCoaxial(const gp_Ax1& a1,
+                               const gp_Ax1& a2,
+                               const double  angTolerDeg,
+                               const double  linToler)
+{
+  if ( a1.IsCoaxial(a2, angTolerDeg, linToler) ||
+       a1.IsCoaxial(a2.Reversed(), angTolerDeg, linToler) )
+  {
+    return true;
+  }
+
+  return false;
 }
