@@ -540,6 +540,13 @@ std::string asiAlgo_Utils::Str::SubStr(const std::string& source,
 
 //-----------------------------------------------------------------------------
 
+std::string asiAlgo_Utils::Str::Slashed(const char* strIN)
+{
+  return Slashed( std::string(strIN) );
+}
+
+//-----------------------------------------------------------------------------
+
 std::string asiAlgo_Utils::Str::Slashed(const std::string& strIN)
 {
   if ( !strIN.length() )
@@ -569,7 +576,7 @@ TCollection_AsciiString
     return str.c_str();
 
   std::string strOUT(str);
-  strOUT.append(fraAlgo_SlashStr);
+  strOUT.append(asiAlgo_SlashStr);
   return strOUT.c_str();
 }
 
