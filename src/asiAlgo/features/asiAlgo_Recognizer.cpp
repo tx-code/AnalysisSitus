@@ -90,7 +90,6 @@ bool asiAlgo_Recognizer::Classify(asiAlgo_Feature& feature,
   // Contract check.
   if ( m_result.ids.IsEmpty() )
   {
-    m_progress.SendLogMessage(LogWarn(Normal) << "No result to classify.");
     return true; // Nothing to classify.
   }
 
