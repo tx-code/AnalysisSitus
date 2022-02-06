@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Analysis Situs: check dihedral angles</title>
+  <title>Analysis Situs: check vertex convexity</title>
   <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
   <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
 
@@ -27,7 +27,7 @@
   <td align="left" class="header">
     <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
     &nbsp;
-    ./<a class="header-href" href="../features.html">features</a>/check dihedral angles
+    ./<a class="header-href" href="../features.html">features</a>/check vertex convexity
   </td>
 </tr>
 </table>
@@ -45,38 +45,19 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Classify dihedral angles</h1>
+<h1>Check vertex convexity</h1>
 
 <p>
-Classification of boundary edges by the vexity of their dihedral angles is the basic
-heuristic for automatic feature recognition.
+  Just like we can test if a <a href="./features_check-dih-angles.html">dihedral angle</a> is convex, concave or smooth, the same classification can be useful recognition cue for vertices. E.g., for each vertex in a planar domain, we can analyze the angle between a pair of edges that meet in this vertex. Such information can be used for accessibility analysis, i.e., if a mill can approach the vicinity of a certain part's corner.
 </p>
 
-<div align="center"><img src="../imgs/classify_dih_angles_anim.gif"/></div>
+<div align="center"><img src="../imgs/vertex-vexity.png"/></div>
 
 <p>
-In a valid boundary representation, the outer contour of each face should be oriented
-counterclockwise looking from the direction of the face normal. This property of the
-shape representation is used in Analysis Situs for computation of dihedral angles.
+  To analyze vertex convexity, select a face and run <span class="code-inline">check-vertex-vexity</span> command.
 </p>
 
-<div align="center"><img src="../imgs/dih_angle_01.png"/></div>
-
-<p>
-The computed dihedral angles may have one the following types:
-<ol>
-  <li>Convex.</li>
-  <li>Concave.</li>
-  <li>Smooth (with a prescribed angular precision).</li>
-</ol>
-</p>
-
-<p>
-The smooth angles can be precised by additional analysis of the interior points on
-the adjacent faces (such recomputation uses Newton iterations and is more expensive
-when the basic check). It is a common practice to use the computed angles as the
-attributes for constructing an <a href="./features_aag.html">Attributed Adjacency Graph</a> (AAG).
-</p>
+<p class="note">You can read more about why this heuristic can be useful in the <a href="http://quaoar.su/blog/page/to-the-automatic-milling-feature-recognition">corresponding blog post</a>.</p>
 
 <!-- [END] contents -->
 </div>
