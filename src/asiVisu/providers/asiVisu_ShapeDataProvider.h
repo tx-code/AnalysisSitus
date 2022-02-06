@@ -40,8 +40,6 @@
 //! Data provider from geometry Node to Presentation.
 class asiVisu_ShapeDataProvider : public asiVisu_DataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_ShapeDataProvider, asiVisu_DataProvider)
 
@@ -69,6 +67,9 @@ public:
 
   asiVisu_EXPORT virtual double
     GetAngularDeflection() const;
+
+  asiVisu_EXPORT virtual double
+    GetPointSize() const;
 
 public:
 

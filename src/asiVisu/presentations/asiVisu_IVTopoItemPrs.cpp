@@ -52,7 +52,8 @@ asiVisu_IVTopoItemPrs::asiVisu_IVTopoItemPrs(const Handle(ActAPI_INode)& N)
     DP = new asiVisu_ShapeDataProvider( N->GetId(),
                                         ActParamStream() << N->Parameter(asiData_IVTopoItemNode::PID_Geometry)
                                                          << N->Parameter(asiData_IVTopoItemNode::PID_TessLinDefl)
-                                                         << N->Parameter(asiData_IVTopoItemNode::PID_TessAngDefl) );
+                                                         << N->Parameter(asiData_IVTopoItemNode::PID_TessAngDefl)
+                                                         << N->Parameter(asiData_IVTopoItemNode::PID_PointSize) );
 
   // Main pipeline
   Handle(asiVisu_ShapePipeline) pl = new asiVisu_ShapePipeline(false);
@@ -62,7 +63,6 @@ asiVisu_IVTopoItemPrs::asiVisu_IVTopoItemPrs(const Handle(ActAPI_INode)& N)
   this->assignDataProvider ( Pipeline_Main, DP );
 
   // Configure
-  pl->Actor()->GetProperty()->SetPointSize(5.0f);
   pl->Actor()->GetProperty()->SetLineWidth(2.0f);
   pl->Actor()->GetProperty()->RenderLinesAsTubesOn();
 }
@@ -128,6 +128,21 @@ void asiVisu_IVTopoItemPrs::afterUpdatePipelines() const
 {
   Handle(asiData_IVTopoItemNode)
     N = Handle(asiData_IVTopoItemNode)::DownCast( this->GetNode() );
+
+  Handle(asiVisu_ShapeDataProvider)
+    DP = Handle(asiVisu_ShapeDataProvider)::DownCast( this->dataProvider(Pipeline_Main) );
+
+  /* Adjust point sizes */
+
+  Handle(asiVisu_ShapePipeline)
+    pl = Handle(asiVisu_ShapePipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
+
+  if ( pl.IsNull() )
+    return;
+
+  const double psz = DP->GetPointSize();
+
+  pl->Actor()->GetProperty()->SetPointSize(psz);
 
   /* Actualize color */
 

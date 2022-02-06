@@ -80,6 +80,7 @@ public:
     PID_DisplayMode,  //!< Display mode.
     PID_HasColor,     //!< Indicates whether the Color Parameter is active.
     PID_Color,        //!< Color.
+    PID_PointSize,    //!< Point size for vertices.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -142,6 +143,12 @@ public:
 
   asiData_EXPORT int
     GetColor() const;
+
+  asiData_EXPORT double
+    GetPointSize() const;
+
+  asiData_EXPORT void
+    SetPointSize(const double sz);
 
 // Initialization:
 public:

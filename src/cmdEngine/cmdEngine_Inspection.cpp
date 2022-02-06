@@ -48,6 +48,7 @@
 #include <asiAlgo_BlendType.h>
 #include <asiAlgo_CheckDihedralAngle.h>
 #include <asiAlgo_CheckValidity.h>
+#include <asiAlgo_CheckVertexVexity.h>
 #include <asiAlgo_CompleteEdgeLoop.h>
 #include <asiAlgo_ExtractFeatures.h>
 #include <asiAlgo_FeatureAttrBaseFace.h>
@@ -4048,6 +4049,91 @@ int ENGINE_CheckFacets(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  // Get part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::cf->Model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  Handle(asiAlgo_AAG) G = partNode->GetAAG();
+
+  int fid = 0;
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdEngine::cf.IsNull() )
+  {
+    asiEngine_Part partApi( cmdEngine::cf->Model,
+                            cmdEngine::cf->ViewerPart->PrsMgr() );
+
+    partApi.GetHighlightedFaces(selected);
+
+    if ( selected.Extent() == 1 )
+    {
+      fid = selected.GetMinimalMapped();
+    }
+    else
+    {
+      interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Please, select one face.");
+      return TCL_ERROR;
+    }
+  }
+
+  if ( !fid )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Face to check is not defined.");
+    return TCL_ERROR;
+  }
+
+  asiAlgo_CheckVertexVexity::t_vexityMap vexity;
+
+  // Prepare the algorithm and collect edges to check.
+  asiAlgo_CheckVertexVexity algo( G,
+                                  interp->GetProgress(),
+                                  nullptr );
+  //
+  algo.CheckContours(fid, vexity);
+
+  // Collect smooth, convex and concave vertices.
+  BRep_Builder bbuilder;
+  TopoDS_Compound compSmooth, compConcave, compConvex;
+  //
+  bbuilder.MakeCompound(compSmooth);
+  bbuilder.MakeCompound(compConcave);
+  bbuilder.MakeCompound(compConvex);
+  //
+  for ( asiAlgo_CheckVertexVexity::t_vexityMap::Iterator vit(vexity);
+        vit.More(); vit.Next() )
+  {
+    const TopoDS_Vertex&           V = vit.Key();
+    const asiAlgo_FeatureAngleType X = vit.Value();
+
+    if ( X == FeatureAngleType_Smooth )
+      bbuilder.Add(compSmooth, V);
+    else if ( X == FeatureAngleType_Concave )
+      bbuilder.Add(compConcave, V);
+    else if ( X == FeatureAngleType_Convex )
+      bbuilder.Add(compConvex, V);
+  }
+
+  interp->GetPlotter().REDRAW_SHAPE("smooth",  compSmooth,  Color_LightGray, 1., true);
+  interp->GetPlotter().REDRAW_SHAPE("concave", compConcave, Color_Red,       1., true);
+  interp->GetPlotter().REDRAW_SHAPE("convex",  compConvex,  Color_Green,     1., true);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4507,4 +4593,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t are good.",
     //
     __FILE__, group, ENGINE_CheckFacets);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-vertex-vexity",
+    //
+    "check-vertex-vexity\n"
+    "\t Checks convexity of all vertices in the given face.",
+    //
+    __FILE__, group, ENGINE_CheckVertexVexity);
 }

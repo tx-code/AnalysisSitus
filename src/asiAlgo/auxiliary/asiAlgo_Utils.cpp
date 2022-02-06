@@ -1539,6 +1539,88 @@ bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsCircular(const TopoDS_Edge& edge)
+{
+  double f, l;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+
+  return IsCircular(curve);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCircular(const Handle(Geom_Curve)& curve)
+{
+  gp_Circ circ;
+  return IsCircular(curve, circ);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCircular(const Handle(Geom_Curve)& curve,
+                               gp_Circ&                  circ)
+{
+  if ( curve->IsKind( STANDARD_TYPE(Geom_Circle) ) )
+  {
+    circ = Handle(Geom_Circle)::DownCast(curve)->Circ();
+    return true;
+  }
+
+  if ( curve->IsInstance( STANDARD_TYPE(Geom_TrimmedCurve) ) )
+  {
+    Handle(Geom_TrimmedCurve) tcurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+    //
+    if ( tcurve->BasisCurve()->IsKind( STANDARD_TYPE(Geom_Circle) ) )
+    {
+      circ = Handle(Geom_Circle)::DownCast( tcurve->BasisCurve() )->Circ();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsStraight(const TopoDS_Edge& edge)
+{
+  Handle(Geom_Line) line;
+  return IsStraight(edge, line);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsStraight(const TopoDS_Edge& edge,
+                               Handle(Geom_Line)& line)
+{
+  double f, l;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+  //
+  if ( curve.IsNull() )
+    return false;
+
+  if ( curve->IsKind( STANDARD_TYPE(Geom_Line) ) )
+  {
+    line = Handle(Geom_Line)::DownCast(curve);
+    return true;
+  }
+
+  if ( curve->IsInstance( STANDARD_TYPE(Geom_TrimmedCurve) ) )
+  {
+    Handle(Geom_TrimmedCurve) tcurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+    //
+    if ( tcurve->BasisCurve()->IsKind( STANDARD_TYPE(Geom_Line) ) )
+    {
+      line = Handle(Geom_Line)::DownCast( tcurve->BasisCurve() );
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
                                      const bool                  canrec)
 {

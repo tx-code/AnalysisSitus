@@ -36,7 +36,7 @@
 
 //-----------------------------------------------------------------------------
 
-//! ctor.
+//! Ñtor.
 asiVisu_ShapeDataProvider::asiVisu_ShapeDataProvider()
 : asiVisu_DataProvider()
 {}
@@ -94,6 +94,16 @@ double asiVisu_ShapeDataProvider::GetAngularDeflection() const
     return 0.;
 
   return ActParamTool::AsReal( m_params->Value(3) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_ShapeDataProvider::GetPointSize() const
+{
+  if ( m_params->Length() != 4 )
+    return 5.;
+
+  return ActParamTool::AsReal( m_params->Value(4) )->GetValue();
 }
 
 //-----------------------------------------------------------------------------

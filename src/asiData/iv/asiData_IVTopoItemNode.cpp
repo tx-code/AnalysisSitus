@@ -51,6 +51,7 @@ asiData_IVTopoItemNode::asiData_IVTopoItemNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Int,   PID_DisplayMode);
   REGISTER_PARAMETER(Bool,  PID_HasColor);
   REGISTER_PARAMETER(Int,   PID_Color);
+  REGISTER_PARAMETER(Real,  PID_PointSize);
 
   // Non-standard Parameters.
   this->registerParameter(PID_BVH, asiData_BVHParameter::Instance(), false);
@@ -79,6 +80,7 @@ void asiData_IVTopoItemNode::Init()
   this->SetHasColor          ( true );
   this->SetColor             ( 150 << 16 | 150 << 8 | 150 );
   this->SetBVH               ( nullptr );
+  this->SetPointSize         ( 5 );
 
   // Initialize Parameter flags.
   this->InitParameter(PID_Name,        "Name",               "", ParameterFlag_IsVisible, true);
@@ -90,6 +92,7 @@ void asiData_IVTopoItemNode::Init()
   this->InitParameter(PID_DisplayMode, "Display mode",  "IVPrsDisplayMode", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_HasColor,    "Colorized",     "",                 0,                       true);
   this->InitParameter(PID_Color,       "Color",         "PrsCustomColor",   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PointSize,   "Point size",    "",                 ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -232,4 +235,21 @@ void asiData_IVTopoItemNode::SetColor(const int color)
 int asiData_IVTopoItemNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! \return the stored point size.
+double asiData_IVTopoItemNode::GetPointSize() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_PointSize) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Sets the point size to store.
+//! \param[in] sz the value to set.
+void asiData_IVTopoItemNode::SetPointSize(const double sz)
+{
+  ActParamTool::AsReal( this->Parameter(PID_PointSize) )->SetValue(sz);
 }

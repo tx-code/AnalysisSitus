@@ -60,6 +60,7 @@
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_CylindricalSurface.hxx>
+#include <Geom_Line.hxx>
 #include <Geom_OffsetSurface.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
@@ -693,6 +694,40 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     IsConical(const TopoDS_Face& face,
               gp_Ax1&            ax1);
+
+  //! Checks if the passed edge is circular.
+  //! \param[in] edge edge to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCircular(const TopoDS_Edge& edge);
+
+  //! Checks if the passed curve is circular.
+  //! \param[in] curve curve to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCircular(const Handle(Geom_Curve)& curve);
+
+  //! Checks if the passed curve is circular.
+  //! \param[in]  curve the curve to check.
+  //! \param[out] circ  the extracted circle.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCircular(const Handle(Geom_Curve)& curve,
+               gp_Circ&                  circ);
+
+  //! Checks if the passed edge is straight.
+  //! \param[in] edge edge to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsStraight(const TopoDS_Edge& edge);
+
+  //! Checks if the passed edge is straight.
+  //! \param[in]  edge edge to check.
+  //! \param[out] line host curve of the straight edge.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsStraight(const TopoDS_Edge& edge,
+               Handle(Geom_Line)& line);
 
   //! Checks if the passed pcurve is a straight line.
   //! \param[in] pcu    pcurve to check.

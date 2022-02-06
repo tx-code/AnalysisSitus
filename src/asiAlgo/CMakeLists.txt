@@ -259,6 +259,7 @@ set (features_H_FILES
   features/asiAlgo_AdjacencyMx.h
   features/asiAlgo_BorderTrihedron.h
   features/asiAlgo_CheckDihedralAngle.h
+  features/asiAlgo_CheckVertexVexity.h
   features/asiAlgo_ExtractFeatures.h
   features/asiAlgo_ExtractFeaturesResult.h
   features/asiAlgo_FeatureAngleType.h
@@ -293,6 +294,7 @@ set (features_CPP_FILES
   features/asiAlgo_AAGIterator.cpp
   features/asiAlgo_AdjacencyMx.cpp
   features/asiAlgo_CheckDihedralAngle.cpp
+  features/asiAlgo_CheckVertexVexity.cpp
   features/asiAlgo_ExtractFeatures.cpp
   features/asiAlgo_ExtractFeaturesResult.cpp
   features/asiAlgo_FeatureFaces.cpp
