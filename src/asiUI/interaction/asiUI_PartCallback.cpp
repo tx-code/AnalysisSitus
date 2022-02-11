@@ -78,6 +78,9 @@ void asiUI_PartCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
   if ( eventId == EVENT_FIND_EDGE )
     emit findEdge();
 
+  if ( eventId == EVENT_FIND_VERTEX )
+    emit findVertex();
+
   if ( eventId == EVENT_REFINE_TESSELLATION )
     emit refineTessellation();
 

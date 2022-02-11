@@ -291,6 +291,38 @@ int ENGINE_SelectEdges(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SelectVertices(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  (void) interp;
+
+  if ( cmdEngine::cf.IsNull() )
+    return TCL_OK;
+
+  asiEngine_Part partApi( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
+
+  TColStd_PackedMapOfInteger vids;
+  //
+  for ( int k = 1; k < argc; ++k )
+    vids.Add( atoi(argv[k]) );
+
+  if ( vids.IsEmpty() )
+  {
+    const TopTools_IndexedMapOfShape&
+      allVertices = partApi.GetAAG()->RequestMapOfVertices();
+    //
+    for ( int vidx = 1; vidx <= allVertices.Extent(); ++vidx )
+      vids.Add(vidx);
+  }
+
+  partApi.HighlightVertices(vids);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
                                 const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -385,4 +417,12 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
     "\t Selects edges specified with their 1-based IDs or all edges.",
     //
     __FILE__, group, ENGINE_SelectEdges);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("select-vertices",
+    //
+    "select-vertices [<vid1> [<vid2> ...]]\n"
+    "\t Selects vertices specified with their 1-based IDs or all vertices.",
+    //
+    __FILE__, group, ENGINE_SelectVertices);
 }

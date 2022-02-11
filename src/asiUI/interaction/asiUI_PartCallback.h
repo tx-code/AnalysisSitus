@@ -72,6 +72,7 @@ signals:
 
   void findFace();
   void findEdge();
+  void findVertex();
   void refineTessellation();
   void buildHLR();
   void buildHLRDiscr();

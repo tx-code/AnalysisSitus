@@ -999,6 +999,27 @@ void asiEngine_Part::GetSubShapeIndicesByEdgeIndices(const TColStd_PackedMapOfIn
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Part::GetSubShapeIndicesByVertexIndices(const TColStd_PackedMapOfInteger& vertexIndices,
+                                                       TColStd_PackedMapOfInteger&       indices)
+{
+  const TopTools_IndexedMapOfShape&
+    AllVertices = m_model->GetPartNode()->GetAAG()->RequestMapOfVertices();
+  //
+  TopTools_IndexedMapOfShape SelectedVertices;
+
+  // Get selected vertices in topological form
+  for ( TColStd_MapIteratorOfPackedMapOfInteger fit(vertexIndices); fit.More(); fit.Next() )
+  {
+    const int input_vertex_idx = fit.Key();
+    SelectedVertices.Add( AllVertices.FindKey(input_vertex_idx) );
+  }
+
+  // Get indices of the vertices among all sub-shapes
+  GetSubShapeIndices(SelectedVertices, indices);
+}
+
+//-----------------------------------------------------------------------------
+
 
 void asiEngine_Part::GetSubShapeIndices(const TopTools_IndexedMapOfShape& subShapes,
                                         TColStd_PackedMapOfInteger&       indices)
@@ -1083,6 +1104,18 @@ void asiEngine_Part::HighlightEdges(const TColStd_PackedMapOfInteger& edgeIndice
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Part::HighlightVertices(const TColStd_PackedMapOfInteger& vertexIndices)
+{
+  // Convert vertex indices to sub-shape indices
+  TColStd_PackedMapOfInteger ssIndices;
+  GetSubShapeIndicesByVertexIndices(vertexIndices, ssIndices);
+
+  // Highlight
+  HighlightSubShapes(ssIndices, SelectionMode_Vertex);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiEngine_Part::HighlightSubShapes(const TColStd_PackedMapOfInteger& subShapeIndices,
                                         const asiVisu_SelectionMode       selMode)
 {
@@ -1102,7 +1135,7 @@ void asiEngine_Part::HighlightSubShapes(const TColStd_PackedMapOfInteger& subSha
     // Highlight
     if ( selMode == SelectionMode_Face )
       m_prsMgr->Highlight(N, prs->MainActor(), subShapeIndices, selMode);
-    else if ( selMode == SelectionMode_Edge )
+    else if ( (selMode == SelectionMode_Edge) || (selMode == SelectionMode_Vertex) )
       m_prsMgr->Highlight(N, prs->ContourActor(), subShapeIndices, selMode);
   }
   m_prsMgr->ChangeCurrentSelection().SetSelectionModes(prevMode);

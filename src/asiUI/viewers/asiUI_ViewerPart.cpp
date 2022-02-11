@@ -43,6 +43,7 @@
 #include <asiUI_ControlsPart.h>
 #include <asiUI_DialogFindEdge.h>
 #include <asiUI_DialogFindFace.h>
+#include <asiUI_DialogFindVertex.h>
 #include <asiUI_DialogRefineTessellation.h>
 
 // asiEngine includes
@@ -193,6 +194,10 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_FIND_EDGE) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_FIND_EDGE, m_partCallback);
 
+    // Set observer for finding vertex
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_FIND_VERTEX) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_FIND_VERTEX, m_partCallback);
+
     // Set observer for tessellation refinement
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_REFINE_TESSELLATION) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_REFINE_TESSELLATION, m_partCallback);
@@ -216,6 +221,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     // Get notified about part events
     connect( m_partCallback, SIGNAL( findFace() ),           this, SLOT( onFindFace() ) );
     connect( m_partCallback, SIGNAL( findEdge() ),           this, SLOT( onFindEdge() ) );
+    connect( m_partCallback, SIGNAL( findVertex() ),         this, SLOT( onFindVertex() ) );
     connect( m_partCallback, SIGNAL( refineTessellation() ), this, SLOT( onRefineTessellation() ) );
     connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
     connect( m_partCallback, SIGNAL( buildHLRDiscr() ),      this, SLOT( onBuildHLRDiscr() ) );
@@ -508,6 +514,18 @@ void asiUI_ViewerPart::onFindEdge()
     wFindEdge = new asiUI_DialogFindEdge(m_model, this->PrsMgr(), this);
   //
   wFindEdge->show();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for vertex find request.
+void asiUI_ViewerPart::onFindVertex()
+{
+  // Run dialog
+  static asiUI_DialogFindVertex*
+    wFindVertex = new asiUI_DialogFindVertex(m_model, this->PrsMgr(), this);
+  //
+  wFindVertex->show();
 }
 
 //-----------------------------------------------------------------------------

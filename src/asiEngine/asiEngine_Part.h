@@ -278,6 +278,13 @@ public:
     GetSubShapeIndicesByEdgeIndices(const TColStd_PackedMapOfInteger& edgeIndices,
                                     TColStd_PackedMapOfInteger&       indices);
 
+  //! Extracts sub-shape indices for the given collection of vertex indices.
+  //! \param[in]  vertexIndices indices of vertices.
+  //! \param[out] indices       their corresponding indices among all sub-shapes.
+  asiEngine_EXPORT void
+    GetSubShapeIndicesByVertexIndices(const TColStd_PackedMapOfInteger& edgeIndices,
+                                      TColStd_PackedMapOfInteger&       indices);
+
   //! Extracts sub-shape indices for the given collection of sub-shapes.
   //! \param[in]  subShapes sub-shapes of interest.
   //! \param[out] indices   their corresponding IDs.
@@ -311,6 +318,11 @@ public:
   //! \param[in] edgeIndices edges to highlight.
   asiEngine_EXPORT void
     HighlightEdges(const TColStd_PackedMapOfInteger& edgeIndices);
+
+  //! Highlights vertices.
+  //! \param[in] vertexIndices vertices to highlight.
+  asiEngine_EXPORT void
+    HighlightVertices(const TColStd_PackedMapOfInteger& vertexIndices);
 
   //! Highlights the passed sub-shapes identified by their indices.
   //! \param[in] subShapeIndices indices of the sub-shapes to highlight.

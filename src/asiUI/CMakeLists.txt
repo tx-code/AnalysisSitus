@@ -190,6 +190,7 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogEuler.h
   dialogs/asiUI_DialogFindEdge.h
   dialogs/asiUI_DialogFindFace.h
+  dialogs/asiUI_DialogFindVertex.h
   dialogs/asiUI_DialogGapFilling.h
   dialogs/asiUI_DialogGeomDef.h
   dialogs/asiUI_DialogOCAFDump.h
@@ -209,6 +210,7 @@ set (dialogs_CPP_FILES
   dialogs/asiUI_DialogEuler.cpp
   dialogs/asiUI_DialogFindEdge.cpp
   dialogs/asiUI_DialogFindFace.cpp
+  dialogs/asiUI_DialogFindVertex.cpp
   dialogs/asiUI_DialogGapFilling.cpp
   dialogs/asiUI_DialogGeomDef.cpp
   dialogs/asiUI_DialogOCAFDump.cpp

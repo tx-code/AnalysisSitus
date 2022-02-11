@@ -203,6 +203,9 @@ void asiVisu_InteractorStylePick::OnKeyPress()
   if ( this->Interactor->GetControlKey() && key == "e" )
     this->InvokeEvent(EVENT_FIND_EDGE);
   //
+  if ( this->Interactor->GetControlKey() && key == "v" )
+    this->InvokeEvent(EVENT_FIND_VERTEX);
+  //
   if ( this->Interactor->GetControlKey() && key == "t" )
     this->InvokeEvent(EVENT_REFINE_TESSELLATION);
   //
