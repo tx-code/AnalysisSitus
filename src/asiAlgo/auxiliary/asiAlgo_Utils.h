@@ -623,6 +623,15 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     IsCylindrical(const TopoDS_Face& face);
 
+  //! Checks if the passed face has cylindrical support and returns the
+  //! extracted cylindrical primitive.
+  //! \param[in]  face face to check.
+  //! \param[out] cyl  extracted cylindrical primitive.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCylindrical(const TopoDS_Face& face,
+                  gp_Cylinder&       cyl);
+
   //! Checks if the passed face has cylindrical support.
   //! \param[in]  face face to check.
   //! \param[out] ax   axis of the cylindrical surface.
@@ -1784,6 +1793,45 @@ namespace asiAlgo_Utils
                const gp_Ax1& a2,
                const double  angTolerDeg,
                const double  linToler);
+
+  //! Checks if the passed curve is equidistant from the given axis, i.e., it
+  //! lies on a cylindrical surface.
+  //! \param[in]  curve the curve to check.
+  //! \param[in]  axis  the known axis to check the passed curve against.
+  //! \param[in]  tol   the linear tolerance value to use for the deviation check.
+  //! \param[out] r     the extracted radius value.
+  //! \return true if the curve lies on a cylinder, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsOnCylinder(const Handle(Geom_Curve)& curves,
+                 const gp_Ax1&             axis,
+                 const double              tol,
+                 double&                   r);
+
+  //! Checks if the passed curves are equidistant from the given axis, i.e., they
+  //! all lie on a cylindrical surface.
+  //! \param[in]  curves the curves to check.
+  //! \param[in]  axis   the known axis to check the curves against.
+  //! \param[in]  tol    the linear tolerance value to use for the deviation check.
+  //! \param[out] r      the extracted radius value.
+  //! \return true if the curves lie on a cylinder, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsOnCylinder(const std::vector<Handle(Geom_Curve)>& curves,
+                 const gp_Ax1&                          axis,
+                 const double                           tol,
+                 double&                                r);
+
+  //! Checks whether the passed curve `curve` lies on the given cylindrical
+  //! surface `cyl`.
+  //! \param[in] curve   the curve to check.
+  //! \param[in] cyl     the candidate cylinder.
+  //! \param[in] tol     the linear tolerance value to use for the deviation check.
+  //! \param[in] plotter the imperative plotter to use.
+  //! \return true if the curve lies on a cylinder, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsOnCylinder(const Handle(Geom_Curve)& curve,
+                 const gp_Cylinder&        cyl,
+                 const double              tol,
+                 ActAPI_PlotterEntry       plotter = nullptr);
 
 } // asiAlgo_Utils namespace.
 

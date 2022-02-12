@@ -1438,6 +1438,24 @@ bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face)
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
+                                  gp_Cylinder&       cyl)
+{
+  double radius;
+  gp_Ax1 ax;
+  double angle_min, angle_max, h_min, h_max;
+
+  if ( IsCylindrical(face, radius, ax, false, angle_min, angle_max, h_min, h_max) )
+  {
+    cyl = gp_Cylinder(gp_Ax3( ax.Location(), ax.Direction() ), radius);
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsCylindrical(const TopoDS_Face& face,
                                   gp_Ax1&            ax)
 {
   double radius, angle_min, angle_max, h_min, h_max;
@@ -5060,4 +5078,138 @@ bool asiAlgo_Utils::AreCoaxial(const gp_Ax1& a1,
   }
 
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsOnCylinder(const Handle(Geom_Curve)& curve,
+                                 const gp_Ax1&             axis,
+                                 const double              tol,
+                                 double&                   r)
+{
+  gp_Lin axLin(axis);
+
+  // Check each curve separately.
+  std::vector<double> dists;
+  //
+  const double cf    = curve->FirstParameter();
+  const double cl    = curve->LastParameter();
+  const double cm    = (cf + cl)*0.5;
+  const double delta = Abs(cl - cf)*0.1;
+
+  // Discretisation of a curve. We take midpoint's vicinity as
+  // the extreme points of a thread's helix might go outside the
+  // cylindrical bore.
+  std::vector<double>
+    cParams = {cm - delta, cm, cm + delta};
+
+  // Measure distances to the axis.
+  for ( auto p : cParams )
+  {
+    dists.push_back( axLin.Distance( curve->Value(p) ) );
+  }
+
+  // Check distances.
+  const double refDist = dists[0];
+  for ( size_t k = 1; k < dists.size(); ++k )
+  {
+    if ( Abs(dists[k] - refDist) > tol )
+    {
+      return false;
+    }
+  }
+
+  r = refDist;
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsOnCylinder(const std::vector<Handle(Geom_Curve)>& curves,
+                                 const gp_Ax1&                          axis,
+                                 const double                           tol,
+                                 double&                                r)
+{
+  gp_Lin axLin(axis);
+
+  // Check each curve separately.
+  std::vector<double> dists;
+  //
+  for ( const auto& curve : curves )
+  {
+    const double cf    = curve->FirstParameter();
+    const double cl    = curve->LastParameter();
+    const double cm    = (cf + cl)*0.5;
+    const double delta = Abs(cl - cf)*0.1;
+
+    // Discretisation of a curve. We take midpoint's vicinity as
+    // the extreme points of a thread's helix might go outside the
+    // cylindrical bore.
+    std::vector<double>
+      cParams = {cm - delta, cm, cm + delta};
+
+    // Measure distances to the axis.
+    for ( auto p : cParams )
+    {
+      dists.push_back( axLin.Distance( curve->Value(p) ) );
+    }
+  } // loop over curves
+
+  // Check distances.
+  const double refDist = dists[0];
+  for ( size_t k = 1; k < dists.size(); ++k )
+  {
+    if ( Abs(dists[k] - refDist) > tol )
+    {
+      return false;
+    }
+  }
+
+  r = refDist;
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Checks whether the passed curve lies on the given cylindrical
+//! surface `cyl`.
+bool asiAlgo_Utils::IsOnCylinder(const Handle(Geom_Curve)& curve,
+                                 const gp_Cylinder&        cyl,
+                                 const double              tol,
+                                 ActAPI_PlotterEntry       plotter)
+{
+  gp_Lin axLin( cyl.Axis() );
+
+  const double cf    = curve->FirstParameter();
+  const double cl    = curve->LastParameter();
+  const double cm    = (cf + cl)*0.5;
+  const double delta = Abs(cl - cf)*0.1;
+
+  // Discretisation of a curve. We take midpoint's vicinity as
+  // the extreme points of a thread's helix might go outside the
+  // cylindrical bore.
+  std::vector<double>
+    cParams = {cm - delta, cm, cm + delta};
+
+  // Measure distances to the cylinder.
+  std::vector<double> dists;
+  //
+  for ( auto p : cParams )
+  {
+    dists.push_back( axLin.Distance( curve->Value(p) ) - cyl.Radius() );
+  }
+
+  // Check distances.
+  for ( size_t k = 0; k < dists.size(); ++k )
+  {
+    if ( Abs(dists[k]) > tol )
+    {
+#if defined DRAW_DEBUG
+      plotter.DRAW_POINT(curve->Value(cParams[k]), Color_Red, "deviationPoint");
+#endif
+      return false;
+    }
+  }
+
+  return true;
 }
