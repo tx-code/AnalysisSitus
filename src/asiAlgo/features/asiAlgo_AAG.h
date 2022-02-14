@@ -89,18 +89,20 @@ public:
   //! Enumerates options for caching maps of shapes.
   enum CachedMap
   {
-    CachedMap_SubShapes  = 0x0001,
-    CachedMap_Faces      = 0x0002,
-    CachedMap_Edges      = 0x0004,
-    CachedMap_Vertices   = 0x0008,
-    CachedMap_EdgesFaces = 0x0010,
+    CachedMap_SubShapes     = 0x0001,
+    CachedMap_Faces         = 0x0002,
+    CachedMap_Edges         = 0x0004,
+    CachedMap_Vertices      = 0x0008,
+    CachedMap_EdgesFaces    = 0x0010,
+    CachedMap_VerticesEdges = 0x0020,
     //
     CachedMap_Minimal = CachedMap_Faces,
-    CachedMap_All = CachedMap_Faces     |
-                    CachedMap_Edges     |
-                    CachedMap_Vertices  |
-                    CachedMap_SubShapes |
-                    CachedMap_EdgesFaces
+    CachedMap_All = CachedMap_Faces      |
+                    CachedMap_Edges      |
+                    CachedMap_Vertices   |
+                    CachedMap_SubShapes  |
+                    CachedMap_EdgesFaces |
+                    CachedMap_VerticesEdges
   };
 
   //---------------------------------------------------------------------------
@@ -842,6 +844,16 @@ public:
   [[deprecated("Use the overloaded version with std::vector instead.")]]
   asiAlgo_EXPORT void
     GetConnectedComponents(NCollection_Vector<asiAlgo_Feature>& res);
+
+  //! Checks if the given vertex has any incident edges of the passed vexity.
+  //! \param[in] V             the vertex to test.
+  //! \param[in] type          the vexity to test.
+  //! \param[in] edges2Exclude the edges to exclude from consideration (optional).
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    HasIncidentEdgeOfVexity(const TopoDS_Vertex&              V,
+                            const asiAlgo_FeatureAngleType    type,
+                            const TopTools_IndexedMapOfShape& edges2Exclude = TopTools_IndexedMapOfShape());
 
   //! Clears cached maps.
   asiAlgo_EXPORT void

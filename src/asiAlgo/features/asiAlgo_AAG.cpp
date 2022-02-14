@@ -1308,6 +1308,53 @@ void asiAlgo_AAG::GetConnectedComponents(NCollection_Vector<asiAlgo_Feature>& re
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_AAG::HasIncidentEdgeOfVexity(const TopoDS_Vertex&              V,
+                                          const asiAlgo_FeatureAngleType    type,
+                                          const TopTools_IndexedMapOfShape& edges2Exclude)
+{
+  const TopTools_IndexedDataMapOfShapeListOfShape& vertEdgesMap  = this->RequestMapOfVerticesEdges();
+  const TopTools_IndexedDataMapOfShapeListOfShape& edgeFacesMap  = this->RequestMapOfEdgesFaces();
+  const TopTools_ListOfShape&                      incidentEdges = vertEdgesMap.FindFromKey(V);
+  //
+  for ( TopTools_ListIteratorOfListOfShape iit(incidentEdges); iit.More(); iit.Next() )
+  {
+    const TopoDS_Edge& incidentEdge = TopoDS::Edge( iit.Value() );
+    //
+    if ( edges2Exclude.Contains(incidentEdge) )
+      continue;
+
+    // Get all faces owning this edge.
+    const TopTools_ListOfShape& faces = edgeFacesMap.FindFromKey(incidentEdge);
+    //
+    if ( faces.Extent() != 2 )
+      continue; // Skip non-manifold edges (should never be any).
+
+    const TopoDS_Face& F1 = TopoDS::Face( faces.First() );
+    const TopoDS_Face& F2 = TopoDS::Face( faces.Last() );
+    //
+    const int f1 = this->GetFaceId(F1);
+    const int f2 = this->GetFaceId(F2);
+
+    asiAlgo_AAG::t_arc arc(f1, f2);
+    //
+    Handle(asiAlgo_FeatureAttrAngle)
+      DA = this->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
+    //
+    if ( DA.IsNull() )
+      continue;
+
+    // We are looking for an angle of a certain type.
+    if ( DA->GetAngleType() == type )
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_AAG::Dump(Standard_OStream& out) const
 {
   out << "===================================================\n";
