@@ -33,6 +33,9 @@
 // Own include
 #include <ActData_Application.h>
 
+// Active Data includes
+#include <ActData_BinDrivers.h>
+
 // OCCT includes
 #include <TColStd_SequenceOfExtendedString.hxx>
 
@@ -40,10 +43,13 @@
 //! \return instance of CAF Application.
 Handle(ActData_Application) ActData_Application::Instance()
 {
-  static Handle(ActData_Application) anApp;
-  if ( anApp.IsNull() )
-    anApp = new ActData_Application();
-  return anApp;
+  static Handle(ActData_Application) app;
+  if ( app.IsNull() )
+  {
+    app = new ActData_Application();
+    ActData_BinDrivers::DefineFormat(app);
+  }
+  return app;
 }
 
 //! Default constructor.

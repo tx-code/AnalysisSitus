@@ -60,4 +60,54 @@
 #define asiTestEngine_Macro_FAILED       "Failed"
 #define asiTestEngine_Macro_OK           "Ok"
 
+//-----------------------------------------------------------------------------
+// Asserts
+//-----------------------------------------------------------------------------
+
+#define TEST_VERIFY(x) \
+  { \
+    if ( !(x) ) return outcome().failure(); \
+  }
+
+//-----------------------------------------------------------------------------
+// Formatted printing
+//-----------------------------------------------------------------------------
+
+#define PRINT_DECOR \
+  std::cout << "------------------------------------------------------------" << std::endl;
+
+#define TEST_STRONG_LINE_DECORATOR \
+  printf("================================================================\
+===============\n"); \
+
+#define TEST_LINE_DECORATOR \
+  printf("----------------------------------------------------------------\
+---------------\n");
+
+#define TEST_FUNC_DECORATOR_BEGIN(FuncName) \
+  printf("\n"); \
+  TEST_STRONG_LINE_DECORATOR \
+  printf("Executing test function: "); printf(FuncName); \
+  printf("\n"); \
+  TEST_LINE_DECORATOR
+
+#define TEST_FUNC_DECORATOR_END \
+  TEST_LINE_DECORATOR \
+  printf("\n");
+
+#define TEST_PRINT(Msg) \
+  printf(Msg);
+
+#define TEST_PRINT_DOUBLE(Val) \
+  printf("%0.6f", Val);
+
+#define TEST_PRINT_L(Msg) \
+  TEST_PRINT(Msg); TEST_PRINT("\n");
+
+#define TEST_PRINT_DECOR(Msg) \
+  TEST_PRINT("*** "); TEST_PRINT(Msg);
+
+#define TEST_PRINT_DECOR_L(Msg) \
+  TEST_PRINT_DECOR(Msg); TEST_PRINT("\n");
+
 #endif

@@ -761,13 +761,17 @@ void ActData_BaseNode::ConnectReference(const Standard_Integer            theId,
    * ============================================= */
 
   Handle(ActData_BaseNode) aReferredNode;
-  if ( theTarget->IsKind( STANDARD_TYPE(ActAPI_INode) ) )
+
+  Handle(ActAPI_INode)          RN = Handle(ActAPI_INode)::DownCast(theTarget);
+  Handle(ActAPI_IUserParameter) RP = Handle(ActAPI_IUserParameter)::DownCast(theTarget);
+
+  if ( !RN.IsNull() )
   {
-    aReferredNode = Handle(ActData_BaseNode)::DownCast(theTarget);
+    aReferredNode = Handle(ActData_BaseNode)::DownCast(RN);
   }
-  else if ( theTarget->IsKind( STANDARD_TYPE(ActAPI_IUserParameter) ) )
+  else if ( !RP.IsNull() )
   {
-    Handle(ActAPI_IUserParameter) aReferredParam = Handle(ActAPI_IUserParameter)::DownCast(theTarget);
+    Handle(ActAPI_IUserParameter) aReferredParam = RP;
     aReferredNode = Handle(ActData_BaseNode)::DownCast( aReferredParam->GetNode() );
   }
 
@@ -852,12 +856,15 @@ void ActData_BaseNode::ConnectReferenceToList(const Standard_Integer            
    *  Bind BACK reference for the referenced Node
    * ============================================= */
 
+  Handle(ActAPI_INode)          RN = Handle(ActAPI_INode)::DownCast(theTarget);
+  Handle(ActAPI_IUserParameter) RP = Handle(ActAPI_IUserParameter)::DownCast(theTarget);
+
   Handle(ActData_BaseNode) aReferredNode;
-  if ( theTarget->IsKind( STANDARD_TYPE(ActAPI_INode) ) )
-    aReferredNode = Handle(ActData_BaseNode)::DownCast(theTarget);
-  else if ( theTarget->IsKind( STANDARD_TYPE(ActAPI_IUserParameter) ) )
+  if ( !RN.IsNull() )
+    aReferredNode = Handle(ActData_BaseNode)::DownCast(RN);
+  else if ( !RP.IsNull() )
   {
-    Handle(ActAPI_IUserParameter) aReferredParam = Handle(ActAPI_IUserParameter)::DownCast(theTarget);
+    Handle(ActAPI_IUserParameter) aReferredParam = RP;
     aReferredNode = Handle(ActData_BaseNode)::DownCast( aReferredParam->GetNode() );
   }
 

@@ -44,6 +44,34 @@
 #include <asiTest_Utils.h>
 #include <asiTest_XdeDoc.h>
 
+// Active Data unit tests
+#include <ActTest_AsciiStringParameter.h>
+#include <ActTest_BaseModel.h>
+#include <ActTest_BoolArrayParameter.h>
+#include <ActTest_BoolParameter.h>
+#include <ActTest_CAFConversionCtx.h>
+#include <ActTest_ComplexArrayParameter.h>
+#include <ActTest_CopyPasteEngine.h>
+#include <ActTest_ExtTransactionEngine.h>
+#include <ActTest_GroupParameter.h>
+#include <ActTest_IntArrayParameter.h>
+#include <ActTest_IntParameter.h>
+#include <ActTest_MeshAttr.h>
+#include <ActTest_MeshParameter.h>
+#include <ActTest_NameParameter.h>
+#include <ActTest_RealArrayParameter.h>
+#include <ActTest_RealParameter.h>
+#include <ActTest_ReferenceListParameter.h>
+#include <ActTest_ReferenceParameter.h>
+#include <ActTest_SelectionParameter.h>
+#include <ActTest_ShapeParameter.h>
+#include <ActTest_StringArrayParameter.h>
+#include <ActTest_TimeStamp.h>
+#include <ActTest_TimeStampParameter.h>
+#include <ActTest_TreeFunctionParameter.h>
+#include <ActTest_TreeNodeParameter.h>
+#include <ActTest_TriangulationParameter.h>
+
 // asiTestEngine includes
 #include <asiTestEngine_Launcher.h>
 
@@ -100,7 +128,8 @@ int main(int argc, char* argv[])
   // Populate launchers.
   std::cout << "asiTest : main()" << std::endl;
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
-  //
+
+  // Main tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>        );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>         );
@@ -114,6 +143,38 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>    );
+
+  // Active Data tests.
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_AsciiStringParameter>   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_BaseModelPersistence>   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_BaseModelStructure>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_BaseModelEvaluation>    );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_BoolArrayParameter>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_BoolParameter>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_ComplexArrayParameter>  );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_GroupParameter>         );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_IntArrayParameter>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_IntParameter>           );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_MeshParameter>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_NameParameter>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_RealArrayParameter>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_RealParameter>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_ReferenceListParameter> );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_ReferenceParameter>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_SelectionParameter>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_ShapeParameter>         );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_StringArrayParameter>   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_TimeStampParameter>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_TreeFunctionParameter>  );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_TreeNodeParameter>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_TimeStamp>              );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_TriangulationParameter> );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_CAFConversionCtx>       );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_ExtTransactionEngine>   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_MeshAttrTransactional>  );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_MeshAttrBean>           );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_MeshAttrPersistent>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_CopyPasteEngine>        );
 
   // Launcher of entire test suite
   asiTestEngine_Launcher Launcher;

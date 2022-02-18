@@ -38,6 +38,13 @@
 // asiAlgo includes
 #include <asiAlgo_Utils.h>
 
+// OCCT includes
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeCone.hxx>
+#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepPrimAPI_MakeTorus.hxx>
+
 // Qt includes
 #pragma warning(push, 0)
 #include <QDateTime>
@@ -318,4 +325,118 @@ bool asiTestEngine_Utils::CreateIndex(const TCollection_AsciiString&    outputDi
   file.close();
 
   return true;
+}
+
+//! Returns "some topological shape" for you. Useful if you do not care
+//! of the actual topological data but do need to have something valid.
+//! \return OCCT topological shape.
+TopoDS_Shape asiTestEngine_Utils::RandomShape()
+{
+  int RAND_INDX = rand() % 10;
+  TopoDS_Shape aResult;
+  switch ( RAND_INDX )
+  {
+    case 0:
+      aResult = BRepPrimAPI_MakeBox(100, 100, 100);
+      break;
+    case 1:
+      aResult = BRepPrimAPI_MakeBox(5, 20, 40);
+      break;
+    case 2:
+      aResult = BRepPrimAPI_MakeCone(10, 5, 10);
+      break;
+    case 3:
+      aResult = BRepPrimAPI_MakeCone(5, 25, 20);
+      break;
+    case 4:
+      aResult = BRepPrimAPI_MakeCylinder(10, 20);
+      break;
+    case 5:
+      aResult = BRepPrimAPI_MakeSphere(10, 2*M_PI / 3);
+      break;
+    case 6:
+      aResult = BRepPrimAPI_MakeSphere(10, 7*M_PI / 8);
+      break;
+    case 7:
+      aResult = BRepPrimAPI_MakeTorus(5, 10);
+      break;
+    case 8:
+      aResult = BRepPrimAPI_MakeTorus(10, 15, M_PI / 3);
+      break;
+    case 9:
+      aResult = BRepPrimAPI_MakeTorus(10, 15, M_PI / 2);
+      break;
+  }
+  return aResult;
+}
+
+//! Returns "some Boolean value" for you.
+//! \return Boolean value.
+bool asiTestEngine_Utils::RandomBoolean()
+{
+  int RAND_INDX = rand() % 10;
+
+  if ( RAND_INDX < 5 )
+    return true;
+
+  return false;
+}
+
+//! Returns "some integer value" for you.
+//! \return integer value.
+int asiTestEngine_Utils::RandomInteger()
+{
+  int RAND_INDX = rand() % 10;
+  return RAND_INDX;
+}
+
+//! Returns "some real value" for you.
+//! \return real value.
+double asiTestEngine_Utils::RandomReal()
+{
+  int RAND_INDX = rand() % 10;
+  double aResult = RAND_INDX * 1.5;
+  return aResult;
+}
+
+//! Returns "some integer array" for you.
+//! \param theLower [in] lower index.
+//! \param theUpper [in] upper index.
+//! \return integer array.
+Handle(HIntArray) asiTestEngine_Utils::RandomIntegerArray(const int theLower,
+                                                          const int theUpper)
+{
+  Handle(HIntArray) aResArr = new HIntArray(theLower, theUpper);
+  for ( int i = theLower; i <= theUpper; ++i )
+    aResArr->SetValue( i, RandomInteger() );
+
+  return aResArr;
+}
+
+//! Returns "some Boolean array" for you.
+//! \param theLower [in] lower index.
+//! \param theUpper [in] upper index.
+//! \return Boolean array.
+Handle(HBoolArray) asiTestEngine_Utils::RandomBooleanArray(const int theLower,
+                                                           const int theUpper)
+{
+  Handle(HBoolArray) aResArr = new HBoolArray(theLower, theUpper);
+  for ( int i = theLower; i <= theUpper; ++i )
+    aResArr->SetValue( i, RandomBoolean() );
+
+  return aResArr;
+}
+
+//! Returns "some real array" for you.
+//! \param theLower [in] lower index.
+//! \param theUpper [in] upper index.
+//! \return real array.
+Handle(HRealArray) asiTestEngine_Utils::RandomRealArray(const int theLower,
+                                                        const int theUpper)
+{
+  Handle(HRealArray) aResArr = new HRealArray(theLower, theUpper);
+  for ( int i = theLower; i <= theUpper; ++i )
+    aResArr->SetValue( i, RandomReal() );
+
+  return aResArr;
 }

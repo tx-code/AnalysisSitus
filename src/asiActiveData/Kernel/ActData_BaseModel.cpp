@@ -265,14 +265,14 @@ Standard_Boolean
   // Commit transaction
   m_doc->CommitCommand();
 
-  const Handle(ActData_Application)& anApp = ActData_Application::Instance();
+  const Handle(ActData_Application)& app = ActData_Application::Instance();
 
   // Write
   PCDM_StoreStatus writerStatus = PCDM_SS_WriteFailure;
   //
   try
   {
-    writerStatus = anApp->SaveAs(m_doc, theFilename);
+    writerStatus = app->SaveAs(m_doc, theFilename);
   }
   catch ( const Standard_Failure& exc )
   {

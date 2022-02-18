@@ -48,6 +48,9 @@
 // STD includes
 #include <fstream>
 
+// Initialize static variable used to store current temp dir name.
+std::string asiTestEngine_Launcher::current_temp_dir;
+
 //! Adds the passed Test Case Launcher to the internal collection.
 //! \param CaseLauncher [in] Test Case Launcher to add.
 //! \return this for subsequent streaming.
@@ -63,6 +66,48 @@ asiTestEngine_Launcher&
 //! \return true if all Cases have succeeded, false -- otherwise.
 bool asiTestEngine_Launcher::Launch(std::ostream* out) const
 {
+  /* =============================
+   *  Prepare temporary directory
+   * ============================= */
+
+  std::string dirName = std::string("ut_") + this->uniqueDirName();
+
+  if ( out )
+    *out << "\tTemporary directory: " << dirName.c_str() << "\n";
+
+  // Prepare full name of the temporary directory
+  std::string
+    fullDirName = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestDumping() ) + dirName;
+
+  // To be used in test cases.
+  current_temp_dir = fullDirName;
+
+#ifdef _WIN32
+  // TODO: for Windows only (!!!)
+  // Create directory
+  if ( !CreateDirectory(fullDirName.c_str(), nullptr) )
+  {
+    if ( out )
+      *out << "\tFailed to create directory: " << fullDirName.c_str() << "\n";
+    return false;
+  }
+#endif
+
+  // TODO: for Windows only (!!!)
+  // Create temporary directory for files
+  if (
+#if _WIN32
+      !CreateDirectory(current_temp_dir_files().c_str(), NULL)
+#else
+      mkdir(current_temp_dir_files().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0
+#endif
+    )
+  {
+    if ( out )
+      *out << "\tFailed to create directory: " << current_temp_dir_files().c_str() << "\n";
+    return false;
+  }
+
   /* ==============================
    *  Launch Test Cases one by one
    * ============================== */
@@ -236,33 +281,9 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
 
   Rdr->EndBody()->EndHtml();
 
-  /* ==========================
-   *  Prepare filesystem stuff
-   * ========================== */
-
-  std::string dirName = std::string("ut_") + this->uniqueDirName();
-
-  if ( out )
-    *out << "\tTemporary directory: " << dirName.c_str() << "\n";
-
-  // Prepare full name of the temporary directory
-  std::string
-    fullDirName = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestDumping() ) + dirName;
-
-#ifdef _WIN32
-  // TODO: for Windows only (!!!)
-  // Create directory
-  if ( !CreateDirectory(fullDirName.c_str(), nullptr) )
-  {
-    if ( out )
-      *out << "\tFailed to create directory: " << fullDirName.c_str() << "\n";
-    return false;
-  }
-#endif
-
   // Filename for HTML report
   std::string
-    filename = asiAlgo_Utils::Str::Slashed(fullDirName) +
+    filename = asiAlgo_Utils::Str::Slashed(current_temp_dir) +
                asiTestEngine_Macro_REPORT_FN + asiTestEngine_Macro_DOT + asiTestEngine_Macro_REPORT_EXT;
 
   // Create file for HTML report

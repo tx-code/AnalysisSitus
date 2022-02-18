@@ -72,6 +72,30 @@ namespace asiTestEngine_Utils
                 const int                         numNoref,
                 const int                         numGenref);
 
+  asiTestEngine_EXPORT TopoDS_Shape
+    RandomShape();
+
+  asiTestEngine_EXPORT int
+    RandomInteger();
+
+  asiTestEngine_EXPORT bool
+    RandomBoolean();
+
+  asiTestEngine_EXPORT double
+    RandomReal();
+
+  asiTestEngine_EXPORT Handle(HIntArray)
+    RandomIntegerArray(const int lower,
+                       const int upper);
+
+  asiTestEngine_EXPORT Handle(HBoolArray)
+    RandomBooleanArray(const int lower,
+                       const int upper);
+
+  asiTestEngine_EXPORT Handle(HRealArray)
+    RandomRealArray(const int lower,
+                    const int upper);
+
 } // asiTestEngine_Utils namespace.
 
 #endif

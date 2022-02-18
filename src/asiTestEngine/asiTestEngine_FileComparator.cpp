@@ -52,6 +52,7 @@ asiTestEngine_FileComparator::asiTestEngine_FileComparator(const TCollection_Asc
   m_filename2      (filename2),
   m_filter         (lineFilter),
   m_comparator     (lineComparator.IsNull() ? new asiTestEngine_DefaultLineComparator : lineComparator),
+  m_iStartingLine  (1),
   m_bDone          (false),
   m_bResult        (false),
   m_iLineWithDiffs (-1)
@@ -62,7 +63,7 @@ asiTestEngine_FileComparator::asiTestEngine_FileComparator(const TCollection_Asc
 //! Performs actual comparison of file contents.
 void asiTestEngine_FileComparator::Perform()
 {
-  m_bDone  = true;
+  m_bDone   = true;
   m_bResult = true;
 
   /* ===========================
@@ -104,6 +105,9 @@ void asiTestEngine_FileComparator::Perform()
     }
 
     FILE2.ReadLine(Buff2, BUFLEN, NbChar2);
+
+    if ( LineIdx < m_iStartingLine )
+      continue; // Skip until the starting line is iterated.
 
     // Check filters. Normally filters are useful to exclude some dedicated
     // lines from comparison process. E.g. we can skip comparison of comment

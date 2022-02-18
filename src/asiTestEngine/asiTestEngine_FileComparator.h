@@ -181,6 +181,14 @@ public:
 
 public:
 
+  //! Sets the starting line.
+  //! \param line [in] 1-based line index of the first line from which
+  //!                  comparison will start.
+  void StartFromLine(const int line)
+  {
+    m_iStartingLine = line;
+  }
+
   //! Returns true if comparison has been performed.
   //! \return true/false.
   bool IsDone() const
@@ -205,10 +213,11 @@ public:
 
 private:
 
-  TCollection_AsciiString                  m_filename1;  //!< Filename 1.
-  TCollection_AsciiString                  m_filename2;  //!< Filename 2.
-  ActAux_StrFilter                         m_filter;     //!< Line filter.
-  Handle(asiTestEngine_BaseLineComparator) m_comparator; //!< Line comparator.
+  TCollection_AsciiString                  m_filename1;     //!< Filename 1.
+  TCollection_AsciiString                  m_filename2;     //!< Filename 2.
+  ActAux_StrFilter                         m_filter;        //!< Line filter.
+  Handle(asiTestEngine_BaseLineComparator) m_comparator;    //!< Line comparator.
+  int                                      m_iStartingLine; //!< Where to start.
 
 private:
 

@@ -34,11 +34,14 @@
 #include <ActData_BinDrivers.h>
 
 // Active Data includes
+#include <ActData_BinRetrievalDriver.h>
+#include <ActData_BinStorageDriver.h>
 #include <ActData_MeshDriver.h>
 
 // OCCT includes
 #include <BinMDF_ADriverTable.hxx>
 #include <Message_Messenger.hxx>
+#include <TDocStd_Application.hxx>
 
 #undef COUT_DEBUG
 
@@ -49,4 +52,11 @@ void ActData_BinDrivers::AddDrivers(const Handle(BinMDF_ADriverTable)& theDriver
                                     const Handle(Message_Messenger)&   theMsgDriver)
 {
   theDriverTable->AddDriver( new ActData_MeshDriver(theMsgDriver) );
+}
+
+void ActData_BinDrivers::DefineFormat(const Handle(TDocStd_Application)& theApp)
+{
+  theApp->DefineFormat(ACTBinFormat, "Binary OCAF Document", "cbf",
+                       new ActData_BinRetrievalDriver,
+                       new ActData_BinStorageDriver);
 }

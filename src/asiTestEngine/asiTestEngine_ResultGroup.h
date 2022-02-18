@@ -107,10 +107,10 @@ struct asiTestEngine_ResultGroups
   }
 };
 
-void PrepareVisualSettings(const Handle(asiTcl_Interp)& interp,
-                           const int                    argc,
-                           const char**                 argv,
-                           asiAlgo_VisualSettings&      settings)
+inline void PrepareVisualSettings(const Handle(asiTcl_Interp)& interp,
+                                  const int                    argc,
+                                  const char**                 argv,
+                                  asiAlgo_VisualSettings&      settings)
 {
   interp->GetKeyValue<float> (argc, argv, "snapshot-line-width",   settings.LineWidth);
   interp->GetKeyValueHex     (argc, argv, "snapshot-color",        settings.Color);

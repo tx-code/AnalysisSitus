@@ -39,6 +39,7 @@
 // OCCT forward declarations
 class BinMDF_ADriverTable;
 class Message_Messenger;
+class TDocStd_Application;
 
 //! \ingroup AD_DF
 //!
@@ -50,6 +51,11 @@ public:
   ActData_EXPORT static void
     AddDrivers(const Handle(BinMDF_ADriverTable)& theDriverTable,
                const Handle(Message_Messenger)&   theMsgDriver);
+
+  //! Defines format "BinOcaf" and registers its read and write drivers
+  //! in the specified application
+  ActData_EXPORT static void
+    DefineFormat(const Handle(TDocStd_Application)& theApp);
 
 };
 

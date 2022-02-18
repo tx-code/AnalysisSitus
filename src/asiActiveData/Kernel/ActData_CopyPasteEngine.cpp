@@ -603,10 +603,12 @@ void ActData_CopyPasteEngine::normalizeReference(const Handle(ActData_BaseNode)&
     // only the source Node is an observer, but its copy -- as well
     if ( isPassOutScoped && (theDirection == Direction_FromBuffer) )
     {
-      Handle(ActAPI_INode)
-        aTargetNode = ( aTargetDC->IsKind( STANDARD_TYPE(ActAPI_INode) ) ? Handle(ActAPI_INode)::DownCast(aTargetDC) :
-                                                                           Handle(ActAPI_IUserParameter)::DownCast(aTargetDC)->GetNode() );
-      Handle(ActData_BaseNode)::DownCast(aTargetNode)->connectReferrer(RefParam);
+      Handle(ActAPI_INode)          targetNode  = Handle(ActAPI_INode)::DownCast(aTargetDC);
+      Handle(ActAPI_IUserParameter) targetParam = Handle(ActAPI_IUserParameter)::DownCast(aTargetDC);
+
+      targetNode = ( targetNode.IsNull() ? targetParam->GetNode() : targetNode );
+
+      Handle(ActData_BaseNode)::DownCast(targetNode)->connectReferrer(RefParam);
     }
 
     if ( !isPassOutScoped )
@@ -656,10 +658,12 @@ void ActData_CopyPasteEngine::normalizeReferenceList(const Handle(ActData_BaseNo
       // only the source Node is an observer, but its copy -- as well
       if ( isPassOutScoped && (theDirection == Direction_FromBuffer) )
       {
-        Handle(ActAPI_INode)
-          aTargetNode = ( aTargetDC->IsKind( STANDARD_TYPE(ActAPI_INode) ) ? Handle(ActAPI_INode)::DownCast(aTargetDC) :
-                                                                             Handle(ActAPI_IUserParameter)::DownCast(aTargetDC)->GetNode() );
-        Handle(ActData_BaseNode)::DownCast(aTargetNode)->connectReferrer(RefParam);
+        Handle(ActAPI_INode)          targetNode  = Handle(ActAPI_INode)::DownCast(aTargetDC);
+        Handle(ActAPI_IUserParameter) targetParam = Handle(ActAPI_IUserParameter)::DownCast(aTargetDC);
+
+        targetNode = ( targetNode.IsNull() ? targetParam->GetNode() : targetNode );
+
+        Handle(ActData_BaseNode)::DownCast(targetNode)->connectReferrer(RefParam);
       }
 
       if ( !isPassOutScoped )

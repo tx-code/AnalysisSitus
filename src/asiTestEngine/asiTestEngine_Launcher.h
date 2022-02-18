@@ -214,6 +214,24 @@ private:
   //! Internal collection of Test Case Launchers.
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > m_launchers;
 
+public:
+
+  asiTestEngine_EXPORT static std::string current_temp_dir; //!< Current temporary directory.
+
+  //! Returns sub-directory used for dumping files.
+  //! \return subdirectory dedicated to temporary files.
+  inline static std::string current_temp_dir_files()
+  {
+    return asiAlgo_Utils::Str::Slashed(current_temp_dir) + "files";
+  }
+
+  //! Returns sub-directory used for reading source files.
+  //! \return subdirectory dedicated to source files.
+  inline static std::string current_temp_dir_source()
+  {
+    return asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestData() );
+  }
+
 };
 
 #endif

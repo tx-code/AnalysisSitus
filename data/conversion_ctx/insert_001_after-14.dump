@@ -1,0 +1,497 @@
+ACT Data Model dump. Bound FRAMEWORK version: 1.5.0
+ACT Data Model dump. Bound APPLICATION version: 0.0.10
+L >> [0:]
+A >> [TDocStd_Owner] - ### cannot dump ###
+A >> [TNaming_UsedShapes] - ### cannot dump ###
+A >> [TFunction_Scope] - ### cannot dump ###
+L >> [0:1]
+     L >> [0:1:1]
+     A >> [TDataStd_Integer] - 66816
+     L >> [0:1:2]
+     A >> [TDataStd_Integer] - 10
+====================================================================================================
++-> [0:2:1] PARTITION [ActTest_StubAPartition]
+     L >> [0:2:1]
+     A >> [TDF_TagSource] - ### cannot dump ###
+     L >> [0:2:1:1]
+    **************************************************************************************
++-> [0:2:1:1] NODE [ActTest_StubANode] - 
+    **************************************************************************************
+          L >> [0:2:1:1:1]
+          A >> [TDataStd_AsciiString] - ActTest_StubANode
+          A >> [TDataStd_TreeNode] - ### cannot dump ###
+          A >> [TDataStd_Integer] - 0
+               L >> [0:2:1:1:1:1]
+               A >> [TDataStd_ReferenceList] - {}
+               L >> [0:2:1:1:1:2]
+               A >> [TDataStd_ReferenceList] - {}
+               L >> [0:2:1:1:1:3]
+               A >> [TDataStd_ReferenceList] - {}
+               L >> [0:2:1:1:1:4]
+                    L >> [0:2:1:1:1:4:1]
+                        -------------------------------------------------------------
+                         [0:2:1:1:1:4:1] PARAMETER [ActData_TreeFunctionParameter]
+                        -------------------------------------------------------------
+                         L >> [0:2:1:1:1:4:1:1]
+                         A >> [TDataStd_Integer {Type}] - 17
+                         L >> <MTime is not dumped>: tag = 5
+                         L >> [0:2:1:1:1:4:1:6]
+                         A >> [TDataStd_Integer {Validity}] - 1
+                         L >> [0:2:1:1:1:4:1:8]
+                         A >> [TDataStd_Integer {Pending}] - 0
+          L >> [0:2:1:1:2]
+               L >> [0:2:1:1:2:100]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:100] PARAMETER [ActData_NameParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:100:1]
+                    A >> [TDataStd_Integer {Type}] - 8
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:100:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:100:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:1:1:2:101]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:101] PARAMETER [ActData_ShapeParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:101:1]
+                    A >> [TDataStd_Integer {Type}] - 5
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:101:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:101:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:1:1:2:101:101]
+                    A >> [TNaming_NamedShape] - [0000000000000000]
+               L >> [0:2:1:1:2:102]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:102] PARAMETER [ActData_ShapeParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:102:1]
+                    A >> [TDataStd_Integer {Type}] - 5
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:102:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:102:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:1:1:2:102:101]
+                    A >> [TNaming_NamedShape] - [0000000000000000]
+               L >> [0:2:1:1:2:103]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:103] PARAMETER [ActData_RealParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:103:1]
+                    A >> [TDataStd_Integer {Type}] - 3
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:103:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:103:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:1:1:2:103:101]
+                    A >> [TDataStd_Real] - 0
+               L >> [0:2:1:1:2:104]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:104] PARAMETER [ActData_TreeFunctionParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:104:1]
+                    A >> [TDataStd_Integer {Type}] - 17
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:104:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:104:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:1:1:2:105]
+                   -------------------------------------------------------------
+                    [0:2:1:1:2:105] PARAMETER [ActData_ReferenceParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:1:1:2:105:1]
+                    A >> [TDataStd_Integer {Type}] - 20
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:1:1:2:105:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:1:1:2:105:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+====================================================================================================
++-> [0:2:2] PARTITION [ActTest_StubBPartition]
+     L >> [0:2:2]
+     A >> [TDF_TagSource] - ### cannot dump ###
+     L >> [0:2:2:1]
+    **************************************************************************************
++-> [0:2:2:1] NODE [ActTest_StubBNode] - Test Node B
+    **************************************************************************************
+          L >> [0:2:2:1:1]
+          A >> [TDataStd_AsciiString] - ActTest_StubBNode
+          A >> [TDataStd_TreeNode] - ### cannot dump ###
+          A >> [TDataStd_Integer] - 0
+               L >> [0:2:2:1:1:1]
+               A >> [TDataStd_ReferenceList] - {}
+               L >> [0:2:2:1:1:2]
+               A >> [TDataStd_ReferenceList] - {}
+               L >> [0:2:2:1:1:3]
+               A >> [TDataStd_ReferenceList] - {}
+          L >> [0:2:2:1:2]
+               L >> [0:2:2:1:2:100]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:100] PARAMETER [ActData_NameParameter]
+                   -------------------------------------------------------------
+               A >> [TDataStd_Name] - Test Node B
+                    L >> [0:2:2:1:2:100:1]
+                    A >> [TDataStd_Integer {Type}] - 8
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:100:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:100:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:2:1:2:101]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:101] PARAMETER [ActData_IntParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:2:1:2:101:1]
+                    A >> [TDataStd_Integer {Type}] - 2
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:101:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:101:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:2:1:2:101:101]
+                    A >> [TDataStd_Integer] - 10
+               L >> [0:2:2:1:2:102]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:102] PARAMETER [ActData_RealParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:2:1:2:102:1]
+                    A >> [TDataStd_Integer {Type}] - 3
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:102:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:102:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:2:1:2:102:101]
+                    A >> [TDataStd_Real] - 3.14
+               L >> [0:2:2:1:2:103]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:103] PARAMETER [ActData_TreeFunctionParameter]
+                   -------------------------------------------------------------
+               A >> [TFunction_Function] - ### cannot dump ###
+               A >> [TFunction_GraphNode] - ### cannot dump ###
+                    L >> [0:2:2:1:2:103:1]
+                    A >> [TDataStd_Integer {Type}] - 17
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:103:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:103:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:2:1:2:103:101]
+                    A >> [TDataStd_ReferenceList] - {0:2:3:1:2:100, 0:2:3:1:2:101}
+                    L >> [0:2:2:1:2:103:102]
+                    A >> [TDataStd_ReferenceList] - {0:2:3:1:2:102}
+               L >> [0:2:2:1:2:104]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:104] PARAMETER [ActData_ReferenceParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:2:1:2:104:1]
+                    A >> [TDataStd_Integer {Type}] - 20
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:104:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:104:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:2:1:2:104:101]
+                    A >> [TDF_Reference] - 0:2:3:1:2:117
+               L >> [0:2:2:1:2:105]
+                   -------------------------------------------------------------
+                    [0:2:2:1:2:105] PARAMETER [ActData_ReferenceListParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:2:1:2:105:1]
+                    A >> [TDataStd_Integer {Type}] - 21
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:2:1:2:105:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:2:1:2:105:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:2:1:2:105:101]
+                    A >> [TDataStd_ReferenceList] - {0:2:3:1:2:110, 0:2:3:1:2:109, 0:2:3:1:2:108, 0:2:3:1:2:107, 0:2:3:1:2:106}
+====================================================================================================
++-> [0:2:3] PARTITION [ActTest_StubCPartition]
+     L >> [0:2:3]
+     A >> [TDF_TagSource] - ### cannot dump ###
+     L >> [0:2:3:1]
+    **************************************************************************************
++-> [0:2:3:1] NODE [ActTest_StubCNode] - 
+    **************************************************************************************
+          L >> [0:2:3:1:1]
+          A >> [TDataStd_AsciiString] - ActTest_StubCNode
+          A >> [TDataStd_TreeNode] - ### cannot dump ###
+          A >> [TDataStd_Integer] - 0
+               L >> [0:2:3:1:1:1]
+               A >> [TDataStd_ReferenceList] - {0:2:2:1:2:103}
+               L >> [0:2:3:1:1:2]
+               A >> [TDataStd_ReferenceList] - {0:2:2:1:2:103}
+               L >> [0:2:3:1:1:3]
+               A >> [TDataStd_ReferenceList] - {0:2:2:1:2:105, 0:2:2:1:2:104}
+          L >> [0:2:3:1:2]
+               L >> [0:2:3:1:2:100]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:100] PARAMETER [ActData_IntParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:100:1]
+                    A >> [TDataStd_Integer {Type}] - 2
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:100:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:100:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:100:101]
+                    A >> [TDataStd_Integer] - 99
+               L >> [0:2:3:1:2:101]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:101] PARAMETER [ActData_RealParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:101:1]
+                    A >> [TDataStd_Integer {Type}] - 3
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:101:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:101:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:101:101]
+                    A >> [TDataStd_Real] - 99.99
+               L >> [0:2:3:1:2:102]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:102] PARAMETER [ActData_BoolParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:102:1]
+                    A >> [TDataStd_Integer {Type}] - 4
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:102:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:102:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:102:101]
+                    A >> [TDataStd_Integer] - 1
+               L >> [0:2:3:1:2:103]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:103] PARAMETER [ActData_ShapeParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:103:1]
+                    A >> [TDataStd_Integer {Type}] - 5
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:103:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:103:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:103:101]
+                    A >> [TNaming_NamedShape] - <Some shape address (unstable to dump)>
+               L >> [0:2:3:1:2:104]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:104] PARAMETER [ActData_RealArrayParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:104:1]
+                    A >> [TDataStd_Integer {Type}] - 12
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:104:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:104:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:104:101]
+                    A >> [TDataStd_RealArray] - {-10.1, -20.2, -30.3}
+                    L >> [0:2:3:1:2:104:102]
+                    A >> [TDataStd_Integer] - 3
+               L >> [0:2:3:1:2:105]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:105] PARAMETER [ActData_TreeFunctionParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:105:1]
+                    A >> [TDataStd_Integer {Type}] - 17
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:105:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:105:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:3:1:2:106]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:106] PARAMETER [ActData_AsciiStringParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:106:1]
+                    A >> [TDataStd_Integer {Type}] - 7
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:106:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:106:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:106:101]
+                    A >> [TDataStd_AsciiString] - Test ASCII string
+               L >> [0:2:3:1:2:107]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:107] PARAMETER [ActData_NameParameter]
+                   -------------------------------------------------------------
+               A >> [TDataStd_Name] - Test UNICODE string
+                    L >> [0:2:3:1:2:107:1]
+                    A >> [TDataStd_Integer {Type}] - 8
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:107:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:107:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:3:1:2:108]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:108] PARAMETER [ActData_BoolArrayParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:108:1]
+                    A >> [TDataStd_Integer {Type}] - 15
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:108:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:108:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:108:101]
+                    A >> [TDataStd_BooleanArray] - {1, 0, 1}
+                    L >> [0:2:3:1:2:108:102]
+                    A >> [TDataStd_Integer] - 3
+               L >> [0:2:3:1:2:109]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:109] PARAMETER [ActData_StringArrayParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:109:1]
+                    A >> [TDataStd_Integer {Type}] - 13
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:109:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:109:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:109:101]
+                    A >> [TDataStd_ExtStringArray] - {Test string 0 [init], Test string 1 [init], Test string 2 [init]}
+                    L >> [0:2:3:1:2:109:102]
+                    A >> [TDataStd_Integer] - 3
+               L >> [0:2:3:1:2:110]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:110] PARAMETER [ActData_ComplexArrayParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:110:1]
+                    A >> [TDataStd_Integer {Type}] - 14
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:110:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:110:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:110:101]
+                    A >> [TDataStd_RealArray] - {1.1, 2.2, 3.3}
+                    L >> [0:2:3:1:2:110:102]
+                    A >> [TDataStd_RealArray] - {-1.1, -2.2, -3.3}
+                    L >> [0:2:3:1:2:110:103]
+                    A >> [TDataStd_Integer] - 3
+               L >> [0:2:3:1:2:111]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:111] PARAMETER [ActData_IntArrayParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:111:1]
+                    A >> [TDataStd_Integer {Type}] - 11
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:111:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:111:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:111:101]
+                    A >> [TDataStd_IntegerArray] - {1000, 2000, 3000}
+                    L >> [0:2:3:1:2:111:102]
+                    A >> [TDataStd_Integer] - 3
+               L >> [0:2:3:1:2:112]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:112] PARAMETER [ActData_ReferenceListParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:112:1]
+                    A >> [TDataStd_Integer {Type}] - 21
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:112:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:112:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:3:1:2:113]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:113] PARAMETER [ActData_GroupParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:113:1]
+                    A >> [TDataStd_Integer {Type}] - 16
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:113:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:113:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:3:1:2:114]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:114] PARAMETER [ActData_MeshParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:114:1]
+                    A >> [TDataStd_Integer {Type}] - 6
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:114:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:114:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:114:101]
+                    A >> [ActData_MeshAttr] - Mesh: nodes {0} faces {0}
+               L >> [0:2:3:1:2:115]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:115] PARAMETER [ActData_ReferenceParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:115:1]
+                    A >> [TDataStd_Integer {Type}] - 20
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:115:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:115:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+               L >> [0:2:3:1:2:116]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:116] PARAMETER [ActData_SelectionParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:116:1]
+                    A >> [TDataStd_Integer {Type}] - 9
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:116:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:116:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:116:101]
+                    A >> [TDataStd_IntPackedMap] - {1, 10, -10}
+               L >> [0:2:3:1:2:117]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:117] PARAMETER [ActData_TimeStampParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:117:1]
+                    A >> [TDataStd_Integer {Type}] - 10
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:117:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:117:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+                    L >> [0:2:3:1:2:117:101]
+                    A >> [TDataStd_IntegerArray] - {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+               L >> [0:2:3:1:2:118]
+                   -------------------------------------------------------------
+                    [0:2:3:1:2:118] PARAMETER [ActData_ReferenceParameter]
+                   -------------------------------------------------------------
+                    L >> [0:2:3:1:2:118:1]
+                    A >> [TDataStd_Integer {Type}] - 20
+                    L >> <MTime is not dumped>: tag = 5
+                    L >> [0:2:3:1:2:118:6]
+                    A >> [TDataStd_Integer {Validity}] - 1
+                    L >> [0:2:3:1:2:118:8]
+                    A >> [TDataStd_Integer {Pending}] - 0
+====================================================================================================
++-> [0:2:4] PARTITION [ActTest_StubMeshPartition]
+     L >> [0:2:4]
+====================================================================================================
++-> [0:2:5] PARTITION [ActData_RealVarPartition]
+     L >> [0:2:5]
+====================================================================================================
++-> [0:2:6] PARTITION [ActData_IntVarPartition]
+     L >> [0:2:6]
+====================================================================================================
++-> [0:2:7] PARTITION [ActData_BoolVarPartition]
+     L >> [0:2:7]
+====================================================================================================
+====================================================================================================
+L >> [0:4]
+     L >> [0:4:1]
