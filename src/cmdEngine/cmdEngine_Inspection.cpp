@@ -3050,7 +3050,7 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
 {
-  if ( argc != 1 && argc != 2 )
+  if ( argc != 1 && argc != 2 && argc != 3 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
@@ -3061,9 +3061,11 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
     return TCL_OK;
   }
 
-  // Get option [-remove-sel] [-collapse-sel].
+  // Get options [-remove-sel] [-collapse-sel] [-add-vertex-adj].
   const bool removeSelected   = interp->HasKeyword(argc, argv, "remove-sel");
   const bool collapseSelected = interp->HasKeyword(argc, argv, "collapse-sel");
+  const bool addVertAdj       = interp->HasKeyword(argc, argv, "add-vertex-adj");
+  const bool copyGraph        = collapseSelected || addVertAdj;
 
   // Get part.
   Handle(asiData_PartNode) part_n;
@@ -3087,9 +3089,18 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
     aag->PushSubgraphX(selected);
   }
 
-  if ( collapseSelected )
+  if ( copyGraph )
   {
     aag->PushSubgraph(); // Make a copy of the adjacency matrix.
+  }
+
+  if ( addVertAdj )
+  {
+    aag->AddVertexAdjacencyArcs();
+  }
+
+  if ( collapseSelected )
+  {
     aag->Collapse(selected);
   }
 
@@ -3100,7 +3111,7 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
   //
   pGraphView->RenderAdjacency(aag);
 
-  if ( removeSelected || collapseSelected )
+  if ( removeSelected || copyGraph )
   {
     aag->PopSubgraph();
   }
@@ -4460,12 +4471,15 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("show-aag",
     //
-    "show-aag [-remove-sel] [-collapse-sel]\n"
+    "show-aag [-remove-sel] [-collapse-sel] [-add-vertex-adj]\n"
     "\t Visualizes AAG for the active part. If the '-remove-sel' flag is passed,\n"
     "\t the selected faces will be excluded from the AAG with all their incident\n"
     "\t arcs. If the '-collapse-sel' flag is passed, the AAG nodes of the selected\n"
     "\t faces will be collapsed while all neighbor relations will be transmitted\n"
-    "\t to the surrounding nodes of the collapsed face.",
+    "\t to the surrounding nodes of the collapsed face.\n"
+    "\n"
+    "\t If the '-add-vertex-adj' flag is passed, vertex-adjacency relations are\n"
+    "\t added as AAG arcs for the faces having common vertices but no common edges.",
     //
     __FILE__, group, ENGINE_ShowAAG);
 

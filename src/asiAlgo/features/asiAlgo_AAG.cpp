@@ -215,6 +215,40 @@ void asiAlgo_AAG::PopSubgraphs()
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AAG::AddVertexAdjacencyArcs()
+{
+  const TopTools_IndexedDataMapOfShapeListOfShape&
+    vertsFaces = this->RequestMapOfVerticesFaces();
+
+  asiAlgo_AdjacencyMx::t_mx& mx = m_neighborsStack.top().mx;
+
+  for ( int v = 1; v <= vertsFaces.Extent(); ++v )
+  {
+    const TopoDS_Shape&         V     = vertsFaces.FindKey(v);
+    const TopTools_ListOfShape& faces = vertsFaces.FindFromKey(V);
+
+    for ( TopTools_ListOfShape::Iterator fit1(faces); fit1.More(); fit1.Next() )
+    {
+      const int f1 = this->GetFaceId( TopoDS::Face( fit1.Value() ) );
+
+      for ( TopTools_ListOfShape::Iterator fit2(faces); fit2.More(); fit2.Next() )
+      {
+        const int f2 = this->GetFaceId( TopoDS::Face( fit2.Value() ) );
+
+        if ( this->HasArc( t_arc(f1, f2) ) ) 
+          continue;
+
+        asiAlgo_Feature* pRow = mx.ChangeSeek(f1);
+        //
+        if ( pRow )
+          pRow->Add(f2);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 const TopoDS_Shape& asiAlgo_AAG::GetMasterShape() const
 {
   return m_master;
@@ -413,6 +447,37 @@ asiAlgo_Feature
   }
 
   return result;
+}
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_Feature
+  asiAlgo_AAG::GetNeighborsThruVerts(const t_topoId face_idx)
+{
+  asiAlgo_Feature res;
+
+  const TopoDS_Face& face = this->GetFace(face_idx);
+
+  const TopTools_IndexedDataMapOfShapeListOfShape&
+    vertsFaces = this->RequestMapOfVerticesFaces();
+
+  for ( TopExp_Explorer vexp(face, TopAbs_VERTEX); vexp.More(); vexp.Next() )
+  {
+    const TopoDS_Shape&         V     = vexp.Current();
+    const TopTools_ListOfShape& faces = vertsFaces.FindFromKey(V);
+
+    for ( TopTools_ListOfShape::Iterator fit(faces); fit.More(); fit.Next() )
+    {
+      const int nid = this->GetFaceId( TopoDS::Face( fit.Value() ) );
+      //
+      if ( nid == face_idx )
+        continue;
+
+      res.Add(nid);
+    }
+  }
+
+  return res;
 }
 
 //-----------------------------------------------------------------------------

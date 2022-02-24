@@ -60,6 +60,8 @@ The following figure gives an example of AAG built for a synthetic model.
 
 <div align="center"><img src="../imgs/aag_illustration.png"/></div>
 
+<h2>Motivation</h2>
+
 <p>AAG is a convenient shape descriptor. It serves the following purposes:</p>
 
 <ol>
@@ -77,6 +79,30 @@ The following figure gives an example of AAG built for a synthetic model.
 </ol>
 
 <div align="center"><img src="../imgs/aag_example.png"/></div>
+
+<h2>Adjacency relationship</h2>
+
+<p>
+  Adjacency relationships between faces is expressed by graph links (arcs) connecting the corresponding graph nodes. A link exists if there is at least one common edge between a couple of faces. If the faces share more than one edge, there is still exactly one link in the graph, although the corresponding edges are cached in one of the arc attributes. Therefore, AAG captures the edge-based connectivity of a model.
+</p>
+
+<p>
+  It might sometimes be useful to add extra arcs to the graph to represent vertex-adjacency relationships. A vertex-adjacency relationship is a situation when two faces have a common vertex and no common edges. For example, this can be a situation at a vertex blend.
+</p>
+
+<div align="center"><img src="../imgs/aag-vertex-adjacency_01.png"/></div>
+
+<p>
+  AAG does not capture such vertex-based adjacency relations, but the corresponding arcs can be added on demand. The following picture illustrates an AAG built with edge-adjacency arcs only:
+</p>
+
+<div align="center"><img src="../imgs/aag-vertex-adjacency_02.png"/></div>
+
+<p>
+  Adding the vertex-adjacency relations makes the graph more complex as the following image shows (gray arcs). Notice also that the convexity attributes are not computed as there is no edge to assess the dihedral angle for:
+</p>
+
+<div align="center"><img src="../imgs/aag-vertex-adjacency_03.png"/></div>
 
 <h1>Dumping to JSON</h1>
 

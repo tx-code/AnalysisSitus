@@ -425,6 +425,14 @@ public:
 
 public:
 
+  //! By default, AAG stores only the adjacency relationships realized over
+  //! the edges of a model. In some situations, it might be necessary to
+  //! consider vertex-adjacent relationships as well (when two faces share
+  //! a vertex while having no common edge). Call this method to add the
+  //! corresponding graph links.
+  asiAlgo_EXPORT void
+    AddVertexAdjacencyArcs();
+
   //! \return master CAD shape.
   asiAlgo_EXPORT const TopoDS_Shape&
     GetMasterShape() const;
@@ -515,6 +523,13 @@ public:
   asiAlgo_EXPORT asiAlgo_Feature
     GetNeighborsThruX(const t_topoId         face_idx,
                       const asiAlgo_Feature& xEdges);
+
+  //! Returns the vertex-adjacent neighbors for the face having the given
+  //! internal index.
+  //! \param[in] face_idx face index.
+  //! \return indices of the neighbor faces.
+  asiAlgo_EXPORT asiAlgo_Feature
+    GetNeighborsThruVerts(const t_topoId face_idx);
 
   //! Returns full collection of neighbor faces.
   //! \return neighborhood data.
