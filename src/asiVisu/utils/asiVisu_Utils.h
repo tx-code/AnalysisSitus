@@ -335,6 +335,11 @@ public:
         greenF = 0.0;
         blueF  = 1.0;
         break;
+      case FeatureAngleType_NonManifold:
+        redF   = 0.0;
+        greenF = 1.0;
+        blueF  = 1.0;
+        break;
       case FeatureAngleType_Undefined:
       default:
         redF   = 1.0;

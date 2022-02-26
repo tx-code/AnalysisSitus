@@ -89,9 +89,6 @@
   PAUSE \
   return 1;
 
-#define PRINT_DECOR \
-  std::cout << "------------------------------------------------------------" << std::endl;
-
 #undef TEST_DEBUG
 #if defined TEST_DEBUG
   #pragma message("===== warning: TEST_DEBUG is enabled")

@@ -234,14 +234,32 @@ void asiAlgo_AAG::AddVertexAdjacencyArcs()
       for ( TopTools_ListOfShape::Iterator fit2(faces); fit2.More(); fit2.Next() )
       {
         const int f2 = this->GetFaceId( TopoDS::Face( fit2.Value() ) );
+        //
+        if ( f1 == f2 )
+          continue;
 
-        if ( this->HasArc( t_arc(f1, f2) ) ) 
+        t_arc arc(f1, f2);
+
+        if ( this->HasArc(arc) )
           continue;
 
         asiAlgo_Feature* pRow = mx.ChangeSeek(f1);
         //
         if ( pRow )
+        {
           pRow->Add(f2);
+
+          // Create attribute.
+          if ( !m_arcAttributes.IsBound(arc) )
+          {
+            Handle(asiAlgo_FeatureAttr)
+              attrAngle = new asiAlgo_FeatureAttrAngle(FeatureAngleType_NonManifold, 0.);
+            //
+            attrAngle->setAAG(this);
+            //
+            m_arcAttributes.Bind(arc, attrAngle);
+          }
+        }
       }
     }
   }
@@ -1101,14 +1119,13 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
    *             /|\
    *            / | \
    *           /  |  \
-   *       f1 o   |   o f3
+   *       f1 o---+---o f3
    *           \  |  /
    *            \ | /
    *             \|/
    *           f4 o
    *
    * It is different from the node removal result, which looks as follows:
-   *
    *
    *              o f2
    *             / \
@@ -1120,10 +1137,10 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
    *                     \
    *                      o f4
    */
-  typedef NCollection_DataMap<t_arc, asiAlgo_FeatureAngleType, t_arc> t_arcAngle;
-  typedef NCollection_DataMap<int, t_arcAngle>                        t_faceArcs;
+  typedef NCollection_Map<t_arc, t_arc>                               t_arcs;
+  typedef NCollection_DataMap<t_arc, asiAlgo_FeatureAngleType, t_arc> t_arcsAngles;
   //
-  t_faceArcs fxIncidentArcs;
+  t_arcsAngles allArcs; // Deduced angles for all processed arcs.
   //
   for ( asiAlgo_Feature::Iterator fit(faceIndices); fit.More(); fit.Next() )
   {
@@ -1135,7 +1152,6 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
     const asiAlgo_Feature& nids = mx.Find(fx);
 
     // Add all links.
-    t_arcAngle incidentArcs;
     for ( asiAlgo_Feature::Iterator nit1(nids); nit1.More(); nit1.Next() )
     {
       const int nid1 = nit1.Key();
@@ -1172,17 +1188,40 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
         {
           cmnAngle = FeatureAngleType_Convex;
         }
-        else if ( asiAlgo_FeatureAngle::IsSmooth(fxn1Angle) && asiAlgo_FeatureAngle::IsSmooth(fxn2Angle) )
+        else if ( (fxn1Angle == FeatureAngleType_Smooth) && (fxn2Angle == FeatureAngleType_Smooth) )
         {
           cmnAngle = FeatureAngleType_Smooth;
         }
+        else
+        {
+          // If one of the angles is non-manifold, we take the one which is defined.
+          if ( (fxn1Angle == FeatureAngleType_NonManifold) && (fxn2Angle != FeatureAngleType_NonManifold) )
+            cmnAngle = fxn2Angle;
+          else if ( (fxn2Angle == FeatureAngleType_NonManifold) && (fxn1Angle != FeatureAngleType_NonManifold) )
+            cmnAngle = fxn1Angle;
+        }
 
-        incidentArcs.Bind( t_arc(nid1, nid2), cmnAngle );
+        t_arc arc(nid1, nid2);
+
+        // Check if the dihedral angle for the current arc exists and, if yes, whether
+        // it can be precised, so that we do not end up with the "undefined" type if
+        // there's a better take on that angle. The ambiguity of the angle definition
+        // can be induced by vertex-adjacency links.
+        asiAlgo_FeatureAngleType* pAngType = allArcs.ChangeSeek(arc);
+        //
+        if ( !pAngType || (*pAngType == FeatureAngleType_Undefined && cmnAngle != FeatureAngleType_Undefined) )
+        {
+          if ( !pAngType )
+          {
+            allArcs.Bind(arc, cmnAngle);
+          }
+          else
+          {
+            *pAngType = cmnAngle;
+          }
+        }
       }
     }
-
-    // Bind the arcs for `fx`.
-    fxIncidentArcs.Bind(fx, incidentArcs);
 
     /* Remove `fx` faces from the incidence matrix. */
     asiAlgo_Feature* mapPtr = nullptr;
@@ -1206,39 +1245,48 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
   }
 
   /* Add incidence relations to restore. */
-  for ( t_faceArcs::Iterator it(fxIncidentArcs); it.More(); it.Next() )
+  for ( t_arcsAngles::Iterator it(allArcs); it.More(); it.Next() )
   {
-    const t_arcAngle& arcs = it.Value();
+    const t_arc&                   arc     = it.Key();
+    const asiAlgo_FeatureAngleType angType = it.Value();
 
-    for ( t_arcAngle::Iterator ait(arcs); ait.More(); ait.Next() )
+    // Add F2 to F1 incidence list.
     {
-      const t_arc&                   arc     = ait.Key();
-      const asiAlgo_FeatureAngleType angType = ait.Value();
+      asiAlgo_Feature* mapPtr = mx.ChangeSeek(arc.F1);
+      if ( mapPtr != nullptr )
+        mapPtr->Add(arc.F2);
+    }
 
-      // Add F2 to F1 incidence list.
-      {
-        asiAlgo_Feature* mapPtr = mx.ChangeSeek(arc.F1);
-        if ( mapPtr != nullptr )
-          mapPtr->Add(arc.F2);
-      }
+    // Add F1 to F2 incidence list.
+    {
+      asiAlgo_Feature* mapPtr = mx.ChangeSeek(arc.F2);
+      if ( mapPtr != nullptr )
+        mapPtr->Add(arc.F1);
+    }
 
-      // Add F1 to F2 incidence list.
-      {
-        asiAlgo_Feature* mapPtr = mx.ChangeSeek(arc.F2);
-        if ( mapPtr != nullptr )
-          mapPtr->Add(arc.F1);
-      }
+    // Create attribute. If there was already a link between F1 and F2, then
+    // we do not override it, because the remaining link corresponds to the
+    // common edge between two faces, which should still be Ok after collapse.
+    Handle(asiAlgo_FeatureAttr)* pArcAttr = m_arcAttributes.ChangeSeek(arc);
+    //
+    if ( !pArcAttr )
+    {
+      Handle(asiAlgo_FeatureAttr)
+        attrAngle = new asiAlgo_FeatureAttrAngle(angType, 0.);
+      //
+      attrAngle->setAAG(this);
+      //
+      m_arcAttributes.Bind(arc, attrAngle);
+    }
+    else
+    {
+      Handle(asiAlgo_FeatureAttrAngle)
+        attrAngle = Handle(asiAlgo_FeatureAttrAngle)::DownCast(*pArcAttr);
 
-      // Create attribute.
-      if ( !m_arcAttributes.IsBound(arc) )
-      {
-        Handle(asiAlgo_FeatureAttr)
-          attrAngle = new asiAlgo_FeatureAttrAngle(angType, 0.);
-        //
-        attrAngle->setAAG(this);
-        //
-        m_arcAttributes.Bind(arc, attrAngle);
-      }
+      // Override the possibly existing virtual link due to other Collapse()
+      // invocations.
+      if ( attrAngle->GetAngleType() != angType )
+        attrAngle->SetAngleType(angType);
     }
   }
 }

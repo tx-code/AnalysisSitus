@@ -47,6 +47,7 @@ enum asiAlgo_FeatureAngleType
   FeatureAngleType_Smooth        =  2,
   FeatureAngleType_SmoothConcave =  3,
   FeatureAngleType_SmoothConvex  =  4,
+  FeatureAngleType_NonManifold   =  5,
   //
   FeatureAngleType_LAST
 };

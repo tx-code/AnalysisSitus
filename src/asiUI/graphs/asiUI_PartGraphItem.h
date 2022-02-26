@@ -224,6 +224,8 @@ protected:
           return vtkColor4ub(190, 40, 0, 255);
         else if ( attr == FeatureAngleType_SmoothConcave )
           return vtkColor4ub(255, 10, 0, 255);
+        else if ( attr == FeatureAngleType_NonManifold )
+          return vtkColor4ub(80, 80, 250, 255);
       }
 
       // Topology graph only
