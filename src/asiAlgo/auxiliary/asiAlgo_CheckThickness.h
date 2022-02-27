@@ -47,8 +47,6 @@
 //! Utility to check thickness of a CAD part.
 class asiAlgo_CheckThickness : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_CheckThickness, ActAPI_IAlgorithm)
 
@@ -127,16 +125,38 @@ public:
     return m_fMaxThick;
   }
 
+public:
+
+  //! Sets the indices of the B-rep elements whose thickness should be analyzed.
+  //! If a subdomain is not defined, the entire input model is exposed to the
+  //! analysis.
+  //!
+  //! \param[in] subdomain the elements to cast rays from. This is an unordered
+  //!                      set of 1-based indices as returned by `TopExp::MapShapes()`.
+  asiAlgo_EXPORT void
+    SetSubdomain(const TColStd_PackedMapOfInteger& subdomain);
+
+  //! \return true if a subdomain is defined.
+  asiAlgo_EXPORT bool
+    HasSubdomain() const;
+
+  //! Checks whether the passed index is a subdomain's element.
+  //! \param[in] id the 1-based ID to check.
+  //! \return true if the passed element is contained in a subdomain.
+  asiAlgo_EXPORT bool
+    IsInSubdomain(const int id) const;
+
 protected:
 
-  Handle(asiAlgo_BVHFacets) m_bvh;          //!< BVH representation of a CAD part.
-  bool                      m_bIsCustomDir; //!< Whether to use custom direction.
+  Handle(asiAlgo_BVHFacets)  m_bvh;          //!< BVH representation of a CAD part.
+  TColStd_PackedMapOfInteger m_subdomain;    //!< Optional subdomain to narrow down the zone of interest.
+  bool                       m_bIsCustomDir; //!< Whether to use custom direction.
 #if defined USE_MOBIUS
-  mobius::t_xyz             m_customDir;    //!< Custom direction.
+  mobius::t_xyz              m_customDir;    //!< Custom direction.
 #endif
-  asiAlgo_MeshWithFields    m_resField;     //!< Mesh with a scalar field.
-  double                    m_fMinThick;    //!< Min thickness.
-  double                    m_fMaxThick;    //!< Max thickness.
+  asiAlgo_MeshWithFields     m_resField;     //!< Mesh with a scalar field.
+  double                     m_fMinThick;    //!< Min thickness.
+  double                     m_fMaxThick;    //!< Max thickness.
 
 };
 

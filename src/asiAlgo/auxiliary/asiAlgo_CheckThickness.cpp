@@ -118,6 +118,12 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     if ( !m_resField.triangulation->GetTriangle(th, t) || t.IsDeleted() )
       continue;
 
+    // Skip faces lying out of a subdomain, if any.
+    const int fid = t.GetFaceRef();
+    //
+    if ( this->HasSubdomain() && !this->IsInSubdomain(fid) )
+      continue;
+
     // Get nodes.
     poly_VertexHandle vh[3];
     t.GetVertices(vh[0], vh[1], vh[2]);
@@ -247,7 +253,9 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
 
     // Now thickness is simply a distance.
     if ( facetIdx != -1 )
+    {
       thickness = cascade::GetOpenCascadePnt(C).Distance(hit);
+    }
 
     /*if ( !m_bIsCustomDir && (tidx == 51121) )
     {
@@ -297,4 +305,25 @@ bool asiAlgo_CheckThickness::Perform_SphereMethod()
 {
   m_progress.SendLogMessage(LogErr(Normal) << "Sphere-based method is not yet implemented.");
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_CheckThickness::SetSubdomain(const TColStd_PackedMapOfInteger& subdomain)
+{
+  m_subdomain = subdomain;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_CheckThickness::HasSubdomain() const
+{
+  return !m_subdomain.IsEmpty();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_CheckThickness::IsInSubdomain(const int id) const
+{
+  return m_subdomain.Contains(id);
 }
