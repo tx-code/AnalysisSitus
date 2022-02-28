@@ -149,12 +149,19 @@
   Many scientific papers and technical reports have been published with the aim to document a well-proven feature recognition method. One of such methods consists in injecting the formalism of graph theory aimed at building up the graph-based abstraction of the recognition problem. The driving idea here consists of converting the geometric representation of a CAD part to a pure topological representation which facilitates computation.
 </p>
 
-<!--
-
 <h1 id="toc-graphbased">Graph-based feature recognition</h1>
 
-TODO
+<p>
+  Analysis Situs is mainly focused on graph-based feature recognition. In this graph-based recognition method, the initial B-rep model is enriched with a supplementary descriptor named <a href="features_aag.html">Attributed Adjacency Graph (AAG)</a>. You can read more about the benefits of using graph formalism in our paper <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a>.
+</p>
 
+<h2 id="toc-graphbased-aag-api">AAG API</h2>
+
+<p>
+  To construct AAG, use its ctor passing the <span class="code-inline">TopoDS_Shape</span> data structure as an argument.
+</p>
+
+<!--
 <h2 id="toc-graphbased-aag">Attributed Adjacency Graph (AAG)</h2>
 
 TODO

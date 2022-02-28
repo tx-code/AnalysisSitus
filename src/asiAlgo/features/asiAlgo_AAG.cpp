@@ -1180,25 +1180,32 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
         // Check for common angle.
         asiAlgo_FeatureAngleType cmnAngle = FeatureAngleType_Undefined;
         //
-        if ( asiAlgo_FeatureAngle::IsConcave(fxn1Angle) && asiAlgo_FeatureAngle::IsConcave(fxn2Angle) )
+        if ( fxn1Angle == fxn2Angle )
         {
-          cmnAngle = FeatureAngleType_Concave;
+          cmnAngle = fxn1Angle; // Reuse the same angle.
         }
-        else if ( asiAlgo_FeatureAngle::IsConvex(fxn1Angle) && asiAlgo_FeatureAngle::IsConvex(fxn2Angle) )
+        else // Or deduce the new one.
         {
-          cmnAngle = FeatureAngleType_Convex;
-        }
-        else if ( (fxn1Angle == FeatureAngleType_Smooth) && (fxn2Angle == FeatureAngleType_Smooth) )
-        {
-          cmnAngle = FeatureAngleType_Smooth;
-        }
-        else
-        {
-          // If one of the angles is non-manifold, we take the one which is defined.
-          if ( (fxn1Angle == FeatureAngleType_NonManifold) && (fxn2Angle != FeatureAngleType_NonManifold) )
-            cmnAngle = fxn2Angle;
-          else if ( (fxn2Angle == FeatureAngleType_NonManifold) && (fxn1Angle != FeatureAngleType_NonManifold) )
-            cmnAngle = fxn1Angle;
+          if ( asiAlgo_FeatureAngle::IsConcave(fxn1Angle) && asiAlgo_FeatureAngle::IsConcave(fxn2Angle) )
+          {
+            cmnAngle = FeatureAngleType_Concave;
+          }
+          else if ( asiAlgo_FeatureAngle::IsConvex(fxn1Angle) && asiAlgo_FeatureAngle::IsConvex(fxn2Angle) )
+          {
+            cmnAngle = FeatureAngleType_Convex;
+          }
+          else if ( (fxn1Angle == FeatureAngleType_Smooth) && (fxn2Angle == FeatureAngleType_Smooth) )
+          {
+            cmnAngle = FeatureAngleType_Smooth;
+          }
+          else
+          {
+            // If one of the angles is non-manifold, we take the one which is defined.
+            if ( (fxn1Angle == FeatureAngleType_NonManifold) && (fxn2Angle != FeatureAngleType_NonManifold) )
+              cmnAngle = fxn2Angle;
+            else if ( (fxn2Angle == FeatureAngleType_NonManifold) && (fxn1Angle != FeatureAngleType_NonManifold) )
+              cmnAngle = fxn1Angle;
+          }
         }
 
         t_arc arc(nid1, nid2);
@@ -1278,16 +1285,16 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
       //
       m_arcAttributes.Bind(arc, attrAngle);
     }
-    else
-    {
-      Handle(asiAlgo_FeatureAttrAngle)
-        attrAngle = Handle(asiAlgo_FeatureAttrAngle)::DownCast(*pArcAttr);
+    //else
+    //{
+    //  Handle(asiAlgo_FeatureAttrAngle)
+    //    attrAngle = Handle(asiAlgo_FeatureAttrAngle)::DownCast(*pArcAttr);
 
-      // Override the possibly existing virtual link due to other Collapse()
-      // invocations.
-      if ( attrAngle->GetAngleType() != angType )
-        attrAngle->SetAngleType(angType);
-    }
+    //  // Override the possibly existing virtual link due to other Collapse()
+    //  // invocations.
+    //  if ( attrAngle->GetAngleType() != angType )
+    //    attrAngle->SetAngleType(angType);
+    //}
   }
 }
 
