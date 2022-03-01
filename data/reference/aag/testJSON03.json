@@ -1,0 +1,54 @@
+{
+  "nodes": {
+    "1": {
+      "surface": "plane"
+    },
+    "2": {
+      "surface": "plane"
+    },
+    "4": {
+      "surface": "plane"
+    },
+    "5": {
+      "surface": "plane"
+    },
+    "6": {
+      "surface": "plane"
+    },
+    "7": {
+      "surface": "plane"
+    },
+    "8": {
+      "surface": "plane"
+    },
+    "11": {
+      "surface": "plane"
+    },
+    "12": {
+      "surface": "plane"
+    }
+  },
+  "arcs": [
+    ["1", "2", "convex", -90],
+    ["1", "4", "convex", -90],
+    ["1", "5", "convex", -90],
+    ["1", "6", "convex", -90],
+    ["1", "7", "convex", -90],
+    ["1", "8", "convex", -90],
+    ["2", "4", "convex", -90],
+    ["2", "5", "smooth concave", 0],
+    ["2", "11", "smooth concave", 0],
+    ["4", "6", "convex", -90],
+    ["4", "7", "convex", -90],
+    ["4", "11", "convex", -90],
+    ["4", "12", "convex", -90],
+    ["5", "7", "convex", -90],
+    ["5", "11", "smooth concave", 0],
+    ["6", "8", "convex", -90],
+    ["6", "12", "convex", -90],
+    ["7", "8", "convex", -90],
+    ["7", "11", "convex", -90],
+    ["7", "12", "convex", -90],
+    ["8", "12", "convex", -90]
+  ]
+}

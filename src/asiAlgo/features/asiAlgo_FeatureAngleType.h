@@ -55,6 +55,19 @@ enum asiAlgo_FeatureAngleType
 //! Auxiliary functions for dealing with feature angles.
 namespace asiAlgo_FeatureAngle
 {
+  //! Returns true if the passed angle type is definite, i.e., it is
+  //! not undefined and manifold.
+  //! \param[in] type type to check.
+  //! \return true/false.
+  inline bool IsDefinite(const asiAlgo_FeatureAngleType type)
+  {
+    if ( type == FeatureAngleType_Undefined ||
+         type == FeatureAngleType_NonManifold )
+      return false;
+
+    return true;
+  }
+
   //! Returns true if the passed angle type is a smooth angle.
   //! \param[in] type type to check.
   //! \return true/false.

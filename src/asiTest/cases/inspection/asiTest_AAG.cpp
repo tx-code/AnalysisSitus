@@ -52,9 +52,13 @@
 #define filename_brep_004 "cad/blends/0006_3boxesblend_06.brep"
 #define filename_brep_005 "cad/blends/0028_customblend_04.brep"
 #define filename_brep_006 "cad/blends/0038_nist_ctc_01_asme1_ap242.brep"
+#define filename_brep_007 "cad/blends/box-corner-cut-fillet.brep"
 //
 #define filename_json_001 "reference/aag/testJSON01.json"
 #define filename_json_002 "reference/aag/testJSON02.json"
+#define filename_json_003 "reference/aag/testJSON03.json"
+#define filename_json_004 "reference/aag/testJSON04.json"
+#define filename_json_005 "reference/aag/testJSON05.json"
 
 //-----------------------------------------------------------------------------
 
@@ -155,9 +159,9 @@ outcome asiTest_AAG::testAllNeighborsIterator(const int               funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testAAG2JSON(const int   funcID,
-                                  const char* shortFilename,
-                                  const char* shortFilenameRef)
+outcome asiTest_AAG::testAAG2JSON(const int                  funcID,
+                                  const Handle(asiAlgo_AAG)& aag,
+                                  const char*                shortFilenameRef)
 {
   // Prepare outcome.
   outcome res(DescriptionFn(), funcID);
@@ -165,37 +169,11 @@ outcome asiTest_AAG::testAAG2JSON(const int   funcID,
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
 
-  // Prepare AAG.
-  Handle(asiAlgo_AAG) aag;
-  //
-  if ( !prepareAAGFromFile(shortFilename, aag) )
-    return res.failure();
-
   // Dump AAG to JSON.
   std::stringstream ss;
   aag->DumpJSON(ss);
   //
   ss << "\n";
-
-#if defined FILE_DEBUG
-  std::string dumpname(shortFilename);
-  asiAlgo_Utils::Str::ReplaceAll(dumpname, "/", "-");
-  dumpname += ".json";
-  //
-  std::ofstream filestream(dumpname);
-  //
-  if ( !filestream.is_open() )
-  {
-    cf->Progress.SendLogMessage(LogErr(Normal) << "FILE_DEBUG: file cannot be opened.");
-    return res.failure();
-  }
-  //
-  aag->DumpJSON(filestream);
-  //
-  filestream << "\n";
-  //
-  filestream.close();
-#endif
 
   // Read JSON from file.
   std::string
@@ -217,6 +195,49 @@ outcome asiTest_AAG::testAAG2JSON(const int   funcID,
   }
 
   return res.success();
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_AAG::testAAG2JSON(const int   funcID,
+                                  const char* shortFilename,
+                                  const char* shortFilenameRef)
+{
+  // Prepare outcome.
+  outcome res(DescriptionFn(), funcID);
+
+  // Get common facilities.
+  Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
+
+  // Prepare AAG.
+  Handle(asiAlgo_AAG) aag;
+  //
+  if ( !prepareAAGFromFile(shortFilename, aag) )
+    return res.failure();
+
+  res = testAAG2JSON(funcID, aag, shortFilenameRef);
+
+#if defined FILE_DEBUG
+  std::string dumpname(shortFilename);
+  asiAlgo_Utils::Str::ReplaceAll(dumpname, "/", "-");
+  dumpname += ".json";
+  //
+  std::ofstream filestream(dumpname);
+  //
+  if ( !filestream.is_open() )
+  {
+    cf->Progress.SendLogMessage(LogErr(Normal) << "FILE_DEBUG: file cannot be opened.");
+    return res.failure();
+  }
+  //
+  aag->DumpJSON(filestream);
+  //
+  filestream << "\n";
+  //
+  filestream.close();
+#endif
+
+  return res;
 }
 
 //-----------------------------------------------------------------------------
@@ -249,6 +270,37 @@ outcome asiTest_AAG::testAAGIndices(const int           funcID,
     return res.failure();
 
   return res.success();
+}
+
+//-----------------------------------------------------------------------------
+
+outcome
+  asiTest_AAG::testAAGCollapse(const int              funcID,
+                               const TopoDS_Shape&    shape,
+                               const asiAlgo_Feature& fids,
+                               const bool             addVertexAdj,
+                               const char*            shortFilenameRef)
+{
+  // Get common facilities.
+  Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
+
+  // Prepare outcome.
+  outcome res(DescriptionFn(), funcID);
+
+  // Prepare AAG.
+  Handle(asiAlgo_AAG) aag = new asiAlgo_AAG(shape, false);
+
+  // Add vertex-adjacent relations, if requested.
+  if ( addVertexAdj )
+    aag->AddVertexAdjacencyArcs();
+
+  // Collapse the passed faces.
+  aag->Collapse(fids);
+
+  // Verify by comparing JSON dump with the reference JSON.
+  res = testAAG2JSON(funcID, aag, shortFilenameRef);
+
+  return res;
 }
 
 //-----------------------------------------------------------------------------
@@ -434,4 +486,43 @@ outcome asiTest_AAG::testNaming03(const int funcID)
 outcome asiTest_AAG::testNaming04(const int funcID)
 {
   return testAAGIndices( funcID, readBRep(filename_brep_006) );
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_AAG::testCollapse01(const int funcID)
+{
+  // 3 9 10 13
+  TopoDS_Shape shape = readBRep(filename_brep_007);
+
+  asiAlgo_Feature fids2Collapse;
+  fids2Collapse.Add(3);
+  fids2Collapse.Add(9);
+  fids2Collapse.Add(10);
+  fids2Collapse.Add(13);
+
+  return testAAGCollapse(funcID, shape, fids2Collapse, false, filename_json_003);
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_AAG::testCollapse02(const int funcID)
+{
+  TopoDS_Shape shape = readBRep(filename_brep_007);
+
+  asiAlgo_Feature fids2Collapse;
+  fids2Collapse.Add(10);
+
+  return testAAGCollapse(funcID, shape, fids2Collapse, false, filename_json_004);
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_AAG::testCollapse03(const int funcID)
+{
+  TopoDS_Shape shape = readBRep(filename_brep_007);
+
+  asiAlgo_Feature fids2Collapse;
+
+  return testAAGCollapse(funcID, shape, fids2Collapse, true, filename_json_005);
 }

@@ -3050,11 +3050,6 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
 {
-  if ( argc != 1 && argc != 2 && argc != 3 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   if ( !cmdEngine::cf || !cmdEngine::cf->ViewerPart )
   {
     interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Part viewer is not available.");
@@ -3066,6 +3061,10 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
   const bool collapseSelected = interp->HasKeyword(argc, argv, "collapse-sel");
   const bool addVertAdj       = interp->HasKeyword(argc, argv, "add-vertex-adj");
   const bool copyGraph        = collapseSelected || addVertAdj;
+
+  // CHeck if there is a filename for JSON dump.
+  std::string filename;
+  const bool doDumpFs = interp->GetKeyValue(argc, argv, "filename", filename);
 
   // Get part.
   Handle(asiData_PartNode) part_n;
@@ -3111,6 +3110,25 @@ int ENGINE_ShowAAG(const Handle(asiTcl_Interp)& interp,
   //
   pGraphView->RenderAdjacency(aag);
 
+  // Dump to file.
+  if ( doDumpFs )
+  {
+    std::ofstream filestream(filename);
+    //
+    if ( !filestream.is_open() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "File '%1' cannot be opened for writing."
+                                                          << filename);
+      return TCL_ERROR;
+    }
+    //
+    aag->DumpJSON(filestream);
+    filestream << "\n";
+    //
+    filestream.close();
+  }
+
+  // Undo modifications.
   if ( removeSelected || copyGraph )
   {
     aag->PopSubgraph();
@@ -4471,7 +4489,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("show-aag",
     //
-    "show-aag [-remove-sel] [-collapse-sel] [-add-vertex-adj]\n"
+    "show-aag [-remove-sel] [-collapse-sel] [-add-vertex-adj] [-filename <json-filename>]\n"
     "\t Visualizes AAG for the active part. If the '-remove-sel' flag is passed,\n"
     "\t the selected faces will be excluded from the AAG with all their incident\n"
     "\t arcs. If the '-collapse-sel' flag is passed, the AAG nodes of the selected\n"
@@ -4479,7 +4497,11 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t to the surrounding nodes of the collapsed face.\n"
     "\n"
     "\t If the '-add-vertex-adj' flag is passed, vertex-adjacency relations are\n"
-    "\t added as AAG arcs for the faces having common vertices but no common edges.",
+    "\t added as AAG arcs for the faces having common vertices but no common edges.\n"
+    "\n"
+    "\t Use the '-filename' option followed by a JSON filename to dump the visualized\n"
+    "\t AAG with all applied modifiers (collapse, delete, added vertex-adjacency arcs)\n"
+    "\t to a JSON file.",
     //
     __FILE__, group, ENGINE_ShowAAG);
 

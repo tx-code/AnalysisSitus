@@ -671,7 +671,8 @@ int ENGINE_DumpAAGJSON(const Handle(asiTcl_Interp)& interp,
   //
   if ( !filestream.is_open() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "FILE_DEBUG: file cannot be opened.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "File '%1' cannot be opened for writing."
+                                                        << argv[1]);
     return TCL_ERROR;
   }
   //

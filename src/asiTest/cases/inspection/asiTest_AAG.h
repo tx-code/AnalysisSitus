@@ -84,6 +84,9 @@ public:
               << &testNaming02
               << &testNaming03
               << &testNaming04
+              << &testCollapse01
+              << &testCollapse02
+              << &testCollapse03
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -103,6 +106,11 @@ private:
                              const std::vector<int>& refFaceIds);
 
   static outcome
+    testAAG2JSON(const int                  funcID,
+                 const Handle(asiAlgo_AAG)& aag,
+                 const char*                shortFilenameRef);
+
+  static outcome
     testAAG2JSON(const int   funcID,
                  const char* shortFilename,
                  const char* shortFilenameRef);
@@ -110,6 +118,13 @@ private:
   static outcome
     testAAGIndices(const int           funcID,
                    const TopoDS_Shape& shape);
+
+  static outcome
+    testAAGCollapse(const int              funcID,
+                    const TopoDS_Shape&    shape,
+                    const asiAlgo_Feature& fids,
+                    const bool             addVertexAdj,
+                    const char*            shortFilenameRef);
 
   static bool
     checkNamesVersusIds(const Handle(asiAlgo_AAG)&    aag,
@@ -134,6 +149,9 @@ private:
   static outcome testNaming02             (const int funcID);
   static outcome testNaming03             (const int funcID);
   static outcome testNaming04             (const int funcID);
+  static outcome testCollapse01           (const int funcID);
+  static outcome testCollapse02           (const int funcID);
+  static outcome testCollapse03           (const int funcID);
 
 };
 

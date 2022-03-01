@@ -1091,6 +1091,9 @@ void asiAlgo_AAG::Collapse(const int fid)
 
 void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
 {
+  if ( faceIndices.IsEmpty() )
+    return; // Nothing to collapse.
+
   asiAlgo_AdjacencyMx::t_mx& mx = m_neighborsStack.top().mx;
 
   /*
@@ -1216,7 +1219,8 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
         // can be induced by vertex-adjacency links.
         asiAlgo_FeatureAngleType* pAngType = allArcs.ChangeSeek(arc);
         //
-        if ( !pAngType || (*pAngType == FeatureAngleType_Undefined && cmnAngle != FeatureAngleType_Undefined) )
+        if ( !pAngType ||
+             !asiAlgo_FeatureAngle::IsDefinite(*pAngType) && asiAlgo_FeatureAngle::IsDefinite(cmnAngle) )
         {
           if ( !pAngType )
           {
@@ -1844,6 +1848,8 @@ void asiAlgo_AAG::dumpArcJSON(const t_arc&      arc,
     angleTypeStr = "smooth concave";
   else if ( arcAttrAngle->GetAngleType() == FeatureAngleType_SmoothConvex )
     angleTypeStr = "smooth convex";
+  else if ( arcAttrAngle->GetAngleType() == FeatureAngleType_NonManifold )
+    angleTypeStr = "non-manifold";
   else
     angleTypeStr = "undefined";
 

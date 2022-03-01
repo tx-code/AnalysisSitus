@@ -1,0 +1,72 @@
+{
+  "nodes": {
+    "1": {
+      "surface": "plane"
+    },
+    "2": {
+      "surface": "plane"
+    },
+    "3": {
+      "surface": "cylinder"
+    },
+    "4": {
+      "surface": "plane"
+    },
+    "5": {
+      "surface": "plane"
+    },
+    "6": {
+      "surface": "plane"
+    },
+    "7": {
+      "surface": "plane"
+    },
+    "8": {
+      "surface": "plane"
+    },
+    "9": {
+      "surface": "cylinder"
+    },
+    "11": {
+      "surface": "plane"
+    },
+    "12": {
+      "surface": "plane"
+    },
+    "13": {
+      "surface": "cylinder"
+    }
+  },
+  "arcs": [
+    ["1", "2", "convex", -90],
+    ["1", "3", "convex", -90],
+    ["1", "4", "convex", -90],
+    ["1", "5", "convex", -90],
+    ["1", "6", "convex", -90],
+    ["1", "7", "convex", -90],
+    ["1", "8", "convex", -90],
+    ["2", "3", "smooth concave", 177.71303937004993],
+    ["2", "4", "convex", -90],
+    ["2", "9", "smooth concave", 177.71303937004996],
+    ["3", "5", "smooth concave", 177.71303937004993],
+    ["3", "9", "smooth concave", 0],
+    ["3", "13", "smooth concave", 0],
+    ["4", "6", "convex", -90],
+    ["4", "7", "convex", -90],
+    ["4", "9", "convex", -90],
+    ["4", "11", "convex", -90],
+    ["4", "12", "convex", -90],
+    ["5", "7", "convex", -90],
+    ["5", "13", "smooth concave", 177.71303937004993],
+    ["6", "8", "convex", -90],
+    ["6", "12", "convex", -90],
+    ["7", "8", "convex", -90],
+    ["7", "11", "convex", -90],
+    ["7", "12", "convex", -90],
+    ["7", "13", "convex", -90],
+    ["8", "12", "convex", -90],
+    ["9", "11", "smooth concave", 177.71303937004993],
+    ["9", "13", "smooth concave", 0],
+    ["11", "13", "smooth concave", 177.71303937004993]
+  ]
+}
