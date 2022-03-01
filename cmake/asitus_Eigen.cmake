@@ -1,7 +1,10 @@
 message (STATUS "Processing Eigen 3-rd party")
 
+set (EIGEN3_INCLUDE_DIR "")
+
 if (WIN32)
   ASITUS_FIND_PRODUCT_DIR ("${3RDPARTY_DIR}" "eigen" EIGEN_DIR)
+  set (EIGEN3_INCLUDE_DIR "${3RDPARTY_DIR}/${EIGEN_DIR}")
 else()
   find_package (Eigen3 REQUIRED)
   include_directories (EIGEN3_INCLUDE_DIR)
