@@ -1833,6 +1833,39 @@ namespace asiAlgo_Utils
                  const double              tol,
                  ActAPI_PlotterEntry       plotter = nullptr);
 
+  //! Returns a set of points presumably lying on the given face.
+  //! \param[in]  face the face in question.
+  //! \param[out] pts  the sampled points on a face.
+  asiAlgo_EXPORT void
+    GetFacePoints(const TopoDS_Face&   face,
+                  std::vector<gp_XYZ>& pts);
+
+  //! Checks if the passed face is internal or external, depending
+  //! on its norm field orientation.
+  //! \param[in] face     the face to check.
+  //! \param[in] diameter the presumably known diameter.
+  //! \param[in] ax       the presumably known axis.
+  //! \return true for internal, false for external.
+  asiAlgo_EXPORT bool
+    IsInternal(const TopoDS_Face& face,
+               const double       diameter,
+               const gp_Ax1&      ax);
+
+  //! Checks if the passed face is internal or external, depending
+  //! on its norm field orientation.
+  //! \param[in] face     the face to check.
+  //! \param[in] diameter the presumably known diameter.
+  //! \param[in] u        the U coordinate of the probe point on the face of interest.
+  //! \param[in] v        the V coordinate of the probe point on the face of interest.
+  //! \param[in] ax       the presumably known axis.
+  //! \return true for internal, false for external.
+  asiAlgo_EXPORT bool
+    IsInternal(const TopoDS_Face& face,
+               const double       diameter,
+               const double       u,
+               const double       v,
+               const gp_Ax1&      ax);
+
 } // asiAlgo_Utils namespace.
 
 #endif

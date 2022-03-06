@@ -67,6 +67,7 @@
 #include <BRep_Builder.hxx>
 #include <BRep_GCurve.hxx>
 #include <BRep_TEdge.hxx>
+#include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo_Common.hxx>
 #include <BRepAlgoAPI_Common.hxx>
@@ -5212,4 +5213,75 @@ bool asiAlgo_Utils::IsOnCylinder(const Handle(Geom_Curve)& curve,
   }
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
+                                  std::vector<gp_XYZ>& pts)
+{
+  TopTools_IndexedMapOfShape faceVerts;
+  TopExp::MapShapes(face, TopAbs_VERTEX, faceVerts);
+  //
+  for ( int v = 1; v <= faceVerts.Extent(); ++v )
+    pts.push_back(BRep_Tool::Pnt(TopoDS::Vertex(faceVerts(v))).XYZ());
+
+  // Add midpoints from edges.
+  TopTools_IndexedMapOfShape faceEdges;
+  TopExp::MapShapes(face, TopAbs_EDGE, faceEdges);
+  //
+  for ( int e = 1; e <= faceEdges.Extent(); ++e )
+  {
+    BRepAdaptor_Curve bac(TopoDS::Edge(faceEdges(e)));
+    pts.push_back(bac.Value(( bac.FirstParameter() + bac.LastParameter() ) * 0.5).XYZ());
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
+                               const double       diameter,
+                               const gp_Ax1&      ax)
+{
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+  return IsInternal(face, diameter, (uMin + uMax)*0.5, (vMin + vMax)*0.5, ax);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
+                               const double       diameter,
+                               const double       u,
+                               const double       v,
+                               const gp_Ax1&      ax)
+{
+  BRepAdaptor_Surface bas(face);
+  BRepLProp_SLProps lprops( bas, u, v, 1, Precision::Confusion() );
+  //
+  if ( !lprops.IsNormalDefined() )
+    return false;
+
+  const gp_Pnt& cylPt   = lprops.Value();
+  gp_Dir        cylNorm = lprops.Normal();
+  //
+  if ( face.Orientation() == TopAbs_REVERSED )
+    cylNorm.Reverse();
+
+  // Take a probe point along the normal.
+  gp_Pnt normProbe = cylPt.XYZ() + cylNorm.XYZ()*diameter*0.05;
+
+  // Compute the distance to the axis.
+  gp_Lin axisLin(ax);
+  //
+  const double probeDist = axisLin.Distance(normProbe);
+  const double cylDist   = axisLin.Distance(cylPt);
+  //
+  if ( probeDist < cylDist )
+  {
+    return true;
+  }
+
+  return false;
 }
