@@ -53,6 +53,7 @@
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 #include <asiAlgo_WriteDXF.h>
+#include <asiAlgo_WriteSVG.h>
 
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
@@ -74,6 +75,7 @@
 
 // VTK includes
 #pragma warning(push, 0)
+#include <vtkCamera.h>
 #include <vtkXMLPolyDataWriter.h>
 #pragma warning(pop)
 
@@ -495,6 +497,82 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SaveSVG(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Get shape to export.
+  TopoDS_Shape shape;
+  std::string  varName;
+  const bool   isVar = interp->GetKeyValue(argc, argv, "var", varName);
+  //
+  if ( !isVar )
+  {
+    // Get Part Node to access shape.
+    Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+    //
+    if ( partNode.IsNull() || !partNode->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+      return TCL_ERROR;
+    }
+    //
+    shape = partNode->GetShape();
+  }
+  else
+  {
+    // Get topological variable.
+    Handle(asiData_IVTopoItemNode)
+      topoItem = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName( varName.c_str() ) );
+    //
+    if ( topoItem.IsNull() || !topoItem->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find topological object with name %1." << varName);
+      return TCL_ERROR;
+    }
+    //
+    shape = topoItem->GetShape();
+  }
+
+  // Get the output filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not provided.");
+    return TCL_ERROR;
+  }
+
+  // Get the direction of projection.
+  if ( cmdEngine::cf.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Visualization facilities are not available.");
+    return TCL_ERROR;
+  }
+
+  vtkCamera*
+    pCamera = cmdEngine::cf->ViewerPart->PrsMgr()->GetRenderer()->GetActiveCamera();
+
+  // Read orientation.
+  gp_Vec dir;
+  double dX, dY, dZ;
+  pCamera->GetViewPlaneNormal(dX, dY, dZ);
+  //
+  dir.SetX(dX);
+  dir.SetY(dY);
+  dir.SetZ(dZ);
+
+  if ( !asiAlgo_WriteSVG::Write(shape, dir, filename.c_str(), 0.1) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to save SVG.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
@@ -893,6 +971,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t Exports the part shape to glTF file <filename> with all assigned colors.",
     //
     __FILE__, group, ENGINE_SaveGLTF);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-svg",
+    //
+    "save-svg [-var <var-name>] -filename <filename>\n"
+    "\t Exports the part shape or the specified variable to SVG file <filename>.",
+    //
+    __FILE__, group, ENGINE_SaveSVG);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-facets-stl",

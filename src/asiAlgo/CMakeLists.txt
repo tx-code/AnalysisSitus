@@ -329,6 +329,7 @@ set (interop_H_FILES
   interop/asiAlgo_WriteREK.h
   interop/asiAlgo_WriteSTEPWithMeta.h
   interop/asiAlgo_WriteSTEPWithMetaInput.h
+  interop/asiAlgo_WriteSVG.h
   interop/dxf.h
 )
 set (interop_CPP_FILES
@@ -342,6 +343,7 @@ set (interop_CPP_FILES
   interop/asiAlgo_WriteDXF.cpp
   interop/asiAlgo_WriteREK.cpp
   interop/asiAlgo_WriteSTEPWithMeta.cpp
+  interop/asiAlgo_WriteSVG.cpp
   interop/dxf.cpp
   interop/dxf_plate.cpp
 )
