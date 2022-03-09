@@ -479,7 +479,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
   tl::optional<gp_Vec> axis;
   tl::optional<gp_Pnt> origin;
   tl::optional<double> diameter;
-  GeomAbs_SurfaceType  surfType = GeomAbs_OtherSurface;
   bool                 isLabeled = false;
 
   /* Cylindrical surface */
@@ -491,7 +490,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
       axis      = surfCyl->Axis().Direction();
       origin    = surfCyl->Axis().Location();
       diameter  = 2*surfCyl->Radius();
-      surfType  = GeomAbs_Cylinder;
       isLabeled = true;
     }
   }
@@ -521,7 +519,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
       axis      = coneSurf->Axis().Direction();
       origin    = coneSurf->Axis().Location();
       diameter  = 2*Handle(Geom_Circle)::DownCast(viso)->Radius();
-      surfType  = GeomAbs_Cone;
       isLabeled = true;
     }
   }
@@ -536,7 +533,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
       axis      = torusSurf->Axis().Direction();
       origin    = torusSurf->Axis().Location();
       diameter  = 2*( torusSurf->MajorRadius() + torusSurf->MinorRadius() );
-      surfType  = GeomAbs_Torus;
       isLabeled = true;
     }
   }
@@ -550,7 +546,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
     {
       axis      = revolSurf->Axis().Direction();
       origin    = revolSurf->Axis().Location();
-      surfType  = GeomAbs_SurfaceOfRevolution;
       isLabeled = true;
 
       // Derive the diameter from extreme values along generatrix.
@@ -573,7 +568,6 @@ bool asiAlgo_CheckDihedralAngle::checkSeamVexity(const gp_Pnt&      pt,
       axis      = sphereSurf->Axis().Direction();
       origin    = sphereSurf->Axis().Location();
       diameter  = 2*sphereSurf->Radius();
-      surfType  = GeomAbs_Sphere;
       isLabeled = true;
     }
   }

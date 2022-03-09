@@ -99,7 +99,8 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
 #if _WIN32
       !CreateDirectory(current_temp_dir_files().c_str(), NULL)
 #else
-      mkdir(current_temp_dir_files().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0
+      // TODO: enable tests on linux
+      //mkdir(current_temp_dir_files().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0
 #endif
     )
   {

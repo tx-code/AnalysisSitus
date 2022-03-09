@@ -1219,8 +1219,8 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
         // can be induced by vertex-adjacency links.
         asiAlgo_FeatureAngleType* pAngType = allArcs.ChangeSeek(arc);
         //
-        if ( !pAngType ||
-             !asiAlgo_FeatureAngle::IsDefinite(*pAngType) && asiAlgo_FeatureAngle::IsDefinite(cmnAngle) )
+        if (  !pAngType ||
+             (!asiAlgo_FeatureAngle::IsDefinite(*pAngType) && asiAlgo_FeatureAngle::IsDefinite(cmnAngle)) )
         {
           if ( !pAngType )
           {
