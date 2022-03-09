@@ -1140,7 +1140,6 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
    *                     \
    *                      o f4
    */
-  typedef NCollection_Map<t_arc, t_arc>                               t_arcs;
   typedef NCollection_DataMap<t_arc, asiAlgo_FeatureAngleType, t_arc> t_arcsAngles;
   //
   t_arcsAngles allArcs; // Deduced angles for all processed arcs.
