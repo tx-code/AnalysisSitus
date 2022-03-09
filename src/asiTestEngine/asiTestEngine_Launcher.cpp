@@ -95,19 +95,22 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
 
   // TODO: for Windows only (!!!)
   // Create temporary directory for files
-  if (
 #if _WIN32
-      !CreateDirectory(current_temp_dir_files().c_str(), NULL)
-#else
-      // TODO: enable tests on linux
-      //mkdir(current_temp_dir_files().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0
-#endif
-    )
+  if ( !CreateDirectory(current_temp_dir_files().c_str(), NULL) )
   {
     if ( out )
       *out << "\tFailed to create directory: " << current_temp_dir_files().c_str() << "\n";
+
     return false;
   }
+#else
+  {
+    if ( out )
+      *out << "\tTests are not yet supported on linux." << "\n";
+
+    return false;
+  }
+#endif
 
   /* ==============================
    *  Launch Test Cases one by one
