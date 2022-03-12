@@ -1140,7 +1140,18 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
    *                     \
    *                      o f4
    */
-  typedef NCollection_DataMap<t_arc, asiAlgo_FeatureAngleType, t_arc> t_arcsAngles;
+
+  // Angle type and a Boolean flag to indicate if it's trustworthy.
+  struct t_ang
+  {
+    asiAlgo_FeatureAngleType type;
+    bool                     isDefinite;
+
+    t_ang()                                          : type(FeatureAngleType_Undefined), isDefinite(false) {}
+    t_ang(asiAlgo_FeatureAngleType _type, bool _def) : type(_type),                      isDefinite(_def) {}
+  };
+
+  typedef NCollection_DataMap<t_arc, t_ang, t_arc> t_arcsAngles;
   //
   t_arcsAngles allArcs; // Deduced angles for all processed arcs.
   //
@@ -1210,24 +1221,27 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
           }
         }
 
+        const bool isAngDefinite = asiAlgo_FeatureAngle::IsDefinite(fxn1Angle) &&
+                                   asiAlgo_FeatureAngle::IsDefinite(fxn2Angle);
+
         t_arc arc(nid1, nid2);
 
         // Check if the dihedral angle for the current arc exists and, if yes, whether
         // it can be precised, so that we do not end up with the "undefined" type if
         // there's a better take on that angle. The ambiguity of the angle definition
         // can be induced by vertex-adjacency links.
-        asiAlgo_FeatureAngleType* pAngType = allArcs.ChangeSeek(arc);
+        t_ang* pAngType = allArcs.ChangeSeek(arc);
         //
-        if (  !pAngType ||
-             (!asiAlgo_FeatureAngle::IsDefinite(*pAngType) && asiAlgo_FeatureAngle::IsDefinite(cmnAngle)) )
+        if ( !pAngType )
         {
-          if ( !pAngType )
+          allArcs.Bind( arc, t_ang(cmnAngle, isAngDefinite) );
+        }
+        else
+        {
+          if ( !pAngType->isDefinite && isAngDefinite )
           {
-            allArcs.Bind(arc, cmnAngle);
-          }
-          else
-          {
-            *pAngType = cmnAngle;
+            pAngType->type       = cmnAngle;
+            pAngType->isDefinite = true;
           }
         }
       }
@@ -1258,7 +1272,7 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
   for ( t_arcsAngles::Iterator it(allArcs); it.More(); it.Next() )
   {
     const t_arc&                   arc     = it.Key();
-    const asiAlgo_FeatureAngleType angType = it.Value();
+    const asiAlgo_FeatureAngleType angType = it.Value().type;
 
     // Add F2 to F1 incidence list.
     {

@@ -151,42 +151,157 @@
 
 <h1 id="toc-graphbased">Graph-based feature recognition</h1>
 
+<h2 id="toc-graphbased-intro">Introduction</h2>
+
 <p>
   Analysis Situs is mainly focused on graph-based feature recognition. In this graph-based recognition method, the initial B-rep model is enriched with a supplementary descriptor named <a href="features_aag.html">Attributed Adjacency Graph (AAG)</a>. You can read more about the benefits of using graph formalism in our paper <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a>.
+</p>
+
+<p>
+  AAG was introduced as a concept back in eighties. You can read a paper by <a href="../references.html#joshi-chang-1988">[Joshi and Chang, 1988]</a> where they describe how an adjacency graph can help in the recognition of subtractive features, such as slots or steps.
+</p>
+
+<div align="center"><img src="../imgs/joshi-chang.png"/></div>
+
+<p>
+  AAG captures the neighborhood relation between the CAD faces. It does not matter how many edges the given two faces have in common: it the terms of adjacency, the graph nodes corresponding to those faces will have exactly one undirected arc in between. Then, there are attributes on the graph. The minimal information required for feature recognition is a Boolean flag indicating if the corresponding <a href="./features_check-dih-angles.html">dihedral angle</a> is concave or convex. The following image illustrates AAG of a box shape. We use a color code to denote the dihedral angle type (green for convex and red for concave).
+</p>
+
+<div align="center"><img src="../imgs/aag-box.png"/></div>
+
+<p class="note">
+  People apply different techniques for feature recognition. You're not obliged to use AAG. A more simple technique would be scanning your model like we mentioned before, and this way to use the same neighborhood relations between the B-rep entities without abstracting them to a graph structure. Iterating through B-rep faces, you can consult the types of surfaces, the corresponding normal fields, orientations, etc. Such techniques are based on programmatic rules (C++ logic) and do not take advantage of graph formalism in explicit form. The main reason of introducing AAG in Analysis Situs was to abstract topology from geometry and this way switch from geometry to the language of graphs. In the terms of graph theory, a feature is then a subgraph of an AAG.
+</p>
+
+<p>
+  The idea of graph-based feature recognition is finding features as subgraphs of AAG. This is basically what Analysis Situs was originally designed for: adding feature recognition logic on top of OpenCascade kernel. The following tools of graph theory become available with an AAG at hand:
+</p>
+
+<ol>
+  <li>Finding <a href="./features_find-isomorphous-faces.html">isomorphous</a> subgraphs.</li>
+  <li>Analysis of connected components.</li>
+  <li>Virtual (topology-only) defeaturing done barely of a graph without affecting the model.</li>
+</ol>
+
+<div align="center"><img src="../imgs/aag-box-fillets.png"/></div>
+
+<p>
+  The following image illustrates an application of AAG to the recognition of sheet metal parts. We can exploit the fact that removing all thickness faces in a part separates the graph onto two connected components corresponding to the upper and lower sides of a two-sided part.
+</p>
+
+<div align="center"><img src="../imgs/aag-sm.png"/></div>
+
+<p>
+  In the same way, if we keep only the thickness faces in the graph, we will see a specific circuit pattern in the corresponding subgraph. We can then check if each node of the graph has two incident arcs and the ring is closed. If so, we can conclude that we found a train of thickness faces.
+</p>
+
+<div align="center"><img src="../imgs/aag-sm-thickness.png"/></div>
+
+<p>
+  Each node of the AAG has a 1-based index corresponding to the index of a face in Analysis Situs. AAG is represented with an adjacency matrix.
+</p>
+
+<h2 id="toc-graphbased-aag-output">Feature recognition output</h2>
+
+<p>
+  If we managed to find a subgraph of AAG corresponding to a certain feature, we should be able to output it as a result. A feature is essentially a <a href="./features_recognition-anatomy-of-feature.html">set of indices</a> that can be easily serialized to any persistent storage, e.g., a file.
+</p>
+
+<div align="center"><img src="../imgs/featrec-result.png"/></div>
+
+<p>
+  Keep in mind that any modification of the input geometry invalidates the reported indices. However, if you do not modify your geometry, the feature indices are guaranteed to stay the same on loading/writing your CAD data from/to file.
 </p>
 
 <h2 id="toc-graphbased-aag-api">AAG API</h2>
 
 <p>
-  To construct AAG, use its ctor passing the <span class="code-inline">TopoDS_Shape</span> data structure as an argument.
+  To construct AAG, use the ctor of <span class="code-inline">asiAlgo_AAG</span> class passing there the <span class="code-inline">TopoDS_Shape</span> data structure as an argument. At construction time, the AAG will index your topology to assign a unique 1-based index with each face. Other exploration maps can be requested by explicit invocations, such as of <span class="code-inline">asiAlgo_AAG::RequestMapOf*()</span>. At construction time, the graph is build and the dihedral angle attributes are associated with the graph arcs.
 </p>
 
-<!--
-<h2 id="toc-graphbased-aag">Attributed Adjacency Graph (AAG)</h2>
+<div class="code">
+  Handle(asiAlgo_AAG) aag = new asiAlgo_AAG(shape);
+</div>
 
-TODO
+<p>
+  AAG is constructed on a heap memory. As you can see, it is a handled class, i.e., it is manipulated by the OpenCascade handle. Once the AAG handle goes out of scope, it decrements the reference counter in the AAG object, and the graph is automatically destructed. This means that you're not supposed to call the destructor explicitly.
+</p>
 
-<h2 id="toc-graphbased-iso">Finding isomorphous faces</h2>
+<p class="note">
+  It should be noted that any geometric modification done on your CAD model invalidates its AAG. E.g., if you remove a feature from your part, you should forget about the existing AAG and construct a new one. Therefore, AAG is valid as long as your CAD geometry remains "frozen."
+</p>
 
-TODO
+<p>
+  In the terms of code architecture, a good practice would be to pass the same instance of AAG through all recognizers you happen to implement in your software: e.g., the recognizers of drilled holes, chamfers, fillets, etc., would all work on the same instance of the graph.
+</p>
 
-<h1 id="toc-integration">Integration notes</h1>
+<p>
+  To access the initial shape from AAG, use its <span class="code-inline">asiAlgo_AAG::GetMasterShape()</span> method. You can always dump the contents of your AAG to a text stream calling its <span class="code-inline">asiAlgo_AAG::DumpJSON()</span> method.
+</p>
 
-TODO
+<pre class="code">
+std::string filename = "C:/tmp/dump.json";
+std::ofstream filestream(filename);
+//
+if ( !filestream.is_open() )
+  return 1; // Error.
+  
+aag->DumpJSON(filestream);
+filestream.close();
+</pre>
 
-<h2 id="toc-integration-app">Application</h2>
+<p>
+  The AAG data structure stores a stack of adjacency matrices representing its states. This stack allows for temporary reducing the entire graph to subgraphs. For example, if you want to keep only specific nodes in the graph, you can use the push/pop API provided by AAG.
+</p>
 
-TODO
+<div align="center"><img src="../imgs/aag-stack.png"/></div>
 
-<h2 id="toc-integration-sdk">Software Development Kit</h2>
+<p>
+  The following code demonstrates how one can extract all connected components in a subgraph represented by <span class="code-inline">feature</span> variable. In the code below, the feature indices are selected arbitrarily. In reality, these indices could come from some other recognition algorithms or even be selected by the user interactively.
+</p>
 
-TODO
+<pre class="code">
+asiAlgo_Feature feature;
+//
+feature.Add(10);
+feature.Add(20);
+feature.Add(13);
+// ...
+  
+aag->PushSubgraph(feature);
+{
+  std::vector&lt;asiAlgo_Feature&gt; ccomps;
+  aag->GetConnectedComponents(ccomps);
 
-<h2 id="toc-integration-services">Custom development services</h2>
+  // Iterate the connected components.
+  for ( const auto& ccomp : ccomps )
+  {
+    // Do something...
+  }
+}
+aag->PopSubgraph();
+</pre>
 
-TODO
+<p>
+  The <span class="code-inline">asiAlgo_AAG::PopSubgraph()</span> invocation restores the previous state of the graph available on the stack. This push/pop pair of functions is pretty instrumental as it allows to capture only the faces of interest and then undo the modification.
+</p>
 
--->
+<p>
+  To iterate over AAG, you can use one of the available subclasses of <span class="code-inline">asiAlgo_AAGIterator</span>. The following code illustrates how to iterate all the faces in the graph. For each face, we also check its neighbors in the loop using the <span class="code-inline">asiAlgo_AAG::GetNeighbors()</span> function.
+</p>
+
+<pre class="code">
+for ( asiAlgo_AAGRandomIterator it(aag); it.More(); it.Next() )
+{
+  const int              fid  = it.GetFaceId();
+  const asiAlgo_Feature& nids = aag->GetNeighbors(fid);
+  // ...
+}
+</pre>
+
+<p>
+  If you want to virtually suppress some faces in the AAG while keeping the incident arcs stitched, use <span class="code-inline">asiAlgo_AAG::Collapse()</span> function. This function is useful if, for example, you want to check the neighbor faces across blends and chamfers while ignoring the latter.
+</p>
 
 <!-- [END] contents -->
 </div>
