@@ -300,8 +300,10 @@ for ( asiAlgo_AAGRandomIterator it(aag); it.More(); it.Next() )
 </pre>
 
 <p>
-  If you want to virtually suppress some faces in the AAG while keeping the incident arcs stitched, use <span class="code-inline">asiAlgo_AAG::Collapse()</span> function. This function is useful if, for example, you want to check the neighbor faces across blends and chamfers while ignoring the latter.
+  If you want to virtually suppress some faces in the AAG while keeping the incident arcs stitched, use <span class="code-inline">asiAlgo_AAG::Collapse()</span> function. This function is useful if, for example, you want to check the neighbor faces across blends and chamfers while ignoring the latter (see the image below).
 </p>
+
+<div align="center"><img src="../imgs/collapsed-blends.png"/></div>
 
 <!-- [END] contents -->
 </div>
