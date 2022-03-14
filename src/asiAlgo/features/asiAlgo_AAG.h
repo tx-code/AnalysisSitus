@@ -430,8 +430,10 @@ public:
   //! consider vertex-adjacent relationships as well (when two faces share
   //! a vertex while having no common edge). Call this method to add the
   //! corresponding graph links.
+  //! \param[in] domain the faces whose vertices to add. If empty, all vertices
+  //!                   of all faces are used.
   asiAlgo_EXPORT void
-    AddVertexAdjacencyArcs();
+    AddVertexAdjacencyArcs(const asiAlgo_Feature& domain = asiAlgo_Feature());
 
   //! \return master CAD shape.
   asiAlgo_EXPORT const TopoDS_Shape&

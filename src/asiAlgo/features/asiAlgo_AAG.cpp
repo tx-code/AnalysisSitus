@@ -215,7 +215,7 @@ void asiAlgo_AAG::PopSubgraphs()
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_AAG::AddVertexAdjacencyArcs()
+void asiAlgo_AAG::AddVertexAdjacencyArcs(const asiAlgo_Feature& domain)
 {
   const TopTools_IndexedDataMapOfShapeListOfShape&
     vertsFaces = this->RequestMapOfVerticesFaces();
@@ -231,11 +231,17 @@ void asiAlgo_AAG::AddVertexAdjacencyArcs()
     {
       const int f1 = this->GetFaceId( TopoDS::Face( fit1.Value() ) );
 
+      if ( !domain.IsEmpty() && !domain.Contains(f1) )
+        continue;
+
       for ( TopTools_ListOfShape::Iterator fit2(faces); fit2.More(); fit2.Next() )
       {
         const int f2 = this->GetFaceId( TopoDS::Face( fit2.Value() ) );
         //
         if ( f1 == f2 )
+          continue;
+
+        if ( !domain.IsEmpty() && !domain.Contains(f2) )
           continue;
 
         t_arc arc(f1, f2);
