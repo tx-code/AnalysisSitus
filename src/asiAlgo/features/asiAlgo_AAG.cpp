@@ -1302,16 +1302,6 @@ void asiAlgo_AAG::Collapse(const asiAlgo_Feature& faceIndices)
       //
       m_arcAttributes.Bind(arc, attrAngle);
     }
-    //else
-    //{
-    //  Handle(asiAlgo_FeatureAttrAngle)
-    //    attrAngle = Handle(asiAlgo_FeatureAttrAngle)::DownCast(*pArcAttr);
-
-    //  // Override the possibly existing virtual link due to other Collapse()
-    //  // invocations.
-    //  if ( attrAngle->GetAngleType() != angType )
-    //    attrAngle->SetAngleType(angType);
-    //}
   }
 }
 
