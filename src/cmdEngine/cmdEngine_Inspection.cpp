@@ -1872,30 +1872,27 @@ int ENGINE_CheckArea(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
 {
-  if ( argc != 1 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   Handle(asiEngine_Model)
     M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
 
-  // Attempt to get the highlighted sub-shapes.
-  TColStd_PackedMapOfInteger selectedFaceIds;
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
   //
-  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  if ( !cmdEngine::cf.IsNull() )
   {
-    asiEngine_Part PartAPI( M,
-                            cmdEngine::cf->ViewerPart->PrsMgr(),
-                            interp->GetProgress(),
-                            interp->GetPlotter() );
-    //
-    PartAPI.GetHighlightedFaces(selectedFaceIds);
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
   }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
 
   // Get total area.
   double area = 0.0;
-  for ( TColStd_MapIteratorOfPackedMapOfInteger fit(selectedFaceIds); fit.More(); fit.Next() )
+  for ( TColStd_MapIteratorOfPackedMapOfInteger fit(selected); fit.More(); fit.Next() )
   {
     const int faceId = fit.Key();
 
@@ -4320,8 +4317,8 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-area",
     //
-    "check-area\n"
-    "\t Checks area of the selected faces.",
+    "check-area  [-fid <faceId>]\n"
+    "\t Checks area of the passed or selected faces.",
     //
     __FILE__, group, ENGINE_CheckArea);
 
@@ -4590,7 +4587,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("print-attrs",
     //
-    "print-attrs -fid [<faceId>]\n"
+    "print-attrs [-fid <faceId>]\n"
     "\t Prints all AAG attributes available for the face with the given ID\n"
     "\t or for the interactively selected faces.",
     //
