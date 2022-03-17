@@ -148,13 +148,51 @@ bool asiAlgo_TopoKill::Apply()
     return false;
   }
 
-  // Prepare root of the same type as a master shape.
-  m_result = m_master.EmptyCopied();
-  //
-  m_history->AddModified(m_master, m_result);
+  // Special case: the root shape is asked for removal
+  if ( m_toRemove.Contains(m_master) )
+  {
+    // The root shape is asked for removal. Check if we
+    // can reduce the dimension here. If not, a compound
+    // is constructed to put the direct children of the
+    // modified shape.
 
-  // Rebuild topology graph recursively.
-  this->buildTopoGraphLevel(m_master, m_result);
+    std::vector<TopoDS_Shape> children;
+    for ( TopoDS_Iterator it(m_master); it.More(); it.Next() )
+    {
+      children.push_back( it.Value() );
+    }
+
+    if ( children.size() == 1 )
+    {
+      m_result = children[0].EmptyCopied();
+      //
+      m_history->AddModified(m_master, m_result);
+
+      // Rebuild topology graph recursively.
+      this->buildTopoGraphLevel(children[0], m_result);
+    }
+    else
+    {
+      TopoDS_Compound comp;
+      BRep_Builder bbuilder;
+      bbuilder.MakeCompound(comp);
+
+      m_result = comp;
+
+      // Rebuild topology graph recursively.
+      this->buildTopoGraphLevel(m_master, m_result);
+    }
+  }
+  else
+  {
+    // Prepare root of the same type as a master shape.
+    m_result = m_master.EmptyCopied();
+    //
+    m_history->AddModified(m_master, m_result);
+
+    // Rebuild topology graph recursively.
+    this->buildTopoGraphLevel(m_master, m_result);
+  }
 
   return !this->IsErrorState(); // Some error may have occurred in recursion.
 }
