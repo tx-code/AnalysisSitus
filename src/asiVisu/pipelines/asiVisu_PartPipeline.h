@@ -74,6 +74,9 @@ protected:
   //! Components of part-wise color.
   double m_fPartRed, m_fPartGreen, m_fPartBlue;
 
+  //! Components of edge color.
+  double m_fEdgeRed, m_fEdgeGreen, m_fEdgeBlue;
+
 };
 
 #endif

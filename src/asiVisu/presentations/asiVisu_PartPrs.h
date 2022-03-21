@@ -97,7 +97,8 @@ public:
     VerticesOff() const;
 
   asiVisu_EXPORT void
-    Colorize(const ActAPI_Color& color) const;
+    Colorize(const ActAPI_Color& color,
+             const ActAPI_Color& edgeColor) const;
 
   asiVisu_EXPORT void
     SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,

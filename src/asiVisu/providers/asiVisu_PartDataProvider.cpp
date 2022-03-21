@@ -179,6 +179,19 @@ void asiVisu_PartDataProvider::GetColor(double& r, double& g, double& b) const
 
 //-----------------------------------------------------------------------------
 
+void asiVisu_PartDataProvider::GetEdgeColor(double& r, double& g, double& b) const
+{
+  const int icolor = m_node->GetEdgeColor();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+
+  r = color.Red();
+  g = color.Green();
+  b = color.Blue();
+}
+
+//-----------------------------------------------------------------------------
+
 //! \return copy.
 Handle(asiVisu_PartDataProvider) asiVisu_PartDataProvider::Clone() const
 {

@@ -686,11 +686,16 @@ vtkSmartPointer<vtkLookupTable>
   asiVisu_Utils::InitLookupTable(const NCollection_DataMap<int, int>& customScalarMap,
                                  const int                            lastUnusedScalar)
 {
-  const double ref_r = 0.9;
-  const double ref_g = 0.9;
-  const double ref_b = 0.9;
+  const double ref_r  = 0.9;
+  const double ref_g  = 0.9;
+  const double ref_b  = 0.9;
+  const double eref_r = ref_r / 4;
+  const double eref_g = ref_g / 4;
+  const double eref_b = ref_b / 4;
 
-  return InitLookupTable(customScalarMap, lastUnusedScalar, ref_r, ref_g, ref_b);
+  return InitLookupTable(customScalarMap, lastUnusedScalar,
+                         ref_r, ref_g, ref_b,
+                         eref_r, eref_g, eref_b);
 }
 //-----------------------------------------------------------------------------
 
@@ -699,7 +704,10 @@ vtkSmartPointer<vtkLookupTable>
                                  const int                            lastUnusedScalar,
                                  const double                         ref_r,
                                  const double                         ref_g,
-                                 const double                         ref_b)
+                                 const double                         ref_b,
+                                 const double                         eref_r,
+                                 const double                         eref_g,
+                                 const double                         eref_b)
 {
   vtkSmartPointer<vtkLookupTable>
     colorTable = vtkSmartPointer<vtkLookupTable>::New();
@@ -720,9 +728,7 @@ vtkSmartPointer<vtkLookupTable>
   colorTable->SetTableValue(ShapePrimitive_FreeEdge,        0.75, 0.0, 0.0);
   colorTable->SetTableValue(ShapePrimitive_DanglingEdge,    1.0,  0.0, 0.0);
   colorTable->SetTableValue(ShapePrimitive_BorderEdge,      1.0,  0.0, 0.0);
-  colorTable->SetTableValue(ShapePrimitive_ManifoldEdge,    ref_r / 4.,
-                                                            ref_g / 4.,
-                                                            ref_b / 4.);
+  colorTable->SetTableValue(ShapePrimitive_ManifoldEdge,    eref_r, eref_g, eref_b);
   colorTable->SetTableValue(ShapePrimitive_NonManifoldEdge, 1.0,  1.0, 0.0);
   //
   colorTable->SetTableValue(ShapePrimitive_Facet,           ref_r, ref_g, ref_b);
@@ -791,7 +797,9 @@ void asiVisu_Utils::InitShapeMapper(vtkMapper*                           mapper,
   actor->GetProperty()->GetColor(ref_r, ref_g, ref_b);
 
   vtkSmartPointer<vtkLookupTable>
-    lookup = InitLookupTable(customScalarMap, lastUnusedScalar, ref_r, ref_g, ref_b);
+    lookup = InitLookupTable(customScalarMap, lastUnusedScalar,
+                             ref_r, ref_g, ref_b,
+                             ref_r / 4, ref_g / 4, ref_b / 4);
 
   InitShapeMapper(mapper, lookup);
 }
@@ -802,11 +810,16 @@ void asiVisu_Utils::InitShapeMapper(vtkMapper*                           mapper,
                                     const double                         ref_r,
                                     const double                         ref_g,
                                     const double                         ref_b,
+                                    const double                         eref_r,
+                                    const double                         eref_g,
+                                    const double                         eref_b,
                                     const NCollection_DataMap<int, int>& customScalarMap,
                                     const int                            lastUnusedScalar)
 {
   vtkSmartPointer<vtkLookupTable>
-    lookup = InitLookupTable(customScalarMap, lastUnusedScalar, ref_r, ref_g, ref_b);
+    lookup = InitLookupTable(customScalarMap, lastUnusedScalar,
+                             ref_r, ref_g, ref_b,
+                             eref_r, eref_g, eref_b);
 
   InitShapeMapper(mapper, lookup);
 }

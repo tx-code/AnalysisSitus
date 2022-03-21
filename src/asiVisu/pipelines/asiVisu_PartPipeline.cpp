@@ -57,7 +57,10 @@ asiVisu_PartPipeline::asiVisu_PartPipeline(const vtkSmartPointer<asiVisu_ShapeRo
 : asiVisu_PartPipelineBase (source),
   m_fPartRed               (0.),
   m_fPartGreen             (0.),
-  m_fPartBlue              (0.)
+  m_fPartBlue              (0.),
+  m_fEdgeRed               (0.),
+  m_fEdgeGreen             (0.),
+  m_fEdgeBlue              (0.)
 {
   m_dmFilter->SetDisplayMode(dm);
   m_dmFilter->SetAllowExtraScalars(true);
@@ -105,7 +108,8 @@ void asiVisu_PartPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataProv
   m_source->SetColorSource( DP->PrepareColorSource(), false );
 
   // Update part-wise colors.
-  DP->GetColor(m_fPartRed, m_fPartGreen, m_fPartBlue);
+  DP->GetColor     (m_fPartRed, m_fPartGreen, m_fPartBlue);
+  DP->GetEdgeColor (m_fEdgeRed, m_fEdgeGreen, m_fEdgeBlue);
 
   // Update use of scalars flag.
   m_bScalarsOn = DP->HasScalars();
@@ -162,6 +166,9 @@ void asiVisu_PartPipeline::callback_update()
                                    m_fPartRed,
                                    m_fPartGreen,
                                    m_fPartBlue,
+                                   m_fEdgeRed,
+                                   m_fEdgeGreen,
+                                   m_fEdgeBlue,
                                    extraScalars,
                                    lastUnusedScalar);
 

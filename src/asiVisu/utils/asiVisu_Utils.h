@@ -262,7 +262,10 @@ public:
                     const int                            lastUnusedScalar,
                     const double                         ref_r,
                     const double                         ref_g,
-                    const double                         ref_b);
+                    const double                         ref_b,
+                    const double                         eref_r,
+                    const double                         eref_g,
+                    const double                         eref_b);
 
   asiVisu_EXPORT static void
     InitShapeMapper(vtkMapper* mapper);
@@ -286,6 +289,9 @@ public:
                     const double                         ref_r,
                     const double                         ref_g,
                     const double                         ref_b,
+                    const double                         eref_r,
+                    const double                         eref_g,
+                    const double                         eref_b,
                     const NCollection_DataMap<int, int>& customScalarMap,
                     const int                            lastUnusedScalar);
 

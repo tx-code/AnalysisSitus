@@ -115,7 +115,8 @@ public:
     PID_GroupPrs,           //!< Presentation group.
     PID_DisplayMode,        //!< Display mode.
     PID_UseScalars,         //!< Indicates whether to use scalars for coloring.
-    PID_Color,              //!< Color.
+    PID_Color,              //!< Main color.
+    PID_EdgeColor,          //!< Edge color.
     PID_HasVertices,        //!< Indicates whether vertices are active.
     PID_HasBackface,        //!< Indicates whether backface coloring is enabled.
     PID_ShowFaultyFaces,    //!< Indicates whether to visualize faulty faces.
@@ -253,6 +254,12 @@ public:
 
   asiData_EXPORT int
     GetColor() const;
+
+  asiData_EXPORT void
+    SetEdgeColor(const int);
+
+  asiData_EXPORT int
+    GetEdgeColor() const;
 
   asiData_EXPORT void
     SetDisplayMode(const int);

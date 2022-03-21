@@ -70,6 +70,7 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Int,           PID_DisplayMode);
   REGISTER_PARAMETER(Bool,          PID_UseScalars);
   REGISTER_PARAMETER(Int,           PID_Color);
+  REGISTER_PARAMETER(Int,           PID_EdgeColor);
   REGISTER_PARAMETER(Bool,          PID_HasVertices);
   REGISTER_PARAMETER(Bool,          PID_HasBackface);
   REGISTER_PARAMETER(Bool,          PID_ShowFaultyFaces);
@@ -112,6 +113,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->SetKeepTessParams        (false);
   this->SetUseScalars            (true);
   this->SetColor                 (180 << 16 | 180 << 8 | 180); // Initial color.
+  this->SetEdgeColor             (10 << 16 | 10 << 8 | 10);    // Initial edge color.
   this->SetDisplayMode           (0x020);                      // Shading with edges.
   this->SetHasVertices           (false);
   this->SetHasBackface           (true);
@@ -148,6 +150,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->InitParameter(PID_DisplayMode,        "Display mode",       "PrsDisplayMode", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_UseScalars,         "Use scalars",        "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_Color,              "Color",              "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_EdgeColor,          "Edge color",         "PrsCustomColor", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_HasVertices,        "Show vertices",      "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_HasBackface,        "Show backface",      "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_ShowFaultyFaces,    "Show faulty faces",  "",               ParameterFlag_IsVisible, true);
@@ -485,6 +488,20 @@ void asiData_PartNode::SetColor(const int color)
 int asiData_PartNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+//! Sets edge color.
+//! \param color [in] color to set.
+void asiData_PartNode::SetEdgeColor(const int color)
+{
+  ActParamTool::AsInt( this->Parameter(PID_EdgeColor) )->SetValue(color);
+}
+
+//! Accessor for the stored edge color value.
+//! \return color value.
+int asiData_PartNode::GetEdgeColor() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_EdgeColor) )->GetValue();
 }
 
 //! Sets display mode.

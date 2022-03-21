@@ -110,7 +110,6 @@ asiVisu_PartPrs::asiVisu_PartPrs(const Handle(ActAPI_INode)& N) : asiVisu_Prs(N)
   // changed).
   contour_pl->Actor()->GetProperty()->SetPointSize(8.0f);
   contour_pl->Actor()->GetProperty()->SetLineWidth(1.25f);
-  contour_pl->Actor()->GetProperty()->SetColor(0.1, 0.1, 0.1); // Default color for edges w/o scalars.
   contour_pl->Actor()->SetPickable(0);
   contour_pl->Actor()->GetProperty()->LightingOff();
   //
@@ -189,16 +188,28 @@ void asiVisu_PartPrs::VerticesOff() const
 //-----------------------------------------------------------------------------
 
 //! Sets custom color.
-//! \param[in] color color to set.
-void asiVisu_PartPrs::Colorize(const ActAPI_Color& color) const
+//! \param[in] color     color to set.
+//! \param[in] edgeColor edge color to set.
+void asiVisu_PartPrs::Colorize(const ActAPI_Color& color,
+                               const ActAPI_Color& edgeColor) const
 {
+  // Main pipeline.
   Handle(asiVisu_PartPipeline)
     pl = Handle(asiVisu_PartPipeline)::DownCast( this->GetPipeline(Pipeline_Main) );
-
+  //
   if ( !pl.IsNull() )
     pl->Actor()->GetProperty()->SetColor( color.Red(),
                                           color.Green(),
                                           color.Blue() );
+
+  // Contour pipeline.
+  Handle(asiVisu_PartEdgesPipeline)
+    cpl = Handle(asiVisu_PartEdgesPipeline)::DownCast( this->GetPipeline(Pipeline_Contour) );
+  //
+  if ( !cpl.IsNull() )
+    cpl->Actor()->GetProperty()->SetColor( edgeColor.Red(),
+                                           edgeColor.Green(),
+                                           edgeColor.Blue() );
 }
 
 //-----------------------------------------------------------------------------
@@ -360,8 +371,10 @@ void asiVisu_PartPrs::afterUpdatePipelines() const
 
   /* Actualize color */
 
-  ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
-  this->Colorize(color);
+  ActAPI_Color color     = asiVisu_Utils::IntToColor( N->GetColor() );
+  ActAPI_Color edgeColor = asiVisu_Utils::IntToColor( N->GetEdgeColor() );
+  //
+  this->Colorize(color, edgeColor);
 
   /* Actualize visualization of vertices */
 
