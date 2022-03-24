@@ -315,6 +315,7 @@ set (features_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (interop_H_FILES
+  interop/asiAlgo_BaseSTEP.h
   interop/asiAlgo_FileFormat.h
   interop/asiAlgo_IGES.h
   interop/asiAlgo_InteropVars.h
@@ -333,6 +334,7 @@ set (interop_H_FILES
   interop/dxf.h
 )
 set (interop_CPP_FILES
+  interop/asiAlgo_BaseSTEP.cpp
   interop/asiAlgo_FileFormat.cpp
   interop/asiAlgo_IGES.cpp
   interop/asiAlgo_OBJ.cpp

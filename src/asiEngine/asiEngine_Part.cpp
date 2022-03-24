@@ -265,6 +265,8 @@ bool asiEngine_Part::Import(const TCollection_AsciiString& filename)
   // Get Part Node.
   Handle(asiData_PartNode) partNode = m_model->GetPartNode();
 
+  TCollection_AsciiString unitString = "mm";
+
   // Load CAD data.
   switch ( format )
   {
@@ -285,6 +287,7 @@ bool asiEngine_Part::Import(const TCollection_AsciiString& filename)
         return false;
       }
 
+      unitString = reader.GetUnitString();
       break;
     }
     case FileFormat_BREP:
@@ -323,8 +326,9 @@ bool asiEngine_Part::Import(const TCollection_AsciiString& filename)
     }
   }
 
-  // Set filename for reference.
+  // Set filename and original units for reference.
   partNode->SetFilenameIn(filename);
+  partNode->SetOriginalUnits(unitString);
 
   return true;
 }

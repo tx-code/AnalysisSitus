@@ -54,6 +54,9 @@
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
 
+// Standard includes
+#include <map>
+
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
@@ -143,6 +146,14 @@ bool asiAlgo_STEP::Read(const TCollection_AsciiString& filename,
     m_progress.SendLogMessage(LogInfo(Normal) << "\t%1 : %2" << entType->Name() << count);
   }
 #endif
+
+  // Get units used in CAD file.
+  TColStd_SequenceOfAsciiString lengthNames, angleNames, solidAngleNames;
+  reader.FileUnits(lengthNames, angleNames, solidAngleNames);
+  //
+  m_unitString   = lengthNames.First();
+  m_fLengthScale = lengthNames.IsEmpty() ? 1.0
+                                         : fromSiName(m_unitString);
 
   /* ==========================
    *  Translate STEP into BREP

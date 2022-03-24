@@ -51,6 +51,7 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
   //
   REGISTER_PARAMETER(Group,         PID_GroupImportExport);
   REGISTER_PARAMETER(AsciiString,   PID_FilenameIn);
+  REGISTER_PARAMETER(AsciiString,   PID_OriginalUnits);
   //
   REGISTER_PARAMETER(Group,         PID_GroupTrsf);
   REGISTER_PARAMETER(Real,          PID_TrsfTx);
@@ -120,6 +121,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->SetShowFaultyFaces       (true);
   this->SetResolveCoincidentTopo (false);
   this->SetRenderEdgesAsTubes    (true);
+  this->SetOriginalUnits         ("mm"); // Default.
 
   // Set identity transformation.
   ActParamTool::AsRealArray( this->Parameter(PID_TrsfMx) )->SetArray( new HRealArray(0, 11, 0.) );
@@ -132,6 +134,7 @@ void asiData_PartNode::Init(const bool resetNaming)
   //
   this->InitParameter(PID_GroupImportExport,  "Import/export",      "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_FilenameIn,         "Input filename",     "FileSelector",   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_OriginalUnits,      "Input units",        "",               ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_GroupTrsf,          "Transformation",     "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_TrsfTx,             "Tx",                 "",               ParameterFlag_IsVisible, true);
@@ -191,6 +194,19 @@ TCollection_AsciiString asiData_PartNode::GetFilenameIn() const
 void asiData_PartNode::SetFilenameIn(const TCollection_AsciiString& filename)
 {
   ActParamTool::AsAsciiString( this->Parameter(PID_FilenameIn) )->SetValue(filename);
+}
+
+//! \return original units in the imported file.
+TCollection_AsciiString asiData_PartNode::GetOriginalUnits() const
+{
+  return ActParamTool::AsAsciiString( this->Parameter(PID_OriginalUnits) )->GetValue();
+}
+
+//! Sets the original units.
+//! \param[in] units the string representation of the measurement units.
+void asiData_PartNode::SetOriginalUnits(const TCollection_AsciiString& units)
+{
+  ActParamTool::AsAsciiString( this->Parameter(PID_OriginalUnits) )->SetValue(units);
 }
 
 //! Returns the stored CAD part.

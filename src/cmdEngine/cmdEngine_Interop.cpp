@@ -162,6 +162,9 @@ int ENGINE_LoadStep(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+
   // Load from STEP
   cmdEngine::model->OpenCommand(); // tx start
   {
@@ -173,7 +176,8 @@ int ENGINE_LoadStep(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
 
-    cmdEngine::model->GetPartNode()->SetFilenameIn(filename);
+    partNode->SetFilenameIn    ( filename );
+    partNode->SetOriginalUnits ( reader.GetUnitString() ); // Units as defined in the original file.
   }
   cmdEngine::model->CommitCommand();
 
@@ -182,7 +186,7 @@ int ENGINE_LoadStep(const Handle(asiTcl_Interp)& interp,
 
   // Update viewer.
   if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
-    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
 
   // Update object browser.
   if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )

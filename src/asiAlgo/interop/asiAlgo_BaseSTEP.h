@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 28 November 2015
+// Created on: 24 March 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,57 +28,60 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_STEP_h
-#define asiAlgo_STEP_h
+#ifndef asiAlgo_BaseSTEP_h
+#define asiAlgo_BaseSTEP_h
 
 // asiAlgo includes
-#include <asiAlgo_BaseSTEP.h>
+#include <asiAlgo_InteropVars.h>
+
+// Active Data includes
+#include <ActAPI_IAlgorithm.h>
+
+class STEPControl_Writer;
 
 //-----------------------------------------------------------------------------
 
-//! STEP interoperability tool.
-class asiAlgo_STEP : public asiAlgo_BaseSTEP
+//! Base class for STEP interoperability interfaces.
+class asiAlgo_BaseSTEP : public ActAPI_IAlgorithm
 {
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_STEP, asiAlgo_BaseSTEP)
-
-public:
-
-  //! Sets header info to the STEP model.
-  //! \param[in] writer the STEP writer to customize.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT static bool
-    SetHeaders(STEPControl_Writer& writer);
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BaseSTEP, ActAPI_IAlgorithm)
 
 public:
 
   //! Ctor accepting progress notifier and imperative plotter.
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
-  asiAlgo_STEP(ActAPI_ProgressEntry progress,
-               ActAPI_PlotterEntry  plotter = nullptr)
+  asiAlgo_BaseSTEP(ActAPI_ProgressEntry progress,
+                   ActAPI_PlotterEntry  plotter = nullptr)
   //
-  : asiAlgo_BaseSTEP(progress, plotter) {}
+  : ActAPI_IAlgorithm(progress, plotter), m_fLengthScale(1.0) {}
 
 public:
 
-  //! Performs STEP import.
-  //! \param[in] filename  file to read.
-  //! \param[in] doHealing indicates whether to run shape healing after import.
-  //! \param[in] result    retrieved shape.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT bool
-    Read(const TCollection_AsciiString& filename,
-         const bool                     doHealing,
-         TopoDS_Shape&                  result);
+  //! \return the unit string from the STEP file.
+  const TCollection_AsciiString& GetUnitString() const
+  {
+    return m_unitString;
+  }
 
-  //! Saves the passed CAD model to STEP file.
-  //! \param[in] shape    shape to store.
-  //! \param[in] filename file to save.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT bool
-    Write(const TopoDS_Shape&            shape,
-          const TCollection_AsciiString& filename);
+  //! \return length scale.
+  double GetLengthScale() const
+  {
+    return m_fLengthScale;
+  }
+
+protected:
+
+  //! Converts the passed unit string to the scaling coefficient.
+  //! \param[in] unitStr the unit string.
+  asiAlgo_EXPORT double
+    fromSiName(const TCollection_AsciiString& unitStr) const;
+
+protected:
+
+  TCollection_AsciiString m_unitString;
+  double                  m_fLengthScale;
 
 };
 

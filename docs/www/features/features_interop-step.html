@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: read & write STEP</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/read & write STEP
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-step-intro">STEP translator</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-step-capabilities">Capabilities</h2>
+
+<p>
+  Analysis Situs can read and write STEP files in different ways, depending on which data you want to exchange:
+</p>
+
+<ol>
+  <li>Pure geometry</li>
+  <li>Geometry with colors</li>
+  <li>Geometry with all metadata, including assembly hierarchy</li>
+</ol>
+
+<p>
+  For our STEP exchange, we rely on the STEP translator of OpenCascade. The following commands are available in the <a href="./features_active-script.html">Tcl console</a> of Analysis Situs.
+</p>
+
+<ul>
+  <li><span class="code-inline">load-step</span> to read a STEP file into the active <a href="./features_part-node.html">Part Node</a>.</li>
+  <li><span class="code-inline">asm-xde-load</span> to read a STEP file into an <a href="./features_asm-xde-document.html">XDE document</a>.</li>
+</ul>
+
+<h2 id="toc-step-units">Measurement units</h2>
+
+<p>
+  The default workspace units of Analysis Situs are millimeters. Still, if your CAD file defines other units, you can trace them back by looking at the Part Node's "input units" parameter:
+</p>
+
+<div align="center"><img src="../imgs/step-init-units.png"/></div>
+
+<p>
+  If you wish to keep using the original units from the STEP file, you can reload the file specifying the <span class="code-inline">xstep.cascade.unit</span> variable to have the desired units, e.g., inches.
+</p>
+
+<div align="center"><img src="../imgs/step-init-units-settings.png"/></div>
+
+<p>
+  To verify how unit conversion worked, you can measure length of a random edge in the imported CAD model: lengths, radii, area and other metric values will be all defined in the units specified with the static <span class="code-inline">xstep.cascade.unit</span> variable.
+</p>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

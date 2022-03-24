@@ -91,6 +91,7 @@ public:
   //------------------------//
     PID_GroupImportExport,  //!< Import/export group.
     PID_FilenameIn,         //!< Input filename.
+    PID_OriginalUnits,      //!< Original units.
   //------------------------//
   // Transformation         //
   //------------------------//
@@ -153,6 +154,12 @@ public:
 
   asiData_EXPORT void
     SetFilenameIn(const TCollection_AsciiString& filename);
+
+  asiData_EXPORT TCollection_AsciiString
+    GetOriginalUnits() const;
+
+  asiData_EXPORT void
+    SetOriginalUnits(const TCollection_AsciiString& units);
 
   asiData_EXPORT TopoDS_Shape
     GetShape(const bool applyTransform = false) const;

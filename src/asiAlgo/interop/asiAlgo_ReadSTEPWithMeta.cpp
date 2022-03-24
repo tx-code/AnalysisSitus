@@ -59,8 +59,8 @@ typedef NCollection_DataMap<TopoDS_Shape, Handle(StepBasic_ProductDefinition), T
 
 asiAlgo_ReadSTEPWithMeta::asiAlgo_ReadSTEPWithMeta(ActAPI_ProgressEntry progress,
                                                    ActAPI_PlotterEntry  plotter)
-: ActAPI_IAlgorithm (progress, plotter),
-  m_bColorMode      (true)
+: asiAlgo_BaseSTEP (progress, plotter),
+  m_bColorMode     (true)
 {
   STEPControl_Controller::Init();
 }
@@ -71,8 +71,8 @@ asiAlgo_ReadSTEPWithMeta::asiAlgo_ReadSTEPWithMeta(const Handle(XSControl_WorkSe
                                                    const bool                           scratch,
                                                    ActAPI_ProgressEntry                 progress,
                                                    ActAPI_PlotterEntry                  plotter)
-: ActAPI_IAlgorithm (progress, plotter),
-  m_bColorMode      (true)
+: asiAlgo_BaseSTEP (progress, plotter),
+  m_bColorMode     (true)
 {
   STEPControl_Controller::Init();
   this->Init(WS, scratch);
@@ -90,7 +90,20 @@ void asiAlgo_ReadSTEPWithMeta::Init(const Handle(XSControl_WorkSession)& WS,
 
 IFSelect_ReturnStatus asiAlgo_ReadSTEPWithMeta::ReadFile(const char* filename)
 {
-  return m_reader.ReadFile(filename);
+  IFSelect_ReturnStatus status = m_reader.ReadFile(filename);
+
+  if ( status == IFSelect_RetDone )
+  {
+    // Get units used in CAD file.
+    TColStd_SequenceOfAsciiString lengthNames, angleNames, solidAngleNames;
+    m_reader.FileUnits(lengthNames, angleNames, solidAngleNames);
+    //
+    m_unitString   = lengthNames.First();
+    m_fLengthScale = lengthNames.IsEmpty() ? 1.0
+                                           : fromSiName(m_unitString);
+  }
+
+  return status;
 }
 
 //-----------------------------------------------------------------------------

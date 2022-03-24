@@ -32,10 +32,8 @@
 #define asiAlgo_ReadSTEPWithMeta_h
 
 // asiAlgo includes
+#include <asiAlgo_BaseSTEP.h>
 #include <asiAlgo_ReadSTEPWithMetaOutput.h>
-
-// Active Data includes
-#include <ActAPI_IAlgorithm.h>
 
 // OpenCascade includes
 #include <STEPControl_Reader.hxx>
@@ -43,12 +41,10 @@
 
 //! STEP reader enriched with possibility to read not only shapes but
 //! also some metadata such as colors.
-class asiAlgo_ReadSTEPWithMeta : public ActAPI_IAlgorithm
+class asiAlgo_ReadSTEPWithMeta : public asiAlgo_BaseSTEP
 {
-public:
-
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ReadSTEPWithMeta, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ReadSTEPWithMeta, asiAlgo_BaseSTEP)
 
 public:
 
@@ -94,10 +90,10 @@ public:
     Transfer();
 
   asiAlgo_EXPORT bool
-    Perform (const TCollection_AsciiString& filename);
+    Perform(const TCollection_AsciiString& filename);
 
   asiAlgo_EXPORT bool
-    Perform (const char* filename);
+    Perform(const char* filename);
 
   //! Returns basic reader
   asiAlgo_EXPORT STEPControl_Reader&
