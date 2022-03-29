@@ -52,13 +52,13 @@ init:windows:
     - if ("$ASCI_BUILD_DIR" | Test-Path) {
     - Remove-Item $ASCI_BUILD_DIR -Recurse -ErrorAction Ignore }
     - mkdir $ASCI_BUILD_DIR -Force
-      # 3RDPARTY
+    # 3RDPARTY
     - if ("$ASCI_3RDPARTY_DIR" | Test-Path) {
     - Remove-Item $ASCI_3RDPARTY_DIR -Recurse -ErrorAction Ignore }
     - mkdir $ASCI_3RDPARTY_DIR -Force
     - if ("$ASCI_3RDPARTY_LIBPACK_DIST" | Test-Path) {
     - Remove-Item $ASCI_3RDPARTY_LIBPACK_DIST -Recurse -ErrorAction Ignore }
-      # CMAKE 
+    # CMAKE 
     - if ("$ASCI_CMAKE_DIR" | Test-Path) {
     - Remove-Item $ASCI_CMAKE_DIR -Recurse -ErrorAction Ignore }
     - mkdir $ASCI_CMAKE_DIR -Force
@@ -79,7 +79,7 @@ configure:windows:
   tags:
     - dev-shell
   script:
-      # 3RDPARTY
+    # 3RDPARTY
     - if (-not ("$ASCI_3RDPARTY_DIR" | Test-Path)) { mkdir $ASCI_3RDPARTY_DIR -Force }
     - Invoke-WebRequest -Uri $ASCI_URL_3RDPARTY_LIBPACK -OutFile $ASCI_3RDPARTY_LIBPACK_DIST
     - $ExtractShell = New-Object -ComObject Shell.Application
@@ -87,7 +87,7 @@ configure:windows:
     - $Files = $ExtractShell.Namespace($parsedLocDist).Items()
     - $parsedLoc3rdParty = [IO.Path]::GetFullPath($ASCI_3RDPARTY_DIR)
     - $ExtractShell.NameSpace($parsedLoc3rdParty).CopyHere($Files)
-      # CMAKE
+    # CMAKE
     - if (-not ("$ASCI_CMAKE_DIR" | Test-Path)) { mkdir $ASCI_CMAKE_DIR -Force }
     - Invoke-WebRequest -Uri $ASCI_CMAKE_URL_LIBPACK -OutFile $ASCI_CMAKE_LIBPACK_DIST
     - $ExtractShellCmake= New-Object -ComObject Shell.Application
@@ -95,7 +95,7 @@ configure:windows:
     - $CmakeFiles = $ExtractShellCmake.Namespace($parsedLocCmakeDist).Items()
     - $parsedLocCmake = [IO.Path]::GetFullPath($ASCI_CMAKE_DIR)
     - $ExtractShellCmake.NameSpace($parsedLocCmake).CopyHere($CmakeFiles)
-      # Configure
+    # Configure
     - cd $ASCI_BUILD_DIR
     - $parsed_ASI_TEST_DUMPING = [IO.Path]::GetFullPath($AS_ASI_TEST_DUMPING)
     - $parsed_ASI_TEST_DUMPING = "$($parsed_ASI_TEST_DUMPING.Split("\") -join "/")"
