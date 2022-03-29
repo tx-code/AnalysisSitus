@@ -58,6 +58,7 @@ asiData_OctreeNode::asiData_OctreeNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,         PID_DistThreshold);
   REGISTER_PARAMETER(Int,          PID_DepthLimit);
   REGISTER_PARAMETER(Bool,         PID_IsUniform);
+  REGISTER_PARAMETER(Bool,         PID_IsBoundaryField);
   REGISTER_PARAMETER(Int,          PID_NumRaysSign);
   //
   REGISTER_PARAMETER(Group,        PID_DomainGroup);
@@ -104,6 +105,7 @@ void asiData_OctreeNode::Init()
   this->SetDistThreshold    (100.); // As max cell size by default.
   this->SetDepthLimit       (0); // No limit.
   this->SetUniform          (false);
+  this->SetBoundaryField    (false);
   this->SetNumRaysSign      (3);
   this->SetDomainMinCorner  (0., 0., 0.);
   this->SetDomainMaxCorner  (0., 0., 0.);
@@ -124,6 +126,7 @@ void asiData_OctreeNode::Init()
   this->InitParameter(PID_DistThreshold,    "Dist. threshold",   "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_DepthLimit,       "Depth limit",       "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_IsUniform,        "Is uniform",        "",                ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsBoundaryField,  "Respect boundary",  "",                ParameterFlag_IsVisible, true);
   this->InitParameter(PID_NumRaysSign,      "Num. rays (sign)",  "",                ParameterFlag_IsVisible, true);
   //
   this->InitParameter(PID_DomainGroup,      "Domain",            "",                ParameterFlag_IsVisible, true);
@@ -423,6 +426,20 @@ bool asiData_OctreeNode::IsUniform() const
 void asiData_OctreeNode::SetUniform(const bool isUniform)
 {
   return ActParamTool::AsBool( this->Parameter(PID_IsUniform) )->SetValue(isUniform);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_OctreeNode::IsBoundaryField() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_IsBoundaryField) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_OctreeNode::SetBoundaryField(const bool isBnd)
+{
+  return ActParamTool::AsBool( this->Parameter(PID_IsBoundaryField) )->SetValue(isBnd);
 }
 
 //-----------------------------------------------------------------------------

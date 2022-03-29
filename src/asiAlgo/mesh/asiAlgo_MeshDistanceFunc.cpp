@@ -198,9 +198,9 @@ double asiAlgo_MeshDistanceFunc::Eval(const double x,
       // Initialize random ray.
       asiAlgo_BVHAlgo::t_ray
         ray( BVH_Vec3d(x, y, z),
-             BVH_Vec3d( m_RNG.RandDouble() * 2.0 - 1.0,
-                        m_RNG.RandDouble() * 2.0 - 1.0,
-                        m_RNG.RandDouble() * 2.0 - 1.0) );
+             BVH_Vec3d(m_RNG.RandDouble() * 2.0 - 1.0,
+                       m_RNG.RandDouble() * 2.0 - 1.0,
+                       m_RNG.RandDouble() * 2.0 - 1.0) );
       //
       const int numBounces = asiAlgo_BVHAlgo::rayMeshHitCount(m_facets.get(), ray);
       //

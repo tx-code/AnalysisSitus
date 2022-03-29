@@ -79,6 +79,7 @@ public:
     PID_DistThreshold,    //!< Threshold for splitting up too large boundary voxels.
     PID_DepthLimit,       //!< Limit for the splitting depth.
     PID_IsUniform,        //!< Indicates whether the voxelization is uniform.
+    PID_IsBoundaryField,  //!< Indicates whether the distance field is based on boundary crossing rule.
     PID_NumRaysSign,      //!< Number of rays to use for sign resolution.
   //----------------------//
     PID_DomainGroup,      //!< Group of domain corner Parameters.
@@ -303,6 +304,15 @@ public:
   //! \param[in] isUniform value to set.
   asiData_EXPORT void
     SetUniform(const bool isUniform);
+
+  //! \return true if boundary should be better respected.
+  asiData_EXPORT bool
+    IsBoundaryField() const;
+
+  //! Enables/disables the boundary respecting mode.
+  //! \param[in] isBnd value to set.
+  asiData_EXPORT void
+    SetBoundaryField(const bool isBnd);
 
   //! \return number of rays used to define the signs of the distance values
   //!         in ADF computation.

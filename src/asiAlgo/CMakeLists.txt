@@ -20,6 +20,7 @@ set (CPP_FILES
 
 set (aux_H_FILES
   auxiliary/asiAlgo_AttrFaceColor.h
+  auxiliary/asiAlgo_BoundaryDistanceField.h
   auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
   auxiliary/asiAlgo_BullardRNG.h
@@ -41,6 +42,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_FuncUnivariate.h
   auxiliary/asiAlgo_GeomSummary.h
   auxiliary/asiAlgo_HitFacet.h
+  auxiliary/asiAlgo_IntersectBoxMesh.h
   auxiliary/asiAlgo_IntersectCC.h
   auxiliary/asiAlgo_IntersectCS.h
   auxiliary/asiAlgo_IntersectionCurveSS.h
@@ -54,6 +56,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_QuickHull.h
   auxiliary/asiAlgo_ReapproxContour.h
   auxiliary/asiAlgo_ResampleADF.h
+  auxiliary/asiAlgo_RTCD.h
   auxiliary/asiAlgo_SampleFace.h
   auxiliary/asiAlgo_ShapeSerializer.h
   auxiliary/asiAlgo_TopoSummary.h
@@ -62,6 +65,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_VisualSettings.h
 )
 set (aux_CPP_FILES
+  auxiliary/asiAlgo_BoundaryDistanceField.cpp
   auxiliary/asiAlgo_BuildConvexHull.cpp
   auxiliary/asiAlgo_BuildHLR.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp
@@ -79,6 +83,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_FindVisibleFaces.cpp
   auxiliary/asiAlgo_FuncUnivariate.cpp
   auxiliary/asiAlgo_HitFacet.cpp
+  auxiliary/asiAlgo_IntersectBoxMesh.cpp
   auxiliary/asiAlgo_IntersectCC.cpp
   auxiliary/asiAlgo_IntersectCS.cpp
   auxiliary/asiAlgo_IntersectSS.cpp
@@ -87,6 +92,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_QuickHull.cpp
   auxiliary/asiAlgo_ReapproxContour.cpp
   auxiliary/asiAlgo_ResampleADF.cpp
+  auxiliary/asiAlgo_RTCD.cpp
   auxiliary/asiAlgo_SampleFace.cpp
   auxiliary/asiAlgo_ShapeSerializer.cpp
   auxiliary/asiAlgo_Utils.cpp

@@ -118,7 +118,10 @@ Handle(asiData_OctreeNode)
                                               << node->Parameter(asiData_OctreeNode::PID_NumRaysSign)
                                               << node->Parameter(asiData_OctreeNode::PID_Operation)
                                               << node->Parameter(asiData_OctreeNode::PID_OpLeft)
-                                              << node->Parameter(asiData_OctreeNode::PID_OpRight),
+                                              << node->Parameter(asiData_OctreeNode::PID_OpRight)
+                                              << node->Parameter(asiData_OctreeNode::PID_IsBoundaryField)
+                                              << node->Parameter(asiData_OctreeNode::PID_DepthLimit)
+                                              << node->Parameter(asiData_OctreeNode::PID_DistThreshold),
                              ActParamStream() << node->Parameter(asiData_OctreeNode::PID_Octree)
                                               << node->Parameter(asiData_OctreeNode::PID_UniformGrid)
                                               << node->Parameter(asiData_OctreeNode::PID_NumElements) );

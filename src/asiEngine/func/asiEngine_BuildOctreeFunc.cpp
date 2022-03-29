@@ -51,9 +51,11 @@
 #ifdef USE_MOBIUS
   #include <mobius/poly_CommonFunc.h>
   #include <mobius/poly_DifferenceFunc.h>
-  #include <mobius/poly_DistanceField.h>
+  #include <mobius/poly_AdaptiveDistanceField.h>
   #include <mobius/poly_SVO.h>
   #include <mobius/poly_UnionFunc.h>
+  //
+  #include <asiAlgo_BoundaryDistanceField.h>
 
   using namespace mobius;
 #endif
@@ -149,6 +151,16 @@ int asiEngine_BuildOctreeFunc::execute(const Handle(ActAPI_HParameterList)& inpu
   Handle(ActAPI_IDataCursor)
     opRightBase = ActParamTool::AsReference( inputs->Value(16) )->GetTarget();
 
+  // Whether to respect boundary on voxelization.
+  const bool isBndField = ActParamTool::AsBool( inputs->Value(17) )->GetValue();
+
+  // Splitting depth limit.
+  const int limit = ActParamTool::AsInt( inputs->Value(18) )->GetValue();
+
+  // Threshold value to split boundary-crossing cells for better
+  // shape of voxelization.
+  const double distThreshold = ActParamTool::AsReal( inputs->Value(19) )->GetValue();
+
   /* =======================
    *  Get output Parameters.
    * ======================= */
@@ -207,8 +219,8 @@ int asiEngine_BuildOctreeFunc::execute(const Handle(ActAPI_HParameterList)& inpu
     poly_SVO* pLeftSVO  = static_cast<poly_SVO*>( opLeftNode->GetOctree() );
     poly_SVO* pRightSVO = static_cast<poly_SVO*>( opRightNode->GetOctree() );
 
-    t_ptr<poly_DistanceField> leftField  = new poly_DistanceField(pLeftSVO);
-    t_ptr<poly_DistanceField> rightField = new poly_DistanceField(pRightSVO);
+    t_ptr<poly_BaseDistanceField> leftField  = new poly_AdaptiveDistanceField(pLeftSVO, prec, isUniform);
+    t_ptr<poly_BaseDistanceField> rightField = new poly_AdaptiveDistanceField(pRightSVO, prec, isUniform);
 
     if ( op == CSG_Union )
       distFunc = new poly_UnionFunc(leftField, rightField);
@@ -226,9 +238,25 @@ int asiEngine_BuildOctreeFunc::execute(const Handle(ActAPI_HParameterList)& inpu
   TIMER_RESET
   TIMER_GO
 
-  t_ptr<poly_DistanceField> DDF = new poly_DistanceField();
+  t_ptr<poly_BaseDistanceField> DDF;
   //
-  if ( !DDF->Build(minSize, maxSize, prec, isUniform, distFunc) )
+  if ( isBndField )
+  {
+    DDF = new asiAlgo_BoundaryDistanceField(bvh, prec, isUniform);
+    //
+    t_ptr<asiAlgo_BoundaryDistanceField>
+      BDDF = t_ptr<asiAlgo_BoundaryDistanceField>::DownCast(DDF);
+    //
+    BDDF->SetDepthLimit(limit);
+    BDDF->SetDistanceThreshold(distThreshold);
+  }
+  else
+  {
+    DDF = new poly_AdaptiveDistanceField(prec, isUniform);
+  }
+
+  // Build.
+  if ( !DDF->Build(minSize, maxSize, distFunc) )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Failed to build distance field.");
     return 1;
@@ -321,6 +349,9 @@ ActAPI_ParameterTypeStream
                                       << Parameter_Int       // Operation type.
                                       << Parameter_Reference // Left operand.
                                       << Parameter_Reference // Right operand.
+                                      << Parameter_Bool      // Respect boundary.
+                                      << Parameter_Int       // Depth limit.
+                                      << Parameter_Real      // Distance threshold.
   ;
 }
 

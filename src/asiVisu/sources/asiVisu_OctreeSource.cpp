@@ -51,7 +51,7 @@
 
 #if defined USE_MOBIUS
   #include <mobius/cascade.h>
-  #include <mobius/poly_DistanceField.h>
+  #include <mobius/poly_BaseDistanceField.h>
   #include <mobius/poly_SVO.h>
 #endif
 
@@ -301,9 +301,9 @@ void asiVisu_OctreeSource::samplePoints(void*                       pNode,
 
   if ( pMobNode->IsLeaf() ) /* Only leaves are sampled */
   {
-    const bool isOn  = mobius::poly_DistanceField::IsZeroCrossing(pMobNode);
-    const bool isIn  = mobius::poly_DistanceField::IsIn(pMobNode);
-    const bool isOut = mobius::poly_DistanceField::IsOut(pMobNode);
+    const bool isOn  = mobius::poly_BaseDistanceField::IsZeroCrossing(pMobNode);
+    const bool isIn  = mobius::poly_BaseDistanceField::IsIn(pMobNode);
+    const bool isOut = mobius::poly_BaseDistanceField::IsOut(pMobNode);
 
     if ( isOn  && (m_strategy & SS_On) ||
          isIn  && (m_strategy & SS_In) ||
@@ -380,9 +380,9 @@ void asiVisu_OctreeSource::addVoxels(void*                pNode,
 
   if ( pMobNode->IsLeaf() )
   {
-    const bool isOn  = mobius::poly_DistanceField::IsZeroCrossing(pMobNode);
-    const bool isIn  = mobius::poly_DistanceField::IsIn(pMobNode);
-    const bool isOut = mobius::poly_DistanceField::IsOut(pMobNode);
+    const bool isOn  = mobius::poly_BaseDistanceField::IsZeroCrossing(pMobNode);
+    const bool isIn  = mobius::poly_BaseDistanceField::IsIn(pMobNode);
+    const bool isOut = mobius::poly_BaseDistanceField::IsOut(pMobNode);
 
     if ( isOn  && (m_strategy & SS_On) ||
          isIn  && (m_strategy & SS_In) ||

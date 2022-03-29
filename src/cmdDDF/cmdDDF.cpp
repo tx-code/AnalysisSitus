@@ -55,10 +55,12 @@
 #ifdef USE_MOBIUS
   #include <mobius/cascade.h>
   #include <mobius/cascade_Triangulation.h>
-  #include <mobius/poly_DistanceField.h>
+  #include <mobius/poly_AdaptiveDistanceField.h>
   #include <mobius/poly_DistanceFunc.h>
   #include <mobius/poly_MarchingCubes.h>
   #include <mobius/poly_SVO.h>
+//
+  #include <asiAlgo_BoundaryDistanceField.h>
 
   using namespace mobius;
 #endif
@@ -477,7 +479,7 @@ int DDF_Polygonize(const Handle(asiTcl_Interp)& interp,
 
   // Construct distance field to serve as a function for the
   // reconstruction algorithm.
-  t_ptr<poly_DistanceField> df = new poly_DistanceField(pOctree);
+  t_ptr<poly_BaseDistanceField> df = new poly_AdaptiveDistanceField(pOctree, 0., false);
 
   // Run marching cubes reconstruction.
   poly_MarchingCubes mcAlgo(df, numSlices);
@@ -572,7 +574,7 @@ int DDF_PolygonizeCell(const Handle(asiTcl_Interp)& interp,
 
   // Construct distance field to serve as a function for the
   // reconstruction algorithm.
-  t_ptr<poly_DistanceField> df = new poly_DistanceField(pNode);
+  t_ptr<poly_BaseDistanceField> df = new poly_AdaptiveDistanceField(pNode, 0., false);
 
   // Run marching cubes reconstruction at a single voxel.
   t_ptr<poly_Mesh>
@@ -665,7 +667,7 @@ int DDF_PolygonizeSVO(const Handle(asiTcl_Interp)& interp,
 
   // Construct distance field to serve as a function for the
   // reconstruction algorithm.
-  t_ptr<poly_DistanceField> df = new poly_DistanceField(pSVO);
+  t_ptr<poly_BaseDistanceField> df = new poly_AdaptiveDistanceField(pSVO, 0., false);
 
   // Gather leaves.
   std::vector<poly_SVO*> leaves;
