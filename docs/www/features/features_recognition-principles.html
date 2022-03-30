@@ -87,7 +87,7 @@
   There is a bit of ambiguity in referring to some feature recognition approach as "graph-based." For example, <a href="./features_find-isomorphous-faces.html">finding isomorphous faces</a> is completely abstract and graph-based as it searches for a pattern subgraph in the entire model <a href="./features_aag.html">AAG</a>. At the same time, the rule-based approach is also "graph-based" as it matches just the same AAG, though in different ways (i.e., by iteration).
 </p>
 
-<h2 id="toc-feat-rec-rule-based">More on rule-based approach</h2>
+<h2 id="toc-feat-rec-rule-based">Recognizer/Rule architecture</h2>
 
 <p>
   Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach, because any customization would require programming and recompilation. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
@@ -160,7 +160,7 @@
 </ol>
 
 <p>
-  The Recognizer/Rule architecture is nothing but a good practice of recognizing well-defined local features. Other feature types, such as blends, chamfers, milling contours, turned faces, etc. might require their own dedicated architecture.
+  The Recognizer/Rule (RR) architecture is nothing but a good practice of recognizing well-defined local features. Other feature types, such as blends, chamfers, milling contours, turned faces, etc. might require their own dedicated architecture.
 </p>
 
 <h1 id="toc-feat-isomorphism">Isomorphism</h1>
