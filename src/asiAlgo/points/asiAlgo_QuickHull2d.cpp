@@ -92,22 +92,28 @@ bool asiAlgo_QuickHull2d<TPoint>::Perform()
   //----------------------------------------------------
 
   double xMin = DBL_MAX, xMax = -DBL_MAX;
+  double yMin = DBL_MAX, yMax = -DBL_MAX;
   int p_left_idx = -1, p_right_idx = -1;
   //
   for ( int p_idx = 0; p_idx < m_cloud->GetNumberOfElements(); ++p_idx )
   {
     const gp_XY& P = m_cloud->GetElement(p_idx);
     const double x = P.X();
+    const double y = P.Y();
 
-    if ( x < xMin )
+    if ( x < xMin ||
+        (std::abs(x - xMin) < gp::Resolution() && y < yMin) )
     {
       xMin       = x;
+      yMin       = y;
       p_left_idx = p_idx;
     }
 
-    if ( x > xMax )
+    if ( x > xMax || 
+        (std::abs(x - xMax) < gp::Resolution() && y > yMax) )
     {
       xMax        = x;
+      yMax        = y;
       p_right_idx = p_idx;
     }
   }
