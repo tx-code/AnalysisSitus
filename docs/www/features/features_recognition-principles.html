@@ -57,21 +57,17 @@
 <div class="toc-panel"><div id="toc"></div></div>
 
 <p>
-  Compared to B-rep faces, features are higher level entities that model the correspondence between design information and manufacturing activities. For example, while CAD data encompasses a model's shape, features communicate how a specific artifact might be manufactured or assembled <a href="../references.html#regli-1995">[Regli, 1995]</a>.
+  Compared to B-rep faces, features are somewhat higher-level entities that capture the correspondence between design information and manufacturing activities. For example, while CAD data expresses the shape, features communicate how a specific artifact might be manufactured or assembled <a href="../references.html#regli-1995">[Regli, 1995]</a>. One may see a feature as an "energy port" as proposed by <a href="../references.html#voelcker-1989">[Shapiro and Voelcker, 1995]</a>.
 </p>
 
 <p>
-  Feature recognition provides a communication medium between CAD and manufacturing applications. Sometimes, feature recognition comes up as an integral part of solid modeling systems and kernels. However, even after decades of research, there is no any conventional systematic approach to feature recognition, because it remains largely application-dependent. We are mainly interested in the material removal features that are common for subtractive technologies, such as milling. At the same time, as practice reveals, a feature recognition framework that serves as a backbone for application-specific feature recognition tends to be abstract enough to stay independent from any particular application.
-</p>
-
-<p>
-  This section covers the principal CAD feature recognition approaches available in Analysis Situs. Read more on the recognition of specific features in the follow up sections.
+  This section uncovers some technical details of the feature recognition framework availble in Analysis Situs. Read the <a href="./features_feature-recognition-framework.html">feature recognition overview</a> chapter for the basics.
 </p>
 
 <h2 id="toc-feat-rec-methods">Feature recognition approaches</h2>
 
 <p>
-  We use two approaches to feature recognition in CAD models:
+  We use two approaches to feature recognition in Analysis Situs and derived applications:
 </p>
 
 <ol>
@@ -84,17 +80,17 @@
 </p>
 
 <p>
-  The rule-based approach is pretty fast. It can also deal with some feature interactions. At the same time, this method is not highly extendable. Still, this method is somewhat standard as it is probably the most straightforward way to get the result. The essence of the approach is to iterate all B-rep faces while attempting to compose them into groups based on some ad-hoc heuristics. We have listed some of such heuristics in our brief conference paper <a href="../references.html#malyshev-rule-based-2017">[Malyshev et al, 2017]</a>.
+  The rule-based approach is pretty fast. It can also deal with some feature interactions. At the same time, this method is not highly extendable. Still, this method is somewhat standard as it is probably the most straightforward way to get the result. The essence of the approach is to iterate all B-rep faces while attempting to compose them into groups based on some ad-hoc heuristics. Some heuristics are listed in our brief conference paper <a href="../references.html#malyshev-rule-based-2017">[Malyshev et al, 2017]</a>.
 </p>
 
 <p class="note">
-  There is a bit of ambiguity in referring to some feature recognition approach as "graph-based." For example, <a href="./features_find-isomorphous-faces.html">finding isomorphous faces</a> is completely abstract and graph-based as it searches for a pattern's subgraph in the entire model's <a href="./features_aag.html">AAG</a>. At the same time, the rule-based approach is also graph-based as it matches just the same AAG, though in different ways (i.e., by iteration). Therefore, we avoid using this "graph-based" naming in Analysis Situs.
+  There is a bit of ambiguity in referring to some feature recognition approach as "graph-based." For example, <a href="./features_find-isomorphous-faces.html">finding isomorphous faces</a> is completely abstract and graph-based as it searches for a pattern subgraph in the entire model <a href="./features_aag.html">AAG</a>. At the same time, the rule-based approach is also "graph-based" as it matches just the same AAG, though in different ways (i.e., by iteration).
 </p>
 
 <h2 id="toc-feat-rec-rule-based">More on rule-based approach</h2>
 
 <p>
-  Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach, because any customization would require recompilation. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
+  Historically first, this approach remains our favorite. If implemented correctly, it gives the right balance between recognition accuracy and efficiency. All rules are programmed in C++, and that's arguably the downside of the approach, because any customization would require programming and recompilation. At the same time, the method is highly maintainable as it is entirely deterministic and straightforward. The following notions are used throughout the rule-based recognition methods:
 </p>
 
 <table align="center" style="border: 1px solid rgb(100, 100, 100);" cellpadding="5" cellspacing="0" width="100%">
@@ -120,7 +116,7 @@
   </td>
   <td class="table-content-block">
     <p>
-      For the given position of AAG iterator (a "cursor"), a Rule performs recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited nodes are usually memorized to avoid checking them twice in the main loop.
+      For the given position of AAG iterator (a "cursor"), a Rule performs <i>local</i> recognition by applying a certain set of geometric and topological heuristics. The Rule is allowed to visit any faces of the AAG, so it can be seen as a nested loop (or loops) for the main recognition loop. All visited nodes are usually memorized to avoid checking them twice in the main loop.
     </p>
     <div class="note">
       One of the fundamental heuristics is the <a href="./features_check-dih-angles.html">dihedral angle</a> between feature faces.
@@ -131,7 +127,7 @@
     <ol>
       <li><i>Get ready:</i> take the current face and mark it as "visited."</li>
       <li><i>Apply heuristics:</i> attempt to recognize a feature starting from the current face inclusively (the iterated faces are marked as "visited" down the road).</li>
-      <li><i>Compose the result:</i> in case of success, and return all "visited" faces as a result.</li>
+      <li><i>Compose the result</i> in the case of success, and return all "visited" faces as a result.</li>
     </ol>
     <p>
       The Recognizer checks the Rule's status at each iteration. If a Rule fails, the Recognizer cancels the "visited" faces returned by a Rule. If a Rule succeeds, the Recognizer makes sure to skip the visited faces, i.e., to avoid passing them as new seeds at subsequent iterations.
@@ -148,6 +144,23 @@
 
 <p>
   Imagine you detect all cylindrical holes in the model using the rule-based approach. Let's also assume that the applied rule does not differentiate between different types of holes, i.e., you get through, blind, countersunk, and counterbored holes all in one result set. To distinguish between various hole types, you can apply isomorphism matching. That would be a good idea since the rule-based recognizers have narrowed down the entire search space, and you have as many connected components out of the initial AAG as many features were detected. Finding isomorphous faces is a computationally expensive operation, and partitioning the initial graph will speed up the process drastically (see <a href="../references.html#slyadnev-graphs-2020">[Slyadnev et al, 2020]</a> for more details).
+</p>
+
+<h2 id="toc-feat-examples">Examples of rule-based recognizers</h2>
+
+<p>
+  The following feature types were recognized with the rule-based Recognizer/Rule architecture using the Analysis Situs framework:
+</p>
+
+<ol>
+  <li>Drilled holes.</li>
+  <li>Cylindrical shafts.</li>
+  <li>Arbitrary cavities.</li>
+  <li>Modeled threads.</li>
+</ol>
+
+<p>
+  The Recognizer/Rule architecture is nothing but a good practice of recognizing well-defined local features. Other feature types, such as blends, chamfers, milling contours, turned faces, etc. might require their own dedicated architecture.
 </p>
 
 <h1 id="toc-feat-isomorphism">Isomorphism</h1>
