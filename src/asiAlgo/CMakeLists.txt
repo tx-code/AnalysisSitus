@@ -20,7 +20,6 @@ set (CPP_FILES
 
 set (aux_H_FILES
   auxiliary/asiAlgo_AttrFaceColor.h
-  auxiliary/asiAlgo_BoundaryDistanceField.h
   auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
   auxiliary/asiAlgo_BullardRNG.h
@@ -65,7 +64,6 @@ set (aux_H_FILES
   auxiliary/asiAlgo_VisualSettings.h
 )
 set (aux_CPP_FILES
-  auxiliary/asiAlgo_BoundaryDistanceField.cpp
   auxiliary/asiAlgo_BuildConvexHull.cpp
   auxiliary/asiAlgo_BuildHLR.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp
@@ -97,6 +95,11 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_ShapeSerializer.cpp
   auxiliary/asiAlgo_Utils.cpp
 )
+
+if (USE_MOBIUS)
+  list(APPEND aux_H_FILES   auxiliary/asiAlgo_BoundaryDistanceField.h)
+  list(APPEND aux_CPP_FILES auxiliary/asiAlgo_BoundaryDistanceField.cpp)
+endif()
 
 #------------------------------------------------------------------------------
 # Blends
