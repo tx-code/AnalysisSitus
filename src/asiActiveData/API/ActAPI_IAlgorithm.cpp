@@ -43,7 +43,7 @@ ActAPI_IAlgorithm::ActAPI_IAlgorithm(ActAPI_ProgressEntry progress,
 : Standard_Transient (),
   m_progress         (progress),
   m_plotter          (plotter),
-  m_iStatusCode      (0) // Zero value is reserved for "no error" status.
+  m_iStatusFlags     (0) // Zero value is reserved for "no error" status flag.
 {}
 
 //-----------------------------------------------------------------------------

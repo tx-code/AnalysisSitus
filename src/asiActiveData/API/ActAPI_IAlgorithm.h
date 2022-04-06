@@ -63,15 +63,15 @@ public:
 
   //! Sets status code as an integer.
   //! \param[in] status code to set.
-  void SetStatusCode(const Standard_Integer status)
+  void SetStatusFlags(const Standard_Integer status)
   {
-    m_iStatusCode = status;
+    m_iStatusFlags = status;
   }
 
   //! \return integer status code.
-  Standard_Integer GetStatusCode() const
+  Standard_Integer GetStatusFlags() const
   {
-    return m_iStatusCode;
+    return m_iStatusFlags;
   }
 
   //! Adds status to the currently stored one. The derived classes take
@@ -79,18 +79,18 @@ public:
   //! 0x04, 0x08, 0x10, 0x20, 0x40, etc. This may we can store several statuses
   //! in one integer variable.
   //! \param[in] statBit status bit to add to the current status.
-  void AddStatusCode(const Standard_Integer statBit)
+  void AddStatusFlag(const Standard_Integer statBit)
   {
-    m_iStatusCode |= statBit;
+    m_iStatusFlags |= statBit;
   }
 
   //! Checks whether the stored status code contains bits for the passed
   //! status.
   //! \param[in] statBit bits to check.
   //! \return true/false.
-  Standard_Boolean HasStatusCode(const Standard_Integer statBit) const
+  Standard_Boolean HasStatusFlag(const Standard_Integer statBit) const
   {
-    return (m_iStatusCode & statBit) > 0;
+    return (m_iStatusFlags & statBit) > 0;
   }
 
 protected:
@@ -104,13 +104,13 @@ protected:
   mutable ActAPI_ProgressEntry m_progress; //!< Progress Notifier.
   mutable ActAPI_PlotterEntry  m_plotter;  //!< Imperative Plotter.
 
-  //! Status code which can be an error code, warning code or any other
-  //! status which gives more detalisation on algorithm's execution state.
-  Standard_Integer m_iStatusCode;
+  //! Status flags that can be an error code, warning code or any other
+  //! status giving more detalisation on the algorithm's execution state.
+  Standard_Integer m_iStatusFlags;
 
 private:
 
-  ActAPI_IAlgorithm() : Standard_Transient(), m_iStatusCode(0) {} //!< Default ctor.
+  ActAPI_IAlgorithm() : Standard_Transient(), m_iStatusFlags(0) {} //!< Default ctor.
 
 };
 
