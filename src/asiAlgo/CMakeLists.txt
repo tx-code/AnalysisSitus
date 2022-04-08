@@ -279,6 +279,7 @@ set (features_H_FILES
   features/asiAlgo_FeatureAttrAdjacency.h
   features/asiAlgo_FeatureAttrAngle.h
   features/asiAlgo_FeatureAttrFace.h
+  features/asiAlgo_FeatureAttrUVBounds.h
   features/asiAlgo_FeatureFaces.h
   features/asiAlgo_FeatureType.h
   features/asiAlgo_FindFeatureHints.h
