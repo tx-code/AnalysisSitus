@@ -38,6 +38,7 @@
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
+#include <Standard_Version.hxx>
 #include <TCollection_AsciiString.hxx>
 
 // Tcl includes
@@ -103,6 +104,11 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
   /* =========================
    *  Add initialization text.
    * ========================= */
+
+  this->addText( QString("OpenCascade version: %1.%2.%3\n")
+                 .arg(OCC_VERSION_MAJOR)
+                 .arg(OCC_VERSION_MINOR)
+                 .arg(OCC_VERSION_MAINTENANCE), false, false );
 
   this->addText( QString("Tcl version: %1 [%2.%3.%4.%5]\n"
                          "Type 'show-commands' to display available commands.\n***")
