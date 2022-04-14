@@ -35,6 +35,7 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiEngine includes
+#include <asiEngine_Clearance.h>
 #include <asiEngine_Curve.h>
 #include <asiEngine_Editing.h>
 #include <asiEngine_Isomorphism.h>
@@ -3639,6 +3640,62 @@ int ENGINE_CheckThickness(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckClearance(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  // Get Data Model instance.
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get owner.
+  Handle(ActAPI_INode) ownerNode;
+  //
+  ActAPI_DataObjectId ownerId;
+  interp->GetKeyValue(argc, argv, "owner", ownerId);
+  //
+  if ( ownerId.IsEmpty() )
+    ownerNode = M->GetPartNode();
+  else
+    ownerNode = M->FindNode(ownerId);
+  //
+  if ( ownerNode.IsNull() || !ownerNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Owner node is null or inconsistent.");
+    return TCL_ERROR;
+  }
+
+  // Clearance analysis API.
+  asiEngine_Clearance clearanceApi( M,
+                                    interp->GetProgress(),
+                                    interp->GetPlotter() );
+  //
+  Handle(asiData_ClearanceNode) CN;
+
+  // Analyze clearance.
+  M->OpenCommand();
+  {
+    CN = clearanceApi.CreateClearance(ownerNode);
+
+    // Execute deps.
+    M->FuncExecuteAll();
+  }
+  M->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf )
+  {
+    if ( cmdEngine::cf->ObjectBrowser )
+      cmdEngine::cf->ObjectBrowser->Populate();
+    if ( cmdEngine::cf->ViewerPart )
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(CN);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_FindVisibleFaces(const Handle(asiTcl_Interp)& interp,
                             int                          argc,
                             const char**                 argv)
@@ -4076,8 +4133,8 @@ int ENGINE_CheckFacets(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
-                             int                          argc,
-                             const char**                 argv)
+                             int                          /*argc*/,
+                             const char**                 /*argv*/)
 {
   // Get part's AAG.
   Handle(asiData_PartNode)
@@ -4566,6 +4623,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks the thickness distribution over the passed owner shape.",
     //
     __FILE__, group, ENGINE_CheckThickness);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-clearance",
+    //
+    "check-clearance [-owner <ownerId>]\n"
+    "\t Checks the clearance distribution over the passed owner shape.",
+    //
+    __FILE__, group, ENGINE_CheckClearance);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("find-visible-faces",

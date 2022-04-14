@@ -135,6 +135,7 @@ set (pipelines_CPP_FILES
 
 set (presentations_H_FILES
   presentations/asiVisu_CalculusLawPrs.h
+  presentations/asiVisu_ClearancePrs.h
   presentations/asiVisu_ContourPrs.h
   presentations/asiVisu_CurvatureCombsPrs.h
   presentations/asiVisu_DefaultPrs.h
@@ -174,6 +175,7 @@ set (presentations_H_FILES
 )
 set (presentations_CPP_FILES 
   presentations/asiVisu_CalculusLawPrs.cpp
+  presentations/asiVisu_ClearancePrs.cpp
   presentations/asiVisu_ContourPrs.cpp
   presentations/asiVisu_CurvatureCombsPrs.cpp
   presentations/asiVisu_DefaultPrs.cpp
@@ -217,6 +219,7 @@ set (presentations_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (providers_H_FILES
+  providers/asiVisu_ClearanceDataProvider.h
   providers/asiVisu_ContourDataProvider.h
   providers/asiVisu_ContourPointsDataProvider.h
   providers/asiVisu_ContourPolesDataProvider.h
@@ -262,6 +265,7 @@ set (providers_H_FILES
   providers/asiVisu_VectorsDataProvider.h
 )
 set (providers_CPP_FILES 
+  providers/asiVisu_ClearanceDataProvider.cpp
   providers/asiVisu_ContourDataProvider.cpp
   providers/asiVisu_ContourPointsDataProvider.cpp
   providers/asiVisu_ContourPolesDataProvider.cpp

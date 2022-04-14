@@ -36,6 +36,7 @@
 
 // asiData includes
 #include <asiData_BoundaryEdgesNode.h>
+#include <asiData_ClearanceNode.h>
 #include <asiData_CurvatureCombsNode.h>
 #include <asiData_DeviationNode.h>
 #include <asiData_Grid2dNode.h>
@@ -532,6 +533,12 @@ public:
     return Handle(asiData_Partition<asiData_ThicknessNode>)::DownCast( this->Partition(Partition_Thickness) );
   }
 
+  //! \return Partition of Clearance Nodes.
+  Handle(asiData_Partition<asiData_ClearanceNode>) GetClearancePartition() const
+  {
+    return Handle(asiData_Partition<asiData_ClearanceNode>)::DownCast( this->Partition(Partition_Clearance) );
+  }
+
 protected:
 
   asiEngine_EXPORT virtual void
@@ -631,6 +638,7 @@ protected:
   //---------------------------------------------------------------------------
     Partition_SurfDeviation,
     Partition_Thickness,
+    Partition_Clearance,
   //---------------------------------------------------------------------------
     Partition_LAST
   };

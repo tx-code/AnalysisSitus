@@ -150,6 +150,7 @@ set (iv_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (misc_H_FILES
+  misc/asiData_ClearanceNode.h
   misc/asiData_ContourNode.h
   misc/asiData_DesignLawNode.h
   misc/asiData_FuncAttr.h
@@ -162,6 +163,7 @@ set (misc_H_FILES
   misc/asiData_UniformGridParameter.h
 )
 set (misc_CPP_FILES
+  misc/asiData_ClearanceNode.cpp
   misc/asiData_ContourNode.cpp
   misc/asiData_DesignLawNode.cpp
   misc/asiData_FuncAttr.cpp

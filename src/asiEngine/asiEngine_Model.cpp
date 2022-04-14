@@ -35,6 +35,7 @@
 #include <asiEngine_BuildEdgeFunc.h>
 #include <asiEngine_BuildOctreeFunc.h>
 #include <asiEngine_BuildPatchFunc.h>
+#include <asiEngine_CheckClearanceFunc.h>
 #include <asiEngine_CheckThicknessFunc.h>
 #include <asiEngine_Curve.h>
 #include <asiEngine_Features.h>
@@ -91,6 +92,7 @@ REGISTER_NODE_TYPE(asiData_ThicknessNode)
 REGISTER_NODE_TYPE(asiData_TriangulationNode)
 REGISTER_NODE_TYPE(asiData_TessNode)
 REGISTER_NODE_TYPE(asiData_MeshNormsNode)
+REGISTER_NODE_TYPE(asiData_ClearanceNode)
 //
 REGISTER_NODE_TYPE(asiData_ReTopoNode)
 REGISTER_NODE_TYPE(asiData_RePatchNode)
@@ -380,6 +382,7 @@ void asiEngine_Model::initPartitions()
   //
   REGISTER_PARTITION(asiData_Partition<asiData_SurfDeviationNode>,  Partition_SurfDeviation);
   REGISTER_PARTITION(asiData_Partition<asiData_ThicknessNode>,      Partition_Thickness);
+  REGISTER_PARTITION(asiData_Partition<asiData_ClearanceNode>,      Partition_Clearance);
 }
 
 //-----------------------------------------------------------------------------
@@ -393,6 +396,7 @@ void asiEngine_Model::initFunctionDrivers()
   REGISTER_TREE_FUNCTION(asiEngine_BuildOctreeFunc);
   REGISTER_TREE_FUNCTION(asiEngine_BuildPatchFunc);
   REGISTER_TREE_FUNCTION(asiEngine_CheckThicknessFunc);
+  REGISTER_TREE_FUNCTION(asiEngine_CheckClearanceFunc);
   REGISTER_TREE_FUNCTION(asiEngine_SmoothenCornersFunc);
   REGISTER_TREE_FUNCTION(asiEngine_SmoothenPatchesFunc);
 

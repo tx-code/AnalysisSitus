@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 02 April 2020
+// Created on: 14 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_CheckThickness_h
-#define asiAlgo_CheckThickness_h
+#ifndef asiAlgo_CheckClearance_h
+#define asiAlgo_CheckClearance_h
 
 // asiAlgo includes
 #include <asiAlgo_BVHFacets.h>
@@ -39,16 +39,17 @@
 #include <ActAPI_IAlgorithm.h>
 
 #if defined USE_MOBIUS
+// Mobius includes
 #include <mobius/poly_Mesh.h>
 #endif
 
 //-----------------------------------------------------------------------------
 
-//! Utility to check thickness of a CAD part.
-class asiAlgo_CheckThickness : public ActAPI_IAlgorithm
+//! Utility to check feature clearances in a CAD part.
+class asiAlgo_CheckClearance : public ActAPI_IAlgorithm
 {
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_CheckThickness, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_CheckClearance, ActAPI_IAlgorithm)
 
 public:
 
@@ -57,7 +58,7 @@ public:
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
+    asiAlgo_CheckClearance(const TopoDS_Shape&  shape,
                            ActAPI_ProgressEntry progress = nullptr,
                            ActAPI_PlotterEntry  plotter  = nullptr);
 
@@ -67,65 +68,44 @@ public:
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_CheckThickness(const mobius::t_ptr<mobius::poly_Mesh>& tris,
+    asiAlgo_CheckClearance(const mobius::t_ptr<mobius::poly_Mesh>& tris,
                            ActAPI_ProgressEntry                    progress = nullptr,
                            ActAPI_PlotterEntry                     plotter  = nullptr);
 #endif
 
 public:
 
-  //! Performs ray casting method of thickness analysis.
+  //! Performs ray casting for clearance analysis.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform_RayMethod();
-
-  //! Performs sphere-based method of thickness anslysis.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT bool
-    Perform_SphereMethod();
+    Perform();
 
 public:
 
-  //! Sets custom direction mode.
-  //! \param[in] on true/false.
-  void SetIsCustomDir(const bool on)
-  {
-    m_bIsCustomDir = on;
-  }
-
-#if defined USE_MOBIUS
-  //! Sets custom direction of analysis.
-  //! \param[in] dir direction to set.
-  void SetCustomDir(const mobius::t_xyz& dir)
-  {
-    m_customDir = dir;
-  }
-#endif
-
-  //! \return result of thickness check which is a faceted representation
+  //! \return result of the clearance check which is a faceted representation
   //!         of the CAD part with associated distance field. The scalar
   //!         values representing the distance field are bounded to the
   //!         mesh nodes.
-  const asiAlgo_MeshWithFields& GetThicknessField() const
+  const asiAlgo_MeshWithFields& GetClearanceField() const
   {
     return m_resField;
   }
 
-  //! \return the computed min thickness value.
-  double GetMinThickness() const
+  //! \return the computed min clearance value.
+  const tl::optional<double>& GetMinClearance() const
   {
-    return m_fMinThick;
+    return m_fMinClr;
   }
 
-  //! \return the computed max thickness value.
-  double GetMaxThickness() const
+  //! \return the computed max clearance value.
+  const tl::optional<double>& GetMaxClearance() const
   {
-    return m_fMaxThick;
+    return m_fMaxClr;
   }
 
 public:
 
-  //! Sets the indices of the B-rep elements whose thickness should be analyzed.
+  //! Sets the indices of the B-rep elements whose clearance should be analyzed.
   //! If a subdomain is not defined, the entire input model is exposed to the
   //! analysis.
   //!
@@ -146,15 +126,11 @@ public:
 
 protected:
 
-  Handle(asiAlgo_BVHFacets)  m_bvh;          //!< BVH representation of a CAD part.
-  TColStd_PackedMapOfInteger m_subdomain;    //!< Optional subdomain to narrow down the zone of interest.
-  bool                       m_bIsCustomDir; //!< Whether to use custom direction.
-#if defined USE_MOBIUS
-  mobius::t_xyz              m_customDir;    //!< Custom direction.
-#endif
-  asiAlgo_MeshWithFields     m_resField;     //!< Mesh with a scalar field.
-  double                     m_fMinThick;    //!< Min thickness.
-  double                     m_fMaxThick;    //!< Max thickness.
+  Handle(asiAlgo_BVHFacets)  m_bvh;       //!< BVH representation of a CAD part.
+  TColStd_PackedMapOfInteger m_subdomain; //!< Optional subdomain to narrow down the zone of interest.
+  asiAlgo_MeshWithFields     m_resField;  //!< Mesh with a scalar field.
+  tl::optional<double>       m_fMinClr;   //!< Min clearance.
+  tl::optional<double>       m_fMaxClr;   //!< Max clearance.
 
 };
 

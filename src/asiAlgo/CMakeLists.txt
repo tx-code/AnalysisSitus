@@ -26,6 +26,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_BVHAlgo.h
   auxiliary/asiAlgo_BVHFacets.h
   auxiliary/asiAlgo_BVHIterator.h
+  auxiliary/asiAlgo_CheckClearance.h
   auxiliary/asiAlgo_CheckContour.h
   auxiliary/asiAlgo_CheckThickness.h
   auxiliary/asiAlgo_CheckToler.h
@@ -69,6 +70,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_BVHAlgo.cpp
   auxiliary/asiAlgo_BVHFacets.cpp
   auxiliary/asiAlgo_BVHIterator.cpp
+  auxiliary/asiAlgo_CheckClearance.cpp
   auxiliary/asiAlgo_CheckContour.cpp
   auxiliary/asiAlgo_CheckThickness.cpp
   auxiliary/asiAlgo_CheckToler.cpp

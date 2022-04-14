@@ -7,6 +7,7 @@ project(asiEngine)
 set (H_FILES
   asiEngine.h
   asiEngine_Base.h
+  asiEngine_Clearance.h
   asiEngine_Curve.h
   asiEngine_Domain.h
   asiEngine_Editing.h
@@ -27,6 +28,7 @@ set (H_FILES
 )
 set (CPP_FILES
   asiEngine_Base.cpp
+  asiEngine_Clearance.cpp
   asiEngine_Curve.cpp
   asiEngine_Domain.cpp
   asiEngine_Editing.cpp
@@ -54,6 +56,7 @@ set (func_H_FILES
   func/asiEngine_BuildEdgeFunc.h
   func/asiEngine_BuildOctreeFunc.h
   func/asiEngine_BuildPatchFunc.h
+  func/asiEngine_CheckClearanceFunc.h
   func/asiEngine_CheckThicknessFunc.h
   func/asiEngine_SmoothenCornersFunc.h
   func/asiEngine_SmoothenPatchesFunc.h
@@ -62,6 +65,7 @@ set (func_CPP_FILES
   func/asiEngine_BuildEdgeFunc.cpp
   func/asiEngine_BuildOctreeFunc.cpp
   func/asiEngine_BuildPatchFunc.cpp
+  func/asiEngine_CheckClearanceFunc.cpp
   func/asiEngine_CheckThicknessFunc.cpp
   func/asiEngine_SmoothenCornersFunc.cpp
   func/asiEngine_SmoothenPatchesFunc.cpp

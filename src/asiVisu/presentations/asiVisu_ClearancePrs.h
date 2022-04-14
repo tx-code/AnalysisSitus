@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 03 April 2020
+// Created on: 14 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,57 +28,73 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiVisu_ThicknessDataProvider_h
-#define asiVisu_ThicknessDataProvider_h
+#ifndef asiVisu_ClearancePrs_h
+#define asiVisu_ClearancePrs_h
 
 // asiVisu includes
-#include <asiVisu_MeshEScalarDataProvider.h>
+#include <asiVisu_DefaultPrs.h>
 
 // asiData includes
-#include <asiData_ThicknessNode.h>
+#include <asiData_ClearanceNode.h>
+
+// VTK includes
+#include <vtkScalarBarWidget.h>
 
 //-----------------------------------------------------------------------------
 
-//! Data provider for thickness fields.
-class asiVisu_ThicknessDataProvider : public asiVisu_MeshEScalarDataProvider
+//! Presentation class for Clearance Node.
+class asiVisu_ClearancePrs : public asiVisu_DefaultPrs
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_ThicknessDataProvider, asiVisu_MeshEScalarDataProvider)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_ClearancePrs, asiVisu_DefaultPrs)
+
+  // Allows to register this Presentation class
+  DEFINE_PRESENTATION_FACTORY(asiData_ClearanceNode, Instance)
 
 public:
 
-  //! Ctor.
-  //! \param[in] N Thickness Node.
-  asiVisu_EXPORT
-    asiVisu_ThicknessDataProvider(const Handle(asiData_ThicknessNode)& N);
+  //! Pipelines.
+  enum PipelineId
+  {
+    Pipeline_Main = 1
+  };
 
 public:
 
-  //! \return ids of the mesh elements having associated scalars.
-  asiVisu_EXPORT virtual Handle(HIntArray)
-    GetElementIDs() const;
+  //! Factory method for Presentation.
+  //! \param[in] N Node to create a Presentation for.
+  //! \return new Presentation instance.
+  static Handle(asiVisu_Prs) Instance(const Handle(ActAPI_INode)& N)
+  {
+    return new asiVisu_ClearancePrs(N);
+  }
 
-  //! \return array of elemental scalars.
-  asiVisu_EXPORT virtual Handle(HRealArray)
-    GetElementScalars() const;
+private:
 
-  //! \return min scalar bound.
-  asiVisu_EXPORT virtual double
-    GetMinScalar() const;
+  //! Creates a Presentation object for the passed Node.
+  //! Allocation is allowed only via Instance() method.
+  //! \param[in] N Node to create a Presentation for.
+  asiVisu_EXPORT asiVisu_ClearancePrs(const Handle(ActAPI_INode)& N);
 
-  //! \return max scalar bound.
-  asiVisu_EXPORT virtual double
-    GetMaxScalar() const;
+// Callbacks:
+private:
 
-protected:
+  //! Callback for updating of Presentation pipelines invoked after the
+  //! kernel update routine completes.
+  virtual void afterUpdatePipelines() const;
 
-  //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
-  //! translation process.
-  //! \return source Parameters.
-  asiVisu_EXPORT virtual Handle(ActAPI_HParameterList)
-    translationSources() const;
+  //! Callback for rendering.
+  //! \param[in] renderer renderer.
+  virtual void renderPipelines(vtkRenderer* renderer) const;
+
+  //! Callback for derendering.
+  virtual void deRenderPipelines(vtkRenderer* renderer) const;
+
+private:
+
+  vtkSmartPointer<vtkScalarBarWidget> m_scalarBarWidget; //!< Scalar bar.
 
 };
 

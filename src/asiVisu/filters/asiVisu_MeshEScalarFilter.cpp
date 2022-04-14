@@ -161,10 +161,11 @@ int asiVisu_MeshEScalarFilter::RequestData(vtkInformation*        request,
     // Access scalar value
     double aScalar = 0.0;
     bool isCellScalared = this->scalarForElem(anElemID, aScalar);
-    this->adjustMinMax(aScalar);
 
     if ( !isCellScalared )
       continue;
+
+    this->adjustMinMax(aScalar);
 
     for ( vtkIdType aNodeLocalID = 0; aNodeLocalID < aNbCellPoints; ++aNodeLocalID )
     {

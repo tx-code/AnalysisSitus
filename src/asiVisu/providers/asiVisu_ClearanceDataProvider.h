@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 03 April 2020
+// Created on: 14 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,31 +28,29 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiVisu_ThicknessDataProvider_h
-#define asiVisu_ThicknessDataProvider_h
+#ifndef asiVisu_ClearanceDataProvider_h
+#define asiVisu_ClearanceDataProvider_h
 
 // asiVisu includes
 #include <asiVisu_MeshEScalarDataProvider.h>
 
 // asiData includes
-#include <asiData_ThicknessNode.h>
+#include <asiData_ClearanceNode.h>
 
 //-----------------------------------------------------------------------------
 
-//! Data provider for thickness fields.
-class asiVisu_ThicknessDataProvider : public asiVisu_MeshEScalarDataProvider
+//! Data provider for clearance fields.
+class asiVisu_ClearanceDataProvider : public asiVisu_MeshEScalarDataProvider
 {
-public:
-
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_ThicknessDataProvider, asiVisu_MeshEScalarDataProvider)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_ClearanceDataProvider, asiVisu_MeshEScalarDataProvider)
 
 public:
 
   //! Ctor.
-  //! \param[in] N Thickness Node.
+  //! \param[in] N Clearance Node.
   asiVisu_EXPORT
-    asiVisu_ThicknessDataProvider(const Handle(asiData_ThicknessNode)& N);
+    asiVisu_ClearanceDataProvider(const Handle(asiData_ClearanceNode)& N);
 
 public:
 

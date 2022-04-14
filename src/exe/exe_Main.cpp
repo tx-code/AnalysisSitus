@@ -44,6 +44,7 @@
 
 // asiVisu includes
 #include <asiVisu_CalculusLawPrs.h>
+#include <asiVisu_ClearancePrs.h>
 #include <asiVisu_CurvatureCombsPrs.h>
 #include <asiVisu_DeviationPrs.h>
 #include <asiVisu_FaceDomainPrs.h>
@@ -298,6 +299,7 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_RePatchPrs)
   REGISTER_PRESENTATION(asiVisu_ReVertexPrs)
   REGISTER_PRESENTATION(asiVisu_ThicknessPrs)
+  REGISTER_PRESENTATION(asiVisu_ClearancePrs)
 
   // Imperative viewer.
   REGISTER_PRESENTATION(asiVisu_IVPointSet2dPrs)
