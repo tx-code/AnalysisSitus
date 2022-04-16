@@ -198,11 +198,6 @@ int main(int argc, char** argv)
   std::string workdir = OSD_Process::ExecutableFolder().ToCString();
   //
   asiAlgo_Utils::Str::ReplaceAll(workdir, "\\", "/");
-  std::string
-    resDir = asiAlgo_Utils::Str::Slashed(workdir) + "resources";
-
-  qputenv( "CSF_PluginDefaults",    resDir.c_str() );
-  qputenv( "CSF_ResourcesDefaults", resDir.c_str() );
 
   // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
   std::string
@@ -214,6 +209,31 @@ int main(int argc, char** argv)
             << " = "
             << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
             << std::endl;
+
+  // Set extra environment variables for resources.
+  std::string
+    resDir = asiAlgo_Utils::Str::Slashed(workdir) + "resources";
+  //
+  if ( QDir( resDir.c_str() ).exists() )
+  {
+    qputenv( "CSF_PluginDefaults",    resDir.c_str() );
+    qputenv( "CSF_ResourcesDefaults", resDir.c_str() );
+
+    TCollection_AsciiString resDirStr = QStr2AsciiStr( QString::fromLatin1( resDir.data() ) );
+    //
+    std::cout << "CSF_PluginDefaults: " << resDirStr.ToCString() << std::endl;
+    std::cout << "CSF_ResourcesDefaults: " << resDirStr.ToCString() << std::endl;
+
+    // Load data dictionary.
+    std::string dictFilename    = resDir + "/asiExeDictionary.xml";
+    QString     dictFilenameStr = QString::fromLatin1( dictFilename.data() );
+    //
+    if ( !asiAlgo_Dictionary::Load( QStr2AsciiStr(dictFilenameStr) ) )
+    {
+      std::cout << "Cannot load data dictionary from "
+                << QStr2AsciiStr(dictFilenameStr).ToCString() << std::endl;
+    }
+  }
 
   //---------------------------------------------------------------------------
   // Batch vs UI initialization
@@ -263,30 +283,6 @@ int main(int argc, char** argv)
     {
       QTimer::singleShot( 3000, pSplash, SLOT( close() ) );
       QTimer::singleShot( 3000, pMainWindow, SLOT( slInit() ) );
-    }
-
-    // Set extra environment variables
-    QByteArray resDir = appRoot + "/resources";
-    //
-    if ( QDir(resDir).exists() )
-    {
-      qputenv("CSF_PluginDefaults", resDir);
-      qputenv("CSF_ResourcesDefaults", resDir);
-
-      TCollection_AsciiString resDirStr = QStr2AsciiStr( QString::fromLatin1( resDir.data() ) );
-      //
-      std::cout << "CSF_PluginDefaults: " << resDirStr.ToCString() << std::endl;
-      std::cout << "CSF_ResourcesDefaults: " << resDirStr.ToCString() << std::endl;
-
-      // Load data dictionary.
-      QByteArray dictFilename = resDir + "/asiExeDictionary.xml";
-      QString dictFilenameStr = QString::fromLatin1( dictFilename.data() );
-      //
-      if ( !asiAlgo_Dictionary::Load( QStr2AsciiStr(dictFilenameStr) ) )
-      {
-        std::cout << "Cannot load data dictionary from "
-                  << QStr2AsciiStr(dictFilenameStr).ToCString() << std::endl;
-      }
     }
 
     // Let Qt do whatever it wants to do before showing UI. This helps
