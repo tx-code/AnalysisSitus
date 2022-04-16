@@ -374,6 +374,25 @@ int main(int argc, char** argv)
     EXE_LOAD_MODULE(cf, "cmdMobius")
 #endif
 
+    // Lookup for custom plugins and try to load them.
+    QDir pluginDir( QDir::currentPath() + "/asi-plugins" );
+    TCollection_AsciiString pluginDirStr = pluginDir.absolutePath().toLatin1().data();
+    //
+    std::cout << "Looking for plugins at "
+              << pluginDirStr.ToCString() << "..." << std::endl;
+    //
+    QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+    //
+    foreach ( QString cmdLib, cmdLibs )
+    {
+      TCollection_AsciiString cmdLibName = cmdLib.section(".", 0, 0).toLatin1().data();
+      //
+      cf->Progress.SendLogMessage(LogNotice(Normal) << "Detected %1 as a custom plugin's library."
+                                                    << cmdLibName);
+
+      EXE_LOAD_MODULE(cf, cmdLibName);
+    }
+
     // Execute script.
     const int
       ret = cf->Interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
