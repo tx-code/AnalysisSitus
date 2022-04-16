@@ -103,6 +103,7 @@
 // OCCT includes
 #include <OSD.hxx>
 #include <OSD_Environment.hxx>
+#include <OSD_Process.hxx>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -121,10 +122,8 @@ VTK_MODULE_INIT(vtkRenderingFreeType)
 VTK_MODULE_INIT(vtkIOExportOpenGL2)
 VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
 
-#define EXE_LOAD_MODULE(name) \
+#define EXE_LOAD_MODULE(__cf, name) \
 { \
-  Handle(exe_CommonFacilities) __cf = exe_CommonFacilities::Instance();\
-  \
   asiTcl_Plugin::Status status = asiTcl_Plugin::Load(__cf->Interp, __cf, name); \
   if ( status == asiTcl_Plugin::Status_Failed ) \
     __cf->Progress.SendLogMessage(LogErr(Normal) << "Cannot load %1 commands." << name); \
@@ -192,6 +191,34 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_IVTopoItemPrs)
   REGISTER_PRESENTATION(asiVisu_IVVectorFieldPrs)
 
+  //---------------------------------------------------------------------------
+  // Environment
+  //---------------------------------------------------------------------------
+
+  std::string workdir = OSD_Process::ExecutableFolder().ToCString();
+  //
+  asiAlgo_Utils::Str::ReplaceAll(workdir, "\\", "/");
+  std::string
+    resDir = asiAlgo_Utils::Str::Slashed(workdir) + "resources";
+
+  qputenv( "CSF_PluginDefaults",    resDir.c_str() );
+  qputenv( "CSF_ResourcesDefaults", resDir.c_str() );
+
+  // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
+  std::string
+    pluginsDir = asiAlgo_Utils::Str::Slashed(workdir) + "asi-plugins";
+  //
+  qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir.c_str());
+  //
+  std::cout << RuntimePathVar
+            << " = "
+            << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
+            << std::endl;
+
+  //---------------------------------------------------------------------------
+  // Batch vs UI initialization
+  //---------------------------------------------------------------------------
+
   if ( !isBatch )
   {
     // Needed to ensure appropriate OpenGL context is created for VTK rendering.
@@ -218,18 +245,6 @@ int main(int argc, char** argv)
 #else
     QApplication::setWindowIcon( QIcon(":icons/asitus/asitus_icon_16x16.png") );
 #endif
-
-    // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
-    QByteArray              appRoot       = app.applicationDirPath().toUtf8();
-    QByteArray              pluginsDir    = appRoot + "/asi-plugins";
-    TCollection_AsciiString pluginsDirStr = QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) );
-    //
-    qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir);
-    //
-    std::cout << RuntimePathVar
-              << " = "
-              << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
-              << std::endl;
 
     // Splash screen.
     QSplashScreen* pSplash = nullptr;
@@ -349,22 +364,18 @@ int main(int argc, char** argv)
   {
     std::cout << "Running Analysis Situs in batch mode..." << std::endl;
 
-    // Get command line arguments to process in a batch mode.
-    for ( int i = 0; i < argc; ++i )
-      std::cout << "Passed arg[" << i << "]: " << argv[i] << std::endl;
-
     // Prepare common facilities for batch mode.
     Handle(asiUI_BatchFacilities) cf = asiUI_BatchFacilities::Instance();
 
     // Load default commands.
-    EXE_LOAD_MODULE("cmdMisc")
-    EXE_LOAD_MODULE("cmdEngine")
-    EXE_LOAD_MODULE("cmdRE")
-    EXE_LOAD_MODULE("cmdDDF")
-    EXE_LOAD_MODULE("cmdAsm")
+    EXE_LOAD_MODULE(cf, "cmdMisc")
+    EXE_LOAD_MODULE(cf, "cmdEngine")
+    EXE_LOAD_MODULE(cf, "cmdRE")
+    EXE_LOAD_MODULE(cf, "cmdDDF")
+    EXE_LOAD_MODULE(cf, "cmdAsm")
     //
 #ifdef USE_MOBIUS
-    EXE_LOAD_MODULE("cmdMobius")
+    EXE_LOAD_MODULE(cf, "cmdMobius")
 #endif
 
     // Execute script.
