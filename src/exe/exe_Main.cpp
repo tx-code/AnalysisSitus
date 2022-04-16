@@ -42,6 +42,9 @@
 #include <exe_Keywords.h>
 #include <exe_MainWindow.h>
 
+// asiTcl includes
+#include <asiTcl_Plugin.h>
+
 // asiVisu includes
 #include <asiVisu_CalculusLawPrs.h>
 #include <asiVisu_ClearancePrs.h>
@@ -118,6 +121,17 @@ VTK_MODULE_INIT(vtkRenderingFreeType)
 VTK_MODULE_INIT(vtkIOExportOpenGL2)
 VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
 
+#define EXE_LOAD_MODULE(name) \
+{ \
+  Handle(exe_CommonFacilities) __cf = exe_CommonFacilities::Instance();\
+  \
+  asiTcl_Plugin::Status status = asiTcl_Plugin::Load(__cf->Interp, __cf, name); \
+  if ( status == asiTcl_Plugin::Status_Failed ) \
+    __cf->Progress.SendLogMessage(LogErr(Normal) << "Cannot load %1 commands." << name); \
+  else if ( status == asiTcl_Plugin::Status_OK ) \
+    __cf->Progress.SendLogMessage(LogInfo(Normal) << "Loaded %1 commands." << name); \
+}
+
 //-----------------------------------------------------------------------------
 // Entry point
 //-----------------------------------------------------------------------------
@@ -134,147 +148,13 @@ int main(int argc, char** argv)
   const bool
     isBatch = isRunScript || isRunCommand;
 
-  //---------------------------------------------------------------------------
-  // Create main window as (it will initialize all resources)
-  //---------------------------------------------------------------------------
+  std::cout << "Batch mode: " << (isBatch ? "true" : "false") << std::endl;
 
-#ifndef _WIN32
-  if ( !isBatch )
-  {
-    QSurfaceFormat fmt;
-    fmt.setRenderableType(QSurfaceFormat::OpenGL);
-    fmt.setVersion(3, 2);
-    fmt.setProfile(QSurfaceFormat::CoreProfile);
-    fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    fmt.setRedBufferSize(1);
-    fmt.setGreenBufferSize(1);
-    fmt.setBlueBufferSize(1);
-    fmt.setDepthBufferSize(1);
-    fmt.setStencilBufferSize(0);
-    //fmt.setAlphaBufferSize(1); // Commented out as this setting causes transparent background on linux.
-    fmt.setStereo(false);
-    fmt.setSamples( vtkOpenGLRenderWindow::GetGlobalMaximumNumberOfMultiSamples() );
-
-    QSurfaceFormat::setDefaultFormat(fmt);
-  }
-#endif
-
-  // Construct Qt application.
-  QApplication app(argc, argv);
-  //
-#ifdef _DEBUG
-  QApplication::setWindowIcon( QIcon(":icons/asitus/asitus-debug_icon_16x16.png") );
-#else
-  QApplication::setWindowIcon( QIcon(":icons/asitus/asitus_icon_16x16.png") );
-#endif
-
-  //---------------------------------------------------------------------------
-  // Runtime path
-  //---------------------------------------------------------------------------
-
-  // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
-  QByteArray              appRoot       = app.applicationDirPath().toUtf8();
-  QByteArray              pluginsDir    = appRoot + "/asi-plugins";
-  TCollection_AsciiString pluginsDirStr = QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) );
-  //
-  qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir);
-  //
-  std::cout << RuntimePathVar
-            << " = "
-            << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
-            << std::endl;
-
-  //---------------------------------------------------------------------------
-  // UI initialization
-  //---------------------------------------------------------------------------
-
-  // Splash screen.
-  QSplashScreen* pSplash = nullptr;
-  //
-  if ( !isBatch )
-  {
-    pSplash = new QSplashScreen( QPixmap(":img/asitus/splash.png"), Qt::WindowStaysOnTopHint );
-    pSplash->show();
-  }
-
-  // Construct main window but do not show it to allow off-screen batch.
-  exe_MainWindow* pMainWindow = new exe_MainWindow(isBatch);
-
-  // Give splash screen some seconds, no matter how fast the main window appears.
-  if ( pSplash )
-  {
-    QTimer::singleShot( 3000, pSplash, SLOT( close() ) );
-    QTimer::singleShot( 3000, pMainWindow, SLOT( slInit() ) );
-  }
-
-  //---------------------------------------------------------------------------
-  // Set extra environment variables
-  //---------------------------------------------------------------------------
-
-  QByteArray resDir = appRoot + "/resources";
-
-  if ( QDir(resDir).exists() )
-  {
-    qputenv("CSF_PluginDefaults", resDir);
-    qputenv("CSF_ResourcesDefaults", resDir);
-
-    TCollection_AsciiString resDirStr = QStr2AsciiStr( QString::fromLatin1( resDir.data() ) );
-    //
-    std::cout << "CSF_PluginDefaults: " << resDirStr.ToCString() << std::endl;
-    std::cout << "CSF_ResourcesDefaults: " << resDirStr.ToCString() << std::endl;
-
-    // Load data dictionary.
-    QByteArray dictFilename = resDir + "/asiExeDictionary.xml";
-    QString dictFilenameStr = QString::fromLatin1( dictFilename.data() );
-    //
-    if ( !asiAlgo_Dictionary::Load( QStr2AsciiStr(dictFilenameStr) ) )
-    {
-      std::cout << "Cannot load data dictionary from "
-                << QStr2AsciiStr(dictFilenameStr).ToCString() << std::endl;
-    }
-  }
-
-  //---------------------------------------------------------------------------
-  // Get command line arguments to process in a batch mode
-  //---------------------------------------------------------------------------
-
+  // Get command line arguments to process in a batch mode.
   for ( int i = 0; i < argc; ++i )
     std::cout << "Passed arg[" << i << "]: " << argv[i] << std::endl;
 
-  // Get Tcl interpeter.
-  const Handle(asiTcl_Interp)&
-    interp = pMainWindow->Widgets.wConsole->GetInterp();
-
-  if ( isBatch )
-  {
-    std::cout << "Running Analysis Situs in batch mode..." << std::endl;
-
-    // Prepare common facilities for batch mode.
-    Handle(asiUI_BatchFacilities) cf = asiUI_BatchFacilities::Instance();
-
-    if ( isRunScript )
-      std::cout << "Exec: " << asiTcl_SourceCmd( scriptArg.c_str() ) << std::endl;
-    else
-      std::cout << "Exec: " << scriptArg.c_str() << std::endl;
-
-    // Execute script.
-    const int
-      ret = interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
-             /* run single command */ : scriptArg.c_str() );
-
-    // Check result.
-    if ( ret != TCL_OK )
-      std::cout << "Batch mode finished with error code " << ret << "." << std::endl;
-    else
-      std::cout << "Batch mode finished successfully (error code " << ret << ")." << std::endl;
-
-    return ret;
-  }
-
-  //---------------------------------------------------------------------------
-  // Register Presentations
-  //---------------------------------------------------------------------------
-
+  // Register Presentations.
   REGISTER_PRESENTATION(asiVisu_PartPrs)
   REGISTER_PRESENTATION(asiVisu_DeviationPrs)
   REGISTER_PRESENTATION(asiVisu_OctreePrs)
@@ -312,78 +192,194 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_IVTopoItemPrs)
   REGISTER_PRESENTATION(asiVisu_IVVectorFieldPrs)
 
-  //---------------------------------------------------------------------------
-  // Configure main window
-  //---------------------------------------------------------------------------
-
-  // Let Qt do whatever it wants to do before showing UI. This helps
-  // to avoid some sort of blinking on launch.
-  QApplication::processEvents(QEventLoop::AllEvents, 10000);
-
-  // Move to a handy position.
-  QRect screenGeometry = QApplication::desktop()->screenGeometry();
-  const int center_x   = ( screenGeometry.width() - pMainWindow->width() ) / 2;
-  const int center_y   = ( screenGeometry.height() - pMainWindow->height() ) / 2;
-  //
-  pMainWindow->move(center_x/8, center_y/4);
-
-  // Show main window.
-  pMainWindow->show();
-
-  // Set focus on Tcl console.
-  pMainWindow->Widgets.wConsole->setFocus();
-
-  //---------------------------------------------------------------------------
-  // Check the autoread log
-  //---------------------------------------------------------------------------
-
-  QFile qFile(asiTcl_AutoLogFilename);
-  //
-  if ( qFile.exists() )
+  if ( !isBatch )
   {
-    if ( qFile.open(QIODevice::ReadOnly | QFile::Text) )
+    // Needed to ensure appropriate OpenGL context is created for VTK rendering.
+    QSurfaceFormat fmt;
+    fmt.setRenderableType(QSurfaceFormat::OpenGL);
+    fmt.setVersion(3, 2);
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+    fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    fmt.setRedBufferSize(1);
+    fmt.setGreenBufferSize(1);
+    fmt.setBlueBufferSize(1);
+    fmt.setDepthBufferSize(1);
+    fmt.setStencilBufferSize(0);
+    fmt.setStereo(false);
+    fmt.setSamples( vtkOpenGLRenderWindow::GetGlobalMaximumNumberOfMultiSamples() );
+    //
+    QSurfaceFormat::setDefaultFormat(fmt);
+
+    // Prepare application.
+    QApplication app(argc, argv);
+    //
+#ifdef _DEBUG
+    QApplication::setWindowIcon( QIcon(":icons/asitus/asitus-debug_icon_16x16.png") );
+#else
+    QApplication::setWindowIcon( QIcon(":icons/asitus/asitus_icon_16x16.png") );
+#endif
+
+    // Adjust PATH/LD_LIBRARY_PATH for loading the plugins.
+    QByteArray              appRoot       = app.applicationDirPath().toUtf8();
+    QByteArray              pluginsDir    = appRoot + "/asi-plugins";
+    TCollection_AsciiString pluginsDirStr = QStr2AsciiStr( QString::fromLatin1( pluginsDir.data() ) );
+    //
+    qputenv(RuntimePathVar, qgetenv(RuntimePathVar) + ";" + pluginsDir);
+    //
+    std::cout << RuntimePathVar
+              << " = "
+              << QStr2AsciiStr( QString::fromLatin1( qgetenv(RuntimePathVar).data() ) ).ToCString()
+              << std::endl;
+
+    // Splash screen.
+    QSplashScreen* pSplash = nullptr;
+    //
+    if ( !isBatch )
     {
-      QTextStream in(&qFile);
-      pMainWindow->Widgets.wConsole->setText( in.readAll() );
+      pSplash = new QSplashScreen( QPixmap(":img/asitus/splash.png"), Qt::WindowStaysOnTopHint );
+      pSplash->show();
     }
+
+    // Construct main window but do not show it to allow off-screen batch.
+    exe_MainWindow* pMainWindow = new exe_MainWindow(isBatch);
+
+    // Give splash screen some seconds, no matter how fast the main window appears.
+    if ( pSplash )
+    {
+      QTimer::singleShot( 3000, pSplash, SLOT( close() ) );
+      QTimer::singleShot( 3000, pMainWindow, SLOT( slInit() ) );
+    }
+
+    // Set extra environment variables
+    QByteArray resDir = appRoot + "/resources";
+    //
+    if ( QDir(resDir).exists() )
+    {
+      qputenv("CSF_PluginDefaults", resDir);
+      qputenv("CSF_ResourcesDefaults", resDir);
+
+      TCollection_AsciiString resDirStr = QStr2AsciiStr( QString::fromLatin1( resDir.data() ) );
+      //
+      std::cout << "CSF_PluginDefaults: " << resDirStr.ToCString() << std::endl;
+      std::cout << "CSF_ResourcesDefaults: " << resDirStr.ToCString() << std::endl;
+
+      // Load data dictionary.
+      QByteArray dictFilename = resDir + "/asiExeDictionary.xml";
+      QString dictFilenameStr = QString::fromLatin1( dictFilename.data() );
+      //
+      if ( !asiAlgo_Dictionary::Load( QStr2AsciiStr(dictFilenameStr) ) )
+      {
+        std::cout << "Cannot load data dictionary from "
+                  << QStr2AsciiStr(dictFilenameStr).ToCString() << std::endl;
+      }
+    }
+
+    // Let Qt do whatever it wants to do before showing UI. This helps
+    // to avoid some sort of blinking on launch.
+    QApplication::processEvents(QEventLoop::AllEvents, 10000);
+
+    // Move to a handy position.
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    const int center_x   = ( screenGeometry.width() - pMainWindow->width() ) / 2;
+    const int center_y   = ( screenGeometry.height() - pMainWindow->height() ) / 2;
+    //
+    pMainWindow->move(center_x/8, center_y/4);
+
+    // Show main window.
+    pMainWindow->show();
+
+    // Set focus on Tcl console.
+    pMainWindow->Widgets.wConsole->setFocus();
+
+    //---------------------------------------------------------------------------
+    // Check the autoread log
+    //---------------------------------------------------------------------------
+
+    QFile qFile(asiTcl_AutoLogFilename);
+    //
+    if ( qFile.exists() )
+    {
+      if ( qFile.open(QIODevice::ReadOnly | QFile::Text) )
+      {
+        QTextStream in(&qFile);
+        pMainWindow->Widgets.wConsole->setText( in.readAll() );
+      }
+    }
+
+    //---------------------------------------------------------------------------
+    // Process the second argument to open the passed file
+    //---------------------------------------------------------------------------
+
+    if ( argc == 2 )
+    {
+      QStringList qtArgs = QApplication::arguments();
+      //
+      TCollection_AsciiString
+        arg1Str = QStr2AsciiStr( QDir::fromNativeSeparators( qtArgs.at(1) ) );
+
+      // Prepare Tcl command.
+      TCollection_AsciiString cmd;
+      //
+      cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += "\"";
+
+      // Execute command.
+      if ( !cmd.IsEmpty() )
+      {
+        QApplication::processEvents(QEventLoop::AllEvents, 10000);
+
+        // Get Tcl interpeter.
+        const Handle(asiTcl_Interp)&
+          interp = pMainWindow->Widgets.wConsole->GetInterp();
+
+        if ( interp->Eval(cmd) != TCL_OK )
+          std::cout << "Tcl finished with error." << std::endl;
+
+        QApplication::processEvents(QEventLoop::AllEvents, 10000);
+
+        if ( interp->Eval("fit") != TCL_OK )
+          std::cout << "Tcl finished with error." << std::endl;
+      }
+    }
+
+    // Run event loop.
+    return app.exec();
   }
 
-  //---------------------------------------------------------------------------
-  // Process the second argument to open the passed file
-  //---------------------------------------------------------------------------
-
-  if ( argc == 2 )
+  else /* Batch mode */
   {
-    QStringList qtArgs = QApplication::arguments();
+    std::cout << "Running Analysis Situs in batch mode..." << std::endl;
+
+    // Get command line arguments to process in a batch mode.
+    for ( int i = 0; i < argc; ++i )
+      std::cout << "Passed arg[" << i << "]: " << argv[i] << std::endl;
+
+    // Prepare common facilities for batch mode.
+    Handle(asiUI_BatchFacilities) cf = asiUI_BatchFacilities::Instance();
+
+    // Load default commands.
+    EXE_LOAD_MODULE("cmdMisc")
+    EXE_LOAD_MODULE("cmdEngine")
+    EXE_LOAD_MODULE("cmdRE")
+    EXE_LOAD_MODULE("cmdDDF")
+    EXE_LOAD_MODULE("cmdAsm")
     //
-    TCollection_AsciiString
-      arg1Str = QStr2AsciiStr( QDir::fromNativeSeparators( qtArgs.at(1) ) );
+#ifdef USE_MOBIUS
+    EXE_LOAD_MODULE("cmdMobius")
+#endif
 
-    // Prepare Tcl command.
-    TCollection_AsciiString cmd;
-    //
-    cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += "\"";
+    // Execute script.
+    const int
+      ret = cf->Interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
+                 /* run single command */ : scriptArg.c_str() );
 
-    // Execute command.
-    if ( !cmd.IsEmpty() )
-    {
-      QApplication::processEvents(QEventLoop::AllEvents, 10000);
+    // Check result.
+    if ( ret != TCL_OK )
+      std::cout << "Batch mode finished with error code " << ret << "." << std::endl;
+    else
+      std::cout << "Batch mode finished successfully (error code " << ret << ")." << std::endl;
 
-      if ( interp->Eval(cmd) != TCL_OK )
-        std::cout << "Tcl finished with error." << std::endl;
-
-      QApplication::processEvents(QEventLoop::AllEvents, 10000);
-
-      if ( interp->Eval("fit") != TCL_OK )
-        std::cout << "Tcl finished with error." << std::endl;
-    }
+    return ret;
   }
-
-  //---------------------------------------------------------------------------
-  // Run event loop
-  //---------------------------------------------------------------------------
-
-  return app.exec();
 }
 
 #else

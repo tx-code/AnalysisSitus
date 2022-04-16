@@ -153,11 +153,17 @@ void exe_MainWindow::onRedo()
 //! Creates main (part) viewer.
 void exe_MainWindow::createPartViewer()
 {
+  std::cout << "Constructing Part viewer..." << std::endl;
+
   // Common facilities instance.
   Handle(exe_CommonFacilities) cf = exe_CommonFacilities::Instance();
 
+  std::cout << "Common facilities are accessed..." << std::endl;
+
   // Create viewer.
   Widgets.wViewerPart = new asiUI_ViewerPart(cf->Model, true, false);
+
+  std::cout << "Part viewer is constructed..." << std::endl;
 
   // Initialize desktop.
   cf->ViewerPart = Widgets.wViewerPart;
@@ -169,6 +175,8 @@ void exe_MainWindow::createPartViewer()
 //! Creates main dockable widgets.
 void exe_MainWindow::createDockWindows()
 {
+  std::cout << "Constructing dockable windows..." << std::endl;
+
   // Common facilities instance.
   Handle(exe_CommonFacilities) cf = exe_CommonFacilities::Instance();
 
@@ -504,6 +512,7 @@ void exe_MainWindow::createDockWindows()
 //! Creates menus.
 void exe_MainWindow::createMenus()
 {
+  std::cout << "Constructing menus..." << std::endl;
 }
 
 //-----------------------------------------------------------------------------
@@ -511,6 +520,8 @@ void exe_MainWindow::createMenus()
 //! Creates toolbar.
 void exe_MainWindow::createToolbar()
 {
+  std::cout << "Constructing toolbar..." << std::endl;
+
   this->Toolbar.pToolbar = new QToolBar(this);
   this->Toolbar.pToolbar->setMovable(false);
   this->Toolbar.pToolbar->setOrientation(Qt::Vertical);
