@@ -34,6 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BVHFacets.h>
 #include <asiAlgo_MeshWithFields.h>
+#include <asiAlgo_Optional.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
