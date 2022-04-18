@@ -132,6 +132,15 @@ void exe_MainWindow::closeEvent(QCloseEvent* evt)
 
 //-----------------------------------------------------------------------------
 
+void exe_MainWindow::onClear()
+{
+  Handle(exe_CommonFacilities) cf = exe_CommonFacilities::Instance();
+  //
+  cf->Interp->Eval("clear");
+}
+
+//-----------------------------------------------------------------------------
+
 void exe_MainWindow::onUndo()
 {
   Handle(exe_CommonFacilities) cf = exe_CommonFacilities::Instance();
@@ -526,6 +535,16 @@ void exe_MainWindow::createToolbar()
   this->Toolbar.pToolbar->setMovable(false);
   this->Toolbar.pToolbar->setOrientation(Qt::Vertical);
   this->addToolBar(Qt::LeftToolBarArea, this->Toolbar.pToolbar);
+
+  // Clear.
+  const QIcon clearIcon   = QIcon(":icons/asitus/asitus_clear_icon_16x16.png");
+  QAction*    clearAction = new QAction(clearIcon, tr("&Clear"), this);
+  clearAction->setShortcut(Qt::SHIFT + Qt::Key_Delete);
+  clearAction->setStatusTip("Clear");
+  //
+  connect( clearAction, SIGNAL( triggered() ), this, SLOT( onClear() ) );
+  //
+  this->Toolbar.pToolbar->addAction(clearAction);
 
   // Undo.
   const QIcon undoIcon   = QIcon(":icons/asitus/asitus_undo_icon_16x16.png");

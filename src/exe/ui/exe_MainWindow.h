@@ -67,6 +67,7 @@ public:
 
 protected slots:
 
+  void onClear();
   void onUndo();
   void onRedo();
 
