@@ -30,6 +30,7 @@
 
 // asiTest includes
 #include <asiTest_AAG.h>
+#include <asiTest_ChangeColor.h>
 #include <asiTest_CommonFacilities.h>
 #include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
@@ -140,6 +141,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>    );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>         );
 
   // Active Data tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_AsciiStringParameter>   );
