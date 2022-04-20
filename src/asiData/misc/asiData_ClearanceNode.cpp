@@ -115,6 +115,9 @@ void asiData_ClearanceNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mes
     // Prepare arrays.
     const int numScalars = field->data.Extent();
     //
+    if ( !numScalars )
+      return;
+    //
     Handle(HIntArray)  elemArr   = new HIntArray  (0, numScalars - 1, 0);
     Handle(HRealArray) valuesArr = new HRealArray (0, numScalars - 1, 0.);
 
