@@ -32,9 +32,11 @@
 #include <cmdEngine.h>
 
 // asiEngine includes
+#include <asiEngine_IVTopoItemSTEPWriterInput.h>
 #include <asiEngine_Model.h>
 #include <asiEngine_Part.h>
 #include <asiEngine_STEPReaderOutput.h>
+#include <asiEngine_STEPWriterInput.h>
 
 // asiVisu includes
 #include <asiVisu_MeshEScalarFilter.h>
@@ -53,6 +55,7 @@
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 #include <asiAlgo_WriteDXF.h>
+#include <asiAlgo_WriteSTEPWithMeta.h>
 #include <asiAlgo_WriteSVG.h>
 
 // asiAsm includes
@@ -208,7 +211,8 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
 
   TCollection_AsciiString filename = ( argc == 2 ? argv[1] : argv[2] );
 
-  TopoDS_Shape shape;
+  Handle(asiAlgo_WriteSTEPWithMetaInput) input;
+
   if ( argc == 2 )
   {
     // Get Part Node to access shape.
@@ -220,7 +224,7 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
     //
-    shape = partNode->GetShape(true);
+    input = new asiEngine_STEPWriterInput(Handle(asiEngine_Model)::DownCast(cmdEngine::model));
   }
   else
   {
@@ -234,11 +238,12 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
       return TCL_OK;
     }
     //
-    shape = topoItem->GetShape();
+    input = new asiEngine_IVTopoItemSTEPWriterInput(topoItem, cmdEngine::model);
   }
 
-  // Save STEP.
-  if ( !asiAlgo_STEP( interp->GetProgress() ).Write(shape, filename) )
+  asiAlgo_WriteSTEPWithMeta writer(interp->GetProgress(), interp->GetPlotter());
+  writer.SetInput(input);
+  if ( !writer.Perform(filename) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save STEP file.");
     return TCL_ERROR;

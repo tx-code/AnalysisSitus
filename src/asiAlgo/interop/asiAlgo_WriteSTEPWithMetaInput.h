@@ -71,11 +71,21 @@ public:
   virtual bool
     HasColor(const TopoDS_Shape& shape) const = 0;
 
-  //! Accessor for the color associated with the given shape.
+  //! Accessor for the color associated with the given subshape.
   //! \param[in] shape shape in question.
   //! \return attached color.
   virtual Quantity_Color
     GetColor(const TopoDS_Shape& shape) const = 0;
+
+  //! Accessor for the color.
+  //! \return common color.
+  virtual Quantity_Color
+    GetCommonColor() const = 0;
+
+  //! Checks whether common shape has color or not.
+  //! \return false if no common color is attached, true -- otherwise.
+  virtual bool
+    HasCommonColor() const = 0;
 
 };
 

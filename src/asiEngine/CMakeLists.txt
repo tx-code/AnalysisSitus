@@ -14,6 +14,7 @@ set (H_FILES
   asiEngine_Features.h
   asiEngine_Isomorphism.h
   asiEngine_IV.h
+  asiEngine_IVTopoItemSTEPWriterInput.h
   asiEngine_Model.h
   asiEngine_Octree.h
   asiEngine_Part.h
@@ -35,6 +36,7 @@ set (CPP_FILES
   asiEngine_Features.cpp
   asiEngine_Isomorphism.cpp
   asiEngine_IV.cpp
+  asiEngine_IVTopoItemSTEPWriterInput.cpp
   asiEngine_Model.cpp
   asiEngine_Octree.cpp
   asiEngine_Part.cpp

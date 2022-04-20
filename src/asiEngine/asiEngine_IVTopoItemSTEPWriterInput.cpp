@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 28 May 2019
+// Created on: 19 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2019-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,120 +29,88 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiEngine_STEPWriterInput.h>
-
-// asiEngine includes
-#include <asiEngine_Part.h>
+#include <asiEngine_IVTopoItemSTEPWriterInput.h>
 
 // asiVisu includes
-#include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
 
 //-----------------------------------------------------------------------------
 
-asiEngine_STEPWriterInput::asiEngine_STEPWriterInput(const Handle(asiEngine_Model)& M)
-: asiAlgo_WriteSTEPWithMetaInput (),
-  m_model                        (M)
+asiEngine_IVTopoItemSTEPWriterInput::
+  asiEngine_IVTopoItemSTEPWriterInput(const Handle(asiData_IVTopoItemNode)& topoItemIV,
+                                      const Handle(asiEngine_Model)&        M)
+  : asiAlgo_WriteSTEPWithMetaInput(),
+  m_topoItem(topoItemIV),
+  m_model(M)
+{}
+
+//-----------------------------------------------------------------------------
+
+TopoDS_Shape asiEngine_IVTopoItemSTEPWriterInput::GetShape() const
 {
-  asiEngine_Part api(m_model);
-  api.GetMetadataElems(m_metaElems);
+  TopoDS_Shape shape;
+
+  if ( !m_topoItem.IsNull() && m_topoItem->IsWellFormed() )
+  {
+    shape = m_topoItem->GetShape();
+  }
+
+  return shape;
 }
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiEngine_STEPWriterInput::GetShape() const
+int asiEngine_IVTopoItemSTEPWriterInput::GetNumSubShapes() const
 {
-  // Check transformation: do not apply one if it is an identity matrix.
-  double tx, ty, tz, rx, ry, rz;
-  m_model->GetPartNode()->GetTransformation(tx, ty, tz, rx, ry, rz);
-  //
-  bool isIdentity = true;
-  //
-  if ( tx != 0. || ty != 0. || tz != 0. || rx != 0. || ry != 0. || rz != 0. )
-    isIdentity = false;
-
-  return m_model->GetPartNode()->GetShape(!isIdentity);
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-int asiEngine_STEPWriterInput::GetNumSubShapes() const
+TopoDS_Shape asiEngine_IVTopoItemSTEPWriterInput::GetSubShape(const int /*zeroBasedIdx*/) const
 {
-  if ( m_metaElems.IsNull() )
-    return 0;
-
-  return m_metaElems->Length();
+  return TopoDS_Shape();
 }
 
 //-----------------------------------------------------------------------------
 
-TopoDS_Shape asiEngine_STEPWriterInput::GetSubShape(const int zeroBasedIdx) const
+bool asiEngine_IVTopoItemSTEPWriterInput::HasColor(const TopoDS_Shape& /*shape*/) const
 {
-  const Handle(asiData_ElemMetadataNode)&
-    elemNode = Handle(asiData_ElemMetadataNode)::DownCast( m_metaElems->Value(zeroBasedIdx + 1) );
-  //
-  return elemNode->GetShape();
-}
-
-//-----------------------------------------------------------------------------
-
-bool asiEngine_STEPWriterInput::HasColor(const TopoDS_Shape& shape) const
-{
-  Handle(asiData_ElemMetadataNode) metaNode = this->elemByShape(shape);
-  //
-  if ( metaNode.IsNull() )
+  if ( m_topoItem.IsNull() || !m_topoItem->IsWellFormed() )
+  {
     return false;
+  }
 
-  return true;
+  return m_topoItem->HasColor();
 }
 
 //-----------------------------------------------------------------------------
 
 Quantity_Color
-  asiEngine_STEPWriterInput::GetColor(const TopoDS_Shape& shape) const
+asiEngine_IVTopoItemSTEPWriterInput::GetColor(const TopoDS_Shape& /*shape*/) const
 {
-  Handle(asiData_ElemMetadataNode) metaNode = this->elemByShape(shape);
-  //
-  if ( metaNode.IsNull() )
-    return Quantity_Color(1., 1., 1., Quantity_TOC_RGB);
-
-  ActAPI_Color color = asiVisu_Utils::IntToColor( metaNode->GetColor() );
-
-  return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
-}
-
-//-----------------------------------------------------------------------------
-
-Handle(asiData_ElemMetadataNode)
-  asiEngine_STEPWriterInput::elemByShape(const TopoDS_Shape& shape) const
-{
-  if ( m_metaElems.IsNull() )
-    return nullptr;
-
-  for ( ActAPI_HNodeList::Iterator nit(*m_metaElems); nit.More(); nit.Next() )
+  if ( m_topoItem.IsNull() || !m_topoItem->IsWellFormed() )
   {
-    const Handle(asiData_ElemMetadataNode)&
-      metaNode = Handle(asiData_ElemMetadataNode)::DownCast( nit.Value() );
-
-    if ( metaNode->GetShape().IsSame(shape) )
-      return metaNode;
+    return Quantity_Color(1., 1., 1., Quantity_TOC_RGB);
   }
 
-  return nullptr;
-}
+  ActAPI_Color color = asiVisu_Utils::IntToColor(m_topoItem->GetColor());
 
-//-----------------------------------------------------------------------------
-
-Quantity_Color asiEngine_STEPWriterInput::
-  GetCommonColor() const
-{
-  ActAPI_Color color = asiVisu_Utils::IntToColor( m_model->GetPartNode()->GetColor() );
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiEngine_STEPWriterInput::
+Quantity_Color asiEngine_IVTopoItemSTEPWriterInput::
+  GetCommonColor() const
+{
+  ActAPI_Color color = asiVisu_Utils::IntToColor( m_topoItem->GetColor() );
+  return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiEngine_IVTopoItemSTEPWriterInput::
   HasCommonColor() const
 {
   return true;

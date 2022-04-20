@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 28 May 2019
+// Created on: 19 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2019-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiEngine_STEPWriterInput_h
-#define asiEngine_STEPWriterInput_h
+#ifndef asiEngine_IVTopoItemSTEPWriterInput_h
+#define asiEngine_IVTopoItemSTEPWriterInput_h
 
 // asiEngine includes
 #include <asiEngine_Model.h>
@@ -40,19 +40,21 @@
 //-----------------------------------------------------------------------------
 
 //! Input data provider for the STEP writer with metadata.
-class asiEngine_STEPWriterInput : public asiAlgo_WriteSTEPWithMetaInput
+class asiEngine_IVTopoItemSTEPWriterInput : public asiAlgo_WriteSTEPWithMetaInput
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiEngine_STEPWriterInput, asiAlgo_WriteSTEPWithMetaInput)
+  DEFINE_STANDARD_RTTI_INLINE(asiEngine_IVTopoItemSTEPWriterInput, asiAlgo_WriteSTEPWithMetaInput)
 
 public:
 
-  //! Ctor accepting the Data Model instance.
-  //! \param[in] M Data Model to export.
+  //! Ctor.
+  //! \param[in] topoItemIV Topo item in IV (Imperative Viewer).
+  //! \param[in] M Data Model.
   asiEngine_EXPORT
-    asiEngine_STEPWriterInput(const Handle(asiEngine_Model)& M);
+    asiEngine_IVTopoItemSTEPWriterInput(const Handle(asiData_IVTopoItemNode)& topoItemIV,
+                                        const Handle(asiEngine_Model)&        M);
 
 public:
 
@@ -77,7 +79,7 @@ public:
   asiEngine_EXPORT virtual bool
     HasColor(const TopoDS_Shape& shape) const;
 
-  //! Accessor for the color associated with the given subshape.
+  //! Accessor for the color associated with the given shape.
   //! \param[in] shape shape in question.
   //! \return attached color.
   asiEngine_EXPORT virtual Quantity_Color
@@ -95,19 +97,11 @@ public:
 
 protected:
 
-  //! Finds metadata element by shape.
-  //! \param[in] shape shape in question.
-  //! \return metadata element or null if no such element exists in the list.
-  asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
-    elemByShape(const TopoDS_Shape& shape) const;
-
-protected:
+  //! Topo item in IV (Imperative Viewer).
+  Handle(asiData_IVTopoItemNode) m_topoItem;
 
   //! Data Model instance.
-  Handle(asiEngine_Model) m_model;
-
-  //! All Metadata Element Nodes.
-  Handle(ActAPI_HNodeList) m_metaElems;
+  Handle(asiEngine_Model)        m_model;
 
 };
 
