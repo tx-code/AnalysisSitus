@@ -40,8 +40,6 @@
 //! Data provider for face hatching.
 class asiVisu_HatchingDataProvider : public asiVisu_DataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_HatchingDataProvider, asiVisu_DataProvider)
 
@@ -54,6 +52,12 @@ public:
 
   asiVisu_EXPORT TopoDS_Face
     GetFace() const;
+
+  asiVisu_EXPORT int
+    GetNumIsosU() const;
+
+  asiVisu_EXPORT int
+    GetNumIsosV() const;
 
 public:
 

@@ -72,6 +72,20 @@ TopoDS_Face asiVisu_HatchingDataProvider::GetFace() const
 
 //-----------------------------------------------------------------------------
 
+int asiVisu_HatchingDataProvider::GetNumIsosU() const
+{
+  return m_source->GetNumIsosU();
+}
+
+//-----------------------------------------------------------------------------
+
+int asiVisu_HatchingDataProvider::GetNumIsosV() const
+{
+  return m_source->GetNumIsosV();
+}
+
+//-----------------------------------------------------------------------------
+
 //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
 //! translation process.
 //! \return source Parameters.
@@ -84,9 +98,11 @@ Handle(ActAPI_HParameterList)
     return out;
 
   // Register sensitive Parameters.
-  out << m_source->Parameter(asiData_HatchingNode::PID_SelectedFaces)
-      << m_partNode->Parameter(asiData_PartNode::PID_Geometry)
-      << m_partNode->Parameter(asiData_PartNode::PID_AAG);
+  out << m_source   ->Parameter(asiData_HatchingNode::PID_SelectedFaces)
+      << m_source   ->Parameter(asiData_HatchingNode::PID_NumIsosU)
+      << m_source   ->Parameter(asiData_HatchingNode::PID_NumIsosV)
+      << m_partNode ->Parameter(asiData_PartNode::PID_Geometry)
+      << m_partNode ->Parameter(asiData_PartNode::PID_AAG);
 
   return out;
 }

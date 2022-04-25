@@ -49,8 +49,49 @@ public:
 
 public:
 
+  //! IDs for the underlying Parameters.
+  enum ParamId
+  {
+  //-----------------------------------------------//
+    PID_NumIsosU = asiData_FaceNodeBase::PID_Last, //!< Number of isolines in U direction.
+    PID_NumIsosV,                                  //!< Number of isolines in V direction.
+  //-----------------------------------------------//
+    PID_Last = PID_NumIsosU + ActData_BaseNode::RESERVED_PARAM_RANGE
+  };
+
+public:
+
   asiData_EXPORT static Handle(ActAPI_INode)
     Instance();
+
+// Generic naming support:
+public:
+
+  asiData_EXPORT virtual TCollection_ExtendedString
+    GetName();
+
+  asiData_EXPORT virtual void
+    SetName(const TCollection_ExtendedString& name);
+
+// Initialization:
+public:
+
+  asiData_EXPORT void
+    Init();
+
+public:
+
+  asiData_EXPORT int
+    GetNumIsosU() const;
+
+  asiData_EXPORT void
+    SetNumIsosU(const int num) const;
+
+  asiData_EXPORT int
+    GetNumIsosV() const;
+
+  asiData_EXPORT void
+    SetNumIsosV(const int num) const;
 
 protected:
 

@@ -128,7 +128,10 @@ class DBRep_IsoBuilder : public Geom2dHatch_Hatcher
 public:
 
   //! Creates the builder.
-  DBRep_IsoBuilder(const TopoDS_Face& TopologicalFace, const double Infinite, const int NbIsos)
+  DBRep_IsoBuilder(const TopoDS_Face& TopologicalFace,
+                   const double       Infinite,
+                   const int          NbIsosU,
+                   const int          NbIsosV)
   : Geom2dHatch_Hatcher(Geom2dHatch_Intersector(IntersectorConfusion,
                                                 IntersectorTangency),
                         HatcherConfusion2d,
@@ -140,10 +143,10 @@ public:
     myUMax     (0.0),
     myVMin     (0.0),
     myVMax     (0.0),
-    myUPrm     (1, NbIsos),
-    myUInd     (1, NbIsos),
-    myVPrm     (1, NbIsos),
-    myVInd     (1, NbIsos),
+    myUPrm     (1, NbIsosU),
+    myUInd     (1, NbIsosU),
+    myVPrm     (1, NbIsosV),
+    myVInd     (1, NbIsosV),
     myNbDom    (0)
   {
     myUInd.Init(0);
@@ -306,11 +309,11 @@ public:
     double confusion = Min (DeltaU, DeltaV) * HatcherConfusion3d ;
     Confusion3d (confusion) ;
 
-    double StepU = DeltaU / (double) NbIsos ;
+    double StepU = DeltaU / (double) NbIsosU;
     if (StepU > confusion) {
       double UPrm = myUMin + StepU / 2. ;
       gp_Dir2d Dir (0., 1.) ;
-      for (IIso = 1 ; IIso <= NbIsos ; IIso++) {
+      for (IIso = 1 ; IIso <= NbIsosU ; IIso++) {
         myUPrm(IIso) = UPrm ;
         gp_Pnt2d Ori (UPrm, 0.) ;
         Geom2dAdaptor_Curve HCur (new Geom2d_Line (Ori, Dir)) ;
@@ -319,11 +322,11 @@ public:
       }
     }
 
-    double StepV = DeltaV / (double) NbIsos ;
+    double StepV = DeltaV / (double) NbIsosV;
     if (StepV > confusion) {
       double VPrm = myVMin + StepV / 2. ;
       gp_Dir2d Dir (1., 0.) ;
-      for (IIso = 1 ; IIso <= NbIsos ; IIso++) {
+      for (IIso = 1 ; IIso <= NbIsosV; IIso++) {
         myVPrm(IIso) = VPrm ;
         gp_Pnt2d Ori (0., VPrm) ;
         Geom2dAdaptor_Curve HCur (new Geom2d_Line (Ori, Dir)) ;
@@ -339,9 +342,9 @@ public:
     Trim() ;
 
     myNbDom = 0 ;
-    for (IIso = 1 ; IIso <= NbIsos ; IIso++)
+    for (IIso = 1 ; IIso <= NbIsosU; IIso++)
     {
-      int Index ;
+      int Index;
 
       Index = myUInd(IIso) ;
       if (Index != 0)
@@ -353,8 +356,13 @@ public:
             myNbDom = myNbDom + Geom2dHatch_Hatcher::NbDomains (Index) ;
         }
       }
+    }
 
-      Index = myVInd(IIso) ;
+    for (IIso = 1 ; IIso <= NbIsosV; IIso++)
+    {
+      int Index;
+
+      Index = myVInd(IIso);
       if (Index != 0)
       {
         if (TrimDone (Index) && !TrimFailed (Index))
@@ -808,6 +816,8 @@ namespace
   }
 
   void BuildIsos(const TopoDS_Face&                  ff,
+                 const int                           numIsosU,
+                 const int                           numIsosV,
                  std::vector< std::vector<gp_XYZ> >& isos)
   {
     TopoDS_Face face = TopoDS::Face( ff.Oriented(TopAbs_FORWARD) );
@@ -817,7 +827,7 @@ namespace
     gp_Pnt P;
     int i, j;
 
-    DBRep_IsoBuilder IsoBuild(face, 100, 10);
+    DBRep_IsoBuilder IsoBuild(face, 100, numIsosU, numIsosV);
 
     DBRep_ListOfFace faces;
     Handle(DBRep_Face) F = new DBRep_Face(face, IsoBuild.NbDomains());
@@ -1018,7 +1028,10 @@ void asiVisu_HatchingPipeline::SetInput(const Handle(asiVisu_DataProvider)& DP)
   if ( faceProvider->MustExecute( this->GetMTime() ) )
   {
     std::vector< std::vector<gp_XYZ> > isos;
-    ::BuildIsos( faceProvider->GetFace(), isos );
+    ::BuildIsos( faceProvider->GetFace(),
+                 faceProvider->GetNumIsosU(),
+                 faceProvider->GetNumIsosV(),
+                 isos );
 
     // Append filter
     vtkSmartPointer<vtkAppendPolyData>

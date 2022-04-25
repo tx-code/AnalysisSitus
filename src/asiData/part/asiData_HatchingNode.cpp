@@ -38,7 +38,12 @@
 
 //! Default constructor. Registers all involved Parameters.
 asiData_HatchingNode::asiData_HatchingNode() : asiData_FaceNodeBase()
-{}
+{
+  REGISTER_PARAMETER(Int, PID_NumIsosU);
+  REGISTER_PARAMETER(Int, PID_NumIsosV);
+}
+
+//-----------------------------------------------------------------------------
 
 //! Returns new DETACHED instance of the Node ensuring its correct
 //! allocation in a heap.
@@ -46,4 +51,66 @@ asiData_HatchingNode::asiData_HatchingNode() : asiData_FaceNodeBase()
 Handle(ActAPI_INode) asiData_HatchingNode::Instance()
 {
   return new asiData_HatchingNode();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Accessor for the Node's name.
+//! \return name of the Node.
+TCollection_ExtendedString asiData_HatchingNode::GetName()
+{
+  return ActParamTool::AsName( this->Parameter(PID_Name) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Sets name for the Node.
+//! \param[in] name the name to set.
+void asiData_HatchingNode::SetName(const TCollection_ExtendedString& name)
+{
+  ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(name);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Performs initial actions required to make Node WELL-FORMED.
+void asiData_HatchingNode::Init()
+{
+  asiData_FaceNodeBase::Init();
+
+  // Set default values.
+  this->SetNumIsosU (10);
+  this->SetNumIsosV (10);
+
+  // Initialize properties.
+  this->InitParameter (PID_NumIsosU, "U isos", "", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_NumIsosV, "V isos", "", ParameterFlag_IsVisible, true);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_HatchingNode::GetNumIsosU() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_NumIsosU) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_HatchingNode::SetNumIsosU(const int num) const
+{
+  ActParamTool::AsInt( this->Parameter(PID_NumIsosU) )->SetValue(num);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_HatchingNode::GetNumIsosV() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_NumIsosV) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_HatchingNode::SetNumIsosV(const int num) const
+{
+  ActParamTool::AsInt( this->Parameter(PID_NumIsosV) )->SetValue(num);
 }

@@ -96,7 +96,7 @@ public:
 // Initialization:
 public:
 
-  asiData_EXPORT void
+  asiData_EXPORT virtual void
     Init();
 
 protected:
