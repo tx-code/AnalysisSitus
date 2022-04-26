@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 15 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,66 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+#include <asiAlgo_DiscrCurve2d.h>
 
-// asiAlgo includes
-#include <asiAlgo_FeatureType.h>
-
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+using namespace asiAlgo::discr;
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
-
-//-----------------------------------------------------------------------------
-
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+void Curve2d::Append(const gp_Pnt2d& thePoint)
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
-};
+  myPoints.SetValue(NbPoints(), thePoint);
+}
 
 //-----------------------------------------------------------------------------
 
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
+void Curve2d::InsertAfter(const int theIndex, const gp_Pnt2d& thePoint)
+{
+  #ifdef DEB
+    if (theIndex < 1 || theIndex > NbPoints())
+      throw Standard_OutOfRange("asiAlgo_DiscrCurve2d::InsertAfter");
+  #endif
+
+  int i(myPoints.Size());
+  for(; i > theIndex; --i)
+    myPoints.SetValue(i, myPoints.Value(i - 1));
+  myPoints.SetValue(i, thePoint);
+}
 
 //-----------------------------------------------------------------------------
 
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
+void Curve2d::InsertBefore(const int theIndex, const gp_Pnt2d& thePoint)
+{
+  #ifdef DEB
+    if (theIndex < 1 || theIndex > NbPoints())
+      throw Standard_OutOfRange("asiAlgo_DiscrCurve2d::InsertBefore");
+  #endif
+
+  int i(myPoints.Size());
+  for(; i > theIndex - 1; --i)
+    myPoints.SetValue(i, myPoints.Value(i - 1));
+  myPoints.SetValue(i, thePoint);
+}
 
 //-----------------------------------------------------------------------------
 
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
+void Curve2d::Remove(const int theFrom, const int theTo)
+{
+  #ifdef DEB
+    if(theFrom < 1 || theFrom > NbPoints() ||
+       theTo < 1 || theTo > NbPoints() || theFrom > theTo)
+       throw Standard_OutOfRange("asiAlgo_DiscrCurve2d::Remove");
+  #endif
 
-#endif
+  NCollection_Vector<gp_Pnt2d> aVector;
+  int aRange[2] = {theFrom - 1, theTo - 1};
+  for(int i(0); i < NbPoints(); ++i)
+  {
+    if(i >= aRange[0] && i <= aRange[1])
+      continue;
+    aVector.Append(myPoints.Value(i));
+  }
+
+  myPoints.Clear();
+  myPoints.Assign(aVector);
+}

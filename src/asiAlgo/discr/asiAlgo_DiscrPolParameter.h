@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 15 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,63 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+#ifndef asiAlgo_DiscrPolParameter_HeaderFile
+#define asiAlgo_DiscrPolParameter_HeaderFile
 
-// asiAlgo includes
-#include <asiAlgo_FeatureType.h>
+#include <asiAlgo.h>
 
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+#include <Standard_TypeDef.hxx>
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
+namespace asiAlgo {
+namespace discr {
 
-//-----------------------------------------------------------------------------
-
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+// Class describing the parameter of an interpolated point
+// on a polygon
+class PolParameter
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
+ public:
+  // ---------- PUBLIC METHODS ----------
+
+  PolParameter ()
+    : myPar(0.), myIndex(0), isVertex(false) {}
+  // Empty constructor
+
+  PolParameter (const bool isVert, int ind, double par)
+    : myPar(par), myIndex(ind), isVertex(isVert) {}
+  // Full constructor
+
+  void Set (const bool isVert, int ind, double par)
+  { myPar=par; myIndex=ind; isVertex=isVert; }
+  // Reinitialize
+
+  const bool&   IsVertex () const {return isVertex;}
+  const int&    Index ()    const {return myIndex;}
+  const double& Param ()    const {return myPar;}
+  bool&         IsVertex ()       {return isVertex;}
+  int&          Index ()          {return myIndex;}
+  double&       Param ()          {return myPar;}
+  // Access methods
+
+  bool operator< (const PolParameter& other) const
+  {
+    double p1 = double(myIndex) + myPar;
+    double p2 = double(other.myIndex) + other.myPar;
+    return p2-p1 > 1e-9;
+  }
+  // Compares me with other
+
+ private:
+  // ---------- PRIVATE FIELDS ----------
+
+  double myPar;    // Parameter on segment [0...1]
+  int    myIndex;  // Index of first point of segment
+  bool   isVertex; // True if this parameter points
+                   // to one of the ends of segment
 };
 
-//-----------------------------------------------------------------------------
-
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
-
-//-----------------------------------------------------------------------------
-
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
-
-//-----------------------------------------------------------------------------
-
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
+}
+}
 
 #endif

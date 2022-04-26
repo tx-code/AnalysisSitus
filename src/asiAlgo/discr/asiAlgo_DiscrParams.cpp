@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 26 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,16 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+// Own include
+#include <asiAlgo_DiscrParams.h>
 
-// asiAlgo includes
-#include <asiAlgo_FeatureType.h>
-
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+using namespace asiAlgo::discr;
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
-
-//-----------------------------------------------------------------------------
-
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+void Params::Update()
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
-};
-
-//-----------------------------------------------------------------------------
-
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
-
-//-----------------------------------------------------------------------------
-
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
-
-//-----------------------------------------------------------------------------
-
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
-
-#endif
+  myCosAngle     = Cos(myDeviationAngle);
+  mySinAngle     = Sin(myDeviationAngle);
+  mySinHalfAngle = Sin(myDeviationAngle * 0.5);
+}

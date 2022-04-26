@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 15 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,56 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+#ifndef asiAlgo_DiscrSeg2d_HeaderFile
+#define asiAlgo_DiscrSeg2d_HeaderFile
 
 // asiAlgo includes
-#include <asiAlgo_FeatureType.h>
+#include <asiAlgo.h>
 
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+// OpenCascade includes
+#include <gp_Pnt2d.hxx>
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
+namespace asiAlgo {
+namespace discr {
 
-//-----------------------------------------------------------------------------
-
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+// This class describes a straight segment of line restricted by
+// two points in parametric space
+class Seg2d
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
+ public:
+  // ---------- CONSTRUCTORS ----------
+
+  Seg2d () : myP1(0,0), myP2(0,0) {}
+  // Empty constructor
+
+  Seg2d (const gp_Pnt2d& p1, const gp_Pnt2d& p2)
+    : myP1(p1), myP2(p2) {}
+  // Complete constructor
+
+  // ---------- GET METHODS ----------
+
+  const gp_Pnt2d& GetPoint1 () const { return myP1; }
+  // Returns first point
+
+  const gp_Pnt2d& GetPoint2 () const { return myP2; }
+  // Returns second point
+
+  gp_Pnt2d& ChangePoint1 () { return myP1; }
+  // Returns first point to change
+
+  gp_Pnt2d& ChangePoint2 () { return myP2; }
+  // Returns second point to change
+
+ private:
+  // ---------- PRIVATE FIELDS ----------
+
+  gp_Pnt2d myP1, myP2;
+
 };
 
-//-----------------------------------------------------------------------------
-
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
-
-//-----------------------------------------------------------------------------
-
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
-
-//-----------------------------------------------------------------------------
-
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
+}
+}
 
 #endif

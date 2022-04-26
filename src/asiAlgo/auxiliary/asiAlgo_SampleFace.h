@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
+#include <asiAlgo_DiscrClassifier2d.h>
 #include <asiAlgo_Membership.h>
 #include <asiAlgo_UniformGrid.h>
 
@@ -49,6 +50,16 @@
 //! Samples the UV domain of a face by overlaying a uniform grid.
 class asiAlgo_SampleFace : public ActAPI_IAlgorithm
 {
+public:
+
+  //! PMC algorithm to use.
+  enum PmcAlgo
+  {
+    PmcAlgo_Precise, //!< Precise OpenCascade-based classifier.
+    PmcAlgo_Haines,  //!< Discrete Haines algorithm.
+    PmcAlgo_Discrete //!< Discrete row-based algorithm.
+  };
+
 public:
 
   //! Converts the passed wire of the given face to a polygon.
@@ -76,11 +87,10 @@ public:
   asiAlgo_EXPORT void
     SetSquare(const bool square);
 
-  //! Sets the Boolean flag indicating whether to use Eric Haines' algorithm
-  //! for PMC tests instead of the good old OpenCascade's classifier.
-  //! \param[in] on the Boolean value to set.
+  //! Sets the PMC algorithm to use.
+  //! \param[in] algo the algorithm to set.
   asiAlgo_EXPORT void
-    SetUseHaines(const bool on);
+    SetPmcAlgo(const PmcAlgo algo);
 
   //! Performs face sampling.
   //! \param[in] numBins the number of discretization steps.
@@ -109,8 +119,8 @@ protected:
   //! Indicates whether the uniform grid we construct should be a square.
   bool m_bSquare;
 
-  //! Alternative classification approach.
-  bool m_bHaines;
+  //! Classification algorithm.
+  PmcAlgo m_algo;
 
   //! Face to sample.
   TopoDS_Face m_face;
@@ -118,8 +128,11 @@ protected:
   //! Parametric bounds of the sampled face.
   double m_fUmin, m_fUmax, m_fVmin, m_fVmax;
 
-  //! Classifier.
+  //! Precise classifier.
   IntTools_FClass2d m_class;
+
+  //! Discrete classifier.
+  Handle(asiAlgo::discr::Classifier2d) m_discrClass;
 
   //! Uniform grid which is the result of the uniform sampling.
   Handle(asiAlgo_UniformGrid<float>) m_grid;

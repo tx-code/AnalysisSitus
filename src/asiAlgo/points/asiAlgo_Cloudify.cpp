@@ -117,7 +117,7 @@ bool asiAlgo_Cloudify::Sample_Faces(const TopoDS_Shape&                model,
     }
 
     // Prepare classifier
-    asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01);
+    asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01, false);
 
     // Sample points
     double u = uMin;

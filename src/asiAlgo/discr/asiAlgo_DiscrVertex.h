@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 15 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,88 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+#ifndef asiAlgo_DiscrVertex_HeaderFile
+#define asiAlgo_DiscrVertex_HeaderFile
 
 // asiAlgo includes
-#include <asiAlgo_FeatureType.h>
+#include <asiAlgo_DiscrSequenceOfPointer.h>
 
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+// OpenCascade includes
+#include <gp_Pnt.hxx>
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
+namespace asiAlgo {
+namespace discr {
 
-//-----------------------------------------------------------------------------
+class Edge;
 
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+// This class describes a vertex
+class Vertex
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
+public:
+
+  Vertex()
+  : myPnt (0.,0.,0.),
+    myTolerance(1e-7) {}
+
+  // ---------- POINT ACCESS ----------
+
+  const gp_Pnt& GetPnt () const { return myPnt; }
+  // Returns the point
+
+  gp_Pnt&       ChangePnt () { return myPnt; }
+  // Returns the point
+
+  const double& Tolerance () const { return myTolerance; }
+  // Returns the tolerance
+
+  void SetTolerance (const double theTol) { myTolerance = theTol; }
+  // sets a tolerance
+
+  // ---------- CONNECTIONS TO EDGES ---------
+
+  void                  AddEdge (const Edge& theEdge)
+        { myEdges.Append((void*)&theEdge); }
+  // Adds an edge
+
+  int      GetNbEdges () const { return myEdges.Length();}
+  // Returns the number of adjacent edges
+
+  const Edge&    GetEdge (const int aIndex) const
+        { return *(Edge*)myEdges(aIndex); }
+  // Returns the edge by index
+
+  Edge&          ChangeEdge (const int aIndex)
+        { return *(Edge*)myEdges(aIndex); }
+  // Returns the non-const edge by index
+
+  void                  RemoveEdge (const int aIndex)
+        { myEdges.Remove(aIndex); }
+  // Removes the edge by index
+
+  // ---------- CONSULTING -------------
+
+  bool operator == (const Vertex& aOther) const
+  { return this == &aOther; }
+
+ private:
+
+  Vertex (const Vertex&);
+  // Hides copy constructor
+
+  Vertex& operator = (const Vertex&);
+  // Hides assignment operator
+
+  // ---------- PRIVATE FIELDS ----------
+
+  gp_Pnt            myPnt;
+  double            myTolerance;
+  SequenceOfPointer myEdges;
+
 };
 
-//-----------------------------------------------------------------------------
-
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
-
-//-----------------------------------------------------------------------------
-
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
-
-//-----------------------------------------------------------------------------
-
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
+}
+}
 
 #endif

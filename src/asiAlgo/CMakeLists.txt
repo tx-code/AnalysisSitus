@@ -506,6 +506,57 @@ set (utils_CPP_FILES
 )
 
 #------------------------------------------------------------------------------
+# Discrete B-rep
+#------------------------------------------------------------------------------
+
+set (discr_H_FILES
+  discr/asiAlgo_DiscrBgrMesh.h
+  discr/asiAlgo_DiscrBgrNode.h
+  discr/asiAlgo_DiscrBgrTriangle.h
+  discr/asiAlgo_DiscrBuilder.h
+  discr/asiAlgo_DiscrClassifier2d.h
+  discr/asiAlgo_DiscrCurve.h
+  discr/asiAlgo_DiscrCurve2d.h
+  discr/asiAlgo_DiscrCurveAdaptor.h
+  discr/asiAlgo_DiscrEdge.h
+  discr/asiAlgo_DiscrEdgeSeg2d.h
+  discr/asiAlgo_DiscrFace.h
+  discr/asiAlgo_DiscrFaceNode.h
+  discr/asiAlgo_DiscrLocation.h
+  discr/asiAlgo_DiscrMetrics.h
+  discr/asiAlgo_DiscrModel.h
+  discr/asiAlgo_DiscrParams.h
+  discr/asiAlgo_DiscrPolParameter.h
+  discr/asiAlgo_DiscrPolyEdgeSeg2d.h
+  discr/asiAlgo_DiscrPolySeg2d.h
+  discr/asiAlgo_DiscrSeg.h
+  discr/asiAlgo_DiscrSeg2d.h
+  discr/asiAlgo_DiscrSegAddress.h
+  discr/asiAlgo_DiscrSegOnFace.h
+  discr/asiAlgo_DiscrSequenceOfPointer.h
+  discr/asiAlgo_DiscrTessellateCurve.h
+  discr/asiAlgo_DiscrVectorOfBgrNode.h
+  discr/asiAlgo_DiscrVertex.h
+  discr/asiAlgo_DiscrWire.h
+)
+set (discr_CPP_FILES
+  discr/asiAlgo_DiscrBuilder.cpp
+  discr/asiAlgo_DiscrClassifier2d.cpp
+  discr/asiAlgo_DiscrCurve.cpp
+  discr/asiAlgo_DiscrCurve2d.cpp
+  discr/asiAlgo_DiscrCurveAdaptor.cpp
+  discr/asiAlgo_DiscrEdge.cpp
+  discr/asiAlgo_DiscrFace.cpp
+  discr/asiAlgo_DiscrFaceNode.cpp
+  discr/asiAlgo_DiscrModel.cpp
+  discr/asiAlgo_DiscrParams.cpp
+  discr/asiAlgo_DiscrPolyEdgeSeg2d.cpp
+  discr/asiAlgo_DiscrPolySeg2d.cpp
+  discr/asiAlgo_DiscrTessellateCurve.cpp
+  discr/asiAlgo_DiscrWire.cpp
+)
+
+#------------------------------------------------------------------------------
 set (OCCT_LIB_FILES
   TKernel
   TKMath
@@ -701,6 +752,14 @@ foreach (FILE ${utils_CPP_FILES})
   source_group ("Source Files\\Utilities" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${discr_H_FILES})
+  source_group ("Header Files\\Discrete" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${discr_CPP_FILES})
+  source_group ("Source Files\\Discrete" FILES "${FILE}")
+endforeach (FILE)
+
 #------------------------------------------------------------------------------
 # Configure includes
 #------------------------------------------------------------------------------
@@ -710,6 +769,7 @@ set (asiAlgo_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/auxiliary;\
   ${CMAKE_CURRENT_SOURCE_DIR}/blends;\
   ${CMAKE_CURRENT_SOURCE_DIR}/canrec;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/discr;\
   ${CMAKE_CURRENT_SOURCE_DIR}/dict;\
   ${CMAKE_CURRENT_SOURCE_DIR}/dict/salome;\
   ${CMAKE_CURRENT_SOURCE_DIR}/editing;\
@@ -780,6 +840,7 @@ add_library (asiAlgo SHARED
   ${points_H_FILES}      ${points_CPP_FILES}
   ${re_H_FILES}          ${re_CPP_FILES}
   ${utils_H_FILES}       ${utils_CPP_FILES}
+  ${discr_H_FILES}       ${discr_CPP_FILES}
 )
 
 target_link_libraries(asiAlgo asiActiveData)
@@ -904,3 +965,4 @@ install (FILES ${opt_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${points_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${re_H_FILES}          DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${utils_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${discr_H_FILES}       DESTINATION ${SDK_INSTALL_SUBDIR}include)

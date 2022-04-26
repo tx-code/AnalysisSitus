@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 11 June 2020
+// Created on: 15 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2016-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Quaoar Studio LLC
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,58 +28,65 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_FeatureFaces_h
-#define asiAlgo_FeatureFaces_h
+#include <asiAlgo_DiscrPolyEdgeSeg2d.h>
 
-// asiAlgo includes
-#include <asiAlgo_FeatureType.h>
-
-// OCCT includes
-#include <NCollection_DataMap.hxx>
-#include <Standard_GUID.hxx>
-#include <TColStd_PackedMapOfInteger.hxx>
+using namespace asiAlgo::discr;
 
 //-----------------------------------------------------------------------------
 
-//! Feature ID.
-typedef int asiAlgo_FeatureId;
-
-//-----------------------------------------------------------------------------
-
-//! Feature as a set of indices of faces.
-typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
-
-//-----------------------------------------------------------------------------
-
-namespace asiAlgo
+void PolyEdgeSeg2d::Init (const Edge& aEdge,
+                                 const int aCurveIndex)
 {
-  //! Dumps the passed feature face IDs to the standard output and
-  //! debugging streams. This function is supposed to be used as
-  //! "watch" for features. To use in Visual Studio, run in Command
-  //! Window:
-  //!
-  //! `? ({,,asiAlgo.dll}asiAlgo::Dump)(feature)`
-  //!
-  //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
-  //!
-  //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT void
-    Dump(const asiAlgo_Feature& feature);
-};
+  if (NbSegments()) DestroySegments();
+
+  const Curve2d& aCurve = aEdge.GetPCurve(aCurveIndex);
+  SetNbSeg (aCurve.NbPoints() - 1);
+  mySegments = new EdgeSeg2d [NbSegments()];
+  int i;
+  for (i=1; i <= NbSegments(); i++)
+    mySegments[i-1].Init (aEdge, aCurveIndex, i);
+
+  Prepare();
+}
 
 //-----------------------------------------------------------------------------
 
-//! Features by indices.
-typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
+void PolyEdgeSeg2d::Init (const int theWireIndex,
+                          const Face&     theFace)
+{
+  int iNbSeg=-1;
+  int iEdge;
+  const Wire& aWire=theFace.GetWire(theWireIndex);
 
-//-----------------------------------------------------------------------------
+  for (iEdge=1; iEdge<=aWire.GetNbEdges(); iEdge++)
+    iNbSeg += aWire.GetEdgeData(iEdge).first->GetCurve().NbPoints();
 
-//! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
+  SetNbSeg (iNbSeg);
+  mySegments = new EdgeSeg2d [iNbSeg];
 
-//-----------------------------------------------------------------------------
+  iNbSeg = 0;
+  for (iEdge=1; iEdge<=aWire.GetNbEdges(); iEdge++)
+  {
+    // Every edge pcurve (on theFace) is appended as segments
+    const PairOfPEdgeBoolean& anEdgeData = aWire.GetEdgeData(iEdge);
+    const Edge& anEdge  = *anEdgeData.first;
+    bool isForward = anEdgeData.second;
+    int iCur=anEdge.FindPCurve(theFace,isForward);
+    if (iCur==0)
+    {
+#     ifdef DEB
+      std::cout << "Warning : (asiAlgo_DiscrPolyEdgeSeg2d) no pcurve "<<iEdge<<std::endl;
+#     endif
+      continue;
+    }
+    int iPt;
+    if (isForward)
+      for (iPt=1; iPt<anEdge.GetCurve().NbPoints(); iPt++)
+        mySegments[iNbSeg++].Init (anEdge, iCur, iPt);
+    else
+      for (iPt=anEdge.GetCurve().NbPoints(); iPt>1; iPt--)
+        mySegments[iNbSeg++].Init (anEdge, iCur, iPt, false);
+  }
 
-//! Undefined GUID.
-typedef Standard_GUID asiAlgo_BadGuid;
-
-#endif
+  Prepare();
+}

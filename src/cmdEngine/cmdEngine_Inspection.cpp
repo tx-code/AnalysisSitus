@@ -3919,6 +3919,20 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       int numBins = 10;
       interp->GetKeyValue(argc, argv, "num", numBins);
 
+      /* PMC algorithm */
+
+      const bool isHaines = interp->HasKeyword(argc, argv, "haines");
+      const bool isDiscr  = interp->HasKeyword(argc, argv, "discr");
+
+      asiAlgo_SampleFace::PmcAlgo pmcAlgo;
+      //
+      if ( isHaines )
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Haines;
+      else if ( isDiscr )
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Discrete;
+      else
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Precise;
+
       TIMER_NEW
       TIMER_GO
 
@@ -3927,8 +3941,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
                                      interp->GetProgress(),
                                      interp->GetPlotter() );
       //
-      sampleFace.SetSquare    ( interp->HasKeyword(argc, argv, "square") );
-      sampleFace.SetUseHaines ( interp->HasKeyword(argc, argv, "haines") );
+      sampleFace.SetSquare  ( interp->HasKeyword(argc, argv, "square") );
+      sampleFace.SetPmcAlgo ( pmcAlgo );
       //
       if ( !sampleFace.Perform(numBins) )
       {
@@ -4661,7 +4675,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-face-grid",
     //
-    "build-face-grid [-num <numBins>] [-filename <filename>] [-square]\n"
+    "build-face-grid [-num <numBins>] [-filename <filename>] [-square] [-haines|-discr]\n"
     "\t Builds a uniform UV grid for the interactively selected face.\n"
     "\t Pass the number of bins to control how fine the discretization is.\n"
     "\t If the filename is passed, the sampled face is converted to vtkImageData\n"

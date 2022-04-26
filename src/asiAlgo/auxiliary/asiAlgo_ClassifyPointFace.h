@@ -31,8 +31,9 @@
 #ifndef asiAlgo_ClassifyPointFace_h
 #define asiAlgo_ClassifyPointFace_h
 
-// Geometry includes
+// asiAlgo includes
 #include <asiAlgo_Classifier.h>
+#include <asiAlgo_DiscrClassifier2d.h>
 
 // OCCT includes
 #include <IntTools_FClass2d.hxx>
@@ -53,6 +54,7 @@ public:
     asiAlgo_ClassifyPointFace(const TopoDS_Face&   F,
                               const double         inaccuracy,
                               const double         precision,
+                              const bool           isDiscr,
                               ActAPI_ProgressEntry progress = nullptr,
                               ActAPI_PlotterEntry  plotter  = nullptr);
 
@@ -75,6 +77,7 @@ protected:
   TopoDS_Face       m_F;           //!< Working face.
   double            m_fInaccuracy; //!< Inaccuracy in the input geometry.
   double            m_fPrecision;  //!< Precision of optimization method.
+  bool              m_bDiscr;      //!< Whether to use discrete classifier.
   IntTools_FClass2d m_fclass;      //!< Internal classifier.
   double            m_fUmin;       //!< U min parametric boundary of the face.
   double            m_fUmax;       //!< U max parametric boundary of the face.
@@ -83,6 +86,9 @@ protected:
   //
   ActAPI_ProgressEntry m_progress; //!< Progress notifier.
   ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
+
+  //! Discrete classifier.
+  Handle(asiAlgo::discr::Classifier2d) m_discrClass;
 
 };
 

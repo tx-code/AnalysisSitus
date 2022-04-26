@@ -3492,7 +3492,7 @@ bool asiAlgo_Utils::CalculateFaceNormals(const TopoDS_Face&                 face
   const double vStep = (vMax - vMin)*sampleRate;
 
   // Prepare classifier
-  asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01);
+  asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01, false);
 
   // Sample points
   double   u = uMin;
@@ -3571,7 +3571,7 @@ bool asiAlgo_Utils::GetFaceAnyInteriorPoint(const TopoDS_Face& face,
   const double vStep = (vMax - vMin)*0.05;
 
   // Prepare classifier
-  asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01);
+  asiAlgo_ClassifyPointFace classifier(face, BRep_Tool::Tolerance(face), 0.01, false);
 
   // Sample points
   double u = uMin;
