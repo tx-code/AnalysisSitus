@@ -693,32 +693,97 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
       return;
     }
 
+    double uMinSurfShifted = uMinSurf, uMaxSurfShifted = uMaxSurf;
+    double vMinSurfShifted = vMinSurf, vMaxSurfShifted = vMaxSurf;
+    if ( surf->IsUPeriodic() && !Precision::IsInfinite(surf->UPeriod()) )
+    {
+      if ( abs(uMaxParam - uMinParam) - surf->UPeriod() >= Precision::Confusion() )
+      {
+        if ( !Precision::IsInfinite(uMinParam) )
+        {
+          uMaxParam = uMinParam + surf->UPeriod();
+        }
+        else if ( !Precision::IsInfinite(uMaxSurf) )
+        {
+          uMinParam = uMaxParam - surf->UPeriod();
+        }
+
+        if ( Precision::IsInfinite(uMinParam) || Precision::IsInfinite(uMaxParam) )
+        {
+          uMinParam = -0.5 * surf->UPeriod();
+          uMaxParam = 0.5 * surf->UPeriod();
+        }
+      }
+
+      uMinSurfShifted = std::min( std::max(uMinParam, -Precision::Infinite()), Precision::Infinite() );
+      uMaxSurfShifted = std::max( std::min(uMinSurfShifted + uMaxSurf - uMinSurf, Precision::Infinite()), -Precision::Infinite() );
+    }
+
+    if ( surf->IsVPeriodic() && !Precision::IsInfinite(surf->VPeriod()) )
+    {
+      if ( abs(vMaxParam - vMinParam) - surf->VPeriod() >= Precision::Confusion() )
+      {
+        if ( !Precision::IsInfinite(vMinParam) )
+        {
+          vMaxParam = vMinParam + surf->VPeriod();
+        }
+        else if ( !Precision::IsInfinite(vMaxSurf) )
+        {
+          vMinParam = vMaxParam - surf->VPeriod();
+        }
+
+        if ( Precision::IsInfinite(vMinParam) || Precision::IsInfinite(vMaxParam) )
+        {
+          vMinParam = -0.5 * surf->VPeriod();
+          vMaxParam = 0.5 * surf->VPeriod();
+        }
+      }
+
+      vMinSurfShifted = std::min( std::max(vMinParam, -Precision::Infinite()), Precision::Infinite() );
+      vMaxSurfShifted = std::max( std::min(vMinSurfShifted + vMaxSurf - vMinSurf, Precision::Infinite()), -Precision::Infinite() );
+    }
+
     // Choose min and max
-    uMin = Max(uMinSurf, uMinParam);
-    uMax = Min(uMaxSurf, uMaxParam);
-    vMin = Max(vMinSurf, vMinParam);
-    vMax = Min(vMaxSurf, vMaxParam);
+    uMin = Max(uMinSurfShifted, uMinParam);
+    uMax = Min(uMaxSurfShifted, uMaxParam);
+    vMin = Max(vMinSurfShifted, vMinParam);
+    vMax = Min(vMaxSurfShifted, vMaxParam);
 
     // Trim natural bounds by the face bounds (if such can be computed)
     if ( canComputeBounds )
     {
-      uMin = asiVisu_Utils::Trim(uMin, boundsDiag);
-      uMax = asiVisu_Utils::Trim(uMax, boundsDiag);
-      vMin = asiVisu_Utils::Trim(vMin, boundsDiag);
-      vMax = asiVisu_Utils::Trim(vMax, boundsDiag);
+      double addU = 0.5 * (uMax + uMin);
+      bool isUInf = Precision::IsInfinite(addU) ||
+                    Precision::IsInfinite(addU - boundsDiag) ||
+                    Precision::IsInfinite(addU + boundsDiag);
+      uMin = asiVisu_Utils::Trim(uMin, boundsDiag, isUInf ? 0.0 : addU);
+      uMax = asiVisu_Utils::Trim(uMax, boundsDiag, isUInf ? 0.0 : addU);
+
+      double addV = 0.5 * (vMax + vMin);
+      bool isVInf = Precision::IsInfinite(addV) ||
+                    Precision::IsInfinite(addV - boundsDiag) ||
+                    Precision::IsInfinite(addV + boundsDiag);
+      vMin = asiVisu_Utils::Trim(vMin, boundsDiag, isVInf ? 0.0 : addV);
+      vMax = asiVisu_Utils::Trim(vMax, boundsDiag, isVInf ? 0.0 : addV);
     }
 
     // Boundary is very ill-defined. If min and max parameter values coincide,
     // we cannot draw even surface isolines, so let's try to expand...
     if ( Abs(uMin - uMax) < RealEpsilon() )
     {
-      uMin = asiVisu_Utils::TrimInf(uMinSurf, m_fGlobalBndDiag*0.5);
-      uMax = asiVisu_Utils::TrimInf(uMaxSurf, m_fGlobalBndDiag*0.5);
+      bool isUInf = Precision::IsInfinite(0.5 * (uMinSurf + uMaxSurf)) ||
+                    Precision::IsInfinite(0.5 * (uMinSurf + uMaxSurf) - m_fGlobalBndDiag * 0.5) ||
+                    Precision::IsInfinite(0.5 * (uMinSurf + uMaxSurf) + m_fGlobalBndDiag * 0.5);
+      uMin = asiVisu_Utils::TrimInf(uMinSurf, m_fGlobalBndDiag*0.5, isUInf ? 0.0 : 0.5 * (uMinSurf + uMaxSurf));
+      uMax = asiVisu_Utils::TrimInf(uMaxSurf, m_fGlobalBndDiag*0.5, isUInf ? 0.0 : 0.5 * (uMinSurf + uMaxSurf));
     }
     if ( Abs(vMin - vMax) < RealEpsilon() )
     {
-      vMin = asiVisu_Utils::TrimInf(vMinSurf, m_fGlobalBndDiag*0.5);
-      vMax = asiVisu_Utils::TrimInf(vMaxSurf, m_fGlobalBndDiag*0.5);
+      bool isVInf = Precision::IsInfinite(0.5 * (vMinSurf + vMaxSurf)) ||
+                    Precision::IsInfinite(0.5 * (vMinSurf + vMaxSurf) - m_fGlobalBndDiag * 0.5) ||
+                    Precision::IsInfinite(0.5 * (vMinSurf + vMaxSurf) + m_fGlobalBndDiag * 0.5);
+      vMin = asiVisu_Utils::TrimInf(vMinSurf, m_fGlobalBndDiag*0.5, isVInf ? 0.0 : 0.5 * (vMinSurf + vMaxSurf));
+      vMax = asiVisu_Utils::TrimInf(vMaxSurf, m_fGlobalBndDiag*0.5, isVInf ? 0.0 : 0.5 * (vMinSurf + vMaxSurf));
     }
 
     const double uStep = (uMax - uMin) / NUMISOS;
@@ -759,8 +824,14 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
         }
         else
         {
-          f = Max( vMin, uIso->FirstParameter() );
-          l = Min( vMax, uIso->LastParameter() );
+          double minRestriction = Precision::IsInfinite(vMin) ||
+                                  !uIso->IsPeriodic() ? uIso->FirstParameter() : vMin;
+          double maxRestriction = Precision::IsInfinite(vMin) ||
+                                  !uIso->IsPeriodic() ? uIso->LastParameter() :
+                                                        minRestriction + uIso->LastParameter() -
+                                                                         uIso->FirstParameter();
+          f = Max( vMin, minRestriction );
+          l = Min( vMax, maxRestriction );
         }
 
         // Add isoline to data source
@@ -799,8 +870,14 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
         }
         else
         {
-          f = Max( uMin, vIso->FirstParameter() );
-          l = Min( uMax, vIso->LastParameter() );
+          double minRestriction = Precision::IsInfinite(uMin) ||
+                                  !vIso->IsPeriodic() ? vIso->FirstParameter() : uMin;
+          double maxRestriction = Precision::IsInfinite(uMin) ||
+                                  !vIso->IsPeriodic() ? vIso->LastParameter() :
+                                                        minRestriction + vIso->LastParameter() -
+                                                                         vIso->FirstParameter();
+          f = Max( uMin, minRestriction );
+          l = Min( uMax, maxRestriction );
         }
 
         // Add isoline to data source

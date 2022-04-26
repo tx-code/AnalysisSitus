@@ -355,25 +355,27 @@ public:
   }
 
   double static TrimInf(const double val,
-                        const double limit = INF_LIMIT)
+                        const double limit = INF_LIMIT,
+                        const double begin = 0.0)
   {
     double ret_val = val;
     if ( Precision::IsPositiveInfinite(val) )
-      ret_val = limit;
+      ret_val = limit + begin;
     else if ( Precision::IsNegativeInfinite(val) )
-      ret_val = -limit;
+      ret_val = -limit + begin;
 
     return ret_val;
   }
 
   double static Trim(const double val,
-                     const double limit)
+                     const double limit,
+                     const double begin = 0.0)
   {
     double ret_val = val;
-    if ( val > limit )
-      ret_val = limit;
-    else if ( val < -limit )
-      ret_val = -limit;
+    if ( val > limit + begin )
+      ret_val = limit + begin;
+    else if ( val < -limit + begin )
+      ret_val = -limit + begin;
 
     return ret_val;
   }
