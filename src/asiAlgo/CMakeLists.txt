@@ -33,6 +33,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_CheckValidity.h
   auxiliary/asiAlgo_Classifier.h
   auxiliary/asiAlgo_ClassifyPointFace.h
+  auxiliary/asiAlgo_ClassifyPointSolid.h
   auxiliary/asiAlgo_Collections.h
   auxiliary/asiAlgo_CompleteEdgeLoop.h
   auxiliary/asiAlgo_CSG.h
