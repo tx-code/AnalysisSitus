@@ -29,6 +29,7 @@ set (part_H_FILES
   part/asiData_CurvatureCombsNode.h
   part/asiData_CurveNode.h
   part/asiData_DeviationNode.h
+  part/asiData_DiscrFaceNode.h
   part/asiData_EdgeNode.h
   part/asiData_ElemMetadataNode.h
   part/asiData_FaceContourNode.h
@@ -58,6 +59,7 @@ set (part_CPP_FILES
   part/asiData_CurvatureCombsNode.cpp
   part/asiData_CurveNode.cpp
   part/asiData_DeviationNode.cpp
+  part/asiData_DiscrFaceNode.cpp
   part/asiData_EdgeNode.cpp
   part/asiData_ElemMetadataNode.cpp
   part/asiData_FaceContourNode.cpp
@@ -153,6 +155,8 @@ set (misc_H_FILES
   misc/asiData_ClearanceNode.h
   misc/asiData_ContourNode.h
   misc/asiData_DesignLawNode.h
+  misc/asiData_DiscrModelAttr.h
+  misc/asiData_DiscrModelParameter.h
   misc/asiData_FuncAttr.h
   misc/asiData_FuncParameter.h
   misc/asiData_OctreeAttr.h
@@ -166,6 +170,8 @@ set (misc_CPP_FILES
   misc/asiData_ClearanceNode.cpp
   misc/asiData_ContourNode.cpp
   misc/asiData_DesignLawNode.cpp
+  misc/asiData_DiscrModelAttr.cpp
+  misc/asiData_DiscrModelParameter.cpp
   misc/asiData_FuncAttr.cpp
   misc/asiData_FuncParameter.cpp
   misc/asiData_OctreeAttr.cpp

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,72 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
-
-#define asiData_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
+#ifndef asiData_DiscrModelAttr_h
+#define asiData_DiscrModelAttr_h
 
 // asiData includes
-#include <asiData_ParameterFlags.h>
+#include <asiData.h>
 
-// Active Data includes
-#include <ActAPI_IParameter.h>
+// asiAlgo includes
+#include <asiAlgo_DiscrModel.h>
 
-//-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
+// OCCT includes
+#include <TDF_Attribute.hxx>
+#include <TDF_Label.hxx>
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+//! OCAF Attribute representing discrete model.
+class asiData_DiscrModelAttr : public TDF_Attribute
+{
+public:
+
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiData_DiscrModelAttr, TDF_Attribute)
+
+// Construction & settling-down routines:
+public:
+
+  asiData_EXPORT
+    asiData_DiscrModelAttr();
+
+  asiData_EXPORT static Handle(asiData_DiscrModelAttr)
+    Set(const TDF_Label& Label);
+
+// GUID accessors:
+public:
+
+  asiData_EXPORT static const Standard_GUID&
+    GUID();
+
+  asiData_EXPORT virtual const Standard_GUID&
+    ID() const;
+
+// Attribute's kernel methods:
+public:
+
+  asiData_EXPORT virtual Handle(TDF_Attribute)
+    NewEmpty() const;
+
+  asiData_EXPORT virtual void
+    Restore(const Handle(TDF_Attribute)& mainAttr);
+
+  asiData_EXPORT virtual void
+    Paste(const Handle(TDF_Attribute)&       into,
+          const Handle(TDF_RelocationTable)& relocTable) const;
+
+// Accessors for domain-specific data:
+public:
+
+  asiData_EXPORT void
+    SetDiscrModel(const Handle(asiAlgo::discr::Model)& model);
+
+  asiData_EXPORT const Handle(asiAlgo::discr::Model)&
+    GetDiscrModel() const;
+
+// Members:
+private:
+
+  Handle(asiAlgo::discr::Model) m_discrModel; //!< Discrete model.
+
+};
 
 #endif

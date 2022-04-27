@@ -3950,7 +3950,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
         return TCL_ERROR;
       }
       //
-      const Handle(asiAlgo_UniformGrid<float>)& grid = sampleFace.GetResult();
+      const Handle(asiAlgo_UniformGrid<float>)& grid       = sampleFace.GetResult();
+      const Handle(asiAlgo::discr::Model)&      discrModel = sampleFace.GetDiscrModel();
 
       TIMER_FINISH
       TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Build face grid")
@@ -3989,16 +3990,22 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       }
 
       // Modify data model and actualize scene.
-      Handle(asiData_Grid2dNode) gridNode;
+      Handle(asiData_Grid2dNode)    gridNode;
+      Handle(asiData_DiscrFaceNode) discrFaceNode;
       //
       cmdEngine::cf->Model->OpenCommand();
       {
         gridNode = partApi.FindFaceGrid2d(true);
         gridNode->SetUniformGrid(grid);
+        //
+        discrFaceNode = partApi.FindDiscrFace(true);
+        discrFaceNode->SetDiscrModel(discrModel);
+        discrFaceNode->SetSelectedFace(selected.GetMinimalMapped());
       }
       cmdEngine::cf->Model->CommitCommand();
       cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
       cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(discrFaceNode);
 
       // Draw the sampled points in 3D.
       interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);

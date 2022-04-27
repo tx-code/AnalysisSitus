@@ -37,6 +37,7 @@
 #include <asiData_BVHParameter.h>
 #include <asiData_ContourNode.h>
 #include <asiData_CurveNode.h>
+#include <asiData_DiscrFaceNode.h>
 #include <asiData_EdgeNode.h>
 #include <asiData_FaceContourNode.h>
 #include <asiData_FaceNode.h>
@@ -347,6 +348,9 @@ public:
 
   asiData_EXPORT Handle(asiData_Grid2dNode)
     GetGrid2d() const;
+
+  asiData_EXPORT Handle(asiData_DiscrFaceNode)
+    GetDiscrFace() const;
 
 // Initialization:
 public:

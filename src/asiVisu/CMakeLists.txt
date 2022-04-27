@@ -52,6 +52,7 @@ set (pipelines_H_FILES
   pipelines/asiVisu_BSurfPolesPipeline.h
   pipelines/asiVisu_CurvatureCombsPipeline.h
   pipelines/asiVisu_CurvePipeline.h
+  pipelines/asiVisu_DiscrFacePipeline.h
   pipelines/asiVisu_EdgeCurvePipeline.h
   pipelines/asiVisu_EdgeDomainPipeline.h
   pipelines/asiVisu_FaceContourPipeline.h
@@ -96,6 +97,7 @@ set (pipelines_CPP_FILES
   pipelines/asiVisu_BSurfPolesPipeline.cpp
   pipelines/asiVisu_CurvatureCombsPipeline.cpp
   pipelines/asiVisu_CurvePipeline.cpp
+  pipelines/asiVisu_DiscrFacePipeline.cpp
   pipelines/asiVisu_EdgeCurvePipeline.cpp
   pipelines/asiVisu_EdgeDomainPipeline.cpp
   pipelines/asiVisu_FaceContourPipeline.cpp
@@ -140,6 +142,7 @@ set (presentations_H_FILES
   presentations/asiVisu_CurvatureCombsPrs.h
   presentations/asiVisu_DefaultPrs.h
   presentations/asiVisu_DeviationPrs.h
+  presentations/asiVisu_DiscrFacePrs.h
   presentations/asiVisu_FaceDomainPrs.h
   presentations/asiVisu_GeomBoundaryEdgesPrs.h
   presentations/asiVisu_GeomCurvePrs.h
@@ -180,6 +183,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_CurvatureCombsPrs.cpp
   presentations/asiVisu_DefaultPrs.cpp
   presentations/asiVisu_DeviationPrs.cpp
+  presentations/asiVisu_DiscrFacePrs.cpp
   presentations/asiVisu_FaceDomainPrs.cpp
   presentations/asiVisu_GeomBoundaryEdgesPrs.cpp
   presentations/asiVisu_GeomCurvePrs.cpp
@@ -227,6 +231,7 @@ set (providers_H_FILES
   providers/asiVisu_CurveDataProvider.h
   providers/asiVisu_DataProvider.h
   providers/asiVisu_DeviationDataProvider.h
+  providers/asiVisu_DiscrFaceDataProvider.h
   providers/asiVisu_DomainPointsDataProvider.h
   providers/asiVisu_EdgeDataProvider.h
   providers/asiVisu_FaceContourDataProvider.h
@@ -271,6 +276,7 @@ set (providers_CPP_FILES
   providers/asiVisu_ContourPolesDataProvider.cpp
   providers/asiVisu_DataProvider.cpp
   providers/asiVisu_DeviationDataProvider.cpp
+  providers/asiVisu_DiscrFaceDataProvider.cpp
   providers/asiVisu_DomainPointsDataProvider.cpp
   providers/asiVisu_EdgeDataProvider.cpp
   providers/asiVisu_FaceContourDataProvider.cpp
@@ -340,6 +346,7 @@ set (sources_H_FILES
   sources/asiVisu_CurvatureCombsSource.h
   sources/asiVisu_CurveSource.h
   sources/asiVisu_CurveSourceBase.h
+  sources/asiVisu_DiscrFaceSource.h
   sources/asiVisu_FuncLevelsSource2d.h
   sources/asiVisu_FuncLevelsSource3d.h
   sources/asiVisu_FuncLevelsSourceBase.h
@@ -371,6 +378,7 @@ set (sources_CPP_FILES
   sources/asiVisu_CurvatureCombsSource.cpp
   sources/asiVisu_CurveSource.cpp
   sources/asiVisu_CurveSourceBase.cpp
+  sources/asiVisu_DiscrFaceSource.cpp
   sources/asiVisu_FuncUnivariateSource.cpp
   sources/asiVisu_Grid2dSource.cpp
   sources/asiVisu_MeshSource.cpp

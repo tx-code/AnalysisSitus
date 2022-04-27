@@ -34,6 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_DiscrClassifier2d.h>
+#include <asiAlgo_DiscrModel.h>
 #include <asiAlgo_Membership.h>
 #include <asiAlgo_UniformGrid.h>
 
@@ -106,6 +107,10 @@ public:
   asiAlgo_EXPORT Handle(asiAlgo_BaseCloud<double>)
     GetResult3d() const;
 
+  //! \return discrete model.
+  asiAlgo_EXPORT const Handle(asiAlgo::discr::Model)&
+    GetDiscrModel() const;
+
 protected:
 
   //! Performs point-face classification.
@@ -139,6 +144,9 @@ protected:
 
   //! Discretized polygon.
   std::vector<gp_XY> m_polygon;
+
+  //! Discrete model.
+  Handle(asiAlgo::discr::Model) m_discrModel;
 
 };
 

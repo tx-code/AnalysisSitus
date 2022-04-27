@@ -815,6 +815,21 @@ Handle(asiData_Grid2dNode) asiData_PartNode::GetGrid2d() const
   return nullptr;
 }
 
+//! \return underlying Node for Discrete Face.
+Handle(asiData_DiscrFaceNode) asiData_PartNode::GetDiscrFace() const
+{
+  Handle(asiData_DiscrFaceNode) discrFace;
+  for ( Handle(ActAPI_IChildIterator) cit = this->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    discrFace = Handle(asiData_DiscrFaceNode)::DownCast( cit->Value() );
+
+    if ( !discrFace.IsNull() && discrFace->IsWellFormed() )
+      return discrFace;
+  }
+
+  return nullptr;
+}
+
 //-----------------------------------------------------------------------------
 
 //! Sets shape to store.

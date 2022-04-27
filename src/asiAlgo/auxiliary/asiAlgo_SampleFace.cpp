@@ -246,13 +246,13 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
     discretizer.Tessellate();
 
     // Access the discrete model.
-    Handle(discr::Model) M = discretizer.GetModel();
+    m_discrModel = discretizer.GetModel();
     //
-    if ( M.IsNull() )
+    if (m_discrModel.IsNull() )
       return false;
 
     // Get the discretized face.
-    const discr::Face& dFace = M->GetFace(1);
+    const discr::Face& dFace = m_discrModel->GetFace(1);
 
     // Prepare the classifier.
     m_discrClass = new discr::Classifier2d(dFace);
@@ -418,4 +418,11 @@ asiAlgo_Membership
   }
 
   return Membership_Unknown;
+}
+
+//-----------------------------------------------------------------------------
+
+const Handle(asiAlgo::discr::Model)& asiAlgo_SampleFace::GetDiscrModel() const
+{
+  return m_discrModel;
 }

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
-
-#define asiData_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
-
-// asiData includes
-#include <asiData_ParameterFlags.h>
-
-// Active Data includes
-#include <ActAPI_IParameter.h>
+// Own include
+#include <asiVisu_DiscrFaceDataProvider.h>
 
 //-----------------------------------------------------------------------------
-// Custom Active Data Parameters
+
+asiVisu_DiscrFaceDataProvider::asiVisu_DiscrFaceDataProvider(const Handle(asiData_DiscrFaceNode)& N)
+: asiVisu_DataProvider (),
+  m_node               (N)
+{}
+
 //-----------------------------------------------------------------------------
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+Handle(asiAlgo::discr::Model)
+  asiVisu_DiscrFaceDataProvider::GetDiscrModel() const
+{
+  return m_node->GetDiscrModel();
+}
 
-#endif
+//-----------------------------------------------------------------------------
+
+Handle(TColStd_HPackedMapOfInteger) asiVisu_DiscrFaceDataProvider::GetFaceIDs() const
+{
+  return m_node->GetSelectedFaces();
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(ActAPI_HParameterList)
+  asiVisu_DiscrFaceDataProvider::translationSources() const
+{
+  ActAPI_ParameterStream out;
+  out << m_node->Parameter(asiData_DiscrFaceNode::PID_DiscrModel)
+      << m_node->Parameter(asiData_FaceNodeBase::PID_SelectedFaces)
+  ;
+
+  return out.List;
+}

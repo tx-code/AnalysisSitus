@@ -93,6 +93,7 @@ REGISTER_NODE_TYPE(asiData_TriangulationNode)
 REGISTER_NODE_TYPE(asiData_TessNode)
 REGISTER_NODE_TYPE(asiData_MeshNormsNode)
 REGISTER_NODE_TYPE(asiData_ClearanceNode)
+REGISTER_NODE_TYPE(asiData_DiscrFaceNode)
 //
 REGISTER_NODE_TYPE(asiData_ReTopoNode)
 REGISTER_NODE_TYPE(asiData_RePatchNode)
@@ -350,6 +351,7 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_TriangulationNode>,  Partition_Triangulation);
   REGISTER_PARTITION(asiData_Partition<asiData_TessNode>,           Partition_Tessellation);
   REGISTER_PARTITION(asiData_Partition<asiData_MeshNormsNode>,      Partition_MeshNorms);
+  REGISTER_PARTITION(asiData_Partition<asiData_DiscrFaceNode>,      Partition_DiscrFace);
   //
   REGISTER_PARTITION(asiData_Partition<asiData_ReTopoNode>,         Partition_ReTopo);
   REGISTER_PARTITION(asiData_Partition<asiData_RePatchNode>,        Partition_RePatch);

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
+// Own include
+#include <asiVisu_DiscrFacePrs.h>
 
-#define asiData_NotUsed(x)
+// asiVisu includes
+#include <asiVisu_DiscrFaceDataProvider.h>
+#include <asiVisu_DiscrFacePipeline.h>
 
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
+// VTK includes
+#include <vtkActor.h>
+#include <vtkMapper.h>
 
-// asiData includes
-#include <asiData_ParameterFlags.h>
+//! Creates a Presentation object for the passed Discrete Face Node.
+//! \param[in] N Grid Node to create a Presentation for.
+asiVisu_DiscrFacePrs::asiVisu_DiscrFacePrs(const Handle(ActAPI_INode)& N)
+: asiVisu_DefaultPrs(N)
+{
+  Handle(asiData_DiscrFaceNode) discrFace = Handle(asiData_DiscrFaceNode)::DownCast(N);
 
-// Active Data includes
-#include <ActAPI_IParameter.h>
+  // Create Data Provider.
+  Handle(asiVisu_DiscrFaceDataProvider) DP = new asiVisu_DiscrFaceDataProvider(discrFace);
 
-//-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
+  // Create pipeline.
+  Handle(asiVisu_DiscrFacePipeline) PL = new asiVisu_DiscrFacePipeline();
+  //
+  PL->Actor()->SetPickable(0);
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+  this->addPipeline        ( Pipeline_DiscrFace, PL );
+  this->assignDataProvider ( Pipeline_DiscrFace, DP );
+}
 
-#endif
+//! Factory method for Presentation.
+//! \param[in] N Discrete Face Node to create a Presentation for.
+//! \return new Presentation instance.
+Handle(asiVisu_Prs) asiVisu_DiscrFacePrs::Instance(const Handle(ActAPI_INode)& N)
+{
+  return new asiVisu_DiscrFacePrs(N);
+}

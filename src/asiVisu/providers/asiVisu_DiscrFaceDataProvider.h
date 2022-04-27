@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,65 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
+#ifndef asiVisu_DiscrFaceDataProvider_h
+#define asiVisu_DiscrFaceDataProvider_h
 
-#define asiData_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
+// asiVisu includes
+#include <asiVisu_DataProvider.h>
 
 // asiData includes
-#include <asiData_ParameterFlags.h>
-
-// Active Data includes
-#include <ActAPI_IParameter.h>
+#include <asiData_DiscrFaceNode.h>
 
 //-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+//! Data provider for a discrete face.
+class asiVisu_DiscrFaceDataProvider : public asiVisu_DataProvider
+{
+public:
+
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_DiscrFaceDataProvider, asiVisu_DataProvider)
+
+public:
+
+  //! Ctor.
+  //! \param[in] node Discrete Face Node to source the persistent data from.
+  asiVisu_EXPORT
+    asiVisu_DiscrFaceDataProvider(const Handle(asiData_DiscrFaceNode)& N);
+
+public:
+
+  //! Returns associated Node ID.
+  //! \return Node ID.
+  virtual ActAPI_DataObjectId GetNodeID() const
+  {
+    return m_node->GetId();
+  }
+
+public:
+
+  //! \return discrete model.
+  asiVisu_EXPORT virtual Handle(asiAlgo::discr::Model)
+    GetDiscrModel() const;
+
+  //! \return IDs of faces.
+  asiVisu_EXPORT virtual Handle(TColStd_HPackedMapOfInteger)
+    GetFaceIDs() const;
+
+protected:
+
+  //! Enumerates all Active Data Parameters playing as sources for DOMAIN -> VTK
+  //! translation process. If any Parameter listed by this method is changed
+  //! (more precisely, if its MTime record is updated), the translation must
+  //! be repeated.
+  //! \return list of source Parameters.
+  asiVisu_EXPORT virtual Handle(ActAPI_HParameterList)
+    translationSources() const;
+
+protected:
+
+  Handle(asiData_DiscrFaceNode) m_node; //!< Discrete Face Node.
+
+};
 
 #endif

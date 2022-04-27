@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,51 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
+#ifndef asiVisu_DiscrFacePrs_h
+#define asiVisu_DiscrFacePrs_h
 
-#define asiData_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
+// asiVisu includes
+#include <asiVisu_DefaultPrs.h>
 
 // asiData includes
-#include <asiData_ParameterFlags.h>
+#include <asiData_DiscrFaceNode.h>
 
-// Active Data includes
-#include <ActAPI_IParameter.h>
+//! Presentation class for Discrete Face.
+class asiVisu_DiscrFacePrs : public asiVisu_DefaultPrs
+{
+public:
 
-//-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_DiscrFacePrs, asiVisu_DefaultPrs)
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+  // Allows to register this Presentation class
+  DEFINE_PRESENTATION_FACTORY(asiData_DiscrFaceNode, Instance)
+
+public:
+
+  //! Pipelines.
+  enum PipelineId
+  {
+    Pipeline_DiscrFace = 1 //!< Discrete Face.
+  };
+
+public:
+
+  asiVisu_EXPORT static Handle(asiVisu_Prs)
+    Instance(const Handle(ActAPI_INode)& N);
+
+public:
+
+  virtual bool IsVisible() const
+  {
+    return true;
+  }
+
+private:
+
+  //! Allocation is allowed only via Instance() method.
+  asiVisu_DiscrFacePrs(const Handle(ActAPI_INode)& theNode);
+
+};
 
 #endif

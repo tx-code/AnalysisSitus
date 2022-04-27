@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 September 2015
+// Created on: 27 April 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,64 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_h
-#define asiData_h
+#ifndef asiVisu_DiscrFacePipeline_h
+#define asiVisu_DiscrFacePipeline_h
 
-#define asiData_NotUsed(x)
+// asiVisu includes
+#include <asiVisu_DataProvider.h>
+#include <asiVisu_DiscrFaceSource.h>
+#include <asiVisu_Pipeline.h>
 
-#ifdef _WIN32
-  #ifdef asiData_EXPORTS
-    #define asiData_EXPORT __declspec(dllexport)
-  #else
-    #define asiData_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define asiData_EXPORT
-#endif
-
-// asiData includes
-#include <asiData_ParameterFlags.h>
-
-// Active Data includes
-#include <ActAPI_IParameter.h>
+// VTK includes
+#include <vtkLookupTable.h>
 
 //-----------------------------------------------------------------------------
-// Custom Active Data Parameters
-//-----------------------------------------------------------------------------
 
-#define Parameter_AAG         Parameter_LASTFREE
-#define Parameter_BVH         Parameter_LASTFREE + 1
-#define Parameter_Naming      Parameter_LASTFREE + 2
-#define Parameter_Function    Parameter_LASTFREE + 3
-#define Parameter_Octree      Parameter_LASTFREE + 4
-#define Parameter_UniformGrid Parameter_LASTFREE + 5
-#define Parameter_PolyMesh    Parameter_LASTFREE + 6
-#define Parameter_DiscrModel  Parameter_LASTFREE + 7
-//
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+//! Visualization pipeline discrete face.
+class asiVisu_DiscrFacePipeline : public asiVisu_Pipeline
+{
+public:
+
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_DiscrFacePipeline, asiVisu_Pipeline)
+
+public:
+
+  asiVisu_EXPORT
+    asiVisu_DiscrFacePipeline();
+
+public:
+
+  asiVisu_EXPORT virtual void
+    SetInput(const Handle(asiVisu_DataProvider)& DP);
+
+public:
+
+  //! \return grid source.
+  const vtkSmartPointer<asiVisu_DiscrFaceSource>& GetSource() const
+  {
+    return m_source;
+  }
+
+private:
+
+  virtual void callback_add_to_renderer      (vtkRenderer* pRenderer);
+  virtual void callback_remove_from_renderer (vtkRenderer* pRenderer);
+  virtual void callback_update               ();
+
+private:
+
+  //! Copying prohibited.
+  asiVisu_DiscrFacePipeline(const asiVisu_DiscrFacePipeline&) = delete;
+
+  //! Assignment prohibited.
+  asiVisu_DiscrFacePipeline& operator=(const asiVisu_DiscrFacePipeline&) = delete;
+
+protected:
+
+  //! Discrete Face source.
+  vtkSmartPointer<asiVisu_DiscrFaceSource> m_source;
+
+};
 
 #endif

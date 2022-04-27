@@ -204,6 +204,19 @@ public:
 
 public:
 
+  //! Creates Discrete Face Node.
+  //! \return Discrete Face Node.
+  asiEngine_EXPORT Handle(asiData_DiscrFaceNode)
+    CreateDiscrFace();
+
+  //! Finds or creates a Discrete Face Node for the active face.
+  //! \param[in] create whether to create a Node if it does not exist.
+  //! \return found or newly created Discrete Face Node.
+  asiEngine_EXPORT Handle(asiData_DiscrFaceNode)
+    FindDiscrFace(const bool create = false);
+
+public:
+
   //! Updates part's geometry in a smart way, so all dependent attributes
   //! are also actualized.
   //! \param[in] model             CAD part to set.
