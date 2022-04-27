@@ -693,11 +693,30 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
       return;
     }
 
+    // In some cases, the curve/direction/surface may be periodic and boundaries
+    // of the face parameterization may be shifted relative to boundaries
+    // of the surface parameterization. With further truncation of the boundaries,
+    // the phase/offset appears, which affects the offset display of the isolines
+    // (or even part of the surface for rendering may disappear). Below, an attempt
+    // is made to remove such phase/offset (or take into account the missing part
+    // of the surface) by shifting boundaries of surface parameterization by
+    // a given phase/shift.
+    //
+    // Note: This is valid for a periodic curve / direction / surface.
+    //
+    // Example (part of the surface for rendering may disappear):
+    //
+    // Boundaries of face parameterization     - [-3, 3]
+    // Boundaries of surface parameterization  - [ 0, 6]
+    // Boundaries after truncation             - [ 0, 3]
+    //
+    // The part that is missing                - [-3, 0]
+    //
     double uMinSurfShifted = uMinSurf, uMaxSurfShifted = uMaxSurf;
     double vMinSurfShifted = vMinSurf, vMaxSurfShifted = vMaxSurf;
     if ( surf->IsUPeriodic() && !Precision::IsInfinite(surf->UPeriod()) )
     {
-      if ( abs(uMaxParam - uMinParam) - surf->UPeriod() >= Precision::Confusion() )
+      if ( abs(uMaxParam - uMinParam) - surf->UPeriod() >= Precision::PConfusion() )
       {
         if ( !Precision::IsInfinite(uMinParam) )
         {
@@ -721,7 +740,7 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
 
     if ( surf->IsVPeriodic() && !Precision::IsInfinite(surf->VPeriod()) )
     {
-      if ( abs(vMaxParam - vMinParam) - surf->VPeriod() >= Precision::Confusion() )
+      if ( abs(vMaxParam - vMinParam) - surf->VPeriod() >= Precision::PConfusion() )
       {
         if ( !Precision::IsInfinite(vMinParam) )
         {
@@ -749,7 +768,9 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
     vMin = Max(vMinSurfShifted, vMinParam);
     vMax = Min(vMaxSurfShifted, vMaxParam);
 
-    // Trim natural bounds by the face bounds (if such can be computed)
+    // Trim natural bounds (originates from the center between
+    // the boundaries of the face parametrization) by the face
+    // bounds (if such can be computed)
     if ( canComputeBounds )
     {
       double addU = 0.5 * (uMax + uMin);
