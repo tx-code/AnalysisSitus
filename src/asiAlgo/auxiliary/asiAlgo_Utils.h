@@ -704,6 +704,18 @@ namespace asiAlgo_Utils
     IsConical(const TopoDS_Face& face,
               gp_Ax1&            ax1);
 
+  //! Checks whether the passed face has spherical support.
+  //! \param[in] face face to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsSpherical(const TopoDS_Face& face);
+
+  //! Checks whether the passed face has toroidal support.
+  //! \param[in] face face to check.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsToroidal(const TopoDS_Face& face);
+
   //! Checks if the passed edge is circular.
   //! \param[in] edge edge to check.
   //! \return true/false.

@@ -100,6 +100,8 @@
 #include <Geom_Line.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Geom_Parabola.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
@@ -1550,6 +1552,34 @@ bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
   if ( IsTypeOf<Geom_ConicalSurface>(face, surf) )
   {
     ax = surf->Axis();
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsSpherical(const TopoDS_Face& face)
+{
+  Handle(Geom_SphericalSurface) surf;
+  //
+  if ( IsTypeOf<Geom_SphericalSurface>(face, surf) )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsToroidal(const TopoDS_Face& face)
+{
+  Handle(Geom_ToroidalSurface) surf;
+  //
+  if ( IsTypeOf<Geom_ToroidalSurface>(face, surf) )
+  {
     return true;
   }
 
