@@ -34,6 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_CheckValidity.h>
+#include <asiAlgo_DiscrBuilder.h>
 #include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -55,6 +56,8 @@ static double pgon[TOT_VERTS][2];
 #if defined DRAW_DEBUG
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
+
+using namespace asiAlgo;
 
 namespace
 {
@@ -177,7 +180,7 @@ asiAlgo_SampleFace::asiAlgo_SampleFace(const TopoDS_Face&   face,
                                        ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm (progress, plotter),
   m_bSquare         (false),
-  m_bHaines         (false),
+  m_algo            (PmcAlgo_Precise),
   m_face            (face),
   m_fUmin           (0.),
   m_fUmax           (0.),
@@ -199,9 +202,9 @@ void asiAlgo_SampleFace::SetSquare(const bool square)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_SampleFace::SetUseHaines(const bool on)
+void asiAlgo_SampleFace::SetPmcAlgo(const PmcAlgo algo)
 {
-  m_bHaines = on;
+  m_algo = algo;
 }
 
 //-----------------------------------------------------------------------------
@@ -214,12 +217,45 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
   if ( numBins < 2 )
     return false;
 
-  if ( m_bHaines && m_polygon.empty() )
+  // Prepare for Haines.
+  if ( (m_algo == PmcAlgo_Haines) && m_polygon.empty() )
   {
     TopoDS_Wire wire = asiAlgo_Utils::OuterWire(m_face);
 
     m_polygon.clear();
     Wire2Polygon(wire, m_face, m_polygon);
+  }
+
+  // Prepare for a discrete classifier.
+  if ( (m_algo == PmcAlgo_Discrete) && m_discrClass.IsNull() )
+  {
+    const double discr   = 42;
+    const double uGrain  = (m_fUmax - m_fUmin)/discr;
+    const double vGrain  = (m_fVmax - m_fVmin)/discr;
+    const double uvGrain = Min(uGrain, vGrain);
+
+    // Discretization parameters.
+    discr::Params params;
+    params.SetMinElemSize(uvGrain);
+    params.SetMaxElemSize(uvGrain*10);
+    params.SetDeviationAngle(1.*M_PI/180.); // 1 degree.
+
+    // Tessellator.
+    discr::Builder discretizer(m_face);
+    discretizer.SetParams(params);
+    discretizer.Tessellate();
+
+    // Access the discrete model.
+    m_discrModel = discretizer.GetModel();
+    //
+    if (m_discrModel.IsNull() )
+      return false;
+
+    // Get the discretized face.
+    const discr::Face& dFace = m_discrModel->GetFace(1);
+
+    // Prepare the classifier.
+    m_discrClass = new discr::Classifier2d(dFace);
   }
 
   // Domain.
@@ -332,7 +368,8 @@ Handle(asiAlgo_BaseCloud<double>) asiAlgo_SampleFace::GetResult3d() const
 asiAlgo_Membership
   asiAlgo_SampleFace::classify(const gp_Pnt2d& PonS)
 {
-  if ( m_bHaines )
+  /* Haines */
+  if ( m_algo == PmcAlgo_Haines )
   {
     if ( m_polygon.empty() || (m_polygon.size() >= TOT_VERTS) )
       return Membership_Unknown;
@@ -353,6 +390,21 @@ asiAlgo_Membership
     if ( state == 0 )
       return Membership_Out;
   }
+
+  /* Discrete */
+  else if ( m_algo == PmcAlgo_Discrete )
+  {
+    const discr::Location dLoc = m_discrClass->Locate(PonS);
+
+    if ( dLoc == discr::Location_IN )
+      return Membership_In;
+    if ( dLoc == discr::Location_ON )
+      return Membership_On;
+    if ( dLoc == discr::Location_OUT )
+      return Membership_Out;
+  }
+
+  /* Precise */
   else
   {
     const TopAbs_State state = m_class.Perform(PonS);
@@ -366,4 +418,11 @@ asiAlgo_Membership
   }
 
   return Membership_Unknown;
+}
+
+//-----------------------------------------------------------------------------
+
+const Handle(asiAlgo::discr::Model)& asiAlgo_SampleFace::GetDiscrModel() const
+{
+  return m_discrModel;
 }

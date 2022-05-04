@@ -39,6 +39,7 @@
 #include <asiData_ClearanceNode.h>
 #include <asiData_CurvatureCombsNode.h>
 #include <asiData_DeviationNode.h>
+#include <asiData_DiscrFaceNode.h>
 #include <asiData_Grid2dNode.h>
 #include <asiData_IVCurve2dNode.h>
 #include <asiData_IVCurveNode.h>
@@ -315,6 +316,13 @@ public:
   Handle(asiData_Partition<asiData_OctreeNode>) GetOctreePartition() const
   {
     return Handle(asiData_Partition<asiData_OctreeNode>)::DownCast( this->Partition(Partition_Octree) );
+  }
+
+  //! Accessor for a Partition instance dedicated to Discrete Face Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_DiscrFaceNode>) GetDiscrFacePartition() const
+  {
+    return Handle(asiData_Partition<asiData_DiscrFaceNode>)::DownCast( this->Partition(Partition_DiscrFace) );
   }
 
   //! Accessor for a Partition instance dedicated to Triangulation Nodes.
@@ -602,6 +610,7 @@ protected:
     Partition_TolerantRange,
     Partition_Deviation,
     Partition_Octree,
+    Partition_DiscrFace,
   //---------------------------------------------------------------------------
     Partition_Triangulation,
     Partition_Tessellation,

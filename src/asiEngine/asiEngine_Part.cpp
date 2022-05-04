@@ -695,6 +695,42 @@ Handle(asiData_Grid2dNode)
 
 //-----------------------------------------------------------------------------
 
+Handle(asiData_DiscrFaceNode) asiEngine_Part::CreateDiscrFace()
+{
+  Handle(asiData_DiscrFaceNode)
+    node = Handle(asiData_DiscrFaceNode)::DownCast( asiData_DiscrFaceNode::Instance() );
+  //
+  m_model->GetDiscrFacePartition()->AddNode(node);
+
+  // Initialize.
+  node->Init();
+  node->SetName("Discrete face");
+  node->AddUserFlags(NodeFlag_IsPresentedInPartView);
+
+  Handle(asiData_PartNode) partNode = this->GetPart();
+
+  // Set as child for the Part Node.
+  partNode->AddChildNode(node);
+
+  return node;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_DiscrFaceNode)
+  asiEngine_Part::FindDiscrFace(const bool create)
+{
+  Handle(asiData_PartNode)      partNode      = this->GetPart();
+  Handle(asiData_DiscrFaceNode) discrFaceNode = partNode->GetDiscrFace();
+
+  if ( discrFaceNode.IsNull() && create )
+    return this->CreateDiscrFace();
+
+  return discrFaceNode;
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            model,
                                                 const Handle(asiAlgo_History)& history,
                                                 const bool                     doResetTessParams)

@@ -50,6 +50,7 @@
 #include <asiVisu_ClearancePrs.h>
 #include <asiVisu_CurvatureCombsPrs.h>
 #include <asiVisu_DeviationPrs.h>
+#include <asiVisu_DiscrFacePrs.h>
 #include <asiVisu_FaceDomainPrs.h>
 #include <asiVisu_GeomBoundaryEdgesPrs.h>
 #include <asiVisu_GeomCurvePrs.h>
@@ -156,6 +157,7 @@ int main(int argc, char** argv)
   // Register Presentations.
   REGISTER_PRESENTATION(asiVisu_PartPrs)
   REGISTER_PRESENTATION(asiVisu_DeviationPrs)
+  REGISTER_PRESENTATION(asiVisu_DiscrFacePrs)
   REGISTER_PRESENTATION(asiVisu_OctreePrs)
   REGISTER_PRESENTATION(asiVisu_GeomBoundaryEdgesPrs)
   REGISTER_PRESENTATION(asiVisu_GeomCurvePrs)

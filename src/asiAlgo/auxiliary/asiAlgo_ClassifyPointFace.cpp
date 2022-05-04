@@ -31,7 +31,11 @@
 // Own include
 #include <asiAlgo_ClassifyPointFace.h>
 
-// OCCT includes
+// asiAlgo includes
+#include <asiAlgo_DiscrBuilder.h>
+#include <asiAlgo_DiscrParams.h>
+
+// OpenCascade includes
 #include <Bnd_Box.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
@@ -45,28 +49,70 @@
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
 
+using namespace asiAlgo;
+
+//-----------------------------------------------------------------------------
+
 //! Constructor.
 //! \param F          [in] face to classify the point against.
 //! \param inaccuracy [in] inaccuracy of the input geometry.
 //! \param precision  [in] numerical precision for optimization.
+//! \param isDiscr    [in] whether to use discrete classifier instead of precise one.
 //! \param progress   [in] progress notifier.
 //! \param plotter    [in] imperative plotter.
 asiAlgo_ClassifyPointFace::asiAlgo_ClassifyPointFace(const TopoDS_Face&   F,
                                                      const double         inaccuracy,
                                                      const double         precision,
+                                                     const bool           isDiscr,
                                                      ActAPI_ProgressEntry progress,
                                                      ActAPI_PlotterEntry  plotter)
 : m_F           (F),
   m_fInaccuracy (inaccuracy),
   m_fPrecision  (precision),
+  m_bDiscr      (isDiscr),
   m_progress    (progress),
   m_plotter     (plotter)
 {
-  m_fclass.Init(m_F, precision);
-
   // Get U-V bounds.
   BRepTools::UVBounds(m_F, m_fUmin, m_fUmax, m_fVmin, m_fVmax);
+
+  if ( isDiscr )
+  {
+    const double discr   = 42;
+    const double uGrain  = (m_fUmax - m_fUmin)/discr;
+    const double vGrain  = (m_fVmax - m_fVmin)/discr;
+    const double uvGrain = Min(uGrain, vGrain);
+
+    // Discretization parameters.
+    discr::Params params;
+    params.SetMinElemSize(uvGrain);
+    params.SetMaxElemSize(uvGrain*10);
+    params.SetDeviationAngle(1.*M_PI/180.); // 1 degree.
+
+    // Tessellator.
+    discr::Builder discretizer(m_F);
+    discretizer.SetParams(params);
+    discretizer.Tessellate();
+
+    // Access the discrete model.
+    Handle(discr::Model) M = discretizer.GetModel();
+    //
+    if ( !M.IsNull() )
+    {
+      // Get the discretized face.
+      const discr::Face& dFace = M->GetFace(1);
+
+      // Prepare the classifier.
+      m_discrClass = new discr::Classifier2d(dFace, precision);
+    }
+  }
+  else
+  {
+    m_fclass.Init(m_F, precision);
+  }
 }
+
+//-----------------------------------------------------------------------------
 
 //! Performs point-face classification.
 //! \param PonS [in] point to classify.
@@ -74,17 +120,36 @@ asiAlgo_ClassifyPointFace::asiAlgo_ClassifyPointFace(const TopoDS_Face&   F,
 asiAlgo_Membership
   asiAlgo_ClassifyPointFace::operator()(const gp_Pnt2d& PonS)
 {
-  const TopAbs_State state = m_fclass.Perform(PonS);
+  if ( m_bDiscr )
+  {
+    if ( m_discrClass.IsNull() )
+      return Membership_Unknown;
 
-  if ( state == TopAbs_IN )
-    return Membership_In;
-  if ( state == TopAbs_ON )
-    return Membership_On;
-  if ( state == TopAbs_OUT )
-    return Membership_Out;
+    const discr::Location dLoc = m_discrClass->Locate(PonS);
+
+    if ( dLoc == discr::Location_IN )
+      return Membership_In;
+    if ( dLoc == discr::Location_ON )
+      return Membership_On;
+    if ( dLoc == discr::Location_OUT )
+      return Membership_Out;
+  }
+  else
+  {
+    const TopAbs_State state = m_fclass.Perform(PonS);
+
+    if ( state == TopAbs_IN )
+      return Membership_In;
+    if ( state == TopAbs_ON )
+      return Membership_On;
+    if ( state == TopAbs_OUT )
+      return Membership_Out;
+  }
 
   return Membership_Unknown;
 }
+
+//-----------------------------------------------------------------------------
 
 //! Performs point-face classification.
 //! \param P             [in] point to classify.
@@ -106,6 +171,8 @@ asiAlgo_Membership
   gp_Pnt2d UV;
   return this->operator()(P, checkDistance, UV);
 }
+
+//-----------------------------------------------------------------------------
 
 //! Performs point-face classification.
 //! \param P             [in]  point to classify.

@@ -642,7 +642,7 @@ bool asiAlgo_InterpolateSurfMesh::collectInteriorNodes(const Handle(Poly_Triangu
    *  Add points representing mesh nodes
    * ==================================== */
 
-  asiAlgo_ClassifyPointFace classifier(F, 1e-4, 1e-4);
+  asiAlgo_ClassifyPointFace classifier(F, 1e-4, 1e-4, false);
 
   const TColgp_Array1OfPnt& triNodes = tris->Nodes();
 

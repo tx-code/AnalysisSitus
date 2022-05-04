@@ -3919,6 +3919,20 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       int numBins = 10;
       interp->GetKeyValue(argc, argv, "num", numBins);
 
+      /* PMC algorithm */
+
+      const bool isHaines = interp->HasKeyword(argc, argv, "haines");
+      const bool isDiscr  = interp->HasKeyword(argc, argv, "discr");
+
+      asiAlgo_SampleFace::PmcAlgo pmcAlgo;
+      //
+      if ( isHaines )
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Haines;
+      else if ( isDiscr )
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Discrete;
+      else
+        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Precise;
+
       TIMER_NEW
       TIMER_GO
 
@@ -3927,8 +3941,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
                                      interp->GetProgress(),
                                      interp->GetPlotter() );
       //
-      sampleFace.SetSquare    ( interp->HasKeyword(argc, argv, "square") );
-      sampleFace.SetUseHaines ( interp->HasKeyword(argc, argv, "haines") );
+      sampleFace.SetSquare  ( interp->HasKeyword(argc, argv, "square") );
+      sampleFace.SetPmcAlgo ( pmcAlgo );
       //
       if ( !sampleFace.Perform(numBins) )
       {
@@ -3936,7 +3950,8 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
         return TCL_ERROR;
       }
       //
-      const Handle(asiAlgo_UniformGrid<float>)& grid = sampleFace.GetResult();
+      const Handle(asiAlgo_UniformGrid<float>)& grid       = sampleFace.GetResult();
+      const Handle(asiAlgo::discr::Model)&      discrModel = sampleFace.GetDiscrModel();
 
       TIMER_FINISH
       TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Build face grid")
@@ -3975,16 +3990,22 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
       }
 
       // Modify data model and actualize scene.
-      Handle(asiData_Grid2dNode) gridNode;
+      Handle(asiData_Grid2dNode)    gridNode;
+      Handle(asiData_DiscrFaceNode) discrFaceNode;
       //
       cmdEngine::cf->Model->OpenCommand();
       {
         gridNode = partApi.FindFaceGrid2d(true);
         gridNode->SetUniformGrid(grid);
+        //
+        discrFaceNode = partApi.FindDiscrFace(true);
+        discrFaceNode->SetDiscrModel(discrModel);
+        discrFaceNode->SetSelectedFace(selected.GetMinimalMapped());
       }
       cmdEngine::cf->Model->CommitCommand();
       cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
       cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(discrFaceNode);
 
       // Draw the sampled points in 3D.
       interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);
@@ -4661,7 +4682,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-face-grid",
     //
-    "build-face-grid [-num <numBins>] [-filename <filename>] [-square]\n"
+    "build-face-grid [-num <numBins>] [-filename <filename>] [-square] [-haines|-discr]\n"
     "\t Builds a uniform UV grid for the interactively selected face.\n"
     "\t Pass the number of bins to control how fine the discretization is.\n"
     "\t If the filename is passed, the sampled face is converted to vtkImageData\n"

@@ -205,8 +205,9 @@ bool asiAlgo_RecognizeConvexHull::Perform()
     // Sample face in its UV domain.
     asiAlgo_SampleFace sampleFace(face);
     //
-    sampleFace.SetUseHaines (m_bHaines);
-    sampleFace.SetSquare    (true);
+    sampleFace.SetPmcAlgo (m_bHaines ? asiAlgo_SampleFace::PmcAlgo_Haines
+                                     : asiAlgo_SampleFace::PmcAlgo_Precise);
+    sampleFace.SetSquare  (true);
     //
     if ( !sampleFace.Perform(m_iGridPts) )
       continue;

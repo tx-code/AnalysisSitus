@@ -51,10 +51,8 @@ typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
 
 //-----------------------------------------------------------------------------
 
-class asiAlgo
+namespace asiAlgo
 {
-public:
-
   //! Dumps the passed feature face IDs to the standard output and
   //! debugging streams. This function is supposed to be used as
   //! "watch" for features. To use in Visual Studio, run in Command
@@ -65,7 +63,7 @@ public:
   //! Here `feature` is of type `TColStd_PackedMapOfInteger`.
   //!
   //! \param[in] feature the feature to dump.
-  asiAlgo_EXPORT static void
+  asiAlgo_EXPORT void
     Dump(const asiAlgo_Feature& feature);
 };
 
