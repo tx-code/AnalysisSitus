@@ -195,16 +195,28 @@ void asiUI_ControlsPart::onLoadFromBRepAppend()
   // Get existing CAD part
   TopoDS_Shape partShape = asiEngine_Part(m_model).GetShape();
 
-  // Build a compound of two shapes
-  TopoDS_Compound comp;
-  BRep_Builder().MakeCompound(comp);
-  BRep_Builder().Add(comp, partShape);
-  BRep_Builder().Add(comp, shape);
+  // Compose a new shape.
+  TopoDS_Shape updatedShape;
+  //
+  if ( !partShape.IsNull() )
+  {
+    // Build a compound of two shapes
+    TopoDS_Compound comp;
+    BRep_Builder().MakeCompound(comp);
+    BRep_Builder().Add(comp, partShape);
+    BRep_Builder().Add(comp, shape);
+
+    updatedShape = comp;
+  }
+  else
+  {
+    updatedShape = shape;
+  }
 
   // Update part
   m_model->OpenCommand(); // tx start
   {
-    asiEngine_Part(m_model).Update( comp, nullptr, !m_model->GetPartNode()->IsKeepTessParams() );
+    asiEngine_Part(m_model).Update( updatedShape, nullptr, !m_model->GetPartNode()->IsKeepTessParams() );
   }
   m_model->CommitCommand(); // tx commit
   //
