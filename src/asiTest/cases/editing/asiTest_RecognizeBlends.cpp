@@ -54,6 +54,12 @@
 //
 #define filename_boxblend_05     "cad/blends/0017_boxblend_05.brep"
 #define filename_boxblend_05_ref "reference/aag/test_boxblend_05_ref.json"
+//
+#define filename_task_166     "cad/blends/test_task_166.brep"
+#define filename_task_166_ref "reference/aag/test_task_166_ref.json"
+
+//--------------------
+#define filename_task_166_tcl "editing/recognize-blends/01_task_166.tcl"
 
 //-----------------------------------------------------------------------------
 
@@ -149,6 +155,25 @@ outcome asiTest_RecognizeBlends::runtest(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
+outcome asiTest_RecognizeBlends::runTestScript(const int   funcID,
+                                               const char* filename)
+{
+  // Get filename of script to execute.
+  TCollection_AsciiString fullFilename = GetFilename(filename);
+
+  // Execute test script.
+  outcome res = evaluate(fullFilename);
+
+  // Set description variables.
+  SetVarDescr("filename", fullFilename, ID(), funcID);
+  SetVarDescr("time", res.elapsedTimeSec, ID(), funcID);
+
+  // Return status.
+  return res;
+}
+
+//-----------------------------------------------------------------------------
+
 outcome asiTest_RecognizeBlends::test_boxblend_01_f3(const int funcID)
 {
   return runtest(funcID,
@@ -185,4 +210,21 @@ outcome asiTest_RecognizeBlends::test_boxblend_05(const int funcID)
                  filename_boxblend_05,
                  filename_boxblend_05_ref,
                  0);
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_RecognizeBlends::test_task_166(const int funcID)
+{
+  return runtest(funcID,
+                 filename_task_166,
+                 filename_task_166_ref,
+                 0);
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_RecognizeBlends::test_task_166_tcl(const int funcID)
+{
+  return runTestScript(funcID, filename_task_166_tcl);
 }

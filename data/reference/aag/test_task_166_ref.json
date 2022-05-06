@@ -1,0 +1,398 @@
+{
+  "nodes": {
+    "1": {
+      "surface": "cylinder"
+    },
+    "2": {
+      "surface": "cylinder"
+    },
+    "3": {
+      "surface": "cylinder"
+    },
+    "4": {
+      "surface": "cone"
+    },
+    "5": {
+      "surface": "cylinder"
+    },
+    "6": {
+      "surface": "cone"
+    },
+    "7": {
+      "surface": "cone"
+    },
+    "8": {
+      "surface": "cylinder"
+    },
+    "9": {
+      "surface": "cone"
+    },
+    "10": {
+      "surface": "cylinder"
+    },
+    "11": {
+      "surface": "plane"
+    },
+    "12": {
+      "surface": "plane"
+    },
+    "13": {
+      "surface": "plane"
+    },
+    "14": {
+      "surface": "plane"
+    },
+    "15": {
+      "surface": "plane"
+    },
+    "16": {
+      "surface": "plane"
+    },
+    "17": {
+      "surface": "plane"
+    },
+    "18": {
+      "surface": "plane"
+    },
+    "19": {
+      "surface": "plane"
+    },
+    "20": {
+      "surface": "plane"
+    },
+    "21": {
+      "surface": "plane"
+    },
+    "22": {
+      "surface": "plane"
+    },
+    "23": {
+      "surface": "cylinder",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "uncertain",
+          "confirmed": "0",
+          "numSmoothEdges": "0",
+          "numSpringEdges": "0",
+          "numCrossEdges": "0",
+          "numTerminatingEdges": "0"
+        }
+      ]
+    },
+    "24": {
+      "surface": "plane"
+    },
+    "25": {
+      "surface": "cylinder",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "uncertain",
+          "confirmed": "0",
+          "numSmoothEdges": "0",
+          "numSpringEdges": "0",
+          "numCrossEdges": "0",
+          "numTerminatingEdges": "0"
+        }
+      ]
+    },
+    "26": {
+      "surface": "plane"
+    },
+    "27": {
+      "surface": "cylinder",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "uncertain",
+          "confirmed": "0",
+          "numSmoothEdges": "0",
+          "numSpringEdges": "0",
+          "numCrossEdges": "0",
+          "numTerminatingEdges": "0"
+        }
+      ]
+    },
+    "28": {
+      "surface": "plane"
+    },
+    "29": {
+      "surface": "cylinder",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "uncertain",
+          "confirmed": "0",
+          "numSmoothEdges": "0",
+          "numSpringEdges": "0",
+          "numCrossEdges": "0",
+          "numTerminatingEdges": "0"
+        }
+      ]
+    },
+    "30": {
+      "surface": "plane"
+    },
+    "31": {
+      "surface": "cone",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "ordinary",
+          "confirmed": "0",
+          "numSmoothEdges": "2",
+          "numSpringEdges": "2",
+          "numCrossEdges": "1",
+          "numTerminatingEdges": "3"
+        }
+      ]
+    },
+    "32": {
+      "surface": "plane",
+      "attributes": [
+        {
+          "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
+          "name": "blend support"
+        }
+      ]
+    },
+    "33": {
+      "surface": "plane",
+      "attributes": [
+        {
+          "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
+          "name": "blend support"
+        }
+      ]
+    },
+    "34": {
+      "surface": "cone",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "ordinary",
+          "confirmed": "1",
+          "numSmoothEdges": "2",
+          "numSpringEdges": "2",
+          "numCrossEdges": "1",
+          "numTerminatingEdges": "1"
+        }
+      ]
+    },
+    "35": {
+      "surface": "cone",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "ordinary",
+          "confirmed": "0",
+          "numSmoothEdges": "2",
+          "numSpringEdges": "2",
+          "numCrossEdges": "1",
+          "numTerminatingEdges": "3"
+        }
+      ]
+    },
+    "36": {
+      "surface": "plane",
+      "attributes": [
+        {
+          "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
+          "name": "blend support"
+        }
+      ]
+    },
+    "37": {
+      "surface": "plane",
+      "attributes": [
+        {
+          "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
+          "name": "blend support"
+        }
+      ]
+    },
+    "38": {
+      "surface": "cone",
+      "attributes": [
+        {
+          "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
+          "name": "blend candidate",
+          "kind": "ordinary",
+          "confirmed": "1",
+          "numSmoothEdges": "2",
+          "numSpringEdges": "2",
+          "numCrossEdges": "1",
+          "numTerminatingEdges": "1"
+        }
+      ]
+    },
+    "39": {
+      "surface": "cylinder"
+    },
+    "40": {
+      "surface": "cone"
+    },
+    "41": {
+      "surface": "cylinder"
+    },
+    "42": {
+      "surface": "cone"
+    },
+    "43": {
+      "surface": "cone"
+    },
+    "44": {
+      "surface": "cylinder"
+    },
+    "45": {
+      "surface": "cone"
+    },
+    "46": {
+      "surface": "cylinder"
+    },
+    "47": {
+      "surface": "cylinder"
+    },
+    "48": {
+      "surface": "cylinder"
+    }
+  },
+  "arcs": [
+    ["1", "6", "convex", -120.98751701533614],
+    ["1", "22", "convex", -90],
+    ["1", "48", "smooth concave", 162.25532837494424],
+    ["2", "4", "convex", -120.98751701533614],
+    ["2", "22", "convex", -90],
+    ["2", "47", "smooth concave", 162.25532837494413],
+    ["3", "4", "concave", 120.99079328466095],
+    ["3", "21", "convex", -90],
+    ["3", "23", "convex", -14.648914547120734],
+    ["3", "24", "convex", -14.592550602024374],
+    ["3", "25", "convex", -14.656681094343393],
+    ["3", "41", "convex", -24.897136288168372],
+    ["3", "46", "smooth concave", 165.5297058999349],
+    ["4", "8", "convex", -62.262547290725891],
+    ["4", "45", "smooth concave", 171.73018659949932],
+    ["5", "6", "concave", 120.99079328466095],
+    ["5", "12", "convex", -14.59255060204619],
+    ["5", "21", "convex", -90],
+    ["5", "27", "convex", -14.656681094313642],
+    ["5", "29", "convex", -14.648914547116307],
+    ["5", "39", "convex", -24.910344122509365],
+    ["5", "44", "smooth concave", 165.5297058999347],
+    ["6", "10", "convex", -62.260651143413618],
+    ["6", "43", "smooth concave", 171.29900197818583],
+    ["7", "8", "convex", -134.98586050757564],
+    ["7", "14", "convex", -135.01413949242439],
+    ["7", "42", "smooth concave", 173.18824019349492],
+    ["8", "20", "convex", -90],
+    ["8", "41", "smooth concave", 165.96375653207446],
+    ["8", "45", "convex", -62.260651143401759],
+    ["9", "10", "convex", -134.98586050757564],
+    ["9", "14", "convex", -135.01413949242439],
+    ["9", "40", "smooth concave", 173.18824019349506],
+    ["10", "16", "convex", -90],
+    ["10", "39", "smooth concave", 165.96375653207446],
+    ["10", "43", "convex", -62.262547290723717],
+    ["11", "23", "smooth concave", 172.5342914109309],
+    ["11", "25", "smooth concave", 172.5342914109317],
+    ["11", "37", "convex", -134.99999999999997],
+    ["11", "46", "convex", -14.592550602058036],
+    ["12", "14", "convex", -89.999999999999972],
+    ["12", "27", "smooth concave", 172.5342914109321],
+    ["12", "29", "smooth concave", 172.5342914109313],
+    ["13", "14", "convex", -90.000000000000014],
+    ["13", "20", "convex", -90],
+    ["13", "21", "convex", -90],
+    ["13", "22", "convex", -90],
+    ["14", "15", "convex", -90],
+    ["14", "21", "convex", -90],
+    ["14", "22", "convex", -90],
+    ["14", "23", "convex", -90],
+    ["14", "24", "convex", -90.000000000000043],
+    ["14", "25", "convex", -90],
+    ["14", "26", "convex", -89.999999999999972],
+    ["14", "27", "convex", -90],
+    ["14", "28", "convex", -90.000000000000043],
+    ["14", "29", "convex", -90],
+    ["14", "40", "convex", -135.01413949242433],
+    ["14", "42", "convex", -135.01413949242433],
+    ["15", "16", "convex", -90],
+    ["15", "21", "convex", -90],
+    ["15", "22", "convex", -90],
+    ["16", "17", "convex", -90],
+    ["16", "21", "convex", -90],
+    ["16", "22", "convex", -90],
+    ["16", "31", "convex", -135.00296043450714],
+    ["16", "32", "convex", -135],
+    ["16", "33", "convex", -135],
+    ["16", "34", "convex", -135.01413949242439],
+    ["16", "39", "convex", -90],
+    ["17", "18", "concave", 90],
+    ["17", "21", "convex", -90],
+    ["17", "22", "convex", -90],
+    ["18", "19", "concave", 90],
+    ["18", "21", "convex", -90],
+    ["18", "22", "convex", -90],
+    ["19", "20", "convex", -89.999999999999986],
+    ["19", "21", "convex", -90],
+    ["19", "22", "convex", -90],
+    ["20", "21", "convex", -90],
+    ["20", "22", "convex", -90],
+    ["20", "35", "convex", -135.00296043450712],
+    ["20", "36", "convex", -135],
+    ["20", "37", "convex", -135.00000000000003],
+    ["20", "38", "convex", -135.01413949242439],
+    ["20", "41", "convex", -89.999999999999986],
+    ["21", "44", "convex", -90],
+    ["21", "46", "convex", -90],
+    ["22", "47", "convex", -90],
+    ["22", "48", "convex", -90],
+    ["23", "24", "smooth concave", 172.53429141093065],
+    ["23", "26", "smooth concave", 172.5342914109321],
+    ["23", "35", "convex", -134.98586050757564],
+    ["23", "46", "convex", -14.65668109433796],
+    ["24", "25", "smooth concave", 172.53429141093144],
+    ["25", "26", "smooth concave", 172.5342914109313],
+    ["25", "38", "convex", -134.98586050757544],
+    ["25", "46", "convex", -14.648914547123102],
+    ["26", "36", "convex", -135.00000000000006],
+    ["27", "28", "smooth concave", 172.5342914109309],
+    ["27", "30", "smooth concave", 172.53429141093184],
+    ["27", "31", "convex", -134.98586050757564],
+    ["27", "44", "convex", -14.648914547120835],
+    ["28", "29", "smooth concave", 172.5342914109317],
+    ["28", "33", "convex", -134.99999999999997],
+    ["29", "30", "smooth concave", 172.53429141093105],
+    ["29", "34", "convex", -134.98586050757544],
+    ["29", "44", "convex", -14.656681094324133],
+    ["30", "32", "convex", -135.00000000000006],
+    ["30", "44", "convex", -14.592550602012537],
+    ["31", "32", "smooth concave", 176.75710065183344],
+    ["31", "33", "smooth concave", 176.80783184371231],
+    ["31", "39", "convex", -45.000204012816276],
+    ["32", "34", "smooth concave", 176.7571006518333],
+    ["33", "34", "smooth concave", 176.80783184371239],
+    ["35", "36", "smooth concave", 176.75710065183318],
+    ["35", "37", "smooth concave", 176.80783184371231],
+    ["35", "41", "convex", -45.000204012816234],
+    ["36", "38", "smooth concave", 176.7571006518333],
+    ["37", "38", "smooth concave", 176.80783184371219],
+    ["39", "40", "convex", -134.98586050757564],
+    ["39", "44", "convex", -24.897136288168159],
+    ["41", "42", "convex", -134.98586050757564],
+    ["41", "46", "convex", -24.91034412249822],
+    ["43", "44", "concave", 120.99079328466095],
+    ["43", "48", "convex", -120.98751701533614],
+    ["45", "46", "concave", 120.99079328466095],
+    ["45", "47", "convex", -120.98751701533614]
+  ]
+}

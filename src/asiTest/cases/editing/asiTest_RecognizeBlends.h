@@ -36,7 +36,7 @@
 #include <asiTest_TclTestCase.h>
 
 //! Test functions for recognizing blend chains.
-class asiTest_RecognizeBlends : public asiTestEngine_TestCase
+class asiTest_RecognizeBlends : public asiTest_TclTestCase
 {
 public:
 
@@ -69,6 +69,9 @@ public:
               << &test_boxblend_02_f3
               << &test_bb_boxblend_03_f29
               << &test_boxblend_05
+              << &test_task_166
+              //---------------------------
+              << &test_task_166_tcl
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -79,12 +82,17 @@ private:
                          const char* shortFilenameRef,
                          const int   seedFaceId);
 
+  static outcome runTestScript(const int   funcID,
+                               const char* filename);
+
 private:
 
   static outcome test_boxblend_01_f3     (const int funcID);
   static outcome test_boxblend_02_f3     (const int funcID);
   static outcome test_bb_boxblend_03_f29 (const int funcID);
   static outcome test_boxblend_05        (const int funcID);
+  static outcome test_task_166           (const int funcID);
+  static outcome test_task_166_tcl       (const int funcID);
 
 };
 

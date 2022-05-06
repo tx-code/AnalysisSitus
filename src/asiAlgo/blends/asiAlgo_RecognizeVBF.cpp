@@ -80,7 +80,14 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     blendAttr = Handle(asiAlgo_AttrBlendCandidate)::DownCast(blendAttrBase);
 
   /* ------------------------------------------------- */
-  /* Heuristic 1: the face is not a blend support face */
+  /* Heuristic 1: face is not planar                   */
+  /* ------------------------------------------------- */
+
+  if ( asiAlgo_Utils::IsPlanar(face) )
+    return false;
+
+  /* ------------------------------------------------- */
+  /* Heuristic 2: the face is not a blend support face */
   /* ------------------------------------------------- */
 
   Handle(asiAlgo_FeatureAttr)
@@ -90,7 +97,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     return false;
 
   /* -------------------------------------------------------- */
-  /* Heuristic 2: all VBFs have not less than 3 adjacent EBFs */
+  /* Heuristic 3: all VBFs have not less than 3 adjacent EBFs */
   /* -------------------------------------------------------- */
 
   // Get the neighbor faces.
@@ -169,7 +176,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     return false;
 
   /* ---------------------------------------------------------------- */
-  /* Heuristic 3: VBF cannot be adjacent to EBF via terminating edges */
+  /* Heuristic 4: VBF cannot be adjacent to EBF via terminating edges */
   /* ---------------------------------------------------------------- */
 
   for ( TColStd_MapIteratorOfPackedMapOfInteger nit(nids); nit.More(); nit.Next() )
