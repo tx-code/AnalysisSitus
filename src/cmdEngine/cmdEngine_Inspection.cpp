@@ -3881,7 +3881,7 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
 {
   // Get part's AAG.
   Handle(asiData_PartNode)
-    partNode = cmdEngine::cf->Model->GetPartNode();
+    partNode = cmdEngine::model->GetPartNode();
   //
   if ( partNode.IsNull() || !partNode->IsWellFormed() )
   {
@@ -3894,127 +3894,142 @@ int ENGINE_BuildFaceGrid(const Handle(asiTcl_Interp)& interp,
   // Access selected faces (if any).
   asiAlgo_Feature selected;
   //
+  asiEngine_Part partApi(cmdEngine::model,
+                         (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr);
   if ( !cmdEngine::cf.IsNull() )
   {
-    asiEngine_Part partApi( cmdEngine::cf->Model,
-                            cmdEngine::cf->ViewerPart->PrsMgr() );
-
     partApi.GetHighlightedFaces(selected);
+  }
 
-    if ( selected.Extent() == 1 )
-    {
-      const TopoDS_Face& face = G->GetFace( selected.GetMinimalMapped() );
+  int fid = 0;
+  TCollection_AsciiString fidStr;
+  if ( interp->GetKeyValue(argc, argv, "fid", fidStr) )
+  {
+    fid = fidStr.IntegerValue();
+  }
 
-      /* Experiment with discrete classifier */
+  if ( fid >= 1 )
+  {
+    selected.Add(fid);
+  }
 
-      TopoDS_Wire wire = asiAlgo_Utils::OuterWire(face);
+  if ( selected.Extent() == 1 )
+  {
+    const TopoDS_Face& face = G->GetFace( selected.GetMinimalMapped() );
 
-      std::vector<gp_XY> polygon;
-      asiAlgo_SampleFace::Wire2Polygon(wire, face, polygon);
+    /* Experiment with discrete classifier */
 
-      interp->GetPlotter().REDRAW_CURVE2D("polygon", asiAlgo_Utils::PolylineAsSpline(polygon), Color_Yellow);
+    TopoDS_Wire wire = asiAlgo_Utils::OuterWire(face);
 
-      /* Sampling */
+    std::vector<gp_XY> polygon;
+    asiAlgo_SampleFace::Wire2Polygon(wire, face, polygon);
 
-      int numBins = 10;
-      interp->GetKeyValue(argc, argv, "num", numBins);
+    interp->GetPlotter().REDRAW_CURVE2D("polygon", asiAlgo_Utils::PolylineAsSpline(polygon), Color_Yellow);
 
-      /* PMC algorithm */
+    /* Sampling */
 
-      const bool isHaines = interp->HasKeyword(argc, argv, "haines");
-      const bool isDiscr  = interp->HasKeyword(argc, argv, "discr");
+    int numBins = 10;
+    interp->GetKeyValue(argc, argv, "num", numBins);
 
-      asiAlgo_SampleFace::PmcAlgo pmcAlgo;
-      //
-      if ( isHaines )
-        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Haines;
-      else if ( isDiscr )
-        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Discrete;
-      else
-        pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Precise;
+    /* PMC algorithm */
 
-      TIMER_NEW
-      TIMER_GO
+    const bool isHaines = interp->HasKeyword(argc, argv, "haines");
+    const bool isDiscr  = interp->HasKeyword(argc, argv, "discr");
 
-      // Sample the face.
-      asiAlgo_SampleFace sampleFace( face,
-                                     interp->GetProgress(),
-                                     interp->GetPlotter() );
-      //
-      sampleFace.SetSquare  ( interp->HasKeyword(argc, argv, "square") );
-      sampleFace.SetPmcAlgo ( pmcAlgo );
-      //
-      if ( !sampleFace.Perform(numBins) )
-      {
-        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to sample the face.");
-        return TCL_ERROR;
-      }
-      //
-      const Handle(asiAlgo_UniformGrid<float>)& grid       = sampleFace.GetResult();
-      const Handle(asiAlgo::discr::Model)&      discrModel = sampleFace.GetDiscrModel();
-
-      TIMER_FINISH
-      TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Build face grid")
-
-      // Proceed with image dump.
-      std::string filename;
-      if ( interp->GetKeyValue(argc, argv, "filename", filename) )
-      {
-        vtkNew<vtkImageData> image;
-
-        // Specify the size of the image data
-        image->SetDimensions(numBins, numBins, 1);
-        image->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
-        int* dims = image->GetDimensions();
-
-        // Fill the image
-        for ( int i = 0; i < dims[0]; ++i )
-        {
-          for ( int j = 0; j < dims[1]; ++j )
-          {
-            unsigned char*
-              pixel = static_cast<unsigned char*>( image->GetScalarPointer(i, j, 0) );
-            //
-            const float isIn = grid->pArray[i][j][0];
-
-            pixel[0] = isIn ? 0 : 255;
-            pixel[1] = isIn ? 0 : 255;
-            pixel[2] = isIn ? 0 : 255;
-          }
-        }
-
-        vtkNew<vtkBMPWriter> bmpWriter;
-        bmpWriter->SetFileName( filename.c_str() );
-        bmpWriter->SetInputData(image);
-        bmpWriter->Write();
-      }
-
-      // Modify data model and actualize scene.
-      Handle(asiData_Grid2dNode)    gridNode;
-      Handle(asiData_DiscrFaceNode) discrFaceNode;
-      //
-      cmdEngine::cf->Model->OpenCommand();
-      {
-        gridNode = partApi.FindFaceGrid2d(true);
-        gridNode->SetUniformGrid(grid);
-        //
-        discrFaceNode = partApi.FindDiscrFace(true);
-        discrFaceNode->SetDiscrModel(discrModel);
-        discrFaceNode->SetSelectedFace(selected.GetMinimalMapped());
-      }
-      cmdEngine::cf->Model->CommitCommand();
-      cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
-      cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
-      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(discrFaceNode);
-
-      // Draw the sampled points in 3D.
-      interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);
-    }
+    asiAlgo_SampleFace::PmcAlgo pmcAlgo;
+    //
+    if ( isHaines )
+      pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Haines;
+    else if ( isDiscr )
+      pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Discrete;
     else
+      pmcAlgo = asiAlgo_SampleFace::PmcAlgo_Precise;
+
+    TIMER_NEW
+    TIMER_GO
+
+    // Sample the face.
+    asiAlgo_SampleFace sampleFace( face,
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+    //
+    sampleFace.SetSquare  ( interp->HasKeyword(argc, argv, "square") );
+    sampleFace.SetPmcAlgo ( pmcAlgo );
+    //
+    if ( !sampleFace.Perform(numBins) )
     {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select exactly one face to proceed with this command.");
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to sample the face.");
       return TCL_ERROR;
     }
+    //
+    const Handle(asiAlgo_UniformGrid<float>)& grid       = sampleFace.GetResult();
+    const Handle(asiAlgo::discr::Model)&      discrModel = sampleFace.GetDiscrModel();
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Build face grid")
+
+    // Proceed with image dump.
+    std::string filename;
+    if ( interp->GetKeyValue(argc, argv, "filename", filename) )
+    {
+      vtkNew<vtkImageData> image;
+
+      // Specify the size of the image data
+      image->SetDimensions(numBins, numBins, 1);
+      image->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
+      int* dims = image->GetDimensions();
+
+      // Fill the image
+      for ( int i = 0; i < dims[0]; ++i )
+      {
+        for ( int j = 0; j < dims[1]; ++j )
+        {
+          unsigned char*
+            pixel = static_cast<unsigned char*>( image->GetScalarPointer(i, j, 0) );
+          //
+          const float isIn = grid->pArray[i][j][0];
+
+          pixel[0] = isIn ? 0 : 255;
+          pixel[1] = isIn ? 0 : 255;
+          pixel[2] = isIn ? 0 : 255;
+        }
+      }
+
+      vtkNew<vtkBMPWriter> bmpWriter;
+      bmpWriter->SetFileName( filename.c_str() );
+      bmpWriter->SetInputData(image);
+      bmpWriter->Write();
+    }
+
+    // Modify data model and actualize scene.
+    Handle(asiData_Grid2dNode)    gridNode;
+    Handle(asiData_DiscrFaceNode) discrFaceNode;
+    //
+    cmdEngine::model->OpenCommand();
+    {
+      gridNode = partApi.FindFaceGrid2d(true);
+      gridNode->SetUniformGrid(grid);
+      //
+      discrFaceNode = partApi.FindDiscrFace(true);
+      discrFaceNode->SetDiscrModel(discrModel);
+      discrFaceNode->SetSelectedFace(selected.GetMinimalMapped());
+    }
+    cmdEngine::model->CommitCommand();
+
+    if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+      cmdEngine::cf->ObjectBrowser->Populate(); // As new node might appear.
+    if ( cmdEngine::cf && cmdEngine::cf->ViewerDomain )
+      cmdEngine::cf->ViewerDomain->PrsMgr()->Actualize(gridNode);
+    if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(discrFaceNode);
+
+    // Draw the sampled points in 3D.
+    interp->GetPlotter().REDRAW_POINTS("grid 3D", sampleFace.GetResult3d()->GetCoordsArray(), Color_Red);
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select exactly one face to proceed with this command.");
+    return TCL_ERROR;
   }
 
   return TCL_OK;
@@ -4682,7 +4697,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-face-grid",
     //
-    "build-face-grid [-num <numBins>] [-filename <filename>] [-square] [-haines|-discr]\n"
+    "build-face-grid [-num <numBins>] [-filename <filename>] [-fid <faceID>] [-square] [-haines|-discr]\n"
     "\t Builds a uniform UV grid for the interactively selected face.\n"
     "\t Pass the number of bins to control how fine the discretization is.\n"
     "\t If the filename is passed, the sampled face is converted to vtkImageData\n"

@@ -925,6 +925,47 @@ int ENGINE_DumpAutoread(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SaveXYZ(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString filename = argv[2];
+
+  Handle(asiData_IVPointSetNode)
+    ptsNode = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
+  //
+  if ( ptsNode.IsNull() || !ptsNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find points with name %1." << argv[1]);
+    return TCL_ERROR;
+  }
+
+  // Get point cloud.
+  Handle(asiAlgo_BaseCloud<double>) pts = ptsNode->GetPoints();
+  //
+  if ( pts.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Selected point cloud is empty.");
+    return TCL_ERROR;
+  }
+
+  // Save points.
+  if ( !pts->SaveAs( filename.ToCString() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save point cloud.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -1058,4 +1099,13 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t without execution on the next launch.",
     //
     __FILE__, group, ENGINE_DumpAutoread);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-xyz",
+    //
+    "save-xyz <varName> <filename>\n"
+    "\t Save (without metadata) selected points to a XYZ file with the\n"
+    "\t given name.",
+    //
+    __FILE__, group, ENGINE_SaveXYZ);
 }

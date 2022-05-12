@@ -128,13 +128,74 @@ Location Classifier2d::ClassifierRow::Locate(const gp_Pnt2d& thePnt,
     gp_Vec2d aD1  (thePnt, gp_Pnt2d(aSeg.A1(), aSeg.O1()));
     gp_Vec2d aD2  (gp_Pnt2d(aSeg.A2(), aSeg.O2()), thePnt);
 
+    // The ray is launched only in the selected direction.
+    // It is necessary to check how many segments the point
+    // lies under.
+    //
+    // Example:
+    //
+    // (aSeg.A2(), aSeg.O2())        (aSeg.A1(), aSeg.O1())
+    //                      -------->
+    //                        _    /
+    //                       |\  |/_             ^
+    //                         \                 |
+    //                          O                | ray
+    //                           thePnt
+    // aScalar1 <= 0
+    // aScalar2 <= 0
+    //
+    // (aSeg.A2(), aSeg.O2())        (aSeg.A1(), aSeg.O1())
+    //                      -------->
+    //                  __          *
+    //                   *|     *       ^
+    //                 *   |*__         |
+    //               O                  | ray
+    //                thePnt
+    // aScalar1 < 0
+    // aScalar2 > 0
+    //
+    // (aSeg.A2(), aSeg.O2())        (aSeg.A1(), aSeg.O1())
+    //                      -------->
+    //                          __   *             ^
+    //                        |*     _*|           |
+    //                            *                | ray
+    //                               *  O
+    //                                   thePnt
+    // aScalar1 > 0
+    // aScalar2 < 0
+    //
+
     // Check whether the point within segment's boundaries
     double aScalar1 = aD1 * aDRef;
     double aScalar2 = aD2 * aDRef;
 
     bool isWithinBoundaries = (aScalar1 <= 0. && aScalar2 <= 0.);
 
-    double    aDist   = (aD1 ^ aDRef);
+    // Geometrically skew product is the oriented area of the parallelogram =>
+    // => S'(P1, P2, P3) = 0.5 * [P2P1, P1P3].
+    //
+    // On the other hand, we know the formula for calculating the area of a triangle =>
+    // => S"(P1, P2, P3) = 0.5 * h * P1P2.
+    //
+    // Knowing the above, we can find h.
+    //
+    // In our case:
+    // P1 = (aSeg.A1(), aSeg.O1())
+    // P2 = (aSeg.A2(), aSeg.O2())
+    // P3 = thePnt
+    // h  = aDist -- We can use aDRef and get rid of the denominator.
+    //
+    //     P2                               P1
+    //       O----------------------------O
+    //       *                *_|        *
+    //          *             *        *
+    //             *        h *      *
+    //                *       *    *
+    //                   *    *  *
+    //                       *O*
+    //                        P3
+    //
+    double aDist   = (aD1 ^ aDRef);
     bool isBelow = aDist < 0.;
     if (isWithinBoundaries)
       aDist = aDist * aDist;
@@ -143,7 +204,9 @@ Location Classifier2d::ClassifierRow::Locate(const gp_Pnt2d& thePnt,
 
     if (aDist > aTol)
     {
-      if (isBelow && aD1.X() <= 0. && aD2.X() < 0.)
+      // It is necessary to take into account the discretization error of segments =>
+      // => Precision::Confusion().
+      if (isBelow && aD1.X() < Precision::Confusion() && aD2.X() <= -Precision::Confusion())
         ++iNbCrossed;
     }
     else

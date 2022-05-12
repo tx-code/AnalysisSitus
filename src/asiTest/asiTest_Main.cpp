@@ -33,6 +33,7 @@
 #include <asiTest_CommonFacilities.h>
 #include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
+#include <asiTest_FaceGrid.h>
 #include <asiTest_InvertShells.h>
 #include <asiTest_IsContourClosed.h>
 #include <asiTest_KEV.h>
@@ -136,6 +137,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>      );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AAG>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_FaceGrid>            );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>     );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
