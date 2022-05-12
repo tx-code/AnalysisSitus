@@ -437,7 +437,15 @@ int ENGINE_SetAsPart(const Handle(asiTcl_Interp)& interp,
 
   // Update UI.
   if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  {
+    // Disable notifier to avoid async events.
+    cmdEngine::cf->ViewerPart->PrsMgr()->SetDiagnosticTools(nullptr, nullptr);
+    //
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(part_n);
+    //
+    cmdEngine::cf->ViewerPart->PrsMgr()->SetDiagnosticTools(interp->GetProgress(),
+                                                            interp->GetPlotter());
+  }
 
   return TCL_OK;
 }
