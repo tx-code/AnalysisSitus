@@ -57,7 +57,6 @@ public:
   //
   : asiAlgo_FeatureAttrFace (featureId),
     Kind                    (BlendType_Uncertain),
-    Vexity                  (BlendVexity_Uncertain),
     Length                  (0.),
     Confirmed               (false)
   {}
@@ -150,17 +149,28 @@ protected:
   //! Converts blend vexity enum to string.
   //! \param[in] vexities blend vexities in question.
   //! \return string representation of a blend vexity.
-  static std::string vexityToString(const std::vector<asiAlgo_BlendVexity>& vexities)
+  static std::string
+    vexitiesToString(const std::vector<asiAlgo_BlendVexity>& vexities)
   {
-    switch ( vexity )
+    std::string res;
+    for ( size_t k = 0; k < vexities.size(); ++k )
     {
-      case BlendVexity_Uncertain: return "uncertain";
-      case BlendVexity_Concave:   return "concave";
-      case BlendVexity_Convex:    return "convex";
-      default: break;
+      switch ( vexities[k] )
+      {
+        case BlendVexity_Uncertain: res += "uncertain"; break;
+        case BlendVexity_Concave:   res += "concave"; break;
+        case BlendVexity_Convex:    res += "convex"; break;
+        default: break;
+      }
+
+      if ( k < vexities.size() - 1 )
+        res += ", ";
     }
 
-    return "undefined";
+    if ( vexities.empty() )
+      res = "empty";
+
+    return res;
   }
 
 public:

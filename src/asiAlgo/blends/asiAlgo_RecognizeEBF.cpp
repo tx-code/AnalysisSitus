@@ -200,7 +200,7 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   }
 
   // Test vexity.
-  blendAttr->Vexity = this->testVexity(fid);
+  blendAttr->Vexities.push_back( this->testVexity(fid) );
 
   this->GetPlotter().DRAW_SHAPE(face, Color_Blue, "Candidate blend after spring edge detection");
   //

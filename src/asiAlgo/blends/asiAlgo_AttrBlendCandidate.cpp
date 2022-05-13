@@ -71,12 +71,8 @@ TCollection_AsciiString asiAlgo_AttrBlendCandidate::DumpInline() const
   else if ( this->Kind == BlendType_Cliff )
     lbl += " / cliff";
   //
-  if ( this->Vexity == BlendVexity_Uncertain )
-    lbl += " / v-uncertain";
-  else if ( this->Vexity == BlendVexity_Concave )
-    lbl += " / v-concave";
-  else if ( this->Vexity == BlendVexity_Convex )
-    lbl += " / v-convex";
+  lbl += " / ";
+  lbl += vexitiesToString(this->Vexities).c_str();
   //
   if ( this->SpringEdgeIndices.Extent() )
   {
@@ -137,12 +133,8 @@ void asiAlgo_AttrBlendCandidate::Dump(Standard_OStream& out) const
   else if ( this->Kind == BlendType_Cliff )
     out << "cliff";
   //
-  if ( this->Vexity == BlendVexity_Uncertain )
-    out << "v-uncertain";
-  else if ( this->Vexity == BlendVexity_Concave )
-    out << "v-concave";
-  else if ( this->Vexity == BlendVexity_Convex )
-    out << "v-convex";
+  out << "\n\tVexity: ";
+  out << vexitiesToString(this->Vexities);
 
   out << "\n\tConfirmed: "              << (this->Confirmed ? "true" : "false");
   out << "\n\tNum. smooth edges: "      <<  this->SmoothEdgeIndices.Extent();
