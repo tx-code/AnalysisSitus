@@ -124,6 +124,7 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   // Among the neighbor faces, there should be some EBFs. At least three
   // EBFs are expected.
   int numEBFs = 0;
+  std::vector<asiAlgo_BlendVexity> ebfVexities;
   //
   for ( TColStd_MapIteratorOfPackedMapOfInteger nit(nids); nit.More(); nit.Next() )
   {
@@ -165,6 +166,10 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     // Increment the number of EBFs arriving at the candidate blend face to
     // check the heuristic.
     numEBFs++;
+
+    // Keep track of EBF vexities.
+    for ( const auto vexity : neighborBcAttr->Vexities )
+      ebfVexities.push_back(vexity);
 
     // Update max radius.
     const double nr = neighborBcAttr->GetMaxRadius();
@@ -236,6 +241,9 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
     blendAttr->SpringEdgeIndices.Clear();
     blendAttr->CrossEdgeIndices.Clear();
   }
+
+  // Store incident vexities.
+  blendAttr->Vexities = ebfVexities;
 
   // Modify the attribute.
   if ( !this->treatSpecialCases(blendAttr) )

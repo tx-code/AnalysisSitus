@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_AAG.h>
+#include <asiAlgo_BlendVexity.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -105,6 +106,12 @@ protected:
   //! \return blend length.
   asiAlgo_EXPORT double
     computeBlendLengthFallback(const int fid) const;
+
+  //! Evaluates blend face vexity.
+  //! \param[in] fid the 1-based ID of a blend face in question.
+  //! \return blend vexity.
+  asiAlgo_EXPORT asiAlgo_BlendVexity
+    testVexity(const int fid) const;
 
 protected:
 

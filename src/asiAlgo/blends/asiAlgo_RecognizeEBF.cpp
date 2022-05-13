@@ -34,6 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_AttrBlendCandidate.h>
 #include <asiAlgo_AttrBlendSupport.h>
+#include <asiAlgo_FeatureAttrAngle.h>
 #include <asiAlgo_FindCrossEdges.h>
 #include <asiAlgo_FindSmoothEdges.h>
 #include <asiAlgo_FindSpringEdges.h>
@@ -41,6 +42,7 @@
 
 // OpenCascade includes
 #include <BRepGProp.hxx>
+#include <gp_Cylinder.hxx>
 #include <GProp_GProps.hxx>
 
 #undef COUT_DEBUG
@@ -196,6 +198,9 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
     blendAttr->Length = this->computeBlendLengthFallback(fid);
     return false;
   }
+
+  // Test vexity.
+  blendAttr->Vexities.push_back( this->testVexity(fid) );
 
   this->GetPlotter().DRAW_SHAPE(face, Color_Blue, "Candidate blend after spring edge detection");
   //
@@ -375,4 +380,72 @@ double asiAlgo_RecognizeEBF::computeBlendLengthFallback(const int fid) const
   }
 
   return Abs(hMax - hMin);
+}
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_BlendVexity
+  asiAlgo_RecognizeEBF::testVexity(const int fid) const
+{
+  const TopoDS_Face& face = m_aag->GetFace(fid);
+
+  /* Check 1: If all dihedral edges are concave, then EBF is also concave. */
+
+  const asiAlgo_Feature& nids       = m_aag->GetNeighbors(fid);
+  bool                   allConcave = true;
+  //
+  for ( asiAlgo_Feature::Iterator nit(nids); nit.More(); nit.Next() )
+  {
+    const int nid = nit.Key();
+
+    asiAlgo_AAG::t_arc arc(fid, nid);
+
+  // Get the dihedral angle.
+    Handle(asiAlgo_FeatureAttrAngle)
+      DA = m_aag->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
+    //
+    if ( DA.IsNull() )
+      continue;
+
+    const asiAlgo_FeatureAngleType vexity = DA->GetAngleType();
+
+    if ( !asiAlgo_FeatureAngle::IsConcave(vexity) )
+    {
+      allConcave = false;
+      break;
+    }
+  }
+  //
+  if ( allConcave )
+    return BlendVexity_Concave;
+
+  /* Check 2: Geometric tests */
+
+  /* Toroidal surface */
+  {
+    Handle(Geom_ToroidalSurface) torusSurf;
+    //
+    if ( asiAlgo_Utils::IsTypeOf<Geom_ToroidalSurface>(face, torusSurf) )
+    {
+      const bool
+        isInternal = ( face.Orientation() == TopAbs_REVERSED );
+      
+      return isInternal ? BlendVexity_Concave : BlendVexity_Convex;
+    }
+  }
+
+  /* Cylinder */
+  {
+    gp_Cylinder cyl;
+    //
+    if ( asiAlgo_Utils::IsCylindrical(face, cyl) )
+    {
+      const bool
+        isInternal = asiAlgo_Utils::IsInternal( face, 2*cyl.Radius(), cyl.Axis() );
+
+      return isInternal ? BlendVexity_Concave : BlendVexity_Convex;
+    }
+  }
+
+  return BlendVexity_Uncertain;
 }
