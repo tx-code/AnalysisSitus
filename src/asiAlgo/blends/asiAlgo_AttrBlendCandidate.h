@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BlendType.h>
+#include <asiAlgo_BlendVexity.h>
 #include <asiAlgo_FeatureAttrFace.h>
 
 // Active Data includes
@@ -46,8 +47,6 @@
 //! Attribute to mark a face as a blend candidate.
 class asiAlgo_AttrBlendCandidate : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AttrBlendCandidate, asiAlgo_FeatureAttrFace)
 
 public:
@@ -58,6 +57,7 @@ public:
   //
   : asiAlgo_FeatureAttrFace (featureId),
     Kind                    (BlendType_Uncertain),
+    Vexity                  (BlendVexity_Uncertain),
     Length                  (0.),
     Confirmed               (false)
   {}
@@ -122,6 +122,7 @@ protected:
     for ( int k = 0; k < numSpaces; ++k ) ws += " ";
 
     out << ",\n" << ws.c_str() << "\"kind\": "                << "\"" << kindToString(this->Kind)              << "\"";
+    out << ",\n" << ws.c_str() << "\"vexity\": "              << "\"" << vexitiesToString(this->Vexities)      << "\"";
     out << ",\n" << ws.c_str() << "\"confirmed\": "           << "\"" << this->Confirmed                       << "\"";
     out << ",\n" << ws.c_str() << "\"numSmoothEdges\": "      << "\"" << this->SmoothEdgeIndices.Extent()      << "\"";
     out << ",\n" << ws.c_str() << "\"numSpringEdges\": "      << "\"" << this->SpringEdgeIndices.Extent()      << "\"";
@@ -146,16 +147,33 @@ protected:
     return "undefined";
   }
 
+  //! Converts blend vexity enum to string.
+  //! \param[in] vexities blend vexities in question.
+  //! \return string representation of a blend vexity.
+  static std::string vexityToString(const std::vector<asiAlgo_BlendVexity>& vexities)
+  {
+    switch ( vexity )
+    {
+      case BlendVexity_Uncertain: return "uncertain";
+      case BlendVexity_Concave:   return "concave";
+      case BlendVexity_Convex:    return "convex";
+      default: break;
+    }
+
+    return "undefined";
+  }
+
 public:
 
-  asiAlgo_BlendType          Kind;                   //!< Blend type.
-  std::set<double>           Radii;                  //!< Blend radius or perhaps seveal radii for VBFs.
-  double                     Length;                 //!< Blend length.
-  bool                       Confirmed;              //!< Confirmed/Unconfirmed blend.
-  TColStd_PackedMapOfInteger SmoothEdgeIndices;      //!< Smooth edges.
-  TColStd_PackedMapOfInteger SpringEdgeIndices;      //!< Spring edges.
-  TColStd_PackedMapOfInteger CrossEdgeIndices;       //!< Cross edges.
-  TColStd_PackedMapOfInteger TerminatingEdgeIndices; //!< Sharp terminating edges.
+  asiAlgo_BlendType                Kind;                   //!< Blend type.
+  std::vector<asiAlgo_BlendVexity> Vexities;               //!< Blend vexity (several for VBFs).
+  std::set<double>                 Radii;                  //!< Blend radius or perhaps several radii for VBFs.
+  double                           Length;                 //!< Blend length.
+  bool                             Confirmed;              //!< Confirmed/unconfirmed blend.
+  TColStd_PackedMapOfInteger       SmoothEdgeIndices;      //!< Smooth edges.
+  TColStd_PackedMapOfInteger       SpringEdgeIndices;      //!< Spring edges.
+  TColStd_PackedMapOfInteger       CrossEdgeIndices;       //!< Cross edges.
+  TColStd_PackedMapOfInteger       TerminatingEdgeIndices; //!< Sharp terminating edges.
 
 };
 

@@ -119,6 +119,7 @@ set (blends_H_FILES
   blends/asiAlgo_BlendTopoConditionFFOrdinaryEBF.h
   blends/asiAlgo_BlendTopoConditionFFOrdinaryVBF.h
   blends/asiAlgo_BlendType.h
+  blends/asiAlgo_BlendVexity.h
   blends/asiAlgo_FindCrossEdges.h
   blends/asiAlgo_FindSmoothEdges.h
   blends/asiAlgo_FindSpringEdges.h
