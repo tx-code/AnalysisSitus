@@ -82,6 +82,10 @@ public:
 public:
 
   cmdMisc_EXPORT static void
+    Commands_Test(const Handle(asiTcl_Interp)&      interp,
+                  const Handle(Standard_Transient)& data);
+
+  cmdMisc_EXPORT static void
     Commands_Coons(const Handle(asiTcl_Interp)&      interp,
                    const Handle(Standard_Transient)& data);
 
