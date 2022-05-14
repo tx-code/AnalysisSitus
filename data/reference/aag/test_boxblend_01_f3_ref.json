@@ -19,6 +19,7 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
+          "vexity": "convex",
           "confirmed": "1",
           "numSmoothEdges": "2",
           "numSpringEdges": "2",
