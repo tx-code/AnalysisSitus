@@ -184,23 +184,31 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   }
 
   // Get number of spring edges and decide the blend type.
+  bool      isUncertain  = false;
   const int nSpringEdges = springEdges.Extent();
   //
   if ( nSpringEdges == 2 )
+  {
     blendAttr->Kind = BlendType_Ordinary;
+  }
   else if ( nSpringEdges == 1)
+  {
     blendAttr->Kind = BlendType_Cliff;
+  }
   else
   {
     blendAttr->Kind = BlendType_Uncertain;
 
     // Initialize length as a fallback solution.
     blendAttr->Length = this->computeBlendLengthFallback(fid);
-    return false;
+    isUncertain = true;
   }
 
   // Test vexity.
   blendAttr->Vexities.push_back( this->testVexity(fid) );
+
+  if ( isUncertain )
+    return false;
 
   this->GetPlotter().DRAW_SHAPE(face, Color_Blue, "Candidate blend after spring edge detection");
   //

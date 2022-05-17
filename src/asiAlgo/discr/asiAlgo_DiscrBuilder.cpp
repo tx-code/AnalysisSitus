@@ -422,13 +422,10 @@ bool Builder::DiscretiseWire(const TopoDS_Wire& theWire,
   }
 
   // Cycle by edges
-  int aPrevInd = sawo.Ordered (nbe);
-  int aNextInd = sawo.Ordered (1);
   TopTools_MapOfShape aCorrectedEdges;
   int k;
   for (k=1; k <= nbe; k++) {
     int ind = sawo.Ordered(k);
-    aNextInd = sawo.Ordered ((k + 1 > nbe ? 1 : k + 1));
 
     const TopoDS_Edge& edge = swd->Edge(ind);
 
@@ -451,7 +448,6 @@ bool Builder::DiscretiseWire(const TopoDS_Wire& theWire,
       AddCompStatus(FailureDiscretizePCurve);
       return false;
     }
-    aPrevInd = ind;
   }
 
   // enrich a wire if it consists of two points only
