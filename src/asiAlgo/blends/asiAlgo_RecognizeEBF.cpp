@@ -62,8 +62,16 @@ asiAlgo_RecognizeEBF::asiAlgo_RecognizeEBF(const Handle(asiAlgo_AAG)& aag,
                                            ActAPI_PlotterEntry        plotter)
 : ActAPI_IAlgorithm (progress, plotter),
   m_aag             (aag),
-  m_pEdgeLengthMap  (nullptr)
+  m_pEdgeLengthMap  (nullptr),
+  m_bAllowCones     (true)
 {}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeEBF::SetAllowCones(const bool on)
+{
+  m_bAllowCones = on;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -86,6 +94,13 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
 
   // Get face in question.
   const TopoDS_Face& face = m_aag->GetFace(fid);
+
+  // Conical and planar types are normally left for chamfers...
+  if ( asiAlgo_Utils::IsPlanar(face) )
+    return false;
+  //
+  if ( !m_bAllowCones && asiAlgo_Utils::IsConical(face) ) // ... but we might wanna change that.
+    return false;
 
   // Prepare tool to find smooth edges.
   asiAlgo_FindSmoothEdges

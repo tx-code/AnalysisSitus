@@ -137,26 +137,27 @@ namespace asiAlgo_AAGIterationRule
   //! This rule recognizes edge-blend faces (EBFs).
   class RecognizeEdgeBlends : public Standard_Transient
   {
-  public:
-
     // OCCT RTTI
     DEFINE_STANDARD_RTTI_INLINE(RecognizeEdgeBlends, Standard_Transient)
 
   public:
 
     //! Ctor.
-    //! \param[in] aag       attributed adjacency graph keeping information on the
-    //!                      recognized properties of the model.
-    //! \param[in] maxRadius max allowed radius.
-    //! \param[in] progress  progress notifier.
-    //! \param[in] plottter  imperative plotter.
+    //! \param[in] aag        attributed adjacency graph keeping information on the
+    //!                       recognized properties of the model.
+    //! \param[in] maxRadius  max allowed radius.
+    //! \param[in] allowCones whether to allow conical faces as EBFs.
+    //! \param[in] progress   progress notifier.
+    //! \param[in] plottter   imperative plotter.
     RecognizeEdgeBlends(const Handle(asiAlgo_AAG)& aag,
                         const double               maxRadius,
+                        const bool                 allowCones,
                         ActAPI_ProgressEntry       progress = nullptr,
                         ActAPI_PlotterEntry        plotter  = nullptr)
     : m_aag(aag), m_fMaxRadius(maxRadius), m_bBlockingModeOn(true)
     {
       m_localReco = new asiAlgo_RecognizeEBF(aag, progress, plotter);
+      m_localReco->SetAllowCones(allowCones);
     }
 
   public:
@@ -216,8 +217,6 @@ namespace asiAlgo_AAGIterationRule
   //! This rule recognizes vertex-blend faces (VBFs).
   class RecognizeVertexBlends : public Standard_Transient
   {
-  public:
-
     // OCCT RTTI
     DEFINE_STANDARD_RTTI_INLINE(RecognizeVertexBlends, Standard_Transient)
 
@@ -282,8 +281,6 @@ namespace asiAlgo_AAGIterationRule
   //! edges connect blend candidate faces.
   class TerminatingEdges2CrossEdges : public Standard_Transient
   {
-  public:
-
     // OCCT RTTI
     DEFINE_STANDARD_RTTI_INLINE(TerminatingEdges2CrossEdges, Standard_Transient)
 
@@ -368,7 +365,8 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const TopoDS_Shape&  masterCAD,
                                                  ActAPI_ProgressEntry progress,
                                                  ActAPI_PlotterEntry  plotter)
 //
-: asiAlgo_Recognizer(masterCAD, nullptr, progress, plotter)
+: asiAlgo_Recognizer (masterCAD, nullptr, progress, plotter),
+  m_bAllowCones      (true)
 {}
 
 //-----------------------------------------------------------------------------
@@ -378,7 +376,8 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const TopoDS_Shape&        mast
                                                  ActAPI_ProgressEntry       progress,
                                                  ActAPI_PlotterEntry        plotter)
 //
-: asiAlgo_Recognizer(masterCAD, aag, progress, plotter)
+: asiAlgo_Recognizer (masterCAD, aag, progress, plotter),
+  m_bAllowCones      (true)
 {}
 
 //-----------------------------------------------------------------------------
@@ -387,8 +386,16 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const Handle(asiAlgo_AAG)& aag,
                                                  ActAPI_ProgressEntry       progress,
                                                  ActAPI_PlotterEntry        plotter)
 //
-: asiAlgo_Recognizer(aag->GetMasterShape(), aag, progress, plotter)
+: asiAlgo_Recognizer (aag->GetMasterShape(), aag, progress, plotter),
+  m_bAllowCones      (true)
 {}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeBlends::SetAllowCones(const bool on)
+{
+  m_bAllowCones = on;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -423,6 +430,7 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
   Handle(asiAlgo_AAGIterationRule::RecognizeEdgeBlends)
     ebfRule = new asiAlgo_AAGIterationRule::RecognizeEdgeBlends(m_aag,
                                                                 radius,
+                                                                m_bAllowCones,
                                                                 m_progress,
                                                                 m_plotter);
 
@@ -555,6 +563,7 @@ bool asiAlgo_RecognizeBlends::Perform(const int    faceId,
   Handle(asiAlgo_AAGIterationRule::RecognizeEdgeBlends)
     ebfRule = new asiAlgo_AAGIterationRule::RecognizeEdgeBlends(m_aag,
                                                                 radius,
+                                                                m_bAllowCones,
                                                                 m_progress,
                                                                 m_plotter);
 

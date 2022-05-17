@@ -48,8 +48,6 @@
 //! node with a blend candidate attribute if the recognition is successful.
 class asiAlgo_RecognizeEBF : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeEBF, ActAPI_IAlgorithm)
 
@@ -65,6 +63,12 @@ public:
                          ActAPI_PlotterEntry        plotter);
 
 public:
+
+  //! Sets a Boolean flag indicating whether conical EBFs are
+  //! allowed or not. If not, all conical faces are to be skipped.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetAllowCones(const bool on);
 
   //! Sets the cache to use for computing edge lengths.
   //! \param[in] ptr the raw pointer to the cache to use.
@@ -117,6 +121,7 @@ protected:
 
   Handle(asiAlgo_AAG)              m_aag;            //!< Attributed Adjacency Graph instance.
   std::unordered_map<int, double>* m_pEdgeLengthMap; //!< Cached edge lengths.
+  bool                             m_bAllowCones;    //!< Whether to allow conical blends.
 
 };
 

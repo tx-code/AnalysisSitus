@@ -40,8 +40,6 @@
 //! Utility to recognize blends.
 class asiAlgo_RecognizeBlends : public asiAlgo_Recognizer
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeBlends, asiAlgo_Recognizer)
 
@@ -78,6 +76,12 @@ public:
 
 public:
 
+  //! Sets a Boolean flag indicating whether conical EBFs are
+  //! allowed or not. If not, all conical faces are to be skipped.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetAllowCones(const bool on);
+
   //! Performs recognition of fillets for the entire model.
   //! \param[in] radius radius of interest.
   //! \return true in case of success, false -- otherwise.
@@ -102,6 +106,10 @@ public:
   asiAlgo_EXPORT void
     GetChains(std::vector<asiAlgo_BlendChain>& chains,
               const double                     rDevPerc = 1.) const;
+
+protected:
+
+  bool m_bAllowCones; //!< Whether to allow conical EBFs.
 
 };
 

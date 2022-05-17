@@ -79,11 +79,12 @@ bool asiAlgo_RecognizeVBF::Perform(const int fid)
   Handle(asiAlgo_AttrBlendCandidate)
     blendAttr = Handle(asiAlgo_AttrBlendCandidate)::DownCast(blendAttrBase);
 
-  /* ------------------------------------------------- */
-  /* Heuristic 1: face is not planar                   */
-  /* ------------------------------------------------- */
+  /* ----------------------------------------- */
+  /* Heuristic 1: face is not of improper type */
+  /* ----------------------------------------- */
 
-  if ( asiAlgo_Utils::IsPlanar(face) )
+  // Conical and planar types are left for chamfers.
+  if ( asiAlgo_Utils::IsPlanar(face) || asiAlgo_Utils::IsConical(face) )
     return false;
 
   /* ------------------------------------------------- */
