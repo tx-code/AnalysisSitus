@@ -132,10 +132,12 @@ set (cases_editing_CPP_FILES
 
 set (cases_framework_H_FILES
   cases/framework/asiTest_DataDictionary.h
+  cases/framework/asiTest_GenerateFacets.h
   cases/framework/asiTest_Utils.h
 )
 set (cases_framework_CPP_FILES
   cases/framework/asiTest_DataDictionary.cpp
+  cases/framework/asiTest_GenerateFacets.cpp
   cases/framework/asiTest_Utils.cpp
 )
 

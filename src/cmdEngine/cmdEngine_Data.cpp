@@ -36,8 +36,10 @@
 
 // asiAlgo includes
 #include <asiAlgo_AttrFaceColor.h>
+#include <asiAlgo_FacetQuality.h>
 #include <asiAlgo_FileDumper.h>
 #include <asiAlgo_MeshConvert.h>
+#include <asiAlgo_MeshGen.h>
 #include <asiAlgo_Utils.h>
 
 // asiData includes
@@ -68,6 +70,46 @@
 
   using namespace mobius;
 #endif
+
+  //-----------------------------------------------------------------------------
+
+void SelectFaceterOptions(const asiAlgo_FacetQuality quality,
+                          double&                    linDefl,
+                          double&                    angDeflDeg,
+                          ActAPI_ProgressEntry       progress)
+{
+  linDefl    = asiAlgo_LINDEFL_MIN;
+  angDeflDeg = asiAlgo_ANGDEFL_MIN;
+
+  // Initialize progress indicator.
+  progress.SendLogMessage(LogInfo(Normal) << "Select faceter options for active part");
+
+  asiEngine_Part partApi(cmdEngine::model,
+                         (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr);
+
+  double partLinDefl = asiAlgo_LINDEFL_MIN;
+  double partAngDefl = asiAlgo_ANGDEFL_MIN;
+  double partMinLinDefl;
+
+  // Get shape for the part.
+  TopoDS_Shape partShape = partApi.GetShape();
+
+  if ( !asiAlgo_Utils::IsEmptyShape(partShape) &&
+        asiAlgo_MeshGen::AutoSelectLinearDeflection(partShape, partMinLinDefl, 0.01) )
+  {
+    asiAlgo_SelectFaceterOptions(quality, partMinLinDefl, partLinDefl, partAngDefl);
+  }
+
+  linDefl    = Max(linDefl,    partLinDefl);
+  angDeflDeg = Max(angDeflDeg, partAngDefl);
+
+  if ( progress.IsCancelling() )
+  {
+    progress.SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
+    return;
+  }
+}
+
 
 //-----------------------------------------------------------------------------
 
@@ -1106,6 +1148,111 @@ int ENGINE_DumpVTP(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_GenerateFacets(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  if ( argc != 1 && argc != 2 && argc != 3 && argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Check if facet quality level is defined.
+  asiAlgo_FacetQuality fq = asiAlgo_FacetQuality::UNDEFINED;
+  if ( interp->HasKeyword(argc, argv, FQ_Name_VeryRough) )
+  {
+    fq = asiAlgo_FacetQuality::VeryRough;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Rough) )
+  {
+    fq = asiAlgo_FacetQuality::Rough;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Normal) )
+  {
+    fq = asiAlgo_FacetQuality::Normal;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_Fine) )
+  {
+    fq = asiAlgo_FacetQuality::Fine;
+  }
+  else if ( interp->HasKeyword(argc, argv, FQ_Name_VeryFine) )
+  {
+    fq = asiAlgo_FacetQuality::VeryFine;
+  }
+
+  // If the quality level is not defined, let's try to find the deflection
+  // values specified explicitly.
+  double linDefl = 0., angDeflDeg = 0.;
+  if ( fq == asiAlgo_FacetQuality::UNDEFINED )
+  {
+    interp->GetKeyValue<double>(argc, argv, "lin", linDefl);
+    interp->GetKeyValue<double>(argc, argv, "ang", angDeflDeg);
+  }
+
+  if ( (fq != asiAlgo_FacetQuality::UNDEFINED) ||
+       (linDefl < asiAlgo_LINDEFL_MIN) ||
+       (angDeflDeg < asiAlgo_ANGDEFL_MIN) )
+  {
+    if ( fq == asiAlgo_FacetQuality::UNDEFINED )
+      fq = asiAlgo_FacetQuality::Rough;
+
+    SelectFaceterOptions(fq, linDefl, angDeflDeg, interp->GetProgress() );
+  }
+  if ( interp->GetProgress().IsCancelling() )
+  {
+    interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
+    return TCL_OK;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Chosen linear/angular deflection values: %1/%2"
+                                                       << linDefl << angDeflDeg);
+
+  // Generate facets.
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Generate facets");
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Processing active part ...");
+
+  asiEngine_Part partApi(cmdEngine::model,
+                         (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr);
+
+  cmdEngine::model->OpenCommand();
+  {
+    partApi.GetPart()->SetLinearDeflection(linDefl);
+    partApi.GetPart()->SetAngularDeflection(angDeflDeg);
+  }
+  cmdEngine::model->CommitCommand();
+
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  {
+    // There is already a facet generator inside.
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(cmdEngine::model->GetPartNode());
+  }
+  else
+  {
+    // This is done for the CLI.
+    TopoDS_Shape partShape = partApi.GetShape();
+
+    asiAlgo_MeshInfo meshInfo;
+    if ( !asiAlgo_MeshGen::DoNative(partShape, linDefl, angDeflDeg, meshInfo) )
+    {
+      interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Failed to generate facets for active part.");
+      return TCL_ERROR;
+    }
+    if ( interp->GetProgress().IsCancelling() )
+    {
+      interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Canceled);
+      return TCL_OK;
+    }
+    interp->GetProgress().SetProgressStatus(ActAPI_ProgressStatus::Progress_Succeeded);
+  }
+  //
+  if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
                               const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -1284,4 +1431,21 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t of VTK.",
     //
     __FILE__, group, ENGINE_DumpVTP);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("generate-facets",
+    //
+    "generate-facets\n"
+    "\t {[-lin <val>] [-ang <deg>] | [-very-rough | -rough | -normal | -fine | -very-fine]}\n"
+    "\n"
+    "\t Generates visualization facets for active part.\n"
+    "\t You can specify the linear and angular deflection values using the '-lin'\n"
+    "\t and '-ang' keywords. The linear deflection is specified in the model units.\n"
+    "\t The angular deflection is specified in degrees.\n"
+    "\n"
+    "\t Alternatively, you can pass one of the predefined quality levels: '-very-rough',\n"
+    "\t '-rough', etc. In such a case, the algorithm will select the linear and angular\n"
+    "\t deflections automatically.",
+    //
+    __FILE__, group, ENGINE_GenerateFacets);
 }
