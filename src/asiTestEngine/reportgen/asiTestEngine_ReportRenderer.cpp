@@ -244,9 +244,9 @@ asiTestEngine_ReportRenderer::THAT
   asiTestEngine_ReportRenderer::AddHRef(const char* url,
                                         const char* title)
 {
-  m_buffer.append("<a href='");
+  m_buffer.append("<a href=\"");
   m_buffer.append(url);
-  m_buffer.append("'>");
+  m_buffer.append("\">");
   m_buffer.append(title);
   m_buffer.append("</a>");
   return this;

@@ -130,7 +130,7 @@ void asiTestEngine_ReportTag::AddStyle(const std::string& styleName,
 void asiTestEngine_ReportTag::AddAttribute(const char* attrName,
                                            const char* attrValue)
 {
-  std::string attrRecord = std::string(attrName) + "='" + std::string(attrValue) + "'";
+  std::string attrRecord = std::string(attrName) + "=\"" + std::string(attrValue) + "\"";
   m_attributes.push_back(attrRecord);
 }
 

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 13 October 2018
+// Created on: 18 May 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,74 +28,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef exe_Keywords_h
-#define exe_Keywords_h
+#ifndef exe_GenerateDocs_HeaderFile
+#define exe_GenerateDocs_HeaderFile
 
-//-----------------------------------------------------------------------------
+// asiTcl includes
+#include <asiTcl_Interp.h>
 
-#define ASITUS_KW_runscript  "runscript"
-#define ASITUS_KW_runcommand "runcommand"
-#define ASITUS_KW_gendoc     "gendoc"
-
-//-----------------------------------------------------------------------------
-
-// asiAlgo includes
-#include <asiAlgo_Utils.h>
-
-// Standard includes
-#include <string>
-
-//-----------------------------------------------------------------------------
-
-class asiExe
+//! This class generates commands list in the static documentation pages.
+namespace exe_GenerateDocs
 {
-public:
-
-  static bool IsKeyword(const std::string& opt,
-                        const std::string& key)
-  {
-    std::string slashedKey = "/"; slashedKey += key;
-    size_t      found      = opt.find(slashedKey);
-    //
-    if ( found == std::string::npos )
-      return false;
-
-    return true;
-  }
-
-  static bool HasKeyword(const int          argc,
-                         char**             argv,
-                         const std::string& key)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-        return true;
-    }
-    return false;
-  }
-
-  static bool GetKeyValue(const int          argc,
-                          char**             argv,
-                          const std::string& key,
-                          std::string&       value)
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      if ( IsKeyword(argv[k], key) )
-      {
-        std::vector<std::string> chunks;
-        asiAlgo_Utils::Str::Split(argv[k], "=", chunks);
-
-        if ( chunks.size() != 2 )
-          return false;
-
-        value = chunks[1];
-        return true;
-      }
-    }
-    return false;
-  }
+  //! Generates documentation using the passed interpreter to grab the
+  //! command list and command descriptions.
+  //! \param[in] interp      the Tcl interpreter.
+  //! \param[in] filenameIn  the filename with template.
+  //! \param[in] filenameOut the output filename.
+  //! \return true in the case of success, false -- otherwise.
+  bool Perform(const Handle(asiTcl_Interp)& interp,
+               const std::string&           filenameIn,
+               const std::string&           filenameOut);
 
 };
 

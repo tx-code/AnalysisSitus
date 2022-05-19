@@ -1969,7 +1969,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("add-subshape",
     //
     "add-subshape <parent> <child>\n"
-    "\t Adds <child> to <parent>.",
+    "\t Adds the <child> subshape to the <parent> shape.",
     //
     __FILE__, group, ENGINE_AddSubShape);
 
@@ -2009,7 +2009,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("bop-split",
     //
-    "bop-cut <plane>\n"
+    "bop-split <plane>\n"
     "\t Splits the active part by the passed plane.",
     //
     __FILE__, group, ENGINE_BOPSplit);

@@ -152,13 +152,11 @@
 #endif
 
 // Eigen includes
-#ifdef _WIN32
-#pragma warning(disable : 4701 4702)
-#endif
+#pragma warning(push, 0)
+#pragma warning(disable : 4702 4701)
 #include <Eigen/Dense>
-#ifdef _WIN32
-#pragma warning(default : 4701 4702)
-#endif
+#pragma warning(default : 4702 4701)
+#pragma warning(pop)
 
 // Standard includes
 #include <map>
@@ -725,6 +723,15 @@ std::string asiAlgo_Utils::Env::AsiTestDumping()
 std::string asiAlgo_Utils::Env::AsiTestScripts()
 {
   return GetVariable(ASI_TEST_SCRIPTS);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Returns value of ASI_DOCS environment variable.
+//! \return value of ASI_DOCS variable.
+std::string asiAlgo_Utils::Env::AsiDocs()
+{
+  return GetVariable(ASI_DOCS);
 }
 
 //-----------------------------------------------------------------------------

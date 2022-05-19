@@ -48,6 +48,7 @@
 #define ASI_TEST_DATA    "ASI_TEST_DATA"
 #define ASI_TEST_DUMPING "ASI_TEST_DUMPING"
 #define ASI_TEST_SCRIPTS "ASI_TEST_SCRIPTS"
+#define ASI_DOCS         "ASI_DOCS"
 
 //-----------------------------------------------------------------------------
 
