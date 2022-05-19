@@ -59,6 +59,9 @@
 // Active Data includes
 #include <ActData_GraphToDot.h>
 
+// DF Browser includes
+#include <DFBrowser.hxx>
+
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkXMLPolyDataWriter.h>
@@ -71,7 +74,7 @@
   using namespace mobius;
 #endif
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 void SelectFaceterOptions(const asiAlgo_FacetQuality quality,
                           double&                    linDefl,
@@ -697,6 +700,23 @@ int ENGINE_DumpProject(const Handle(asiTcl_Interp)& interp,
   pDumpProject->Populate();
   //
   pDumpProject->show();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_DFBrowse(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  Handle(ActData_BaseModel)
+    M = Handle(ActData_BaseModel)::DownCast( interp->GetModel() );
+
+  DFBrowser::DFBrowserCall( M->Document() );
 
   return TCL_OK;
 }
@@ -1375,6 +1395,15 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Dumps the active project's OCAF contents as text into a specific UI dialog.",
     //
     __FILE__, group, ENGINE_DumpProject);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("dfbrowse",
+    //
+    "dfbrowse\n"
+    "\t Opens DF Browser to inspect the internals of the OCAF document\n"
+    "\t for the active project.",
+    //
+    __FILE__, group, ENGINE_DFBrowse);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("set-face-color-aag",

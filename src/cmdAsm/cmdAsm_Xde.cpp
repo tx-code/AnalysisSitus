@@ -1438,7 +1438,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("asm-xde-dfbrowse",
     //
     "asm-xde-dfbrowse -model <M>\n"
-    "\t Opens up a DF Browser to inspect the internals of the OCAF document\n"
+    "\t Opens DF Browser to inspect the internals of the OCAF document\n"
     "\t for the model <M>.",
     //
     __FILE__, group, ASMXDE_DFBrowse);
