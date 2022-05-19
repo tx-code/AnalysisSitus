@@ -142,9 +142,9 @@ namespace
   //! \param[in] argc   the number of arguments.
   //! \param[in] argv   the argument string.
   //! \return the mesh to work with.
-  t_ptr<poly_Mesh> GetActiveMesh(const Handle(asiTcl_Interp)& interp,
-                                 int                          argc,
-                                 const char**                 argv)
+  t_ptr<poly_Mesh> GetActiveMesh(const Handle(asiTcl_Interp)& /*interp*/,
+                                 int                          /*argc*/,
+                                 const char**                 /*argv*/)
   {
     // Make a copy to assure that we do not modify the persistent data
     // directly as otherwise undo/redo will be buggy.
@@ -338,6 +338,9 @@ int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
                      const char**                 argv)
 {
 #if defined USE_MOBIUS
+  (void) argc;
+  (void) argv;
+
   // Get shape.
   Handle(asiData_PartNode) part_n = cmdMobius::model->GetPartNode();
   TopoDS_Shape             shape  = part_n->GetShape();

@@ -3148,8 +3148,8 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_ConvertToCanonical(const Handle(asiTcl_Interp)& interp,
-                              int                          argc,
-                              const char**                 argv)
+                              int                          /*argc*/,
+                              const char**                 /*argv*/)
 {
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
@@ -3436,7 +3436,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("set-tolerance",
     //
-    "set-face-tolerance <toler>\n"
+    "set-tolerance <toler>\n"
     "\t Forces the part to have the passed tolerance in all its sub-shapes.",
     //
     __FILE__, group, ENGINE_SetTolerance);

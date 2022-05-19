@@ -39,6 +39,7 @@
 
 // exe includes
 #include <exe_CommonFacilities.h>
+#include <exe_GenerateDocs.h>
 #include <exe_Keywords.h>
 #include <exe_MainWindow.h>
 
@@ -146,7 +147,9 @@ int main(int argc, char** argv)
   const bool
     isRunCommand = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runcommand, scriptArg);
   const bool
-    isBatch = isRunScript || isRunCommand;
+    isGenDoc = asiExe::HasKeyword(argc, argv, ASITUS_KW_gendoc);
+  const bool
+    isBatch = isRunScript || isRunCommand || isGenDoc;
 
   std::cout << "Batch mode: " << (isBatch ? "true" : "false") << std::endl;
 
@@ -395,18 +398,36 @@ int main(int argc, char** argv)
       EXE_LOAD_MODULE(cf, cmdLibName);
     }
 
-    // Execute script.
-    const int
-      ret = cf->Interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
-                 /* run single command */ : scriptArg.c_str() );
+    if ( isGenDoc )
+    {
+      std::string
+        docsDir = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiDocs() );
 
-    // Check result.
-    if ( ret != TCL_OK )
-      std::cout << "Batch mode finished with error code " << ret << "." << std::endl;
+      cf->Progress.SendLogMessage(LogNotice(Normal) << "Generating commands list in '%1'..."
+                                                    << docsDir);
+
+      std::string docFnIn  (docsDir + "commands_template.html");
+      std::string docFnOut (docsDir + "commands.html");
+
+      /* Generate documentation page with all Tcl commands listed */
+      exe_GenerateDocs::Perform(cf->Interp, docFnIn, docFnOut);
+    }
     else
-      std::cout << "Batch mode finished successfully (error code " << ret << ")." << std::endl;
+    {
+      /* Execute batch job */
 
-    return ret;
+      const int
+        ret = cf->Interp->Eval( isRunScript ? asiTcl_SourceCmd( scriptArg.c_str() )
+                   /* run single command */ : scriptArg.c_str() );
+
+      // Check result.
+      if ( ret != TCL_OK )
+        std::cout << "Batch mode finished with error code " << ret << "." << std::endl;
+      else
+        std::cout << "Batch mode finished successfully (error code " << ret << ")." << std::endl;
+
+      return ret;
+    }
   }
 }
 

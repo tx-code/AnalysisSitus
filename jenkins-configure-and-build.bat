@@ -68,6 +68,14 @@ echo "*** Running compilation in Release mode..."
 "%JENKINS_CMAKE_BIN%\cmake.exe" --build . --config Release --target INSTALL
 
 REM ===========================================================================
+REM Generate docs
+REM ===========================================================================
+
+cd cmake-install-dir/bin
+
+asiExe.exe /gendoc
+
+REM ===========================================================================
 REM Prepare installer
 REM ===========================================================================
 

@@ -5,9 +5,11 @@ project(asiExe)
 #------------------------------------------------------------------------------
 
 set (H_FILES
+  exe_GenerateDocs.h
   exe_Keywords.h
 )
 set (CPP_FILES
+  exe_GenerateDocs.cpp
   exe_Main.cpp
 )
 
@@ -154,6 +156,7 @@ include_directories ( SYSTEM
                       ${asiVisu_include_dir}
                       ${asiEngine_include_dir}
                       ${asiUI_include_dir}
+                      ${asiTestEngine_include_dir}
                       ${3RDPARTY_OCCT_INCLUDE_DIR}
                       ${3RDPARTY_EIGEN_DIR}
                       ${3RDPARTY_vtk_INCLUDE_DIR}
@@ -203,7 +206,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
 
 qt5_use_modules(asiExe Core Widgets)
 
-target_link_libraries(asiExe asiTcl asiAlgo asiData asiVisu asiEngine asiUI)
+target_link_libraries(asiExe asiTcl asiAlgo asiData asiVisu asiEngine asiTestEngine asiUI)
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)
   link_directories(${3RDPARTY_tbb_LIBRARY_DIR_DEBUG})

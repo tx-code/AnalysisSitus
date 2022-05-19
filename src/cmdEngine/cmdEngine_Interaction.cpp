@@ -169,19 +169,19 @@ void cmdEngine::Commands_Interaction(const Handle(asiTcl_Interp)&      interp,
 {
   static const char* group = "cmdEngine";
 
-  //-------------------------------------------------------------------------//
-  interp->AddCommand("add-curve-handle",
-    //
-    "add-curve-handle\n"
-    "\t Allows to add interactively on-curve handles.",
-    //
-    __FILE__, group, ENGINE_AddCurveHandle);
+  ////-------------------------------------------------------------------------//
+  //interp->AddCommand("add-curve-handle",
+  //  //
+  //  "add-curve-handle\n"
+  //  "\t Allows to add interactively on-curve handles.",
+  //  //
+  //  __FILE__, group, ENGINE_AddCurveHandle);
 
-  //-------------------------------------------------------------------------//
-  interp->AddCommand("move-curve-handle",
-    //
-    "move-curve-handle\n"
-    "\t Allows to move the selected curve handle to another (picked) position.",
-    //
-    __FILE__, group, ENGINE_MoveCurveHandle);
+  ////-------------------------------------------------------------------------//
+  //interp->AddCommand("move-curve-handle",
+  //  //
+  //  "move-curve-handle\n"
+  //  "\t Allows to move the selected curve handle to another (picked) position.",
+  //  //
+  //  __FILE__, group, ENGINE_MoveCurveHandle);
 }

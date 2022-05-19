@@ -208,6 +208,9 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&         shape,
 
   return DoNetGen(shape, minh, maxh, grading, mesh, faceElems, progress);
 #else
+  (void) shape;
+  (void) mesh;
+
   progress.SendLogMessage(LogErr(Normal) << "NetGen is not available. Consider turning on the USE_NETGEN cmake flag.");
   return false;
 #endif
@@ -304,6 +307,13 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&                              
   nglib::Ng_Exit();
   return true;
 #else
+  (void) shape;
+  (void) minh;
+  (void) maxh;
+  (void) grading;
+  (void) mesh;
+  (void) faceElems;
+
   progress.SendLogMessage(LogErr(Normal) << "NetGen is not available. Consider turning on the USE_NETGEN cmake flag.");
   return false;
 #endif
