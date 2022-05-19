@@ -380,7 +380,7 @@ void cmdEngine::Factory(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("show-commands",
     //
     "show-commands\n"
-    "\t Opens dialog which lists all available commands for analysis.",
+    "\t Opens UI dialog listing all available Tcl commands.",
     //
     __FILE__, group, ENGINE_ShowCommands);
 

@@ -4262,9 +4262,9 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("explode",
     //
     "explode [{-vertex | -edge | -wire | -face | -shell | -solid | -noloc}]\n"
-    "\t Explodes active part to sub-shapes of interest. If no sub-shape\n"
+    "\t Explodes the active part to subshapes of interest. If no subshape\n"
     "\t qualifier is passed, this command explodes the part to its direct\n"
-    "\t children (e.g. edges for wire, wires for face, etc.). If '-noloc'\n"
+    "\t children (e.g. edges for wire, wires for face, etc.). If the '-noloc'\n"
     "\t flag is passed, locations are not accumulated on explode.",
     //
     __FILE__, group, ENGINE_Explode);
@@ -4296,14 +4296,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("get-summary-geom",
     //
-    "get-summary-geom <nbSurfBezier>   <nbSurfSpl>        <nbSurfConical>  \n"
-    "                 <nbSurfCyl>      <nbSurfOffset>     <nbSurfSph>      \n"
-    "                 <nbSurfLinExtr>  <nbSurfOfRevol>    <nbSurfToroidal> \n"
-    "                 <nbSurfPlane>                                        \n"
-    "                 <nbCurveBezier>  <nbCurveSpline>    <nbCurveCircle>  \n"
-    "                 <nbCurveEllipse> <nbCurveHyperbola> <nbCurveLine>    \n"
-    "                 <nbCurveOffset>  <nbCurveParabola>                   \n"
-    //
+    "get-summary-geom <nbSurfBezier>   <nbSurfSpl>        <nbSurfConical> "
+    "                 <nbSurfCyl>      <nbSurfOffset>     <nbSurfSph>     "
+    "                 <nbSurfLinExtr>  <nbSurfOfRevol>    <nbSurfToroidal>"
+    "                 <nbSurfPlane>                                       "
+    "                 <nbCurveBezier>  <nbCurveSpline>    <nbCurveCircle> "
+    "                 <nbCurveEllipse> <nbCurveHyperbola> <nbCurveLine>   "
+    "                 <nbCurveOffset>  <nbCurveParabola>                  "
+    "\n"
     "\t Returns the summary of geometric entities to the specified output variables.\n"
     "\t The rectangular trimmed surfaces are not accounted directly and rather inspected\n"
     "\t deeper for their basic surfaces. The same applies to the trimmed curves. This\n"
@@ -4331,12 +4331,15 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-curvature",
     //
     "check-curvature [<numPts> [<scaleFactor> [<curvAmpl>]]] [-noplot] [-noalong]\n"
+    "\n"
     "\t Checks curvature of the selected edge. As a result, curvature combs\n"
     "\t are visualized in 3D. You can control its scale factor with\n"
     "\t <scaleFactor> argument and also its density with <numPts> argument.\n"
     "\t To bring out the salient features of the comb, <curvAmpl> amplification\n"
-    "\t factor can be used. If -noplot key is passed, the curvature plot is not\n"
-    "\t constructed. If -noalong key is passed, the along-curvature value for\n"
+    "\t factor can be used.\n"
+    "\n"
+    "\t If the '-noplot' key is passed, the curvature plot is not\n"
+    "\t constructed. If the '-noalong' key is passed, the along-curvature value for\n"
     "\t the selected edges is not computed.",
     //
     __FILE__, group, ENGINE_CheckCurvature);
@@ -4353,7 +4356,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-euler",
     //
     "check-euler [<genus>]\n"
-    "\t Opens dialog to check Euler-Poincare property of the Part geometry.\n"
+    "\t Opens dialog to check Euler-Poincare property of the active part.\n"
     "\t If <genus> parameter is not specified, this command will open a prompt\n"
     "\t dialog to ask the user to type genus.",
     //
@@ -4372,7 +4375,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     //
     "eval-curve <curveName> <u> <order> [-mobius]\n"
     "\t Evaluates curve <curveName> for the given parameter value <u>.\n"
-    "\t If <-mobius> keyword is used, evaluation is performed using Mobius\n"
+    "\t If the '-mobius' keyword is used, evaluation is performed using Mobius\n"
     "\t functions. The argument <order> specifies the order of derivatives\n"
     "\t to evaluate (0 for value evaluation).",
     //
@@ -4383,7 +4386,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     //
     "eval-surf <surfName> <u> <v> <order> [-mobius]\n"
     "\t Evaluates surface <surfName> for the given parameter pair <u, v>.\n"
-    "\t If <-mobius> keyword is used, evaluation is performed using Mobius\n"
+    "\t If the '-mobius' keyword is used, evaluation is performed using Mobius\n"
     "\t functions. The argument <order> specifies the order of derivatives\n"
     "\t to evaluate (0 for value evaluation).",
     //
@@ -4393,9 +4396,9 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-toler",
     //
     "check-toler [<numRanges>]\n"
-    "\t Checks local tolerances in the part shape and distributes sub-shapes\n."
-    "\t by tolerance ranges. You can control the fineness of tolerance ranges\n"
-    "\t using <numRanges> optional argument.",
+    "\t Checks local tolerances in the part shape and distributes sub-shapes\n"
+    "\t by distinct tolerance ranges. You can control the fineness of these tolerance ranges\n"
+    "\t using the <numRanges> optional argument (10 by default).",
     //
     __FILE__, group, ENGINE_CheckToler);
 
@@ -4426,11 +4429,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-aabb",
     //
-    "check-aabb\n"
-    "\t Checks AABB of the active part. If 'opt' key is passed,\n"
-    "\t the bounding box will be optimized to better fit the\n"
-    "\t part's shape. If 'tris' key is passed, the algorithm will\n"
-    "\t use triangulation (facets) of the part.",
+    "check-aabb [-opt] [-tris]\n"
+    "\t Checks axis-aligned bounding box (AABB) of the active part. If the '-opt'\n"
+    "\t key is passed, the bounding box will be optimized to better fit the\n"
+    "\t shape. This option can be computationally heavy though as it implies\n"
+    "\t numerical optimization.\n"
+    "\n"
+    "\t If the '-tris' key is passed, the algorithm will\n"
+    "\t use triangulation (facets) of the part to compute its AABB.",
     //
     __FILE__, group, ENGINE_CheckAABB);
 
@@ -4478,7 +4484,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("get-surface-bending",
     //
     "get-surface-bending <surfName>\n"
-    "\t Returns bending energy of the passed surface.",
+    "\t Computes bending energy of the passed surface.",
     //
     __FILE__, group, ENGINE_GetSurfaceBending);
 
@@ -4486,7 +4492,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-edge-vexity",
     //
     "check-edge-vexity {<edgeIndex> | -name <edgeName>}\n"
-    "\t Rebuilds edge with the given ID or name.",
+    "\t Analyzes convexity/concavity of the given edge.",
     //
     __FILE__, group, ENGINE_CheckEdgeVexity);
 
@@ -4530,15 +4536,17 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("recognize-blends",
     //
     "recognize-blends [-radius <r>] [-fid <id>] [{-ebf | -vbf}] [-store [-cdev <perc>]]\n"
-    "\t Recognizes all blend faces in AAG representing the part. The optional\n"
+    "\n"
+    "\t Recognizes all blend faces in the active part. The optional\n"
     "\t '-fid' key allows to specify the face ID to start recognition from.\n"
     "\t The optional '-radius' key allows to limit the recognized radius.\n"
-    "\t The optional '-ebf|-vbf' keys allows you to find the blend faces of\n"
+    "\t The optional '-ebf|-vbf' keys allow finding the blend faces of\n"
     "\t a certain type (EBF = edge-blend face, VBF = vertex-blend face).\n"
+    "\n"
     "\t If the '-store' key is passed, the recognized blend chains will be stored\n"
     "\t as series of features under the Part Node. If this flag is supplemented\n"
     "\t with '-cdev' (chain deviation) flag, then the following <perc> value is used\n"
-    "\t to join the fillet faces into chains.",
+    "\t to regroup the fillet faces into the chains of equal radii.",
     //
     __FILE__, group, ENGINE_RecognizeBlends);
 
@@ -4615,7 +4623,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("invert-point-surf",
     //
     "invert-point-surf <surf> <x> <y> <z>\n"
-    "\t Inverts point on a surface.",
+    "\t Inverts (projects) the passed point onto the given surface.",
     //
     __FILE__, group, ENGINE_InvertPointSurf);
 
@@ -4656,7 +4664,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-thickness",
     //
     "check-thickness [-owner <ownerId>]\n"
-    "\t Checks the thickness distribution over the passed owner shape.",
+    "\t Checks the thickness distribution over the passed owner shape or mesh.",
     //
     __FILE__, group, ENGINE_CheckThickness);
 
@@ -4698,11 +4706,16 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("build-face-grid",
     //
     "build-face-grid [-num <numBins>] [-filename <filename>] [-fid <faceID>] [-square] [-haines|-discr]\n"
+    "\n"
     "\t Builds a uniform UV grid for the interactively selected face.\n"
-    "\t Pass the number of bins to control how fine the discretization is.\n"
+    "\t Pass the number of bins to control how fine sampling is going to be.\n"
     "\t If the filename is passed, the sampled face is converted to vtkImageData\n"
     "\t and dumped as a bitmap image. Pass the '-square' keyword to force the\n"
-    "\t decomposition domain be of a squared shape.",
+    "\t decomposition domain be of a squared shape.\n"
+    "\n"
+    "\t For efficient computation, pass the '-discr' keyword. This option turns the\n"
+    "\t face of interest into a discrete representation and uses extremely fast\n"
+    "\t two-dimensional classifier.",
     //
     __FILE__, group, ENGINE_BuildFaceGrid);
 
@@ -4722,7 +4735,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-facets",
     //
     "check-facets\n"
-    "\t Checks triangulation distributed by CAD faces. Returns 0 to the"
+    "\t Checks triangulation distributed by CAD faces. Returns 0 (zero) to the"
     "\t Tcl interpreter if the facets are broken and 1 if the facets"
     "\t are good.",
     //

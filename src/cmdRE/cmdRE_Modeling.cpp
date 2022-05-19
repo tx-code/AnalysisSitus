@@ -2418,7 +2418,7 @@ void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("re-invert-points",
     //
-    "re-invert-bpoles <surfName> <ptsName> [-opencascade]\n"
+    "re-invert-points <surfName> <ptsName> [-opencascade]\n"
     "\t Inverts the passed point cloud to the B-surface with the given name.",
     //
     __FILE__, group, RE_InvertPoints);

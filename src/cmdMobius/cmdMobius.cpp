@@ -2309,7 +2309,7 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-find-domain-edges",
     //
-    "poly-domain-edges -domain <id> [-draw]\n"
+    "poly-find-domain-edges -domain <id> [-draw]\n"
     "\n"
     "\t Finds edges belonging to the given domain.",
     //

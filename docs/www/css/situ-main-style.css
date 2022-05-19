@@ -158,6 +158,8 @@ a.footer-href {
 }
 .command-tr {
   border-bottom: 1px dotted rgb(200, 200, 200);
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 .command-td-cell {
   vertical-align: top;

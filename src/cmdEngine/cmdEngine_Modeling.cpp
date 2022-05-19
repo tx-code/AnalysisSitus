@@ -1906,15 +1906,14 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     //
     "make-vertex <result> <ptName>\n"
     "\n"
-    "\t Creates a vertex from the point named 'ptName'.",
+    "\t Creates a vertex from the point named <ptName>.",
     //
     __FILE__, group, ENGINE_MakeVertex);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-edge",
     //
-    "make-edge <result> <curveName>\n"
-    "make-edge <result> -p1 <pointName> -p2 <pointName>\n"
+    "make-edge <result> {<curveName> | -p1 <pointName> -p2 <pointName>}\n"
     "\n"
     "\t Creates an edge from a curve or a pair of points. The <curveName>/<pointName>\n"
     "\t variables should exist in the scene graph of the imperative plotter.",
@@ -1933,10 +1932,9 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-face",
     //
-    "make-face <result> <surfaceName>\n"
-    "make-face <result> -w [<wireName1> <wireName2> ...]\n"
+    "make-face <result> {<surfaceName> | -w <wireName1> [<wireName2> ...]}\n"
     "\n"
-    "\t Creates face from a surface or wire. The <surfaceName>/<wireName> variables\n"
+    "\t Creates a face from a surface or wires. The <surfaceName>/<wireName> variables\n"
     "\t should exist in the scene graph of the imperative plotter.",
     //
     __FILE__, group, ENGINE_MakeFace);
@@ -2018,7 +2016,8 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("bop-cut",
     //
     "bop-cut <result> <op1> <op2> [<fuzz>]\n"
-    "\t Cuts <op2> from <op1> using Boolean Cut operation.",
+    "\t Cuts <op2> from <op1> using Boolean Cut operation. Use <fuzz> value\n"
+    "\t to control the 'fuzzy tolerance'.",
     //
     __FILE__, group, ENGINE_BOPCut);
 

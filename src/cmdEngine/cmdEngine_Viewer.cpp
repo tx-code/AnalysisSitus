@@ -332,7 +332,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("erase",
     //
     "erase [<varName1> [<varName2> ...]]\n"
-    "\t Hides object in viewer.",
+    "\t Hides objects in their associated viewers.",
     //
     __FILE__, group, ENGINE_Erase);
 
@@ -340,7 +340,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("hide",
     //
     "hide <varName1> [<varName2> ...]\n"
-    "\t Hides object in viewer.",
+    "\t Hides objects in their associated viewers.",
     //
     __FILE__, group, ENGINE_Erase);
 
@@ -356,7 +356,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("show",
     //
     "show <varName1> [<varName2> ...]\n"
-    "\t Shows the given object in viewer.",
+    "\t Shows the given object in its associated viewer.",
     //
     __FILE__, group, ENGINE_Show);
 
@@ -364,7 +364,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("display",
     //
     "display <varName1> [<varName2> ...]\n"
-    "\t Shows the given object in viewer.",
+    "\t Shows the given object in its associated viewer.",
     //
     __FILE__, group, ENGINE_Show);
 
@@ -372,7 +372,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("show-only",
     //
     "show-only [<varName1> [<varName2> ...]]\n"
-    "\t Shows only the given objects in viewer. If no objects are passed, the\n"
+    "\t Shows only the given objects in their associated viewers. If no objects are passed, the\n"
     "\t working part will be exclusively shown.",
     //
     __FILE__, group, ENGINE_ShowOnly);
@@ -381,7 +381,7 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("donly",
     //
     "donly [<varName1> [<varName2> ...]]\n"
-    "\t Shows only the given objects in viewer. If no objects are passed, the\n"
+    "\t Shows only the given objects in their associated viewers. If no objects are passed, the\n"
     "\t working part will be exclusively shown.",
     //
     __FILE__, group, ENGINE_ShowOnly);

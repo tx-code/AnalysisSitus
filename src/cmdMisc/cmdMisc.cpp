@@ -3695,7 +3695,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-hexagon-bops",
     //
-    "test-hexagon-bops \n"
+    "test-hexagon-bops\n"
     "\t No arguments are expected. This command demonstrates solid Booleans \n"
     "\t of OpenCascade. It cuts many cylinders from a hexagonal prism.",
     //
@@ -3704,7 +3704,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-hexagon-bops-faces",
     //
-    "test-hexagon-bops-faces \n"
+    "test-hexagon-bops-faces\n"
     "\t No arguments are expected. This command demonstrates solid Booleans \n"
     "\t of OpenCascade. It cuts many circles from a hexagon and then \n"
     "\t constructs a prism.",
@@ -3714,23 +3714,23 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("push-pull",
     //
-    "push-pull faceId offset \n"
-    "\t Push/pull operation.",
+    "push-pull <faceId> <offset>\n"
+    "\t Dummy \"push/pull\" kind of operation. It is experimental and not recommended for use.",
     //
     __FILE__, group, MISC_PushPull);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-builder",
     //
-    "test-builder \n"
-    "\t Reproducer for issue with BRep_Builder.",
+    "test-builder\n"
+    "\t Reproducer for one issue with BRep_Builder.",
     //
     __FILE__, group, MISC_TestBuilder);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-composite",
     //
-    "test-composite \n"
+    "test-composite\n"
     "\t Constructs sample non-manifold CAD model.",
     //
     __FILE__, group, MISC_TestComposite);
@@ -3738,7 +3738,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-offset",
     //
-    "test-offset \n"
+    "test-offset\n"
     "\t Constructs simple solid by offset.",
     //
     __FILE__, group, MISC_TestOffset);
@@ -3746,7 +3746,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-ineq",
     //
-    "test-ineq \n"
+    "test-ineq\n"
     "\t Test for inequality solver.",
     //
     __FILE__, group, MISC_TestIneq);
@@ -3754,9 +3754,9 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-eval-curve",
     //
-    "test-eval-curve curveName u num order [-mobius]\n"
-    "\t Evaluates curve <t_curveName> for the given parameter value <u>.\n"
-    "\t If <-mobius> keyword is used, evaluation is performed using Mobius\n"
+    "test-eval-curve <curveName> <u> <num> <order> [-mobius]\n"
+    "\t Evaluates curve <curveName> for the given parameter value <u>.\n"
+    "\t If the '-mobius' keyword is used, evaluation is performed using Mobius\n"
     "\t functions. The argument <num> specifies how many iterations to use.\n"
     "\t This function is used to test performance of curve evaluation.",
     //
@@ -3765,9 +3765,9 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-eval-surf",
     //
-    "test-eval-surf surfName u v num order [-mobius]\n"
+    "test-eval-surf <surfName> <u> <v> <num> <order> [-mobius]\n"
     "\t Evaluates surface <surfName> for the given parameter pair <u, v>.\n"
-    "\t If <-mobius> keyword is used, evaluation is performed using Mobius\n"
+    "\t If the '-mobius' keyword is used, evaluation is performed using Mobius\n"
     "\t functions. The argument <num> specifies how many iterations to use.\n"
     "\t This function is used to test performance of surface evaluation.",
     //
@@ -3784,7 +3784,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-fibers",
     //
-    "test-fibers \n"
+    "test-fibers\n"
     "\t Tests fiber polyhedrization algorithm.",
     //
     __FILE__, group, MISC_TestFibers);
@@ -3792,8 +3792,8 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-transform-axes",
     //
-    "test-transform-axes \n"
-    "\t Transforms axes B to place them coincidently with axes A.",
+    "test-transform-axes\n"
+    "\t Transforms axes 'B' to place them coincidently with axes 'A'.",
     //
     __FILE__, group, MISC_TestTranformAxes);
 
@@ -3810,7 +3810,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-fair",
     //
-    "test-fair fid\n"
+    "test-fair <fid>\n"
     "\t Test for fairing function.",
     //
     __FILE__, group, MISC_TestFair);
@@ -3842,7 +3842,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-dist",
     //
-    "test-dist surfName ustep vstep\n"
+    "test-dist <surfName> <ustep> <vstep>\n"
     "\t Test for distance evaluation.",
     //
     __FILE__, group, MISC_TestDist);
@@ -3852,14 +3852,15 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("dump-bvh",
     //
     "dump-bvh [-build]\n"
-    "\t Dumps BVH to viewer.",
+    "\t Dumps the bounding volume hierarchy (BVH) associated with the active part to the viewer.\n"
+    "\t Use the '-build' key to construct BVH explicitly in the case it does not exist.",
     //
     __FILE__, group, MISC_DumpBVH);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("misc-invert-bpoles",
     //
-    "misc-invert-bpoles surfName\n"
+    "misc-invert-bpoles <surfName>\n"
     "\t Inverts the control points of a B-surface to itself.",
     //
     __FILE__, group, MISC_InvertBPoles);

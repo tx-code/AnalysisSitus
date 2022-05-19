@@ -1126,7 +1126,7 @@ void cmdDDF::Factory(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("ddf-cut",
     //
     "ddf-cut <id1> <id2>\n"
-    "\t Builds a cut, i.e., max(f, -g) function for the octrees with the IDs\n"
+    "\t Builds a cut, i.e., max(f,-g) function for the octrees with the IDs\n"
     "\t <id1> and <id2>.",
     //
     __FILE__, group, DDF_Cut);

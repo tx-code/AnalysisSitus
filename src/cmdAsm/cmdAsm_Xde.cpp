@@ -1490,7 +1490,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     //
     "asm-xde-xcompounds -model <M> [-items <item_1> ... <item_k>]\n"
     "\t Expands the compound-type parts in the model <M> for the assembly\n"
-    "\t items <item_1>, ... <item_k> (if passed), or for the all leaves (if\n"
+    "\t items <item_1>, ... <item_k> (if passed), or all leaves (if\n"
     "\t not passed).",
     //
     __FILE__, group, ASMXDE_XCompounds);

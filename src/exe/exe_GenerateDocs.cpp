@@ -74,7 +74,7 @@ namespace
         }
         else
         {
-          helpStreamOut << line;
+          helpStreamOut << line << "\n";
         }
       }
 
@@ -82,12 +82,12 @@ namespace
     }
   }
 
-  //! Converts newline characters to HTML line breaks.
+  //! Converts double newline characters to HTML line breaks.
   void Nl2Br(std::vector<asiTcl_CommandInfo>& cmdInfos)
   {
     for ( auto& cmdInfo : cmdInfos )
     {
-      asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, "\n", "<br/>");
+      asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, "\n\n", "<br/><br/>");
     }
   }
 
@@ -98,6 +98,17 @@ namespace
     {
       asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, "<", "&lt;");
       asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, ">", "&gt;");
+    }
+  }
+
+  //! Aligns arguments.
+  void AlignArgs(std::vector<asiTcl_CommandInfo>& cmdInfos)
+  {
+    for ( auto& cmdInfo : cmdInfos )
+    {
+      asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, " -", " <br/>&nbsp;-");
+      asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, "[-", " <br/>  [-");
+      asiAlgo_Utils::Str::ReplaceAll(cmdInfo.Help, "{-", " <br/>  {-");
     }
   }
 }
@@ -130,6 +141,9 @@ bool exe_GenerateDocs::Perform(const Handle(asiTcl_Interp)& interp,
 
     // Beautify.
     ::Beautify(cmdInfos);
+
+    // Align arguments.
+    ::AlignArgs(cmdInfos);
 
     // Nl to br.
     ::Nl2Br(cmdInfos);

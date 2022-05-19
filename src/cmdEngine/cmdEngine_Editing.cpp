@@ -3289,7 +3289,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kev",
     //
-    "kev {<edgeIndex> <vertexIndex> | -edge '<edgeName>' -vertex '<vertexName>' | -name '<edgeName>'}\n"
+    "kev {<edgeIndex> <vertexIndex> | -edge <edgeName> -vertex <vertexName> | -name <edgeName>}\n"
     "\t KEV (Kill-Edge-Vertex) Euler operator.",
     //
     __FILE__, group, ENGINE_KEV);
@@ -3297,7 +3297,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kef",
     //
-    "kef {<edgeIndex> <faceIndex> | -edge '<edgeName>' -face '<faceName>'}\n"
+    "kef {<edgeIndex> <faceIndex> | -edge <edgeName> -face <faceName>}\n"
     "\t KEF (Kill-Edge-Face) Euler operator.",
     //
     __FILE__, group, ENGINE_KEF);
@@ -3305,7 +3305,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kfmv",
     //
-    "kfmv {<faceIndex> | -name '<faceName>'}\n"
+    "kfmv {<faceIndex> | -name <faceName>}\n"
     "\t KFMV (Kill-Face-Make-Vertex) Euler operator.",
     //
     __FILE__, group, ENGINE_KFMV);
@@ -3313,7 +3313,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("merge-vertices",
     //
-    "merge-vertices -name '<vertexName1>' -name '<vertexName2>' [... -name '<vertexNameK>']\n"
+    "merge-vertices -name <vertexName1> -name <vertexName2> [... -name <vertexNameK>]\n"
     "\t Merges several vertices into one.",
     //
     __FILE__, group, ENGINE_MergeVertices);
@@ -3321,7 +3321,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("merge-edges",
     //
-    "merge-edges -name '<edgeName1>' -name '<edgeName2>' [... -name '<edgeNameK>]'\n"
+    "merge-edges -name <edgeName1> -name <edgeName2> [... -name <edgeNameK>]\n"
     "\t Merges several edges into one.",
     //
     __FILE__, group, ENGINE_MergeEdges);
@@ -3329,7 +3329,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kill-vertex",
     //
-    "kill-vertex {<vertexIndex> | -name '<vertexName>'}\n"
+    "kill-vertex {<vertexIndex> | -name <vertexName>}\n"
     "\t Kills vertex with the passed 1-based index from the active part.\n"
     "\t This is a pure topological operation which does not attempt to\n"
     "\t modify geometry. Moreover, unlike Euler operator, this function\n"
@@ -3341,7 +3341,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kill-edge",
     //
-    "kill-edge {<edgeIndex> | -name '<edgeName>'}\n"
+    "kill-edge {<edgeIndex> | -name <edgeName>}\n"
     "\t Kills edge with the passed 1-based index from the active part.\n"
     "\t This is a pure topological operation which does not attempt to\n"
     "\t modify geometry. Moreover, unlike Euler operator, this function\n"
@@ -3353,13 +3353,14 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("kill-face",
     //
-    "kill-face {<fid> | -name '<faceName>'} [-defeat]\n"
+    "kill-face {<fid> | -name <faceName>} [-defeat]\n"
     "\t Kills the face with the passed 1-based index from the active part.\n"
     "\t This is a pure topological operation which does not attempt to\n"
     "\t modify geometry. Moreover, unlike Euler operators, this function\n"
     "\t does not preserve the topological consistency of the CAD part.\n"
     "\t We have introduced this function to ground Euler operators on it.\n"
-    "\t If '-defeat' key is passed, another algorithm of smart face removal\n"
+    "\n"
+    "\t If the '-defeat' key is passed, another algorithm of smart face removal\n"
     "\t will be used. The 'smart' algorithm not only removes a face but also\n"
     "\t stitches the neighbor faces to produce a watertight solid model as a result.",
     //
@@ -3426,10 +3427,10 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     //
     "set-face-tolerance <faceId> <toler>\n"
     "\t Forces the face with the given index to have the passed tolerance.\n"
-    "\t In OpenCascade, there is a rule that a tolerance of a face should be\n"
-    "\t not greater than tolerances of its edges (the same rule applies to\n"
+    "\t In OpenCascade, there is a rule that a tolerance of a face should not be\n"
+    "\t greater than the tolerances of its edges (the same rule applies for\n"
     "\t edges and vertices). Therefore, this function updates tolerance not\n"
-    "\t only for face but also for its sub-shapes.",
+    "\t only for the face in question, but also for its sub-shapes.",
     //
     __FILE__, group, ENGINE_SetFaceTolerance);
 
@@ -3444,7 +3445,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("rebuild-edge",
     //
-    "rebuild-edge {<edgeIndex> | -name '<edgeName>'}\n"
+    "rebuild-edge {<edgeIndex> | -name <edgeName>}\n"
     "\t Rebuilds edge with the given ID or name.",
     //
     __FILE__, group, ENGINE_RebuildEdge);
@@ -3653,7 +3654,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("convert-plane-to-bsurf",
     //
     "convert-plane-to-bsurf <res> <surfName> <uDeg> <vDeg>\n"
-    "\t Converts the planar surface with the given name to B-surface. The trimming\n"
+    "\t Converts the planar surface with the given name to a B-spline surface. The trimming\n"
     "\t parameters are taken from the corresponding Data Node. The desired degrees\n"
     "\t are specified via <uDeg> and <vDeg> arguments.",
     //

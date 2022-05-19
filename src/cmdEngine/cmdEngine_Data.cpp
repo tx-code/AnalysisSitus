@@ -1321,10 +1321,11 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "set-as-part [<varName> | -node <id> -param <id>]\n"
     "\t Sets the object with the given name as a part for analysis.\n"
     "\t The object is expected to exist as a topological item in\n"
-    "\t imperative plotter. Alternatively, you can specify a custom Node ID\n"
+    "\t the imperative plotter. Alternatively, you can specify a custom Node ID\n"
     "\t with its source Parameter ID storing the shape to transfer to the\n"
     "\t Part Node. The latter option is useful if your shape is not stored\n"
-    "\t in the section of imperative plotter data.",
+    "\t in the section of imperative plotter data (i.e., you use custom Node\n"
+    "\t as storage).",
     //
     __FILE__, group, ENGINE_SetAsPart);
 
@@ -1343,7 +1344,7 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "get-id [<parentObjectName> / [<parentObjectName> / [...]]] <objectName> [-nosplit]\n"
     "\t Finds a data object with the given name and returns its persistent ID.\n"
     "\t If the object name is not unique, you may specify a list of parents\n"
-    "\t to narrow your request. The names of the parent objects are separated\n"
+    "\t to narrow down your request. The names of the parent objects are separated\n"
     "\t by direct slash. You should always specify a direct parent of an object.\n"
     "\t It is not allowed to leave intermediate parents unspecified. If the '-nosplit'\n"
     "\t keyword is used, the direct slashes will be treated as parts of the single\n"
@@ -1371,7 +1372,7 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("dump-project",
     //
     "dump-project\n"
-    "\t Dumps project contents as text.",
+    "\t Dumps the active project's OCAF contents as text into a specific UI dialog.",
     //
     __FILE__, group, ENGINE_DumpProject);
 
@@ -1419,7 +1420,8 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("dump-execution-graph-dot",
     //
     "dump-execution-graph-dot <filename>\n"
-    "\t Dumps execution graph of the project to DOT file (Graphviz).",
+    "\t Dumps Tree Function execution graph of the active project to a DOT file (Graphviz).\n"
+    "\t Read more about Active Data framework to familiarize yourself with Tree Functions.",
     //
     __FILE__, group, ENGINE_DumpExecutionGraphDot);
 
@@ -1427,18 +1429,17 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("dump-vtp",
     //
     "dump-vtp <filename>\n"
-    "\t Dumps the polygonal data of the active parts to a file in the VTP format\n"
-    "\t of VTK.",
+    "\t Dumps the polygonal data of the active part to a file in the VTP format\n"
+    "\t of VTK. The data to dump is taken out from the part's pipelines.",
     //
     __FILE__, group, ENGINE_DumpVTP);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("generate-facets",
     //
-    "generate-facets\n"
-    "\t {[-lin <val>] [-ang <deg>] | [-very-rough | -rough | -normal | -fine | -very-fine]}\n"
+    "generate-facets {[-lin <val>] [-ang <deg>] | [-very-rough | -rough | -normal | -fine | -very-fine]}\n"
     "\n"
-    "\t Generates visualization facets for active part.\n"
+    "\t Generates visualization facets for the active part.\n"
     "\t You can specify the linear and angular deflection values using the '-lin'\n"
     "\t and '-ang' keywords. The linear deflection is specified in the model units.\n"
     "\t The angular deflection is specified in degrees.\n"

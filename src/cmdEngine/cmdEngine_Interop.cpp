@@ -1093,10 +1093,13 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("dump-autoread",
     //
     "dump-autoread\n"
-    "\t Dumps the Active Script commands currently entered to the\n"
-    "\t 'autoread.log' file located in the working direction of\n"
-    "\t application. If exists, this file will be automatically loaded\n"
-    "\t without execution on the next launch.",
+    "\t Dumps the currently entered Active Script commands to a specific file\n"
+    "\t named 'autoread.log' that is located in the working directory of\n"
+    "\t Analysis Situs. If exists, this file will be automatically loaded\n"
+    "\t without execution on the next launch.\n"
+    "\n"
+    "\t Use this option to make Analysis Situs a kind of a \"notebook\" with your\n"
+    "\t recorded commands and comments to get back on each launch.",
     //
     __FILE__, group, ENGINE_DumpAutoread);
 
