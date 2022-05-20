@@ -39,6 +39,8 @@
 #include <iostream>
 #include <fstream>
 
+std::string DocsUrl("http://analysissitus.org/commands.html");
+
 //-----------------------------------------------------------------------------
 
 namespace
@@ -176,7 +178,7 @@ bool exe_GenerateDocs::Perform(const Handle(asiTcl_Interp)& interp,
          ->AddText("</span>")
          ->BreakRow()
          ->AddText("[")
-         ->AddHRef( (filenameOut + "#" + cmdInfo.Name).c_str(), "link" )
+         ->AddHRef( (DocsUrl + "#" + cmdInfo.Name).c_str(), "link" )
          ->AddText("]")
          ->EndPre()
          ->EndTableCell()

@@ -194,7 +194,7 @@ public:
 public:
 
   void addToReferenceMap(const TDF_Label& theLab,
-                          const StructureTags theTag);
+                         const StructureTags theTag);
 
   void addToReferenceMap(const Handle(ActAPI_IUserParameter)& theParam,
                          const StructureTags theTag);
