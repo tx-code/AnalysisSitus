@@ -35,7 +35,13 @@
 #include <ActData_ParameterFactory.h>
 
 // OCCT includes
+#include <TDF_ChildIterator.hxx>
 #include <TNaming_NamedShape.hxx>
+
+#ifdef METADATA_DEBUG
+#include <TDF_Tool.hxx>
+#endif // !METADATA_DEBUG
+
 
 //-----------------------------------------------------------------------------
 
@@ -100,14 +106,30 @@ Handle(asiData_ElemMetadataNode)
 
     TDF_Label root = cit->ValueLabel();
 
+#ifdef METADATA_DEBUG
+    TCollection_AsciiString path;
+    TDF_Tool::Entry(root, path);
+    std::string pathStr = path.ToCString();
+#endif // !METADATA_DEBUG
+
     // Access label with user Parameters.
     TDF_Label shapeLab = root.FindChild(ActData_BaseNode::TagUser)
                              .FindChild(asiData_ElemMetadataNode::PID_Shape);
 
-    // Get shape attribute.
+    // Attributes do not "hang" on the shapeLab itself, but each attribute
+    // has its own label, and these labels are children of shapeLab.
     Handle(TNaming_NamedShape) shapeAttr;
-    shapeLab.FindAttribute(TNaming_NamedShape::GetID(), shapeAttr);
-    //
+    TDF_ChildIterator itShapeLab(shapeLab, false);
+    for ( ; itShapeLab.More(); itShapeLab.Next() )
+    {
+      TDF_Label label = itShapeLab.Value();
+      // Get shape attribute.
+      if ( label.FindAttribute(TNaming_NamedShape::GetID(), shapeAttr) )
+      {
+        break;
+      }
+    }
+
     if ( shapeAttr.IsNull() )
       continue;
 

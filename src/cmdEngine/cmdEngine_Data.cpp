@@ -902,7 +902,7 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
     for ( TColStd_MapIteratorOfPackedMapOfInteger fit(fids); fit.More(); fit.Next() )
     {
       Handle(asiData_ElemMetadataNode)
-        emn = partApi.CreateElemMetadata( "Color", partApi.GetFace( fit.Key() ) );
+        emn = partApi.FindElemMetadata( partApi.GetFace( fit.Key() ), true );
       //
       const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
                                                    colorComponents[1],
@@ -911,6 +911,7 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
       interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Setting face color to %1." << icolor);
       //
       emn->SetColor(icolor);
+      emn->SetName("Color");
     }
   }
   cmdEngine::model->CommitCommand();
@@ -921,6 +922,541 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
   //
   if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
     cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_GetFaceColor(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get face ID.
+  int fid = 0;
+  TCollection_AsciiString fidStr;
+  //
+  if ( interp->GetKeyValue(argc, argv, "fid", fidStr) )
+  {
+    fid = fidStr.IntegerValue();
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "'-fid' is not specified.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+  bool isFound = false;
+  int colorInt = 0;
+  Handle(ActAPI_HNodeList) metaElems;
+  partApi.GetMetadataElems(metaElems);
+  if ( !metaElems.IsNull() )
+  {
+    TopoDS_Shape shape = partApi.GetFace(fid);
+    for ( ActAPI_HNodeList::Iterator nit(*metaElems); nit.More(); nit.Next() )
+    {
+      const Handle(asiData_ElemMetadataNode)&
+        metaNode = Handle(asiData_ElemMetadataNode)::DownCast(nit.Value());
+
+      if ( metaNode->GetShape().IsSame(shape) )
+      {
+        colorInt = metaNode->GetColor();
+        isFound = true;
+        break;
+      }
+    }
+  }
+
+  if ( !isFound )
+  {
+    colorInt = cmdEngine::model->GetPartNode()->GetColor();
+    isFound = true;
+  }
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()  * MAX_COLOR_SCALE;
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color: (%1, %2, %3)." << red << green << blue);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_CheckFaceColor(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  if ( argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get face ID.
+  int fid = 0;
+  TCollection_AsciiString fidStr;
+  //
+  if ( interp->GetKeyValue(argc, argv, "fid", fidStr) )
+  {
+    fid = fidStr.IntegerValue();
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "'-fid' is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+
+  bool isFound = false;
+  int colorInt = 0;
+  Handle(ActAPI_HNodeList) metaElems;
+  partApi.GetMetadataElems(metaElems);
+  if ( !metaElems.IsNull() )
+  {
+    TopoDS_Shape shape = partApi.GetFace(fid);
+    for ( ActAPI_HNodeList::Iterator nit(*metaElems); nit.More(); nit.Next() )
+    {
+      const Handle(asiData_ElemMetadataNode)&
+        metaNode = Handle(asiData_ElemMetadataNode)::DownCast(nit.Value());
+
+      if ( metaNode->GetShape().IsSame(shape) )
+      {
+        colorInt = metaNode->GetColor();
+        isFound = true;
+        break;
+      }
+    }
+  }
+
+  if ( !isFound )
+  {
+    colorInt = cmdEngine::model->GetPartNode()->GetColor();
+    isFound = true;
+  }
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()  * MAX_COLOR_SCALE;
+
+  Quantity_Color checkedColor(colorComponents[0]/MAX_COLOR_SCALE,
+                              colorComponents[1]/MAX_COLOR_SCALE,
+                              colorComponents[2]/MAX_COLOR_SCALE,
+                              Quantity_TOC_RGB);
+
+  if ( !color.IsEqual(checkedColor) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color of face: (%1, %2, %3)." << red << green << blue);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color matched.");
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SetPartColor(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+  cmdEngine::model->OpenCommand();
+  {
+    const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
+                                                 colorComponents[1],
+                                                 colorComponents[2]);
+    cmdEngine::model->GetPartNode()->SetColor(icolor);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+  //
+  if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_GetPartColor(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+
+  int colorInt = cmdEngine::model->GetPartNode()->GetColor();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()  * MAX_COLOR_SCALE;
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color: (%1, %2, %3)." << red << green << blue);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_CheckPartColor(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  asiEngine_Part partApi( cmdEngine::model,
+                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+
+  int colorInt = cmdEngine::model->GetPartNode()->GetColor();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()  * MAX_COLOR_SCALE;
+
+  Quantity_Color checkedColor(colorComponents[0]/MAX_COLOR_SCALE,
+                              colorComponents[1]/MAX_COLOR_SCALE,
+                              colorComponents[2]/MAX_COLOR_SCALE,
+                              Quantity_TOC_RGB);
+
+  if ( !color.IsEqual(checkedColor) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color of part: (%1, %2, %3)." << red << green << blue);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color matched.");
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SetTopoItemColor(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+  if ( argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get name.
+  TCollection_AsciiString nameOfTopoItem;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", nameOfTopoItem) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Name of topological object is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  Handle(asiData_IVTopoItemNode)
+  topoItem = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(nameOfTopoItem) );
+  //
+  if ( topoItem.IsNull() || !topoItem->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find topological object with name %1." << nameOfTopoItem.ToCString());
+    return TCL_ERROR;
+  }
+
+  cmdEngine::model->OpenCommand();
+  {
+    const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
+                                                 colorComponents[1],
+                                                 colorComponents[2]);
+    topoItem->SetHasColor(true);
+    topoItem->SetColor(icolor);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( topoItem );
+  //
+  if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_GetTopoItemColor(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get name.
+  TCollection_AsciiString nameOfTopoItem;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", nameOfTopoItem) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Name of topological object is not specified.");
+    return TCL_ERROR;
+  }
+
+  Handle(asiData_IVTopoItemNode)
+  topoItem = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(nameOfTopoItem) );
+  //
+  if ( topoItem.IsNull() || !topoItem->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find topological object with name %1." << nameOfTopoItem.ToCString());
+    return TCL_ERROR;
+  }
+
+  if ( !topoItem->HasColor() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Topological object does not have color.");
+    return TCL_ERROR;
+  }
+
+  int colorInt = topoItem->GetColor();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()   * MAX_COLOR_SCALE;
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color: (%1, %2, %3)." << red << green << blue);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_CheckTopoItemColor(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
+{
+  if ( argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get name.
+  TCollection_AsciiString nameOfTopoItem;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "name", nameOfTopoItem) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Name of topological object is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color RGB components as unsigned integer values.
+  TCollection_AsciiString colorStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "color", colorStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color components are not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get color components.
+  std::vector<unsigned int> colorComponents;
+  std::vector<std::string> colorComponentsStr;
+  //
+  asiAlgo_Utils::Str::Split(colorStr.ToCString(), "(,)", colorComponentsStr);
+  //
+  for ( size_t k = 0; k < colorComponentsStr.size(); ++k )
+  {
+    TCollection_AsciiString compStr( colorComponentsStr[k].c_str() );
+    //
+    if ( compStr.IsIntegerValue() )
+      colorComponents.push_back( compStr.IntegerValue() );
+  }
+
+  if ( colorComponents.size() != 3 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Three color components expected.");
+    return TCL_ERROR;
+  }
+
+  Handle(asiData_IVTopoItemNode)
+  topoItem = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(nameOfTopoItem) );
+  //
+  if ( topoItem.IsNull() || !topoItem->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find topological object with name %1." << nameOfTopoItem.ToCString());
+    return TCL_ERROR;
+  }
+
+  if (!topoItem->HasColor())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Topological object does not have color.");
+    return TCL_ERROR;
+  }
+
+  int colorInt = topoItem->GetColor();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
+  int red   = color.Red()   * MAX_COLOR_SCALE;
+  int green = color.Green() * MAX_COLOR_SCALE;
+  int blue  = color.Blue()  * MAX_COLOR_SCALE;
+
+  Quantity_Color checkedColor(colorComponents[0]/MAX_COLOR_SCALE,
+                              colorComponents[1]/MAX_COLOR_SCALE,
+                              colorComponents[2]/MAX_COLOR_SCALE,
+                              Quantity_TOC_RGB);
+
+  if ( !color.IsEqual(checkedColor) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Color of topological object: (%1, %2, %3)." << red << green << blue);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Color matched.");
 
   return TCL_OK;
 }
@@ -989,7 +1525,7 @@ int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
     for ( TColStd_MapIteratorOfPackedMapOfInteger eit(eids); eit.More(); eit.Next() )
     {
       Handle(asiData_ElemMetadataNode)
-        emn = partApi.CreateElemMetadata( "Color", partApi.GetEdge( eit.Key() ) );
+        emn = partApi.FindElemMetadata( partApi.GetEdge( eit.Key() ), true );
       //
       const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
                                                    colorComponents[1],
@@ -998,6 +1534,7 @@ int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
       interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Setting edge color to %1." << icolor);
       //
       emn->SetColor(icolor);
+      emn->SetName("Color");
     }
   }
   cmdEngine::model->CommitCommand();
@@ -1420,6 +1957,70 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Sets color for the given face.",
     //
     __FILE__, group, ENGINE_SetFaceColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-face-color",
+    //
+    "get-face-color -fid <id>\n"
+    "\t Gets color for the given face.",
+    //
+    __FILE__, group, ENGINE_GetFaceColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-face-color",
+    //
+    "check-face-color -fid <id> -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Checks color for the given face.",
+    //
+    __FILE__, group, ENGINE_CheckFaceColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("set-part-color",
+    //
+    "set-part-color -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Sets color for the part.",
+    //
+    __FILE__, group, ENGINE_SetPartColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-part-color",
+    //
+    "get-part-color\n"
+    "\t Gets color for the part.",
+    //
+    __FILE__, group, ENGINE_GetPartColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-part-color",
+    //
+    "check-part-color -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Checks color for the part.",
+    //
+    __FILE__, group, ENGINE_CheckPartColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("set-topo-item-color",
+    //
+    "set-topo-item-color -name <name> -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Sets color for the given topoItem.",
+    //
+    __FILE__, group, ENGINE_SetTopoItemColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-topo-item-color",
+    //
+    "get-topo-item-color -name <name>\n"
+    "\t Gets color for the given topoItem.",
+    //
+    __FILE__, group, ENGINE_GetTopoItemColor);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-topo-item-color",
+    //
+    "check-topo-item-color -name <name> -color rgb(<ured>, <ugreen>, <ublue>)\n"
+    "\t Checks color for the given topoItem.",
+    //
+    __FILE__, group, ENGINE_CheckTopoItemColor);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("set-edge-color",

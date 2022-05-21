@@ -55,6 +55,7 @@
 #include <StepVisual_PresentationStyleSelect.hxx>
 #include <StepVisual_StyledItem.hxx>
 #include <StepVisual_SurfaceStyleUsage.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <Transfer_TransientListBinder.hxx>
 #include <TransferBRep.hxx>
@@ -242,10 +243,12 @@ bool asiAlgo_WriteSTEPWithMeta::writeColors(const Handle(XSControl_WorkSession)&
     TopoDS_Shape subShape = m_input->GetSubShape(ss);
 
     // Create STEP styles.
-    Handle(StepVisual_StyledItem) override;
+    Handle(StepVisual_StyledItem) overridedStyle;
     TopTools_MapOfShape Map;
     //
-    this->makeSTEPStyles(Styles, subShape, override, Map, DPDCs, ColRGBs);
+    Quantity_Color shapeColor = m_input->GetColor(subShape);
+
+    this->makeSTEPStyles(Styles, subShape, shapeColor, false, overridedStyle, Map, DPDCs, ColRGBs);
 
     // Create MDGPR.
     Handle(StepVisual_MechanicalDesignGeometricPresentationRepresentation) MDGPR;
@@ -257,6 +260,30 @@ bool asiAlgo_WriteSTEPWithMeta::writeColors(const Handle(XSControl_WorkSession)&
     //
     if ( !MDGPR.IsNull() )
       m_mapCompMDGPR.Bind(subShape, MDGPR);
+  }
+
+  // own shape
+  TopExp_Explorer expSolids(shape, TopAbs_SOLID);
+  for ( ; expSolids.More(); expSolids.Next() )
+  {
+    // Create STEP styles.
+    Handle(StepVisual_StyledItem) overridedStyle;
+    TopTools_MapOfShape Map;
+    //
+    Quantity_Color shapeColor = m_input->GetCommonColor();
+
+    this->makeSTEPStyles(Styles, expSolids.Value(), shapeColor, true, overridedStyle, Map, DPDCs, ColRGBs);
+
+    // Create MDGPR.
+    Handle(StepVisual_MechanicalDesignGeometricPresentationRepresentation) MDGPR;
+    //
+    if ( m_mapCompMDGPR.IsBound(expSolids.Value()) )
+      m_progress.SendLogMessage(LogWarn(Normal) << "Current shape already has MDGPR.");
+    //
+    Styles.CreateMDGPR(context, MDGPR);
+    //
+    if ( !MDGPR.IsNull() )
+      m_mapCompMDGPR.Bind(expSolids.Value(), MDGPR);
   }
 
   return true;
@@ -280,6 +307,8 @@ bool asiAlgo_WriteSTEPWithMeta::GetColorMode() const
 
 void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&                        Styles,
                                                const TopoDS_Shape&                          S,
+                                               const Quantity_Color&                        shapeColor,
+                                               const bool                                   isCommonColor,
                                                Handle(StepVisual_StyledItem)&               override,
                                                TopTools_MapOfShape&                         Map,
                                                STEPConstruct_DataMapOfAsciiStringTransient& DPDCs,
@@ -289,14 +318,12 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
   if ( !Map.Add(S) )
     return;
 
-  Quantity_Color shapeColor = m_input->GetColor(S);
-
   // Translate colors to STEP.
-  Handle(StepVisual_Colour) surfColor;
-  if ( m_input->HasColor(S) )
-    surfColor = Styles.EncodeColor(shapeColor, DPDCs, ColRGBs);
+  Handle(StepVisual_Colour) color;
+  if ( m_input->HasColor(S) || isCommonColor && m_input->HasCommonColor() )
+    color = Styles.EncodeColor(shapeColor, DPDCs, ColRGBs);
 
-  bool hasOwn = !surfColor.IsNull();
+  bool hasOwn = !color.IsNull();
 
   // Find target item and assign style to it.
   Handle(StepVisual_StyledItem) STEPstyle = override;
@@ -305,6 +332,8 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
   {
     if ( S.ShapeType() != TopAbs_COMPOUND ) // Skip compounds, let subshapes inherit its colors.
     {
+      bool isEdge = (S.ShapeType() == TopAbs_EDGE || S.ShapeType() == TopAbs_WIRE);
+
       TopLoc_Location L;
       TColStd_SequenceOfTransient seqRI;
       int nb = FindEntities(Styles.FinderProcess(), S, L, seqRI);
@@ -320,16 +349,16 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
 
         Handle(StepVisual_PresentationStyleAssignment) PSA;
 
-        if ( !surfColor.IsNull() )
+        if ( !color.IsNull() )
           //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
-          PSA = Styles.MakeColorPSA(item, surfColor, nullptr, false);
+          PSA = Styles.MakeColorPSA(item, !isEdge ? color: nullptr, isEdge ? color : nullptr, false);
         else
         {
           // Default color is white.
-          surfColor = Styles.EncodeColor(Quantity_Color(1, 1, 1, Quantity_TOC_RGB), DPDCs, ColRGBs);
+          color = Styles.EncodeColor(Quantity_Color(1, 1, 1, Quantity_TOC_RGB), DPDCs, ColRGBs);
           //
           //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
-          PSA = Styles.MakeColorPSA(item, surfColor, nullptr, false);
+          PSA = Styles.MakeColorPSA(item, !isEdge ? color : nullptr, isEdge ? color : nullptr, false);
         }
 
         STEPstyle = Styles.AddStyle(item, PSA, override);

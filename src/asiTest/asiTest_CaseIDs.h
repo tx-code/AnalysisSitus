@@ -49,6 +49,7 @@ enum test_CaseID
 
 /* ------------------------------------------------------------------------ */
 
+  CaseID_ChangeColor,
   CaseID_DataDictionary,
   CaseID_GenerateFacets,
   CaseID_Utils,

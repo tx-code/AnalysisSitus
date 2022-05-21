@@ -244,7 +244,6 @@ Handle(asiData_MetadataNode) asiEngine_Model::GetMetadataNode() const
   return nullptr;
 }
 
-
 //-----------------------------------------------------------------------------
 
 //! \return Features Node attached to the Part Node.

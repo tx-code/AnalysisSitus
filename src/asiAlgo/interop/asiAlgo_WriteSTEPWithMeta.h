@@ -107,6 +107,8 @@ private:
 
   void makeSTEPStyles(STEPConstruct_Styles&                        Styles,
                       const TopoDS_Shape&                          S,
+                      const Quantity_Color&                        shapeColor,
+                      const bool                                   isCommonColor,
                       Handle(StepVisual_StyledItem)&               override,
                       TopTools_MapOfShape&                         Map,
                       STEPConstruct_DataMapOfAsciiStringTransient& DPDCs,

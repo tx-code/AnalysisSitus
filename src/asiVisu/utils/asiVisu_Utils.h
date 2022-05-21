@@ -66,6 +66,7 @@
 //-----------------------------------------------------------------------------
 
 #define INF_LIMIT 100
+#define MAX_COLOR_SCALE 255.
 
 //-----------------------------------------------------------------------------
 
@@ -434,7 +435,7 @@ public:
     unsigned char uRed   = ( icolor >> 16 ) & 0xFF;
     unsigned char uGreen = ( icolor >>  8 ) & 0xFF;
     unsigned char uBlue  =   icolor         & 0xFF;
-    return ActAPI_Color(uRed/255., uGreen/255., uBlue/255., Quantity_TOC_RGB);
+    return ActAPI_Color(uRed/MAX_COLOR_SCALE, uGreen/MAX_COLOR_SCALE, uBlue/MAX_COLOR_SCALE, Quantity_TOC_RGB);
   }
 
 private:
