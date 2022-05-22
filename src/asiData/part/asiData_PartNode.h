@@ -127,7 +127,6 @@ public:
   //------------------------//
   // References             //
   //------------------------//
-    PID_MetadataElems,      //!< Metadata elements.
     PID_Features,           //!< Features.
   //------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE

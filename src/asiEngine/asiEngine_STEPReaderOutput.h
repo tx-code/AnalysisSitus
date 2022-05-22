@@ -32,7 +32,7 @@
 #define asiEngine_STEPReaderOutput_h
 
 // asiEngine includes
-#include <asiEngine_Model.h>
+#include <asiEngine_Part.h>
 
 // asiAlgo includes
 #include <asiAlgo_ReadSTEPWithMetaOutput.h>
@@ -64,16 +64,11 @@ public:
 
 protected:
 
-  //! Finds metadata element by shape.
-  //! \param[in] shape shape in question.
-  //! \return metadata element or null if no such element exists in the list.
-  asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
-    elemByShape(const TopoDS_Shape& shape) const;
-
-protected:
-
   //! Data Model instance.
   Handle(asiEngine_Model) m_model;
+
+  //! Part API.
+  asiEngine_Part m_api;
 
 };
 

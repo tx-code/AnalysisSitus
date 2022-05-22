@@ -111,18 +111,15 @@ public:
 
 public:
 
+  //! Returns Metadata Node.
+  //! \return Metadata Node.
+  asiEngine_EXPORT Handle(asiData_MetadataNode)
+    GetMetadata() const;
+
   //! Creates metadata holder.
   //! \return Metadata Node.
   asiEngine_EXPORT Handle(asiData_MetadataNode)
     CreateMetadata();
-
-  //! Creates elementary metadata holder.
-  //! \param[in] name  name of the Node.
-  //! \param[in] shape shape.
-  //! \return Element Metadata Node.
-  asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
-    CreateElemMetadata(const TCollection_ExtendedString& name,
-                       const TopoDS_Shape&               shape);
 
   //! Cleans up metadata.
   asiEngine_EXPORT void
@@ -138,19 +135,6 @@ public:
   asiEngine_EXPORT int
     GetNumOfMetadata() const;
 
-  //! Gathers all Metadata Element Nodes.
-  //! \param[out] nodes Metadata Element Nodes.
-  asiEngine_EXPORT void
-    GetMetadataElems(Handle(ActAPI_HNodeList)& nodes) const;
-
-  //! Finds or creates elemental metadata for the passed shape which is normally
-  //! a sub-shape of the part shape.
-  //! \param[in] shape  sub-shape in question.
-  //! \param[in] create whether to create the metadata element if it does not exist.
-  //! \return found or newly created metadata element.
-  asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
-    FindElemMetadata(const TopoDS_Shape& shape,
-                     const bool          create = false);
 public:
 
   //! Creates Features Node.

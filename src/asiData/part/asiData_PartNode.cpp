@@ -78,7 +78,6 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,          PID_IsCoincidentTopo);
   REGISTER_PARAMETER(Bool,          PID_RenderEdgesAsTubes);
   //
-  REGISTER_PARAMETER(ReferenceList, PID_MetadataElems);
   REGISTER_PARAMETER(ReferenceList, PID_Features);
 
   // Register custom Parameters specific to Analysis Situs.

@@ -31,7 +31,6 @@ set (part_H_FILES
   part/asiData_DeviationNode.h
   part/asiData_DiscrFaceNode.h
   part/asiData_EdgeNode.h
-  part/asiData_ElemMetadataNode.h
   part/asiData_FaceContourNode.h
   part/asiData_FaceNode.h
   part/asiData_FaceNodeBase.h
@@ -40,7 +39,9 @@ set (part_H_FILES
   part/asiData_FeaturesNode.h
   part/asiData_Grid2dNode.h
   part/asiData_HatchingNode.h
+  part/asiData_MetadataAttr.h
   part/asiData_MetadataNode.h
+  part/asiData_MetadataParameter.h
   part/asiData_NamingAttr.h
   part/asiData_NamingParameter.h
   part/asiData_PartNode.h
@@ -61,7 +62,6 @@ set (part_CPP_FILES
   part/asiData_DeviationNode.cpp
   part/asiData_DiscrFaceNode.cpp
   part/asiData_EdgeNode.cpp
-  part/asiData_ElemMetadataNode.cpp
   part/asiData_FaceContourNode.cpp
   part/asiData_FaceNode.cpp
   part/asiData_FaceNodeBase.cpp
@@ -70,7 +70,9 @@ set (part_CPP_FILES
   part/asiData_FeaturesNode.cpp
   part/asiData_Grid2dNode.cpp
   part/asiData_HatchingNode.cpp
+  part/asiData_MetadataAttr.cpp
   part/asiData_MetadataNode.cpp
+  part/asiData_MetadataParameter.cpp
   part/asiData_NamingAttr.cpp
   part/asiData_NamingParameter.cpp
   part/asiData_PartNode.cpp

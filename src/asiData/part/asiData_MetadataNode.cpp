@@ -31,6 +31,9 @@
 // Own include
 #include <asiData_MetadataNode.h>
 
+// asiData includes
+#include <asiData_MetadataParameter.h>
+
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
@@ -49,6 +52,9 @@
 asiData_MetadataNode::asiData_MetadataNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name, PID_Name);
+
+  // Register parameter types specific to Analysis Situs.
+  this->registerParameter(PID_Metadata, asiData_MetadataParameter::Instance(), false);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -86,60 +92,27 @@ void asiData_MetadataNode::SetName(const TCollection_ExtendedString& name)
 
 //-----------------------------------------------------------------------------
 
-//! Finds elemental metadata for the passed shape which is normally
-//! a sub-shape of the part shape.
-//! \param[in] shape  sub-shape in question.
-//! \return found metadata element or null if there is no such object.
-Handle(asiData_ElemMetadataNode)
-  asiData_MetadataNode::FindElemMetadata(const TopoDS_Shape& shape) const
+void asiData_MetadataNode::SetColor(const TopoDS_Shape& shape,
+                                    const int           icolor)
 {
-  // Iterate over the existing metadata elements to find one for the
-  // requested shape.
-  Handle(asiData_ElemMetadataNode) metadataElem_n;
-  for ( Handle(ActAPI_IChildIterator) cit = this->GetChildIterator(); cit->More(); cit->Next() )
-  {
-    /*
-       Make this accessor as fast as possible by using labels directly and
-       not using data cursors. Doing so, we avoid overheads on cursor
-       construction and validation thus saving quite a lot of CPU cycles.
-     */
+  Handle(asiData_MetadataParameter)
+    P = Handle(asiData_MetadataParameter)::DownCast( this->Parameter(PID_Metadata) );
 
-    TDF_Label root = cit->ValueLabel();
+  P->SetColor(shape, icolor);
+}
 
-#ifdef METADATA_DEBUG
-    TCollection_AsciiString path;
-    TDF_Tool::Entry(root, path);
-    std::string pathStr = path.ToCString();
-#endif // !METADATA_DEBUG
+int asiData_MetadataNode::GetColor(const TopoDS_Shape& shape) const
+{
+  Handle(asiData_MetadataParameter)
+    P = Handle(asiData_MetadataParameter)::DownCast( this->Parameter(PID_Metadata) );
 
-    // Access label with user Parameters.
-    TDF_Label shapeLab = root.FindChild(ActData_BaseNode::TagUser)
-                             .FindChild(asiData_ElemMetadataNode::PID_Shape);
+  return P->GetColor(shape);
+}
 
-    // Attributes do not "hang" on the shapeLab itself, but each attribute
-    // has its own label, and these labels are children of shapeLab.
-    Handle(TNaming_NamedShape) shapeAttr;
-    TDF_ChildIterator itShapeLab(shapeLab, false);
-    for ( ; itShapeLab.More(); itShapeLab.Next() )
-    {
-      TDF_Label label = itShapeLab.Value();
-      // Get shape attribute.
-      if ( label.FindAttribute(TNaming_NamedShape::GetID(), shapeAttr) )
-      {
-        break;
-      }
-    }
+void asiData_MetadataNode::GetShapeColorMap(asiData_MetadataAttr::t_shapeColorMap& map) const
+{
+  Handle(asiData_MetadataParameter)
+    P = Handle(asiData_MetadataParameter)::DownCast( this->Parameter(PID_Metadata) );
 
-    if ( shapeAttr.IsNull() )
-      continue;
-
-    // Compare shape and return if that's one requested.
-    if ( shapeAttr->Get().IsSame(shape) )
-    {
-      metadataElem_n = Handle(asiData_ElemMetadataNode)::DownCast( ActData_NodeFactory::NodeSettle(root) );
-      break;
-    }
-  }
-
-  return metadataElem_n;
+  P->GetShapeColorMap(map);
 }

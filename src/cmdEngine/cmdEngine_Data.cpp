@@ -896,13 +896,14 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
   else
     fids.Add(fid);
 
+  Handle(asiData_MetadataNode) meta_n = partApi.GetMetadata();
+
   cmdEngine::model->OpenCommand();
   {
     // Add metadata.
     for ( TColStd_MapIteratorOfPackedMapOfInteger fit(fids); fit.More(); fit.Next() )
     {
-      Handle(asiData_ElemMetadataNode)
-        emn = partApi.FindElemMetadata( partApi.GetFace( fit.Key() ), true );
+      TopoDS_Shape shape = partApi.GetFace( fit.Key() );
       //
       const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
                                                    colorComponents[1],
@@ -910,8 +911,7 @@ int ENGINE_SetFaceColor(const Handle(asiTcl_Interp)& interp,
       //
       interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Setting face color to %1." << icolor);
       //
-      emn->SetColor(icolor);
-      emn->SetName("Color");
+      meta_n->SetColor(shape, icolor);
     }
   }
   cmdEngine::model->CommitCommand();
@@ -952,33 +952,24 @@ int ENGINE_GetFaceColor(const Handle(asiTcl_Interp)& interp,
   }
 
   asiEngine_Part partApi( cmdEngine::model,
-                          (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
+                         (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
 
-  bool isFound = false;
-  int colorInt = 0;
-  Handle(ActAPI_HNodeList) metaElems;
-  partApi.GetMetadataElems(metaElems);
-  if ( !metaElems.IsNull() )
-  {
-    TopoDS_Shape shape = partApi.GetFace(fid);
-    for ( ActAPI_HNodeList::Iterator nit(*metaElems); nit.More(); nit.Next() )
-    {
-      const Handle(asiData_ElemMetadataNode)&
-        metaNode = Handle(asiData_ElemMetadataNode)::DownCast(nit.Value());
+  Handle(asiData_MetadataNode) meta_n = partApi.GetMetadata();
 
-      if ( metaNode->GetShape().IsSame(shape) )
-      {
-        colorInt = metaNode->GetColor();
-        isFound = true;
-        break;
-      }
-    }
-  }
+  asiData_MetadataAttr::t_shapeColorMap map;
+  meta_n->GetShapeColorMap(map);
+
+  int          colorInt = 0;
+  TopoDS_Shape shape    = partApi.GetFace(fid);
+  bool         isFound  = map.Contains(shape);
+  //
+  if ( isFound )
+    colorInt = map.FindFromKey(shape);
 
   if ( !isFound )
   {
     colorInt = cmdEngine::model->GetPartNode()->GetColor();
-    isFound = true;
+    isFound  = true;
   }
 
   ActAPI_Color color = asiVisu_Utils::IntToColor(colorInt);
@@ -1047,27 +1038,19 @@ int ENGINE_CheckFaceColor(const Handle(asiTcl_Interp)& interp,
   asiEngine_Part partApi( cmdEngine::model,
                           (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
 
+  TopoDS_Shape shape = partApi.GetFace(fid);
 
-  bool isFound = false;
+  // Get metadata.
+  Handle(asiData_MetadataNode) metadata_n = partApi.GetMetadata();
+
+  asiData_MetadataAttr::t_shapeColorMap map;
+  metadata_n->GetShapeColorMap(map);
+
+  bool isFound = map.Contains(shape);
   int colorInt = 0;
-  Handle(ActAPI_HNodeList) metaElems;
-  partApi.GetMetadataElems(metaElems);
-  if ( !metaElems.IsNull() )
-  {
-    TopoDS_Shape shape = partApi.GetFace(fid);
-    for ( ActAPI_HNodeList::Iterator nit(*metaElems); nit.More(); nit.Next() )
-    {
-      const Handle(asiData_ElemMetadataNode)&
-        metaNode = Handle(asiData_ElemMetadataNode)::DownCast(nit.Value());
-
-      if ( metaNode->GetShape().IsSame(shape) )
-      {
-        colorInt = metaNode->GetColor();
-        isFound = true;
-        break;
-      }
-    }
-  }
+  //
+  if ( isFound )
+    colorInt = map.FindFromKey(shape);
 
   if ( !isFound )
   {
@@ -1511,6 +1494,9 @@ int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
   asiEngine_Part partApi( cmdEngine::model,
                           (cmdEngine::cf && cmdEngine::cf->ViewerPart) ? cmdEngine::cf->ViewerPart->PrsMgr() : nullptr );
 
+  // Get Metadata Node.
+  Handle(asiData_MetadataNode) metadata_n = partApi.GetMetadata();
+
   // If the edge ID is not passed, get the selected edge.
   TColStd_PackedMapOfInteger eids;
   //
@@ -1524,17 +1510,15 @@ int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
     // Add metadata.
     for ( TColStd_MapIteratorOfPackedMapOfInteger eit(eids); eit.More(); eit.Next() )
     {
-      Handle(asiData_ElemMetadataNode)
-        emn = partApi.FindElemMetadata( partApi.GetEdge( eit.Key() ), true );
-      //
+      TopoDS_Shape edge = partApi.GetEdge( eit.Key() );
+
       const int icolor = asiVisu_Utils::ColorToInt(colorComponents[0],
                                                    colorComponents[1],
                                                    colorComponents[2]);
       //
       interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Setting edge color to %1." << icolor);
       //
-      emn->SetColor(icolor);
-      emn->SetName("Color");
+      metadata_n->SetColor(edge, icolor);
     }
   }
   cmdEngine::model->CommitCommand();
@@ -1545,43 +1529,6 @@ int ENGINE_SetEdgeColor(const Handle(asiTcl_Interp)& interp,
   //
   if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
     cmdEngine::cf->ObjectBrowser->Populate(); // To sync metadata.
-
-  return TCL_OK;
-}
-
-//-----------------------------------------------------------------------------
-
-int ENGINE_GetMetadataIds(const Handle(asiTcl_Interp)& interp,
-                          int                          argc,
-                          const char**                 argv)
-{
-  if ( argc != 1 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
-  // Get all metadata elements.
-  asiEngine_Part partApi(cmdEngine::model);
-  //
-  Handle(ActAPI_HNodeList) elems;
-  partApi.GetMetadataElems(elems);
-
-  // Number of elements.
-  const int numElems = elems->Length();
-
-  // Send to interpreter.
-  int idx = 0;
-  //
-  for ( ActAPI_HNodeList::Iterator nit(*elems); nit.More(); nit.Next() )
-  {
-    ++idx;
-    const ActAPI_DataObjectId nid = nit.Value()->GetId();
-
-    *interp << nid;
-
-    if ( idx < numElems )
-      *interp << " ";
-  }
 
   return TCL_OK;
 }
@@ -2029,14 +1976,6 @@ void cmdEngine::Commands_Data(const Handle(asiTcl_Interp)&      interp,
     "\t Sets color for the given edge.",
     //
     __FILE__, group, ENGINE_SetEdgeColor);
-
-  //-------------------------------------------------------------------------//
-  interp->AddCommand("get-metadata-ids",
-    //
-    "get-metadata-ids\n"
-    "\t Returns IDs of all elementary metadata objects.",
-    //
-    __FILE__, group, ENGINE_GetMetadataIds);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("get-param-shape",

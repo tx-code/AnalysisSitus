@@ -39,6 +39,7 @@
 #include <asiAlgo_ShapePartnerHasher.h>
 
 // asiData includes
+#include <asiData_MetadataAttr.h>
 #include <asiData_MetadataNode.h>
 #include <asiData_PartNode.h>
 
@@ -52,8 +53,6 @@
 //! Element Nodes.
 class asiVisu_ShapeColorSourceMeta : public asiVisu_ShapeColorSource
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_ShapeColorSourceMeta, asiVisu_ShapeColorSource)
 
@@ -66,18 +65,7 @@ public:
   : asiVisu_ShapeColorSource (),
     m_metaNode               (node)
   {
-    // Prepare cache.
-    for ( Handle(ActAPI_IChildIterator) cit = m_metaNode->GetChildIterator();
-          cit->More(); cit->Next() )
-    {
-      Handle(asiData_ElemMetadataNode)
-        emn = Handle(asiData_ElemMetadataNode)::DownCast( cit->Value() );
-
-      TopoDS_Shape shape  = emn->GetShape();
-      const int    icolor = emn->GetColor();
-
-      m_shapeColorMap.Bind(shape, icolor);
-    }
+    m_metaNode->GetShapeColorMap(m_shapeColorMap);
 
     // Get Part Node for faster access.
     m_partNode = Handle(asiData_PartNode)::DownCast( m_metaNode->GetParentNode() );
@@ -117,7 +105,7 @@ public:
 protected:
 
   //! Cache of shapes versus colors.
-  NCollection_DataMap<TopoDS_Shape, int, asiAlgo_ShapePartnerHasher> m_shapeColorMap;
+  asiData_MetadataAttr::t_shapeColorMap m_shapeColorMap;
 
   //! Part Node.
   Handle(asiData_PartNode) m_partNode;

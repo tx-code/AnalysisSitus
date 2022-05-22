@@ -42,6 +42,9 @@
 #include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
 
+// asiData includes
+#include <asiData_MetadataAttr.h>
+
 // asiAlgo includes
 #include <asiAlgo_CheckDeviations.h>
 #include <asiAlgo_FileFormat.h>
@@ -380,6 +383,13 @@ bool
 
 //-----------------------------------------------------------------------------
 
+Handle(asiData_MetadataNode) asiEngine_Part::GetMetadata() const
+{
+  return m_model->GetMetadataNode();
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_MetadataNode) asiEngine_Part::CreateMetadata()
 {
   Handle(ActAPI_INode) metadata_base = asiData_MetadataNode::Instance();
@@ -400,32 +410,6 @@ Handle(asiData_MetadataNode) asiEngine_Part::CreateMetadata()
 
 //-----------------------------------------------------------------------------
 
-Handle(asiData_ElemMetadataNode)
-  asiEngine_Part::CreateElemMetadata(const TCollection_ExtendedString& name,
-                                     const TopoDS_Shape&               shape)
-{
-  Handle(asiData_ElemMetadataNode)
-    node = Handle(asiData_ElemMetadataNode)::DownCast( asiData_ElemMetadataNode::Instance() );
-  //
-  m_model->GetElemMetadataPartition()->AddNode(node);
-
-  // Initialize.
-  node->Init();
-  node->SetName(name);
-  node->SetShape(shape);
-
-  // Set as child for the Metadata Node.
-  m_model->GetMetadataNode()->AddChildNode(node);
-
-  // Add reference in the part Node.
-  m_model->GetPartNode()->ConnectReferenceToList(asiData_PartNode::PID_MetadataElems,
-                                                 node);
-
-  return node;
-}
-
-//-----------------------------------------------------------------------------
-
 void asiEngine_Part::CleanMetadata()
 {
   this->_cleanChildren( m_model->GetMetadataNode() );
@@ -435,47 +419,28 @@ void asiEngine_Part::CleanMetadata()
 
 void asiEngine_Part::UpdateMetadata(const Handle(asiAlgo_History)& history)
 {
-  std::vector<Handle(asiData_ElemMetadataDTO)> dtos;
+  Handle(asiData_MetadataNode) N = this->GetMetadata();
 
-  if ( !history.IsNull() )
-  {
-    // Get references to metadata elements.
-    Handle(ActData_ReferenceListParameter)
-      refListParam = ActParamTool::AsReferenceList( m_model->GetPartNode()->Parameter(asiData_PartNode::PID_MetadataElems) );
-    //
-    Handle(ActAPI_HDataCursorList) refs = refListParam->GetTargets();
-    //
-    if ( refs.IsNull() )
-      return;
-
-    // Iterate over the existing metadata to gather data transfer objects (DTOs)
-    // for transferring data.
-    for ( ActAPI_HDataCursorList::Iterator it(*refs); it.More(); it.Next() )
-    {
-      const Handle(asiData_ElemMetadataNode)&
-        MN = Handle(asiData_ElemMetadataNode)::DownCast( it.Value() );
-      //
-      if ( MN.IsNull() || !MN->IsWellFormed() )
-        continue;
-
-      // Prepare DTO.
-      dtos.push_back( MN->CreateDTO() );
-    }
-  }
+  // Get all metadata records.
+  asiData_MetadataAttr::t_shapeColorMap shapeColorMap;
+  N->GetShapeColorMap(shapeColorMap);
 
   // Clean up the existing metadata.
   this->CleanMetadata();
 
-  // If there is no history, let's simply clean the metadata.
+  // If there is no history, let's simply leave the
+  // metadata container cleaned up.
   if ( history.IsNull() )
     return;
 
-  // Create new metadata objects from the collected DTOs.
-  for ( size_t k = 0; k < dtos.size(); ++k )
+  // Create new metadata records from the collected DTOs.
+  for ( int k = 1; k <= shapeColorMap.Extent(); ++k )
   {
-    std::cout << "\t" << asiAlgo_Utils::ShapeAddrWithPrefix(dtos[k]->Shape) << " >>> ";
+    const TopoDS_Shape& sshape = shapeColorMap.FindKey(k);
 
-    TopoDS_Shape imSh = history->GetLastImageOrArg(dtos[k]->Shape);
+    std::cout << "\t" << asiAlgo_Utils::ShapeAddrWithPrefix(sshape) << " >>> ";
+
+    TopoDS_Shape imSh = history->GetLastImageOrArg(sshape);
     //
     if ( imSh.IsNull() ) // Image is null, i.e., the shape was deleted.
     {
@@ -485,11 +450,8 @@ void asiEngine_Part::UpdateMetadata(const Handle(asiAlgo_History)& history)
     //
     std::cout << asiAlgo_Utils::ShapeAddrWithPrefix(imSh) << std::endl;
 
-    // Create elementary metadata Node.
-    Handle(asiData_ElemMetadataNode)
-      EMN = this->CreateElemMetadata(dtos[k]->Name, imSh);
-    //
-    EMN->SetColor(dtos[k]->Color);
+    // Add metadata record.
+    N->SetColor( imSh, shapeColorMap.FindFromIndex(k) );
   }
 }
 
@@ -497,52 +459,13 @@ void asiEngine_Part::UpdateMetadata(const Handle(asiAlgo_History)& history)
 
 int asiEngine_Part::GetNumOfMetadata() const
 {
-  Handle(ActData_ReferenceListParameter)
-    refListParam = ActParamTool::AsReferenceList( m_model->GetPartNode()->Parameter(asiData_PartNode::PID_MetadataElems) );
-  //
-  const int numElems = refListParam->NbTargets();
+  Handle(asiData_MetadataNode) N = this->GetMetadata();
 
-  return numElems;
-}
+  // Get all metadata records.
+  asiData_MetadataAttr::t_shapeColorMap shapeColorMap;
+  N->GetShapeColorMap(shapeColorMap);
 
-//-----------------------------------------------------------------------------
-
-void asiEngine_Part::GetMetadataElems(Handle(ActAPI_HNodeList)& nodes) const
-{
-  nodes = new ActAPI_HNodeList;
-
-  for ( Handle(ActAPI_IChildIterator) cit = m_model->GetMetadataNode()->GetChildIterator();
-        cit->More(); cit->Next() )
-  {
-    Handle(asiData_ElemMetadataNode)
-      elem_n = Handle(asiData_ElemMetadataNode)::DownCast( cit->Value() );
-    //
-    if ( !elem_n.IsNull() && elem_n->IsWellFormed() )
-      nodes->Append(elem_n);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-Handle(asiData_ElemMetadataNode)
-  asiEngine_Part::FindElemMetadata(const TopoDS_Shape& shape,
-                                   const bool          create)
-{
-  Handle(asiData_ElemMetadataNode)
-    metadataElem_n = m_model->GetMetadataNode()->FindElemMetadata(shape);
-
-  // Create if requested.
-  if ( metadataElem_n.IsNull() && create )
-  {
-    // Prepare name.
-    std::string nodeName("Element ");
-    nodeName += asiAlgo_Utils::ShapeTypeStr(shape);
-
-    // Create elementary metadata Node.
-    metadataElem_n = this->CreateElemMetadata(nodeName.c_str(), shape);
-  }
-
-  return metadataElem_n;
+  return shapeColorMap.Extent();
 }
 
 //-----------------------------------------------------------------------------
@@ -1324,21 +1247,18 @@ void asiEngine_Part::GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndi
 void asiEngine_Part::TransferMetadata(const asiAsm::xde::PartId&      pid,
                                       const Handle(asiAsm::xde::Doc)& xdeDoc)
 {
-  // Get all metadata elements.
-  Handle(ActAPI_HNodeList) mdElems;
-  this->GetMetadataElems(mdElems);
-  //
-  if ( mdElems.IsNull() || !mdElems->Length() )
-    return;
+  Handle(asiData_MetadataNode) N = this->GetMetadata();
 
-  for ( ActAPI_HNodeList::Iterator nit(*mdElems); nit.More(); nit.Next() )
+  // Get all metadata records.
+  asiData_MetadataAttr::t_shapeColorMap shapeColorMap;
+  N->GetShapeColorMap(shapeColorMap);
+
+  // Create new metadata records from the collected DTOs.
+  for ( int k = 1; k <= shapeColorMap.Extent(); ++k )
   {
-    Handle(asiData_ElemMetadataNode)
-      mdNode = Handle(asiData_ElemMetadataNode)::DownCast( nit.Value() );
-
     // Get shape and color.
-    TopoDS_Shape shape  = mdNode->GetShape();
-    const int    icolor = mdNode->GetColor();
+    const TopoDS_Shape& shape  = shapeColorMap.FindKey(k);
+    const int           icolor = shapeColorMap.FindFromIndex(k);
 
     ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
 

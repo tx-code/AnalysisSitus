@@ -31,9 +31,6 @@
 // Own include
 #include <asiEngine_STEPReaderOutput.h>
 
-// asiEngine includes
-#include <asiEngine_Part.h>
-
 // asiVisu includes
 #include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
@@ -42,16 +39,15 @@
 
 asiEngine_STEPReaderOutput::asiEngine_STEPReaderOutput(const Handle(asiEngine_Model)& M)
 : asiAlgo_ReadSTEPWithMetaOutput (),
-  m_model                        (M)
+  m_model                        (M),
+  m_api                          (M)
 {}
 
 //-----------------------------------------------------------------------------
 
 void asiEngine_STEPReaderOutput::SetShape(const TopoDS_Shape& shape)
 {
-  asiEngine_Part partApi(m_model);
-  //
-  partApi.Update( shape, nullptr, !m_model->GetPartNode()->IsKeepTessParams() );
+  m_api.Update( shape, nullptr, !m_model->GetPartNode()->IsKeepTessParams() );
 }
 
 //-----------------------------------------------------------------------------
@@ -81,22 +77,7 @@ void asiEngine_STEPReaderOutput::SetColor(const TopoDS_Shape&   subshape,
     if ( (subshape.ShapeType() == TopAbs_VERTEX) && (attch != ColorAttachment_POINT) )
       return;
 
-    Handle(asiData_ElemMetadataNode) elemNode = this->elemByShape(subshape);
-    //
-    if ( elemNode.IsNull() || !elemNode->IsWellFormed() )
-      return;
-
     // Store color.
-    elemNode->SetColor(iCol);
+    m_api.GetMetadata()->SetColor(subshape, iCol);
   }
-}
-
-//-----------------------------------------------------------------------------
-
-Handle(asiData_ElemMetadataNode)
-  asiEngine_STEPReaderOutput::elemByShape(const TopoDS_Shape& shape) const
-{
-  asiEngine_Part partApi(m_model);
-
-  return partApi.FindElemMetadata(shape, true);
 }

@@ -32,7 +32,7 @@
 #define asiEngine_STEPWriterInput_h
 
 // asiEngine includes
-#include <asiEngine_Model.h>
+#include <asiEngine_Part.h>
 
 // asiAlgo includes
 #include <asiAlgo_WriteSTEPWithMetaInput.h>
@@ -42,8 +42,6 @@
 //! Input data provider for the STEP writer with metadata.
 class asiEngine_STEPWriterInput : public asiAlgo_WriteSTEPWithMetaInput
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiEngine_STEPWriterInput, asiAlgo_WriteSTEPWithMetaInput)
 
@@ -95,19 +93,14 @@ public:
 
 protected:
 
-  //! Finds metadata element by shape.
-  //! \param[in] shape shape in question.
-  //! \return metadata element or null if no such element exists in the list.
-  asiEngine_EXPORT Handle(asiData_ElemMetadataNode)
-    elemByShape(const TopoDS_Shape& shape) const;
-
-protected:
-
   //! Data Model instance.
   Handle(asiEngine_Model) m_model;
 
-  //! All Metadata Element Nodes.
-  Handle(ActAPI_HNodeList) m_metaElems;
+  //! Part API.
+  asiEngine_Part m_api;
+
+  //! Metadata Node.
+  Handle(asiData_MetadataNode) m_metadata;
 
 };
 

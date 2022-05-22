@@ -34,9 +34,6 @@
 // asiUI includes
 #include <asiUI_ParamEditorImpl.h>
 
-// asiData includes
-#include <asiData_ElemMetadataNode.h>
-
 // asiEngine includes
 #include <asiEngine_Part.h>
 
@@ -81,30 +78,9 @@ void asiUI_ObjectBrowserListener::processNode(const ActAPI_DataObjectId& nid)
   if ( node.IsNull() || !node->IsWellFormed() )
     return;
 
-  /* ==================
-   *  Metadata element.
-   * ================== */
-
-  if ( node->IsInstance( STANDARD_TYPE(asiData_ElemMetadataNode) ) )
-  {
-    Handle(asiData_ElemMetadataNode)
-      emn = Handle(asiData_ElemMetadataNode)::DownCast(node);
-
-    // Get part shape.
-    TopoDS_Shape partShape = m_cf->Model->GetPartNode()->GetShape();
-
-    // Check if the sub-shape is contained with the part.
-    TopoDS_Shape subshape = emn->GetShape();
-    //
-    if ( asiAlgo_Utils::Contains(partShape, subshape) )
-      m_cf->Progress.SendLogMessage(LogInfo(Normal) << "Sub-shape is ALIVE.");
-    else
-      m_cf->Progress.SendLogMessage(LogWarn(Normal) << "Sub-shape is DEAD.");
-  }
-
-  /* ==================
-   *  Metadata element.
-   * ================== */
+  /* ==============
+   *  Feature Node.
+   * ============== */
 
   if ( node->IsInstance( STANDARD_TYPE(asiData_FeatureNode) ) )
   {

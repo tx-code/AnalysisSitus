@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 27 May 2019
+// Created on: 21 May 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2019-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,75 +28,83 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiData_MetadataNode_h
-#define asiData_MetadataNode_h
+#ifndef asiData_MetadataAttr_h
+#define asiData_MetadataAttr_h
 
 // asiData includes
-#include <asiData_MetadataAttr.h>
+#include <asiData.h>
 
-// Active Data includes
-#include <ActData_BaseNode.h>
+// asiAlgo includes
+#include <asiAlgo_AAG.h>
 
-//-----------------------------------------------------------------------------
+// OCCT includes
+#include <TDF_Attribute.hxx>
+#include <TDF_Label.hxx>
 
-//! Node to group metadata chunks associated with the elements of a CAD part.
-class asiData_MetadataNode : public ActData_BaseNode
+//! OCAF attribute for metadata, such as colors.
+class asiData_MetadataAttr : public TDF_Attribute
 {
-public:
-
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiData_MetadataNode, ActData_BaseNode)
-
-  // Automatic registration of Node type in global factory
-  DEFINE_NODE_FACTORY(asiData_MetadataNode, Instance)
+  DEFINE_STANDARD_RTTI_INLINE(asiData_MetadataAttr, TDF_Attribute)
 
 public:
 
-  //! IDs for the underlying Parameters.
-  enum ParamId
-  {
-  //------------------//
-    PID_Name,         //!< Name of the Node.
-    PID_Metadata,     //!< Metadata.
-  //------------------//
-    PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
-  };
+  typedef NCollection_IndexedDataMap<TopoDS_Shape,
+                                     int,
+                                     asiAlgo_ShapePartnerHasher> t_shapeColorMap;
 
+// Construction & settling-down routines:
 public:
 
-  asiData_EXPORT static Handle(ActAPI_INode)
-    Instance();
+  asiData_EXPORT
+    asiData_MetadataAttr();
 
-// Generic naming support:
+  asiData_EXPORT static Handle(asiData_MetadataAttr)
+    Set(const TDF_Label& Label);
+
+// GUID accessors:
 public:
 
-  asiData_EXPORT virtual TCollection_ExtendedString
-    GetName();
+  asiData_EXPORT static const Standard_GUID&
+    GUID();
+
+  asiData_EXPORT virtual const Standard_GUID&
+    ID() const;
+
+// Attribute's kernel methods:
+public:
+
+  asiData_EXPORT virtual Handle(TDF_Attribute)
+    NewEmpty() const;
 
   asiData_EXPORT virtual void
-    SetName(const TCollection_ExtendedString& name);
+    Restore(const Handle(TDF_Attribute)& mainAttr);
 
-// Initialization:
+  asiData_EXPORT virtual void
+    Paste(const Handle(TDF_Attribute)&       into,
+          const Handle(TDF_RelocationTable)& relocTable) const;
+
+// Accessors for domain-specific data:
 public:
 
   asiData_EXPORT void
-    Init();
-
-  asiData_EXPORT void
-    SetColor(const TopoDS_Shape&,
-             const int);
+    SetColor(const TopoDS_Shape& shape,
+             const int           icolor);
 
   asiData_EXPORT int
-    GetColor(const TopoDS_Shape&) const;
+    GetColor(const TopoDS_Shape& shape) const;
 
   asiData_EXPORT void
-    GetShapeColorMap(asiData_MetadataAttr::t_shapeColorMap&) const;
+    SetShapeColorMap(const t_shapeColorMap& map);
 
-protected:
+  asiData_EXPORT const t_shapeColorMap&
+    GetShapeColorMap() const;
 
-  //! Allocation is allowed only via Instance() method.
-  asiData_EXPORT
-    asiData_MetadataNode();
+// Members:
+private:
+
+  //! Stored map of colors.
+  t_shapeColorMap m_shapeColorMap;
 
 };
 

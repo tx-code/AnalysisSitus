@@ -60,7 +60,7 @@ void asiUI_ParameterEditorListenerDefault::beforeParameterChanged(const Handle(A
     if ( pid == asiData_PartNode::PID_Color )
     {
       // Customization of color assignment in the Part Node consists in
-      // creating a metadata element in case if any face is selected. If,
+      // creating a metadata record in the case if any face is selected. If,
       // however, there is no active face, this callback simply returns true
       // to let the base class proceed as usual.
       // ...
@@ -69,6 +69,8 @@ void asiUI_ParameterEditorListenerDefault::beforeParameterChanged(const Handle(A
                               m_cf->ViewerPart->PrsMgr(),
                               m_cf->Progress,
                               m_cf->Plotter );
+
+      Handle(asiData_MetadataNode) meta_n = partApi.GetMetadata();
 
       // Get IDs of the highlighted faces.
       TColStd_PackedMapOfInteger fids;
@@ -91,16 +93,14 @@ void asiUI_ParameterEditorListenerDefault::beforeParameterChanged(const Handle(A
         // Get the face in question.
         TopoDS_Face F = partApi.GetFace(fid);
 
-        // Find or create Metadata Element for this face.
-        Handle(asiData_ElemMetadataNode) meta_n = partApi.FindElemMetadata(F, true);
-
         // Set color.
-        meta_n->SetColor( value.toInt() );
-
-        // Set reference list to metadata in the Part Node modified to allow for
-        // actualization in 3D when the existing face was recolored.
-        part_n->Parameter(asiData_PartNode::PID_MetadataElems)->SetModified();
+        meta_n->SetColor( F, value.toInt() );
       }
+
+      // Touch the Part Node. That is a little trick to actualize
+      // the presentation of the Part Node, because if we touch its
+      // any Parameter, it will be in the "affected" list.
+      part_n->Parameter(asiData_PartNode::PID_Color)->SetModified();
 
       // Set update type for Object Browser. Here we need to repopulate the
       // tree as new object appears.

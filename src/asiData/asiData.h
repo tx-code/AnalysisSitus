@@ -61,7 +61,8 @@
 #define Parameter_UniformGrid Parameter_LASTFREE + 5
 #define Parameter_PolyMesh    Parameter_LASTFREE + 6
 #define Parameter_DiscrModel  Parameter_LASTFREE + 7
+#define Parameter_Metadata    Parameter_LASTFREE + 8
 //
-#define Parameter_LASTFREE_ASITUS Parameter_Mesh
+#define Parameter_LASTFREE_ASITUS Parameter_LASTFREE + 100
 
 #endif

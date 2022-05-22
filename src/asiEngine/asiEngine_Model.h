@@ -177,14 +177,6 @@ public:
     return Handle(asiData_Partition<asiData_MetadataNode>)::DownCast( this->Partition(Partition_Metadata) );
   }
 
-  //! Accessor for a Partition instance dedicated to Element Metadata Nodes.
-  //! \return requested Partition.
-  Handle(asiData_Partition<asiData_ElemMetadataNode>) GetElemMetadataPartition() const
-  {
-    return Handle(asiData_Partition<asiData_ElemMetadataNode>)::DownCast( this->Partition(Partition_ElemMetadata) );
-  }
-
-  
   //! Accessor for a Partition instance dedicated to Features Nodes.
   //! \return requested Partition.
   Handle(asiData_Partition<asiData_FeaturesNode>) GetFeaturesPartition() const

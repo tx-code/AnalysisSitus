@@ -31,9 +31,6 @@
 // Own include
 #include <asiEngine_STEPWriterInput.h>
 
-// asiEngine includes
-#include <asiEngine_Part.h>
-
 // asiVisu includes
 #include <asiVisu_PrsManager.h>
 #include <asiVisu_Utils.h>
@@ -42,10 +39,10 @@
 
 asiEngine_STEPWriterInput::asiEngine_STEPWriterInput(const Handle(asiEngine_Model)& M)
 : asiAlgo_WriteSTEPWithMetaInput (),
-  m_model                        (M)
+  m_model                        (M),
+  m_api                          (M)
 {
-  asiEngine_Part api(m_model);
-  api.GetMetadataElems(m_metaElems);
+  m_metadata = m_api.GetMetadata();
 }
 
 //-----------------------------------------------------------------------------
@@ -68,29 +65,30 @@ TopoDS_Shape asiEngine_STEPWriterInput::GetShape() const
 
 int asiEngine_STEPWriterInput::GetNumSubShapes() const
 {
-  if ( m_metaElems.IsNull() )
-    return 0;
+  asiData_MetadataAttr::t_shapeColorMap map;
+  m_metadata->GetShapeColorMap(map);
 
-  return m_metaElems->Length();
+  return map.Extent();
 }
 
 //-----------------------------------------------------------------------------
 
 TopoDS_Shape asiEngine_STEPWriterInput::GetSubShape(const int zeroBasedIdx) const
 {
-  const Handle(asiData_ElemMetadataNode)&
-    elemNode = Handle(asiData_ElemMetadataNode)::DownCast( m_metaElems->Value(zeroBasedIdx + 1) );
+  asiData_MetadataAttr::t_shapeColorMap map;
+  m_metadata->GetShapeColorMap(map);
   //
-  return elemNode->GetShape();
+  return map.FindKey(zeroBasedIdx + 1);
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiEngine_STEPWriterInput::HasColor(const TopoDS_Shape& shape) const
 {
-  Handle(asiData_ElemMetadataNode) metaNode = this->elemByShape(shape);
-  //
-  if ( metaNode.IsNull() )
+  asiData_MetadataAttr::t_shapeColorMap map;
+  m_metadata->GetShapeColorMap(map);
+
+  if ( !map.Contains(shape) )
     return false;
 
   return true;
@@ -101,49 +99,32 @@ bool asiEngine_STEPWriterInput::HasColor(const TopoDS_Shape& shape) const
 Quantity_Color
   asiEngine_STEPWriterInput::GetColor(const TopoDS_Shape& shape) const
 {
-  Handle(asiData_ElemMetadataNode) metaNode = this->elemByShape(shape);
-  //
-  if ( metaNode.IsNull() )
+  asiData_MetadataAttr::t_shapeColorMap map;
+  m_metadata->GetShapeColorMap(map);
+
+  if ( !map.Contains(shape) )
     return Quantity_Color(1., 1., 1., Quantity_TOC_RGB);
 
-  ActAPI_Color color = asiVisu_Utils::IntToColor( metaNode->GetColor() );
+  const int icolor = map.FindFromKey(shape);
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
 
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 
 //-----------------------------------------------------------------------------
 
-Handle(asiData_ElemMetadataNode)
-  asiEngine_STEPWriterInput::elemByShape(const TopoDS_Shape& shape) const
+Quantity_Color asiEngine_STEPWriterInput::GetCommonColor() const
 {
-  if ( m_metaElems.IsNull() )
-    return nullptr;
+  const int icolor = m_model->GetPartNode()->GetColor();
 
-  for ( ActAPI_HNodeList::Iterator nit(*m_metaElems); nit.More(); nit.Next() )
-  {
-    const Handle(asiData_ElemMetadataNode)&
-      metaNode = Handle(asiData_ElemMetadataNode)::DownCast( nit.Value() );
-
-    if ( metaNode->GetShape().IsSame(shape) )
-      return metaNode;
-  }
-
-  return nullptr;
-}
-
-//-----------------------------------------------------------------------------
-
-Quantity_Color asiEngine_STEPWriterInput::
-  GetCommonColor() const
-{
-  ActAPI_Color color = asiVisu_Utils::IntToColor( m_model->GetPartNode()->GetColor() );
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiEngine_STEPWriterInput::
-  HasCommonColor() const
+bool asiEngine_STEPWriterInput::HasCommonColor() const
 {
   return true;
 }
