@@ -320,7 +320,7 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
 
   // Translate colors to STEP.
   Handle(StepVisual_Colour) color;
-  if ( m_input->HasColor(S) || isCommonColor && m_input->HasCommonColor() )
+  if ( m_input->HasColor(S) || ( isCommonColor && m_input->HasCommonColor() ) )
     color = Styles.EncodeColor(shapeColor, DPDCs, ColRGBs);
 
   bool hasOwn = !color.IsNull();
