@@ -135,6 +135,11 @@ public:
   asiEngine_EXPORT int
     GetNumOfMetadata() const;
 
+  //! Sets color of the passed subshape.
+  asiEngine_EXPORT void
+    SetSubshapeColor(const TopoDS_Shape& shape,
+                     const int           icolor);
+
 public:
 
   //! Creates Features Node.

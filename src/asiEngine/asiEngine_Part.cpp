@@ -470,6 +470,17 @@ int asiEngine_Part::GetNumOfMetadata() const
 
 //-----------------------------------------------------------------------------
 
+void
+  asiEngine_Part::SetSubshapeColor(const TopoDS_Shape& shape,
+                                   const int           icolor)
+{
+  Handle(asiData_MetadataNode) N = this->GetMetadata();
+
+  N->SetColor(shape, icolor);
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiData_FeaturesNode) asiEngine_Part::CreateFeatures()
 {
   Handle(ActAPI_INode) features_base = asiData_FeaturesNode::Instance();
