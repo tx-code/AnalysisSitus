@@ -142,6 +142,7 @@ protected slots:
   void onHide                  ();
   void onManagePipelines       ();
   void onShowExecutionGraph    ();
+  void onPrintMetadataContents ();
   //
   void onHidePartEdges         ();
   void onShowPartEdges         ();

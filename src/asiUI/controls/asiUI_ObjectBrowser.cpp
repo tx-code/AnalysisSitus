@@ -527,6 +527,26 @@ void asiUI_ObjectBrowser::onShowExecutionGraph()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onPrintMetadataContents()
+{
+  Handle(ActAPI_INode) selected_n;
+  if ( !this->selectedNode(selected_n) ) return;
+
+  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_MetadataNode) ) )
+    return;
+
+  Handle(asiData_MetadataNode)
+    meta_n = Handle(asiData_MetadataNode)::DownCast(selected_n);
+
+  asiData_MetadataAttr::t_shapeColorMap map;
+  meta_n->GetShapeColorMap(map);
+
+  m_progress.SendLogMessage(LogInfo(Normal) << "Num. of metadata records: %1."
+                                            << map.Extent());
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_ObjectBrowser::onHidePartEdges()
 {
   Handle(ActAPI_INode) selected_n;
@@ -1194,6 +1214,12 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
   {
     pMenu->addSeparator();
     pMenu->addAction( "Show execution graph", this, SLOT( onShowExecutionGraph () ) );
+  }
+  //
+  if ( node->IsKind( STANDARD_TYPE(asiData_MetadataNode) ) )
+  {
+    pMenu->addSeparator();
+    pMenu->addAction( "Print contents", this, SLOT( onPrintMetadataContents () ) );
   }
   //
   if ( isPresented )

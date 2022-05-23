@@ -116,3 +116,11 @@ void asiData_MetadataNode::GetShapeColorMap(asiData_MetadataAttr::t_shapeColorMa
 
   P->GetShapeColorMap(map);
 }
+
+void asiData_MetadataNode::Clear()
+{
+  Handle(asiData_MetadataParameter)
+    P = Handle(asiData_MetadataParameter)::DownCast( this->Parameter(PID_Metadata) );
+
+  P->SetShapeColorMap( asiData_MetadataAttr::t_shapeColorMap() );
+}

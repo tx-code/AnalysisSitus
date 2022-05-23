@@ -1,22 +1,3 @@
-proc check-metadata {pidShape refNumMeta} {
-  # Get IDs of all metadata elements.
-  set metaElems [get-metadata-ids]
-
-  if { [llength $metaElems] != $refNumMeta } {
-    error "Unexpected number of metadata elements (expected $refNumMeta)."
-  }
-
-  # Loop over the metadata elements and check if the part shape
-  # contains all sub-shapes stored in these elements.
-  foreach elemId $metaElems {
-    get-param-shape test $elemId $pidShape
-
-    if { [check-part-contains test] != 1 } {
-      error "Part does not contain sub-shape from metadata element $elemId. There should be a problem in history."
-    }
-  }
-}
-
 # Set working variables.
 set datafile cad/box.brep
 
@@ -45,10 +26,7 @@ init-naming
 rebuild-edge -name edge_1
 
 # Check metadata.
-set pid 1
-set refMetaNum 3
-#
-check-metadata $pid $refMetaNum
+check-part-metadata
 
 # Check validity.
 if { [check-validity] != 1 } {

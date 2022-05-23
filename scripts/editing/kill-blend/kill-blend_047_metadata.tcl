@@ -1,5 +1,3 @@
-source $env(ASI_TEST_SCRIPTS)/editing/kill-blend/__check-metadata.tcl
-
 clear
 
 # Set working variables.
@@ -37,10 +35,7 @@ if { [kill-blends-inc] != 2 } {
 }
 
 # Check metadata.
-set pid 1
-set refMetaNum 11
-#
-check-metadata $pid $refMetaNum
+check-part-metadata
 
 # Check Euler-Poincare property of the manifold after modification.
 if { [check-euler 0] != 1 } {

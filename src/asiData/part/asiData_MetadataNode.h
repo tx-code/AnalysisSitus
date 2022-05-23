@@ -92,6 +92,9 @@ public:
   asiData_EXPORT void
     GetShapeColorMap(asiData_MetadataAttr::t_shapeColorMap&) const;
 
+  asiData_EXPORT void
+    Clear();
+
 protected:
 
   //! Allocation is allowed only via Instance() method.

@@ -412,7 +412,7 @@ Handle(asiData_MetadataNode) asiEngine_Part::CreateMetadata()
 
 void asiEngine_Part::CleanMetadata()
 {
-  this->_cleanChildren( m_model->GetMetadataNode() );
+  this->GetMetadata()->Clear();
 }
 
 //-----------------------------------------------------------------------------

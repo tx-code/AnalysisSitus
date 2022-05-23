@@ -777,7 +777,10 @@ Handle(asiData_MetadataNode) asiData_PartNode::GetMetadata() const
   {
     meta_n = Handle(asiData_MetadataNode)::DownCast( cit->Value() );
 
-    if ( !meta_n.IsNull() && meta_n->IsWellFormed() )
+    if ( meta_n.IsNull() )
+      continue;
+
+    if ( meta_n->IsWellFormed() )
       return meta_n;
   }
 

@@ -3368,7 +3368,7 @@ int ENGINE_CheckPartContains(const Handle(asiTcl_Interp)& interp,
   // Get Part Node.
   Handle(asiData_PartNode) part_n = cmdEngine::model->GetPartNode();
 
-  // Get topological item to imprint.
+  // Get topological item to check.
   Handle(asiData_IVTopoItemNode)
     topoItem_n = Handle(asiData_IVTopoItemNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
   //
@@ -3379,6 +3379,45 @@ int ENGINE_CheckPartContains(const Handle(asiTcl_Interp)& interp,
   }
 
   *interp << asiAlgo_Utils::Contains( part_n->GetShape(), topoItem_n->GetShape() );
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_CheckPartMetadata(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  // Get Part Node.
+  Handle(asiData_PartNode) part_n = cmdEngine::model->GetPartNode();
+
+  // Part shape.
+  TopoDS_Shape partShape = part_n->GetShape();
+
+  // Get Metadata Node.
+  Handle(asiData_MetadataNode) meta_n = part_n->GetMetadata();
+
+  // Get all shapes registered in the Metadata Node.
+  asiData_MetadataAttr::t_shapeColorMap map;
+  meta_n->GetShapeColorMap(map);
+  //
+  bool allFine = true;
+  //
+  for ( int k = 1; k <= map.Extent(); ++k )
+  {
+    const TopoDS_Shape& subshape = map.FindKey(k);
+    //
+    if ( !asiAlgo_Utils::Contains(partShape, subshape) )
+    {
+      allFine = false;
+      break;
+    }
+  }
+
+  *interp << allFine;
   return TCL_OK;
 }
 
@@ -4631,9 +4670,17 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-part-contains",
     //
     "check-part-contains <shapeName>\n"
-    "\t Checks whether the part contains the shape <shapeName> as its sub-shape.",
+    "\t Checks whether the part contains the shape <shapeName> as its subshape.",
     //
     __FILE__, group, ENGINE_CheckPartContains);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-part-metadata",
+    //
+    "check-part-metadata\n"
+    "\t Checks whether the part contains all shapes registered in the Metadata Node as its subshapes.",
+    //
+    __FILE__, group, ENGINE_CheckPartMetadata);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-self-inter",

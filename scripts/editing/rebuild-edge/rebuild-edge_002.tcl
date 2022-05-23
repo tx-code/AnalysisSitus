@@ -4,25 +4,6 @@
 # the modification history is propagated to the fan of s-t (support-terminating)
 # edges and the corresponding terminating faces.
 
-proc check-metadata {pidShape refNumMeta} {
-  # Get IDs of all metadata elements.
-  set metaElems [get-metadata-ids]
-
-  if { [llength $metaElems] != $refNumMeta } {
-    error "Unexpected number of metadata elements (expected $refNumMeta)."
-  }
-
-  # Loop over the metadata elements and check if the part shape
-  # contains all sub-shapes stored in these elements.
-  foreach elemId $metaElems {
-    get-param-shape test $elemId $pidShape
-
-    if { [check-part-contains test] != 1 } {
-      error "Part does not contain sub-shape from metadata element $elemId. There should be a problem in history."
-    }
-  }
-}
-
 # Set working variables.
 set datafile cad/blends/0038_nist_ctc_01_asme1_ap242.brep
 
@@ -63,10 +44,7 @@ init-naming
 rebuild-edge -name edge_310; donly
 
 # Check metadata.
-set pid 1
-set refMetaNum 13
-#
-check-metadata $pid $refMetaNum
+check-part-metadata
 
 # Check validity.
 if { [check-validity] != 1 } {
