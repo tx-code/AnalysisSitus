@@ -135,19 +135,48 @@ ActAPI_DataObjectId ActData_BasePartition::GetId() const
 // Management of Data Nodes
 //-----------------------------------------------------------------------------
 
-ActAPI_DataObjectId ActData_BasePartition::AddNode(const Handle(ActAPI_INode)& theNode)
+ActAPI_DataObjectId ActData_BasePartition::AddNode(const Handle(ActAPI_INode)& N)
 {
   // Check type consistency
-  TCollection_AsciiString aNodeType = theNode->DynamicType()->Name();
-  TCollection_AsciiString anAllowedType = TCollection_AsciiString( this->GetNodeType()->Name() );
-  if ( !::IsEqual(aNodeType, anAllowedType) )
+  TCollection_AsciiString nodeType    = N->DynamicType()->Name();
+  TCollection_AsciiString allowedType = TCollection_AsciiString( this->GetNodeType()->Name() );
+  //
+  if ( !::IsEqual(nodeType, allowedType) )
     Standard_ProgramError::Raise("Unexpected Node type");
 
-  // Expand Data Node on the new TDF Label
-  TDF_Label aNodeLab = TDF_TagSource::NewChild(m_label);
-  Handle(ActData_BaseNode)::DownCast(theNode)->expandOn(aNodeLab);
+  // Find a label to be a root for the Node.
+  TDF_Label             nodeLab;
+  Handle(TDF_TagSource) tagSourceAttr;
+  //
+  if ( !m_label.FindAttribute(TDF_TagSource::GetID(), tagSourceAttr) )
+  {
+    nodeLab = TDF_TagSource::NewChild(m_label);
+  }
+  else
+  {
+    // Try to find any "ghost" label.
+    for ( TDF_ChildIterator cit(m_label, false); cit.More(); cit.Next() )
+    {
+      TDF_Label labCandidate = cit.Value();
 
-  return ActData_Utils::GetEntry(aNodeLab);
+      Handle(ActData_BaseNode)::DownCast(N)->settleOn(labCandidate);
+      //
+      if ( !N->IsWellFormed() )
+      {
+        nodeLab = labCandidate;
+        break;
+      }
+    }
+
+    if ( nodeLab.IsNull() )
+      nodeLab = TDF_TagSource::NewChild(m_label);
+  }
+
+  // Create a new Node on the found anchoring label.
+  Handle(ActData_BaseNode)::DownCast(N)->expandOn(nodeLab);
+
+  // Return Node ID.
+  return ActData_Utils::GetEntry(nodeLab);
 }
 
 Standard_Boolean

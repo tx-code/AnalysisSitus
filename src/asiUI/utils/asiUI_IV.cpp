@@ -31,7 +31,6 @@
 // Own include
 #include <asiUI_IV.h>
 
-
 // asiUI includes
 #include <asiUI_ObjectBrowser.h>
 
