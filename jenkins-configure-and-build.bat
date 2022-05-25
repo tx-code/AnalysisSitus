@@ -36,6 +36,7 @@ REM ===========================================================================
 
 set "JENKINS_JOB_DIR=%~dp0"
 echo JENKINS_JOB_DIR: %JENKINS_JOB_DIR%
+set "ASI_DOCS=%~dp0docs/www"
 
 REM ===========================================================================
 REM Prepare build and install directories for CMake
@@ -71,6 +72,8 @@ REM ===========================================================================
 REM Generate docs
 REM ===========================================================================
 
+echo "*** Generating commands list..."
+
 cd ../cmake-install-dir/bin
 
 asiExe.exe /gendoc
@@ -79,7 +82,7 @@ REM ===========================================================================
 REM Prepare installer
 REM ===========================================================================
 
-cd ..
+cd ../..
 
 xcopy /S /Y cmake-build-dir\setup .\setup
 
