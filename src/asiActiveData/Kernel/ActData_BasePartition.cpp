@@ -40,6 +40,29 @@
 // OCCT includes
 #include <TDF_Tool.hxx>
 
+namespace
+{
+  bool IsEmpty(const TDF_Label& lab)
+  {
+    if ( lab.HasAttribute() )
+      return false;
+
+    bool emptyChildren = true;
+    for ( TDF_ChildIterator cit(lab, false); cit.More(); cit.Next() )
+    {
+      TDF_Label childLab = cit.Value();
+
+      if ( !IsEmpty(childLab) )
+      {
+        emptyChildren = false;
+        break;
+      }
+    }
+
+    return emptyChildren;
+  }
+}
+
 /* =========================================================================
  *  Class: ActData_IPartition
  *  Subclass: Iterator
@@ -159,9 +182,7 @@ ActAPI_DataObjectId ActData_BasePartition::AddNode(const Handle(ActAPI_INode)& N
     {
       TDF_Label labCandidate = cit.Value();
 
-      Handle(ActData_BaseNode)::DownCast(N)->settleOn(labCandidate);
-      //
-      if ( !N->IsWellFormed() )
+      if ( ::IsEmpty(labCandidate) )
       {
         nodeLab = labCandidate;
         break;
