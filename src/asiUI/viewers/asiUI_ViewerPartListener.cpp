@@ -462,7 +462,10 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       //
       m_pInvertFacesAction = menu.addAction("Invert faces");
       m_pFindIsolated      = menu.addAction("Find isolated");
-      m_pCheckDihAngle     = menu.addAction("Check dihedral angle");
+      if ( faceIndices.Extent() > 1 )
+      {
+        m_pCheckDihAngle = menu.addAction("Check dihedral angle");
+      }
       m_pAddAsFeature      = menu.addAction("Add as feature");
       m_pGetAsBLOB         = menu.addAction("Get as BLOB");
 
