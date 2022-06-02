@@ -292,6 +292,10 @@ if (NOT BUILD_ALGO_ONLY)
   set_property(TARGET asiExe        PROPERTY FOLDER Executables)
 
   if (WIN32)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT asiExe)
+  endif()
+
+  if (WIN32)
     if (MSVC)
       set_property(TARGET asiExeCli    PROPERTY FOLDER Executables)
       set_property(TARGET asiExeServer PROPERTY FOLDER Executables)
