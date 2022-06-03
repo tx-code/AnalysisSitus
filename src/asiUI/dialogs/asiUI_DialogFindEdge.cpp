@@ -196,7 +196,7 @@ void asiUI_DialogFindEdge::onFind()
   }
   else
   {
-    QStringList eidList = m_widgets.pIndex->text().split(QRegExp("[\\s,]+"), QString::SkipEmptyParts);
+    QStringList eidList = m_widgets.pIndex->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
 
     for ( const auto& eidStr : eidList )
     {

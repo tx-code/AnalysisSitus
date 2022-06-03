@@ -196,7 +196,7 @@ void asiUI_DialogFindVertex::onFind()
   }
   else
   {
-    QStringList vidList = m_widgets.pIndex->text().split(QRegExp("[\\s,]+"), QString::SkipEmptyParts);
+    QStringList vidList = m_widgets.pIndex->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
 
     for ( const auto& vidStr : vidList )
     {

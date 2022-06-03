@@ -187,7 +187,7 @@ void asiUI_DialogFindFace::onFind()
 
   if ( typeIdx == FaceIdType_Serial )
   {
-    QStringList fidList = m_widgets.pIdSerial->text().split(QRegExp("[\\s,]+"), QString::SkipEmptyParts);
+    QStringList fidList = m_widgets.pIdSerial->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
 
     for ( const auto& fidStr : fidList )
     {
