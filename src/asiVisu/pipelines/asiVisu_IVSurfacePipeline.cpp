@@ -59,11 +59,13 @@ asiVisu_IVSurfacePipeline::asiVisu_IVSurfacePipeline()
 //! \param[in] DP Data Provider.
 void asiVisu_IVSurfacePipeline::SetInput(const Handle(asiVisu_DataProvider)& DP)
 {
-  if ( !m_iStepsNumber )
-    return;
-
   Handle(asiVisu_IVSurfaceDataProvider)
     provider = Handle(asiVisu_IVSurfaceDataProvider)::DownCast(DP);
+
+  m_iStepsNumber = provider->GetUVStepTessellation();
+
+  if ( m_iStepsNumber < 1 )
+    return;
 
   /* ===========================
    *  Validate input Parameters

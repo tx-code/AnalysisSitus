@@ -83,6 +83,10 @@ public:
     PID_VMin,         //!< Value to trim the surface in its V parametric direction.
     PID_VMax,         //!< Value to trim the surface in its V parametric direction.
   //------------------//
+  // Facets           //
+  //------------------//
+    PID_TessUVStep,   //!< Number of steps for sampling UV space for visualization tessellation.
+  //------------------//
   // Presentation     //
   //------------------//
     PID_GroupPrs,     //!< Presentation group.
@@ -128,6 +132,12 @@ public:
   asiData_EXPORT void
     GetLimits(double& uMin, double& uMax,
               double& vMin, double& vMax) const;
+
+  asiData_EXPORT void
+    SetUVStepTessellation(const int step);
+
+  asiData_EXPORT int
+    GetUVStepTessellation() const;
 
   asiData_EXPORT void
     SetHasColor(const bool);

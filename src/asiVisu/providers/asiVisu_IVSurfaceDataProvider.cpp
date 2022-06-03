@@ -113,7 +113,20 @@ Handle(ActAPI_HParameterList) asiVisu_IVSurfaceDataProvider::translationSources(
       << surface_n->Parameter(asiData_IVSurfaceNode::PID_UMin)
       << surface_n->Parameter(asiData_IVSurfaceNode::PID_UMax)
       << surface_n->Parameter(asiData_IVSurfaceNode::PID_VMin)
-      << surface_n->Parameter(asiData_IVSurfaceNode::PID_VMax);
+      << surface_n->Parameter(asiData_IVSurfaceNode::PID_VMax)
+      << surface_n->Parameter(asiData_IVSurfaceNode::PID_TessUVStep);
 
   return out;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Gets number of steps for sampling UV space for visualization tessellation.
+//! \return number of sampling steps.
+int asiVisu_IVSurfaceDataProvider::GetUVStepTessellation() const
+{
+  Handle(asiData_IVSurfaceNode)
+    surface_n = Handle(asiData_IVSurfaceNode)::DownCast(m_node);
+
+  return surface_n->GetUVStepTessellation();
 }

@@ -63,6 +63,9 @@ public:
                double& vMin,
                double& vMax) const;
 
+  asiVisu_EXPORT int
+    GetUVStepTessellation() const;
+
 private:
 
   virtual Handle(ActAPI_HParameterList)

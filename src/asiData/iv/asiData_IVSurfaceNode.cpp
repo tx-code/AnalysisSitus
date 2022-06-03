@@ -57,6 +57,7 @@ asiData_IVSurfaceNode::asiData_IVSurfaceNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,  PID_UMax);
   REGISTER_PARAMETER(Real,  PID_VMin);
   REGISTER_PARAMETER(Real,  PID_VMax);
+  REGISTER_PARAMETER(Int,   PID_TessUVStep);
   REGISTER_PARAMETER(Group, PID_GroupPrs);
   REGISTER_PARAMETER(Bool,  PID_HasColor);
   REGISTER_PARAMETER(Int,   PID_Color);
@@ -74,11 +75,12 @@ Handle(ActAPI_INode) asiData_IVSurfaceNode::Instance()
 void asiData_IVSurfaceNode::Init()
 {
   // Set default values.
-  this->SetSurfaceType (SurfaceType_General);
-  this->SetSurface     (nullptr);
-  this->SetLimits      (0.0, 0.0, 0.0, 0.0);
-  this->SetHasColor    (false);
-  this->SetColor       (2500134); // Sort of dark color.
+  this->SetSurfaceType        (SurfaceType_General);
+  this->SetSurface            (nullptr);
+  this->SetLimits             (0.0, 0.0, 0.0, 0.0);
+  this->SetUVStepTessellation (150);
+  this->SetHasColor           (false);
+  this->SetColor              (2500134); // Sort of dark color.
 
   // Initialize properties.
   this->InitParameter (PID_Name, "Name", "", ParameterFlag_IsVisible, true);
@@ -88,6 +90,8 @@ void asiData_IVSurfaceNode::Init()
   this->InitParameter (PID_UMax,        "U max",  "", ParameterFlag_IsVisible, true);
   this->InitParameter (PID_VMin,        "V min",  "", ParameterFlag_IsVisible, true);
   this->InitParameter (PID_VMax,        "V max",  "", ParameterFlag_IsVisible, true);
+  //
+  this->InitParameter (PID_TessUVStep, "Number of sampling steps", "", ParameterFlag_IsVisible, true);
   //
   this->InitParameter (PID_GroupPrs, "Presentation", "",               ParameterFlag_IsVisible, true);
   this->InitParameter (PID_HasColor, "Colorized",    "",               ParameterFlag_IsVisible, true);
@@ -187,6 +191,20 @@ void asiData_IVSurfaceNode::GetLimits(double& uMin, double& uMax,
   uMax = ActParamTool::AsReal( this->Parameter(PID_UMax) )->GetValue();
   vMin = ActParamTool::AsReal( this->Parameter(PID_VMin) )->GetValue();
   vMax = ActParamTool::AsReal( this->Parameter(PID_VMax) )->GetValue();
+}
+
+//! Sets number of steps for sampling UV space for visualization tessellation.
+//! \param[in] step number of sampling steps.
+void asiData_IVSurfaceNode::SetUVStepTessellation(const int step)
+{
+  ActParamTool::AsInt(this->Parameter(PID_TessUVStep))->SetValue(step);
+}
+
+//! Gets number of steps for sampling UV space for visualization tessellation.
+//! \return number of sampling steps.
+int asiData_IVSurfaceNode::GetUVStepTessellation() const
+{
+  return ActParamTool::AsInt(this->Parameter(PID_TessUVStep))->GetValue();
 }
 
 //! Sets the Boolean value indicating whether the color Parameter of this
