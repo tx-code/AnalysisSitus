@@ -51,7 +51,7 @@
 
 //-----------------------------------------------------------------------------
 
-int MISC_Test(const Handle(asiTcl_Interp)& interp,
+int MISC_Test(const Handle(asiTcl_Interp)& cmdMisc_NotUsed(interp),
               int                          argc,
               const char**                 argv)
 {

@@ -224,7 +224,7 @@ int ENGINE_SaveStep(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
     //
-    input = new asiEngine_STEPWriterInput(Handle(asiEngine_Model)::DownCast(cmdEngine::model));
+    input = new asiEngine_STEPWriterInput(cmdEngine::model);
   }
   else
   {

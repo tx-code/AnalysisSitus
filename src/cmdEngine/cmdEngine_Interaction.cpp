@@ -164,7 +164,7 @@ int ENGINE_MoveCurveHandle(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-void cmdEngine::Commands_Interaction(const Handle(asiTcl_Interp)&      interp,
+void cmdEngine::Commands_Interaction(const Handle(asiTcl_Interp)&      cmdEngine_NotUsed(interp),
                                      const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
   static const char* group = "cmdEngine";

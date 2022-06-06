@@ -332,14 +332,17 @@ bool asiTestEngine_DescriptionProc::isVar(const std::string& token,
                                           int&               varStart,
                                           int&               varEnd)
 {
-  if ( token.length() <= 4 )
+  if ( token.length() <= 4 || token.length() > INT_MAX )
     return false;
 
-  varStart = (int) token.find(asiTestEngine_Macro_VAR_MARKER);
-  varEnd   = (int) token.rfind(asiTestEngine_Macro_VAR_MARKER);
+  size_t varStartLoc = token.find(asiTestEngine_Macro_VAR_MARKER);
+  size_t varEndLoc   = token.rfind(asiTestEngine_Macro_VAR_MARKER);
 
-  if ( varStart == (int) std::string::npos || varEnd == (int) std::string::npos || varStart >= varEnd )
+  if ( varStartLoc == std::string::npos || varEndLoc == std::string::npos || varStartLoc >= varEndLoc)
     return false;
+
+  varStart = (int)varStartLoc;
+  varEnd   = (int)varEndLoc;
 
   return true;
 }
