@@ -83,15 +83,12 @@ public:
     PID_VMin,         //!< Value to trim the surface in its V parametric direction.
     PID_VMax,         //!< Value to trim the surface in its V parametric direction.
   //------------------//
-  // Facets           //
-  //------------------//
-    PID_TessUVStep,   //!< Number of steps for sampling UV space for visualization tessellation.
-  //------------------//
   // Presentation     //
   //------------------//
     PID_GroupPrs,     //!< Presentation group.
     PID_HasColor,     //!< Indicates whether the Color Parameter is active.
     PID_Color,        //!< Color.
+    PID_TessUVStep,   //!< Number of steps for sampling UV space for visualization tessellation.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };

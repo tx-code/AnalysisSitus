@@ -57,10 +57,10 @@ asiData_IVSurfaceNode::asiData_IVSurfaceNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,  PID_UMax);
   REGISTER_PARAMETER(Real,  PID_VMin);
   REGISTER_PARAMETER(Real,  PID_VMax);
-  REGISTER_PARAMETER(Int,   PID_TessUVStep);
   REGISTER_PARAMETER(Group, PID_GroupPrs);
   REGISTER_PARAMETER(Bool,  PID_HasColor);
   REGISTER_PARAMETER(Int,   PID_Color);
+  REGISTER_PARAMETER(Int,   PID_TessUVStep);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -91,11 +91,10 @@ void asiData_IVSurfaceNode::Init()
   this->InitParameter (PID_VMin,        "V min",  "", ParameterFlag_IsVisible, true);
   this->InitParameter (PID_VMax,        "V max",  "", ParameterFlag_IsVisible, true);
   //
-  this->InitParameter (PID_TessUVStep, "Number of sampling steps", "", ParameterFlag_IsVisible, true);
-  //
-  this->InitParameter (PID_GroupPrs, "Presentation", "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_HasColor, "Colorized",    "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_Color,    "Color",        "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,   "Presentation", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,   "Colorized",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,      "Color",        "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_TessUVStep, "Discr. steps", "",               ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
