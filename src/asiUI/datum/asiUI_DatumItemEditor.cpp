@@ -136,7 +136,7 @@ bool asiUI_DatumItemEditor::eventFilter(QObject* theObj, QEvent* theEvent)
   if ( theEvent->type() == QEvent::FocusOut )
   {
     // custom focus handling for selector widget
-    if ( asiUI_DatumSelector* aSel = qobject_cast<asiUI_DatumSelector*>( m_pDatum ) )
+    if ( qobject_cast<asiUI_DatumSelector*>( m_pDatum ) )
     {
       theEvent->ignore();
       return true;

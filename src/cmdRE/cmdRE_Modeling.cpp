@@ -181,13 +181,6 @@ int RE_BuildPatches(const Handle(asiTcl_Interp)& interp,
   cmdRE_NotUsed(argc);
   cmdRE_NotUsed(argv);
 
-  // Get surface fairing coefficient.
-  double fairCoeff = 0.;
-  TCollection_AsciiString fairCoeffStr;
-  //
-  if ( interp->GetKeyValue(argc, argv, "fair", fairCoeffStr) )
-    fairCoeff = fairCoeffStr.RealValue();
-
   // Get a flag indicating if approximation is required.
   const bool isApprox = interp->HasKeyword(argc, argv, "approx");
 
@@ -216,7 +209,7 @@ int RE_BuildPatches(const Handle(asiTcl_Interp)& interp,
   {
     // Skip keywords.
     TCollection_AsciiString arg(argv[k]);
-    if ( arg.IsRealValue() || arg == "-fair" || arg == "-approx" )
+    if ( arg.IsRealValue() || arg == "-approx" )
       continue;
 
     Handle(asiData_RePatchNode)
@@ -303,14 +296,12 @@ int RE_BuildContourLines(const Handle(asiTcl_Interp)& interp,
 
   Handle(ActAPI_HNodeList) edgeNodes = new ActAPI_HNodeList;
 
-  bool                    hasToler = false;
   double                  toler    = 5.0;
   TCollection_AsciiString tolerStr;
   //
   if ( interp->GetKeyValue(argc, argv, "toler", tolerStr) )
   {
-    hasToler = true;
-    toler    = tolerStr.RealValue();
+    toler = tolerStr.RealValue();
   }
 
   /* Collect edges by names */
@@ -2310,7 +2301,7 @@ void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("re-build-patches",
     //
-    "re-build-patches [<patchName1> [<patchName2> ...]] [-fair <coeff>] [-approx]\n"
+    "re-build-patches [<patchName1> [<patchName2> ...]] [-approx]\n"
     "\t Constructs surface patched for the passed data object(s).",
     //
     __FILE__, group, RE_BuildPatches);

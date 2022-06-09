@@ -80,92 +80,93 @@ void QTGUIListViewItem::rebuildCell()
   QTGUIListViewItem* anItem;
   QTGUIListViewItem* aPrevItem;
   // childs
-  while(!aChild.IsNull()) 
+  while(!aChild.IsNull())
+  {
     if (aChild->Visible()) {
       aHasChilds = Standard_True;
       break;
     } 
     else aChild = aChild->Next();
-    if (!myNode->CanOpen()) aHasChilds = Standard_False;
-    if (child(0) == NULL) {
-      if (aHasChilds) { // just add all subitems
-        aPrevItem = this;
-        while(!aChild.IsNull()) {
-	        if (!aChild->Visible()) {
-	          aChild = aChild->Next();
-	          continue;
-	        }
-	        anItem =  new QTGUIListViewItem(this,(QTreeWidgetItem*)aPrevItem);
-
-          aPrevItem = anItem;
-	        aChild->Update();
-	        anItem->SetNode(aChild);
-          anItem->rebuildCell();
-	        aChild = aChild->Next();
+  }
+  if (!myNode->CanOpen()) aHasChilds = Standard_False;
+  if (child(0) == NULL) {
+    if (aHasChilds) { // just add all subitems
+      aPrevItem = this;
+      while(!aChild.IsNull()) {
+        if (!aChild->Visible()) {
+          aChild = aChild->Next();
+          continue;
         }
+        anItem =  new QTGUIListViewItem(this,(QTreeWidgetItem*)aPrevItem);
+        aPrevItem = anItem;
+        aChild->Update();
+        anItem->SetNode(aChild);
+        anItem->rebuildCell();
+        aChild = aChild->Next();
       }
     }
-    else {
-      if (aHasChilds) { // merge sturctures
-        anItem = (QTGUIListViewItem*)child(0);
-        while(anItem!=NULL) {
-          if (anItem->GetNode().IsNull() ||
-              anItem->GetNode()->Tree().IsNull() ||
-              !anItem->GetNode()->Visible() ||
-              anItem->GetNode()->Parent() != ((QTGUIListViewItem*)(anItem->parent()))->GetNode() ||
-              (myNode->GetType() == DFBrowser_LABEL &&
-               !(Handle(DFBrowser_LabelNode)::DownCast(myNode)->List().IsNull()) &&
-               anItem->GetNode()->GetType() == DFBrowser_ATTRIBUTE))
-          { // this node must be deleted here
-            QTGUIListViewItem* anParent = (QTGUIListViewItem*)(anItem->parent());
-            Standard_Integer aCurIdx = anParent->indexOfChild(anItem);
-            anItem = (QTGUIListViewItem *)anParent->child( aCurIdx + 1 );
-            this->takeChild( aCurIdx );
-            continue;
-          }
+  }
+  else {
+    if (aHasChilds) { // merge sturctures
+      anItem = (QTGUIListViewItem*)child(0);
+      while(anItem!=NULL) {
+        if (anItem->GetNode().IsNull() ||
+            anItem->GetNode()->Tree().IsNull() ||
+            !anItem->GetNode()->Visible() ||
+            anItem->GetNode()->Parent() != ((QTGUIListViewItem*)(anItem->parent()))->GetNode() ||
+            (myNode->GetType() == DFBrowser_LABEL &&
+            !(Handle(DFBrowser_LabelNode)::DownCast(myNode)->List().IsNull()) &&
+            anItem->GetNode()->GetType() == DFBrowser_ATTRIBUTE))
+        { // this node must be deleted here
           QTGUIListViewItem* anParent = (QTGUIListViewItem*)(anItem->parent());
           Standard_Integer aCurIdx = anParent->indexOfChild(anItem);
           anItem = (QTGUIListViewItem *)anParent->child( aCurIdx + 1 );
+          this->takeChild( aCurIdx );
+          continue;
         }
-        aPrevItem = this;
-        while(!aChild.IsNull()) {
-	        if (!aChild->Visible()) {
-	          aChild = aChild->Next();
-	          continue;
-	        }
-	      anItem = (QTGUIListViewItem*)child(0);
-	      while(anItem!=NULL) {
-	        if (anItem->GetNode() == aChild) break;
+        QTGUIListViewItem* anParent = (QTGUIListViewItem*)(anItem->parent());
+        Standard_Integer aCurIdx = anParent->indexOfChild(anItem);
+        anItem = (QTGUIListViewItem *)anParent->child( aCurIdx + 1 );
+      }
+      aPrevItem = this;
+      while(!aChild.IsNull()) {
+        if (!aChild->Visible()) {
+          aChild = aChild->Next();
+          continue;
+        }
+        anItem = (QTGUIListViewItem*)child(0);
+        while(anItem!=NULL) {
+          if (anItem->GetNode() == aChild) break;
           Standard_Integer aCurIdx = indexOfChild(anItem);
           anItem = (QTGUIListViewItem *)child( aCurIdx + 1 );
-	      }
-	      if (anItem==NULL) {
-	        // remove all items at bottom
-	        Handle(DFBrowser_DFNode) aBottom = aChild->Next();
-	        while(!aBottom.IsNull()) {
-	          if (!aBottom->Visible()) {
-	            aBottom = aBottom->Next();
-	            continue;
-  	        }
-	          QTGUIListViewItem * aBItem = (QTGUIListViewItem*)child( 0 );
-	          while(aBItem!=NULL) {
-	            if (aBItem->GetNode() == aBottom) break;
+        }
+        if (anItem==NULL) {
+          // remove all items at bottom
+          Handle(DFBrowser_DFNode) aBottom = aChild->Next();
+          while(!aBottom.IsNull()) {
+            if (!aBottom->Visible()) {
+              aBottom = aBottom->Next();
+              continue;
+            }
+            QTGUIListViewItem * aBItem = (QTGUIListViewItem*)child( 0 );
+            while(aBItem!=NULL) {
+              if (aBItem->GetNode() == aBottom) break;
               Standard_Integer aCurIdx = indexOfChild(aBItem);
               aBItem = (QTGUIListViewItem *)child( aCurIdx + 1 );
-	          }
-	          if (aBItem!=NULL) {
+            }
+            if (aBItem!=NULL) {
               Standard_Integer aCurIdx = indexOfChild(aBItem);
               takeChild(aCurIdx);
             }
-	          aBottom = aBottom->Next();
-	        }
-	  
-	        anItem = new QTGUIListViewItem(this,aPrevItem);
-	        aChild->Update();
-	        anItem->SetNode(aChild);
-	      }
-	      aPrevItem = anItem;
-	      aChild = aChild->Next();
+            aBottom = aBottom->Next();
+          }
+
+          anItem = new QTGUIListViewItem(this,aPrevItem);
+          aChild->Update();
+          anItem->SetNode(aChild);
+        }
+        aPrevItem = anItem;
+        aChild = aChild->Next();
       }
     }
     else {

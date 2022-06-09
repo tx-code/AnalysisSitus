@@ -264,7 +264,7 @@ bool asiAlgo_KHull2d<TPoint>::perform(Handle(asiAlgo_PointWithAttrCloud<TPoint>)
 
   // Point with minimal Y coordinate.
   asiAlgo_PointWithAttr<TPoint> firstPoint;
-  int firstPointIdx;
+  int firstPointIdx = 0;
   //
   this->findMinYPoint(firstPoint, firstPointIdx, dataset);
 
@@ -521,7 +521,13 @@ std::vector<int>
   for ( int idx = 0; idx < cloud->GetNumberOfElements(); ++idx )
   {
     asiAlgo_PointWithAttr<TPoint>& P = cloud->ChangeElement(idx);
-    delete P.pData; P.pData = nullptr;
+    t_point_data* pointData = reinterpret_cast<t_point_data*>(P.pData);
+    if ( pointData != nullptr )
+    {
+      delete pointData;
+    }
+    P.pData   = nullptr;
+    pointData = nullptr;
   }
 
   return res;
@@ -708,7 +714,13 @@ std::vector<int>
   for ( int idx = 0; idx < int( point_indices.size() ); ++idx )
   {
     asiAlgo_PointWithAttr<TPoint>& P = dataset->ChangeElement(idx);
-    delete P.pData; P.pData = nullptr;
+    t_point_data* pointData = reinterpret_cast<t_point_data*>(P.pData);
+    if ( pointData != nullptr )
+    {
+      delete pointData;
+    }
+    P.pData   = nullptr;
+    pointData = nullptr;
   }
 
   return res;

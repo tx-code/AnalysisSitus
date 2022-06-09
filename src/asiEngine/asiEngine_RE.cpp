@@ -816,7 +816,7 @@ bool asiEngine_RE::FillPatchCoons(const std::vector<Handle(asiData_ReCoedgeNode)
   c0 = curves[0];
 
   // P00, P10.
-  gp_Pnt p00 = c0->Value( c0->FirstParameter() );
+  // gp_Pnt p00 = c0->Value( c0->FirstParameter() );
   gp_Pnt p10 = c0->Value( c0->LastParameter() );
 
   // B1 is the curve next to C0 which touches C0 at its end point (P01).
@@ -875,7 +875,7 @@ bool asiEngine_RE::FillPatchCoons(const std::vector<Handle(asiData_ReCoedgeNode)
   }
 
   // P01.
-  gp_Pnt p01 = c1->Value( c1->FirstParameter() );
+  // gp_Pnt p01 = c1->Value( c1->FirstParameter() );
 
   // Get b0.
   for ( size_t k = 1; k < 4; ++k )

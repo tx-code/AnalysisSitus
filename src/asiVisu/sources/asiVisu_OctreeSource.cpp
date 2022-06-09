@@ -305,9 +305,9 @@ void asiVisu_OctreeSource::samplePoints(void*                       pNode,
     const bool isIn  = mobius::poly_BaseDistanceField::IsIn(pMobNode);
     const bool isOut = mobius::poly_BaseDistanceField::IsOut(pMobNode);
 
-    if ( isOn  && (m_strategy & SS_On) ||
-         isIn  && (m_strategy & SS_In) ||
-         isOut && (m_strategy & SS_Out) )
+    if ( (isOn  && (m_strategy & SS_On)) ||
+         (isIn  && (m_strategy & SS_In)) ||
+         (isOut && (m_strategy & SS_Out)) )
     {
       // Get center point.
       gp_XYZ
@@ -384,9 +384,9 @@ void asiVisu_OctreeSource::addVoxels(void*                pNode,
     const bool isIn  = mobius::poly_BaseDistanceField::IsIn(pMobNode);
     const bool isOut = mobius::poly_BaseDistanceField::IsOut(pMobNode);
 
-    if ( isOn  && (m_strategy & SS_On) ||
-         isIn  && (m_strategy & SS_In) ||
-         isOut && (m_strategy & SS_Out) )
+    if ( (isOn  && (m_strategy & SS_On)) ||
+         (isIn  && (m_strategy & SS_In)) ||
+         (isOut && (m_strategy & SS_Out)) )
     {
       const double sc0 = pMobNode->GetScalar( mobius::poly_SVO::GetCornerID(0, 0, 0) );
       const double sc1 = pMobNode->GetScalar( mobius::poly_SVO::GetCornerID(1, 0, 0) );

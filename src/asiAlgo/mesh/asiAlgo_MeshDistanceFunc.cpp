@@ -143,8 +143,6 @@ bool asiAlgo_MeshDistanceFunc::Init(const Handle(asiAlgo_BVHFacets)& facets,
   if ( facets.IsNull() )
     return false;
 
-  BVH_Box<double, 3> aabb = facets->Box();
-
   mobius::t_xyz Pmin = mobius::cascade::GetMobiusPnt(domainMin);
   mobius::t_xyz Pmax = mobius::cascade::GetMobiusPnt(domainMax);
 

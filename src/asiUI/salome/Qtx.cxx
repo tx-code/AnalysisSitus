@@ -528,6 +528,19 @@ bool Qtx::dos2unix( const QString& absName )
   /* we'll use temporary file */
   char temp[512] = { '\0' };
   QString dir = Qtx::dir( absName );
+
+  // During linking (Linux), we get the following message:
+  // warning: the use of `tempnam' is dangerous, better use `mkstemp'.
+  //
+  // In our case, it's better to keep using 'tempnam', since 'mkstemp'
+  // creates a temporary file, and so on. In addition, we can look at:
+  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97274
+  // https://sourceware.org/bugzilla/show_bug.cgi?id=12017
+  // https://sourceware.org/bugzilla/show_bug.cgi?id=26701
+  //
+  // This warning is not easy to suppress. The proposed approaches
+  // (links given above) are dangerous.
+  //
   FILE* tgt = ::fopen( strcpy( temp, ::tempnam( dir.toLatin1(), "__x" ) ), "wb" );
   if ( !tgt )
     return false;

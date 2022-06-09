@@ -1719,7 +1719,7 @@ int MISC_TestTranformAxes(const Handle(asiTcl_Interp)& interp,
   BRepGProp::VolumeProperties(partShape, gProps, 1.e-4);
 
   gp_Vec partPrincipalX = gProps.PrincipalProperties().ThirdAxisOfInertia();
-  gp_Vec partPrincipalY = gProps.PrincipalProperties().SecondAxisOfInertia();
+  // gp_Vec partPrincipalY = gProps.PrincipalProperties().SecondAxisOfInertia();
   gp_Vec partPrincipalZ = gProps.PrincipalProperties().FirstAxisOfInertia();
 
   // First Ax3.
@@ -1823,7 +1823,7 @@ int MISC_TestTranformAxesDir(const Handle(asiTcl_Interp)& interp,
   BRepGProp::VolumeProperties(partShape, gProps, 1.e-4);
 
   gp_Vec partPrincipalX = gProps.PrincipalProperties().ThirdAxisOfInertia();
-  gp_Vec partPrincipalY = gProps.PrincipalProperties().SecondAxisOfInertia();
+  // gp_Vec partPrincipalY = gProps.PrincipalProperties().SecondAxisOfInertia();
   gp_Vec partPrincipalZ = gProps.PrincipalProperties().FirstAxisOfInertia();
 
   // First Ax3.

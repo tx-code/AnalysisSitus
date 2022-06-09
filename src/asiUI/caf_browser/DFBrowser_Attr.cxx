@@ -89,9 +89,11 @@
 #define DB_ORIENTATION_TYPE 8
 
 DFBrowser_Attr::DFBrowser_Attr()
-: myColor(DFBrowser_BLACK),
-  myError(Standard_False),
+: Standard_Transient(),
+  myName(""),
+  myColor(DFBrowser_BLACK),
   myBrackets(0),
+  myError(Standard_False),
   myDetailed(Standard_True)
 {
 }
@@ -452,7 +454,20 @@ void DFBrowser_Attr::Description (const Handle(TDF_Attribute) &theAttr,
     AddToName("value: ");
     sprintf(aString,"%f\n",aReal->Get());
     AddToName(aString);
+
+#ifndef WIN32
+  #ifdef USE_GCC
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  #endif
+#endif
     AddToName(DB_DIMENSION_TYPE,aReal->GetDimension());
+#ifndef WIN32
+  #ifdef USE_GCC
+    #pragma GCC diagnostic pop
+  #endif
+#endif
+
     AddToName(" dimension");
   } else if (theAttr->ID() == TDataStd_RealArray::GetID()) {
     Handle(TDataStd_RealArray) array = Handle(TDataStd_RealArray)::DownCast(theAttr);
@@ -580,7 +595,7 @@ void DFBrowser_Attr::Description (const Handle(TDF_Attribute) &theAttr,
       AddToName(aString);
     } else AddToName("Has no own color\n");
     if (aPrs->HasOwnWidth()) {
-      sprintf(aString,"Own width: %d\n",aPrs->Width());
+      sprintf(aString,"Own width: %f\n",aPrs->Width());
       AddToName(aString);
     } else AddToName("Has no own width\n");
     if (aPrs->HasOwnMode()) {

@@ -1398,7 +1398,6 @@ int ENGINE_HLR(const Handle(asiTcl_Interp)& interp,
   asiAlgo_Utils::Bounds(partShape, xmin, ymin, zmin, xmax, ymax, zmax);
   //
   const double diag = gp_Pnt(xmax, ymax, zmax).Distance( gp_Pnt(xmin, ymin, zmin) );
-  gp_Pnt midPt = ( gp_XYZ(xmin, ymin, zmin) + gp_XYZ(xmax, ymax, zmax) )*0.5;
 
   gp_Pnt pos;
   gp_Vec dir;
@@ -1665,6 +1664,13 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+#ifndef WIN32
+  #ifdef USE_GCC
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-function"
+  #endif
+#endif
+
 namespace
 {
   //! Computes the unsigned distance between the two passed planes.
@@ -1726,6 +1732,12 @@ namespace
     return false;
   }
 }
+
+#ifndef WIN32
+  #ifdef USE_GCC
+    #pragma GCC diagnostic pop
+  #endif
+#endif
 
 int ENGINE_Fill(const Handle(asiTcl_Interp)& interp,
                 int                          argc,
