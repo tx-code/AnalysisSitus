@@ -81,6 +81,8 @@ public:
 
   virtual ~asiUI_DialogSTEP();
 
+  bool isProceed() const { return m_isProceed; }
+
 public slots:
 
   void onVarChanged(QTableWidgetItem*);
@@ -92,8 +94,8 @@ protected:
   void initialize_Read(NCollection_Sequence<asiAlgo_Variable>& vars);
   void initialize_Write(NCollection_Sequence<asiAlgo_Variable>& vars);
   void saveVars();
-  void proceed_Write();
-  void proceed_Read();
+  bool proceed_Write();
+  bool proceed_Read();
 
 private:
 
@@ -124,6 +126,7 @@ private:
   ActAPI_ProgressEntry     m_notifier; //!< Progress notifier.
   ActAPI_PlotterEntry      m_plotter;  //!< Imperative plotter.
 
+  bool                     m_isProceed;   //!< State whether the STEP is processed.
 };
 
 #endif

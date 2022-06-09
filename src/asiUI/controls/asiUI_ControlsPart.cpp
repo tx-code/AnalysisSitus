@@ -243,8 +243,11 @@ void asiUI_ControlsPart::onLoadFromSTEP()
                                                 this);
   pDlg->exec();
 
-  // Notify
-  emit partLoaded(pDlg->Filename);
+  if(pDlg->isProceed())
+  {
+    // Notify
+    emit partLoaded(pDlg->Filename);
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -83,14 +83,18 @@ asiUI_DialogSTEP::asiUI_DialogSTEP(const Handle(ActAPI_IModel)&    model,
   m_model    (model),
   m_part     (part_n),
   m_notifier (notifier),
-  m_plotter  (plotter)
+  m_plotter  (plotter),
+  m_isProceed(false)
 {
+  // Window title
+  this->setWindowTitle("Loading STEP parameters");
+
   // Main layout
   m_pMainLayout = new QVBoxLayout();
 
   // Widgets
   m_widgets.pOptions = new QTableWidget();
-  m_widgets.pProceed = new QPushButton("Proceed");
+  m_widgets.pProceed = new QPushButton("Continue");
   //
   m_widgets.pProceed -> setMinimumWidth(BTN_MIN_WIDTH);
 
@@ -295,18 +299,18 @@ void asiUI_DialogSTEP::saveVars()
 //-----------------------------------------------------------------------------
 
 //! Writes STEP.
-void asiUI_DialogSTEP::proceed_Write()
+bool asiUI_DialogSTEP::proceed_Write()
 {
   // Check Part Node.
   if ( m_part.IsNull() || !m_part->IsWellFormed() )
-    return;
+    return false;
 
   QString
     filename = asiUI_Common::selectSTEPFile( asiUI_Common::OpenSaveAction_Save,
                                              AsciiStr2QStr( m_part->GetFilenameIn() ) );
   //
   if ( filename.isEmpty() )
-    return;
+    return false;
 
   // Shape to save
   TopoDS_Shape targetShape = m_part->GetShape();
@@ -314,7 +318,7 @@ void asiUI_DialogSTEP::proceed_Write()
   if ( targetShape.IsNull() )
   {
     m_notifier.SendLogMessage(LogErr(Normal) << "Part shape is null.");
-    return;
+    return false;
   }
 
   QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -332,6 +336,7 @@ void asiUI_DialogSTEP::proceed_Write()
     m_notifier.SendLogMessage(LogErr(Normal) << "STEP writer failed.");
 
   QApplication::restoreOverrideCursor();
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -339,18 +344,18 @@ void asiUI_DialogSTEP::proceed_Write()
 //-----------------------------------------------------------------------------
 
 //! Reads STEP.
-void asiUI_DialogSTEP::proceed_Read()
+bool asiUI_DialogSTEP::proceed_Read()
 {
   this->Filename = asiUI_Common::selectSTEPFile(asiUI_Common::OpenSaveAction_Open);
   //
   TCollection_AsciiString filename = QStr2AsciiStr(this->Filename);
   //
   if ( filename.IsEmpty() )
-    return;
+    return false;
 
   // Check Part Node.
   if ( m_part.IsNull() || !m_part->IsWellFormed() )
-    return;
+    return false;
 
   QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
   m_notifier.SetMessageKey("Load STEP");
@@ -369,7 +374,7 @@ void asiUI_DialogSTEP::proceed_Read()
       QApplication::restoreOverrideCursor();
 
       m_model->AbortCommand();
-      return;
+      return false;
     }
   }
   m_model->CommitCommand();
@@ -380,6 +385,7 @@ void asiUI_DialogSTEP::proceed_Read()
   m_notifier.SendLogMessage(LogNotice(Normal) << "Part loaded from STEP file '%1'." << filename);
   m_notifier.SetProgressStatus(Progress_Succeeded);
   QApplication::restoreOverrideCursor();
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -401,7 +407,7 @@ void asiUI_DialogSTEP::onProceed()
   this->close();
 
   if ( m_mode == Mode_Read )
-    this->proceed_Read();
+    m_isProceed = this->proceed_Read();
   else
-    this->proceed_Write();
+    m_isProceed = this->proceed_Write();
 }

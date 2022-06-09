@@ -60,6 +60,9 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   m_interp   (interp),
   m_notifier (notifier)
 {
+  // Window title
+  setWindowTitle("Available commands");
+
   // Main layout
   m_pMainLayout = new QVBoxLayout();
 
