@@ -51,14 +51,37 @@
 
 //-----------------------------------------------------------------------------
 
-int MISC_Test(const Handle(asiTcl_Interp)& cmdMisc_NotUsed(interp),
+int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
   (void) argc;
   (void) argv;
 
-  // TODO: test anything here.
+  gp_Pnt p1(0, 0, 0);
+    gp_Pnt p2(10, 0, 0);
+    gp_Pnt p3(10, 10, 0);
+    gp_Pnt p4(0, 10, 0);
+    TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(p1, p2);
+    TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(p2, p3);
+    TopoDS_Edge e3 = BRepBuilderAPI_MakeEdge(p3, p4);
+    TopoDS_Edge e4 = BRepBuilderAPI_MakeEdge(p4, p1);
+    TopoDS_Wire aWire = BRepBuilderAPI_MakeWire(e1, e2, e3, e4);
+    TopoDS_Face aFace = BRepBuilderAPI_MakeFace(aWire);
+
+    gp_Pnt p5(10, 5, 0);
+    gp_Pnt p6(0, 5, 0);
+    TopoDS_Edge e01 = BRepBuilderAPI_MakeEdge(p1, p2);
+    TopoDS_Edge e02 = BRepBuilderAPI_MakeEdge(p2, p5);
+    TopoDS_Edge e03 = BRepBuilderAPI_MakeEdge(p5, p6);
+    TopoDS_Edge e04 = BRepBuilderAPI_MakeEdge(p6, p1);
+    TopoDS_Wire bWire = BRepBuilderAPI_MakeWire(e01, e02, e03, e04);
+    TopoDS_Face bFace = BRepBuilderAPI_MakeFace(bWire);
+
+    TopoDS_Shape bCuta = BRepAlgoAPI_Cut(bFace, aFace);
+    if (bCuta.IsNull()) std::cout << "bCuta is null!" << std::endl;
+
+    interp->GetPlotter().REDRAW_SHAPE("bCuta", bCuta);
 
   return TCL_OK;
 }

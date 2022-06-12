@@ -1597,23 +1597,16 @@ int ENGINE_ExtendSurf(const Handle(asiTcl_Interp)& interp,
                       int                          argc,
                       const char**                 argv)
 {
-  if ( argc != 5 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   // Find Surface Node by name.
-  Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[2]);
+  Handle(ActAPI_INode)          node     = cmdEngine::model->FindNodeByName(argv[2]);
+  Handle(asiData_IVSurfaceNode) surfNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
   //
-  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+  if ( surfNode.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a surface."
                                                         << argv[2]);
     return TCL_OK;
   }
-  //
-  Handle(asiData_IVSurfaceNode)
-    surfNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
 
   // Get surface.
   Handle(Geom_Surface) occtSurface = surfNode->GetSurface();
@@ -1640,13 +1633,13 @@ int ENGINE_ExtendSurf(const Handle(asiTcl_Interp)& interp,
   // Get extension qualifier.
   TCollection_AsciiString qualifier(argv[4]);
 
-  if ( qualifier == "umin" )
+  if ( interp->HasKeyword(argc, argv, "umin") )
     GeomLib::ExtendSurfByLength(BS, L, 1, 1, 0);
-  else if ( qualifier == "umax" )
+  if ( interp->HasKeyword(argc, argv, "umax") )
     GeomLib::ExtendSurfByLength(BS, L, 1, 1, 1);
-  else if ( qualifier == "vmin" )
+  if ( interp->HasKeyword(argc, argv, "vmin") )
     GeomLib::ExtendSurfByLength(BS, L, 1, 0, 0);
-  else if ( qualifier == "vmax" )
+  if ( interp->HasKeyword(argc, argv, "vmax") )
     GeomLib::ExtendSurfByLength(BS, L, 1, 0, 1);
 
   // Create surface.
@@ -3488,7 +3481,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("extend-surf",
     //
-    "extend-surf <resName> <surfName> <length> {<umax> | <umin> | <vmax> | <vmin>}\n"
+    "extend-surf <resName> <surfName> <length> {-umax | -umin | -vmax | -vmin}\n"
     "\t Extends surface <surfName> by length <length> in the given\n"
     "\t parameter's direction.",
     //
