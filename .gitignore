@@ -1,9 +1,6 @@
 products
 3rd-parties-arc
-cmake-build-debug
-cmake-build-release
-cmake-build-dir
-cmake-install-dir
+cmake*
 3rd-parties
 custom.bat
 win64/
