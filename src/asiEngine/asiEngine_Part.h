@@ -125,6 +125,10 @@ public:
   asiEngine_EXPORT void
     CleanMetadata();
 
+  //! Reset part parameters to default.
+  asiEngine_EXPORT void
+    ResetPartParametersToDefault();
+
   //! Updates metadata available for the Part Node according to the passed
   //! modification history.
   //! \param[in] history modification history.

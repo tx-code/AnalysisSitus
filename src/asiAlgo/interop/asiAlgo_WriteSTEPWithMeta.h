@@ -101,7 +101,9 @@ protected:
              const STEPControl_StepModelType mode = STEPControl_AsIs);
   
   asiAlgo_EXPORT bool
-    writeColors(const Handle(XSControl_WorkSession)& WS);
+    writeColors(const Handle(XSControl_WorkSession)& WS,
+                const TopoDS_Shape&                  shape,
+                const TopLoc_Location&               loc);
 
 private:
 

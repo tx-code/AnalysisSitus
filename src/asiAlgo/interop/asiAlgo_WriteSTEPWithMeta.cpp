@@ -137,6 +137,9 @@ bool asiAlgo_WriteSTEPWithMeta::transfer(STEPControl_Writer&             writer,
 
   // Get shape to write.
   TopoDS_Shape shape = m_input->GetShape();
+  TopLoc_Location loc = m_input->GetLocation();
+  if ( !loc.IsIdentity() )
+    shape.Move(loc);
   //
   if ( shape.IsNull() )
     return false;
@@ -149,7 +152,7 @@ bool asiAlgo_WriteSTEPWithMeta::transfer(STEPControl_Writer&             writer,
 
   // Write colors.
   if ( m_bColorMode )
-    this->writeColors( writer.WS() );
+    this->writeColors( writer.WS(), shape, loc );
 
   // Register all MDGPRs in model.
   const Handle(Interface_InterfaceModel)& Model = writer.WS()->Model();
@@ -216,14 +219,13 @@ static int FindEntities(const Handle(Transfer_FinderProcess)& FP,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_WriteSTEPWithMeta::writeColors(const Handle(XSControl_WorkSession)& WS)
+bool asiAlgo_WriteSTEPWithMeta::writeColors(const Handle(XSControl_WorkSession)& WS,
+                                            const TopoDS_Shape&                  shape,
+                                            const TopLoc_Location&               loc)
 {
   STEPConstruct_Styles                        Styles(WS);
   STEPConstruct_DataMapOfAsciiStringTransient DPDCs;
   STEPConstruct_DataMapOfPointTransient       ColRGBs;
-
-  // Get shape.
-  TopoDS_Shape shape = m_input->GetShape();
 
   // Get its representation context.
   Handle(StepRepr_RepresentationContext) context = Styles.FindContext(shape);
@@ -241,6 +243,8 @@ bool asiAlgo_WriteSTEPWithMeta::writeColors(const Handle(XSControl_WorkSession)&
   {
     // Get subshape.
     TopoDS_Shape subShape = m_input->GetSubShape(ss);
+    if ( !loc.IsIdentity() )
+      subShape.Move(loc);
 
     // Create STEP styles.
     Handle(StepVisual_StyledItem) overridedStyle;

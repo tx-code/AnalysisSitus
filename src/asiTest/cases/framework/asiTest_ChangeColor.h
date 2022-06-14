@@ -71,6 +71,13 @@ public:
               << &test_color_part_4
               << &test_color_face_5
               << &test_color_face_6
+              << &test_color_part_7
+              << &test_color_part_8
+              << &test_color_part_9
+              << &test_color_part_10
+              << &test_color_part_11
+              << &test_color_part_12
+              << &test_color_part_13
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -85,6 +92,13 @@ private:
   static outcome test_color_part_4(const int funcID);
   static outcome test_color_face_5(const int funcID);
   static outcome test_color_face_6(const int funcID);
+  static outcome test_color_part_7(const int funcID);
+  static outcome test_color_part_8(const int funcID);
+  static outcome test_color_part_9(const int funcID);
+  static outcome test_color_part_10(const int funcID);
+  static outcome test_color_part_11(const int funcID);
+  static outcome test_color_part_12(const int funcID);
+  static outcome test_color_part_13(const int funcID);
 
 };
 

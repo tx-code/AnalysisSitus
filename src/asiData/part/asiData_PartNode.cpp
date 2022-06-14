@@ -94,8 +94,8 @@ Handle(ActAPI_INode) asiData_PartNode::Instance()
   return new asiData_PartNode();
 }
 
-//! Performs initial actions required to make Geometry Node WELL-FORMED.
-void asiData_PartNode::Init(const bool resetNaming)
+//! Reset part parameters to default.
+void asiData_PartNode::ResetToDefault(const bool resetNaming)
 {
   // Set empty initial B-Rep and AAG.
   this->setShape  ( TopoDS_Shape() );
@@ -126,6 +126,12 @@ void asiData_PartNode::Init(const bool resetNaming)
   ActParamTool::AsRealArray( this->Parameter(PID_TrsfMx) )->SetArray( new HRealArray(0, 11, 0.) );
   //
   this->SetTransformation(0., 0., 0., 0., 0., 0.);
+}
+
+//! Performs initial actions required to make Geometry Node WELL-FORMED.
+void asiData_PartNode::Init(const bool resetNaming)
+{
+  ResetToDefault(resetNaming);
 
   // Initialize Parameter flags.
   this->InitParameter(PID_Name,               "Name",               "",               ParameterFlag_IsVisible, true);

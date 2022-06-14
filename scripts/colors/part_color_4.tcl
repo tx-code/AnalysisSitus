@@ -1,3 +1,4 @@
+clear
 set datafile cad/ANC101.stp
 
 # Create box
@@ -17,9 +18,10 @@ if { ![file isdirectory $tmpDir] } {
 
 # Save in new step.
 set resultName "result.stp"
-save-step $tmpDir$resultName
+save-step aaa $tmpDir$resultName
 
 # Load saved step.
+clear
 load-step $tmpDir$resultName
 
 # Check color.

@@ -60,6 +60,13 @@ TopoDS_Shape asiEngine_IVTopoItemSTEPWriterInput::GetShape() const
 
 //-----------------------------------------------------------------------------
 
+TopLoc_Location asiEngine_IVTopoItemSTEPWriterInput::GetLocation() const
+{
+  return TopLoc_Location();
+}
+
+//-----------------------------------------------------------------------------
+
 int asiEngine_IVTopoItemSTEPWriterInput::GetNumSubShapes() const
 {
   return 0;

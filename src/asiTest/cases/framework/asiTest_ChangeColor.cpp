@@ -109,3 +109,73 @@ outcome asiTest_ChangeColor::test_color_face_6(const int funcID)
 {
   return runTestScript(funcID, "colors/face_color_6.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 7.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_7(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_7.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 8.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_8(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_8.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 9.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_9(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_9.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 10.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_10(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_10.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 11.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_11(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_11.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 12.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_12(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_12.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 13.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ChangeColor::test_color_part_13(const int funcID)
+{
+  return runTestScript(funcID, "colors/part_color_13.tcl");
+}

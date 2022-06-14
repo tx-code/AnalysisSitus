@@ -199,6 +199,7 @@ void asiEngine_Model::Clear()
     asiEngine_Part partApi(this);
     partApi.CleanMetadata();
     partApi.CleanFeatures();
+    partApi.ResetPartParametersToDefault();
 
     // Let sub-classes do some job
     this->clearCustom();

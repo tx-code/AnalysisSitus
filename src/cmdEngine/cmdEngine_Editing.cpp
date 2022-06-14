@@ -2649,7 +2649,7 @@ int ENGINE_MovePart(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 7 )
+  if ( argc != 7 && argc != 8 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
@@ -2662,6 +2662,12 @@ int ENGINE_MovePart(const Handle(asiTcl_Interp)& interp,
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is empty.");
     return TCL_ERROR;
+  }
+
+  bool isGeometric = false;
+  if ( interp->HasKeyword(argc, argv, "isGeometric") )
+  {
+    isGeometric = true;
   }
 
   // Read input transformation.
@@ -2682,19 +2688,34 @@ int ENGINE_MovePart(const Handle(asiTcl_Interp)& interp,
   T.SetRotation(RZ*RY*RX);
   T.SetTranslationPart(Translation);
 
-  // Create a new transformed shape.
-  TopoDS_Shape newShape = BRepBuilderAPI_Transform(shape, T, true);
-
-  // Update Data Model.
-  cmdEngine::model->OpenCommand();
+  if ( isGeometric )
   {
-    asiEngine_Part(cmdEngine::model).Update(newShape);
+    // Create a new transformed shape.
+    TopoDS_Shape newShape = BRepBuilderAPI_Transform(shape, T, true);
+
+    // Update Data Model.
+    cmdEngine::model->OpenCommand();
+    {
+      asiEngine_Part(cmdEngine::model).Update(newShape);
+    }
+    cmdEngine::model->CommitCommand();
   }
-  cmdEngine::model->CommitCommand();
+  else
+  {
+    cmdEngine::model->OpenCommand();
+    {
+      asiEngine_Part(cmdEngine::model).GetPart()->SetTransformation(tx, ty, tz, rx, ry, rz);
+    }
+    cmdEngine::model->CommitCommand();
+  }
 
   // Actualize.
-  if ( cmdEngine::cf->ViewerPart )
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
     cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+
+  // To sync metadata.
+  if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate();
 
   return TCL_OK;
 }
@@ -3625,8 +3646,10 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("move-part",
     //
-    "move-part <tx> <ty> <tz> <rx> <ry> <rz>\n"
-    "\t Moves part by applying the passed transformation on its deep copy. The values\n"
+    "move-part <tx> <ty> <tz> <rx> <ry> <rz> [-isGeometric]\n"
+    "\t In case the '-isGeometric' key is not set, moves part by applying the passed\n"
+    "\t transformation to the location of part. In case the '-isGeometric' key is set,\n"
+    "\t moves part by applying the passed transformation on its deep copy. The values\n"
     "\t <tx>, <ty>, <tx> define the translation vector. The values <rx>, <ry>, <rz>\n"
     "\t define the rotation angles in degrees. Rotation is performed with respect\n"
     "\t to the global X, Y, Z axes.",

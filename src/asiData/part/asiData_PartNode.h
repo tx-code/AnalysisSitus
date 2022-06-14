@@ -357,6 +357,9 @@ public:
   asiData_EXPORT void
     Init(const bool resetNaming);
 
+  asiData_EXPORT void
+    ResetToDefault(const bool resetNaming);
+
 protected:
 
   //! Allocation is allowed only via Instance() method.

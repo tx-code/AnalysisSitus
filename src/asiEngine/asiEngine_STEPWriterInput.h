@@ -69,6 +69,11 @@ public:
   asiEngine_EXPORT virtual TopoDS_Shape
     GetSubShape(const int zeroBasedIdx) const;
 
+  //! Get additional location.
+  //! \return location.
+  asiEngine_EXPORT virtual TopLoc_Location
+    GetLocation() const;
+
   //! Checks whether the passed shape has color or not.
   //! \param[in] shape shape in question.
   //! \return false if no color is attached, true -- otherwise.

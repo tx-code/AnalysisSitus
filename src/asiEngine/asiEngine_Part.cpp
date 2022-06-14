@@ -417,6 +417,16 @@ void asiEngine_Part::CleanMetadata()
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Part::ResetPartParametersToDefault()
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = m_model->GetPartNode();
+
+  partNode->ResetToDefault(true);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiEngine_Part::UpdateMetadata(const Handle(asiAlgo_History)& history)
 {
   Handle(asiData_MetadataNode) N = this->GetMetadata();

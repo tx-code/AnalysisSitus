@@ -1,7 +1,9 @@
+clear
 set datafile cad/ANC101.stp
 
 # Read input geometry.
 set datadir $env(ASI_TEST_DATA)
+clear
 load-step $datadir/$datafile
 
 # Recognize features and change color.
@@ -36,6 +38,7 @@ set resultName "result.stp"
 save-step $tmpDir$resultName
 
 # Load saved step.
+clear
 load-step $tmpDir$resultName
 
 # Check color.

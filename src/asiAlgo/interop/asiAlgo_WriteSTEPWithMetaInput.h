@@ -87,6 +87,11 @@ public:
   virtual bool
     HasCommonColor() const = 0;
 
+  //! Get additional location.
+  //! \return location.
+  virtual TopLoc_Location
+    GetLocation() const = 0;
+
 };
 
 #endif
