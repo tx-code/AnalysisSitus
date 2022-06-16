@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BuildHLR.h>
+#include <asiAlgo_SuppressFeatures.h>
 #include <asiAlgo_Timer.h>
 
 // asiVisu includes
@@ -45,6 +46,7 @@
 #include <asiUI_DialogFindFace.h>
 #include <asiUI_DialogFindVertex.h>
 #include <asiUI_DialogRefineTessellation.h>
+#include <asiUI_IV.h>
 
 // asiEngine includes
 #include <asiEngine_Part.h>
@@ -718,12 +720,34 @@ void asiUI_ViewerPart::onDefeature()
 {
   asiEngine_Part partApi(m_model, m_prs_mgr, m_progress, m_plotter);
 
-  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  TopoDS_Shape initShape = partApi.GetShape();
   //
-  if ( aag.IsNull() )
+  if ( initShape.IsNull() )
     return;
 
-  // TODO: NYI
+  // Get selected faces.
+  asiAlgo_Feature features, unsuppressed;
+  partApi.GetHighlightedFaces(features);
+
+  // Suppress.
+  TopoDS_Shape              resShape;
+  Handle(BRepTools_History) resHistory;
+  //
+  asiAlgo_SuppressFeatures suppress(m_progress);
+  //
+  if ( !suppress(initShape, features, true, resShape, unsuppressed, resHistory) )
+    return;
+
+  // Prepare native history.
+  Handle(asiAlgo_History)
+    history = asiAlgo_History::Create(initShape, resHistory);
+
+  // Update data model.
+  m_model->OpenCommand();
+  {
+    partApi.Update(resShape, history);
+  }
+  m_model->CommitCommand();
 }
 
 //-----------------------------------------------------------------------------

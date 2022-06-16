@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 02 March 2016
+// Created on: 16 June 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,113 +31,89 @@
 // Own include
 #include <asiAlgo_SuppressFaces.h>
 
-// asiAlgo includes
-#include <asiAlgo_Utils.h>
-
 // OCCT includes
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 
-#undef COUT_DEBUG
+//-----------------------------------------------------------------------------
 
-//! Constructor.
-//! \param[in] masterCAD full CAD model.
-asiAlgo_SuppressFaces::asiAlgo_SuppressFaces(const TopoDS_Shape& masterCAD)
+asiAlgo_SuppressFaces::asiAlgo_SuppressFaces()
 {
-  m_master  = masterCAD;
-  m_reShape = new BRepTools_ReShape;
-  m_reShape->ModeConsiderLocation() = 1; // We do not care of location today
+  m_reShape = new BRepTools_ReShape();
+  m_reShape->ModeConsiderLocation() = 0; // We do not care of location today.
 }
 
 //-----------------------------------------------------------------------------
 
-//! Removes the given faces from the master model.
-//! \param[in] faceIndices indices faces to suppress.
-//! \param[in] facesOnly   indicates whether to delete faces only.
-//! \return true in case of success, false -- otherwise.
-bool asiAlgo_SuppressFaces::Perform(const TColStd_PackedMapOfInteger& faceIndices,
-                                    const bool                        facesOnly)
+asiAlgo_SuppressFaces::asiAlgo_SuppressFaces(const TopoDS_Shape& masterCAD)
 {
-  // Get indices of faces
-  TopTools_IndexedMapOfShape faces;
-  TopExp::MapShapes(m_master, TopAbs_FACE, faces);
+  m_master  = masterCAD;
+  m_reShape = new BRepTools_ReShape();
+  m_reShape->ModeConsiderLocation() = 0; // We do not care of location today.
+}
 
-  // Remove requested faces
-  TopTools_ListOfShape faceList;
-  //
+//-----------------------------------------------------------------------------
+
+asiAlgo_SuppressFaces::asiAlgo_SuppressFaces(const Handle(asiAlgo_AAG)& aag)
+{
+  this->SetAAG(aag);
+
+  m_reShape = new BRepTools_ReShape();
+  m_reShape->ModeConsiderLocation() = 0; // We do not care of location today.
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_SuppressFaces::Perform(const asiAlgo_Feature& faceIndices,
+                                    const bool             facesOnly)
+{
+  // Get indices of faces.
+  if ( m_faces.IsEmpty() )
+  {
+    if ( m_aag.IsNull() )
+      TopExp::MapShapes(m_master, TopAbs_FACE, m_faces);
+    else
+      m_faces = m_aag->GetMapOfFaces();
+  }
+
+  // Remove requested faces.
   for ( TColStd_MapIteratorOfPackedMapOfInteger fit(faceIndices); fit.More(); fit.Next() )
   {
     const int face_idx = fit.Key();
     //
-    if ( face_idx < 1 || face_idx > faces.Extent() )
+    if ( face_idx < 1 || face_idx > m_faces.Extent() )
       continue;
 
-    faceList.Append( faces(face_idx) );
-  }
+    const TopoDS_Shape& face = m_faces(face_idx);
 
-  return this->Perform(faceList, facesOnly);
-}
+    m_reShape->Remove(face);
 
-//-----------------------------------------------------------------------------
+    if ( !facesOnly )
+    {
+      // Kill wires.
+      for ( TopExp_Explorer exp(face, TopAbs_WIRE); exp.More(); exp.Next() )
+      {
+        m_reShape->Remove( exp.Current() );
+      }
 
-//! Removes the given faces from the master model.
-//! \param[in] faces     faces to suppress.
-//! \param[in] facesOnly indicates whether to delete faces only.
-//! \return true in case of success, false -- otherwise.
-bool asiAlgo_SuppressFaces::Perform(const TopTools_ListOfShape& faces,
-                                    const bool                  facesOnly)
-{
-  // Remove requested faces
-  for ( TopTools_ListIteratorOfListOfShape fit(faces); fit.More(); fit.Next() )
-  {
-    //const TopoDS_Shape& face = fit.Value();
-    suppressFace(fit.Value(), facesOnly);
+      // Kill edges.
+      for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
+      {
+        m_reShape->Remove( exp.Current() );
+      }
+
+      // Kill vertices.
+      for ( TopExp_Explorer exp(face, TopAbs_VERTEX); exp.More(); exp.Next() )
+      {
+        m_reShape->Remove( exp.Current() );
+      }
+    }
   }
   m_result = m_reShape->Apply(m_master);
 
-  return true; // Success
-}
-
-//-----------------------------------------------------------------------------
-bool asiAlgo_SuppressFaces::Perform(const TopTools_IndexedMapOfShape& faces,
-                                    const bool                        facesOnly)
-{
-  TopTools_IndexedMapOfShape::Iterator it(faces);
-  for (; it.More(); it.Next())
-  {
-    suppressFace(it.Value(), facesOnly);
-  }
-
-  m_result = m_reShape->Apply(m_master);
-
-  return true; // Success
-}
-
-//-----------------------------------------------------------------------------
-void asiAlgo_SuppressFaces::suppressFace(const TopoDS_Shape& face,
-                                         const bool          facesOnly)
-{
-  m_reShape->Remove(face);
-
-  if (!facesOnly)
-  {
-    // Get rid of wires
-    for (TopExp_Explorer exp(face, TopAbs_WIRE); exp.More(); exp.Next())
-    {
-      m_reShape->Remove(exp.Current());
-    }
-
-    // Get rid of edges
-    for (TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next())
-    {
-      m_reShape->Remove(exp.Current());
-    }
-
-    // Get rid of vertices
-    for (TopExp_Explorer exp(face, TopAbs_VERTEX); exp.More(); exp.Next())
-    {
-      m_reShape->Remove(exp.Current());
-    }
-  }
+  // For some reason, Apply() may not be effective and return null shape out
+  // of the non-null input. Let's do this final judgement over here to prevent
+  // returning 'true' in such situations...
+  return !m_result.IsNull();
 }

@@ -37,6 +37,41 @@
 // OCCT includes
 #include <BRepTools_History.hxx>
 #include <NCollection_Map.hxx>
+#include <TopExp_Explorer.hxx>
+
+//-----------------------------------------------------------------------------
+
+Handle(asiAlgo_History)
+  asiAlgo_History::Create(const TopoDS_Shape&              initShape,
+                          const Handle(BRepTools_History)& occHistory)
+{
+  if ( occHistory.IsNull() )
+    return nullptr;
+
+  Handle(asiAlgo_History) res = new asiAlgo_History;
+
+  TopExp_Explorer expShF(initShape, TopAbs_FACE);
+  for ( ; expShF.More(); expShF.Next() )
+  {
+    const TopoDS_Shape& subshape = expShF.Value();
+
+    if ( occHistory->IsRemoved(subshape) )
+    {
+      res->SetDeleted(subshape);
+    }
+    else
+    {
+      const TopTools_ListOfShape& images = occHistory->Modified(subshape);
+      //
+      for ( TopTools_ListOfShape::Iterator iit(images); iit.More(); iit.Next() )
+      {
+        res->AddModified( subshape, iit.Value() );
+      }
+    }
+  }
+
+  return res;
+}
 
 //-----------------------------------------------------------------------------
 

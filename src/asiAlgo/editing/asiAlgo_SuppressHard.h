@@ -28,95 +28,70 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_SuppressFaces_h
-#define asiAlgo_SuppressFaces_h
+#ifndef algoFeat_SuppressHard_h
+#define algoFeat_SuppressHard_h
 
 // asiAlgo includes
 #include <asiAlgo_AAG.h>
-#include <asiAlgo_FeatureFaces.h>
+
+// Active Data includes
+#include <ActAPI_IAlgorithm.h>
 
 // OCCT includes
-#include <BRepTools_ReShape.hxx>
+#include <Message_ProgressIndicator.hxx>
 
-//-----------------------------------------------------------------------------
-
-//! Utility to delete faces.
-class asiAlgo_SuppressFaces : public Standard_Transient
+//! Utility to suppress hard features.
+class asiAlgo_SuppressHard : public ActAPI_IAlgorithm
 {
-  // OCCT RTTI.
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_SuppressFaces, Standard_Transient)
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_SuppressHard, ActAPI_IAlgorithm)
 
 public:
-
-  //! Default ctor.
-  asiAlgo_EXPORT
-    asiAlgo_SuppressFaces();
 
   //! Constructor.
   //! \param[in] masterCAD full CAD model.
+  //! \param[in] aag       Attributed Adjacency Graph.
+  //! \param[in] progress  progress notifier.
+  //! \param[in] plotter   imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_SuppressFaces(const TopoDS_Shape& masterCAD);
-
-  //! Constructor.
-  //! \param[in] aag attributed adjacency graph.
-  asiAlgo_EXPORT
-    asiAlgo_SuppressFaces(const Handle(asiAlgo_AAG)& aag);
+    asiAlgo_SuppressHard(const TopoDS_Shape&        masterCAD,
+                         const Handle(asiAlgo_AAG)& aag,
+                         ActAPI_ProgressEntry       progress,
+                         ActAPI_PlotterEntry        plotter);
 
 public:
 
-  //! Removes the given faces from the master model.
-  //! \param[in] faceIndices indices faces to suppress.
-  //! \param[in] facesOnly   indicates whether to delete faces only. Otherwise,
-  //!                        all their belonging sub-shapes will be deleted,
-  //!                        thus having impact on the neighbor shapes.
+  //! Removes the given feature faces from the master model.
+  //! \param[in] faceIndices indices of faces to delete.
   //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT virtual bool
-    Perform(const asiAlgo_Feature& faceIndices,
-            const bool             facesOnly);
+  asiAlgo_EXPORT bool
+    Perform(const asiAlgo_Feature& faceIndices);
 
 public:
-
-  //! Sets map of faces. If this method is not used, the map of faces will
-  //! be taken from the input shape or from AAG (if provided).
-  //! \param[in] faces map to set.
-  void SetMapOfFaces(const TopTools_IndexedMapOfShape& faces)
-  {
-    m_faces = faces;
-  }
-
-  //! Sets AAG.
-  //! \param[in] aag attributed adjacency graph.
-  void SetAAG(const Handle(asiAlgo_AAG)& aag)
-  {
-    m_master = aag->GetMasterShape();
-    m_aag    = aag;
-  }
 
   //! \return result shape.
   const TopoDS_Shape& GetResult() const
   {
-    return m_result;
+    return m_output;
   }
 
-  //! \return instance of Re-Shape utility used for topological reduction.
-  const Handle(BRepTools_ReShape)& GetReShape() const
+  //! \return modification history.
+  const Handle(BRepTools_History)& GetHistory() const
   {
-    return m_reShape;
-  }
-
-  //! \return history of modification.
-  Handle(BRepTools_History) GetHistory() const
-  {
-    return m_reShape->History();
+    return m_history;
   }
 
 protected:
 
-  TopoDS_Shape               m_master;  //!< Master model.
-  TopoDS_Shape               m_result;  //!< Result.
-  Handle(BRepTools_ReShape)  m_reShape; //!< Re-Shape tool.
-  Handle(asiAlgo_AAG)        m_aag;     //!< Optional AAG.
-  TopTools_IndexedMapOfShape m_faces;   //!< Map of faces.
+  //! History is prepared in Perform() method..
+  virtual void buildHistory(Handle(BRepTools_History)&) {};
+
+protected:
+
+  TopoDS_Shape              m_input;   //!< Input shape.
+  TopoDS_Shape              m_output;  //!< Output shape.
+  Handle(asiAlgo_AAG)       m_aag;     //!< AAG.
+  Handle(BRepTools_History) m_history; //!< Modification history.
 
 };
 

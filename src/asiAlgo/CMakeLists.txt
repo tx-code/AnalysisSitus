@@ -232,6 +232,9 @@ set (editing_H_FILES
   editing/asiAlgo_RepatchFaces.h
   editing/asiAlgo_SmallEdges.h
   editing/asiAlgo_SuppressFaces.h
+  editing/asiAlgo_SuppressFeatures.h
+  editing/asiAlgo_SuppressHard.h
+  editing/asiAlgo_SuppressSoft.h
   editing/asiAlgo_TopoKill.h
 )
 set (editing_CPP_FILES
@@ -259,6 +262,9 @@ set (editing_CPP_FILES
   editing/asiAlgo_RehostFaces.cpp
   editing/asiAlgo_SmallEdges.cpp
   editing/asiAlgo_SuppressFaces.cpp
+  editing/asiAlgo_SuppressFeatures.cpp
+  editing/asiAlgo_SuppressHard.cpp
+  editing/asiAlgo_SuppressSoft.cpp
   editing/asiAlgo_TopoKill.cpp
 )
 
@@ -272,6 +278,7 @@ set (features_H_FILES
   features/asiAlgo_AdjacencyMx.h
   features/asiAlgo_BorderTrihedron.h
   features/asiAlgo_CheckDihedralAngle.h
+  features/asiAlgo_CheckInsertion.h
   features/asiAlgo_CheckVertexVexity.h
   features/asiAlgo_ExtractFeatures.h
   features/asiAlgo_ExtractFeaturesResult.h
@@ -287,6 +294,7 @@ set (features_H_FILES
   features/asiAlgo_FeatureFaces.h
   features/asiAlgo_FeatureType.h
   features/asiAlgo_FindFeatureHints.h
+  features/asiAlgo_InsertionType.h
   features/asiAlgo_Isomorphism.h
   features/asiAlgo_RecognitionRule.h
   features/asiAlgo_RecognizeCavities.h
@@ -308,6 +316,7 @@ set (features_CPP_FILES
   features/asiAlgo_AAGIterator.cpp
   features/asiAlgo_AdjacencyMx.cpp
   features/asiAlgo_CheckDihedralAngle.cpp
+  features/asiAlgo_CheckInsertion.cpp
   features/asiAlgo_CheckVertexVexity.cpp
   features/asiAlgo_ExtractFeatures.cpp
   features/asiAlgo_ExtractFeaturesResult.cpp

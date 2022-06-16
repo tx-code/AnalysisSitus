@@ -55,10 +55,16 @@ class BRepTools_History;
 //! This utility class serves tracking history of topological modifications.
 class asiAlgo_History : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_History, Standard_Transient)
+
+public:
+
+  //! Factory method to create history from the passed OpenCascade's native
+  //! data structure.
+  asiAlgo_EXPORT static Handle(asiAlgo_History)
+    Create(const TopoDS_Shape&              initShape,
+           const Handle(BRepTools_History)& occHistory);
 
 public:
 

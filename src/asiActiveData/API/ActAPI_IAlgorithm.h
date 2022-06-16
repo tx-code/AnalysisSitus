@@ -44,8 +44,6 @@
 //! Interface for algorithms.
 class ActAPI_IAlgorithm : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(ActAPI_IAlgorithm, Standard_Transient)
 
