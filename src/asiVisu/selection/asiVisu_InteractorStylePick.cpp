@@ -200,21 +200,24 @@ void asiVisu_InteractorStylePick::OnKeyPress()
   if ( this->Interactor->GetControlKey() && key == "f" )
     this->InvokeEvent(EVENT_FIND_FACE);
   //
-  if ( this->Interactor->GetControlKey() && key == "e" )
+  else if ( this->Interactor->GetControlKey() && key == "e" )
     this->InvokeEvent(EVENT_FIND_EDGE);
   //
-  if ( this->Interactor->GetControlKey() && key == "v" )
+  else if ( this->Interactor->GetControlKey() && key == "v" )
     this->InvokeEvent(EVENT_FIND_VERTEX);
   //
-  if ( this->Interactor->GetControlKey() && key == "t" )
+  else if ( this->Interactor->GetControlKey() && key == "t" )
     this->InvokeEvent(EVENT_REFINE_TESSELLATION);
   //
-  if ( this->Interactor->GetControlKey() && key == "a" )
+  else if ( this->Interactor->GetControlKey() && key == "a" )
     this->InvokeEvent(EVENT_SELECT_ALL);
   //
-  if ( key == "h" )
+  else if ( key == "h" )
     this->Interactor->GetAltKey() ? this->InvokeEvent(EVENT_BUILD_HLR_DISCR) :
                                     this->InvokeEvent(EVENT_BUILD_HLR);
+  //
+  else if ( key == "Delete" )
+    this->InvokeEvent(EVENT_DEFEATURE);
 }
 
 bool asiVisu_InteractorStylePick::IsControlPressed() const

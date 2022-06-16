@@ -110,6 +110,7 @@ public slots:
   asiUI_EXPORT void onRightView();
   asiUI_EXPORT void onTopView();
   asiUI_EXPORT void onSelectAll();
+  asiUI_EXPORT void onDefeature();
 
 signals:
 

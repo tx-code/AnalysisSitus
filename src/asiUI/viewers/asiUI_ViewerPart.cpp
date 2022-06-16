@@ -214,6 +214,10 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR_DISCR) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR_DISCR, m_partCallback);
 
+    // Set observer for defeaturing
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_DEFEATURE) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_DEFEATURE, m_partCallback);
+
     // Get notified once a sub-shape is picked
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onSubShapesPicked() ) );
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onWhateverPicked() ) );
@@ -226,6 +230,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
     connect( m_partCallback, SIGNAL( buildHLRDiscr() ),      this, SLOT( onBuildHLRDiscr() ) );
     connect( m_partCallback, SIGNAL( selectAll() ),          this, SLOT( onSelectAll() ) );
+    connect( m_partCallback, SIGNAL( defeature() ),          this, SLOT( onDefeature() ) );
 
     /* ===============================
      *  Setting up rotation callbacks
@@ -705,6 +710,20 @@ void asiUI_ViewerPart::onSelectAll()
   aag->GetAllFaces(fids);
 
   partApi.HighlightFaces(fids);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPart::onDefeature()
+{
+  asiEngine_Part partApi(m_model, m_prs_mgr, m_progress, m_plotter);
+
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+    return;
+
+  // TODO: NYI
 }
 
 //-----------------------------------------------------------------------------

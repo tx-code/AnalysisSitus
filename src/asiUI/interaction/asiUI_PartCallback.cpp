@@ -92,4 +92,7 @@ void asiUI_PartCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
 
   if ( eventId == EVENT_SELECT_ALL )
     emit selectAll();
+
+  if ( eventId == EVENT_DEFEATURE )
+    emit defeature();
 }

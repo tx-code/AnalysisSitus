@@ -92,6 +92,7 @@
 #define EVENT_BUILD_HLR_DISCR     (vtkCommand::UserEvent + 1011)
 #define EVENT_SELECT_ALL          (vtkCommand::UserEvent + 1012)
 #define EVENT_FIND_VERTEX         (vtkCommand::UserEvent + 1013)
+#define EVENT_DEFEATURE           (vtkCommand::UserEvent + 1014)
 
 // For interactive picking:
 #define EVENT_DETECT_WORLD_POINT  (vtkCommand::UserEvent + 2010) // World picker.

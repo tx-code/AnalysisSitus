@@ -77,6 +77,7 @@ signals:
   void buildHLR();
   void buildHLRDiscr();
   void selectAll();
+  void defeature();
 
 private:
 
