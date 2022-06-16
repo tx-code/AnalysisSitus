@@ -423,7 +423,7 @@ asiAlgo_BlendVexity
 
     asiAlgo_AAG::t_arc arc(fid, nid);
 
-  // Get the dihedral angle.
+    // Get the dihedral angle.
     Handle(asiAlgo_FeatureAttrAngle)
       DA = m_aag->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
     //
