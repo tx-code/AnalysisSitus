@@ -138,7 +138,7 @@ asiUI_ControlsAnalysis::asiUI_ControlsAnalysis(const Handle(asiEngine_Model)& mo
   pFeaturesLay->addWidget(m_widgets.Features.pShowAAG);
   pFeaturesLay->addWidget(m_widgets.Features.pShowAAGWoSel);
   pFeaturesLay->addWidget(m_widgets.Features.pCheckDihAngles);
-  pFeaturesLay->addWidget(m_widgets.Features.pCheckG1Crossings);
+  //pFeaturesLay->addWidget(m_widgets.Features.pCheckG1Crossings);
   pFeaturesLay->addWidget(m_widgets.Features.pFindSmoothEdges);
   pFeaturesLay->addWidget(m_widgets.Features.pFindConvexOnly);
 
