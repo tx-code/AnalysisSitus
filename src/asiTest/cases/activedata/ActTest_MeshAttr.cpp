@@ -148,8 +148,8 @@ Standard_Integer ActTest_MeshAttrBase::NB_QUADRANGLES =
 //!        then commit) CAF transaction by itself.
 //! \return true in case of success, false -- otherwise.
 bool ActTest_MeshAttrBase::initializeMeshAttr(const Handle(TDocStd_Document)& doc,
-                                              TDF_Label& meshLab,
-                                              const Standard_Boolean isImplictTrans)
+                                              TDF_Label&                      meshLab,
+                                              const Standard_Boolean          isImplictTrans)
 {
   if ( isImplictTrans )
     doc->NewCommand();
@@ -174,75 +174,83 @@ bool ActTest_MeshAttrBase::initializeMeshAttr(const Handle(TDocStd_Document)& do
 //!        then commit) CAF transaction by itself.
 //! \return true in case of success, false -- otherwise.
 outcome ActTest_MeshAttrBase::populateMeshData(const Handle(TDocStd_Document)& doc,
-                                               TDF_Label& meshLab,
-                                               DatumIdList& NODE_IDS,
-                                               DatumIdList& TRIANGLE_IDS,
-                                               DatumIdList& QUADRANGLE_IDS,
-                                               const Standard_Boolean isImplictTrans)
+                                               TDF_Label&                      meshLab,
+                                               DatumIdList&                    NODE_IDS,
+                                               DatumIdList&                    TRIANGLE_IDS,
+                                               DatumIdList&                    QUADRANGLE_IDS,
+                                               const Standard_Boolean          isImplictTrans,
+                                               const std::string&              nameFunc,
+                                               const int                       funcID)
 {
   if ( isImplictTrans )
     doc->NewCommand();
 
-  if ( !populateMeshNodes(meshLab, NODE_IDS).ok ||
-       !populateMeshTriangles(meshLab, TRIANGLE_IDS).ok ||
-       !populateMeshQuadrangles(meshLab, QUADRANGLE_IDS).ok )
-    return outcome().failure();
+  if ( !populateMeshNodes(meshLab, NODE_IDS, nameFunc, funcID).ok ||
+       !populateMeshTriangles(meshLab, TRIANGLE_IDS, nameFunc, funcID).ok ||
+       !populateMeshQuadrangles(meshLab, QUADRANGLE_IDS, nameFunc, funcID).ok )
+    return outcome(nameFunc, funcID).failure();
 
   if ( isImplictTrans )
     doc->CommitCommand();
 
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 //! Populates Mesh Attribute with test nodes.
 //! \param meshLab [in/out] mesh Label.
 //! \param NODE_IDS [out] node IDs registered in the Mesh DS.
 //! \return true in case of success, false -- otherwise.
-outcome ActTest_MeshAttrBase::populateMeshNodes(TDF_Label& meshLab,
-                                                DatumIdList& NODE_IDS)
+outcome ActTest_MeshAttrBase::populateMeshNodes(TDF_Label&         meshLab,
+                                                DatumIdList&       NODE_IDS,
+                                                const std::string& nameFunc,
+                                                const int          funcID)
 {
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
 
   // Populate Mesh DS with nodes
   for ( Standard_Integer i = 0; i < NB_NODES; i++ )
     NODE_IDS.Append( aMeshAttr->AddNode(NODES[i][0], NODES[i][1], NODES[i][2]) );
 
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 //! Populates Mesh Attribute with test triangles.
 //! \param meshLab [in/out] mesh Label.
 //! \param TRIANGLE_IDS [out] triangle IDs registered in the Mesh DS.
 //! \return true in case of success, false -- otherwise.
-outcome ActTest_MeshAttrBase::populateMeshTriangles(TDF_Label& meshLab,
-                                                    DatumIdList& TRIANGLE_IDS)
+outcome ActTest_MeshAttrBase::populateMeshTriangles(TDF_Label&         meshLab,
+                                                    DatumIdList&       TRIANGLE_IDS,
+                                                    const std::string& nameFunc,
+                                                    const int          funcID)
 {
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
 
   // Populate Mesh DS with triangles
   for ( Standard_Integer i = 0; i < NB_TRIANGLES; i++ )
     TRIANGLE_IDS.Append( aMeshAttr->AddElement(TRIANGLES[i], 3) );
 
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 //! Populates Mesh Attribute with test quadrangles.
 //! \param meshLab [in/out] mesh Label.
 //! \param QUADRANGLE_IDS [out] quadrangle IDs registered in the Mesh DS.
 //! \return true in case of success, false -- otherwise.
-outcome ActTest_MeshAttrBase::populateMeshQuadrangles(TDF_Label& meshLab,
-                                                      DatumIdList& QUADRANGLE_IDS)
+outcome ActTest_MeshAttrBase::populateMeshQuadrangles(TDF_Label&         meshLab,
+                                                      DatumIdList&       QUADRANGLE_IDS,
+                                                      const std::string& nameFunc,
+                                                      const int          funcID)
 {
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
 
   // Populate Mesh DS with quadrangles
   for ( Standard_Integer i = 0; i < NB_QUADRANGLES; i++ )
     QUADRANGLE_IDS.Append( aMeshAttr->AddElement(QUADRANGLES[i], 4) );
 
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -252,7 +260,7 @@ outcome ActTest_MeshAttrBase::populateMeshQuadrangles(TDF_Label& meshLab,
 //! Performs test on accessing data stored in MeshAttrBean.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshAttrBean::meshBeanTest(const int funcID)
 {
   TEST_PRINT_DECOR_L("Create new Mesh Attribute");
 
@@ -268,13 +276,15 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
   initializeMeshAttr(doc, meshLab);
 
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr),
+               DescriptionFn(), funcID )
 
   // Access Mesh DS
   Handle(ActData_Mesh) aActData_Mesh_TRANSIENT = aMeshAttr->GetMesh();
 
   // Check if Mesh DS is created
-  TEST_VERIFY( !aActData_Mesh_TRANSIENT.IsNull() )
+  TEST_VERIFY( !aActData_Mesh_TRANSIENT.IsNull(),
+               DescriptionFn(), funcID )
 
   /* ==================================================
    *  Populate transient Mesh Attribute with test data
@@ -290,8 +300,9 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
    *  Read and verify data from Mesh Attribute
    * ========================================== */
 
-  TEST_VERIFY(aActData_Mesh_TRANSIENT->NbNodes() == NB_NODES)
-  TEST_VERIFY(aActData_Mesh_TRANSIENT->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES)
+  TEST_VERIFY( aActData_Mesh_TRANSIENT->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aActData_Mesh_TRANSIENT->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES,
+               DescriptionFn(), funcID )
 
   // Verify nodes
   for ( Standard_Integer i = 0; i < NB_NODES; i++ )
@@ -299,10 +310,10 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
     Standard_Integer aNodeId = i + 1;
     Handle(ActData_Mesh_Node) aNode = aActData_Mesh_TRANSIENT->FindNode(aNodeId);
 
-    TEST_VERIFY( !aNode.IsNull() )
-    TEST_VERIFY(aNode->X() == NODES[i][0])
-    TEST_VERIFY(aNode->Y() == NODES[i][1])
-    TEST_VERIFY(aNode->Z() == NODES[i][2])
+    TEST_VERIFY( !aNode.IsNull(), DescriptionFn(), funcID )
+    TEST_VERIFY( aNode->X() == NODES[i][0], DescriptionFn(), funcID )
+    TEST_VERIFY( aNode->Y() == NODES[i][1], DescriptionFn(), funcID )
+    TEST_VERIFY( aNode->Z() == NODES[i][2], DescriptionFn(), funcID )
   }
 
   // Verify elements: can be TRIANGLES or QUADRANGLES
@@ -319,9 +330,9 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
       Standard_Integer aNbNodes;
       aTriElem->GetFaceDefinedByNodes(3, aTriNodeIds, aNbNodes);
 
-      TEST_VERIFY(aTriNodeIds[0] == TRIANGLES[anElemId - 1][0]);
-      TEST_VERIFY(aTriNodeIds[1] == TRIANGLES[anElemId - 1][1]);
-      TEST_VERIFY(aTriNodeIds[2] == TRIANGLES[anElemId - 1][2]);
+      TEST_VERIFY( aTriNodeIds[0] == TRIANGLES[anElemId - 1][0], DescriptionFn(), funcID);
+      TEST_VERIFY( aTriNodeIds[1] == TRIANGLES[anElemId - 1][1], DescriptionFn(), funcID);
+      TEST_VERIFY( aTriNodeIds[2] == TRIANGLES[anElemId - 1][2], DescriptionFn(), funcID);
     }
     else if ( aMeshElem->IsInstance( STANDARD_TYPE(ActData_Mesh_Quadrangle) ) )
     {
@@ -337,14 +348,14 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
       // we pushed them before. That is why their IDs are shifted by
       // NB_TRIS from the beginning and we can easily collate them with
       // the initial test data stored in a plain array
-      TEST_VERIFY(aQuadNodeIds[0] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][0]);
-      TEST_VERIFY(aQuadNodeIds[1] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][1]);
-      TEST_VERIFY(aQuadNodeIds[2] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][2]);
-      TEST_VERIFY(aQuadNodeIds[3] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][3]);
+      TEST_VERIFY( aQuadNodeIds[0] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][0], DescriptionFn(), funcID );
+      TEST_VERIFY( aQuadNodeIds[1] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][1], DescriptionFn(), funcID );
+      TEST_VERIFY( aQuadNodeIds[2] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][2], DescriptionFn(), funcID );
+      TEST_VERIFY( aQuadNodeIds[3] == QUADRANGLES[anElemId - NB_TRIANGLES - 1][3], DescriptionFn(), funcID );
     }
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -355,7 +366,7 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int asiTestEngine_NotUsed(funcI
 //! UNDO and REDO actions.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int funcID)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -378,17 +389,17 @@ outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int asiTestE
 
   // Populate mesh with nodes
   doc->NewCommand();
-  populateMeshNodes(meshLab, NODE_IDS);
+  populateMeshNodes(meshLab, NODE_IDS, DescriptionFn(), funcID);
   doc->CommitCommand();
 
   // Populate mesh with triangles
   doc->NewCommand();
-  populateMeshTriangles(meshLab, TRIANGLE_IDS);
+  populateMeshTriangles(meshLab, TRIANGLE_IDS, DescriptionFn(), funcID);
   doc->CommitCommand();
 
   // Populate mesh with quadrangles
   doc->NewCommand();
-  populateMeshQuadrangles(meshLab, QUADRANGLE_IDS);
+  populateMeshQuadrangles(meshLab, QUADRANGLE_IDS, DescriptionFn(), funcID);
   doc->CommitCommand();
 
   /* ====================================================================
@@ -396,30 +407,31 @@ outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int asiTestE
    * ==================================================================== */
 
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), DescriptionFn(), funcID )
   const Handle(ActData_Mesh)& aMeshDS = aMeshAttr->GetMesh();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES)
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES, DescriptionFn(), funcID )
 
   /* ====================================
    *  Undo changes one-by-one and verify
    * ==================================== */
 
   doc->Undo();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == NB_TRIANGLES) // Quadrangles disappear
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == NB_TRIANGLES, DescriptionFn(), funcID ) // Quadrangles disappear
 
   doc->Undo();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == 0) // Triangles disappear
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == 0, DescriptionFn(), funcID ) // Triangles disappear
 
   doc->Undo();
-  TEST_VERIFY(aMeshDS->NbNodes() == 0) // Nodes disappear
-  TEST_VERIFY(aMeshDS->NbFaces() == 0)
+  TEST_VERIFY( aMeshDS->NbNodes() == 0, DescriptionFn(), funcID ) // Nodes disappear
+  TEST_VERIFY( aMeshDS->NbFaces() == 0, DescriptionFn(), funcID )
 
   doc->Undo();
   Handle(ActData_MeshAttr) aMeshAttr2;
-  TEST_VERIFY( !meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr2) ) // Attribute disappears
+  TEST_VERIFY( !meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr2),
+               DescriptionFn(), funcID ) // Attribute disappears
 
   /* ====================================
    *  Redo changes one-by-one and verify
@@ -427,27 +439,28 @@ outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int asiTestE
 
   doc->Redo();
   Handle(ActData_MeshAttr) aMeshAttr3;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr3) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr3),
+               DescriptionFn(), funcID )
 
   doc->Redo();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == 0)
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == 0, DescriptionFn(), funcID )
 
   doc->Redo();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == NB_TRIANGLES)
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == NB_TRIANGLES, DescriptionFn(), funcID )
 
   doc->Redo();
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES)
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test of Mesh Attribute with ABORT action.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int funcID)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -466,15 +479,15 @@ outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int asiTestEngi
   // Assure that CAF Document lost the aborted changes as just created
   // Mesh Attribute must have been "Forgotten"
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( !meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( !meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test of Mesh Attribute with ABORT action.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int funcID)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -496,11 +509,11 @@ outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int asiTestEngi
 
   // Assure that CAF Document is still here
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
-  TEST_VERIFY(aMeshAttr->GetMesh()->NbNodes() == 0)
-  TEST_VERIFY(aMeshAttr->GetMesh()->NbFaces() == 0)
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshAttr->GetMesh()->NbNodes() == 0, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshAttr->GetMesh()->NbFaces() == 0, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -510,7 +523,7 @@ outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int asiTestEngi
 //! Performs test on saving and restoring Mesh Attribute.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int funcID)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -540,7 +553,7 @@ outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_Not
   // Save
   PCDM_StoreStatus
     aSaveStat = ActData_Application::Instance()->SaveAs(doc, aFilename);
-  TEST_VERIFY(aSaveStat == PCDM_SS_OK)
+  TEST_VERIFY( aSaveStat == PCDM_SS_OK, DescriptionFn(), funcID )
 
   /* ===================================================================
    *  Open the document expecting that Mesh Attribute will be recovered
@@ -555,27 +568,27 @@ outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_Not
   // Open
   PCDM_ReaderStatus
     anOpenStat = ActData_Application::Instance()->Open(aFilename, doc);
-  TEST_VERIFY(anOpenStat == PCDM_RS_OK)
+  TEST_VERIFY( anOpenStat == PCDM_RS_OK, DescriptionFn(), funcID )
 
   // Re-initialize TDF Label
   meshLab = doc->Main().Root().FindChild(anAttrTag, Standard_False);
-  TEST_VERIFY( !meshLab.IsNull() )
+  TEST_VERIFY( !meshLab.IsNull(), DescriptionFn(), funcID )
 
   // Access Mesh Attribute
   Handle(ActData_MeshAttr) aMeshAttr;
-  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr) )
+  TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), DescriptionFn(), funcID )
 
   // Access Mesh Data
   Handle(ActData_Mesh) aMeshDS = aMeshAttr->GetMesh();
-  TEST_VERIFY( !aMeshDS.IsNull() )
+  TEST_VERIFY( !aMeshDS.IsNull(), DescriptionFn(), funcID )
 
   /* ==============================================
    *  Verify the contents of the retrieved Mesh DS
    * ============================================== */
 
   // Verify generalities
-  TEST_VERIFY(aMeshDS->NbNodes() == NB_NODES)
-  TEST_VERIFY(aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES)
+  TEST_VERIFY( aMeshDS->NbNodes() == NB_NODES, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshDS->NbFaces() == NB_TRIANGLES + NB_QUADRANGLES, DescriptionFn(), funcID )
 
   // Verify mesh nodes
   Standard_Integer aNodeIndex = 0;
@@ -587,13 +600,13 @@ outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_Not
       aNode = Handle(ActData_Mesh_Node)::DownCast( aMeshNodesIt.GetValue() );
 
     // Verify node ID
-    TEST_VERIFY( aNode->GetID() == NODE_IDS(aNodeIndex + 1) )
+    TEST_VERIFY( aNode->GetID() == NODE_IDS(aNodeIndex + 1), DescriptionFn(), funcID )
 
     // Verify nodal co-ordinates
     gp_Pnt aNodeCoords = aNode->Pnt();
-    TEST_VERIFY(aNodeCoords.X() == NODES[aNodeIndex][0])
-    TEST_VERIFY(aNodeCoords.Y() == NODES[aNodeIndex][1])
-    TEST_VERIFY(aNodeCoords.Z() == NODES[aNodeIndex][2])
+    TEST_VERIFY( aNodeCoords.X() == NODES[aNodeIndex][0], DescriptionFn(), funcID )
+    TEST_VERIFY( aNodeCoords.Y() == NODES[aNodeIndex][1], DescriptionFn(), funcID )
+    TEST_VERIFY( aNodeCoords.Z() == NODES[aNodeIndex][2], DescriptionFn(), funcID )
     aNodeIndex++;
   }
 
@@ -611,14 +624,14 @@ outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_Not
       Handle(ActData_Mesh_Triangle) aTriElem = Handle(ActData_Mesh_Triangle)::DownCast(anElem);
 
       // Verify element ID
-      TEST_VERIFY( aTriElem->GetID() == TRIANGLE_IDS(aTriIndex + 1) )
+      TEST_VERIFY( aTriElem->GetID() == TRIANGLE_IDS(aTriIndex + 1), DescriptionFn(), funcID )
 
       Standard_Integer aTriNodeIds[3];
       Standard_Integer aNbNodes;
       aTriElem->GetFaceDefinedByNodes(3, aTriNodeIds, aNbNodes);
 
       for ( Standard_Integer k = 0; k < 3; k++ )
-        TEST_VERIFY(aTriNodeIds[k] == TRIANGLES[aTriIndex][k])
+        TEST_VERIFY( aTriNodeIds[k] == TRIANGLES[aTriIndex][k], DescriptionFn(), funcID )
 
       aTriIndex++;
     }
@@ -629,20 +642,20 @@ outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int asiTestEngine_Not
       Handle(ActData_Mesh_Quadrangle) aQuadElem = Handle(ActData_Mesh_Quadrangle)::DownCast(anElem);
 
       // Verify element ID
-      TEST_VERIFY( aQuadElem->GetID() == QUADRANGLE_IDS(aQuadIndex + 1) )
+      TEST_VERIFY( aQuadElem->GetID() == QUADRANGLE_IDS(aQuadIndex + 1), DescriptionFn(), funcID )
 
       Standard_Integer aQuadNodeIds[4];
       Standard_Integer aNbNodes;
       aQuadElem->GetFaceDefinedByNodes(4, aQuadNodeIds, aNbNodes);
 
       for ( Standard_Integer k = 0; k < 4; k++ )
-        TEST_VERIFY(aQuadNodeIds[k] == QUADRANGLES[aQuadIndex][k])
+        TEST_VERIFY( aQuadNodeIds[k] == QUADRANGLES[aQuadIndex][k], DescriptionFn(), funcID )
 
       aQuadIndex++;
     }
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

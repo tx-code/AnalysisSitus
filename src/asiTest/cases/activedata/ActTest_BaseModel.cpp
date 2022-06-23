@@ -74,45 +74,47 @@
 //! Performs test on HasOpenCommand method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::testHasOpenCommand(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelPersistence::testHasOpenCommand(const int funcID)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
 
-  TEST_VERIFY( M->NewEmpty() )
-  TEST_VERIFY( !M->HasOpenCommand() )
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( !M->HasOpenCommand(), DescriptionFn(), funcID )
 
   M->OpenCommand();
-  TEST_VERIFY( M->HasOpenCommand() )
+  TEST_VERIFY( M->HasOpenCommand(), DescriptionFn(), funcID )
   M->CommitCommand();
 
-  TEST_VERIFY( !M->HasOpenCommand() )
+  TEST_VERIFY( !M->HasOpenCommand(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on NewEmpty method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::newEmptyModel(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelPersistence::newEmptyModel(const int funcID)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
 
-  TEST_VERIFY( !M->IsInitialized() )
-  TEST_VERIFY( M->GetVersionStatus() == ActAPI_IModel::Version_Undefined )
-  TEST_VERIFY( M->NewEmpty() )
-  TEST_VERIFY( M->IsInitialized() )
-  TEST_VERIFY( M->GetVersionStatus() == ActAPI_IModel::Version_Ok )
+  TEST_VERIFY( !M->IsInitialized(), DescriptionFn(), funcID )
+  TEST_VERIFY( M->GetVersionStatus() == ActAPI_IModel::Version_Undefined,
+               DescriptionFn(), funcID )
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( M->IsInitialized(), DescriptionFn(), funcID )
+  TEST_VERIFY( M->GetVersionStatus() == ActAPI_IModel::Version_Ok,
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on Open method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelPersistence::loadModel(const int funcID)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
-  TEST_VERIFY( M->NewEmpty() )
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
 
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
   
@@ -156,9 +158,9 @@ outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(
   aNodeC->Init(aNodeC_ShapeA, aNodeC_ShapeB, aNodeC_Val);
 
   // Verify Node statuses
-  TEST_VERIFY( aNodeA->IsWellFormed() )
-  TEST_VERIFY( aNodeB->IsWellFormed() )
-  TEST_VERIFY( aNodeC->IsWellFormed() )
+  TEST_VERIFY( aNodeA->IsWellFormed(), DescriptionFn(), funcID )
+  TEST_VERIFY( aNodeB->IsWellFormed(), DescriptionFn(), funcID )
+  TEST_VERIFY( aNodeC->IsWellFormed(), DescriptionFn(), funcID )
 
   // Prepare primitive USER tree
   aNodeA->AddChildNode(aNodeB);
@@ -175,7 +177,7 @@ outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(
     aFilename = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "loadModel.cbf").c_str();
 
   // Save the Model
-  TEST_VERIFY( aDummyModel->SaveAs(aFilename) )
+  TEST_VERIFY( aDummyModel->SaveAs(aFilename), DescriptionFn(), funcID )
 
   // Close the Document
   aDummyModel->Release();
@@ -188,24 +190,26 @@ outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(
   Handle(ActTest_DummyModel) aSecondModel = new ActTest_DummyModel();
   
   // Verify the initial statuses of the Model
-  TEST_VERIFY( !aSecondModel->IsInitialized() )
-  TEST_VERIFY( aSecondModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined )
+  TEST_VERIFY( !aSecondModel->IsInitialized(), DescriptionFn(), funcID )
+  TEST_VERIFY( aSecondModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined,
+               DescriptionFn(), funcID )
 
   // Model is NOT SAVED initially
-  TEST_VERIFY( !aSecondModel->IsSaved() )
+  TEST_VERIFY( !aSecondModel->IsSaved(), DescriptionFn(), funcID )
 
   // Load the persistent CAF Document into new Model
-  TEST_VERIFY( aSecondModel->Open(aFilename) )
+  TEST_VERIFY( aSecondModel->Open(aFilename), DescriptionFn(), funcID )
 
   // Model gets SAVED just after LOAD
-  TEST_VERIFY( aSecondModel->IsSaved() )
+  TEST_VERIFY( aSecondModel->IsSaved(), DescriptionFn(), funcID )
 
   // Model is NOT MODIFED just after LOAD
-  TEST_VERIFY( !aSecondModel->IsModified() )
+  TEST_VERIFY( !aSecondModel->IsModified(), DescriptionFn(), funcID )
 
   // Verify statuses
-  TEST_VERIFY( aSecondModel->IsInitialized() )
-  TEST_VERIFY( aSecondModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined )
+  TEST_VERIFY( aSecondModel->IsInitialized(), DescriptionFn(), funcID )
+  TEST_VERIFY( aSecondModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined,
+               DescriptionFn(), funcID )
 
   /* ==================
    *  Verify hierarchy
@@ -213,17 +217,18 @@ outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(
 
   // Access root Node
   Handle(ActAPI_INode) aRootNode = aSecondModel->GetRootNode();
-  TEST_VERIFY( aRootNode->GetParentNode().IsNull() )
+  TEST_VERIFY( aRootNode->GetParentNode().IsNull(), DescriptionFn(), funcID )
 
   // Basic checks
-  TEST_VERIFY( !aRootNode.IsNull() )
-  TEST_VERIFY( ActAux::are_equal( aRootNode->DynamicType()->Name(), STANDARD_TYPE(ActTest_StubANode)->Name() ) )
-  TEST_VERIFY( aRootNode->IsWellFormed() )
+  TEST_VERIFY( !aRootNode.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( ActAux::are_equal( aRootNode->DynamicType()->Name(), STANDARD_TYPE(ActTest_StubANode)->Name() ),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( aRootNode->IsWellFormed(), DescriptionFn(), funcID )
 
   // Check stored integer Parameter value: we do not check shapes as they
   // are different after retrieval (different TShape handles)
   Handle(ActTest_StubANode) aRootDummy = Handle(ActTest_StubANode)::DownCast(aRootNode);
-  TEST_VERIFY( aRootDummy->GetValue() == aNodeA_Val )
+  TEST_VERIFY( aRootDummy->GetValue() == aNodeA_Val, DescriptionFn(), funcID )
 
   // Verify children
   Standard_Integer aNodeIndex = 0;
@@ -234,21 +239,21 @@ outcome ActTest_BaseModelPersistence::loadModel(const int asiTestEngine_NotUsed(
     Handle(ActTest_StubANode)
       aChildDummy = Handle(ActTest_StubANode)::DownCast( aChildIt->Value() );
     if ( aNodeIndex == 1 )
-      TEST_VERIFY( aChildDummy->GetValue() == aNodeB_Val )
+      TEST_VERIFY( aChildDummy->GetValue() == aNodeB_Val, DescriptionFn(), funcID )
     else if ( aNodeIndex == 2 )
-      TEST_VERIFY( aChildDummy->GetValue() == aNodeC_Val )
+      TEST_VERIFY( aChildDummy->GetValue() == aNodeC_Val, DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on Save method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::saveModel(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelPersistence::saveModel(const int funcID)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
-  TEST_VERIFY( M->NewEmpty() )
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
 
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
   
@@ -271,15 +276,15 @@ outcome ActTest_BaseModelPersistence::saveModel(const int asiTestEngine_NotUsed(
                asiTestEngine_Utils::RandomInteger() );
 
   // Verify Node status
-  TEST_VERIFY( aNode->IsWellFormed() )
+  TEST_VERIFY( aNode->IsWellFormed(), DescriptionFn(), funcID )
 
   aDummyModel->CommitCommand();
 
   // Model gets MODIFIED just after COMMIT
-  TEST_VERIFY( aDummyModel->IsModified() )
+  TEST_VERIFY( aDummyModel->IsModified(), DescriptionFn(), funcID )
 
   // Model is NOT SAVED initially
-  TEST_VERIFY( !aDummyModel->IsSaved() )
+  TEST_VERIFY( !aDummyModel->IsSaved(), DescriptionFn(), funcID )
 
   /* ====================
    *  Save Model to file
@@ -290,24 +295,24 @@ outcome ActTest_BaseModelPersistence::saveModel(const int asiTestEngine_NotUsed(
     aFilename = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "saveModel.cbf").c_str();
 
   // Save the Model
-  TEST_VERIFY( aDummyModel->SaveAs(aFilename) )
+  TEST_VERIFY( aDummyModel->SaveAs(aFilename), DescriptionFn(), funcID )
 
   // Model gets UNMODIFIED just after SAVE
-  TEST_VERIFY( !aDummyModel->IsModified() )
+  TEST_VERIFY( !aDummyModel->IsModified(), DescriptionFn(), funcID )
 
   // Model gets SAVED just after SAVE
-  TEST_VERIFY( aDummyModel->IsSaved() )
+  TEST_VERIFY( aDummyModel->IsSaved(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on Release method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::releaseModel(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelPersistence::releaseModel(const int funcID)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
 
@@ -330,7 +335,7 @@ outcome ActTest_BaseModelPersistence::releaseModel(const int asiTestEngine_NotUs
                asiTestEngine_Utils::RandomInteger() );
 
   // Verify Node status
-  TEST_VERIFY( aNode->IsWellFormed() )
+  TEST_VERIFY( aNode->IsWellFormed(), DescriptionFn(), funcID )
 
   aDummyModel->CommitCommand();
 
@@ -340,12 +345,13 @@ outcome ActTest_BaseModelPersistence::releaseModel(const int asiTestEngine_NotUs
 
   aDummyModel->Release();
 
-  TEST_VERIFY( !aDummyModel->IsInitialized() )
-  TEST_VERIFY( !aDummyModel->IsModified() )
-  TEST_VERIFY( !aDummyModel->IsSaved() )
-  TEST_VERIFY( aDummyModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined )
+  TEST_VERIFY( !aDummyModel->IsInitialized(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aDummyModel->IsModified(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aDummyModel->IsSaved(), DescriptionFn(), funcID )
+  TEST_VERIFY( aDummyModel->GetVersionStatus() == ActAPI_IModel::Version_Undefined,
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -636,7 +642,7 @@ void ActTest_BaseModelStructure::init(Handle(ActAPI_IModel)& M,
 //! Test function for FindNode method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::findNode(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::findNode(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -647,17 +653,19 @@ outcome ActTest_BaseModelStructure::findNode(const int asiTestEngine_NotUsed(fun
   Handle(ActAPI_INode) aRootNode = M->FindNode( node_IDs(1) );
 
   // Verify results
-  TEST_VERIFY( !aRootNode.IsNull() )
-  TEST_VERIFY( ActAux::are_equal( aRootNode->GetId().ToCString(), node_IDs(1).ToCString() ) )
-  TEST_VERIFY( ActAux::are_equal( aRootNode->GetId().ToCString(), M->GetRootNode()->GetId().ToCString() ) )
+  TEST_VERIFY( !aRootNode.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( ActAux::are_equal( aRootNode->GetId().ToCString(), node_IDs(1).ToCString() ),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( ActAux::are_equal( aRootNode->GetId().ToCString(), M->GetRootNode()->GetId().ToCString() ),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for DeleteNode method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteRootNode(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::deleteRootNode(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -669,31 +677,31 @@ outcome ActTest_BaseModelStructure::deleteRootNode(const int asiTestEngine_NotUs
     aFilenameBefore = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "deleteRootNode_before.cbf").c_str();
 
   // Save the Model before modifications
-  TEST_VERIFY( M->SaveAs(aFilenameBefore) )
+  TEST_VERIFY( M->SaveAs(aFilenameBefore), DescriptionFn(), funcID )
 
   // Delete root Node A
   M->OpenCommand();
-  TEST_VERIFY( M->DeleteNode( node_IDs(1) ) )
+  TEST_VERIFY( M->DeleteNode( node_IDs(1) ), DescriptionFn(), funcID )
   M->CommitCommand();
 
   Handle(ActAPI_INode) aNewRoot = M->GetRootNode();
-  TEST_VERIFY( aNewRoot.IsNull() )
+  TEST_VERIFY( aNewRoot.IsNull(), DescriptionFn(), funcID )
 
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
   ActTest_StubAPartition::Iterator aPartIt( aDummyModel->StubAPartition() );
 
   // All Nodes and Partition Iterator can handle this situation by resolving
   // "ghost" Labels as non-Nodal ones
-  TEST_VERIFY( !aPartIt.More() )
+  TEST_VERIFY( !aPartIt.More(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for DeleteNode method called on Node D of the
 //! initial hierarchy.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -705,11 +713,11 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int asiTestEngine_
     aFilenameBefore = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "deleteSubTreeNode_D_before.cbf").c_str();
 
   // Save the Model before modifications
-  TEST_VERIFY( M->SaveAs(aFilenameBefore) )
+  TEST_VERIFY( M->SaveAs(aFilenameBefore), DescriptionFn(), funcID )
 
   // Delete Data Node D
   M->OpenCommand();
-  TEST_VERIFY( M->DeleteNode( node_IDs(4) ) )
+  TEST_VERIFY( M->DeleteNode( node_IDs(4) ), DescriptionFn(), funcID )
   M->CommitCommand();
 
   /* ====================================================
@@ -723,43 +731,49 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int asiTestEngine_
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
 
   // Save the Model
-  TEST_VERIFY( aDummyModel->SaveAs(aFilename) )
+  TEST_VERIFY( aDummyModel->SaveAs(aFilename), DescriptionFn(), funcID )
 
   /* ======================================================================
    *  Verify the deletion results by accessing all Data Nodes in the Model
    * ====================================================================== */
 
-  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull() )  // A is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull() )  // B is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull() )  // C is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(4) ).IsNull() )  // D deleted (!)
-  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull() )  // E is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull() )  // F is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull() )  // G is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(8) ).IsNull() )  // H deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(9) ).IsNull() )  // I deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(10) ).IsNull() ) // J deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(11) ).IsNull() ) // K deleted (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull(),  DescriptionFn(), funcID )  // A is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull(),  DescriptionFn(), funcID )  // B is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull(),  DescriptionFn(), funcID )  // C is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(4) ).IsNull(),  DescriptionFn(), funcID )  // D deleted (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull(),  DescriptionFn(), funcID )  // E is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull(),  DescriptionFn(), funcID )  // F is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull(),  DescriptionFn(), funcID )  // G is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(8) ).IsNull(),  DescriptionFn(), funcID )  // H deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(9) ).IsNull(),  DescriptionFn(), funcID )  // I deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(10) ).IsNull(), DescriptionFn(), funcID ) // J deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(11) ).IsNull(), DescriptionFn(), funcID ) // K deleted (!)
 
   /* ================================================
    *  Verify Tree Function Parameters after deletion
    * ================================================ */
 
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedFunction() )
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedFunction() )
-  TEST_VERIFY(  Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(3) ) )->HasConnectedFunction() )
-  TEST_VERIFY(  Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedFunction() )
-  TEST_VERIFY(  Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(6) ) )->HasConnectedFunction() )
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(3) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(6) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for DeleteNode method called on Node D of the
 //! initial hierarchy. Introduces additional dependencies via References.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -792,7 +806,7 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int a
 
   // Assure that C has no Referrer observers yet
   Handle(ActData_BaseNode) CBase = Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(3) ) );
-  TEST_VERIFY( CBase->GetReferrers()->IsEmpty() )
+  TEST_VERIFY( CBase->GetReferrers()->IsEmpty(), DescriptionFn(), funcID )
 
   // D refers to C
   M->FindNode( node_IDs(4) )->ConnectReference(ActTest_StubANode::PID_Ref, C_anyParam);
@@ -802,11 +816,11 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int a
     TCollection_AsciiString
       fn = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "deleteSubTreeNode_D_AsReferenced_init.cbf").c_str();
     //
-    TEST_VERIFY( M->SaveAs(fn) )
+    TEST_VERIFY( M->SaveAs(fn), DescriptionFn(), funcID )
   }
 
   // Assure that C has got a Referrer observer
-  TEST_VERIFY( !CBase->GetReferrers()->IsEmpty() )
+  TEST_VERIFY( !CBase->GetReferrers()->IsEmpty(), DescriptionFn(), funcID )
 
   M->CommitCommand();
 
@@ -819,11 +833,11 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int a
     aFilenameBefore = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "deleteSubTreeNode_D_AsReferenced_D_before.cbf").c_str();
 
   // Save the Model before modifications
-  TEST_VERIFY( M->SaveAs(aFilenameBefore) )
+  TEST_VERIFY( M->SaveAs(aFilenameBefore), DescriptionFn(), funcID )
 
   // Delete Data Node D
   M->OpenCommand();
-  TEST_VERIFY( M->DeleteNode( node_IDs(4) ) )
+  TEST_VERIFY( M->DeleteNode( node_IDs(4) ), DescriptionFn(), funcID )
   M->CommitCommand();
 
   /* ====================================================
@@ -837,42 +851,44 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int a
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
 
   // Save the Model
-  TEST_VERIFY( aDummyModel->SaveAs(aFilename) )
+  TEST_VERIFY( aDummyModel->SaveAs(aFilename), DescriptionFn(), funcID )
 
   /* ======================================================================
    *  Verify the deletion results by accessing all Data Nodes in the Model
    * ====================================================================== */
 
-  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull() )  // A is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull() )  // B is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull() )  // C is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(4) ).IsNull() )  // D deleted (!)
-  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull() )  // E is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull() )  // F is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull() )  // G is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(8) ).IsNull() )  // H deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(9) ).IsNull() )  // I deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(10) ).IsNull() ) // J deleted (!)
-  TEST_VERIFY(  M->FindNode( node_IDs(11) ).IsNull() ) // K deleted (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull(),  DescriptionFn(), funcID )  // A is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull(),  DescriptionFn(), funcID )  // B is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull(),  DescriptionFn(), funcID )  // C is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(4) ).IsNull(),  DescriptionFn(), funcID )  // D deleted (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull(),  DescriptionFn(), funcID )  // E is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull(),  DescriptionFn(), funcID )  // F is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull(),  DescriptionFn(), funcID )  // G is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(8) ).IsNull(),  DescriptionFn(), funcID )  // H deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(9) ).IsNull(),  DescriptionFn(), funcID )  // I deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(10) ).IsNull(), DescriptionFn(), funcID ) // J deleted (!)
+  TEST_VERIFY(  M->FindNode( node_IDs(11) ).IsNull(), DescriptionFn(), funcID ) // K deleted (!)
 
   /* ============================================
    *  Verify Reference Parameters after deletion
    * ============================================ */
 
-  TEST_VERIFY( !M->FindNode( node_IDs(1) )->HasConnectedReference(ActTest_StubANode::PID_Ref) )
-  TEST_VERIFY( !M->FindNode( node_IDs(2) )->HasConnectedReference(ActTest_StubANode::PID_Ref) )
+  TEST_VERIFY( !M->FindNode( node_IDs(1) )->HasConnectedReference(ActTest_StubANode::PID_Ref),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( !M->FindNode( node_IDs(2) )->HasConnectedReference(ActTest_StubANode::PID_Ref),
+               DescriptionFn(), funcID )
 
   // Assure that C has lost its Referrer observer D
-  TEST_VERIFY( CBase->GetReferrers()->IsEmpty() )
+  TEST_VERIFY( CBase->GetReferrers()->IsEmpty(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for DeleteNode method called on Node C of the
 //! initial hierarchy.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -884,11 +900,11 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int asiTestEngine_
     aFilenameBefore = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "deleteSubTreeNode_C_before.cbf").c_str();
 
   // Save the Model before modifications
-  TEST_VERIFY( M->SaveAs(aFilenameBefore) )
+  TEST_VERIFY( M->SaveAs(aFilenameBefore), DescriptionFn(), funcID )
 
   // Delete Data Node
   M->OpenCommand();
-  TEST_VERIFY( M->DeleteNode( node_IDs(3) ) )
+  TEST_VERIFY( M->DeleteNode( node_IDs(3) ), DescriptionFn(), funcID )
   M->CommitCommand();
 
   /* ====================================================
@@ -902,65 +918,75 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int asiTestEngine_
   Handle(ActTest_DummyModel) aDummyModel = Handle(ActTest_DummyModel)::DownCast(M);
 
   // Save the Model
-  TEST_VERIFY( aDummyModel->SaveAs(aFilename) )
+  TEST_VERIFY( aDummyModel->SaveAs(aFilename), DescriptionFn(), funcID )
 
   /* ======================================================================
    *  Verify the deletion results by accessing all Data Nodes in the Model
    * ====================================================================== */
 
-  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull() )  // A is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull() )  // B is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(3) ).IsNull() )  // C deleted (!)
-  TEST_VERIFY( !M->FindNode( node_IDs(4) ).IsNull() )  // D is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull() )  // E is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull() )  // F is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull() )  // G is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(8) ).IsNull() )  // H is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(9) ).IsNull() )  // I is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(10) ).IsNull() ) // J is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(11) ).IsNull() ) // K is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull(),  DescriptionFn(), funcID )  // A is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull(),  DescriptionFn(), funcID )  // B is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(3) ).IsNull(),  DescriptionFn(), funcID )  // C deleted (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(4) ).IsNull(),  DescriptionFn(), funcID )  // D is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull(),  DescriptionFn(), funcID )  // E is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(6) ).IsNull(),  DescriptionFn(), funcID )  // F is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull(),  DescriptionFn(), funcID )  // G is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(8) ).IsNull(),  DescriptionFn(), funcID )  // H is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(9) ).IsNull(),  DescriptionFn(), funcID )  // I is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(10) ).IsNull(), DescriptionFn(), funcID ) // J is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(11) ).IsNull(), DescriptionFn(), funcID ) // K is still here
 
   /* ================================================
    *  Verify Tree Function Parameters after deletion
    * ================================================ */
 
   // A did not have Tree Function Parameter
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // B did not have Tree Function Parameter
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // D looses its Tree Function Parameter (!)
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(4) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(4) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // E looses its Tree Function Parameter (!)
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // F looses its Tree Function Parameter (!)
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(6) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(6) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // G did not have Tree Function Parameter
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // H looses its Tree Function Parameter (!)
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(8) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(8) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // I keeps its Tree Function Parameter
-  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(9) ) )->HasConnectedFunction() )
+  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(9) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // J did not have Tree Function Parameter
-  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(10) ) )->HasConnectedFunction() )
+  TEST_VERIFY( !Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(10) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
   // K keeps its Tree Function Parameter
-  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(11) ) )->HasConnectedFunction() )
+  TEST_VERIFY( Handle(ActTest_StubANode)::DownCast( M->FindNode( node_IDs(11) ) )->HasConnectedFunction(),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for accessing Tree Function observers of Node D.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::accessObservers_D(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelStructure::accessObservers_D(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -968,15 +994,15 @@ outcome ActTest_BaseModelStructure::accessObservers_D(const int asiTestEngine_No
   init(M, node_IDs);
 
   Handle(ActAPI_INode) aNodeD = M->FindNode( node_IDs(4) );
-  TEST_VERIFY( aNodeD->IsWellFormed() )
+  TEST_VERIFY( aNodeD->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ================
    *  General checks
    * ================ */
 
-  TEST_VERIFY( aNodeD->GetOutputWriters()->IsEmpty() )
-  TEST_VERIFY( !aNodeD->GetInputReaders()->IsEmpty() )
-  TEST_VERIFY( aNodeD->GetInputReaders()->Length() == 2 )
+  TEST_VERIFY( aNodeD->GetOutputWriters()->IsEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aNodeD->GetInputReaders()->IsEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( aNodeD->GetInputReaders()->Length() == 2, DescriptionFn(), funcID )
 
   /* ======================
    *  Verify INPUT readers
@@ -992,11 +1018,12 @@ outcome ActTest_BaseModelStructure::accessObservers_D(const int asiTestEngine_No
     const Handle(ActAPI_IUserParameter)& aNextObserver = aParamIt.Value();
     Handle(ActAPI_INode) aDependentNode = ActData_NodeFactory::NodeByParamSettle(aNextObserver);
 
-    TEST_VERIFY( aDependentNode->IsWellFormed() )
-    TEST_VERIFY( ActAux::are_equal( aDependentNode->GetId().ToCString(), EXPECTED[i++].ToCString() ) )
+    TEST_VERIFY( aDependentNode->IsWellFormed(), DescriptionFn(), funcID )
+    TEST_VERIFY( ActAux::are_equal( aDependentNode->GetId().ToCString(), EXPECTED[i++].ToCString() ),
+                 DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -1096,7 +1123,7 @@ void ActTest_BaseModelEvaluation::init(Handle(ActAPI_IModel)& M,
 //! evaluation mechanism.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::removeVariable(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::removeVariable(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1193,7 +1220,7 @@ outcome ActTest_BaseModelEvaluation::removeVariable(const int asiTestEngine_NotU
   TCollection_AsciiString
     aFilenameBefore = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "removeVariable_before.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameBefore) )
+  TEST_VERIFY( M->SaveAs(aFilenameBefore), DescriptionFn(), funcID )
 
   M->CommitCommand();
 
@@ -1204,20 +1231,22 @@ outcome ActTest_BaseModelEvaluation::removeVariable(const int asiTestEngine_NotU
   Handle(ActAPI_HParameterList) anOutputWritersI1 = aIntVarNode1->GetOutputWriters();
   Handle(ActAPI_HParameterList) anInputReadersI1 = aIntVarNode1->GetInputReaders();
 
-  TEST_VERIFY( anOutputWritersI1->IsEmpty() )
-  TEST_VERIFY( !anInputReadersI1->IsEmpty() )
-  TEST_VERIFY( anInputReadersI1->Length() == 2 )
+  TEST_VERIFY( anOutputWritersI1->IsEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( !anInputReadersI1->IsEmpty(), DescriptionFn(), funcID )
+  TEST_VERIFY( anInputReadersI1->Length() == 2, DescriptionFn(), funcID)
 
   Handle(ActAPI_INode)
     aReaderI1_1 = ActData_NodeFactory::NodeByParamSettle( anInputReadersI1->Value(1) );
   Handle(ActAPI_INode)
     aReaderI1_2 = ActData_NodeFactory::NodeByParamSettle( anInputReadersI1->Value(2) );
 
-  TEST_VERIFY( !aReaderI1_1.IsNull() )
-  TEST_VERIFY( !aReaderI1_2.IsNull() )
+  TEST_VERIFY( !aReaderI1_1.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aReaderI1_2.IsNull(), DescriptionFn(), funcID )
 
-  TEST_VERIFY( ActAux::are_equal( aReaderI1_1->GetId().ToCString(), aRealVarNode1->GetId().ToCString() ) )
-  TEST_VERIFY( ActAux::are_equal( aReaderI1_2->GetId().ToCString(), aNodeB->GetId().ToCString() ) )
+  TEST_VERIFY( ActAux::are_equal( aReaderI1_1->GetId().ToCString(), aRealVarNode1->GetId().ToCString() ),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( ActAux::are_equal( aReaderI1_2->GetId().ToCString(), aNodeB->GetId().ToCString() ),
+               DescriptionFn(), funcID )
 
   /* ====================================================================
    *  Now, remove Integer Variable 1 (I1). As R1 and D2 are dependent
@@ -1227,7 +1256,8 @@ outcome ActTest_BaseModelEvaluation::removeVariable(const int asiTestEngine_NotU
 
   M->OpenCommand();
 
-  TEST_VERIFY( M->DeleteNode( aIntVarNode1->GetId() ) )
+  TEST_VERIFY( M->DeleteNode( aIntVarNode1->GetId() ),
+               DescriptionFn(), funcID )
 
   M->CommitCommand();
 
@@ -1240,58 +1270,66 @@ outcome ActTest_BaseModelEvaluation::removeVariable(const int asiTestEngine_NotU
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "removeVariable_after.cbf").c_str();
 
   // Save the Model
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
 
   /* ======================================================================
    *  Verify the deletion results by accessing all Data Nodes in the Model
    * ====================================================================== */
 
-  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull() ) // A is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull() ) // B is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull() ) // C is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(4) ).IsNull() ) // R1 is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull() ) // R2 is still here
-  TEST_VERIFY(  M->FindNode( node_IDs(6) ).IsNull() ) // I1 is removed (!)
-  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull() ) // I2 is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(8) ).IsNull() ) // B1 is still here
-  TEST_VERIFY( !M->FindNode( node_IDs(9) ).IsNull() ) // B2 is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(1) ).IsNull(), DescriptionFn(), funcID ) // A is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(2) ).IsNull(), DescriptionFn(), funcID ) // B is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(3) ).IsNull(), DescriptionFn(), funcID ) // C is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(4) ).IsNull(), DescriptionFn(), funcID ) // R1 is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(5) ).IsNull(), DescriptionFn(), funcID ) // R2 is still here
+  TEST_VERIFY(  M->FindNode( node_IDs(6) ).IsNull(), DescriptionFn(), funcID ) // I1 is removed (!)
+  TEST_VERIFY( !M->FindNode( node_IDs(7) ).IsNull(), DescriptionFn(), funcID ) // I2 is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(8) ).IsNull(), DescriptionFn(), funcID ) // B1 is still here
+  TEST_VERIFY( !M->FindNode( node_IDs(9) ).IsNull(), DescriptionFn(), funcID ) // B2 is still here
 
   /* ================================================
    *  Verify Tree Function Parameters after deletion
    * ================================================ */
 
   // A still has its Evaluator as it does not depend on I1
-  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real) )
+  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(1) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real),
+               DescriptionFn(), funcID )
 
   // B loses its Evaluator as it depends on I1
-  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real) )
+  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(2) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real),
+               DescriptionFn(), funcID )
 
   // C still has its Evaluator as it does not depend on I1
-  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(3) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real) )
+  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(3) ) )->HasConnectedEvaluator(ActTest_StubANode::PID_Real),
+               DescriptionFn(), funcID )
 
   // R1 loses its Evaluator as it depends on I1
-  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(4) ) )->HasConnectedEvaluator(ActData_RealVarNode::Param_Value) )
+  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(4) ) )->HasConnectedEvaluator(ActData_RealVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
   // R2 still has its Evaluator as it does not depend on I1
-  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedEvaluator(ActData_RealVarNode::Param_Value) )
+  TEST_VERIFY( Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(5) ) )->HasConnectedEvaluator(ActData_RealVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
   // I2 did not have Evaluator
-  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedEvaluator(ActData_IntVarNode::Param_Value) )
+  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(7) ) )->HasConnectedEvaluator(ActData_IntVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
   // B1 did not have Evaluator
-  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(8) ) )->HasConnectedEvaluator(ActData_BoolVarNode::Param_Value) )
+  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(8) ) )->HasConnectedEvaluator(ActData_BoolVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
   // B2 did not have Evaluator
-  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(9) ) )->HasConnectedEvaluator(ActData_BoolVarNode::Param_Value) )
+  TEST_VERIFY( !Handle(ActData_BaseNode)::DownCast( M->FindNode( node_IDs(9) ) )->HasConnectedEvaluator(ActData_BoolVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
 //! if there are some loops in it. Simple loop exists.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops1(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1333,17 +1371,17 @@ outcome ActTest_BaseModelEvaluation::checkLoops1(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops1_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY( (aState & ActData_DependencyAnalyzer::GraphState_HasLoops) > 0 )
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY( (aState & ActData_DependencyAnalyzer::GraphState_HasLoops) > 0, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops2(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1399,17 +1437,17 @@ outcome ActTest_BaseModelEvaluation::checkLoops2(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops2_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok)
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
 //! if there are some loops in it. One loop exists.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops3(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops3(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1469,17 +1507,17 @@ outcome ActTest_BaseModelEvaluation::checkLoops3(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops3_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_HasLoops)
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_HasLoops, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops4(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops4(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1526,17 +1564,17 @@ outcome ActTest_BaseModelEvaluation::checkLoops4(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops4_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok)
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops5(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops5(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1583,10 +1621,10 @@ outcome ActTest_BaseModelEvaluation::checkLoops5(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops5_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok)
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_Ok, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for performing validation of dependency graph checking
@@ -1607,7 +1645,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops5(const int asiTestEngine_NotUsed
 //! </pre>
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops6(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::checkLoops6(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1654,16 +1692,16 @@ outcome ActTest_BaseModelEvaluation::checkLoops6(const int asiTestEngine_NotUsed
   TCollection_AsciiString
     aFilenameAfter = (ActAux::slashed( asiTestEngine_Launcher::current_temp_dir_files() ) + "checkLoops6_after.cbf").c_str();
 
-  TEST_VERIFY( M->SaveAs(aFilenameAfter) )
-  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_HasLoops)
+  TEST_VERIFY( M->SaveAs(aFilenameAfter), DescriptionFn(), funcID )
+  TEST_VERIFY(aState & ActData_DependencyAnalyzer::GraphState_HasLoops, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for renaming functionality for Variable Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::renameVariable1(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1701,15 +1739,16 @@ outcome ActTest_BaseModelEvaluation::renameVariable1(const int asiTestEngine_Not
   M->CommitCommand();
 
   // Verify results
-  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING.ToCString() ) )
+  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING.ToCString() ),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for renaming functionality for Variable Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::renameVariable2(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1755,17 +1794,19 @@ outcome ActTest_BaseModelEvaluation::renameVariable2(const int asiTestEngine_Not
   M->CommitCommand();
 
   // Verify results
-  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING1.ToCString() ) )
-  TEST_VERIFY( ActAux::are_equal( iX_param->GetEvalString().ToCString(), EXPECTED_STRING2.ToCString() ) )
+  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING1.ToCString() ),
+               DescriptionFn(), funcID )
+  TEST_VERIFY( ActAux::are_equal( iX_param->GetEvalString().ToCString(), EXPECTED_STRING2.ToCString() ),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for renaming functionality for Variable Nodes. This one will
 //! test some special characters in Variable names, e.g. "_".
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable3(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::renameVariable3(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1800,15 +1841,16 @@ outcome ActTest_BaseModelEvaluation::renameVariable3(const int asiTestEngine_Not
   M->CommitCommand();
 
   // Verify results
-  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING.ToCString() ) )
+  TEST_VERIFY( ActAux::are_equal( rY_param->GetEvalString().ToCString(), EXPECTED_STRING.ToCString() ),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test for AddVariable functionality on BaseModel.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::addVariable(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BaseModelEvaluation::addVariable(const int funcID)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1834,7 +1876,8 @@ outcome ActTest_BaseModelEvaluation::addVariable(const int asiTestEngine_NotUsed
   rX_param->SetEvalString(INV_EXPRESSION);
   M->CommitCommand();
 
-  TEST_VERIFY( !rX_node->HasConnectedEvaluator(ActData_BaseVarNode::Param_Value) )
+  TEST_VERIFY( !rX_node->HasConnectedEvaluator(ActData_BaseVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
   /* ==============================================================
    *  Now add Variable using comprehensive Data Model abilities to
@@ -1850,9 +1893,10 @@ outcome ActTest_BaseModelEvaluation::addVariable(const int asiTestEngine_NotUsed
    * ================ */
 
   // Evaluator must have been connected
-  TEST_VERIFY( rX_node->HasConnectedEvaluator(ActData_BaseVarNode::Param_Value) )
+  TEST_VERIFY( rX_node->HasConnectedEvaluator(ActData_BaseVarNode::Param_Value),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4800) // "Standard_Boolean: forcing value to bool" by TEST_VERIFY

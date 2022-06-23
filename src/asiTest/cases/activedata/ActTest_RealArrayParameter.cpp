@@ -41,7 +41,7 @@
 //! Performs test on accessing value of RealArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_RealArrayParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_RealArrayParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -58,7 +58,7 @@ outcome ActTest_RealArrayParameter::accessValue(const int asiTestEngine_NotUsed(
   doc->CommitCommand();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =======================================
    *  Initialize input array with test data
@@ -85,7 +85,7 @@ outcome ActTest_RealArrayParameter::accessValue(const int asiTestEngine_NotUsed(
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================================================
    *  Access array FROM CAF structure. Perform validations on:
@@ -97,7 +97,7 @@ outcome ActTest_RealArrayParameter::accessValue(const int asiTestEngine_NotUsed(
   Standard_Integer aNbElems_FROM = param->NbElements();
 
   // Check if the number of elements is as expected
-  TEST_VERIFY(NB_ELEMS == aNbElems_FROM)
+  TEST_VERIFY( NB_ELEMS == aNbElems_FROM, DescriptionFn(), funcID )
 
   // Access array
   Handle(HRealArray) anArray_FROM = param->GetArray();
@@ -109,16 +109,16 @@ outcome ActTest_RealArrayParameter::accessValue(const int asiTestEngine_NotUsed(
     const Standard_Real aValue_FROM = anArray_FROM->Value(i);
 
     // Exact equality is expected
-    TEST_VERIFY(aValue_TO == aValue_FROM)
+    TEST_VERIFY( aValue_TO == aValue_FROM, DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on accessing particular elements of RealArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_RealArrayParameter::accessElements(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_RealArrayParameter::accessElements(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -135,7 +135,7 @@ outcome ActTest_RealArrayParameter::accessElements(const int asiTestEngine_NotUs
   doc->CommitCommand();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =======================================
    *  Initialize input array with test data
@@ -162,7 +162,7 @@ outcome ActTest_RealArrayParameter::accessElements(const int asiTestEngine_NotUs
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ========================
    *  Update Parameter value
@@ -177,11 +177,11 @@ outcome ActTest_RealArrayParameter::accessElements(const int asiTestEngine_NotUs
    *  Perform validations
    * ===================== */
 
-  TEST_VERIFY(param->NbElements()  == NB_ELEMS)
-  TEST_VERIFY(param->GetElement(0) == 5.5)
-  TEST_VERIFY(param->GetElement(1) == 11.5)
+  TEST_VERIFY( param->NbElements()  == NB_ELEMS, DescriptionFn(), funcID )
+  TEST_VERIFY( param->GetElement(0) == 5.5,      DescriptionFn(), funcID )
+  TEST_VERIFY( param->GetElement(1) == 11.5,     DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

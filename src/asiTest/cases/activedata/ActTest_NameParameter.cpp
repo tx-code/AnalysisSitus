@@ -41,7 +41,7 @@
 //! Performs test on accessing value of NameParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_NameParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_NameParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -60,7 +60,7 @@ outcome ActTest_NameParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   TCollection_ExtendedString VALUE = "TEST_TEST";
 
   // Parameter is always well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -75,7 +75,7 @@ outcome ActTest_NameParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   doc->CommitCommand();
 
   // Parameter is always well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ========================
    *  Access Parameter value
@@ -86,9 +86,10 @@ outcome ActTest_NameParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   // Finally, we check if the output is equal to the input to ensure
   // that no corruption has happened during data transferring to/from CAF
   TEST_VERIFY( ActAux::are_equal( TCollection_AsciiString(aString).ToCString(),
-                                 TCollection_AsciiString(VALUE).ToCString() ) )
+                                 TCollection_AsciiString(VALUE).ToCString() ),
+               DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

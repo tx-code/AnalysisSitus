@@ -44,13 +44,19 @@ protected:
 
   //! Evaluates Tcl script using the available Tcl interpretor.
   //! \param[in] scriptFilename the full script's filename.
+  //! \param[in] name           function name.
+  //! \param[in] funcID         function ID.
   //! \return true if Tcl returns TCL_OK, false -- otherwise.
-  static outcome evaluate(const TCollection_AsciiString& scriptFilename);
+  static outcome evaluate(const TCollection_AsciiString& scriptFilename,
+                          const std::string&             name,
+                          const int                      funcID);
 
   //! Evaluates all Tcl scripts in the passed directory.
-  //! \param[in] dir the directory containing Tcl test scripts.
+  //! \param[in] dir  the directory containing Tcl test scripts.
+  //! \param[in] name function name.
   //! \return true if Tcl returns TCL_OK, false -- otherwise.
-  static outcome evaluateAll(const TCollection_AsciiString& dir);
+  static outcome evaluateAll(const TCollection_AsciiString& dir,
+                             const std::string&             name);
 
 };
 

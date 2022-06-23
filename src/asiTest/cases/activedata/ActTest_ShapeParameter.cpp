@@ -46,7 +46,7 @@
 //! Performs test on accessing value of ShapeParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ShapeParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ShapeParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -65,7 +65,7 @@ outcome ActTest_ShapeParameter::accessValue(const int asiTestEngine_NotUsed(func
   TopoDS_Shape VALUE = BRepPrimAPI_MakeBox(10, 20, 30).Shape();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -81,15 +81,15 @@ outcome ActTest_ShapeParameter::accessValue(const int asiTestEngine_NotUsed(func
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Validate Parameter value
    * ========================== */
 
   // Validate
-  TEST_VERIFY(param->GetShape() == VALUE)
-  return outcome().success();
+  TEST_VERIFY( param->GetShape() == VALUE, DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ outcome ActTest_ShapeParameter::accessValue(const int asiTestEngine_NotUsed(func
 //! reversed face.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ShapeParameter::accessReversedValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ShapeParameter::accessReversedValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -118,7 +118,7 @@ outcome ActTest_ShapeParameter::accessReversedValue(const int asiTestEngine_NotU
     VALUE = BRepBuilderAPI_MakeFace( gp_Pln( gp::Origin(), gp::DZ() ) );
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -134,7 +134,7 @@ outcome ActTest_ShapeParameter::accessReversedValue(const int asiTestEngine_NotU
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Validate Parameter value
@@ -143,7 +143,7 @@ outcome ActTest_ShapeParameter::accessReversedValue(const int asiTestEngine_NotU
   TopoDS_Shape returnedShape = param->GetShape();
 
   // Validate
-  TEST_VERIFY(returnedShape == VALUE)
+  TEST_VERIFY( returnedShape == VALUE, DescriptionFn(), funcID)
 
   /* =======================================
    *  Reverse shape and set it back to OCAF
@@ -167,9 +167,9 @@ outcome ActTest_ShapeParameter::accessReversedValue(const int asiTestEngine_NotU
   TopoDS_Shape returnedShape2 = param->GetShape();
 
   // Validate: orientation should change.
-  TEST_VERIFY( returnedShape2.IsEqual(returnedShape) )
+  TEST_VERIFY( returnedShape2.IsEqual(returnedShape), DescriptionFn(), funcID)
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

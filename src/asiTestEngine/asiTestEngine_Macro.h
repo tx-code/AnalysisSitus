@@ -64,9 +64,19 @@
 // Asserts
 //-----------------------------------------------------------------------------
 
-#define TEST_VERIFY(x) \
+#define TEST_VERIFY(x, name, funcID) \
   { \
-    if ( !(x) ) return outcome().failure(); \
+    if ( !(x) ) \
+    { \
+      if ( funcID < 1 ) \
+      { \
+        return outcome(name).failure(); \
+      } \
+      else \
+      { \
+        return outcome(name, funcID).failure(); \
+      } \
+    } \
   }
 
 //-----------------------------------------------------------------------------

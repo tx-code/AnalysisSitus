@@ -37,7 +37,7 @@
 //! Performs test on accessing value of BoolParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BoolParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_BoolParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -56,7 +56,7 @@ outcome ActTest_BoolParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   const Standard_Boolean VALUE = Standard_True;
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -72,15 +72,15 @@ outcome ActTest_BoolParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() );
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID );
 
   /* ==========================
    *  Validate Parameter value
    * ========================== */
 
   // Validate
-  TEST_VERIFY(param->GetValue() == VALUE)
-  return outcome().success();
+  TEST_VERIFY( param->GetValue() == VALUE, DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

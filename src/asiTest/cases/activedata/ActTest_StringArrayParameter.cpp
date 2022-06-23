@@ -41,7 +41,7 @@
 //! Performs test on accessing value of StringArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_StringArrayParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_StringArrayParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -58,7 +58,7 @@ outcome ActTest_StringArrayParameter::accessValue(const int asiTestEngine_NotUse
   doc->CommitCommand();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =======================================
    *  Initialize input array with test data
@@ -88,7 +88,7 @@ outcome ActTest_StringArrayParameter::accessValue(const int asiTestEngine_NotUse
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================================================
    *  Access array FROM CAF structure. Perform validations on:
@@ -100,7 +100,7 @@ outcome ActTest_StringArrayParameter::accessValue(const int asiTestEngine_NotUse
   Standard_Integer aNbElems_FROM = param->NbElements();
 
   // Check if the number of elements is as expected
-  TEST_VERIFY(NB_ELEMS == aNbElems_FROM)
+  TEST_VERIFY( NB_ELEMS == aNbElems_FROM, DescriptionFn(), funcID )
 
   // Access array
   Handle(HStringArray) anArray_FROM = param->GetArray();
@@ -111,16 +111,16 @@ outcome ActTest_StringArrayParameter::accessValue(const int asiTestEngine_NotUse
     TCollection_ExtendedString aValue_TO = anArray_TO->Value(i);
     TCollection_ExtendedString aValue_FROM = anArray_FROM->Value(i);
 
-    TEST_VERIFY(aValue_TO == aValue_FROM)
+    TEST_VERIFY( aValue_TO == aValue_FROM, DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on accessing individual elements of StringArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_StringArrayParameter::accessElements(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_StringArrayParameter::accessElements(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -137,7 +137,7 @@ outcome ActTest_StringArrayParameter::accessElements(const int asiTestEngine_Not
   doc->CommitCommand();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =======================================
    *  Initialize input array with test data
@@ -164,7 +164,7 @@ outcome ActTest_StringArrayParameter::accessElements(const int asiTestEngine_Not
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ========================
    *  Update Parameter value
@@ -182,11 +182,11 @@ outcome ActTest_StringArrayParameter::accessElements(const int asiTestEngine_Not
    *  Perform validations
    * ===================== */
 
-  TEST_VERIFY(param->NbElements()  == NB_ELEMS)
-  TEST_VERIFY(param->GetElement(0) == aString1)
-  TEST_VERIFY(param->GetElement(1) == aString2)
+  TEST_VERIFY( param->NbElements()  == NB_ELEMS, DescriptionFn(), funcID )
+  TEST_VERIFY( param->GetElement(0) == aString1, DescriptionFn(), funcID )
+  TEST_VERIFY( param->GetElement(1) == aString2, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

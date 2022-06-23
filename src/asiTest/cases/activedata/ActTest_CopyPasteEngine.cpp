@@ -60,7 +60,7 @@
 //! Performs test on Copy method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PlainToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -70,7 +70,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
    *  Prepare initial data to be copied
    * =================================== */
 
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   // Prepare detached data
   Handle(ActTest_StubBNode) aSourceNode_B = Handle(ActTest_StubBNode)::DownCast( ActTest_StubBNode::Instance() );
@@ -90,8 +90,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
   aTargetNode_A->Init(aTargetShapes[0], aTargetShapes[1], aTargetRealVal);
   aSourceNode_B->SetName("Source B");
   aSourceNode_B->Init(aSourceIntVal, aSourceRealVal);
-  TEST_VERIFY( aSourceNode_B->IsWellFormed() );
-  TEST_VERIFY( aTargetNode_A->IsWellFormed() );
+  TEST_VERIFY( aSourceNode_B->IsWellFormed(), DescriptionFn(), funcID );
+  TEST_VERIFY( aTargetNode_A->IsWellFormed(), DescriptionFn(), funcID );
   M->CommitCommand();
 
   // Dump the Model before modifications
@@ -114,7 +114,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
   Standard_Boolean isOk = tool->TransferToBuffer(aSourceNode_B);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -126,15 +126,15 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
   // access this Label and settle down a Node onto it in order to check if
   // data is generally Ok
   Handle(ActTest_StubBNode) aBufferNode = Handle(ActTest_StubBNode)::DownCast( tool->GetRootBuffered() );
-  TEST_VERIFY( aBufferNode->IsWellFormed() );
+  TEST_VERIFY( aBufferNode->IsWellFormed(), DescriptionFn(), funcID );
 
   // Do something with source Node to assure that copy is not affected
   M->OpenCommand();
   aSourceNode_B->Init(aSourceAltIntVal, aSourceAltRealVal);
   M->CommitCommand();
 
-  TEST_VERIFY(aSourceNode_B->GetIntValue() == aSourceAltIntVal);
-  TEST_VERIFY(aSourceNode_B->GetRealValue() == aSourceAltRealVal);
+  TEST_VERIFY( aSourceNode_B->GetIntValue()  == aSourceAltIntVal,  DescriptionFn(), funcID );
+  TEST_VERIFY( aSourceNode_B->GetRealValue() == aSourceAltRealVal, DescriptionFn(), funcID );
 
   /* ===============
    *  Perform Paste
@@ -145,8 +145,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
   aTargetNode_A->AddChildNode(aSourceCopy);
   M->CommitCommand();
 
-  TEST_VERIFY( !aSourceCopy.IsNull() );
-  TEST_VERIFY( aSourceCopy->IsWellFormed() );
+  TEST_VERIFY( !aSourceCopy.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( aSourceCopy->IsWellFormed(), DescriptionFn(), funcID );
 
   // Dump the Model just after the pasting
   TCollection_AsciiString
@@ -163,10 +163,10 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
   Handle(ActTest_StubBNode) aSourceCopyStub = Handle(ActTest_StubBNode)::DownCast(aSourceCopy);
 
   // Values should be equal to the initial sources
-  TEST_VERIFY(aSourceCopyStub->GetIntValue() == aSourceIntVal);
-  TEST_VERIFY(aSourceCopyStub->GetRealValue() == aSourceRealVal);
+  TEST_VERIFY( aSourceCopyStub->GetIntValue()  == aSourceIntVal,  DescriptionFn(), funcID );
+  TEST_VERIFY( aSourceCopyStub->GetRealValue() == aSourceRealVal, DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on Copy method with the following Nodes:
@@ -200,7 +200,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int asiTestEng
 //! ---------------------------------------------------------------------------
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -211,7 +211,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int asiTestEngi
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -254,7 +254,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int asiTestEngi
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -280,7 +280,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int asiTestEngi
    * ====================================================== */
 
   M->OpenCommand();
-  TEST_VERIFY( M->DeleteNode( A_1->GetId() ) );
+  TEST_VERIFY( M->DeleteNode( A_1->GetId() ), DescriptionFn(), funcID );
   M->CommitCommand();
 
   // Dump the Model just after the pasting
@@ -301,15 +301,15 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int asiTestEngi
   
   isOk = Standard_True;
   verifyTree(aSourceCopy, COPY_Reloc, PASTE_Reloc, TreeLevels, 0, 1, isOk);
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 3.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -320,7 +320,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -366,7 +366,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -415,42 +415,45 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const
 
   Handle(ActAPI_IUserParameter) A_2_copy_TFunc = A_2_copy->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy) ); // !!!
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy) ); // !!!
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID ); // !!!
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID ); // !!!
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy) ); // !!!
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID ); // !!!
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
 
   // Precise the actual Parameters referred to by Tree Function one
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( A_3_copy->Parameter(ActTest_StubANode::PID_Real) ) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( B_2_copy->Parameter(ActTest_StubBNode::PID_Int) ) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsResult( B_1_copy->Parameter(ActTest_StubBNode::PID_Int) ) );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( A_3_copy->Parameter(ActTest_StubANode::PID_Real) ),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( B_2_copy->Parameter(ActTest_StubBNode::PID_Int) ),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsResult( B_1_copy->Parameter(ActTest_StubBNode::PID_Int) ),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 3.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -461,7 +464,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -507,7 +510,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -556,32 +559,32 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const
 
   Handle(ActAPI_IUserParameter) A_2_copy_TFunc = A_2_copy->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Arguments().IsNull() );
-  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Results().IsNull() );
+  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Arguments().IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Results().IsNull(), DescriptionFn(), funcID );
 
   /* ==================================================
    *  Verify that the source references is still there
@@ -589,56 +592,56 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const
 
   Handle(ActAPI_IUserParameter) A_2_TFunc = A_2->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_1).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_2).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers(), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 3.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -649,7 +652,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -695,7 +698,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -744,32 +747,32 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const
 
   Handle(ActAPI_IUserParameter) A_2_copy_TFunc = A_2_copy->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Arguments().IsNull() );
-  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Results().IsNull() );
+  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Arguments().IsNull(), DescriptionFn(), funcID);
+  TEST_VERIFY( ActData_ParameterFactory::AsTreeFunction(A_2_copy_TFunc)->Results().IsNull(), DescriptionFn(), funcID);
 
   /* ==================================================
    *  Verify that the source references is still there
@@ -777,55 +780,55 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const
 
   Handle(ActAPI_IUserParameter) A_2_TFunc = A_2->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy) );  
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );  
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_2).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers(), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 3.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -836,7 +839,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -881,7 +884,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -930,56 +933,56 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const
 
   Handle(ActAPI_IUserParameter) B_3_TFunc = B_3->Parameter(ActTest_StubBNode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(B_3_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasObservers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers(), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 3.5 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_5");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -990,7 +993,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1035,7 +1038,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1084,31 +1087,31 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const
 
   Handle(ActAPI_IUserParameter) A_2_TFunc = A_2->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* ==========================
    *  Verify copied references
@@ -1116,66 +1119,70 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const
 
   Handle(ActAPI_IUserParameter) A_2_copy_TFunc = A_2_copy->Parameter(ActTest_StubANode::PID_TFunc);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_3) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_3), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_TFunc).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers(), DescriptionFn(), funcID );
 
   /* ===================
    *  Nano Verification
    * =================== */
 
-  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_TFunc).HasAsArgument( A_2->Parameter(ActTest_StubANode::PID_DummyShapeA) ) );
-  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_TFunc).HasAsResult( A_2->Parameter(ActTest_StubANode::PID_Real) ) );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_TFunc).HasAsArgument( A_2->Parameter(ActTest_StubANode::PID_DummyShapeA) ),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_TFunc).HasAsResult( A_2->Parameter(ActTest_StubANode::PID_Real) ),
+               DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( A_2_copy->Parameter(ActTest_StubANode::PID_DummyShapeA) ) );
-  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsResult( A_2_copy->Parameter(ActTest_StubANode::PID_Real) ) );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsArgument( A_2_copy->Parameter(ActTest_StubANode::PID_DummyShapeA) ),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::TreeFunction(A_2_copy_TFunc).HasAsResult( A_2_copy->Parameter(ActTest_StubANode::PID_Real) ),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithEvalReferencesToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1186,7 +1193,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(con
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1243,7 +1250,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(con
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1292,35 +1299,35 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(con
 
   Handle(ActAPI_IUserParameter) A_2_copy_Eval = A_2_copy->Evaluator(ActTest_StubANode::PID_Real);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_3) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(VAR_1) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(VAR_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_3),   DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(VAR_1), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(VAR_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(VAR_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(VAR_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(VAR_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(VAR_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_copy_Eval).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -1328,66 +1335,68 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(con
 
   Handle(ActAPI_IUserParameter) A_2_Eval = A_2->Evaluator(ActTest_StubANode::PID_Real);
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_3) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(VAR_1) );
-  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(VAR_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_3),   DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(VAR_1), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(VAR_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsInputReaderFor(B_2_copy), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_2) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_3) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(VAR_1) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(VAR_2) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_1),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_2),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_3),   DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(VAR_1), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(VAR_2), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_2_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_1_copy) );
-  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_2_copy) );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_1_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::TreeFunction(A_2_Eval).IsOutputWriterFor(B_2_copy), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(VAR_1).HasObservers() );
-  TEST_VERIFY( ReferenceValidator::Node(VAR_2).HasObservers() );
+  TEST_VERIFY( ReferenceValidator::Node(VAR_1).HasObservers(), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(VAR_2).HasObservers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(VAR_1).InputReadersAre(ActAPI_ParameterStream() << A_2_Eval << A_2_copy_Eval) );
-  TEST_VERIFY( ReferenceValidator::Node(VAR_2).InputReadersAre(ActAPI_ParameterStream() << A_2_Eval << A_2_copy_Eval) );
+  TEST_VERIFY( ReferenceValidator::Node(VAR_1).InputReadersAre(ActAPI_ParameterStream() << A_2_Eval << A_2_copy_Eval),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(VAR_2).InputReadersAre(ActAPI_ParameterStream() << A_2_Eval << A_2_copy_Eval),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 5.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1398,7 +1407,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1418,7 +1427,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
   B_2->ConnectReference(ActTest_StubBNode::PID_Ref, A_2);
   M->CommitCommand();
 
-  TEST_VERIFY( ReferenceValidator::Node(A_2).HasReferrers() );
+  TEST_VERIFY( ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
 
   // Dump the Model before modifications
   TCollection_AsciiString
@@ -1440,7 +1449,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1489,7 +1498,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(A_2_copy) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(A_2_copy), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -1497,35 +1506,37 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(A_2) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(A_2), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(A_2).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_2_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(A_2).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_2_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 5.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1536,7 +1547,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(c
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1576,7 +1587,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(c
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1625,7 +1636,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(c
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ActData_ParameterFactory::AsReference(B_2_copy_Ref)->GetTarget().IsNull() );
+  TEST_VERIFY( ActData_ParameterFactory::AsReference(B_2_copy_Ref)->GetTarget().IsNull(), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -1633,34 +1644,34 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(c
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 5.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1671,7 +1682,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(c
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1718,7 +1729,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(c
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1767,7 +1778,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(c
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -1775,34 +1786,35 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(c
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 5.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1813,7 +1825,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -1860,7 +1872,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1909,7 +1921,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* ==================================
    *  Copy A_1_copy sub-tree to buffer
@@ -1919,7 +1931,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
   isOk = tool->TransferToBuffer(A_1_copy);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -1968,7 +1980,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
 
   Handle(ActAPI_IUserParameter) B_2_copy_copy_Ref = B_2_copy_copy->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_copy_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_copy_copy_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -1976,40 +1988,41 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_Ref);
 
-  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3) );
+  TEST_VERIFY( ReferenceValidator::Reference(B_2_Ref).TargetIs(B_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref << B_2_copy_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref << B_2_copy_copy_Ref),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 6.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2020,7 +2033,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(co
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -2061,7 +2074,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(co
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2110,8 +2123,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(co
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_2_copy) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_2_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -2119,39 +2132,39 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(co
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_2) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_2), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(A_2).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_2_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(A_2).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_2_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 6.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2162,7 +2175,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(co
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -2203,7 +2216,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(co
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY(isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2252,7 +2265,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(co
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).IsEmpty() );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).IsEmpty(), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -2260,37 +2273,37 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(co
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_4) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_4), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_4).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_4).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(B_4).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(B_4).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 6.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2301,7 +2314,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(co
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -2342,7 +2355,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(co
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY(isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2391,8 +2404,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(co
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy) );
-  TEST_VERIFY( !ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(B_3) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(B_3), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -2400,38 +2413,38 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(co
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 6.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2442,7 +2455,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(co
    * ====================== */
 
   ActAPI_DataObjectIdList ANodeIDs, BNodeIDs, VARNodeIDs;
-  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs);
+  populateSampleTree(M, ANodeIDs, BNodeIDs, VARNodeIDs, DescriptionFn(), funcID);
 
   Handle(ActAPI_INode) A   = M->FindNode( ANodeIDs(1) );
   Handle(ActAPI_INode) A_1 = M->FindNode( ANodeIDs(2) );
@@ -2491,7 +2504,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(co
   Standard_Boolean isOk = tool->TransferToBuffer(A_1);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2540,8 +2553,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(co
 
   Handle(ActAPI_IUserParameter) B_2_copy_Ref = B_2_copy->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(B_3) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(B_3), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_copy_Ref).HasTarget(A_3_copy), DescriptionFn(), funcID );
 
   /* =================================================
    *  Verify that the source reference is still there
@@ -2549,38 +2562,41 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(co
 
   Handle(ActAPI_IUserParameter) B_2_Ref = B_2->Parameter(ActTest_StubBNode::PID_RefList);
 
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3) );
-  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3) );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(B_3), DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::ReferenceList(B_2_Ref).HasTarget(A_3), DescriptionFn(), funcID );
 
   /* =====================================
    *  Verification from Nodal perspective
    * ===================================== */
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(B_3).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_4).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers() );
-  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers() );
-  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers() );
+  TEST_VERIFY( !ReferenceValidator::Node(A_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(A_2_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY(  ReferenceValidator::Node(A_3_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_1_copy).HasReferrers(), DescriptionFn(), funcID );
+  TEST_VERIFY( !ReferenceValidator::Node(B_2_copy).HasReferrers(), DescriptionFn(), funcID );
 
-  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref) );
-  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref) );
+  TEST_VERIFY( ReferenceValidator::Node(B_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref << B_2_copy_Ref),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3).ReferrersAre(ActAPI_ParameterStream() << B_2_Ref),
+               DescriptionFn(), funcID );
+  TEST_VERIFY( ReferenceValidator::Node(A_3_copy).ReferrersAre(ActAPI_ParameterStream() << B_2_copy_Ref),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! See case 7 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PlainMeshToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2590,7 +2606,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
    *  Prepare initial data to be copied
    * =================================== */
 
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   // Prepare detached data
   Handle(ActTest_StubMeshNode) MESH = Handle(ActTest_StubMeshNode)::DownCast( ActTest_StubMeshNode::Instance() );
@@ -2606,8 +2622,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
   A->Init(aTargetShapes[0], aTargetShapes[1], aTargetRealVal);
   MESH->SetName("Mesh Node");
   MESH->Init(new ActData_Mesh);
-  TEST_VERIFY( A->IsWellFormed() );
-  TEST_VERIFY( MESH->IsWellFormed() );
+  TEST_VERIFY( A->IsWellFormed(), DescriptionFn(), funcID );
+  TEST_VERIFY( MESH->IsWellFormed(), DescriptionFn(), funcID );
   M->CommitCommand();
 
   // Prepare simple test mesh
@@ -2640,7 +2656,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
   Standard_Boolean isOk = tool->TransferToBuffer(MESH);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2656,8 +2672,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
   A->AddChildNode(ActData_Mesh_COPY);
   M->CommitCommand();
 
-  TEST_VERIFY( !ActData_Mesh_COPY.IsNull() );
-  TEST_VERIFY( ActData_Mesh_COPY->IsWellFormed() );
+  TEST_VERIFY( !ActData_Mesh_COPY.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( ActData_Mesh_COPY->IsWellFormed(), DescriptionFn(), funcID );
 
   // Dump the Model just after the pasting
   TCollection_AsciiString
@@ -2684,12 +2700,12 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
 
   for ( Standard_Integer k = 0; k < 3; k++ )
   {
-    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->X() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->X() );
-    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->Y() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->Y() );
-    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->Z() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->Z() );
+    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->X() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->X(), DescriptionFn(), funcID );
+    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->Y() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->Y(), DescriptionFn(), funcID );
+    TEST_VERIFY( aMeshDS_Copy->FindNode(NODES[k])->Z() == ActData_Mesh_P->GetMesh()->FindNode(NODES[k])->Z(), DescriptionFn(), funcID );
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Attempts to paste simple Node having Tree Function Parameter with
@@ -2697,7 +2713,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int asiTes
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEAD_DFunctionArgument");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2707,7 +2723,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
    *  Prepare initial data to be copied
    * =================================== */
 
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   // Prepare detached data for root
   Handle(ActTest_StubANode) ROOT = Handle(ActTest_StubANode)::DownCast( ActTest_StubANode::Instance() );
@@ -2740,9 +2756,9 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
     A->Init(aTargetShapes[0], aTargetShapes[1], aTargetRealVal);
     B->Init(aBIntVal, aBRealVal);
 
-    TEST_VERIFY( ROOT->IsWellFormed() );
-    TEST_VERIFY( A->IsWellFormed() );
-    TEST_VERIFY( B->IsWellFormed() );
+    TEST_VERIFY( ROOT->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( A->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID );
 
     ROOT->AddChildNode(A);
     ROOT->AddChildNode(B);
@@ -2780,7 +2796,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
   Standard_Boolean isOk = M->CopyNode(A);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2793,8 +2809,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
    * ================================================================ */
 
    M->OpenCommand();
-   TEST_VERIFY( M->DeleteNode(A) );
-   TEST_VERIFY( M->DeleteNode(B) );
+   TEST_VERIFY( M->DeleteNode(A), DescriptionFn(), funcID );
+   TEST_VERIFY( M->DeleteNode(B), DescriptionFn(), funcID );
    M->CommitCommand();
 
    // Dump the Model just after the copying
@@ -2812,8 +2828,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
 
   // Some very preliminary verifications which assure us that pasting has
   // been really performed
-  TEST_VERIFY( !A_COPY.IsNull() );
-  TEST_VERIFY( A_COPY->IsWellFormed() );
+  TEST_VERIFY( !A_COPY.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsWellFormed(), DescriptionFn(), funcID );
 
   // Dump the Model just after the pasting
   TCollection_AsciiString
@@ -2833,10 +2849,10 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
 
   Standard_Integer PasteStatus = M->CopyPasteEngine()->Status();
 
-  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_WarnNullFuncArgument);
-  TEST_VERIFY( A_COPY->IsValidData() );
+  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_WarnNullFuncArgument, DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsValidData(), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Attempts to paste simple Node having Tree Function Parameter with
@@ -2844,7 +2860,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEAD_DFunctionResult");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2854,7 +2870,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
    *  Prepare initial data to be copied
    * =================================== */
 
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   // Prepare detached data for root
   Handle(ActTest_StubANode) ROOT = Handle(ActTest_StubANode)::DownCast( ActTest_StubANode::Instance() );
@@ -2887,9 +2903,9 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
     A->Init(aTargetShapes[0], aTargetShapes[1], aTargetRealVal);
     B->Init(aBIntVal, aBRealVal);
 
-    TEST_VERIFY( ROOT->IsWellFormed() );
-    TEST_VERIFY( A->IsWellFormed() );
-    TEST_VERIFY( B->IsWellFormed() );
+    TEST_VERIFY( ROOT->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( A->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID );
 
     ROOT->AddChildNode(A);
     ROOT->AddChildNode(B);
@@ -2927,7 +2943,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
   Standard_Boolean isOk = M->CopyNode(A);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID );
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -2940,8 +2956,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
    * ================================================================ */
 
    M->OpenCommand();
-   TEST_VERIFY( M->DeleteNode(A) );
-   TEST_VERIFY( M->DeleteNode(B) );
+   TEST_VERIFY( M->DeleteNode(A), DescriptionFn(), funcID );
+   TEST_VERIFY( M->DeleteNode(B), DescriptionFn(), funcID );
    M->CommitCommand();
 
    // Dump the Model just after the copying
@@ -2959,8 +2975,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
 
   // Some very preliminary verifications which assure us that pasting has
   // been really performed
-  TEST_VERIFY( !A_COPY.IsNull() );
-  TEST_VERIFY( A_COPY->IsWellFormed() );
+  TEST_VERIFY( !A_COPY.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsWellFormed(), DescriptionFn(), funcID );
 
   // Dump the Model just after the pasting
   TCollection_AsciiString
@@ -2980,10 +2996,10 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
 
   Standard_Integer PasteStatus = M->CopyPasteEngine()->Status();
 
-  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_WarnNullFuncResult);
-  TEST_VERIFY( A_COPY->IsValidData() );
+  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_WarnNullFuncResult, DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsValidData(), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Attempts to paste simple Node having Reference Parameter with
@@ -2991,7 +3007,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int funcID)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEADReference");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -3001,7 +3017,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
    *  Prepare initial data to be copied
    * =================================== */
 
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
 
   // Prepare detached data for root
   Handle(ActTest_StubANode) ROOT = Handle(ActTest_StubANode)::DownCast( ActTest_StubANode::Instance() );
@@ -3034,9 +3050,9 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
     A->Init(aTargetShapes[0], aTargetShapes[1], aTargetRealVal);
     B->Init(aBIntVal, aBRealVal);
 
-    TEST_VERIFY( ROOT->IsWellFormed() );
-    TEST_VERIFY( A->IsWellFormed() );
-    TEST_VERIFY( B->IsWellFormed() );
+    TEST_VERIFY( ROOT->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( A->IsWellFormed(), DescriptionFn(), funcID );
+    TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID );
 
     ROOT->AddChildNode(A);
     ROOT->AddChildNode(B);
@@ -3074,7 +3090,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
   Standard_Boolean isOk = M->CopyNode(A);
   M->CommitCommand();
 
-  TEST_VERIFY(isOk);
+  TEST_VERIFY( isOk, DescriptionFn(), funcID);
 
   // Dump the Model just after the copying
   TCollection_AsciiString
@@ -3087,8 +3103,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
    * ================================================================ */
 
    M->OpenCommand();
-   TEST_VERIFY( M->DeleteNode(A) );
-   TEST_VERIFY( M->DeleteNode(B) );
+   TEST_VERIFY( M->DeleteNode(A), DescriptionFn(), funcID );
+   TEST_VERIFY( M->DeleteNode(B), DescriptionFn(), funcID );
    M->CommitCommand();
 
   // Dump the Model just after the copying
@@ -3106,8 +3122,8 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
 
   // Some very preliminary verifications which assure us that pasting has
   // been really performed
-  TEST_VERIFY( !A_COPY.IsNull() );
-  TEST_VERIFY( A_COPY->IsWellFormed() );
+  TEST_VERIFY( !A_COPY.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsWellFormed(), DescriptionFn(), funcID );
 
   // Dump the Model just after the pasting
   TCollection_AsciiString
@@ -3127,11 +3143,12 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
 
   Standard_Integer PasteStatus = M->CopyPasteEngine()->Status();
 
-  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_NoError);
-  TEST_VERIFY( A_COPY->IsValidData() );
-  TEST_VERIFY( ActData_ParameterFactory::AsReference( A->Parameter(ActTest_StubANode::PID_Ref) )->GetTarget().IsNull() );
+  TEST_VERIFY(PasteStatus & ActData_CopyPasteEngine::Status_NoError, DescriptionFn(), funcID );
+  TEST_VERIFY( A_COPY->IsValidData(), DescriptionFn(), funcID );
+  TEST_VERIFY( ActData_ParameterFactory::AsReference( A->Parameter(ActTest_StubANode::PID_Ref) )->GetTarget().IsNull(),
+               DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------
@@ -3147,9 +3164,11 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int 
 outcome ActTest_CopyPasteEngine::populateSampleTree(const Handle(ActTest_DummyModel)& M,
                                                     ActAPI_DataObjectIdList& ANodeIDs,
                                                     ActAPI_DataObjectIdList& BNodeIDs,
-                                                    ActAPI_DataObjectIdList& VARNodeIDs)
+                                                    ActAPI_DataObjectIdList& VARNodeIDs,
+                                                    const std::string&       nameFunc,
+                                                    const int                funcID)
 {
-  TEST_VERIFY( M->NewEmpty() );
+  TEST_VERIFY( M->NewEmpty(), nameFunc, funcID );
 
   // Prepare detached A Nodes
   Handle(ActTest_StubANode) A   = Handle(ActTest_StubANode)::DownCast( ActTest_StubANode::Instance() ),
@@ -3232,15 +3251,15 @@ outcome ActTest_CopyPasteEngine::populateSampleTree(const Handle(ActTest_DummyMo
   M->CommitCommand();
 
   // Check if initial data is OK
-  TEST_VERIFY( A_1->IsWellFormed() );
-  TEST_VERIFY( A_2->IsWellFormed() );
-  TEST_VERIFY( A_3->IsWellFormed() );
-  TEST_VERIFY( B_1->IsWellFormed() );
-  TEST_VERIFY( B_2->IsWellFormed() );
-  TEST_VERIFY( B_3->IsWellFormed() );
-  TEST_VERIFY( B_4->IsWellFormed() );
-  TEST_VERIFY( VAR_1->IsWellFormed() );
-  TEST_VERIFY( VAR_2->IsWellFormed() );
+  TEST_VERIFY( A_1->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( A_2->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( A_3->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( B_1->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( B_2->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( B_3->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( B_4->IsWellFormed(),   nameFunc, funcID );
+  TEST_VERIFY( VAR_1->IsWellFormed(), nameFunc, funcID );
+  TEST_VERIFY( VAR_2->IsWellFormed(), nameFunc, funcID );
 
   // Build parent-child relationship
   M->OpenCommand();
@@ -3255,7 +3274,7 @@ outcome ActTest_CopyPasteEngine::populateSampleTree(const Handle(ActTest_DummyMo
   A_2->AddChildNode(A_3);
   M->CommitCommand();
 
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 //! Verifies the Nodal sub-tree against the passed pattern. Relocation tables

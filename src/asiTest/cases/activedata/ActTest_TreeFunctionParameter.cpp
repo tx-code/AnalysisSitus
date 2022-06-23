@@ -80,7 +80,7 @@ public:
 //! Attributes which are forming the core of the OCCT TFunction mechanism.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TreeFunctionParameter::accessFunction(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -253,21 +253,21 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
    * =========================================================== */
 
   // Verify self-check
-  TEST_VERIFY( thisParam->IsWellFormed() )
+  TEST_VERIFY( thisParam->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access Driver GUID
   Handle(TFunction_Function) aFunctionAttr;
   THISLabel.FindAttribute(TFunction_Function::GetID(), aFunctionAttr);
-  TEST_VERIFY( !aFunctionAttr.IsNull() )
+  TEST_VERIFY( !aFunctionAttr.IsNull(), DescriptionFn(), funcID)
   const Standard_GUID& aGUID = aFunctionAttr->GetDriverGUID();
 
   // Verify GUID
-  TEST_VERIFY(aGUID == TEST_GUID)
+  TEST_VERIFY( aGUID == TEST_GUID, DescriptionFn(), funcID )
 
   // Access Graph Node
   Handle(TFunction_GraphNode) aGraphNodeAttr;
   THISLabel.FindAttribute(TFunction_GraphNode::GetID(), aGraphNodeAttr);
-  TEST_VERIFY( !aGraphNodeAttr.IsNull() )
+  TEST_VERIFY( !aGraphNodeAttr.IsNull(), DescriptionFn(), funcID )
 
   // Access global Function Scope
   TDF_Label aDocRoot = THISLabel.Root();
@@ -276,8 +276,8 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
     aDocRoot.FindAttribute(TFunction_Scope::GetID(), aGlobalScopeAttr);
 
   // Verify Scope
-  TEST_VERIFY( isGlobalScopeBound )
-  TEST_VERIFY( !aGlobalScopeAttr.IsNull() )
+  TEST_VERIFY( isGlobalScopeBound, DescriptionFn(), funcID )
+  TEST_VERIFY( !aGlobalScopeAttr.IsNull(), DescriptionFn(), funcID )
 
   /* ==================================================================
    *  Iterate over the dependency graph and verify the execution order
@@ -300,7 +300,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
   }
 
   // Verify the entire number of Functions
-  TEST_VERIFY(aGlobalScopeAttr->GetFunctions().Extent() == 7)
+  TEST_VERIFY( aGlobalScopeAttr->GetFunctions().Extent() == 7, DescriptionFn(), funcID )
 
   Standard_Integer ITERATION = 1;
   Standard_Integer EXPECTED_NB_FUNCTIONS[] = {1, 4, 1, 1};
@@ -336,7 +336,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
 
     // Verify the number of Functions accessible for concurrent execution
     Standard_Integer aNbCurrent = aCurrentFunctions.Extent();
-    TEST_VERIFY(aNbCurrent == EXPECTED_NB_FUNCTIONS[ITERATION - 1])
+    TEST_VERIFY( aNbCurrent == EXPECTED_NB_FUNCTIONS[ITERATION - 1], DescriptionFn(), funcID )
 
     TDF_ListIteratorOfLabelList aCurrentIt(aCurrentFunctions);
     for ( ; aCurrentIt.More(); aCurrentIt.Next() )
@@ -345,7 +345,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
       TCollection_AsciiString aLabEntry;
       TDF_Tool::Entry(aLab, aLabEntry);
 
-      TEST_VERIFY( isLabelExpectedByLevel(ITERATION, aLabEntry, EXPECTED_FUNCTION_LABELS) )
+      TEST_VERIFY( isLabelExpectedByLevel(ITERATION, aLabEntry, EXPECTED_FUNCTION_LABELS), DescriptionFn(), funcID )
 
       // Ok, succeeded
       aFuncIt.SetStatus(aLab, TFunction_ES_Succeeded);
@@ -355,7 +355,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
   }
 
   doc->CommitCommand();
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on disconnecting Tree Function from CAF document. This
@@ -364,7 +364,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int asiTestEngine_No
 //! the corresponding Function from Execution Graph.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::disconnect_soft(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TreeFunctionParameter::disconnect_soft(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -400,17 +400,17 @@ outcome ActTest_TreeFunctionParameter::disconnect_soft(const int asiTestEngine_N
    * ================================ */
 
   // Verify self-check
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access Function Attribute
   Handle(TFunction_Function) aFunctionAttr_BEFORE;
   label.FindAttribute(TFunction_Function::GetID(), aFunctionAttr_BEFORE);
-  TEST_VERIFY( !aFunctionAttr_BEFORE.IsNull() )
+  TEST_VERIFY( !aFunctionAttr_BEFORE.IsNull(), DescriptionFn(), funcID )
 
   // Access Graph Node Attribute
   Handle(TFunction_GraphNode) aGraphNodeAttr_BEFORE;
   label.FindAttribute(TFunction_GraphNode::GetID(), aGraphNodeAttr_BEFORE);
-  TEST_VERIFY( !aGraphNodeAttr_BEFORE.IsNull() )
+  TEST_VERIFY( !aGraphNodeAttr_BEFORE.IsNull(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Disconnect Tree Function
@@ -425,19 +425,19 @@ outcome ActTest_TreeFunctionParameter::disconnect_soft(const int asiTestEngine_N
    * ================================ */
 
   // Verify self-check
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access Function Attribute
   Handle(TFunction_Function) aFunctionAttr_AFTER;
   label.FindAttribute(TFunction_Function::GetID(), aFunctionAttr_AFTER);
-  TEST_VERIFY( !aFunctionAttr_AFTER.IsNull() )
+  TEST_VERIFY( !aFunctionAttr_AFTER.IsNull(), DescriptionFn(), funcID )
 
   // Access Graph Node Attribute
   Handle(TFunction_GraphNode) aGraphNodeAttr_AFTER;
   label.FindAttribute(TFunction_GraphNode::GetID(), aGraphNodeAttr_AFTER);
-  TEST_VERIFY( !aGraphNodeAttr_AFTER.IsNull() )
+  TEST_VERIFY( !aGraphNodeAttr_AFTER.IsNull(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on complete disconnecting Tree Function from CAF document.
@@ -445,7 +445,7 @@ outcome ActTest_TreeFunctionParameter::disconnect_soft(const int asiTestEngine_N
 //! up along with all references to the root TDF Label of Tree Function.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::disconnect_full(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TreeFunctionParameter::disconnect_full(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -481,17 +481,17 @@ outcome ActTest_TreeFunctionParameter::disconnect_full(const int asiTestEngine_N
    * ================================ */
 
   // Verify self-check
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access Function Attribute
   Handle(TFunction_Function) aFunctionAttr_BEFORE;
   label.FindAttribute(TFunction_Function::GetID(), aFunctionAttr_BEFORE);
-  TEST_VERIFY( !aFunctionAttr_BEFORE.IsNull() )
+  TEST_VERIFY( !aFunctionAttr_BEFORE.IsNull(), DescriptionFn(), funcID )
 
   // Access Graph Node Attribute
   Handle(TFunction_GraphNode) aGraphNodeAttr_BEFORE;
   label.FindAttribute(TFunction_GraphNode::GetID(), aGraphNodeAttr_BEFORE);
-  TEST_VERIFY( !aGraphNodeAttr_BEFORE.IsNull() )
+  TEST_VERIFY( !aGraphNodeAttr_BEFORE.IsNull(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Disconnect Tree Function
@@ -506,19 +506,19 @@ outcome ActTest_TreeFunctionParameter::disconnect_full(const int asiTestEngine_N
    * ================================ */
 
   // Verify self-check
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access Function Attribute
   Handle(TFunction_Function) aFunctionAttr_AFTER;
   label.FindAttribute(TFunction_Function::GetID(), aFunctionAttr_AFTER);
-  TEST_VERIFY( aFunctionAttr_AFTER.IsNull() )
+  TEST_VERIFY( aFunctionAttr_AFTER.IsNull(), DescriptionFn(), funcID )
 
   // Access Graph Node Attribute
   Handle(TFunction_GraphNode) aGraphNodeAttr_AFTER;
   label.FindAttribute(TFunction_GraphNode::GetID(), aGraphNodeAttr_AFTER);
-  TEST_VERIFY( aGraphNodeAttr_AFTER.IsNull() )
+  TEST_VERIFY( aGraphNodeAttr_AFTER.IsNull(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

@@ -39,7 +39,7 @@ outcome asiTest_RecognizeCavities::testAll(const int /*funcID*/)
   TCollection_AsciiString fullFilename = GetPath("inspection/recognize-cavities");
 
   // Execute test script.
-  outcome res = evaluateAll(fullFilename);
+  outcome res = evaluateAll(fullFilename, DescriptionFn());
 
   // Return status.
   return res;

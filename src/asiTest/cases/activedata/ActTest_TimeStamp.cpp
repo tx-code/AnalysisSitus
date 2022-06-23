@@ -45,7 +45,7 @@
 //! Performs complex test on TimeStamp functionality.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStamp::cumulTest(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TimeStamp::cumulTest(const int funcID)
 {
   TEST_PRINT_DECOR_L("Generating UniqueTime structure for current time")
 
@@ -68,16 +68,16 @@ outcome ActTest_TimeStamp::cumulTest(const int asiTestEngine_NotUsed(funcID))
   Handle(ActAux_TimeStamp) aTS2 = ActAux_TimeStampTool::FromChunked(aCAFSuitedTM);
 
   // Take advantage of overloaded equality operator
-  TEST_VERIFY( aTS1->IsEqual(aTS2) )
+  TEST_VERIFY( aTS1->IsEqual(aTS2), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs a simple test on accessing modification time for
 //! Integer Parameters.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStamp::accessMTime(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TimeStamp::accessMTime(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -112,7 +112,7 @@ outcome ActTest_TimeStamp::accessMTime(const int asiTestEngine_NotUsed(funcID))
   Handle(ActAux_TimeStamp) aTSFor1 = anIntParam1->GetMTime();
   Handle(ActAux_TimeStamp) aTSFor2 = anIntParam2->GetMTime();
 
-  TEST_VERIFY( aTSFor1->IsLess(aTSFor2) )
+  TEST_VERIFY( aTSFor1->IsLess(aTSFor2), DescriptionFn(), funcID )
 
   doc->NewCommand();
   anIntParam2->SetValue(0);
@@ -122,9 +122,9 @@ outcome ActTest_TimeStamp::accessMTime(const int asiTestEngine_NotUsed(funcID))
   aTSFor1 = anIntParam1->GetMTime();
   aTSFor2 = anIntParam2->GetMTime();
 
-  TEST_VERIFY( aTSFor1->IsGreater(aTSFor2) )
+  TEST_VERIFY( aTSFor1->IsGreater(aTSFor2), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

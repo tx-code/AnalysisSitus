@@ -41,7 +41,7 @@
 //! Test function for Reference Parameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ReferenceParameter::testReference(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ReferenceParameter::testReference(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -81,13 +81,13 @@ outcome ActTest_ReferenceParameter::testReference(const int asiTestEngine_NotUse
   param->SetTarget( PARAMS(1) );
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsTarget( PARAMS(1) ) )
+  TEST_VERIFY( param->IsTarget( PARAMS(1) ), DescriptionFn(), funcID )
 
   doc->NewCommand();
   param->RemoveTarget();
   doc->CommitCommand();
 
-  TEST_VERIFY( param->GetTarget().IsNull() )
+  TEST_VERIFY( param->GetTarget().IsNull(), DescriptionFn(), funcID )
 
   /* =====================================================
    *  Set up the reference to the 2-nd Parameter & verify
@@ -97,8 +97,8 @@ outcome ActTest_ReferenceParameter::testReference(const int asiTestEngine_NotUse
   param->SetTarget( PARAMS(2) );
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsTarget( PARAMS(2) ) )
-  TEST_VERIFY( !param->GetTarget().IsNull() )
+  TEST_VERIFY( param->IsTarget( PARAMS(2) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->GetTarget().IsNull(), DescriptionFn(), funcID )
 
   /* =====================================================
    *  Set up the reference to the 3-rd Parameter & verify
@@ -108,10 +108,10 @@ outcome ActTest_ReferenceParameter::testReference(const int asiTestEngine_NotUse
   param->SetTarget( PARAMS(3) );
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsTarget( PARAMS(3) ) )
-  TEST_VERIFY( !param->GetTarget().IsNull() )
+  TEST_VERIFY( param->IsTarget( PARAMS(3) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->GetTarget().IsNull(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

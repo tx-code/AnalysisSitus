@@ -41,7 +41,7 @@
 //! Test function for Reference List Parameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ReferenceListParameter::testReferences(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ReferenceListParameter::testReferences(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -92,11 +92,11 @@ outcome ActTest_ReferenceListParameter::testReferences(const int asiTestEngine_N
    *  Verify the references
    * ======================= */
 
-  TEST_VERIFY(  param->HasTarget( PARAMS(1) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(2) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(3) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(4) ) )
-  TEST_VERIFY( !param->HasTarget( PARAMS(5) ) )
+  TEST_VERIFY(  param->HasTarget( PARAMS(1) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(2) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(3) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(4) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->HasTarget( PARAMS(5) ), DescriptionFn(), funcID )
 
   /* ========================
    *  Remove some references
@@ -104,9 +104,9 @@ outcome ActTest_ReferenceListParameter::testReferences(const int asiTestEngine_N
 
   doc->NewCommand();
 
-  TEST_VERIFY(  param->RemoveTarget( PARAMS(1) ) )
-  TEST_VERIFY(  param->RemoveTarget( PARAMS(3) ) )
-  TEST_VERIFY( !param->RemoveTarget( PARAMS(5) ) )
+  TEST_VERIFY(  param->RemoveTarget( PARAMS(1) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->RemoveTarget( PARAMS(3) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->RemoveTarget( PARAMS(5) ), DescriptionFn(), funcID )
 
   doc->CommitCommand();
 
@@ -114,19 +114,19 @@ outcome ActTest_ReferenceListParameter::testReferences(const int asiTestEngine_N
    *  Verify the rest of references
    * =============================== */
 
-  TEST_VERIFY( !param->HasTarget( PARAMS(1) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(2) ) )
-  TEST_VERIFY( !param->HasTarget( PARAMS(3) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(4) ) )
-  TEST_VERIFY( !param->HasTarget( PARAMS(5) ) )
+  TEST_VERIFY( !param->HasTarget( PARAMS(1) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(2) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->HasTarget( PARAMS(3) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(4) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->HasTarget( PARAMS(5) ), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Test function for Reference List Parameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -173,11 +173,11 @@ outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(c
 
   doc->CommitCommand();
 
-  TEST_VERIFY(  param->HasTarget( PARAMS(1) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(2) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(3) ) )
-  TEST_VERIFY(  param->HasTarget( PARAMS(4) ) )
-  TEST_VERIFY( !param->HasTarget( PARAMS(5) ) )
+  TEST_VERIFY(  param->HasTarget( PARAMS(1) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(2) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(3) ), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->HasTarget( PARAMS(4) ), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->HasTarget( PARAMS(5) ), DescriptionFn(), funcID )
 
   /* =====================
    *  Try to swap targets
@@ -185,27 +185,27 @@ outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(c
 
   doc->NewCommand();
 
-  TEST_VERIFY( param->SwapTargets( 1, 3 ) );
-  TEST_VERIFY( param->SwapTargets( 4, 2 ) );
+  TEST_VERIFY( param->SwapTargets( 1, 3 ), DescriptionFn(), funcID );
+  TEST_VERIFY( param->SwapTargets( 4, 2 ), DescriptionFn(), funcID );
 
   doc->CommitCommand();
 
   // check swap (1,3)
-  TEST_VERIFY( param->HasTarget( PARAMS(1) ) == 3 )
-  TEST_VERIFY( param->HasTarget( PARAMS(3) ) == 1 )
+  TEST_VERIFY( param->HasTarget( PARAMS(1) ) == 3, DescriptionFn(), funcID )
+  TEST_VERIFY( param->HasTarget( PARAMS(3) ) == 1, DescriptionFn(), funcID )
 
   // check swap (4,2)
-  TEST_VERIFY( param->HasTarget( PARAMS(4) ) == 2 )
-  TEST_VERIFY( param->HasTarget( PARAMS(2) ) == 4 )
+  TEST_VERIFY( param->HasTarget( PARAMS(4) ) == 2, DescriptionFn(), funcID )
+  TEST_VERIFY( param->HasTarget( PARAMS(2) ) == 4, DescriptionFn(), funcID )
 
   doc->NewCommand();
 
   // check swap with unreferenced target
-  TEST_VERIFY( !param->SwapTargets( 5, 3 ) )
+  TEST_VERIFY( !param->SwapTargets( 5, 3 ), DescriptionFn(), funcID)
 
   doc->CommitCommand();
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

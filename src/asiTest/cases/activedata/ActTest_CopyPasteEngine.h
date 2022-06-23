@@ -132,7 +132,9 @@ private:
     populateSampleTree(const Handle(ActTest_DummyModel)& M,
                        ActAPI_DataObjectIdList& ANodeIDs,
                        ActAPI_DataObjectIdList& BNodeIDs,
-                       ActAPI_DataObjectIdList& VARNodeIDs);
+                       ActAPI_DataObjectIdList& VARNodeIDs,
+                       const std::string&       nameFunc = "",
+                       const int                funcID   = 0);
 
   static void
     verifyTree(const Handle(ActAPI_INode)& theRoot,

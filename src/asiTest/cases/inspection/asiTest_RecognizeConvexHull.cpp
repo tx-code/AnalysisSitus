@@ -39,7 +39,7 @@ outcome asiTest_RecognizeConvexHull::testAll(const int /*funcID*/)
   TCollection_AsciiString fullFilename = GetPath("inspection/recognize-hull");
 
   // Execute test script.
-  outcome res = evaluateAll(fullFilename);
+  outcome res = evaluateAll(fullFilename, DescriptionFn());
 
   // Return status.
   return res;

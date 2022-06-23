@@ -40,7 +40,7 @@
 //! Performs test on accessing value of AsciiStringParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_AsciiStringParameter::accessASCIIStringValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_AsciiStringParameter::accessASCIIStringValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -59,7 +59,7 @@ outcome ActTest_AsciiStringParameter::accessASCIIStringValue(const int asiTestEn
   const Standard_CString VALUE = "TEST_TEST";
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -74,7 +74,7 @@ outcome ActTest_AsciiStringParameter::accessASCIIStringValue(const int asiTestEn
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() );
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID );
 
   /* ========================
    *  Access Parameter value
@@ -84,9 +84,9 @@ outcome ActTest_AsciiStringParameter::accessASCIIStringValue(const int asiTestEn
 
   // Finally, we check if the output is equal to the input to ensure
   // that no corruption has happened during data transferring to/from CAF
-  TEST_VERIFY( aString.IsEqual(VALUE) );
+  TEST_VERIFY( aString.IsEqual(VALUE), DescriptionFn(), funcID );
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

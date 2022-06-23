@@ -62,28 +62,36 @@ protected:
 
   static bool
     initializeMeshAttr(const Handle(TDocStd_Document)& doc,
-                       TDF_Label& meshLab,
-                       const Standard_Boolean isImplictTrans = Standard_True);
+                       TDF_Label&                      meshLab,
+                       const Standard_Boolean          isImplictTrans = Standard_True);
 
   static outcome
     populateMeshData(const Handle(TDocStd_Document)& doc,
-                     TDF_Label& meshLab,
-                     DatumIdList& NODE_IDS,
-                     DatumIdList& TRIANGLE_IDS,
-                     DatumIdList& QUADRANGLE_IDS,
-                     const Standard_Boolean isImplictTrans = Standard_True);
+                     TDF_Label&                      meshLab,
+                     DatumIdList&                    NODE_IDS,
+                     DatumIdList&                    TRIANGLE_IDS,
+                     DatumIdList&                    QUADRANGLE_IDS,
+                     const Standard_Boolean          isImplictTrans = Standard_True,
+                     const std::string&              nameFunc       = "",
+                     const int                       funcID         = 0);
 
   static outcome
-    populateMeshNodes(TDF_Label& meshLab,
-                      DatumIdList& NODE_IDS);
+    populateMeshNodes(TDF_Label&         meshLab,
+                      DatumIdList&       NODE_IDS,
+                      const std::string& nameFunc = "",
+                      const int          funcID   = 0);
 
   static outcome
-    populateMeshTriangles(TDF_Label& meshLab,
-                          DatumIdList& TRIANGLE_IDS);
+    populateMeshTriangles(TDF_Label&         meshLab,
+                          DatumIdList&       TRIANGLE_IDS,
+                          const std::string& nameFunc = "",
+                          const int          funcID   = 0);
 
   static outcome
-    populateMeshQuadrangles(TDF_Label& meshLab,
-                            DatumIdList& QUADRANGLE_IDS);
+    populateMeshQuadrangles(TDF_Label&         meshLab,
+                            DatumIdList&       QUADRANGLE_IDS,
+                            const std::string& nameFunc = "",
+                            const int          funcID   = 0);
 
 };
 

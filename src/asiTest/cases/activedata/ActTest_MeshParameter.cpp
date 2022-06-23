@@ -44,7 +44,7 @@
 //! Performs test on accessing value of MeshParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_MeshParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -60,7 +60,7 @@ outcome ActTest_MeshParameter::accessValue(const int asiTestEngine_NotUsed(funcI
     param = ActParamTool::AsMesh( createParameter(doc, Parameter_Mesh) );
   doc->CommitCommand();
 
-  TEST_VERIFY( !param->IsWellFormed() ) // As not yet initialized
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID ) // As not yet initialized
 
   /* ===========================
    *  Initialize Mesh Parameter
@@ -75,7 +75,7 @@ outcome ActTest_MeshParameter::accessValue(const int asiTestEngine_NotUsed(funcI
   param->SetMesh(MESH);
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==============================================
    *  Verify Mesh DS retrieved from Mesh Parameter
@@ -83,29 +83,29 @@ outcome ActTest_MeshParameter::accessValue(const int asiTestEngine_NotUsed(funcI
 
   Handle(ActData_Mesh) aMeshFrom = param->GetMesh();
 
-  TEST_VERIFY( !aMeshFrom.IsNull() )
-  TEST_VERIFY( aMeshFrom->NbFaces() == 0 )
-  TEST_VERIFY( aMeshFrom->NbNodes() == 3 )
+  TEST_VERIFY( !aMeshFrom.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshFrom->NbFaces() == 0, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshFrom->NbNodes() == 3, DescriptionFn(), funcID )
 
   Handle(ActData_Mesh_Node) aNode1 = aMeshFrom->FindNode(1);
   Handle(ActData_Mesh_Node) aNode2 = aMeshFrom->FindNode(2);
   Handle(ActData_Mesh_Node) aNode3 = aMeshFrom->FindNode(3);
 
-  TEST_VERIFY( !aNode1.IsNull() )
-  TEST_VERIFY( !aNode2.IsNull() )
-  TEST_VERIFY( !aNode3.IsNull() )
+  TEST_VERIFY( !aNode1.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aNode2.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( !aNode3.IsNull(), DescriptionFn(), funcID )
 
-  TEST_VERIFY(aNode1->Pnt().X() == 0.0)
-  TEST_VERIFY(aNode2->Pnt().X() == 0.0)
-  TEST_VERIFY(aNode3->Pnt().X() == 0.0)
-  TEST_VERIFY(aNode1->Pnt().Y() == 0.0)
-  TEST_VERIFY(aNode2->Pnt().Y() == 0.0)
-  TEST_VERIFY(aNode3->Pnt().Y() == 0.0)
-  TEST_VERIFY(aNode1->Pnt().Z() == 0.0)
-  TEST_VERIFY(aNode2->Pnt().Z() == 1.0)
-  TEST_VERIFY(aNode3->Pnt().Z() == 2.0)
+  TEST_VERIFY( aNode1->Pnt().X() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode2->Pnt().X() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode3->Pnt().X() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode1->Pnt().Y() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode2->Pnt().Y() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode3->Pnt().Y() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode1->Pnt().Z() == 0.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode2->Pnt().Z() == 1.0, DescriptionFn(), funcID)
+  TEST_VERIFY( aNode3->Pnt().Z() == 2.0, DescriptionFn(), funcID)
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

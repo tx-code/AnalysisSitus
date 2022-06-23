@@ -41,7 +41,7 @@
 //! Performs test on accessing value of TriangulationParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TriangulationParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TriangulationParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -57,7 +57,7 @@ outcome ActTest_TriangulationParameter::accessValue(const int asiTestEngine_NotU
     param = ActParamTool::AsTriangulation( createParameter(doc, Parameter_Triangulation) );
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsWellFormed() ) // Triangulation Node is well-formed even without initialization
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID ) // Triangulation Node is well-formed even without initialization
 
   /* ===========================
    *  Initialize Mesh Parameter
@@ -74,7 +74,7 @@ outcome ActTest_TriangulationParameter::accessValue(const int asiTestEngine_NotU
   param->SetTriangulation(TRIS);
   doc->CommitCommand();
 
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==============================================
    *  Verify Mesh DS retrieved from Mesh Parameter
@@ -82,27 +82,27 @@ outcome ActTest_TriangulationParameter::accessValue(const int asiTestEngine_NotU
 
   Handle(Poly_Triangulation) aMeshFrom = param->GetTriangulation();
 
-  TEST_VERIFY( !aMeshFrom.IsNull() )
-  TEST_VERIFY( aMeshFrom->NbTriangles() == 1 )
-  TEST_VERIFY( aMeshFrom->NbNodes() == 3 )
+  TEST_VERIFY( !aMeshFrom.IsNull(), DescriptionFn(), funcID)
+  TEST_VERIFY( aMeshFrom->NbTriangles() == 1, DescriptionFn(), funcID )
+  TEST_VERIFY( aMeshFrom->NbNodes() == 3, DescriptionFn(), funcID )
 
   const gp_Pnt& aNode1 = aMeshFrom->Node(1);
   const gp_Pnt& aNode2 = aMeshFrom->Node(2);
   const gp_Pnt& aNode3 = aMeshFrom->Node(3);
 
-  TEST_VERIFY(aNode1.X() == 0.0)
-  TEST_VERIFY(aNode1.Y() == 0.0)
-  TEST_VERIFY(aNode1.Z() == 0.0)
+  TEST_VERIFY( aNode1.X() == 0.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode1.Y() == 0.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode1.Z() == 0.0, DescriptionFn(), funcID )
   //
-  TEST_VERIFY(aNode2.X() == 1.0)
-  TEST_VERIFY(aNode2.Y() == 0.0)
-  TEST_VERIFY(aNode2.Z() == 0.0)
+  TEST_VERIFY( aNode2.X() == 1.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode2.Y() == 0.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode2.Z() == 0.0, DescriptionFn(), funcID )
   //
-  TEST_VERIFY(aNode3.X() == 1.0)
-  TEST_VERIFY(aNode3.Y() == 1.0)
-  TEST_VERIFY(aNode3.Z() == 0.0)
+  TEST_VERIFY( aNode3.X() == 1.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode3.Y() == 1.0, DescriptionFn(), funcID )
+  TEST_VERIFY( aNode3.Z() == 0.0, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

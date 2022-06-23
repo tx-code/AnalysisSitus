@@ -45,7 +45,7 @@
 //! Performs test on accessing USER tree of Parameters defined by Tree Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeNodeParameter::accessUserTree(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TreeNodeParameter::accessUserTree(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -75,7 +75,7 @@ outcome ActTest_TreeNodeParameter::accessUserTree(const int asiTestEngine_NotUse
    * =================================================== */
 
   // Parameter is always well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   doc->NewCommand();
 
@@ -109,19 +109,19 @@ outcome ActTest_TreeNodeParameter::accessUserTree(const int asiTestEngine_NotUse
    *  Verify USER tree
    * ================== */
 
-  TEST_VERIFY( param->IsWellFormed() )
-  TEST_VERIFY( A->IsWellFormed() )
-  TEST_VERIFY( B->IsWellFormed() )
-  TEST_VERIFY( C->IsWellFormed() )
-  TEST_VERIFY( D->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
+  TEST_VERIFY( A->IsWellFormed(),     DescriptionFn(), funcID )
+  TEST_VERIFY( B->IsWellFormed(),     DescriptionFn(), funcID )
+  TEST_VERIFY( C->IsWellFormed(),     DescriptionFn(), funcID )
+  TEST_VERIFY( D->IsWellFormed(),     DescriptionFn(), funcID )
 
   // Verify root
   Handle(TDataStd_TreeNode) aTN_THIS = param->GetCAFTreeNode();
-  TEST_VERIFY( !aTN_THIS->Father().IsNull() )
-  TEST_VERIFY( aTN_THIS->Father()->Father().IsNull() )
+  TEST_VERIFY( !aTN_THIS->Father().IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( aTN_THIS->Father()->Father().IsNull(), DescriptionFn(), funcID )
 
   // Verify the number of children
-  TEST_VERIFY(aTN_THIS->NbChildren() == 2);
+  TEST_VERIFY( aTN_THIS->NbChildren() == 2, DescriptionFn(), funcID );
 
   TCollection_AsciiString THISEntry, AEntry, BEntry, CEntry, DEntry;
   TDF_Tool::Entry(param->GetCAFTreeNode()->Label(), THISEntry);
@@ -142,7 +142,7 @@ outcome ActTest_TreeNodeParameter::accessUserTree(const int asiTestEngine_NotUse
   EXPECTED_ENTIRES.ChangeValue(3).Append(DEntry);
 
   // Verify USER tree recursively
-  return verifyTreeStructure(1, aTN_THIS->Father(), EXPECTED_ENTIRES);
+  return verifyTreeStructure(1, aTN_THIS->Father(), EXPECTED_ENTIRES, DescriptionFn(), funcID);
 }
 
 //! Recursive tree validation routine. Checks that the iterated Labels are
@@ -151,26 +151,28 @@ outcome ActTest_TreeNodeParameter::accessUserTree(const int asiTestEngine_NotUse
 //! \param TN [in] current root Tree Node.
 //! \param theEntriesByLevels [in] reference collection of expected results.
 //! \return true in case of success, false -- otherwise.
-outcome ActTest_TreeNodeParameter::verifyTreeStructure(const Standard_Integer LEVEL,
+outcome ActTest_TreeNodeParameter::verifyTreeStructure(const Standard_Integer           LEVEL,
                                                        const Handle(TDataStd_TreeNode)& TN,
-                                                       const EntriesByLevels& theEntriesByLevels)
+                                                       const EntriesByLevels&           theEntriesByLevels,
+                                                       const std::string&               nameFunc,
+                                                       const int                        funcID)
 {
   TDataStd_ChildNodeIterator aChildIt(TN, Standard_False);
   for ( ; aChildIt.More(); aChildIt.Next() )
   {
     Handle(TDataStd_TreeNode) aChildTN = aChildIt.Value();
 
-    TEST_VERIFY( !aChildTN.IsNull() )
+    TEST_VERIFY( !aChildTN.IsNull(), nameFunc, funcID )
 
     TCollection_AsciiString aNextEntry;
     TDF_Tool::Entry(aChildTN->Label(), aNextEntry);
 
-    TEST_VERIFY( isLabelExpectedByLevel(LEVEL, aNextEntry, theEntriesByLevels) )
+    TEST_VERIFY( isLabelExpectedByLevel(LEVEL, aNextEntry, theEntriesByLevels), nameFunc, funcID )
 
     if ( !verifyTreeStructure(LEVEL + 1, aChildTN, theEntriesByLevels).ok )
-      return outcome().failure();
+      return outcome(nameFunc, funcID).failure();
   }
-  return outcome().success();
+  return outcome(nameFunc, funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

@@ -43,7 +43,7 @@ outcome asiTest_ConvertCanonical::runTestScript(const int   funcID,
   TCollection_AsciiString fullFilename = GetFilename(filename);
 
   // Execute test script.
-  outcome res = evaluate(fullFilename);
+  outcome res = evaluate(fullFilename, DescriptionFn(), funcID);
 
   // Set description variables.
   SetVarDescr("filename", fullFilename,       ID(), funcID);

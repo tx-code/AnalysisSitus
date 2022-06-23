@@ -44,7 +44,7 @@
 //! Performs test on accessing value of TimeStampParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStampParameter::accessValue(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TimeStampParameter::accessValue(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -63,7 +63,7 @@ outcome ActTest_TimeStampParameter::accessValue(const int asiTestEngine_NotUsed(
   Handle(ActAux_TimeStamp) TS = ActAux_TimeStampTool::Generate();
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -74,21 +74,21 @@ outcome ActTest_TimeStampParameter::accessValue(const int asiTestEngine_NotUsed(
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Validate Parameter value
    * ========================== */
 
   // Validate
-  TEST_VERIFY( param->GetValue()->IsEqual(TS) )
-  return outcome().success();
+  TEST_VERIFY( param->GetValue()->IsEqual(TS), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on accessing value of TimeStampParameter by portions.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStampParameter::accessValueByPortions(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_TimeStampParameter::accessValueByPortions(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -118,7 +118,7 @@ outcome ActTest_TimeStampParameter::accessValueByPortions(const int asiTestEngin
   Standard_Integer IsDST   = TSArr->Value(8);
 
   // Parameter is not well-formed as it does not have value Attribute yet
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Set Parameter value
@@ -137,23 +137,23 @@ outcome ActTest_TimeStampParameter::accessValueByPortions(const int asiTestEngin
   doc->CommitCommand();
 
   // Now we expect the Parameter to become well-formed
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* ==========================
    *  Validate Parameter value
    * ========================== */
 
   // Validate
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Seconds) == Seconds)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Minutes) == Minutes)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Hours)   == Hours)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_MDays)   == MDays)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Month)   == Month)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Years)   == Years)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_WDays)   == WDays)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_YDays)   == YDays)
-  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_IsDST)   == IsDST)
-  return outcome().success();
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Seconds) == Seconds, DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Minutes) == Minutes, DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Hours)   == Hours,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_MDays)   == MDays,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Month)   == Month,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_Years)   == Years,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_WDays)   == WDays,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_YDays)   == YDays,   DescriptionFn(), funcID )
+  TEST_VERIFY(param->GetValue(ActData_TimeStampParameter::Item_IsDST)   == IsDST,   DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

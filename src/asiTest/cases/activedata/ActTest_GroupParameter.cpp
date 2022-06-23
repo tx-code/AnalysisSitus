@@ -41,7 +41,7 @@
 //! Performs test on accessing type of GroupParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_GroupParameter::testGroupType(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_GroupParameter::testGroupType(const int funcID)
 {
   TEST_PRINT_DECOR_L("Create new GROUP Parameter");
 
@@ -55,12 +55,12 @@ outcome ActTest_GroupParameter::testGroupType(const int asiTestEngine_NotUsed(fu
 
   // Parameter is not well-formed from the very beginning as it contains no
   // actual data
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Check type
-  TEST_VERIFY( param->GetParamType() == Parameter_Group )
+  TEST_VERIFY( param->GetParamType() == Parameter_Group, DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

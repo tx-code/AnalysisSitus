@@ -42,7 +42,7 @@
 //! is well-formed, while Redo one is empty.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int funcID)
 {
   const Standard_Integer NbCommits = 4;
   TCollection_AsciiString Names[] = {"TR 1", "TR 2", "TR 3", "TR 4"};
@@ -56,10 +56,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int asiTestEngine
   // ...
   for ( Standard_Integer i = 0; i < NbCommits; i++ )
   {
-    TEST_VERIFY( !engine->HasOpenCommand() )
+    TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
 
     engine->OpenCommand();
-    TEST_VERIFY( engine->HasOpenCommand() )
+    TEST_VERIFY( engine->HasOpenCommand(), DescriptionFn(), funcID )
     engine->CommitCommandExt( ActAPI_TxData() << Names[i] );
   }
 
@@ -68,10 +68,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int asiTestEngine
   const ActAPI_TxDataSeq& RedoData = engine->GetRedoData();
 
   // No Redos should exist
-  TEST_VERIFY( RedoData.IsEmpty() )
+  TEST_VERIFY( RedoData.IsEmpty(), DescriptionFn(), funcID)
 
   // Verify number of Undos
-  TEST_VERIFY(UndoData.Length() == NbCommits)
+  TEST_VERIFY( UndoData.Length() == NbCommits, DescriptionFn(), funcID )
 
   // Verify Undos by iterating from the beginning to end
   Standard_Integer CommitIndex = NbCommits;
@@ -79,17 +79,17 @@ outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int asiTestEngine
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[--CommitIndex]);
+    TEST_VERIFY( aName == Names[--CommitIndex], DescriptionFn(), funcID );
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! After several commits, performs Undo operations and checks the UR
 //! collections' contents.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int funcID)
 {
   const Standard_Integer NbCommits = 5,
                          NbUndos = 2;
@@ -104,16 +104,16 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int asiTestEngine_N
   // ...
   for ( Standard_Integer i = 0; i < NbCommits; i++ )
   {
-    TEST_VERIFY( !engine->HasOpenCommand() )
+    TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
 
     engine->OpenCommand();
-    TEST_VERIFY( engine->HasOpenCommand() )
+    TEST_VERIFY( engine->HasOpenCommand(), DescriptionFn(), funcID )
     engine->CommitCommandExt( ActAPI_TxData() << Names[i] );
   }
 
   // Couple of Undos
   // ...
-  TEST_VERIFY( !engine->HasOpenCommand() )
+  TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
   engine->Undo(NbUndos);
 
   // Get the list of Undo & Redo data
@@ -121,10 +121,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int asiTestEngine_N
   const ActAPI_TxDataSeq& RedoData = engine->GetRedoData();
 
   // Verify number of Undos
-  TEST_VERIFY(UndoData.Length() == NbCommits - NbUndos)
+  TEST_VERIFY(UndoData.Length() == NbCommits - NbUndos, DescriptionFn(), funcID )
 
   // Verify number of Redos
-  TEST_VERIFY(RedoData.Length() == NbUndos)
+  TEST_VERIFY(RedoData.Length() == NbUndos, DescriptionFn(), funcID )
 
   // Verify Undos by iterating from the beginning to end
   Standard_Integer UndoIndex = NbCommits - NbUndos;
@@ -132,7 +132,7 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int asiTestEngine_N
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[--UndoIndex])
+    TEST_VERIFY(aName == Names[--UndoIndex], DescriptionFn(), funcID )
   }
 
   // Verify Redos by iterating from the beginning to end
@@ -141,17 +141,17 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int asiTestEngine_N
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[RedoIndex++])
+    TEST_VERIFY(aName == Names[RedoIndex++], DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! After several commits and Undo operations, performs Redo operations and
 //! checks the UR collections' contents.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int funcID)
 {
   const Standard_Integer NbCommits = 5,
                          NbUndos = 4,
@@ -168,23 +168,23 @@ outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int asiTestEngine_N
   // TR 5 | TR 4 | TR 3 | TR 2 | TR 1 <-|||-> <empty>
   for ( Standard_Integer i = 0; i < NbCommits; i++ )
   {
-    TEST_VERIFY( !engine->HasOpenCommand() )
+    TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
 
     engine->OpenCommand();
-    TEST_VERIFY( engine->HasOpenCommand() )
+    TEST_VERIFY( engine->HasOpenCommand(), DescriptionFn(), funcID )
     engine->CommitCommandExt( ActAPI_TxData() << Names[i] );
   }
 
   // Couple of Undos
   // ...
   // TR 1 <-|||-> TR 2 | TR 3 | TR 4 | TR 5
-  TEST_VERIFY( !engine->HasOpenCommand() )
+  TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
   engine->Undo(NbUndos);
 
   // Several Redos
   // ...
   // TR 4 | TR 3 | TR 2 | TR 1 <-|||-> TR 5
-  TEST_VERIFY( !engine->HasOpenCommand() )
+  TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
   engine->Redo(NbRedos);
 
   // Get the list of Undo & Redo data
@@ -192,10 +192,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int asiTestEngine_N
   const ActAPI_TxDataSeq& RedoData = engine->GetRedoData();
 
   // Verify number of Undos
-  TEST_VERIFY(UndoData.Length() == NbCommits - NbUndos + NbRedos)
+  TEST_VERIFY(UndoData.Length() == NbCommits - NbUndos + NbRedos, DescriptionFn(), funcID )
 
   // Verify number of Redos
-  TEST_VERIFY(RedoData.Length() == NbUndos - NbRedos)
+  TEST_VERIFY(RedoData.Length() == NbUndos - NbRedos, DescriptionFn(), funcID )
 
   // Verify Undos by iterating from the beginning to end
   Standard_Integer UndoIndex = NbCommits - NbUndos + NbRedos;
@@ -203,7 +203,7 @@ outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int asiTestEngine_N
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[--UndoIndex])
+    TEST_VERIFY(aName == Names[--UndoIndex], DescriptionFn(), funcID )
   }
 
   // Verify Redos by iterating from the beginning to end
@@ -212,16 +212,16 @@ outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int asiTestEngine_N
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[RedoIndex++])
+    TEST_VERIFY(aName == Names[RedoIndex++], DescriptionFn(), funcID )
   }
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Checks if Undo Limit works ;)
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int funcID)
 {
   ActTest_DocAlloc docAlloc;
   Handle(TDocStd_Document) doc = docAlloc.Doc;
@@ -238,10 +238,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int asiTestEngi
   // TR 101 | TR 100 | TR 99 | TR 98 | TR 97 | ... | TR 5 | TR 4 | TR 3 | TR 2 <-|||-> <empty>
   for ( Standard_Integer i = 0; i < NbCommits; i++ )
   {
-    TEST_VERIFY( !engine->HasOpenCommand() )
+    TEST_VERIFY( !engine->HasOpenCommand(), DescriptionFn(), funcID )
 
     engine->OpenCommand();
-    TEST_VERIFY( engine->HasOpenCommand() )
+    TEST_VERIFY( engine->HasOpenCommand(), DescriptionFn(), funcID )
     engine->CommitCommandExt( ActAPI_TxData() << Names[i] );
   }
 
@@ -250,10 +250,10 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int asiTestEngi
   const ActAPI_TxDataSeq& RedoData = engine->GetRedoData();
 
   // Verify number of Undos
-  TEST_VERIFY(UndoData.Length() == NbCommits - 1) // One disappeared
+  TEST_VERIFY(UndoData.Length() == NbCommits - 1, DescriptionFn(), funcID ) // One disappeared
 
   // Verify number of Redos
-  TEST_VERIFY(RedoData.Length() == 0) // No Redo records
+  TEST_VERIFY(RedoData.Length() == 0, DescriptionFn(), funcID ) // No Redo records
 
   // Verify Undos by iterating from the beginning to end
   Standard_Integer UndoIndex = NbCommits;
@@ -261,11 +261,11 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int asiTestEngi
   {
     TCollection_AsciiString aName;
     it.ChangeValue() >> aName;
-    TEST_VERIFY(aName == Names[--UndoIndex])
+    TEST_VERIFY(aName == Names[--UndoIndex], DescriptionFn(), funcID )
   }
   delete[] Names;
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

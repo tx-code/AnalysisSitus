@@ -42,7 +42,7 @@
 //! SelectionParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_SelectionParameter::accessSelectionMask(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_SelectionParameter::accessSelectionMask(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -59,7 +59,7 @@ outcome ActTest_SelectionParameter::accessSelectionMask(const int asiTestEngine_
   doc->CommitCommand();
 
   // Not yet initialized -> BAD-FORMED
-  TEST_VERIFY( !param->IsWellFormed() )
+  TEST_VERIFY( !param->IsWellFormed(), DescriptionFn(), funcID )
 
   /* =====================
    *  Prepare a test mask
@@ -84,23 +84,23 @@ outcome ActTest_SelectionParameter::accessSelectionMask(const int asiTestEngine_
    * ================ */
 
   // Initialized -> WELL-FORMED
-  TEST_VERIFY( param->IsWellFormed() )
+  TEST_VERIFY( param->IsWellFormed(), DescriptionFn(), funcID )
 
   // Access stored mask
   Handle(TColStd_HPackedMapOfInteger) aMask_FROM = param->GetMask();
 
-  TEST_VERIFY( !aMask_FROM.IsNull() )
+  TEST_VERIFY( !aMask_FROM.IsNull(), DescriptionFn(), funcID )
 
   // Compare the contents of both maps: they should be identical
-  TEST_VERIFY( aMask_FROM->Map().IsEqual(aTestMap) )
+  TEST_VERIFY( aMask_FROM->Map().IsEqual(aTestMap), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on accessing individual masked IDs of SelectionParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int funcID)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -126,7 +126,7 @@ outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int asiTestEngi
   param->SetMask( new TColStd_HPackedMapOfInteger(aTestMap) );
   doc->CommitCommand();
 
-  TEST_VERIFY(param->Size() == 0);
+  TEST_VERIFY( param->Size() == 0, DescriptionFn(), funcID );
 
   /* ========================
    *  Try per-element access
@@ -138,10 +138,10 @@ outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int asiTestEngi
   param->Add(MASKED_IDs[0]);
   doc->CommitCommand();
 
-  TEST_VERIFY(  param->Size() == 1 )
-  TEST_VERIFY(  param->Contains(MASKED_IDs[0]) )
-  TEST_VERIFY( !param->Contains(MASKED_IDs[1]) )
-  TEST_VERIFY( !param->Contains(MASKED_IDs[2]) )
+  TEST_VERIFY(  param->Size() == 1 ,            DescriptionFn(), funcID )
+  TEST_VERIFY(  param->Contains(MASKED_IDs[0]), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->Contains(MASKED_IDs[1]), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->Contains(MASKED_IDs[2]), DescriptionFn(), funcID )
 
   // Try again just the sampe
   doc->OpenCommand();
@@ -149,30 +149,30 @@ outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int asiTestEngi
   doc->CommitCommand();
 
   // Verify again
-  TEST_VERIFY(  param->Size() == 1 )
-  TEST_VERIFY(  param->Contains(MASKED_IDs[0]) )
-  TEST_VERIFY( !param->Contains(MASKED_IDs[1]) )
-  TEST_VERIFY( !param->Contains(MASKED_IDs[2]) )
+  TEST_VERIFY(  param->Size() == 1,             DescriptionFn(), funcID )
+  TEST_VERIFY(  param->Contains(MASKED_IDs[0]), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->Contains(MASKED_IDs[1]), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->Contains(MASKED_IDs[2]), DescriptionFn(), funcID )
 
   doc->OpenCommand();
   param->Add(MASKED_IDs[1]);
   doc->CommitCommand();
 
-  TEST_VERIFY(  param->Size() == 2 )
-  TEST_VERIFY(  param->Contains(MASKED_IDs[0]) )
-  TEST_VERIFY(  param->Contains(MASKED_IDs[1]) )
-  TEST_VERIFY( !param->Contains(MASKED_IDs[2]) )
+  TEST_VERIFY(  param->Size() == 2,             DescriptionFn(), funcID )
+  TEST_VERIFY(  param->Contains(MASKED_IDs[0]), DescriptionFn(), funcID )
+  TEST_VERIFY(  param->Contains(MASKED_IDs[1]), DescriptionFn(), funcID )
+  TEST_VERIFY( !param->Contains(MASKED_IDs[2]), DescriptionFn(), funcID )
 
   doc->OpenCommand();
   param->Add(MASKED_IDs[2]);
   doc->CommitCommand();
 
-  TEST_VERIFY( param->Size() == 3 )
-  TEST_VERIFY( param->Contains(MASKED_IDs[0]) )
-  TEST_VERIFY( param->Contains(MASKED_IDs[1]) )
-  TEST_VERIFY( param->Contains(MASKED_IDs[2]) )
+  TEST_VERIFY( param->Size() == 3,             DescriptionFn(), funcID )
+  TEST_VERIFY( param->Contains(MASKED_IDs[0]), DescriptionFn(), funcID )
+  TEST_VERIFY( param->Contains(MASKED_IDs[1]), DescriptionFn(), funcID )
+  TEST_VERIFY( param->Contains(MASKED_IDs[2]), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 #pragma warning(default: 4127) // "Conditional expression is constant" by TEST_VERIFY

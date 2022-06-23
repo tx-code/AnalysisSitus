@@ -43,9 +43,11 @@
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilename)
+outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilename,
+                                      const std::string&             name,
+                                      const int                      funcID)
 {
-  outcome res;
+  outcome res(name, funcID);
 
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -58,9 +60,10 @@ outcome asiTest_TclTestCase::evaluate(const TCollection_AsciiString& scriptFilen
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_TclTestCase::evaluateAll(const TCollection_AsciiString& dir)
+outcome asiTest_TclTestCase::evaluateAll(const TCollection_AsciiString& dir,
+                                         const std::string&             name)
 {
-  outcome res;
+  outcome res(name);
 
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();

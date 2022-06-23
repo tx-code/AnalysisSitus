@@ -125,7 +125,7 @@ namespace Aux
 //! Performs test on atomic insertion No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_001(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_001(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -164,7 +164,7 @@ outcome ActTest_CAFConversionCtx::insert_001(const int asiTestEngine_NotUsed(fun
     Ctx.Insert(DTO);
 
     // Apply Modification
-    TEST_VERIFY( Ctx.Apply(M) )
+    TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
     // Get resulting Model
     const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -178,15 +178,15 @@ outcome ActTest_CAFConversionCtx::insert_001(const int asiTestEngine_NotUsed(fun
                             ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
     // Perform comparison
-    TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
+    TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
   }
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (a).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002a(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002a(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -224,7 +224,7 @@ outcome ActTest_CAFConversionCtx::insert_002a(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) );
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID );
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -238,14 +238,14 @@ outcome ActTest_CAFConversionCtx::insert_002a(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (b).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002b(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002b(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -283,7 +283,7 @@ outcome ActTest_CAFConversionCtx::insert_002b(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -297,14 +297,14 @@ outcome ActTest_CAFConversionCtx::insert_002b(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (c).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002c(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002c(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -342,7 +342,7 @@ outcome ActTest_CAFConversionCtx::insert_002c(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -356,14 +356,14 @@ outcome ActTest_CAFConversionCtx::insert_002c(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (d).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002d(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002d(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -412,7 +412,7 @@ outcome ActTest_CAFConversionCtx::insert_002d(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -426,14 +426,14 @@ outcome ActTest_CAFConversionCtx::insert_002d(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (e).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002e(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002e(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -487,7 +487,7 @@ outcome ActTest_CAFConversionCtx::insert_002e(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -501,14 +501,14 @@ outcome ActTest_CAFConversionCtx::insert_002e(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (f).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002f(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002f(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -561,7 +561,7 @@ outcome ActTest_CAFConversionCtx::insert_002f(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -575,14 +575,14 @@ outcome ActTest_CAFConversionCtx::insert_002f(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (g).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002g(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002g(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -631,7 +631,7 @@ outcome ActTest_CAFConversionCtx::insert_002g(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -645,14 +645,14 @@ outcome ActTest_CAFConversionCtx::insert_002g(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (h).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002h(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002h(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -710,7 +710,7 @@ outcome ActTest_CAFConversionCtx::insert_002h(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -724,14 +724,14 @@ outcome ActTest_CAFConversionCtx::insert_002h(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (i).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002i(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002i(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -786,7 +786,7 @@ outcome ActTest_CAFConversionCtx::insert_002i(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -800,14 +800,14 @@ outcome ActTest_CAFConversionCtx::insert_002i(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (j).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002j(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002j(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -845,7 +845,7 @@ outcome ActTest_CAFConversionCtx::insert_002j(const int asiTestEngine_NotUsed(fu
   Ctx.Insert(DTO2);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -859,14 +859,14 @@ outcome ActTest_CAFConversionCtx::insert_002j(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 002 (k).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002k(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_002k(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -899,33 +899,33 @@ outcome ActTest_CAFConversionCtx::insert_002k(const int asiTestEngine_NotUsed(fu
   Handle(ActData_ParameterDTO) DTO2 = dtoByType(Aux::ParamTypes[1], GID);
 
   // Register two insertion requests
-  TEST_VERIFY( Ctx.Insert(DTO1) )
-  TEST_VERIFY( Ctx.Insert(DTO2) )
+  TEST_VERIFY( Ctx.Insert(DTO1), DescriptionFn(), funcID )
+  TEST_VERIFY( Ctx.Insert(DTO2), DescriptionFn(), funcID )
 
   ActAPI_ParameterGID GID100( N->GetId(), 100 );
 
   // Check invalid Update-Delete pair
   Ctx.Clear();
-  TEST_VERIFY( Ctx.Update(GID100, DTO1) )
-  TEST_VERIFY( !Ctx.Delete(GID100) )
+  TEST_VERIFY( Ctx.Update(GID100, DTO1), DescriptionFn(), funcID )
+  TEST_VERIFY( !Ctx.Delete(GID100),      DescriptionFn(), funcID )
 
   // Check invalid Delete-Delete pair
   Ctx.Clear();
-  TEST_VERIFY( Ctx.Delete(GID100) )
-  TEST_VERIFY( !Ctx.Delete(GID100) )
+  TEST_VERIFY( Ctx.Delete(GID100),  DescriptionFn(), funcID )
+  TEST_VERIFY( !Ctx.Delete(GID100), DescriptionFn(), funcID )
 
   // Check invalid Update-Update pair
   Ctx.Clear();
-  TEST_VERIFY( Ctx.Update(GID100, DTO1) )
-  TEST_VERIFY( !Ctx.Update(GID100, DTO2) )
+  TEST_VERIFY( Ctx.Update(GID100, DTO1),  DescriptionFn(), funcID )
+  TEST_VERIFY( !Ctx.Update(GID100, DTO2), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 003.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_003(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_003(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -963,7 +963,7 @@ outcome ActTest_CAFConversionCtx::insert_003(const int asiTestEngine_NotUsed(fun
   Ctx.Insert(DTO, GIDBefore);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -977,14 +977,14 @@ outcome ActTest_CAFConversionCtx::insert_003(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic insertion No. 004.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_004(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::insert_004(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1012,8 +1012,8 @@ outcome ActTest_CAFConversionCtx::insert_004(const int asiTestEngine_NotUsed(fun
   AIt->Next();
   Handle(ActTest_StubBNode) B = Handle(ActTest_StubBNode)::DownCast( AIt->Value() );
 
-  TEST_VERIFY( !B.IsNull() )
-  TEST_VERIFY( B->IsWellFormed() )
+  TEST_VERIFY( !B.IsNull(), DescriptionFn(), funcID )
+  TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID )
 
   // ...
   // Prepare Conversion Context
@@ -1109,7 +1109,7 @@ outcome ActTest_CAFConversionCtx::insert_004(const int asiTestEngine_NotUsed(fun
    * =============== */
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1123,14 +1123,14 @@ outcome ActTest_CAFConversionCtx::insert_004(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic modification No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::modify_001(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::modify_001(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1191,7 +1191,7 @@ outcome ActTest_CAFConversionCtx::modify_001(const int asiTestEngine_NotUsed(fun
     Ctx.Update(GID, DTO);
 
     // Apply Modification
-    TEST_VERIFY( Ctx.Apply(M) )
+    TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
     // Get resulting Model
     const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1205,15 +1205,15 @@ outcome ActTest_CAFConversionCtx::modify_001(const int asiTestEngine_NotUsed(fun
                             ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
     // Perform comparison
-    TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
+    TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
   }
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic modification No. 002.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::modify_002(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::modify_002(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1248,14 +1248,14 @@ outcome ActTest_CAFConversionCtx::modify_002(const int asiTestEngine_NotUsed(fun
   Ctx.Update(GID, DTO);
 
   // Apply Modification: failure due to type inconsistency is expected
-  TEST_VERIFY( !Ctx.Apply(M) )
-  return outcome().success();
+  TEST_VERIFY( !Ctx.Apply(M), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic removal No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_001(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::remove_001(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1289,7 +1289,7 @@ outcome ActTest_CAFConversionCtx::remove_001(const int asiTestEngine_NotUsed(fun
   Ctx.Delete(GID);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1303,14 +1303,14 @@ outcome ActTest_CAFConversionCtx::remove_001(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic removal No. 002.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_002(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::remove_002(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1344,7 +1344,7 @@ outcome ActTest_CAFConversionCtx::remove_002(const int asiTestEngine_NotUsed(fun
   Ctx.Delete(GID);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1358,14 +1358,14 @@ outcome ActTest_CAFConversionCtx::remove_002(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic removal No. 003.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_003(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::remove_003(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1401,7 +1401,7 @@ outcome ActTest_CAFConversionCtx::remove_003(const int asiTestEngine_NotUsed(fun
   Ctx.Delete(GID2);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1415,14 +1415,14 @@ outcome ActTest_CAFConversionCtx::remove_003(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic removal No. 004.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_004(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::remove_004(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1456,7 +1456,7 @@ outcome ActTest_CAFConversionCtx::remove_004(const int asiTestEngine_NotUsed(fun
   Ctx.Delete(GID);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1470,14 +1470,14 @@ outcome ActTest_CAFConversionCtx::remove_004(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on atomic removal No. 005.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_005(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::remove_005(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1499,8 +1499,8 @@ outcome ActTest_CAFConversionCtx::remove_005(const int asiTestEngine_NotUsed(fun
   AIt->Next();
   Handle(ActTest_StubBNode) B = Handle(ActTest_StubBNode)::DownCast( AIt->Value() );
 
-  TEST_VERIFY( !B.IsNull() );
-  TEST_VERIFY( B->IsWellFormed() );
+  TEST_VERIFY( !B.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID );
 
   // ...
   // Initialize Reference List Parameter with targets from Node C affected by
@@ -1548,7 +1548,7 @@ outcome ActTest_CAFConversionCtx::remove_005(const int asiTestEngine_NotUsed(fun
   Ctx.Delete(GID);
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1562,14 +1562,14 @@ outcome ActTest_CAFConversionCtx::remove_005(const int asiTestEngine_NotUsed(fun
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
-  return outcome().success();
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //! Performs test on complex modification No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::complex_001(const int asiTestEngine_NotUsed(funcID))
+outcome ActTest_CAFConversionCtx::complex_001(const int funcID)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1597,8 +1597,8 @@ outcome ActTest_CAFConversionCtx::complex_001(const int asiTestEngine_NotUsed(fu
   AIt->Next();
   Handle(ActTest_StubBNode) B = Handle(ActTest_StubBNode)::DownCast( AIt->Value() );
 
-  TEST_VERIFY( !B.IsNull() );
-  TEST_VERIFY( B->IsWellFormed() );
+  TEST_VERIFY( !B.IsNull(), DescriptionFn(), funcID );
+  TEST_VERIFY( B->IsWellFormed(), DescriptionFn(), funcID );
 
   // ...
   // Prepare Conversion Context
@@ -1735,7 +1735,7 @@ outcome ActTest_CAFConversionCtx::complex_001(const int asiTestEngine_NotUsed(fu
    * =============== */
 
   // Apply Modification
-  TEST_VERIFY( Ctx.Apply(M) )
+  TEST_VERIFY( Ctx.Apply(M), DescriptionFn(), funcID )
 
   // Get resulting Model
   const Handle(ActAPI_IModel)& ResModel = Ctx.Result();
@@ -1749,7 +1749,7 @@ outcome ActTest_CAFConversionCtx::complex_001(const int asiTestEngine_NotUsed(fu
                           ActData_CAFDumper::Verbosity_DetailsSkipUnstable);
 
   // Perform comparison
-  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef) )
+  TEST_VERIFY( verifyResults(aFilenameAct, aFilenameRef), DescriptionFn(), funcID )
 
   /* ===============================================================
    *  Settle down converted Nodes to check their WELL-FORMED states
@@ -1775,13 +1775,13 @@ outcome ActTest_CAFConversionCtx::complex_001(const int asiTestEngine_NotUsed(fu
   Handle(ActData_BaseNode) BConv = Handle(ActData_BaseNode)::DownCast( ActTest_StubBNodeConv::Instance() );
   ActData_NodeFactory::NodeSettle(BConv, RootNodeB);
 
-  TEST_VERIFY( !CNotConv->IsWellFormed() )
-  TEST_VERIFY( CConv->IsWellFormed() )
+  TEST_VERIFY( !CNotConv->IsWellFormed(), DescriptionFn(), funcID )
+  TEST_VERIFY( CConv->IsWellFormed(), DescriptionFn(), funcID )
 
-  TEST_VERIFY( !BNotConv->IsWellFormed() )
-  TEST_VERIFY( BConv->IsWellFormed() )
+  TEST_VERIFY( !BNotConv->IsWellFormed(), DescriptionFn(), funcID )
+  TEST_VERIFY( BConv->IsWellFormed(), DescriptionFn(), funcID )
 
-  return outcome().success();
+  return outcome(DescriptionFn(), funcID).success();
 }
 
 //-----------------------------------------------------------------------------

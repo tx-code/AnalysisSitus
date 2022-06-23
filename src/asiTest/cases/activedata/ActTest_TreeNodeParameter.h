@@ -81,9 +81,11 @@ private:
 private:
 
   static outcome
-    verifyTreeStructure(const Standard_Integer LEVEL,
+    verifyTreeStructure(const Standard_Integer           LEVEL,
                         const Handle(TDataStd_TreeNode)& TN,
-                        const EntriesByLevels& theEntriesByLevels);
+                        const EntriesByLevels&           theEntriesByLevels,
+                        const std::string&               nameFunc = "",
+                        const int                        funcID   = 0);
 
 };
 
