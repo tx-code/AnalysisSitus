@@ -32,7 +32,7 @@
 #include <asiVisu_ShapePipeline.h>
 
 // asiVisu includes
-#include <asiVisu_NodeInfo.h>
+#include <asiVisu_IVShapeNodeInfo.h>
 #include <asiVisu_ShapeDataProvider.h>
 #include <asiVisu_Utils.h>
 
@@ -130,7 +130,7 @@ void asiVisu_ShapePipeline::SetInput(const Handle(asiVisu_DataProvider)& dataPro
     m_source->SetTessellationParams(linDefl, angDefl);
 
     // Bind to a Data Node using information key.
-    asiVisu_NodeInfo::Store( DP->GetNodeID(), this->Actor() );
+    asiVisu_IVShapeNodeInfo::Store( DP->GetNodeID(), this->Actor() );
 
     // Initialize pipeline.
     this->SetInputConnection( m_source->GetOutputPort() );

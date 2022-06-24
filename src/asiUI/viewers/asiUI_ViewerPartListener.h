@@ -123,6 +123,7 @@ protected:
   QAction* m_pGetAsBLOB;
   QAction* m_pMeasureLength;
   QAction* m_pGetSpannedAngle;
+  QAction* m_pCheckThickness;
 
 };
 

@@ -42,6 +42,7 @@
 #include <asiAlgo_JSON.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_ShapeSerializer.h>
+#include <asiEngine_Thickness.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -52,7 +53,9 @@
 #include <asiEngine_Triangulation.h>
 
 // asiVisu includes
+#include <asiVisu_IVShapeNodeInfo.h>
 #include <asiVisu_PartNodeInfo.h>
+#include <asiVisu_TriangulationNodeInfo.h>
 
 // OCCT includes
 #include <BRep_Builder.hxx>
@@ -204,7 +207,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pAddAsFeature         (nullptr),
   m_pGetAsBLOB            (nullptr),
   m_pMeasureLength        (nullptr),
-  m_pGetSpannedAngle      (nullptr)
+  m_pGetSpannedAngle      (nullptr),
+  m_pCheckThickness       (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -505,6 +509,35 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     {
       m_pMeasureLength = menu.addAction("Measure distance");
     }
+  }
+
+  {
+    const asiVisu_ActualSelection& sel = m_pViewer->PrsMgr()->GetCurrentSelection();
+    const Handle(asiVisu_CellPickerResult)& pick_res = sel.GetCellPickerResult(SelectionNature_Detection);
+
+    asiVisu_PartNodeInfo*          partNodeInfo  = asiVisu_PartNodeInfo::Retrieve(pick_res->GetPickedActor());
+    asiVisu_IVShapeNodeInfo*       shapeNodeInfo = asiVisu_IVShapeNodeInfo::Retrieve(pick_res->GetPickedActor());
+    asiVisu_TriangulationNodeInfo* triNodeInfo   = asiVisu_TriangulationNodeInfo::Retrieve(pick_res->GetPickedActor());
+
+    bool isPart     = (partNodeInfo  != nullptr) && pick_res->GetPickedActor() || faceIndices.Extent();
+    bool isTopoItem = (shapeNodeInfo != nullptr) && pick_res->GetPickedActor();
+    bool isTri      = (triNodeInfo   != nullptr) && pick_res->GetPickedActor() || facetIndices.Extent();
+
+    if ( isTopoItem )
+    {
+      Handle(ActAPI_INode) pickedNode = m_model->FindNode(shapeNodeInfo->GetNodeId());
+      if ( Handle(asiData_IVTopoItemNode)::DownCast(pickedNode).IsNull() )
+      {
+        isTopoItem = false;
+      }
+    }
+
+    if ( isPart || isTopoItem || isTri )
+    {
+      menu.addSeparator();
+      m_pCheckThickness = menu.addAction("Check thickness");
+    }
+
   }
 }
 
@@ -985,5 +1018,86 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
       m_progress.SendLogMessage(LogInfo(Normal) << "Spanned angle: %1 deg."
                                                 << Abs(uMax - uMin)*180/M_PI);
     }
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: Check thickness
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pCheckThickness )
+  {
+    if ( m_pViewer == nullptr || m_pViewer->PrsMgr() == nullptr || m_wBrowser == nullptr )
+    {
+      return;
+    }
+
+    TColStd_PackedMapOfInteger faceIndices;
+    asiEngine_Part(m_model, m_pViewer->PrsMgr()).GetHighlightedFaces(faceIndices);
+    //
+    TColStd_PackedMapOfInteger facetsIndices;
+    asiEngine_Triangulation(m_model, m_pViewer->PrsMgr()).GetHighlightedFacets(facetsIndices);
+
+    const asiVisu_ActualSelection& sel = m_pViewer->PrsMgr()->GetCurrentSelection();
+    const Handle(asiVisu_CellPickerResult)& pick_res = sel.GetCellPickerResult(SelectionNature_Detection);
+    //
+    asiVisu_PartNodeInfo*          partNodeInfo  = asiVisu_PartNodeInfo::Retrieve(pick_res->GetPickedActor());
+    asiVisu_IVShapeNodeInfo*       shapeNodeInfo = asiVisu_IVShapeNodeInfo::Retrieve(pick_res->GetPickedActor());
+    asiVisu_TriangulationNodeInfo* triNodeInfo   = asiVisu_TriangulationNodeInfo::Retrieve(pick_res->GetPickedActor());
+    //
+    bool isPart      = (partNodeInfo  != nullptr) && pick_res->GetPickedActor() || faceIndices.Extent();
+    bool isShapeItem = (shapeNodeInfo != nullptr) && pick_res->GetPickedActor();
+    bool isTri       = (triNodeInfo   != nullptr) && pick_res->GetPickedActor() || facetsIndices.Extent();
+
+
+    Handle(ActAPI_INode) ownerNode;
+    if ( isPart )
+    {
+      ownerNode = m_model->GetPartNode();
+    }
+    else if ( isShapeItem )
+    {
+      ownerNode = m_model->FindNode(shapeNodeInfo->GetNodeId());
+
+      if ( Handle(asiData_IVTopoItemNode)::DownCast(ownerNode).IsNull() )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "No chosen objects.");
+        return;
+      }
+    }
+    else if ( isTri )
+    {
+      ownerNode = m_model->FindNode(triNodeInfo->GetNodeId());
+    }
+    else
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "No chosen objects.");
+      return;
+    }
+
+    if ( ownerNode.IsNull() || !ownerNode->IsWellFormed() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Owner node is null or inconsistent.");
+      return;
+    }
+
+    // Thickness analysis API.
+    asiEngine_Thickness thicknessApi( m_model,
+                                      m_progress,
+                                      m_plotter );
+    //
+    Handle(asiData_ThicknessNode) TN;
+
+    // Analyze thickness.
+    m_model->OpenCommand();
+    {
+      TN = thicknessApi.CreateThickness(ownerNode);
+
+      // Execute deps.
+      m_model->FuncExecuteAll();
+    }
+    m_model->CommitCommand();
+
+    // Update UI.
+    m_wBrowser->Populate();
+    m_pViewer->PrsMgr()->Actualize(TN);
   }
 }

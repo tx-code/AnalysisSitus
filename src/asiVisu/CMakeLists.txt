@@ -317,6 +317,7 @@ set (providers_CPP_FILES
 set (selection_H_FILES
   selection/asiVisu_InteractorStylePick.h
   selection/asiVisu_InteractorStylePick2d.h
+  selection/asiVisu_IVShapeNodeInfo.h
   selection/asiVisu_NodeInfo.h
   selection/asiVisu_PartNodeInfo.h
   selection/asiVisu_Selection.h
@@ -325,6 +326,7 @@ set (selection_H_FILES
 set (selection_CPP_FILES 
   selection/asiVisu_InteractorStylePick.cpp
   selection/asiVisu_InteractorStylePick2d.cpp
+  selection/asiVisu_IVShapeNodeInfo.cpp
   selection/asiVisu_NodeInfo.cpp
   selection/asiVisu_PartNodeInfo.cpp
   selection/asiVisu_Selection.cpp
