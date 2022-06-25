@@ -56,6 +56,10 @@ enum test_CaseID
 
 /* ------------------------------------------------------------------------ */
 
+  CaseID_ExchangeMesh,
+
+/* ------------------------------------------------------------------------ */
+
   CaseID_AAG,
   CaseID_IsContourClosed,
   CaseID_EdgeVexity,

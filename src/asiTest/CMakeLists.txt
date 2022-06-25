@@ -130,6 +130,13 @@ set (cases_editing_CPP_FILES
   cases/editing/asiTest_SuppressBlends.cpp
 )
 
+set (cases_exchange_H_FILES
+  cases/exchange/asiTest_ExchangeMesh.h
+)
+set (cases_exchange_CPP_FILES
+  cases/exchange/asiTest_ExchangeMesh.cpp
+)
+
 set (cases_framework_H_FILES
   cases/framework/asiTest_ChangeColor.h
   cases/framework/asiTest_DataDictionary.h
@@ -216,6 +223,16 @@ foreach (FILE ${cases_editing_CPP_FILES})
   source_group ("Source Files\\Cases\\Editing" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${cases_exchange_H_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Header Files\\Cases\\Exchange" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${cases_exchange_CPP_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Source Files\\Cases\\Exchange" FILES "${FILE}")
+endforeach (FILE)
+
 foreach (FILE ${cases_framework_H_FILES})
   set (src_files ${src_files} ${FILE})
   source_group ("Header Files\\Cases\\Framework" FILES "${FILE}")
@@ -253,6 +270,7 @@ set (asiTest_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/activedata/model;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/asm;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/editing;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/cases/exchange;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/framework;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/inspection;")
 #
@@ -294,7 +312,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/templates/exePROTOTYPE.vcxproj.user.in
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiTest asiAlgo asiAsm asiData asiEngine asiTestEngine asiTcl asiUI cmdEngine cmdMisc)
+target_link_libraries(asiTest asiAlgo asiAsm asiData asiEngine asiTestEngine asiTcl asiUI cmdEngine cmdMisc cmdTest)
 
 #------------------------------------------------------------------------------
 # Installation

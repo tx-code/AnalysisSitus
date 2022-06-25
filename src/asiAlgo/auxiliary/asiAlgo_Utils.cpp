@@ -2286,9 +2286,21 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString&,
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::WriteStl(const Handle(Poly_Triangulation)& triangulation,
-                             const TCollection_AsciiString&    filename)
+                             const TCollection_AsciiString&    filename,
+                             const bool                        isBinary)
 {
-  return RWStl::WriteAscii(triangulation, filename);
+  bool isOK = true;
+
+  if ( isBinary )
+  {
+    isOK = RWStl::WriteBinary(triangulation, filename);
+  }
+  else
+  {
+    isOK = RWStl::WriteAscii(triangulation, filename);
+  }
+
+  return isOK;
 }
 
 //-----------------------------------------------------------------------------

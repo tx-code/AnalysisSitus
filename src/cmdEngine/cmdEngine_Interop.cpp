@@ -586,6 +586,8 @@ int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
 {
+  const bool isBinary = interp->HasKeyword(argc, argv, "binary");
+
   // Get Part Node to access shape.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -624,7 +626,7 @@ int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
 
   // Save mesh to STL file.
   if ( !asiAlgo_Utils::WriteStl( meshMerge.GetResultPoly()->GetTriangulation(),
-                                 filename.c_str() ) )
+                                 filename.c_str(), isBinary ) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save facets to STL file '%1'."
                                                         << filename);
@@ -1033,7 +1035,7 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-facets-stl",
     //
-    "save-facets-stl -filename <filename>\n"
+    "save-facets-stl -filename <filename> [-binary]\n"
     "\t Exports the part shape's facets to STL file <filename>.",
     //
     __FILE__, group, ENGINE_SaveFacetsStl);

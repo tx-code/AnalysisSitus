@@ -964,10 +964,14 @@ namespace asiAlgo_Utils
   //! Writes triangulation to STL file.
   //! \param[in] triangulation triangulation to write.
   //! \param[in] filename      target filename.
+  //! \param[in] isBinary      indicator showing whether to save
+  //!                          the mesh in Ascii format or binary
+  //!                          format.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     WriteStl(const Handle(Poly_Triangulation)& triangulation,
-             const TCollection_AsciiString&    filename);
+             const TCollection_AsciiString&    filename,
+             const bool                        isBinary = false);
 
   //! Writes triangulation to PLY file.
   //! \param[in] triangulation triangulation to write.
