@@ -77,6 +77,12 @@ public:
   asiUI_EXPORT asiUI_StatusBar*
     GetStatusBar() const;
 
+  asiUI_EXPORT virtual const TCollection_AsciiString
+    CurrentState() const
+  {
+    return "Debug your B - Rep...";
+  }
+
 private:
 
   //! Status bar widget.

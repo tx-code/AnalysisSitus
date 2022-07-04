@@ -95,6 +95,7 @@ public slots:
   asiUI_EXPORT void onFitAll();
   asiUI_EXPORT void onSubShapesPicked();
   asiUI_EXPORT void onWhateverPicked();
+  asiUI_EXPORT void onSubShapesHighlighted();
   asiUI_EXPORT void onFindFace();
   asiUI_EXPORT void onFindEdge();
   asiUI_EXPORT void onFindVertex();
@@ -118,6 +119,9 @@ signals:
   void facePicked     (asiVisu_PickerResult*);
   void edgePicked     (asiVisu_PickerResult*);
   void vertexPicked   (asiVisu_PickerResult*);
+  void faceHighlighted(asiVisu_PickerResult*);
+  void edgeHighlighted(asiVisu_PickerResult*);
+  void vertexHighlighted(asiVisu_PickerResult*);
 
 protected:
 

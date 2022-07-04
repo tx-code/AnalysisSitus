@@ -76,6 +76,10 @@ public:
   //! \param textMsg [in] text to show as information label.
   virtual void
     SetInfoMessage(const TCollection_AsciiString& textMsg) = 0;
+
+  //! Current state message.
+  virtual const TCollection_AsciiString
+    CurrentState() const = 0;
 };
 
 #endif

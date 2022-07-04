@@ -367,6 +367,16 @@ void exe_MainWindow::createDockWindows()
     cf->ParamEditor = new asiUI_ParamEditorImpl(Widgets.wParamEditor);
     cf->ObjectBrowser->SetParameterEditor(cf->ParamEditor);
   }
+
+  // Create status bar.
+  Handle(asiUI_StatusBarImpl)
+    statusBar = new asiUI_StatusBarImpl(new asiUI_StatusBar);
+  //
+  this->setStatusBar(statusBar->GetStatusBar());
+  //
+  cf->StatusBar = statusBar;
+  cf->StatusBar->SetStatusText(cf->StatusBar->CurrentState());
+
   //
   this->tabifyDockWidget(pDockDomain, pDockParamEditor);
 
@@ -401,7 +411,8 @@ void exe_MainWindow::createDockWindows()
                                                        Widgets.wBrowser,
                                                        cf->Model,
                                                        cf->Progress,
-                                                       cf->Plotter);
+                                                       cf->Plotter,
+                                                       cf->StatusBar);
 
   // Listener for domain viewer.
   Listeners.pViewerDomain = new asiUI_ViewerDomainListener(Widgets.wViewerPart,
@@ -445,15 +456,6 @@ void exe_MainWindow::createDockWindows()
     //
     this->addDockWidget(Qt::BottomDockWidgetArea, pDockLogWindow);
   }
-
-  // Create status bar.
-  Handle(asiUI_StatusBarImpl)
-    statusBar = new asiUI_StatusBarImpl(new asiUI_StatusBar);
-  //
-  this->setStatusBar( statusBar->GetStatusBar() );
-  //
-  cf->StatusBar = statusBar;
-  cf->StatusBar->SetStatusText("Debug your B-Rep...");
 
   // Initialize and connect progress listener.
   cf->Logger           = new asiUI_Logger(Widgets.wLogger);

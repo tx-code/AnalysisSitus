@@ -35,6 +35,7 @@
 #include <asiUI_BgColorDialog.h>
 #include <asiUI_Common.h>
 #include <asiUI_DialogDump.h>
+#include <asiUI_IStatusBar.h>
 
 // asiAlgo includes
 #include <asiAlgo_CheckDihedralAngle.h>
@@ -188,7 +189,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
                                                    asiUI_ObjectBrowser*           wBrowser,
                                                    const Handle(asiEngine_Model)& model,
                                                    ActAPI_ProgressEntry           progress,
-                                                   ActAPI_PlotterEntry            plotter)
+                                                   ActAPI_PlotterEntry            plotter,
+                                                   Handle(asiUI_IStatusBar)       statusBar)
 //
 : asiUI_Viewer3dListener  (wViewerPart, model, progress, plotter),
   m_wViewerDomain         (wViewerDomain),
@@ -208,7 +210,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pGetAsBLOB            (nullptr),
   m_pMeasureLength        (nullptr),
   m_pGetSpannedAngle      (nullptr),
-  m_pCheckThickness       (nullptr)
+  m_pCheckThickness       (nullptr),
+  m_statusBar             (statusBar)
 {}
 
 //-----------------------------------------------------------------------------
@@ -230,6 +233,15 @@ void asiUI_ViewerPartListener::Connect()
   //
   connect( m_pViewer, SIGNAL ( vertexPicked(asiVisu_PickerResult*) ),
            this,      SLOT   ( onVertexPicked(asiVisu_PickerResult*) ) );
+  //
+  connect( m_pViewer, SIGNAL ( faceHighlighted(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onFaceHighlighted(asiVisu_PickerResult*) ) );
+  //
+  connect( m_pViewer, SIGNAL ( edgeHighlighted(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onEdgeHighlighted(asiVisu_PickerResult*) ) );
+  //
+  connect( m_pViewer, SIGNAL ( vertexHighlighted(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onVertexHighlighted(asiVisu_PickerResult*) ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -410,6 +422,109 @@ void asiUI_ViewerPartListener::onVertexPicked(asiVisu_PickerResult* pickRes)
                                              geom_n->GetNaming() );
   //
   m_progress.SendLogMessage( LogInfo(Normal) << msg.ToCString() );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
+{
+  // Check if part is highlighted
+  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
+  if (pickRes->GetPickedActor() && !nodeInfo)
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+  TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
+  if (gids.IsEmpty())
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
+  const TopTools_IndexedMapOfShape& allFaces = geom_n->GetAAG()->GetMapOfFaces();
+  if (m_statusBar)
+  {
+    for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
+    {
+      const TopoDS_Shape& subShape = allSubShapes(gid.Key());
+      const int pedigreeId = allFaces.FindIndex(subShape);
+      m_statusBar->SetStatusText(TCollection_AsciiString("Face ID:") + pedigreeId + " Global ID:" + gid.Key());
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
+{
+  // Check if part is highlighted
+  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
+  if (pickRes->GetPickedActor() && !nodeInfo)
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+  TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
+  if (gids.IsEmpty())
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
+  const TopTools_IndexedMapOfShape& allEdges = geom_n->GetAAG()->RequestMapOfEdges();
+  if (m_statusBar)
+  {
+    for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
+    {
+      const TopoDS_Shape& subShape = allSubShapes(gid.Key());
+      const int pedigreeId = allEdges.FindIndex(subShape);
+      m_statusBar->SetStatusText(TCollection_AsciiString("Edge ID:") + pedigreeId + " Global ID:" + gid.Key());
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes)
+{
+  // Check if part is highlighted
+  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
+  if (pickRes->GetPickedActor() && !nodeInfo)
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+  TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
+  if (gids.IsEmpty())
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
+  // Get map of vertices.
+  const TopTools_IndexedMapOfShape& allVertices = geom_n->GetAAG()->RequestMapOfVertices();
+  if (m_statusBar)
+  {
+    for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
+    {
+      const TopoDS_Shape& subShape = allSubShapes(gid.Key());
+      const int pedigreeId = allVertices.FindIndex(subShape);
+      m_statusBar->SetStatusText(TCollection_AsciiString("Vertex ID:") + pedigreeId + " Global ID:" + gid.Key());
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------

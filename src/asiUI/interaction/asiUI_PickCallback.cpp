@@ -115,4 +115,6 @@ void asiUI_PickCallback::Execute(vtkObject*    vtkNotUsed(pCaller),
   // Notify observers
   if ( eventId == EVENT_PICK_DEFAULT )
     emit picked();
+  else if (eventId == EVENT_DETECT_DEFAULT)
+    emit highlighted();
 }

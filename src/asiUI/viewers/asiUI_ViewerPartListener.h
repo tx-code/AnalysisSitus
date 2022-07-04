@@ -35,6 +35,7 @@
 #include <asiUI_Viewer3dListener.h>
 #include <asiUI_ViewerDomain.h>
 #include <asiUI_ViewerHost.h>
+#include <asiUI_IStatusBar.h>
 #include <asiUI_ViewerPart.h>
 
 // Active Data includes
@@ -55,13 +56,15 @@ public:
   //! \param[in] model         Data Model instance.
   //! \param[in] progress      progress notifier.
   //! \param[in] plotter       imperative plotter.
+  //! \param[in] statusBar     status bar string.
   asiUI_ViewerPartListener(asiUI_ViewerPart*              wViewerPart,
                            asiUI_ViewerDomain*            wViewerDomain,
                            asiUI_ViewerHost*              wViewerHost,
                            asiUI_ObjectBrowser*           wBrowser,
                            const Handle(asiEngine_Model)& model,
                            ActAPI_ProgressEntry           progress,
-                           ActAPI_PlotterEntry            plotter);
+                           ActAPI_PlotterEntry            plotter,
+                           Handle(asiUI_IStatusBar)       statusBar);
 
   //! Dtor.
   virtual
@@ -90,6 +93,21 @@ protected slots:
   void
     onVertexPicked(asiVisu_PickerResult* pickRes);
 
+  //! Reaction on face highlighting.
+  //! \param[in] pickRes pick result.
+  void
+    onFaceHighlighted(asiVisu_PickerResult* pickRes);
+
+  //! Reaction on edge highlighting.
+  //! \param[in] pickRes pick result.
+  void
+    onEdgeHighlighted(asiVisu_PickerResult* pickRes);
+
+  //! Reaction on vertex highlighting.
+  //! \param[in] pickRes pick result.
+  void
+    onVertexHighlighted(asiVisu_PickerResult* pickRes);
+
 protected:
 
   //! Populates the passed Qt menu with actions specific to Part viewer.
@@ -107,6 +125,7 @@ protected:
   asiUI_ViewerDomain*  m_wViewerDomain; //!< Domain viewer.
   asiUI_ViewerHost*    m_wViewerHost;   //!< Host viewer.
   asiUI_ObjectBrowser* m_wBrowser;      //!< Object browser.
+  Handle(asiUI_IStatusBar) m_statusBar; //!< Status bar string.
 
   //! Custom actions.
   QAction* m_pSaveBREPAction;

@@ -103,6 +103,7 @@ public:
 signals:
 
   void picked();
+  void highlighted();
 
 protected:
 
