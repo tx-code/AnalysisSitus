@@ -57,10 +57,11 @@ public:
   //! IDs for the underlying Parameters.
   enum ParamId
   {
-  //-----------------//
-    PID_Name,        //!< Name of the Node.
-    PID_PrsHlr,      //!< Indicates whether HLR is enabled in the active renderer.
-  //-----------------//
+  //------------------------//
+    PID_Name,               //!< Name of the Node.
+    PID_PrsHlr,             //!< Indicates whether HLR is enabled in the active renderer.
+    PID_IsCoincidentTopo,   //!< Indicates whether to resolve coincident topology in 3D.
+  //------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -93,6 +94,15 @@ public:
   //! \param[in] isHlr the Boolean value to set.
   asiData_EXPORT void
     SetHlr(const bool isHlr);
+
+  //! Enables/disables resolving the coincident topology in VTK mapper.
+  //! \param[in] on value to set.
+  asiData_EXPORT void
+    SetResolveCoincidentTopo(const bool on);
+
+  //! \return true if coincident topology in 3D is resolved.
+  asiData_EXPORT bool
+    IsResolveCoincidentTopo() const;
 
 // Initialization:
 public:

@@ -37,6 +37,9 @@
 #include <asiVisu_PartPipeline.h>
 #include <asiVisu_ShapeDisplayMode.h>
 
+// asiData includes
+#include <asiData_RootNode.h>
+
 // VTK includes
 #include <vtkCellData.h>
 #include <vtkCellTreeLocator.h>
@@ -351,12 +354,15 @@ void asiVisu_PartPrs::beforeUpdatePipelines() const
   Handle(asiData_PartNode)
     N = Handle(asiData_PartNode)::DownCast( this->GetNode() );
 
+  Handle(asiData_RootNode) rootNode =
+    Handle(asiData_RootNode)::DownCast( N->GetParentNode() );
+
   /* Actualize display mode */
 
   this->SetDisplayMode( (asiVisu_ShapeDisplayMode) N->GetDisplayMode(),
                          N->HasBackface(),
                          N->IsShowFaultyFaces(),
-                         N->IsResolveCoincidentTopo(),
+                         rootNode->IsResolveCoincidentTopo(),
                          N->GetRenderEdgesAsTubes() );
 }
 

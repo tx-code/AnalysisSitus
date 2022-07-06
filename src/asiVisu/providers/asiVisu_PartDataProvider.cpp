@@ -34,6 +34,9 @@
 // asiVisu includes
 #include <asiVisu_ShapeColorSourceMeta.h>
 
+// asiData includes
+#include <asiData_RootNode.h>
+
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
@@ -207,10 +210,14 @@ Handle(ActAPI_HParameterList) asiVisu_PartDataProvider::translationSources() con
 {
   ActParamStream params;
 
+  Handle(asiData_RootNode) rootNode =
+    Handle(asiData_RootNode)::DownCast(m_node->GetParentNode());
+
   params << m_node->Parameter(asiData_PartNode::PID_Geometry)
          << m_node->Parameter(asiData_PartNode::PID_AAG)
          << m_node->Parameter(asiData_PartNode::PID_TessLinDefl)
          << m_node->Parameter(asiData_PartNode::PID_TessAngDefl)
+         << rootNode->Parameter(asiData_RootNode::PID_IsCoincidentTopo)
          ;
 
   return params.List;

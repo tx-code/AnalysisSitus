@@ -75,7 +75,6 @@ asiData_PartNode::asiData_PartNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,          PID_HasVertices);
   REGISTER_PARAMETER(Bool,          PID_HasBackface);
   REGISTER_PARAMETER(Bool,          PID_ShowFaultyFaces);
-  REGISTER_PARAMETER(Bool,          PID_IsCoincidentTopo);
   REGISTER_PARAMETER(Bool,          PID_RenderEdgesAsTubes);
   //
   REGISTER_PARAMETER(ReferenceList, PID_Features);
@@ -118,7 +117,6 @@ void asiData_PartNode::ResetToDefault(const bool resetNaming)
   this->SetHasVertices           (false);
   this->SetHasBackface           (true);
   this->SetShowFaultyFaces       (true);
-  this->SetResolveCoincidentTopo (false);
   this->SetRenderEdgesAsTubes    (true);
   this->SetOriginalUnits         ("mm"); // Default.
 
@@ -162,7 +160,6 @@ void asiData_PartNode::Init(const bool resetNaming)
   this->InitParameter(PID_HasVertices,        "Show vertices",      "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_HasBackface,        "Show backface",      "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_ShowFaultyFaces,    "Show faulty faces",  "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCoincidentTopo,   "Resolve coin. topo", "",               ParameterFlag_IsVisible, true);
   this->InitParameter(PID_RenderEdgesAsTubes, "Edges as tubes",     "",               ParameterFlag_IsVisible, true);
 }
 
@@ -580,19 +577,6 @@ void asiData_PartNode::SetShowFaultyFaces(const bool on)
 bool asiData_PartNode::IsShowFaultyFaces() const
 {
   return ActParamTool::AsBool( this->Parameter(PID_ShowFaultyFaces) )->GetValue();
-}
-
-//! Enables/disables resolving the coincident topology in VTK mapper.
-//! \param[in] on value to set.
-void asiData_PartNode::SetResolveCoincidentTopo(const bool on)
-{
-  ActParamTool::AsBool( this->Parameter(PID_IsCoincidentTopo) )->SetValue(on);
-}
-
-//! \return true/false.
-bool asiData_PartNode::IsResolveCoincidentTopo() const
-{
-  return ActParamTool::AsBool( this->Parameter(PID_IsCoincidentTopo) )->GetValue();
 }
 
 //! Sets a Boolean flag indicating whether to use shaders for rendering CAD edges.

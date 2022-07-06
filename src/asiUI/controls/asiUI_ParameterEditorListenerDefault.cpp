@@ -201,5 +201,18 @@ void asiUI_ParameterEditorListenerDefault::afterParameterChanged(const Handle(Ac
         renderer->SetUseHiddenLineRemoval(isHlrOn);
       }
     }
+    else if ( pid == asiData_RootNode::PID_IsCoincidentTopo)
+    {
+      if ( !m_cf.IsNull() && !m_cf->Model.IsNull() )
+      {
+        Handle(ActAPI_HNodeMap) affectedNodes = new ActAPI_HNodeMap;
+
+        Handle(asiData_PartNode) partNode = m_cf->Model->GetPartNode();
+        if ( !partNode.IsNull() && partNode->IsWellFormed() )
+          affectedNodes->Add(partNode);
+
+        m_cf->ActualizeNodes(affectedNodes);
+      }
+    }
   }
 }

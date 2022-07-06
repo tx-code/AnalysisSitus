@@ -40,6 +40,7 @@ asiData_RootNode::asiData_RootNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name, PID_Name);
   REGISTER_PARAMETER(Bool, PID_PrsHlr);
+  REGISTER_PARAMETER(Bool, PID_IsCoincidentTopo);
 }
 
 //-----------------------------------------------------------------------------
@@ -53,11 +54,13 @@ Handle(ActAPI_INode) asiData_RootNode::Instance()
 
 void asiData_RootNode::Init()
 {
-  this->InitParameter(PID_Name,   "Name",         "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_PrsHlr, "Hidden lines", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,             "Name",               "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PrsHlr,           "Hidden lines",       "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCoincidentTopo, "Resolve coin. topo", "", ParameterFlag_IsVisible, true);
 
   // Set defaults.
   this->SetHlr(false);
+  this->SetResolveCoincidentTopo(false);
 }
 
 //-----------------------------------------------------------------------------
@@ -86,4 +89,18 @@ bool asiData_RootNode::IsHlr() const
 void asiData_RootNode::SetHlr(const bool isHlr)
 {
   ActParamTool::AsBool( this->Parameter(PID_PrsHlr) )->SetValue(isHlr);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_RootNode::SetResolveCoincidentTopo(const bool on)
+{
+  ActParamTool::AsBool(this->Parameter(PID_IsCoincidentTopo))->SetValue(on);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_RootNode::IsResolveCoincidentTopo() const
+{
+  return ActParamTool::AsBool(this->Parameter(PID_IsCoincidentTopo))->GetValue();
 }
