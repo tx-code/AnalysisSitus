@@ -63,41 +63,33 @@ public:
            const Handle(ActAPI_INode)&       parent);
 
   //! Creates Data Node represening curvature combs.
-  //! \param[in] parent      parent Data Node representing a curve.
-  //! \param[in] scaleFactor scale factor.
-  //! \param[in] points      discretization points.
-  //! \param[in] pointsOk    statuses of discretization points.
-  //! \param[in] params      discretization parameters.
-  //! \param[in] curvatures  curvatures.
-  //! \param[in] combs       curvature combs.
+  //! \param[in] partNode       part node.
+  //! \param[in] parent         parent Data Node representing a curve.
+  //! \param[in] scaleFactor    scale factor.
+  //! \param[in] amplFactor     amplification factor.
+  //! \param[in] numberOfPoints number of discretization points.
   //! \return newly constructed Curvature Combs Node.
   asiEngine_EXPORT Handle(asiData_CurvatureCombsNode)
-    CreateCurvatureCombs(const Handle(asiData_CurveNode)& parent,
+    CreateCurvatureCombs(const Handle(asiData_PartNode)&  partNode,
+                         const Handle(asiData_CurveNode)& parent,
                          const double                     scaleFactor,
-                         const std::vector<gp_Pnt>&       points,
-                         const std::vector<bool>&         pointsOk,
-                         const std::vector<double>&       params,
-                         const std::vector<double>&       curvatures,
-                         const std::vector<gp_Vec>&       combs);
+                         const double                     amplFactor,
+                         const int                        numberOfPoints);
 
   //! Creates Data Node represening curvature combs if it does not exist.
   //! If such Node already exists, it is updated.
-  //! \param[in] parent      parent Data Node representing a curve.
-  //! \param[in] scaleFactor scale factor.
-  //! \param[in] points      discretization points.
-  //! \param[in] pointsOk    statuses of discretization points.
-  //! \param[in] params      discretization parameters.
-  //! \param[in] curvatures  curvatures.
-  //! \param[in] combs       curvature combs.
+  //! \param[in] partNode       part node.
+  //! \param[in] parent         parent Data Node representing a curve.
+  //! \param[in] scaleFactor    scale factor.
+  //! \param[in] amplFactor     amplification factor.
+  //! \param[in] numberOfPoints number of discretization points.
   //! \return newly constructed Curvature Combs Node.
   asiEngine_EXPORT Handle(asiData_CurvatureCombsNode)
-    CreateOrUpdateCurvatureCombs(const Handle(asiData_CurveNode)& parent,
+    CreateOrUpdateCurvatureCombs(const Handle(asiData_PartNode)&  partNode,
+                                 const Handle(asiData_CurveNode)& parent,
                                  const double                     scaleFactor,
-                                 const std::vector<gp_Pnt>&       points,
-                                 const std::vector<bool>&         pointsOk,
-                                 const std::vector<double>&       params,
-                                 const std::vector<double>&       curvatures,
-                                 const std::vector<gp_Vec>&       combs);
+                                 const double                     amplFactor,
+                                 const int                        numberOfPoints);
 
   //! Deletes all sub-Nodes for the given Curve Node.
   //! \param[in] parent parent Curve Node to clean the underlying objects for.

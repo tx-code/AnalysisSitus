@@ -31,6 +31,9 @@
 // Own include
 #include <asiEngine_Curve.h>
 
+// Engine includes
+#include <asiEngine_CurvatureCombsFunc.h>
+
 //-----------------------------------------------------------------------------
 
 Handle(asiData_CurveNode)
@@ -55,13 +58,11 @@ Handle(asiData_CurveNode)
 //-----------------------------------------------------------------------------
 
 Handle(asiData_CurvatureCombsNode)
-  asiEngine_Curve::CreateCurvatureCombs(const Handle(asiData_CurveNode)& parent,
+  asiEngine_Curve::CreateCurvatureCombs(const Handle(asiData_PartNode)&  partNode,
+                                        const Handle(asiData_CurveNode)& parent,
                                         const double                     scaleFactor,
-                                        const std::vector<gp_Pnt>&       points,
-                                        const std::vector<bool>&         pointsOk,
-                                        const std::vector<double>&       params,
-                                        const std::vector<double>&       curvatures,
-                                        const std::vector<gp_Vec>&       combs)
+                                        const double                     amplFactor,
+                                        const int                        numberOfPoints)
 {
   Handle(ActAPI_INode) node = asiData_CurvatureCombsNode::Instance();
   m_model->GetCurvatureCombsPartition()->AddNode(node);
@@ -72,13 +73,24 @@ Handle(asiData_CurvatureCombsNode)
   combs_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
   combs_n->SetName("Curvature combs");
   combs_n->SetScaleFactor(scaleFactor);
-  combs_n->SetPoints(points);
-  combs_n->SetPointsStatuses(pointsOk);
-  combs_n->SetParameters(params);
-  combs_n->SetCurvatures(curvatures);
-  combs_n->SetCombs(combs);
+  combs_n->SetNbOfPoints(numberOfPoints);
+  combs_n->SetAmplificationFactor(amplFactor);
   //
   combs_n->ConnectReference(asiData_CurvatureCombsNode::PID_RefCurve, parent);
+
+  // Attach tree function.
+  node->ConnectTreeFunction(asiData_CurvatureCombsNode::PID_CurvatureCombsFunc,
+                            asiEngine_CurvatureCombsFunc::GUID(),
+                            ActParamStream() << node->Parameter(asiData_CurvatureCombsNode::PID_NumPoints)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_ScaleFactor)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_AmplificationFactor)
+                                             << partNode->Parameter(asiData_PartNode::PID_AAG)
+                                             << parent->Parameter(asiData_CurveNode::PID_SelectedEdge),
+                            ActParamStream() << node->Parameter(asiData_CurvatureCombsNode::PID_Points)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_PointsStatuses)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_Parameters)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_Curvatures)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_Combs));
 
   // Set as child
   parent->AddChildNode(combs_n);
@@ -89,13 +101,11 @@ Handle(asiData_CurvatureCombsNode)
 //-----------------------------------------------------------------------------
 
 Handle(asiData_CurvatureCombsNode)
-  asiEngine_Curve::CreateOrUpdateCurvatureCombs(const Handle(asiData_CurveNode)& parent,
+  asiEngine_Curve::CreateOrUpdateCurvatureCombs(const Handle(asiData_PartNode)&  partNode,
+                                                const Handle(asiData_CurveNode)& parent,
                                                 const double                     scaleFactor,
-                                                const std::vector<gp_Pnt>&       points,
-                                                const std::vector<bool>&         pointsOk,
-                                                const std::vector<double>&       params,
-                                                const std::vector<double>&       curvatures,
-                                                const std::vector<gp_Vec>&       combs)
+                                                const double                     amplFactor,
+                                                const int                        numberOfPoints)
 {
   Handle(ActAPI_IPartition)
     combsPartition = m_model->GetCurvatureCombsPartition();
@@ -104,13 +114,8 @@ Handle(asiData_CurvatureCombsNode)
   //
   if ( node.IsNull() )
   {
-    node = this->CreateCurvatureCombs(parent,
-                                      scaleFactor,
-                                      points,
-                                      pointsOk,
-                                      params,
-                                      curvatures,
-                                      combs);
+    node = this->CreateCurvatureCombs(partNode, parent, scaleFactor,
+                                      amplFactor, numberOfPoints);
   }
   else
   {
@@ -119,11 +124,8 @@ Handle(asiData_CurvatureCombsNode)
 
     // Update
     combs_n->SetScaleFactor(scaleFactor);
-    combs_n->SetPoints(points);
-    combs_n->SetPointsStatuses(pointsOk);
-    combs_n->SetParameters(params);
-    combs_n->SetCurvatures(curvatures);
-    combs_n->SetCombs(combs);
+    combs_n->SetNbOfPoints(numberOfPoints);
+    combs_n->SetAmplificationFactor(amplFactor);
   }
 
   return Handle(asiData_CurvatureCombsNode)::DownCast(node);

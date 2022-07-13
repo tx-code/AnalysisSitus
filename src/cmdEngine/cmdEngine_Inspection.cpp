@@ -676,9 +676,6 @@ int ENGINE_CheckCurvature(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
     return TCL_OK;
   }
-  //
-  double f, l;
-  Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
 
   /* ==========================
    *  Evaluate curvature combs
@@ -689,38 +686,16 @@ int ENGINE_CheckCurvature(const Handle(asiTcl_Interp)& interp,
   //
   Handle(asiData_CurvatureCombsNode) combsNode;
   //
-  std::vector<gp_Pnt> points;
-  std::vector<double> params;
-  std::vector<double> curvatures;
-  std::vector<gp_Vec> combs;
-  std::vector<bool>   combsOk;
-  //
   cmdEngine::model->OpenCommand();
   {
-    // Calculate curvature field.
-    if ( !asiAlgo_Utils::CalculateCurvatureCombs(curve,
-                                                 f,
-                                                 l,
-                                                 numPts,
-                                                 amplFactor,
-                                                 points,
-                                                 params,
-                                                 curvatures,
-                                                 combs,
-                                                 combsOk) )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot calculate curvature field.");
-      return TCL_OK;
-    }
-
     // Create persistent object.
-    combsNode = CurveAPI.CreateOrUpdateCurvatureCombs(curveNode,
+    combsNode = CurveAPI.CreateOrUpdateCurvatureCombs(partNode,
+                                                      curveNode,
                                                       scaleFactor,
-                                                      points,
-                                                      combsOk,
-                                                      params,
-                                                      curvatures,
-                                                      combs);
+                                                      amplFactor,
+                                                      numPts);
+
+    cmdEngine::model->FuncExecuteAll();
   }
   cmdEngine::model->CommitCommand();
 
@@ -742,6 +717,10 @@ int ENGINE_CheckCurvature(const Handle(asiTcl_Interp)& interp,
       cPlot = new asiUI_Plot2d( interp->GetProgress(),
                                 interp->GetPlotter() );
     //
+    std::vector<double> params;
+    std::vector<double> curvatures;
+    combsNode->GetParameters(params);
+    combsNode->GetCurvatures(curvatures);
     cPlot->Render(params, curvatures, "Parameter", "Curvature", "Curvature Plot");
   }
 

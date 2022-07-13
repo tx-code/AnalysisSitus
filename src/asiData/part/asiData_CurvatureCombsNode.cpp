@@ -40,14 +40,17 @@
 //! Default constructor. Registers all involved Parameters.
 asiData_CurvatureCombsNode::asiData_CurvatureCombsNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name,      PID_Name);
-  REGISTER_PARAMETER(RealArray, PID_Points);
-  REGISTER_PARAMETER(BoolArray, PID_PointsStatuses);
-  REGISTER_PARAMETER(RealArray, PID_Parameters);
-  REGISTER_PARAMETER(RealArray, PID_Curvatures);
-  REGISTER_PARAMETER(RealArray, PID_Combs);
-  REGISTER_PARAMETER(Reference, PID_RefCurve);
-  REGISTER_PARAMETER(Real,      PID_ScaleFactor);
+  REGISTER_PARAMETER(Name,         PID_Name);
+  REGISTER_PARAMETER(RealArray,    PID_Points);
+  REGISTER_PARAMETER(Int,          PID_NumPoints);
+  REGISTER_PARAMETER(BoolArray,    PID_PointsStatuses);
+  REGISTER_PARAMETER(RealArray,    PID_Parameters);
+  REGISTER_PARAMETER(RealArray,    PID_Curvatures);
+  REGISTER_PARAMETER(RealArray,    PID_Combs);
+  REGISTER_PARAMETER(Reference,    PID_RefCurve);
+  REGISTER_PARAMETER(Real,         PID_ScaleFactor);
+  REGISTER_PARAMETER(Real,         PID_AmplificationFactor);
+  REGISTER_PARAMETER(TreeFunction, PID_CurvatureCombsFunc);
 }
 
 //-----------------------------------------------------------------------------
@@ -66,13 +69,15 @@ Handle(ActAPI_INode) asiData_CurvatureCombsNode::Instance()
 void asiData_CurvatureCombsNode::Init()
 {
   // Initialize Parameters
-  this->InitParameter(PID_Name,           "Name");
-  this->InitParameter(PID_Points,         "Discretization points");
-  this->InitParameter(PID_PointsStatuses, "Statuses of discretization points");
-  this->InitParameter(PID_Parameters,     "Discretization parameters");
-  this->InitParameter(PID_Curvatures,     "Curvatures");
-  this->InitParameter(PID_Combs,          "Comb vectors");
-  this->InitParameter(PID_ScaleFactor,    "Scale factor");
+  this->InitParameter(PID_Name,                "Name",                              "", 0,                       false);
+  this->InitParameter(PID_Points,              "Discretization points",             "", 0,                       false);
+  this->InitParameter(PID_NumPoints,           "Number of discretization points",   "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PointsStatuses,      "Statuses of discretization points", "", 0,                       false);
+  this->InitParameter(PID_Parameters,          "Discretization parameters",         "", 0,                       false);
+  this->InitParameter(PID_Curvatures,          "Curvatures",                        "", 0,                       false);
+  this->InitParameter(PID_Combs,               "Comb vectors",                      "", 0,                       false);
+  this->InitParameter(PID_ScaleFactor,         "Scale factor",                      "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_AmplificationFactor, "Amplification factor",              "", ParameterFlag_IsVisible, true);
 
   // Initialize arrays
   ActParamTool::AsRealArray( this->Parameter(PID_Points) )         ->SetArray(nullptr);
@@ -81,8 +86,11 @@ void asiData_CurvatureCombsNode::Init()
   ActParamTool::AsRealArray( this->Parameter(PID_Curvatures) )     ->SetArray(nullptr);
   ActParamTool::AsRealArray( this->Parameter(PID_Combs) )          ->SetArray(nullptr);
 
+  ActParamTool::AsInt( this->Parameter(PID_NumPoints) )->SetValue(0);
+
   // Set default values
   this->SetScaleFactor(1.0);
+  this->SetAmplificationFactor(1.0);
 }
 
 //-----------------------------------------------------------------------------
@@ -119,6 +127,15 @@ void asiData_CurvatureCombsNode::SetPoints(const std::vector<gp_Pnt>& points)
 
   // Store in OCAF
   ActParamTool::AsRealArray( this->Parameter(PID_Points) )->SetArray(coords);
+  if ( !coords.IsNull() )
+  {
+    ActParamTool::AsInt( this->Parameter(PID_NumPoints) )->SetValue(coords->Size());
+  }
+  else
+  {
+    ActParamTool::AsInt( this->Parameter(PID_NumPoints) )->SetValue(0);
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -267,4 +284,32 @@ void asiData_CurvatureCombsNode::SetScaleFactor(const double scaleFactor)
 double asiData_CurvatureCombsNode::GetScaleFactor() const
 {
   return ActParamTool::AsReal( this->Parameter(PID_ScaleFactor) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_CurvatureCombsNode::SetAmplificationFactor(const double amplificationFactor)
+{
+  ActParamTool::AsReal( this->Parameter(PID_AmplificationFactor) )->SetValue(amplificationFactor);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiData_CurvatureCombsNode::GetAmplificationFactor() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_AmplificationFactor) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_CurvatureCombsNode::SetNbOfPoints(const int numberOfPoints)
+{
+  ActParamTool::AsInt(this->Parameter(PID_NumPoints))->SetValue(numberOfPoints);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_CurvatureCombsNode::GetNbOfPoints() const
+{
+  return ActParamTool::AsInt(this->Parameter(PID_NumPoints))->GetValue();
 }

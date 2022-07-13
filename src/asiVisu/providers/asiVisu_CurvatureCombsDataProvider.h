@@ -146,6 +146,20 @@ public:
     m_combsNode->GetCombs(combs);
   }
 
+  //! Returns amplification factor.
+  //! \param[out] amplificationFactor amplification factor.
+  void GetAmplificationFactor(double& amplificationFactor)
+  {
+    amplificationFactor = m_combsNode->GetAmplificationFactor();
+  }
+
+  //! Returns number of points.
+  //! \param[out] nbPoints number of points.
+  void GetNbOfPoints(int& nbPoints)
+  {
+    nbPoints = m_combsNode->GetNbOfPoints();
+  }
+
 public:
 
   //! Returns associated Node ID.
@@ -168,12 +182,14 @@ protected:
 
     out << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_Combs)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_Points)
+        << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_NumPoints)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_PointsStatuses)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_Parameters)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_Curvatures)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_Combs)
         << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_RefCurve)
-        << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_ScaleFactor);
+        << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_ScaleFactor)
+        << m_combsNode->Parameter(asiData_CurvatureCombsNode::PID_AmplificationFactor);
 
     return out.List;
   }

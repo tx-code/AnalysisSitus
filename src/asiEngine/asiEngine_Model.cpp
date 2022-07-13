@@ -37,6 +37,7 @@
 #include <asiEngine_BuildPatchFunc.h>
 #include <asiEngine_CheckClearanceFunc.h>
 #include <asiEngine_CheckThicknessFunc.h>
+#include <asiEngine_CurvatureCombsFunc.h>
 #include <asiEngine_Curve.h>
 #include <asiEngine_Features.h>
 #include <asiEngine_IV.h>
@@ -397,6 +398,7 @@ void asiEngine_Model::initFunctionDrivers()
   REGISTER_TREE_FUNCTION(asiEngine_BuildPatchFunc);
   REGISTER_TREE_FUNCTION(asiEngine_CheckThicknessFunc);
   REGISTER_TREE_FUNCTION(asiEngine_CheckClearanceFunc);
+  REGISTER_TREE_FUNCTION(asiEngine_CurvatureCombsFunc);
   REGISTER_TREE_FUNCTION(asiEngine_SmoothenCornersFunc);
   REGISTER_TREE_FUNCTION(asiEngine_SmoothenPatchesFunc);
 

@@ -1006,9 +1006,6 @@ void asiUI_ControlsAnalysis::onEdgeCurvature()
     m_notifier.SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
     return;
   }
-  //
-  TopoDS_Shape                      partShape = partNode->GetShape();
-  const TopTools_IndexedMapOfShape& subShapes = partNode->GetAAG()->RequestMapOfSubShapes();
 
   // Curve Node is expected.
   Handle(asiData_CurveNode) curveNode = partNode->GetCurveRepresentation();
@@ -1018,28 +1015,6 @@ void asiUI_ControlsAnalysis::onEdgeCurvature()
     m_notifier.SendLogMessage(LogErr(Normal) << "Curve Node is null or ill-defined.");
     return;
   }
-
-  // Get ID of the selected edge.
-  const int edgeIdx = curveNode->GetSelectedEdge();
-  //
-  if ( edgeIdx <= 0 )
-  {
-    m_notifier.SendLogMessage(LogErr(Normal) << "Please, select edge first.");
-    return;
-  }
-
-  // Get host curve of the selected edge.
-  const TopoDS_Shape& edgeShape = subShapes(edgeIdx);
-  //
-  if ( edgeShape.ShapeType() != TopAbs_EDGE )
-  {
-    m_notifier.SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
-    return;
-  }
-  //
-  double f, l;
-  Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
-
   /* ==========================
    *  Evaluate curvature combs
    * ========================== */
@@ -1049,38 +1024,16 @@ void asiUI_ControlsAnalysis::onEdgeCurvature()
   //
   Handle(asiData_CurvatureCombsNode) combsNode;
   //
-  std::vector<gp_Pnt> points;
-  std::vector<double> params;
-  std::vector<double> curvatures;
-  std::vector<gp_Vec> combs;
-  std::vector<bool>   combsOk;
-  //
   m_model->OpenCommand();
   {
-    // Calculate curvature field.
-    if ( !asiAlgo_Utils::CalculateCurvatureCombs(curve,
-                                                 f,
-                                                 l,
-                                                 numPts,
-                                                 amplFactor,
-                                                 points,
-                                                 params,
-                                                 curvatures,
-                                                 combs,
-                                                 combsOk) )
-    {
-      m_notifier.SendLogMessage(LogErr(Normal) << "Cannot calculate curvature field.");
-      return;
-    }
-
     // Create persistent object.
-    combsNode = CurveAPI.CreateOrUpdateCurvatureCombs(curveNode,
+    combsNode = CurveAPI.CreateOrUpdateCurvatureCombs(partNode,
+                                                      curveNode,
                                                       scaleFactor,
-                                                      points,
-                                                      combsOk,
-                                                      params,
-                                                      curvatures,
-                                                      combs);
+                                                      amplFactor,
+                                                      numPts);
+
+    m_model->FuncExecuteAll();
   }
   m_model->CommitCommand();
 

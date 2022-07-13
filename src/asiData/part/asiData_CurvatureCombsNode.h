@@ -54,14 +54,17 @@ public:
   //! IDs for the underlying Parameters.
   enum ParamId
   {
-    PID_Name,           //!< Name of the Node.
-    PID_Points,         //!< Discretization points.
-    PID_PointsStatuses, //!< Statuses of the discretization points.
-    PID_Parameters,     //!< Parameter values corresponding to the discr. points.
-    PID_Curvatures,     //!< Curvature values at discretization points.
-    PID_Combs,          //!< Comb vectors.
-    PID_RefCurve,       //!< Reference to Curve Node.
-    PID_ScaleFactor,    //!< Scale factor.
+    PID_Name,                //!< Name of the Node.
+    PID_Points,              //!< Discretization points.
+    PID_NumPoints,           //!< Number of discretization points.
+    PID_PointsStatuses,      //!< Statuses of the discretization points.
+    PID_Parameters,          //!< Parameter values corresponding to the discr. points.
+    PID_Curvatures,          //!< Curvature values at discretization points.
+    PID_Combs,               //!< Comb vectors.
+    PID_RefCurve,            //!< Reference to Curve Node.
+    PID_ScaleFactor,         //!< Scale factor.
+    PID_AmplificationFactor, //!< Amplification factor.
+    PID_CurvatureCombsFunc,  //!< Tree Function to calculate curvatures.
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -123,6 +126,18 @@ public:
 
   asiData_EXPORT double
     GetScaleFactor() const;
+
+  asiData_EXPORT void
+    SetAmplificationFactor(const double amplificationFactor);
+
+  asiData_EXPORT double
+    GetAmplificationFactor() const;
+
+  asiData_EXPORT void
+    SetNbOfPoints(const int numberOfPoints);
+
+  asiData_EXPORT int
+    GetNbOfPoints() const;
 
 public:
 
