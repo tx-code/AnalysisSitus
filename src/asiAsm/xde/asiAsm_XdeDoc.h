@@ -70,8 +70,6 @@ class PartRepr;
 //! from within application.
 class Doc : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(Doc, Standard_Transient)
 
@@ -776,6 +774,10 @@ public:
   asiAsm_EXPORT bool
     AutoColorizePart(const PartId& partId,
                      const bool    force = false);
+
+  //! Cleans up all colors from the document.
+  asiAsm_EXPORT void
+    ResetColors();
 
   //! Updates boundary representation (shape) of the given part. The passed
   //! history is used to update the related metadata (e.g., colors of faces).

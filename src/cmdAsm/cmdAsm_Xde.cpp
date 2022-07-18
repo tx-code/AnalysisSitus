@@ -464,6 +464,45 @@ int ASMXDE_XCompounds(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_ResetColors(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  TIMER_NEW
+  TIMER_GO
+
+  // Clean up colors.
+  xdeDoc->ResetColors();
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-reset-colors")
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ASMXDE_PrintStructure(const Handle(asiTcl_Interp)& interp,
                           int                          argc,
                           const char**                 argv)
@@ -1494,6 +1533,14 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t not passed).",
     //
     __FILE__, group, ASMXDE_XCompounds);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-reset-colors",
+    //
+    "asm-xde-reset-colors -model <M>\n"
+    "\t Cleans up all colors in the model with the name <M>.",
+    //
+    __FILE__, group, ASMXDE_ResetColors);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-print-structure",

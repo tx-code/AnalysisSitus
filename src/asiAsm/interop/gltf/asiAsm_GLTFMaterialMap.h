@@ -32,7 +32,7 @@ public:
   //! Ctor.
   gltf_EXPORT
     glTFMaterialMap(const TCollection_AsciiString& theFile,
-                     const int                      theDefSamplerId);
+                    const int                      theDefSamplerId);
 
   //! Dtor.
   gltf_EXPORT virtual

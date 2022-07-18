@@ -276,10 +276,10 @@ void glTFWriter::writeBinDataIndices(std::ostream&    binFile,
 
 //-----------------------------------------------------------------------------
 
-bool glTFWriter::Perform(const Handle(glTFIDataSourceProvider)&     dataProvider,
+bool glTFWriter::Perform(const Handle(glTFIDataSourceProvider)&      dataProvider,
                          const TColStd_IndexedDataMapOfStringString& fileInfo)
 {
-  if (dataProvider.IsNull() )
+  if ( dataProvider.IsNull() )
     return false;
 
   m_dataProvider = dataProvider;
@@ -390,9 +390,9 @@ bool glTFWriter::writeBinData()
   m_buffViewNodalColor.ByteStride     = 12;
   m_buffViewNodalColor.Target         = glTFBufferViewTarget_ARRAY_BUFFER;
 
-  m_buffViewIndices.ByteOffset       = 0;
-  m_buffViewIndices.ByteLength       = 0;
-  m_buffViewIndices.Target           = glTFBufferViewTarget_ELEMENT_ARRAY_BUFFER;
+  m_buffViewIndices.ByteOffset        = 0;
+  m_buffViewIndices.ByteLength        = 0;
+  m_buffViewIndices.Target            = glTFBufferViewTarget_ELEMENT_ARRAY_BUFFER;
 
   m_binDataLen64 = 0;
 

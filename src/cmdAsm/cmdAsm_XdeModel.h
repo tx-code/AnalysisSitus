@@ -46,8 +46,6 @@
 //! XDE model in a Tcl session.
 class cmdAsm_XdeModel : public asiTcl_Variable
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(cmdAsm_XdeModel, asiTcl_Variable)
 

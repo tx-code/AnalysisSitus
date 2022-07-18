@@ -35,15 +35,15 @@ using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-glTFMaterialMapBase::glTFMaterialMapBase(const TCollection_AsciiString& theFile)
-: myFileName (theFile),
-  myKeyPrefix ("mat_"),
-  myNbMaterials (0),
-  myIsFailed (false),
+glTFMaterialMapBase::glTFMaterialMapBase(const TCollection_AsciiString& filename)
+: myFileName     (filename),
+  myKeyPrefix    ("mat_"),
+  myNbMaterials  (0),
+  myIsFailed     (false),
   myMatNameAsKey (true)
 {
   TCollection_AsciiString aFileName, aFileExt;
-  OSD_Path::FolderAndFileFromPath(theFile, myFolder, aFileName);
+  OSD_Path::FolderAndFileFromPath(filename, myFolder, aFileName);
   asiAlgo_Utils::Str::FileNameAndExtension(aFileName, myShortFileNameBase, aFileExt);
 }
 

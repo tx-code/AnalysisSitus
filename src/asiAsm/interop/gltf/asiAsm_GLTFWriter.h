@@ -87,9 +87,9 @@ public:
   //! \param[in] plotter  the imperative plotter.
   gltf_EXPORT
     glTFWriter(const TCollection_AsciiString& filename,
-               const bool                            isBinary,
-               ActAPI_ProgressEntry                  progress = nullptr,
-               ActAPI_PlotterEntry                   plotter  = nullptr);
+               const bool                     isBinary,
+               ActAPI_ProgressEntry           progress = nullptr,
+               ActAPI_PlotterEntry            plotter  = nullptr);
 
   //! Dtor.
   gltf_EXPORT virtual
@@ -106,17 +106,17 @@ public:
   //!    "generator": "XXX",
   //!    "version": "2.0",
   //!      "extras": {
-  //!        "Author": "STEP Inspector",
+  //!        "Author": "Analysis Situs",
   //!        "Organization": "YYY"
   //!      }
   //!  }
   //!
-  //! \param[in] dataProvider       the input data source provider feeding glTF writer with scene structure and nodes content.
-  //! \param[in] fileInfo           the map with file metadata to put into glTF header section.
+  //! \param[in] dataProvider the input data source provider feeding glTF writer with scene structure and nodes content.
+  //! \param[in] fileInfo     the map with file metadata to put into glTF header section.
   //!
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
-    Perform(const Handle(glTFIDataSourceProvider)& dataProvider,
+    Perform(const Handle(glTFIDataSourceProvider)&      dataProvider,
             const TColStd_IndexedDataMapOfStringString& fileInfo = TColStd_IndexedDataMapOfStringString());
 
 public:

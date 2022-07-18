@@ -35,7 +35,7 @@ class glTFMaterialMapBase
 public:
 
   //! Main constructor.
-  gltf_EXPORT glTFMaterialMapBase (const TCollection_AsciiString& theFile);
+  gltf_EXPORT glTFMaterialMapBase (const TCollection_AsciiString& filename);
 
   //! Destructor.
   gltf_EXPORT virtual ~glTFMaterialMapBase();

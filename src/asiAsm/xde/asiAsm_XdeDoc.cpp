@@ -1891,6 +1891,24 @@ bool Doc::AutoColorizePart(const PartId& part,
 
 //-----------------------------------------------------------------------------
 
+void Doc::ResetColors()
+{
+  // Get color tool.
+  Handle(XCAFDoc_ColorTool)
+    CT = XCAFDoc_DocumentTool::ColorTool( m_doc->Main() );
+
+  TDF_LabelSequence colorLabs;
+  CT->GetColors(colorLabs);
+
+  for ( TDF_LabelSequence::Iterator lit(colorLabs); lit.More(); lit.Next() )
+  {
+    TDF_Label colorLab = lit.Value();
+    CT->RemoveColor(colorLab);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 void Doc::UpdatePartShape(const TDF_Label&                 partLab,
                           const TopoDS_Shape&              newShape,
                           const Handle(BRepTools_History)& history,
