@@ -229,9 +229,10 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
            shape.IsNull() || shape.ShapeType() != TopAbs_EDGE)
         continue;
 
-      TopoDS_Edge&         e = TopoDS::Edge(shape);
+      TopoDS_Edge&  e = TopoDS::Edge(shape);
       glTFPrimitive edgePrimitive;
-      if (!processEdgePrimitive(e, styles, edgePrimitive) )
+      //
+      if ( !processEdgePrimitive(e, styles, edgePrimitive) )
         continue;
 
       if (!m_meshes.Contains(itM.Key()))
@@ -278,8 +279,8 @@ TCollection_AsciiString glTFXdeDataSourceProvider::readNameAttribute(const Handl
 
 //-----------------------------------------------------------------------------
 
-void glTFXdeDataSourceProvider::readStyles(const TDF_Label&  label,
-                                           t_Shape2Style&    shapeStyles)
+void glTFXdeDataSourceProvider::readStyles(const TDF_Label& label,
+                                           t_Shape2Style&   shapeStyles)
 {
   // Get styles out of OCAF.
   TopLoc_Location                     dummyLoc;
@@ -424,9 +425,10 @@ bool glTFXdeDataSourceProvider::processEdgePrimitive(const TopoDS_Edge&   edge,
                                                      const t_Shape2Style& styles,
                                                      glTFPrimitive&       edgePrimitive)
 {
-  TopLoc_Location                       loc;
-  Handle(Poly_Triangulation)            tri;
-  Handle(Poly_PolygonOnTriangulation)   polygon;
+  TopLoc_Location                     loc;
+  Handle(Poly_Triangulation)          tri;
+  Handle(Poly_PolygonOnTriangulation) polygon;
+  //
   BRep_Tool::PolygonOnTriangulation(edge, polygon, tri, loc);
 
   if (polygon.IsNull())
