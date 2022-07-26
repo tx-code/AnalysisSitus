@@ -38,6 +38,9 @@
 #include <asiUI_DialogCommands.h>
 #include <asiUI_IV.h>
 
+// STL includes
+#include <regex>
+
 //-----------------------------------------------------------------------------
 
 Handle(asiEngine_Model)        cmdEngine::model = nullptr;
@@ -242,6 +245,54 @@ int ENGINE_ShowCommands(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_Help(const Handle(asiTcl_Interp)& interp,
+                int                          argc,
+                const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::string originalCommand = argv[1];
+
+  std::vector<asiTcl_CommandInfo> commands;
+  interp->GetAvailableCommands(commands);
+
+  std::string help = "";
+  std::vector<asiTcl_CommandInfo>::const_iterator itCommands = commands.cbegin();
+  for ( ; itCommands != commands.cend(); ++itCommands )
+  {
+    const asiTcl_CommandInfo& command = *itCommands;
+    const std::string name            = command.Name;
+
+    if ( originalCommand != name )
+    {
+      continue;
+    }
+
+    help = command.Help;
+    break;
+  }
+
+  help = std::regex_replace(help, std::regex("<"), "&lt;");
+  help = std::regex_replace(help, std::regex(">"), "&gt;");
+
+  if ( help.empty() )
+  {
+    std::string message = std::string("Command '") + originalCommand + std::string("' was not found");
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << message.c_str());
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << help.c_str());
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::ClearViewers(const bool repaint)
 {
   if ( cf.IsNull() )
@@ -383,6 +434,13 @@ void cmdEngine::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Opens UI dialog listing all available Tcl commands.",
     //
     __FILE__, group, ENGINE_ShowCommands);
+
+  interp->AddCommand("help",
+    //
+    "help <command>\n"
+    "\t Return the hints for command.",
+    //
+    __FILE__, group, ENGINE_Help);
 
   // Load sub-modules.
   Commands_Data        (interp, data);
