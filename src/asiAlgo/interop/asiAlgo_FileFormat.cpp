@@ -96,6 +96,14 @@ asiAlgo_FileFormat
   {
     return FileFormat_IGES;
   }
+  else if ( ext == "ply" )
+  {
+    return FileFormat_PLY;
+  }
+  else if ( ext == "obj" )
+  {
+    return FileFormat_OBJ;
+  }
   else if ( ext == "xml" )
   {
     return FileFormat_XML;

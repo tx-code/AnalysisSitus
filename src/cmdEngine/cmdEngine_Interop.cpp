@@ -37,6 +37,7 @@
 #include <asiEngine_Part.h>
 #include <asiEngine_STEPReaderOutput.h>
 #include <asiEngine_STEPWriterInput.h>
+#include <asiEngine_Triangulation.h>
 
 // asiVisu includes
 #include <asiVisu_MeshEScalarFilter.h>
@@ -48,6 +49,7 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_FileFormat.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_ReadSTEPWithMeta.h>
 #include <asiAlgo_STEP.h>
@@ -586,6 +588,8 @@ int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
 {
+  const bool isBinary = interp->HasKeyword(argc, argv, "binary");
+
   // Get Part Node to access shape.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -624,7 +628,7 @@ int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
 
   // Save mesh to STL file.
   if ( !asiAlgo_Utils::WriteStl( meshMerge.GetResultPoly()->GetTriangulation(),
-                                 filename.c_str() ) )
+                                 filename.c_str(), isBinary ) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save facets to STL file '%1'."
                                                         << filename);
@@ -634,6 +638,112 @@ int ENGINE_SaveFacetsStl(const Handle(asiTcl_Interp)& interp,
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Saved to '%1'."
                                                        << filename);
   return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SaveSTL(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+#ifndef USE_MOBIUS
+  m_progress.SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
+  return TCL_ERROR;
+#else
+
+  if ( argc != 3 && argc != 4 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  const bool isBinary = interp->HasKeyword(argc, argv, "binary");
+
+  Handle(asiData_TriangulationNode) triangulationNode = cmdEngine::model->GetTriangulationNode();
+  //
+  if ( triangulationNode.IsNull() || !triangulationNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is not initialized.");
+    return TCL_ERROR;
+  }
+
+  Handle(Poly_Triangulation) mesh = cascade::GetOpenCascadeMesh(triangulationNode->GetTriangulation());
+  //
+  if ( mesh.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mesh is null.");
+    return TCL_ERROR;
+  }
+
+  // Get the output filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not provided.");
+    return TCL_ERROR;
+  }
+
+  // Save mesh to STL file.
+  if ( !asiAlgo_Utils::WriteStl(mesh, filename.c_str(), isBinary) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save triangulation to STL file '%1'."
+      << filename);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Saved to '%1'."
+                                                       << filename);
+  return TCL_OK;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_SavePLY(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+#ifndef USE_MOBIUS
+  m_progress.SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
+  return TCL_ERROR;
+#else
+
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiData_TriangulationNode) triangulationNode = cmdEngine::model->GetTriangulationNode();
+  //
+  if ( triangulationNode.IsNull() || !triangulationNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Triangulation is not initialized.");
+    return TCL_ERROR;
+  }
+
+  Handle(Poly_Triangulation) mesh = cascade::GetOpenCascadeMesh(triangulationNode->GetTriangulation());
+  //
+  if ( mesh.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mesh is null.");
+    return TCL_ERROR;
+  }
+
+  // Get the output filename.
+  std::string filename = argv[1];
+
+  // Save mesh to STL file.
+  if ( !asiAlgo_Utils::WritePly(mesh, filename.c_str(), nullptr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save triangulation to PLY file '%1'."
+      << filename);
+    return TCL_ERROR;
+  }
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Saved to '%1'."
+                                                       << filename);
+  return TCL_OK;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -664,6 +774,32 @@ int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_LoadIGES(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString filename(argv[1]);
+
+  // Read BREP
+  TopoDS_Shape shape;
+  if ( !asiAlgo_Utils::ReadIGES(filename, shape) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read IGES file.");
+    return TCL_ERROR;
+  }
+
+  onModelLoaded(shape);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
@@ -675,22 +811,54 @@ int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
 
   TCollection_AsciiString filename(argv[1]);
 
-   // Modify Data Model.
-  cmdEngine::model->OpenCommand();
+  asiAlgo_FileFormat
+    format = asiAlgo_FileFormatTool::FormatFromFileContent(filename);
+  if ( format == FileFormat_Unknown )
   {
-    if ( !asiEngine_Part( cmdEngine::model, interp->GetProgress() ).Import(filename) )
+    // Recognize file format from file extension.
+    format = asiAlgo_FileFormatTool::FormatFromFileExtension(filename);
+  }
+
+  if ( asiAlgo_Utils::isMeshFormat(format) )
+  {
+    cmdEngine::model->OpenCommand();
     {
-      cmdEngine::model->AbortCommand();
-      return TCL_ERROR;
+      if ( !asiEngine_Triangulation(cmdEngine::model, interp->GetProgress()).Import(filename) )
+      {
+        cmdEngine::model->AbortCommand();
+        return TCL_ERROR;
+      }
+    }
+    cmdEngine::model->CommitCommand();
+
+    if ( cmdEngine::cf )
+    {
+      // Update viewer.
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetTriangulationNode() );
     }
   }
-  cmdEngine::model->CommitCommand();
+  else
+  {
+    // Modify Data Model.
+    cmdEngine::model->OpenCommand();
+    {
+      if ( !asiEngine_Part( cmdEngine::model, interp->GetProgress() ).Import(filename) )
+      {
+        cmdEngine::model->AbortCommand();
+        return TCL_ERROR;
+      }
+    }
+    cmdEngine::model->CommitCommand();
+
+    if ( cmdEngine::cf )
+    {
+      // Update viewer.
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+    }
+  }
 
   if ( cmdEngine::cf )
   {
-    // Update viewer.
-    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
-
     // Update object browser.
     cmdEngine::cf->ObjectBrowser->Populate();
   }
@@ -724,6 +892,57 @@ int ENGINE_LoadSTL(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
+//-----------------------------------------------------------------------------
+
+int ENGINE_LoadOBJ(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString filename(argv[1]);
+
+  // Read STL
+  Handle(Poly_Triangulation) mesh;
+  if ( !asiAlgo_Utils::ReadObj( filename, mesh, interp->GetProgress() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read OBJ file.");
+    return TCL_ERROR;
+  }
+
+  onModelLoaded(mesh);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_LoadPLY(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString filename(argv[1]);
+
+  // Read STL
+  Handle(Poly_Triangulation) mesh;
+  if ( !asiAlgo_Utils::ReadPly( filename, mesh, interp->GetProgress() ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read PLY file.");
+    return TCL_ERROR;
+  }
+
+  onModelLoaded(mesh);
+
+  return TCL_OK;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -1033,10 +1252,26 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-facets-stl",
     //
-    "save-facets-stl -filename <filename>\n"
+    "save-facets-stl -filename <filename> [-binary]\n"
     "\t Exports the part shape's facets to STL file <filename>.",
     //
     __FILE__, group, ENGINE_SaveFacetsStl);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-stl",
+    //
+    "save-stl -filename <filename> [-binary]\n"
+    "\t Exports data from triangulation node to STL file <filename>.",
+    //
+    __FILE__, group, ENGINE_SaveSTL);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-ply",
+    //
+    "save-ply <filename>\n"
+    "\t Exports data from triangulation node to PLY file <filename>.",
+    //
+    __FILE__, group, ENGINE_SavePLY);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-brep",
@@ -1047,12 +1282,37 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_LoadBRep);
 
   //-------------------------------------------------------------------------//
+  interp->AddCommand("load-iges",
+    //
+    "load-iges <filename>\n"
+    "\t Loads IGES file to the active part.",
+    //
+    __FILE__, group, ENGINE_LoadIGES);
+
+  //-------------------------------------------------------------------------//
   interp->AddCommand("load-part",
     //
     "load-part <filename>\n"
-    "\t Loads CAD file of any supported format to the active part.",
+    "\t Loads CAD file of any supported format to the active part.\n"
+    "\t If the model is coming in a mesh format, the data is loaded into the Triangulation Node.",
     //
     __FILE__, group, ENGINE_LoadPart);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("load-obj",
+    //
+    "load-obj <filename>\n"
+    "\t Loads OBJ file to the active triangulation.",
+    //
+    __FILE__, group, ENGINE_LoadOBJ);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("load-ply",
+    //
+    "load-ply <filename>\n"
+    "\t Loads PLY file to the active triangulation.",
+    //
+    __FILE__, group, ENGINE_LoadPLY);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-stl",

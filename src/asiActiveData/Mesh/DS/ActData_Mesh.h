@@ -114,6 +114,10 @@ public:
 
 public:
 
+  //! Construct Poly_Triangulation from internal representation of mesh.
+  //! return Poly_Triangulation.
+  ActData_EXPORT Handle(Poly_Triangulation) GetPolyTriangulation();
+
   //! Remove all mesh entities from the current mesh.
   //! isClearNodes == True means that all nodes becoming free after
   //! the removal of elements are also removed. Otherwise all nodes

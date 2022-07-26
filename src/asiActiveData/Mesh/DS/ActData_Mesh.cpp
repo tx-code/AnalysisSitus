@@ -84,6 +84,39 @@ ActData_Mesh::ActData_Mesh(const int nbnodes,
 }
 
 //=======================================================================
+//function : GetPolyTriangulation
+//purpose  : construct Poly_Triangulation from internal representation of
+//           mesh.
+//=======================================================================
+Handle(Poly_Triangulation) ActData_Mesh::GetPolyTriangulation()
+{
+  if ( !this->NbNodes() || !this->NbFaces() )
+  {
+    return nullptr;
+  }
+
+  TColgp_Array1OfPnt    nodes(1, this->NbNodes());
+  Poly_Array1OfTriangle triangles(1, this->NbFaces());
+
+  for ( int indexNode = 1; indexNode <= this->NbNodes(); ++indexNode )
+  {
+    Handle(ActData_Mesh_Node) meshElem = Handle(ActData_Mesh_Node)::DownCast(this->GetNode(indexNode));
+    gp_Pnt pnt(meshElem->X(), meshElem->Y(), meshElem->Z());
+    nodes.SetValue(indexNode, pnt);
+  }
+
+  for ( int indexTri = 1; indexTri <= this->NbFaces(); ++indexTri )
+  {
+    Handle(ActData_Mesh_Triangle) meshElem = Handle(ActData_Mesh_Triangle)::DownCast(this->GetNode(indexTri));
+    Poly_Triangle triangle(meshElem->GetConnection(1), meshElem->GetConnection(2), meshElem->GetConnection(3));
+    triangles.SetValue(indexTri, triangle);
+  }
+
+  Handle(Poly_Triangulation) resultMesh = new Poly_Triangulation(nodes, triangles);
+  return resultMesh;
+}
+
+//=======================================================================
 //function : Clear
 //purpose  : Destructor
 //           This code is to release the elements of removed mesh to clean

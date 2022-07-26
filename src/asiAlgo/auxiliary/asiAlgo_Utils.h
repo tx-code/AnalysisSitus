@@ -38,6 +38,7 @@
 #include <asiAlgo_ConvertCanonicalSummary.h>
 #include <asiAlgo_FeatureAngleType.h>
 #include <asiAlgo_FeatureFaces.h>
+#include <asiAlgo_FileFormat.h>
 #include <asiAlgo_Naming.h>
 #include <asiAlgo_TopoSummary.h>
 
@@ -931,7 +932,19 @@ namespace asiAlgo_Utils
     WriteBRep(const TopoDS_Shape&            shape,
               const TCollection_AsciiString& filename);
 
-  //! Reads STL triangulation from file.
+  //! Reads CAD model from IGES.
+  //! \param [in]  filename filename.
+  //! \param [out] shape    CAD model retrieved from file.
+  //! \param [in]  progress progress notifier.
+  //! \param [in]  plotter  the imperative plotter to use.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ReadIGES(const TCollection_AsciiString& filename,
+             TopoDS_Shape&                  shape,
+             ActAPI_ProgressEntry           progress = nullptr,
+             ActAPI_PlotterEntry            plotter  = nullptr);
+
+  //! Reads triangulation from STL.
   //! \param[in]  filename      source filename.
   //! \param[out] triangulation output triangulation.
   //! \param[in]  progress      progress notifier.
@@ -951,6 +964,16 @@ namespace asiAlgo_Utils
             Handle(ActData_Mesh)&          mesh,
             ActAPI_ProgressEntry           progress);
 
+  //! Reads PLY triangulation from file.
+  //! \param[in]  filename source filename.
+  //! \param[out] mesh     output triangulation.
+  //! \param[in]  progress progress notifier.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ReadPly(const TCollection_AsciiString& filename,
+            Handle(Poly_Triangulation)&    triangulation,
+            ActAPI_ProgressEntry           progress);
+
   //! Reads OBJ tessellation from file.
   //! \param[in]  filename source filename.
   //! \param[out] mesh     output tessellation.
@@ -961,13 +984,27 @@ namespace asiAlgo_Utils
             Handle(ActData_Mesh)&          mesh,
             ActAPI_ProgressEntry           progress);
 
+  //! Reads OBJ triangulation from file.
+  //! \param[in]  filename source filename.
+  //! \param[out] mesh     output triangulation.
+  //! \param[in]  progress progress notifier.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ReadObj(const TCollection_AsciiString& filename,
+            Handle(Poly_Triangulation)&    triangulation,
+            ActAPI_ProgressEntry           progress);
+
   //! Writes triangulation to STL file.
   //! \param[in] triangulation triangulation to write.
   //! \param[in] filename      target filename.
+  //! \param[in] isBinary      indicator showing whether to save
+  //!                          the mesh in Ascii format or binary
+  //!                          format.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     WriteStl(const Handle(Poly_Triangulation)& triangulation,
-             const TCollection_AsciiString&    filename);
+             const TCollection_AsciiString&    filename,
+             const bool                        isBinary = false);
 
   //! Writes triangulation to PLY file.
   //! \param[in] triangulation triangulation to write.
@@ -978,6 +1015,12 @@ namespace asiAlgo_Utils
     WritePly(const Handle(Poly_Triangulation)& triangulation,
              const TCollection_AsciiString&    filename,
              ActAPI_ProgressEntry              progress);
+
+  //! Checks if file format is a mesh format.
+  //! \param[in] fileFormat file format.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsMeshFormat(const asiAlgo_FileFormat& fileFormat);
 
   //! Collects summary information for the given shape.
   //! \param shape   [in]  input shape.

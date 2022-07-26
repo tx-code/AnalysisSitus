@@ -37,6 +37,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_CheckDeviations.h>
+#include <asiAlgo_FileFormat.h>
 #include <asiAlgo_Timer.h>
 
 #if defined USE_MOBIUS
@@ -74,6 +75,88 @@ t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
 }
 
 #endif
+
+//-----------------------------------------------------------------------------
+
+#ifdef USE_MOBIUS
+bool asiEngine_Triangulation::Import(const TCollection_AsciiString& filename)
+{
+  // Auto-recognize file format.
+  asiAlgo_FileFormat
+    format = asiAlgo_FileFormatTool::FormatFromFileContent(filename);
+  //
+  if ( format == FileFormat_Unknown )
+  {
+    // Recognize file format from file extension.
+    format = asiAlgo_FileFormatTool::FormatFromFileExtension(filename);
+  }
+
+  Handle(Poly_Triangulation) mesh;
+
+  // Load CAD data.
+  switch ( format )
+  {
+    case FileFormat_STL:
+    {
+      if ( !asiAlgo_Utils::ReadStl(filename, mesh, m_progress) )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Cannot read STL file.");
+        return false;
+      }
+      break;
+    }
+    case FileFormat_PLY:
+    {
+      if ( !asiAlgo_Utils::ReadPly(filename, mesh, m_progress) )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Cannot read PLY file.");
+        return false;
+      }
+      break;
+    }
+    case FileFormat_OBJ:
+    {
+      if ( !asiAlgo_Utils::ReadObj(filename, mesh, m_progress) )
+      {
+        m_progress.SendLogMessage(LogErr(Normal) << "Cannot read OBJ file.");
+        return false;
+      }
+      break;
+    }
+    default:
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Unsupported file format.");
+      return false;
+    }
+  }
+
+  if ( !mesh.IsNull() )
+  {
+    m_model->GetTriangulationNode()->SetTriangulation(cascade::GetMobiusMesh(mesh));
+  }
+  else
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Mesh is NULL");
+    return false;
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = m_model->GetPartNode();
+  TCollection_AsciiString unitString = "mm";
+  // Set filename and original units for reference.
+  partNode->SetFilenameIn(filename);
+  partNode->SetOriginalUnits(unitString);
+
+  return true;
+}
+#else
+bool asiEngine_Triangulation::Import(const TCollection_AsciiString&)
+{
+  m_progress.SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
+  return false;
+}
+#endif
+
 
 //-----------------------------------------------------------------------------
 

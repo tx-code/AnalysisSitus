@@ -34,6 +34,9 @@
 #include <asiTest_CommonFacilities.h>
 #include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
+#include <asiTest_Exchange.h>
+#include <asiTest_ExchangeMesh.h>
+#include <asiTest_ExchangeShape.h>
 #include <asiTest_FaceGrid.h>
 #include <asiTest_InvertShells.h>
 #include <asiTest_IsContourClosed.h>
@@ -124,6 +127,7 @@ int main(int argc, char* argv[])
   TEST_LOAD_MODULE("cmdMisc")
   TEST_LOAD_MODULE("cmdEngine")
   TEST_LOAD_MODULE("cmdAsm")
+  TEST_LOAD_MODULE("cmdTest")
 
   // Populate launchers.
   std::cout << "asiTest : main()" << std::endl;
@@ -146,6 +150,11 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>    );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_GenerateFacets>      );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>         );
+
+  // Data exchange tests.
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ExchangeMesh>  );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ExchangeShape> );
 
   // Active Data tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<ActTest_AsciiStringParameter>   );

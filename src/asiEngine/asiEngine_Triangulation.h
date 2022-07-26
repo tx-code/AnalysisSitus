@@ -90,6 +90,15 @@ public:
 
 #endif
 
+  //! Imports CAD data from a file with the passed filename into the Part Node.
+  //! This function will automatically recognize the file format from its extension
+  //! or contents.
+  //! Note: requires opening and committing a transaction.
+  //! \param[in] filename the input filename.
+  //! \return true in case of success, false -- otherwise.
+  asiEngine_EXPORT bool
+    Import(const TCollection_AsciiString& filename);
+
   //! Cleans up Triangulation Node.
   asiEngine_EXPORT void
     Clean_All();

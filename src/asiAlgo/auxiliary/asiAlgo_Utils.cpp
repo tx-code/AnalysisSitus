@@ -41,6 +41,7 @@
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_ClassifyPointFace.h>
 #include <asiAlgo_ConvertCanonical.h>
+#include <asiAlgo_IGES.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_RecognizeCanonical.h>
@@ -2039,6 +2040,21 @@ bool asiAlgo_Utils::ReadBRep(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::ReadIGES(const TCollection_AsciiString& filename,
+                             TopoDS_Shape&                  shape,
+                             ActAPI_ProgressEntry           progress,
+                             ActAPI_PlotterEntry            plotter)
+{
+  asiAlgo_IGES reader(progress, plotter);
+  if ( !reader.Read(filename, shape) )
+  {
+    return false;
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::WriteBRep(const TopoDS_Shape&            theShape,
                               const TCollection_AsciiString& theFilename)
 {
@@ -2198,6 +2214,46 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString&,
 //-----------------------------------------------------------------------------
 
 #if defined USE_MOBIUS
+bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
+                            Handle(Poly_Triangulation)&    triangulation,
+                            ActAPI_ProgressEntry           progress)
+{
+  progress.SendLogMessage(LogInfo(Normal) << "Use Mobius PLY reader.");
+
+  // Prepare reader.
+  poly_ReadPLY reader;
+
+  // Read PLY.
+  if ( !reader.Perform(filename.ToCString() ))
+    return false;
+
+  // Get the constructed mesh.
+  const t_ptr<poly_Mesh>& mesh = reader.GetResult();
+
+  // Convert to OpenCascade's mesh.
+  cascade_Triangulation converter(mesh);
+  converter.DirectConvert();
+  //
+  triangulation = converter.GetOpenCascadeTriangulation();
+
+  if ( triangulation.IsNull() )
+    return false;
+
+  return true;
+}
+#else
+bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString&,
+                            Handle(Poly_Triangulation)&,
+                            ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "PLY reader is unavailable (USE_MOBIUS is off).");
+  return false;
+}
+#endif
+
+//-----------------------------------------------------------------------------
+
+#if defined USE_MOBIUS
 bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
                             Handle(ActData_Mesh)&          mesh,
                             ActAPI_ProgressEntry           progress)
@@ -2283,12 +2339,62 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString&,
 }
 #endif
 
+#if defined USE_MOBIUS
+bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
+                            Handle(Poly_Triangulation)&    triangulation,
+                            ActAPI_ProgressEntry           progress)
+{
+  progress.SendLogMessage(LogInfo(Normal) << "Use Mobius OBJ reader.");
+
+  // Prepare reader.
+  poly_ReadOBJ reader;
+
+  // Read OBJ.
+  if ( !reader.Perform(filename.ToCString()) )
+    return false;
+
+  // Get the constructed mesh.
+  const t_ptr<poly_Mesh>& mesh = reader.GetResult();
+
+  // Convert to OpenCascade's mesh.
+  cascade_Triangulation converter(mesh);
+  converter.DirectConvert();
+  //
+  triangulation = converter.GetOpenCascadeTriangulation();
+
+  if ( triangulation.IsNull() )
+    return false;
+
+  return true;
+}
+#else
+bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString&,
+                            Handle(Poly_Triangulation)&,
+                            ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage(LogErr(Normal) << "OBJ reader is unavailable (USE_MOBIUS is off).");
+  return false;
+}
+#endif
+
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::WriteStl(const Handle(Poly_Triangulation)& triangulation,
-                             const TCollection_AsciiString&    filename)
+                             const TCollection_AsciiString&    filename,
+                             const bool                        isBinary)
 {
-  return RWStl::WriteAscii(triangulation, filename);
+  bool isOK = true;
+
+  if ( isBinary )
+  {
+    isOK = RWStl::WriteBinary(triangulation, filename);
+  }
+  else
+  {
+    isOK = RWStl::WriteAscii(triangulation, filename);
+  }
+
+  return isOK;
 }
 
 //-----------------------------------------------------------------------------
@@ -2298,6 +2404,21 @@ bool asiAlgo_Utils::WritePly(const Handle(Poly_Triangulation)& triangulation,
                              ActAPI_ProgressEntry              progress)
 {
   return asiAlgo_PLY(progress).Write(triangulation, filename);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsMeshFormat(const asiAlgo_FileFormat& fileFormat)
+{
+  switch (fileFormat)
+  {
+    case FileFormat_STL:
+    case FileFormat_PLY:
+    case FileFormat_OBJ:
+      return true;
+    default:
+      return false;
+  }
 }
 
 //-----------------------------------------------------------------------------

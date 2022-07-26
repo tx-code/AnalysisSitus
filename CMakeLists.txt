@@ -268,6 +268,7 @@ if (NOT BUILD_ALGO_ONLY)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdEngine)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdMisc)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdRE)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdTest)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/cmdMobius)
 
   # Setup compiler
@@ -314,6 +315,7 @@ if (NOT BUILD_ALGO_ONLY)
   set_property(TARGET cmdEngine PROPERTY FOLDER Commands)
   set_property(TARGET cmdMisc   PROPERTY FOLDER Commands)
   set_property(TARGET cmdRE     PROPERTY FOLDER Commands)
+  set_property(TARGET cmdTest   PROPERTY FOLDER Commands)
   set_property(TARGET cmdMobius PROPERTY FOLDER Commands)
 
   set_property (GLOBAL PROPERTY USE_FOLDERS ON)
