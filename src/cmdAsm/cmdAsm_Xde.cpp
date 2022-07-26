@@ -35,6 +35,7 @@
 #include <asiAlgo_FacetQuality.h>
 #include <asiAlgo_FindVisibleFaces.h>
 #include <asiAlgo_MeshGen.h>
+#include <asiAlgo_STEP.h>
 #include <asiAlgo_Timer.h>
 
 // asiAsm includes
@@ -1024,10 +1025,30 @@ int ASMXDE_SaveSTEP(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  if ( !doc->SaveSTEP(filename) )
+  // Get optional part.
+  PersistentId partId;
+  //
+  if ( interp->GetKeyValue(argc, argv, "part", partId) )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "STEP export failed.");
-    return TCL_ERROR;
+    TopoDS_Shape partShape = doc->GetShape( PartId(partId) );
+
+    // Write with a plain STEP translator.
+    asiAlgo_STEP writer( interp->GetProgress() );
+    //
+    if ( !writer.Write(partShape, filename) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save part '%1' to '%2'."
+                                                          << partId << filename);
+      return TCL_ERROR;
+    }
+  }
+  else
+  {
+    if ( !doc->SaveSTEP(filename) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "STEP export failed.");
+      return TCL_ERROR;
+    }
   }
 
   TIMER_FINISH
@@ -1612,7 +1633,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-save-step",
     //
-    "asm-xde-save-step -model <M> -filename <filename>\n"
+    "asm-xde-save-step -model <M> [-part <id>] -filename <filename>\n"
     "\t Exports the passed XDE model to STEP format.",
     //
     __FILE__, group, ASMXDE_SaveSTEP);

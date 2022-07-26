@@ -327,6 +327,14 @@ asm-xde-save-fbx -model M -filename box-colored.fbx
 
 <!-- ========================================================================== -->
 
+<h2 id="toc-asm-xde-save-step">asm-xde-save-step</h2>
+
+<p>
+The <span class="code-inline">asm-xde-save-step</span> function exports the entire document or a specified part to a STEP file.
+</p>
+
+<!-- ========================================================================== -->
+
 <h2 id="toc-asm-xde-generate-facets">asm-xde-generate-facets</h2>
 
 <p>
@@ -360,6 +368,27 @@ The <span class="code-inline">asm-xde-remove-parts</span> function removes the s
 </p>
 
 <!-- ========================================================================== -->
+
+<h1 id="toc-asm-xde-examples">Examples</h1>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-examples-parts">Extract unique parts</h2>
+
+<p>
+  The following script extracts all unique parts from an assembly and exports them to STEP files. This way you can break down an assembly file to individual solids. It should be noted though that such technique does not take into account part occurrences, so if, for example, you have one bolt instantiated 10 times, the following script will output only one file for the unique bolt's geometry.
+</p>
+
+<pre class="code">
+asm-xde-load -model M -filename "assembly.stp"
+asm-xde-xcompounds -model M
+set pids [asm-xde-get-parts -model M]
+set i 0
+foreach pid $pids {
+  asm-xde-save-step -model M -filename part_$i.stp -part $pid
+  incr i
+}
+</pre>
 
 <!-- [END] contents -->
 </div>

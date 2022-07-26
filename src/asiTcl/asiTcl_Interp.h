@@ -363,6 +363,24 @@ public:
     return false;
   }
 
+  //! Variation of GetKeyValue() for OCCT strings.
+  bool
+    GetKeyValue(const int                argc,
+                const char**             argv,
+                const std::string&       key,
+                TCollection_AsciiString& value)
+  {
+    for ( int k = 1; k < argc - 1; ++k )
+    {
+      if ( this->IsKeyword(argv[k], key) )
+      {
+        value = argv[k+1];
+        return true;
+      }
+    }
+    return false;
+  }
+
   //! Variation of GetKeyValue() for standard string and any
   //! primitive type.
   template <typename T>
