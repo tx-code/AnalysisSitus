@@ -56,8 +56,11 @@
 
 // OCCT includes
 #include <BRep_Builder.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepTools.hxx>
+#include <IntCurvesFace_ShapeIntersector.hxx>
+#include <ShapeAnalysis_Surface.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
 // VTK includes
@@ -204,7 +207,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pAddAsFeature         (nullptr),
   m_pGetAsBLOB            (nullptr),
   m_pMeasureLength        (nullptr),
-  m_pGetSpannedAngle      (nullptr)
+  m_pGetSpannedAngle      (nullptr),
+  m_pCheckThickness       (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -471,6 +475,8 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
 
       if ( faceIndices.Extent() == 1 )
       {
+        m_pCheckThickness = menu.addAction("Check thickness");
+
         const int          fid  = faceIndices.GetMinimalMapped();
         const TopoDS_Face& face = partApi.GetAAG()->GetFace(fid);
 
@@ -985,5 +991,103 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
       m_progress.SendLogMessage(LogInfo(Normal) << "Spanned angle: %1 deg."
                                                 << Abs(uMax - uMin)*180/M_PI);
     }
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: check thickness
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pCheckThickness)
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get highlighted faces.
+    asiAlgo_Feature faceIndices;
+    partApi.GetHighlightedFaces(faceIndices);
+
+    if ( faceIndices.Extent() != 1 )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "There should be one face to check thickness.");
+      return;
+    }
+
+    // Get AAG to access faces by indices.
+    Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+    //
+    if ( aag.IsNull() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "AAG is null.");
+      return;
+    }
+
+    // Get face.
+    const TopoDS_Face& face = aag->GetFace( faceIndices.GetMinimalMapped() );
+    Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
+    if (surf.IsNull())
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Surface is NULL.");
+      return;
+    }
+
+    const asiVisu_ActualSelection&          sel      = m_pViewer->PrsMgr()->GetCurrentSelection();
+    const Handle(asiVisu_CellPickerResult)& pick_res = sel.GetCellPickerResult(SelectionNature_Persistent);
+    gp_XYZ                                  pos      = pick_res->GetPickedPos();
+
+    double toler = Precision::Confusion();
+    ShapeAnalysis_Surface shAnalysis(surf);
+    gp_Pnt2d uvPos = shAnalysis.ValueOfUV(pos, toler);
+
+    gp_Vec D1U, D1V;
+    gp_Pnt posPnt;
+    surf->D1(uvPos.X(), uvPos.Y(), posPnt, D1U, D1V);
+
+    gp_Vec normal = D1U ^ D1V;
+    //
+    if (normal.Magnitude() < toler)
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Normal is NULL.");
+      return;
+    }
+
+    normal.Normalize();
+
+    if (face.Orientation() == TopAbs_REVERSED)
+    {
+      normal *= -1.0;
+    }
+
+    gp_Lin line(gp_Pnt(posPnt.XYZ() - 2.0 * toler * normal.XYZ()), -1.0 * normal);
+
+    IntCurvesFace_ShapeIntersector intersector;
+    intersector.Load(aag->GetMasterShape(), toler);
+    intersector.Perform(line, 0.0, RealLast());
+
+    if (!intersector.IsDone() || !intersector.NbPnt())
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Thickness has been measured. Intersections not found.");
+      return;
+    }
+
+    double minDist = RealLast();
+    gp_Pnt oppositePnt;
+    for (int index = 1; index <= intersector.NbPnt(); ++index)
+    {
+      gp_Pnt pnt = intersector.Pnt(index);
+      double distSquare = posPnt.SquareDistance(pnt);
+      if (distSquare <= minDist - Precision::SquareConfusion())
+      {
+        minDist = distSquare;
+        oppositePnt = pnt;
+      }
+    }
+    minDist = sqrt(minDist);
+
+    if (minDist > Precision::Confusion())
+    {
+      TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(posPnt, oppositePnt);
+      m_plotter.DRAW_SHAPE(edge, Color_Red, "thickness");
+    }
+
+    m_progress.SendLogMessage( LogInfo(Normal) << "Thickness is %1."
+                                               << minDist);
   }
 }
