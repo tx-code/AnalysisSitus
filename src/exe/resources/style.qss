@@ -499,10 +499,8 @@ QTextEdit
 
 QPlainTextEdit
 {
-    background-color: #232629;;
-    color: #eff0f1;
-    border-radius: 2px;
-    border: 1px solid #76797C;
+    background-color: #1E1E1E;
+    font-size: 14px;
 }
 
 QHeaderView::section

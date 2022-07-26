@@ -30,6 +30,7 @@
 
 // Own include
 #include <asiUI_DialogDump.h>
+#include <asiUI_JsonEditor.h>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -57,7 +58,9 @@ asiUI_DialogDump::asiUI_DialogDump(const QString&       title,
   QGroupBox* pGroup = new QGroupBox("Text dump");
 
   // Editors.
-  m_widgets.pEditor = new asiUI_StyledTextEdit();
+  m_widgets.pEditor = new asiUI_JsonEditor(this);
+  m_widgets.pEditor->setImmediateValidate(true);
+
   //
   QVBoxLayout* boxLayout = new QVBoxLayout(pGroup);
   boxLayout->addWidget(m_widgets.pEditor);
@@ -97,7 +100,9 @@ asiUI_DialogDump::~asiUI_DialogDump()
 
 void asiUI_DialogDump::Populate(const std::string& buff)
 {
-  m_widgets.pEditor->setText( buff.c_str() );
+  m_widgets.pEditor->insertPlainText(buff.c_str());
+  m_widgets.pEditor->moveCursor(QTextCursor::MoveOperation::Start);
+  m_widgets.pEditor->ensureCursorVisible();
 }
 
 //-----------------------------------------------------------------------------

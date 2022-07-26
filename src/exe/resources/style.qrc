@@ -3,6 +3,8 @@
     <file>asitus/splash.png</file>
   </qresource>
   <qresource prefix="icons">
+    <file>asitus/arrow_down.svg</file>
+    <file>asitus/arrow_right.svg</file>
     <file>asitus/asitus_icon_16x16.png</file>
     <file>asitus/asitus-cli_icon_16x16.png</file>
     <file>asitus/asitus-debug_icon_16x16.png</file>

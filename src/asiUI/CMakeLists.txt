@@ -35,6 +35,9 @@ set (controls_H_UI_FILES
   controls/asiUI_ControlsPart.h
   controls/asiUI_ControlsPartListener.h
   controls/asiUI_EvalButton.h
+  controls/asiUI_JsonBlock.h
+  controls/asiUI_JsonEditor.h
+  controls/asiUI_JsonHighlighter.h
   controls/asiUI_LineEdit.h
   controls/asiUI_ObjectBrowser.h
   controls/asiUI_ObjectBrowserListener.h
@@ -61,6 +64,8 @@ set (controls_CPP_FILES
   controls/asiUI_ControlsPart.cpp
   controls/asiUI_ControlsPartListener.cpp
   controls/asiUI_EvalButton.cpp
+  controls/asiUI_JsonEditor.cpp
+  controls/asiUI_JsonHighlighter.cpp
   controls/asiUI_LineEdit.cpp
   controls/asiUI_ObjectBrowser.cpp
   controls/asiUI_ObjectBrowserListener.cpp

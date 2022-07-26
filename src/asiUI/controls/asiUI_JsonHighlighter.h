@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 21 January 2021
+// Created on: 16 June 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Natalia Ermolaeva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,82 +28,36 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_DialogDump_h
-#define asiUI_DialogDump_h
+#ifndef asiUI_JsonHighlighter_h
+#define asiUI_JsonHighlighter_h
 
 // asiUI includes
-#include <asiUI_StyledTextEdit.h>
-
-// Active Data includes
-#include <ActAPI_IProgressNotifier.h>
+#include <asiUI_CommonFacilities.h>
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QDialog>
-#include <QPushButton>
-#include <QVBoxLayout>
+#include <QSyntaxHighlighter>
 #pragma warning(pop)
 
-class asiUI_JsonEditor;
+class QTextDocument;
 
-//! Text view for any dumps.
-class asiUI_DialogDump : public QDialog
+//! Syntax highlighter for text editor following Json rules.
+class asiUI_EXPORT asiUI_JsonHighlighter : public QSyntaxHighlighter
 {
   Q_OBJECT
 
 public:
 
-  //! Ctor.
-  //! \param[in] title    the dialog title to set.
-  //! \param[in] progress the progress notifier.
-  //! \param[in] parent   the optional parent widget.
-  asiUI_EXPORT
-    asiUI_DialogDump(const QString&       title,
-                     ActAPI_ProgressEntry progress,
-                     QWidget*             parent = nullptr);
+  //! Constructor.
+  //! \param[in] editor text editor widget.
+  asiUI_JsonHighlighter(QTextDocument* parent);
 
-  //! Dtor.
-  asiUI_EXPORT virtual
-    ~asiUI_DialogDump();
+  //! Destructor.
+  virtual ~asiUI_JsonHighlighter();
 
-public:
-
-  //! Populates the widget's text area with the passed string buffer.
-  //! \param[in] buff the text buffer to dump.
-  asiUI_EXPORT void
-    Populate(const std::string& buff);
-
-public slots:
-
-  //! Reaction on close.
-  void onClose();
-
-protected:
-
-  QVBoxLayout* m_pMainLayout; //!< Layout of the widget.
-
-  //! Widgets.
-  struct t_base_widgets
-  {
-    asiUI_JsonEditor* pEditor; //!< Text editor.
-    QPushButton*      pClose;  //!< Close button.
-
-    t_base_widgets() : pEditor (nullptr),
-                       pClose  (nullptr)
-    {}
-
-    void Release()
-    {
-      pEditor = nullptr;
-      delete pClose;  pClose = nullptr;
-    }
-  };
-
-  t_base_widgets m_widgets; //!< Involved widgets.
-
-protected:
-
-  ActAPI_ProgressEntry m_notifier; //!< Progress Notifier.
+  //! Highlights the given text block.
+  //! \param[in] text a separate text block of the text editor document
+  virtual void highlightBlock(const QString& text);
 
 };
 
