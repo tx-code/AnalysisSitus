@@ -16,6 +16,7 @@ set (controls_H_FILES
   controls/asiUI_IParamEditor.h
   controls/asiUI_IStatusBar.h
   controls/asiUI_ItemRoles.h
+  controls/asiUI_JsonBlock.h
   controls/asiUI_HeaderViewAPI.h
   controls/asiUI_ParamEditorImpl.h
   controls/asiUI_ParameterEditorItem.h
@@ -35,7 +36,6 @@ set (controls_H_UI_FILES
   controls/asiUI_ControlsPart.h
   controls/asiUI_ControlsPartListener.h
   controls/asiUI_EvalButton.h
-  controls/asiUI_JsonBlock.h
   controls/asiUI_JsonEditor.h
   controls/asiUI_JsonHighlighter.h
   controls/asiUI_LineEdit.h
