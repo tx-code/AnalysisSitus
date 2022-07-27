@@ -41,6 +41,8 @@
 // Active Data includes
 #include <ActAPI_IPlotter.h>
 
+#pragma warning(disable : 4251)
+
 //! Default slots for part viewer.
 class asiUI_EXPORT asiUI_ViewerPartListener : public asiUI_Viewer3dListener
 {
@@ -145,5 +147,7 @@ protected:
   QAction* m_pCheckThickness;
 
 };
+
+#pragma warning(default : 4251)
 
 #endif

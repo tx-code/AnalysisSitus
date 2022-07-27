@@ -453,7 +453,7 @@ void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
     {
       const TopoDS_Shape& subShape = allSubShapes(gid.Key());
       const int pedigreeId = allFaces.FindIndex(subShape);
-      m_statusBar->SetStatusText(TCollection_AsciiString("Face ID:") + pedigreeId + " Global ID:" + gid.Key());
+      m_statusBar->SetStatusText(TCollection_AsciiString("Face ID: ") + pedigreeId);
     }
   }
 }
@@ -487,7 +487,7 @@ void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
     {
       const TopoDS_Shape& subShape = allSubShapes(gid.Key());
       const int pedigreeId = allEdges.FindIndex(subShape);
-      m_statusBar->SetStatusText(TCollection_AsciiString("Edge ID:") + pedigreeId + " Global ID:" + gid.Key());
+      m_statusBar->SetStatusText(TCollection_AsciiString("Edge ID: ") + pedigreeId);
     }
   }
 }
@@ -522,7 +522,7 @@ void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes
     {
       const TopoDS_Shape& subShape = allSubShapes(gid.Key());
       const int pedigreeId = allVertices.FindIndex(subShape);
-      m_statusBar->SetStatusText(TCollection_AsciiString("Vertex ID:") + pedigreeId + " Global ID:" + gid.Key());
+      m_statusBar->SetStatusText(TCollection_AsciiString("Vertex ID: ") + pedigreeId);
     }
   }
 }
