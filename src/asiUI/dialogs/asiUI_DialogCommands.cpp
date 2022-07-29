@@ -89,29 +89,6 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  QString commandArguments(const asiTcl_CommandInfo& commandTcl)
-  {
-    QString command = commandTcl.Name.c_str();
-    QString help = commandTcl.Help.c_str();
-    if (help.indexOf(command) == -1)
-    {
-      return "";
-    }
-
-    QString arguments = help;
-    int lastIndexOfCommandName = arguments.indexOf(command);
-    if (lastIndexOfCommandName >= 0)
-      arguments = arguments.mid(lastIndexOfCommandName + command.length(), arguments.length());
-
-    int indexOnNewLine = arguments.indexOf('\n');
-    if (indexOnNewLine >= 0)
-      arguments = arguments.mid(0, indexOnNewLine);
-
-    return arguments;
-  }
-
-  //-----------------------------------------------------------------------------
-
   void uniteCommandsByPlugin(const std::vector<asiTcl_CommandInfo>&  commandsFrom,
                              std::vector<asiUI_TclPluginToCommands>& commandsTo)
   {
@@ -160,7 +137,7 @@ namespace
       }
       else
       {
-        arguments = commandArguments(info);
+        arguments = asiUI_Console::commandArguments(info);
 
         description = curHelp;
         description = description.mid(curCommand.length() + arguments.length());

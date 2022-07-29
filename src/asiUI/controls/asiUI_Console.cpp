@@ -48,9 +48,33 @@
 #pragma warning(push, 0)
 #include <QAbstractItemView>
 #include <QDesktopWidget>
+#include <QLabel>
 #include <QScrollBar>
 #include <QTextBlock>
 #pragma warning(pop)
+
+namespace
+{
+  //-----------------------------------------------------------------------------
+
+  QString findCommandArguments(const std::vector<asiTcl_CommandInfo>& commands,
+                               const QString&                         curCommand)
+  {
+    if (curCommand.isEmpty())
+      return "";
+
+    for (int commandIter = 0; commandIter < commands.size(); commandIter++)
+    {
+      QString command(commands[commandIter].Name.c_str());
+      if (command != curCommand)
+        continue;
+
+      QString arguments = asiUI_Console::commandArguments(commands[commandIter]);
+      return arguments.trimmed(); // remove spaces in the start and end of the help text
+    }
+    return "";
+  }
+};
 
 //-----------------------------------------------------------------------------
 
@@ -64,7 +88,9 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
 //
 : asiUI_StyledTextEdit (parent),
   m_interp             (interp),
-  m_pCompleter         (nullptr)
+  m_pCompleter         (nullptr),
+  m_descriptionShown   (false),
+  m_description        (nullptr)
 {
   this->setUndoRedoEnabled ( false );
   this->setLineWrapMode    ( QTextEdit::WidgetWidth );
@@ -89,7 +115,9 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
   //
   for ( int c = 0; c < (int) commands.size(); ++c )
   {
-    commandNames << CStr2QStr( commands[c].Name.c_str() );
+    QString cmd = CStr2QStr(commands[c].Name.c_str());
+    m_CmdToDescription[cmd] = findCommandArguments(commands, cmd);
+    commandNames << cmd;
   }
 
   // Sorts the list of strings in ascending order.
@@ -101,9 +129,13 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
   m_pCompleter->setCompletionMode(QCompleter::PopupCompletion);
   m_pCompleter->setCaseSensitivity(Qt::CaseInsensitive);
   m_pCompleter->setMaxVisibleItems(15);
+  m_pCompleter->popup()->installEventFilter(this);
   //
   QObject::connect(m_pCompleter, QOverload<const QString&>::of(&QCompleter::activated),
                    this,         &asiUI_Console::insertCompletion);
+
+  QObject::connect(m_pCompleter, SIGNAL(highlighted(const QString&)),
+                   this,         SLOT(completerHighlighted()));
 
   /* =========================
    *  Add initialization text.
@@ -152,6 +184,42 @@ QSize asiUI_Console::sizeHint() const
 void asiUI_Console::addCommand(QString command)
 {
   textCursor().insertText(command);
+}
+
+//-----------------------------------------------------------------------------
+
+QString asiUI_Console::commandArguments(const asiTcl_CommandInfo& commandTcl)
+{
+  QString command = commandTcl.Name.c_str();
+  QString help = commandTcl.Help.c_str();
+  if (help.indexOf(command) == -1)
+  {
+    return "";
+  }
+
+  QString arguments = help;
+  int lastIndexOfCommandName = arguments.indexOf(command);
+  if (lastIndexOfCommandName >= 0)
+    arguments = arguments.mid(lastIndexOfCommandName + command.length(), arguments.length());
+
+  int indexOnNewLine = arguments.indexOf('\n');
+  if (indexOnNewLine >= 0)
+    arguments = arguments.mid(0, indexOnNewLine);
+
+  return arguments;
+}
+
+
+//-----------------------------------------------------------------------------
+
+bool asiUI_Console::eventFilter( QObject* o, QEvent* e )
+{
+  if ( o == m_pCompleter->popup() && e->type() == QEvent::Hide )
+  {
+    m_pCompleter->popup()->setCurrentIndex( QModelIndex() );
+    hideCommandDescription();
+  }
+  return asiUI_StyledTextEdit::eventFilter( o, e );
 }
 
 //-----------------------------------------------------------------------------
@@ -303,13 +371,38 @@ void asiUI_Console::keyPressEvent(QKeyEvent* e)
 
   if ( completionPrefix != m_pCompleter->completionPrefix() )
   {
+    // store text of the selected item
+    QString selCompletion;
+    QModelIndexList selIndices = m_pCompleter->popup()->selectionModel()->selectedIndexes();
+    if ( !selIndices.isEmpty() )
+    {
+      selCompletion = m_pCompleter->popup()->model()->data( selIndices.first() ).toString();
+    }
     m_pCompleter->setCompletionPrefix(completionPrefix);
-    m_pCompleter->popup()->setCurrentIndex( m_pCompleter->completionModel()->index(0, 0) );
+
+    if ( !selCompletion.isEmpty() )
+    {
+      // restore selection by stored selected text if the item exists
+      QModelIndex selIndex;
+
+      QAbstractItemModel* model = m_pCompleter->popup()->model();
+      for ( int i = 0; i < model->rowCount(); i++ )
+      {
+        QModelIndex index = model->index( i, 0 );
+        if ( model->data( index ).toString() != selCompletion )
+          continue;
+        selIndex = index;
+        break;
+      }
+      if ( selIndex.isValid() )
+        m_pCompleter->popup()->setCurrentIndex( selIndex );
+    }
   }
   QRect cr = cursorRect();
   cr.setWidth(  m_pCompleter->popup()->sizeHintForColumn(0)
               + m_pCompleter->popup()->verticalScrollBar()->sizeHint().width() );
   m_pCompleter->complete(cr); // popup it up!
+  completerHighlighted();
 }
 
 //-----------------------------------------------------------------------------
@@ -377,6 +470,12 @@ QString asiUI_Console::wordUnderCursor() const
   QString result;
 
   QTextCursor tc = this->textCursor();
+
+  if (tc.positionInBlock() == 0)
+  {
+    // there is no a word under cursor when it's in the beginning on a new row
+    return QString();
+  }
 
   bool endOfWord = false;
   do
@@ -452,4 +551,71 @@ void asiUI_Console::insertCompletion(const QString& completion)
   cursor.insertText   ( completion.right(extra) );
   //
   this->setTextCursor(cursor);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_Console::completerHighlighted()
+{
+  QAbstractItemView* view = m_pCompleter->popup();
+  QModelIndex curIndex = view->currentIndex();
+  QString completion = curIndex.isValid() ? view->model()->data( curIndex ).toString() : QString();
+
+  QString highlightedDescription = m_CmdToDescription.contains( completion )
+                                 ? m_CmdToDescription[completion] : QString();
+  QModelIndexList selIndices = view->selectionModel()->selectedIndexes();
+  if ( highlightedDescription.isEmpty() || selIndices.isEmpty() )
+  {
+    if ( m_descriptionShown )
+      hideCommandDescription();
+    return;
+  }
+
+  showCommandDescription( highlightedDescription, view->visualRect( curIndex ) );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_Console::showCommandDescription( const QString& description,
+                                            const QRect&   selectedRect )
+{
+  QAbstractItemView* view = m_pCompleter->popup();
+
+  m_descriptionShown = true;
+  if ( !m_description )
+  {
+    m_description = new QLabel( view );
+    m_description->setStyleSheet(
+      QString::fromUtf8( "background-color: rgb(30, 30, 30); color: rgb(230, 230, 230); border: 1px solid #76797C;" ) );
+    m_description->setWindowFlags( Qt::ToolTip );
+  }
+  m_description->setText( description );
+
+  QFontMetrics fmetrics( m_description->font() );
+  m_description->setFixedWidth( fmetrics.width( description ) + 2 * 2/*description margin*/ + 2 * 1 /*border width*/ );
+
+  QStyleOptionSlider opt;
+  QPoint rightTop = view->mapToGlobal( QPoint( selectedRect.right(), selectedRect.top() ) );
+
+  int slider_thick = 0;
+  bool isScrollBarVisible = m_pCompleter->completionCount() > m_pCompleter->maxVisibleItems();
+  if ( isScrollBarVisible )
+  {
+    slider_thick = m_pCompleter->popup()->verticalScrollBar()->sizeHint().width();
+  }
+
+  int x = rightTop.x() + slider_thick + 2 * 2/*description margin*/;
+  int y = rightTop.y();
+  m_description->move( x, y );
+  m_description->show();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_Console::hideCommandDescription()
+{
+  if ( !m_description )
+    return;
+  m_description->hide();
+  m_descriptionShown = false;
 }

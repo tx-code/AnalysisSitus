@@ -46,6 +46,8 @@
 
 #pragma warning(disable : 4251)
 
+class QLabel;
+
 //-----------------------------------------------------------------------------
 
 //! Console window.
@@ -83,7 +85,17 @@ public:
   //! \param[in] command text of the command for insertion
   void addCommand(QString command);
 
+  //! Returns command arguments defined in Tcl command.
+  //! \param commandTcl [in] the command information.
+  static QString commandArguments(const asiTcl_CommandInfo& commandTcl);
+
+
 protected:
+  //! Processes Hide even for completer object. It hides the command description label.
+  //! \param o [in] object where the event happened.
+  //! \param e [in] event processed.
+  //! \return true if the event is processed.
+  virtual bool eventFilter(QObject* o, QEvent* e);
 
   virtual void keyPressEvent(QKeyEvent* e);
 
@@ -115,11 +127,27 @@ private slots:
 
   void insertCompletion(const QString& completion);
 
+  //! Visualizes the description for active command of the completer.
+  void completerHighlighted();
+
+private:
+  //! Shows the command description label.
+  //! \param description [in]  the command description.
+  //! \param selectedRect [in] rect in global coordinates defines the label position.
+  void showCommandDescription(const QString& description,
+                              const QRect&   selectedRect);
+
+  //! Hides description label.
+  void hideCommandDescription();
+
 protected:
 
-  QString               m_prompt;     //!< Prompt prefix.
-  Handle(asiTcl_Interp) m_interp;     //!< Tcl interpreter.
-  QCompleter*           m_pCompleter; //!< Auto-completer.
+  QString                m_prompt;           //!< Prompt prefix.
+  Handle(asiTcl_Interp)  m_interp;           //!< Tcl interpreter.
+  QCompleter*            m_pCompleter;       //!< Auto-completer.
+  bool                   m_descriptionShown; //!< State whether the description is shown.
+  QLabel*                m_description;      //!< The command description.
+  QMap<QString, QString> m_CmdToDescription; //!< Container of command name to the command description.
 
 };
 
