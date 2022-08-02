@@ -47,7 +47,7 @@ namespace xde {
 // Forward declarations from the `asiAsm` namespace.
 class glTFMaterialMap;
 
-//! Writes the passed XDE document to glTF/glb format. All B-rep shapes in the
+//! Writes the passed scene structure to gltf/glb format. All B-rep shapes in the
 //! document should have undergone meshing to get facets for export.
 //!
 //! The glTF format was defined and specified by the Khronos Group for the
@@ -69,6 +69,7 @@ class glTFMaterialMap;
 //! 3) The original version of glTF writer in OpenCascade is too coupled with the
 //!    rest of OpenCascade kernel. This version is our attempt to make it more
 //!    compact in its code base.
+//!
 //! To know more about glTF format follow this: https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_001_Introduction.md
 class glTFWriter : public ActAPI_IAlgorithm
 {
@@ -177,7 +178,7 @@ protected:
     writeBinData();
 
   //! Writes JSON file with glTF structure (should be called after `writeBinData()`).
-  //! \param[in] fileInfo  extras for the JSON's header section.
+  //! \param[in] fileInfo extras for the JSON's header section.
   //! \return true in case of success, false -- otherwise.
   gltf_EXPORT virtual bool
     writeJson(const TColStd_IndexedDataMapOfStringString& fileInfo);
@@ -188,34 +189,33 @@ protected:
   //! \param[out]    binFile    output file to write into.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    writeBinDataNodes(std::ostream&            binFile,
-                      int&                     accessorNb) const;
+    writeBinDataNodes(std::ostream& binFile,
+                      int&          accessorNb) const;
 
   //! Writes mesh normals into binary file.
   //! \param[out]    binFile    output file to write into.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    writeBinDataNormals(std::ostream&      binFile,
-                        int&               accessorNb) const;
+    writeBinDataNormals(std::ostream& binFile,
+                        int&          accessorNb) const;
 
   //! Writes mesh texture UV coordinates into binary file.
   //! \param[out]    binFile    output file to write into.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    writeBinDataTextCoords(std::ostream&            binFile,
-                           int&                     accessorNb) const;
+    writeBinDataTextCoords(std::ostream& binFile,
+                           int&          accessorNb) const;
 
-  gltf_EXPORT virtual void writeBinDataNodalColors(std::ostream& binFile,
-                                                   int& accessorNb) const;
+  gltf_EXPORT virtual void
+    writeBinDataNodalColors(std::ostream& binFile,
+                            int&          accessorNb) const;
 
   //! Writes meshes indexes into binary file.
-  //! \param[out]    gltfFace   glTF face definition.
   //! \param[out]    binFile    output file to write into.
-  //! \param[in]     faceIter   current face to write.
   //! \param[in,out] accessorNb last accessor index.
   gltf_EXPORT virtual void
-    writeBinDataIndices(std::ostream&            binFile,
-                        int&                     accessorNb);
+    writeBinDataIndices(std::ostream& binFile,
+                        int&          accessorNb);
 
 protected:
 
@@ -276,17 +276,17 @@ protected:
   //! Writes "images" section.
   //! \param[out] materialMap map of materials, filled with image files used by textures.
   gltf_EXPORT virtual void
-    writeImages(glTFMaterialMap&        materialMap);
+    writeImages(glTFMaterialMap& materialMap);
 
   //! Writes "materials" section.
   //! \param[out] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMaterials(glTFMaterialMap&        materialMap);
+    writeMaterials(glTFMaterialMap& materialMap);
 
   //! Writes "meshes" section.
   //! \param[in] materialMap map of materials.
   gltf_EXPORT virtual void
-    writeMeshes(const glTFMaterialMap&  materialMap);
+    writeMeshes(const glTFMaterialMap& materialMap);
 
   //! Writes "nodes" section for the scene nodes.
   gltf_EXPORT virtual void
@@ -314,13 +314,12 @@ protected:
   //! Writes "textures" section.
   //! \param[out] materialMap map of materials, filled with textures.
   gltf_EXPORT virtual void
-    writeTextures(glTFMaterialMap&        materialMap);
+    writeTextures(glTFMaterialMap& materialMap);
 
 protected:
 
   typedef std::shared_ptr<glTFJsonSerializer> glTFJsonSerializerPtr;
 
-  Handle(XCAFDoc_ShapeTool) m_shapeTool;         //!< Shape Tool of XCAF.
   TCollection_AsciiString   m_filename;          //!< Output glTF file.
   TCollection_AsciiString   m_binFilenameFull;   //!< Output file with binary data (full path).
   TCollection_AsciiString   m_binFilenameShort;  //!< Output file with binary data (short path).

@@ -37,57 +37,57 @@ const Standard_GUID& glTFMaterialAttr::GetID()
 //-----------------------------------------------------------------------------
 
 glTFMaterialAttr::glTFMaterialAttr()
-: myAlphaMode (Graphic3d_AlphaMode_BlendAuto),
-  myAlphaCutOff (0.5f),
-  myIsDoubleSided (true)
+//
+: m_alphaMode      (Graphic3d_AlphaMode_BlendAuto),
+  m_fAlphaCutOff   (0.5f),
+  m_bIsDoubleSided (true)
+{}
+
+//-----------------------------------------------------------------------------
+
+void glTFMaterialAttr::SetPbrMaterial(const glTFMaterialPbr& material)
 {
+  Backup();
+  m_pbrMat = material;
+}
+
+//-----------------------------------------------------------------------------
+
+void glTFMaterialAttr::SetCommonMaterial(const glTFMaterialCommon& material)
+{
+  Backup();
+  m_commonMat = material;
+}
+
+//-----------------------------------------------------------------------------
+
+void glTFMaterialAttr::SetAlphaMode(Graphic3d_AlphaMode mode,
+                                    float               cutOff)
+{
+  Backup();
+  m_alphaMode    = mode;
+  m_fAlphaCutOff = cutOff;
+}
+
+//-----------------------------------------------------------------------------
+
+void glTFMaterialAttr::SetDoubleSided(bool isDoubleSided)
+{
+  Backup();
+  m_bIsDoubleSided = isDoubleSided;
+}
+
+//-----------------------------------------------------------------------------
+
+void glTFMaterialAttr::Restore(const Handle(TDF_Attribute)& with)
+{
+  glTFMaterialAttr* pOther = dynamic_cast<glTFMaterialAttr*>( with.get() );
   //
-}
-
-//-----------------------------------------------------------------------------
-
-void glTFMaterialAttr::SetPbrMaterial(const glTFMaterialPbr& theMaterial)
-{
-  Backup();
-  myPbrMat = theMaterial;
-}
-
-//-----------------------------------------------------------------------------
-
-void glTFMaterialAttr::SetCommonMaterial(const glTFMaterialCommon& theMaterial)
-{
-  Backup();
-  myCommonMat = theMaterial;
-}
-
-//-----------------------------------------------------------------------------
-
-void glTFMaterialAttr::SetAlphaMode(Graphic3d_AlphaMode theMode,
-                                     float               theCutOff)
-{
-  Backup();
-  myAlphaMode   = theMode;
-  myAlphaCutOff = theCutOff;
-}
-
-//-----------------------------------------------------------------------------
-
-void glTFMaterialAttr::SetDoubleSided(bool theIsDoubleSided)
-{
-  Backup();
-  myIsDoubleSided = theIsDoubleSided;
-}
-
-//-----------------------------------------------------------------------------
-
-void glTFMaterialAttr::Restore(const Handle(TDF_Attribute)& theWith)
-{
-  glTFMaterialAttr* anOther = dynamic_cast<glTFMaterialAttr* >(theWith.get());
-  myPbrMat        = anOther->myPbrMat;
-  myCommonMat     = anOther->myCommonMat;
-  myAlphaMode     = anOther->myAlphaMode;
-  myAlphaCutOff   = anOther->myAlphaCutOff;
-  myIsDoubleSided = anOther->myIsDoubleSided;
+  m_pbrMat         = pOther->m_pbrMat;
+  m_commonMat      = pOther->m_commonMat;
+  m_alphaMode      = pOther->m_alphaMode;
+  m_fAlphaCutOff   = pOther->m_fAlphaCutOff;
+  m_bIsDoubleSided = pOther->m_bIsDoubleSided;
 }
 
 //-----------------------------------------------------------------------------
@@ -99,76 +99,77 @@ Handle(TDF_Attribute) glTFMaterialAttr::NewEmpty() const
 
 //-----------------------------------------------------------------------------
 
-void glTFMaterialAttr::Paste(const Handle(TDF_Attribute)& theInto,
-                              const Handle(TDF_RelocationTable)& ) const
+void glTFMaterialAttr::Paste(const Handle(TDF_Attribute)& into,
+                             const Handle(TDF_RelocationTable)&) const
 {
-  glTFMaterialAttr* anOther = dynamic_cast<glTFMaterialAttr* >(theInto.get());
-  anOther->Backup();
-  anOther->myPbrMat        = myPbrMat;
-  anOther->myCommonMat     = myCommonMat;
-  anOther->myAlphaMode     = myAlphaMode;
-  anOther->myAlphaCutOff   = myAlphaCutOff;
-  anOther->myIsDoubleSided = myIsDoubleSided;
+  glTFMaterialAttr* pOther = dynamic_cast<glTFMaterialAttr*>( into.get() );
+  //
+  pOther->Backup();
+  pOther->m_pbrMat         = m_pbrMat;
+  pOther->m_commonMat      = m_commonMat;
+  pOther->m_alphaMode      = m_alphaMode;
+  pOther->m_fAlphaCutOff   = m_fAlphaCutOff;
+  pOther->m_bIsDoubleSided = m_bIsDoubleSided;
 }
 
 //-----------------------------------------------------------------------------
 
 Quantity_ColorRGBA glTFMaterialAttr::BaseColor() const
 {
-  if (myPbrMat.IsDefined)
+  if ( m_pbrMat.IsDefined )
   {
-    return myPbrMat.BaseColor;
+    return m_pbrMat.BaseColor;
   }
-  else if (myCommonMat.IsDefined)
+  else if ( m_commonMat.IsDefined )
   {
-    return Quantity_ColorRGBA (myCommonMat.DiffuseColor, 1.0f - myCommonMat.Transparency);
+    return Quantity_ColorRGBA( m_commonMat.DiffuseColor, 1.0f - m_commonMat.Transparency );
   }
-  return Quantity_ColorRGBA (Quantity_NOC_WHITE);
+  return Quantity_ColorRGBA(Quantity_NOC_WHITE);
 }
 
 //-----------------------------------------------------------------------------
 
 glTFMaterialCommon glTFMaterialAttr::ConvertToCommonMaterial()
 {
-  if (myCommonMat.IsDefined)
+  if ( m_commonMat.IsDefined )
   {
-    return myCommonMat;
+    return m_commonMat;
   }
-  else if (!myPbrMat.IsDefined)
+  else if ( !m_pbrMat.IsDefined )
   {
     return glTFMaterialCommon();
   }
 
   // convert metal-roughness into common
-  glTFMaterialCommon aComMat;
-  aComMat.IsDefined = true;
-  aComMat.DiffuseTexture = myPbrMat.BaseColorTexture;
-  aComMat.DiffuseColor  = myPbrMat.BaseColor.GetRGB();
-  aComMat.SpecularColor = Quantity_Color (Graphic3d_Vec3 (myPbrMat.Metallic));
-  aComMat.Transparency = 1.0f - myPbrMat.BaseColor.Alpha();
-  aComMat.Shininess    = 1.0f - myPbrMat.Roughness;
-  return aComMat;
+  glTFMaterialCommon comMat;
+  comMat.IsDefined      = true;
+  comMat.DiffuseTexture = m_pbrMat.BaseColorTexture;
+  comMat.DiffuseColor   = m_pbrMat.BaseColor.GetRGB();
+  comMat.SpecularColor  = Quantity_Color( Graphic3d_Vec3(m_pbrMat.Metallic) );
+  comMat.Transparency   = 1.0f - m_pbrMat.BaseColor.Alpha();
+  comMat.Shininess      = 1.0f - m_pbrMat.Roughness;
+  return comMat;
 }
 
 //-----------------------------------------------------------------------------
 
 glTFMaterialPbr glTFMaterialAttr::ConvertToPbrMaterial()
 {
-  if (myPbrMat.IsDefined)
+  if ( m_pbrMat.IsDefined )
   {
-    return myPbrMat;
+    return m_pbrMat;
   }
-  else if (!myCommonMat.IsDefined)
+  else if ( !m_commonMat.IsDefined )
   {
     return glTFMaterialPbr();
   }
 
-  glTFMaterialPbr aPbrMat;
-  aPbrMat.IsDefined = true;
-  aPbrMat.BaseColorTexture = myCommonMat.DiffuseTexture;
-  aPbrMat.BaseColor.SetRGB (myCommonMat.DiffuseColor);
-  aPbrMat.BaseColor.SetAlpha (1.0f - myCommonMat.Transparency);
-  aPbrMat.Metallic  = 0;//Graphic3d_PBRMaterial::MetallicFromSpecular (myCommonMat.SpecularColor);
-  aPbrMat.Roughness = 0;//Graphic3d_PBRMaterial::RoughnessFromSpecular (myCommonMat.SpecularColor, myCommonMat.Shininess);
-  return aPbrMat;
+  glTFMaterialPbr pbrMat;
+  pbrMat.IsDefined = true;
+  pbrMat.BaseColorTexture = m_commonMat.DiffuseTexture;
+  pbrMat.BaseColor.SetRGB(m_commonMat.DiffuseColor);
+  pbrMat.BaseColor.SetAlpha(1.0f - m_commonMat.Transparency);
+  pbrMat.Metallic  = 0;
+  pbrMat.Roughness = 0;
+  return pbrMat;
 }

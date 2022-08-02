@@ -432,7 +432,10 @@ void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
   asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
   if (pickRes->GetPickedActor() && !nodeInfo)
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull()  )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
@@ -441,13 +444,16 @@ void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
   TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
   if (gids.IsEmpty())
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   const TopTools_IndexedMapOfShape& allFaces = geom_n->GetAAG()->GetMapOfFaces();
-  if (m_statusBar)
+  if ( !m_statusBar.IsNull() )
   {
     for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
     {
@@ -466,7 +472,10 @@ void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
   asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
   if (pickRes->GetPickedActor() && !nodeInfo)
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
@@ -475,13 +484,16 @@ void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
   TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
   if (gids.IsEmpty())
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   const TopTools_IndexedMapOfShape& allEdges = geom_n->GetAAG()->RequestMapOfEdges();
-  if (m_statusBar)
+  if ( !m_statusBar.IsNull() )
   {
     for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
     {
@@ -500,7 +512,10 @@ void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes
   asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
   if (pickRes->GetPickedActor() && !nodeInfo)
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
@@ -509,14 +524,17 @@ void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes
   TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
   if (gids.IsEmpty())
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+    {
+      m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    }
     return;
   }
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   // Get map of vertices.
   const TopTools_IndexedMapOfShape& allVertices = geom_n->GetAAG()->RequestMapOfVertices();
-  if (m_statusBar)
+  if ( !m_statusBar.IsNull() )
   {
     for (TColStd_PackedMapOfInteger::Iterator gid(gids); gid.More(); gid.Next())
     {

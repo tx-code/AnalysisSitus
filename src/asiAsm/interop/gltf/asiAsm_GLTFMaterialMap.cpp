@@ -55,11 +55,11 @@ const Handle(Image_Texture)&
 glTFMaterialMap::glTFMaterialMap(const TCollection_AsciiString& filename,
                                  const int                      defSamplerId)
 : glTFMaterialMapBase (filename),
-  myWriter             (nullptr),
-  myDefSamplerId       (defSamplerId),
-  myNbImages           (0)
+  m_pWriter           (nullptr),
+  m_iDefSamplerId     (defSamplerId),
+  m_iNbImages         (0)
 {
-  myMatNameAsKey = false;
+  m_matNameAsKey = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -91,31 +91,31 @@ void glTFMaterialMap::addImage(glTFJsonSerializer*          writer,
                                const Handle(Image_Texture)& texture,
                                bool&                        isStarted)
 {
-#if defined USE_RAPIDJSON
-  if ( texture.IsNull() || myImageMap.IsBound1(texture) || myImageFailMap.Contains(texture) )
+  if ( texture.IsNull() || m_imageMap.IsBound1(texture) || m_imageFailMap.Contains(texture) )
   {
     return;
   }
 
-  TCollection_AsciiString aGltfImgKey = myNbImages;
-  ++myNbImages;
-  for (; myImageMap.IsBound2 (aGltfImgKey); ++myNbImages)
+  TCollection_AsciiString gltfImgKey = m_iNbImages;
+  ++m_iNbImages;
+  //
+  for ( ; m_imageMap.IsBound2(gltfImgKey); ++m_iNbImages )
   {
-    aGltfImgKey = myNbImages;
+    gltfImgKey = m_iNbImages;
   }
 
-  TCollection_AsciiString aTextureUri;
-  if (!CopyTexture (aTextureUri, texture, aGltfImgKey))
+  TCollection_AsciiString textureUri;
+  if ( !CopyTexture(textureUri, texture, gltfImgKey) )
   {
-    myImageFailMap.Add (texture);
+    m_imageFailMap.Add (texture);
     return;
   }
 
-  myImageMap.Bind (texture, aGltfImgKey);
+  m_imageMap.Bind(texture, gltfImgKey);
 
-  if (!isStarted)
+  if ( !isStarted )
   {
-    writer->Key (glTFRootElementName (glTFRootElement_Images));
+    writer->Key( glTFRootElementName(glTFRootElement_Images) );
     writer->StartArray();
     isStarted = true;
   }
@@ -123,248 +123,220 @@ void glTFMaterialMap::addImage(glTFJsonSerializer*          writer,
   writer->StartObject();
   {
     writer->Key ("uri");
-    writer->String (aTextureUri.ToCString());
+    writer->String( textureUri.ToCString() );
   }
   writer->EndObject();
-#else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) writer;
-  (void) texture;
-  (void) isStarted;
-#endif
 }
 
 //-----------------------------------------------------------------------------
 
-void glTFMaterialMap::AddMaterial(glTFJsonSerializer*       theWriter,
-                                  const glTFXdeVisualStyle& theStyle,
-                                  bool&                     theIsStarted)
+void glTFMaterialMap::AddMaterial(glTFJsonSerializer*       writer,
+                                  const glTFXdeVisualStyle& style,
+                                  bool&                     isStarted)
 {
-#if defined USE_RAPIDJSON
-  if (theWriter == NULL
-   || ((theStyle.GetMaterial().IsNull() || theStyle.GetMaterial()->IsEmpty())
-    && !(theStyle.IsSetColorSurf() || theStyle.IsSetColorCurve())))
+  if ( writer == NULL || ( ( style.GetMaterial().IsNull() || style.GetMaterial()->IsEmpty() )
+                       && !( style.IsSetColorSurf() || style.IsSetColorCurve() ) ) )
   {
     return;
   }
 
-  if (!theIsStarted)
+  if ( !isStarted )
   {
-    theWriter->Key (glTFRootElementName (glTFRootElement_Materials));
-    theWriter->StartArray();
-    theIsStarted = true;
+    writer->Key( glTFRootElementName(glTFRootElement_Materials) );
+    writer->StartArray();
+    isStarted = true;
   }
-  myWriter = theWriter;
-  AddMaterial (theStyle);
-  myWriter = NULL;
-#else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) theWriter;
-  (void) theStyle;
-  (void) theIsStarted;
-#endif
+
+  m_pWriter = writer;
+  AddMaterial(style);
+  m_pWriter = NULL;
 }
 
 //-----------------------------------------------------------------------------
 
-void glTFMaterialMap::AddTextures(glTFJsonSerializer*       theWriter,
-                                  const glTFXdeVisualStyle& theStyle,
-                                  bool&                     theIsStarted)
+void glTFMaterialMap::AddTextures(glTFJsonSerializer*       writer,
+                                  const glTFXdeVisualStyle& style,
+                                  bool&                     isStarted)
 {
-#if defined USE_RAPIDJSON
-  if (theWriter == NULL
-   || theStyle.GetMaterial().IsNull()
-   || theStyle.GetMaterial()->IsEmpty())
+  if ( writer == NULL || style.GetMaterial().IsNull() || style.GetMaterial()->IsEmpty() )
   {
     return;
   }
 
-  addTexture (theWriter, baseColorTexture (theStyle.GetMaterial()), theIsStarted);
-  addTexture (theWriter, theStyle.GetMaterial()->PbrMaterial().MetallicRoughnessTexture, theIsStarted);
-  addTexture (theWriter, theStyle.GetMaterial()->PbrMaterial().NormalTexture,    theIsStarted);
-  addTexture (theWriter, theStyle.GetMaterial()->PbrMaterial().EmissiveTexture,  theIsStarted);
-  addTexture (theWriter, theStyle.GetMaterial()->PbrMaterial().OcclusionTexture, theIsStarted);
-#else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) theWriter;
-  (void) theStyle;
-  (void) theIsStarted;
-#endif
+  addTexture(writer, baseColorTexture( style.GetMaterial() ),                     isStarted);
+  addTexture(writer, style.GetMaterial()->PbrMaterial().MetallicRoughnessTexture, isStarted);
+  addTexture(writer, style.GetMaterial()->PbrMaterial().NormalTexture,            isStarted);
+  addTexture(writer, style.GetMaterial()->PbrMaterial().EmissiveTexture,          isStarted);
+  addTexture(writer, style.GetMaterial()->PbrMaterial().OcclusionTexture,         isStarted);
 }
 
 //-----------------------------------------------------------------------------
 
-void glTFMaterialMap::addTexture(glTFJsonSerializer*          theWriter,
-                                 const Handle(Image_Texture)& theTexture,
-                                 bool&                        theIsStarted)
+void glTFMaterialMap::addTexture(glTFJsonSerializer*          writer,
+                                 const Handle(Image_Texture)& texture,
+                                 bool&                        isStarted)
 {
-#if defined USE_RAPIDJSON
-  if (theTexture.IsNull()
-  ||  myTextureMap.Contains (theTexture)
-  || !myImageMap  .IsBound1 (theTexture))
+  if ( texture.IsNull() || m_textureMap.Contains(texture) || !m_imageMap.IsBound1(texture) )
   {
     return;
   }
 
-  const TCollection_AsciiString anImgKey = myImageMap.Find1 (theTexture);
-  myTextureMap.Add (theTexture);
-  if (anImgKey.IsEmpty())
+  const TCollection_AsciiString imgKey = m_imageMap.Find1(texture);
+  m_textureMap.Add(texture);
+  //
+  if ( imgKey.IsEmpty() )
   {
     return;
   }
 
-  if (!theIsStarted)
+  if ( !isStarted )
   {
-    theWriter->Key (glTFRootElementName (glTFRootElement_Textures));
-    theWriter->StartArray();
-    theIsStarted = true;
+    writer->Key( glTFRootElementName(glTFRootElement_Textures) );
+    writer->StartArray();
+    isStarted = true;
   }
 
-  theWriter->StartObject();
+  writer->StartObject();
   {
-    theWriter->Key ("sampler");
-    theWriter->Int (myDefSamplerId); // mandatory field by specs
-    theWriter->Key ("source");
-    theWriter->Int (anImgKey.IntegerValue());
+    writer->Key( "sampler" );
+    writer->Int( m_iDefSamplerId ); // mandatory field by specs
+    writer->Key( "source" );
+    writer->Int( imgKey.IntegerValue() );
   }
-  theWriter->EndObject();
-#else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) theWriter;
-  (void) theTexture;
-  (void) theIsStarted;
-#endif
+  writer->EndObject();
 }
 
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
-  glTFMaterialMap::AddMaterial(const glTFXdeVisualStyle& theStyle)
+  glTFMaterialMap::AddMaterial(const glTFXdeVisualStyle& style)
 {
-  return glTFMaterialMapBase::AddMaterial(theStyle);
+  return glTFMaterialMapBase::AddMaterial(style);
 }
 
 //-----------------------------------------------------------------------------
 
-void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      theStyle,
-                                     const TCollection_AsciiString& /*theKey*/,
-                                     const TCollection_AsciiString& theName)
+void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      style,
+                                     const TCollection_AsciiString&,
+                                     const TCollection_AsciiString& name)
 {
-#if defined USE_RAPIDJSON
-  if (myWriter == NULL)
+  if ( m_pWriter == NULL )
   {
     Standard_ProgramError::Raise ("glTFMaterialMap::DefineMaterial() should be called with JSON Writer");
     return;
   }
 
-  glTFMaterialPbr aPbrMat;
-  const bool hasMaterial = !theStyle.GetMaterial().IsNull()
-                        && !theStyle.GetMaterial()->IsEmpty();
-  if (hasMaterial)
+  glTFMaterialPbr pbrMat;
+  const bool hasMaterial = !style.GetMaterial().IsNull()
+                        && !style.GetMaterial()->IsEmpty();
+  if ( hasMaterial )
   {
-    aPbrMat = theStyle.GetMaterial()->ConvertToPbrMaterial();
+    pbrMat = style.GetMaterial()->ConvertToPbrMaterial();
   }
-  else if (!myDefaultStyle.GetMaterial().IsNull()
-         && myDefaultStyle.GetMaterial()->HasPbrMaterial())
+  else if ( !m_defaultStyle.GetMaterial().IsNull()
+          && m_defaultStyle.GetMaterial()->HasPbrMaterial() )
   {
-    aPbrMat = myDefaultStyle.GetMaterial()->PbrMaterial();
+    pbrMat = m_defaultStyle.GetMaterial()->PbrMaterial();
   }
-  if (theStyle.IsSetColorSurf())
+  if ( style.IsSetColorSurf() )
   {
-    aPbrMat.BaseColor.SetRGB (theStyle.GetColorSurf());
-    if (theStyle.GetColorSurfRGBA().Alpha() < 1.0f)
+    pbrMat.BaseColor.SetRGB( style.GetColorSurf() );
+
+    if ( style.GetColorSurfRGBA().Alpha() < 1.0f )
     {
-      aPbrMat.BaseColor.SetAlpha (theStyle.GetColorSurfRGBA().Alpha());
+      pbrMat.BaseColor.SetAlpha( style.GetColorSurfRGBA().Alpha() );
     }
   }
-  else if (theStyle.IsSetColorCurve())
+  else if ( style.IsSetColorCurve() )
   {
-    aPbrMat.BaseColor.SetRGB(theStyle.GetColorCurve());
+    pbrMat.BaseColor.SetRGB( style.GetColorCurve() );
   }
-  myWriter->StartObject();
+
+  m_pWriter->StartObject();
   {
-    myWriter->Key ("name");
-    myWriter->String (theName.ToCString());
+    m_pWriter->Key    ( "name" );
+    m_pWriter->String ( name.ToCString() );
 
-    myWriter->Key ("pbrMetallicRoughness");
-    myWriter->StartObject();
+    m_pWriter->Key ("pbrMetallicRoughness");
+    m_pWriter->StartObject();
     {
-      myWriter->Key ("baseColorFactor");
-      myWriter->StartArray();
+      m_pWriter->Key ("baseColorFactor");
+      m_pWriter->StartArray();
       {
-        myWriter->Double (aPbrMat.BaseColor.GetRGB().Red());
-        myWriter->Double (aPbrMat.BaseColor.GetRGB().Green());
-        myWriter->Double (aPbrMat.BaseColor.GetRGB().Blue());
-        myWriter->Double (aPbrMat.BaseColor.Alpha());
+        m_pWriter->Double( pbrMat.BaseColor.GetRGB().Red() );
+        m_pWriter->Double( pbrMat.BaseColor.GetRGB().Green() );
+        m_pWriter->Double( pbrMat.BaseColor.GetRGB().Blue() );
+        m_pWriter->Double( pbrMat.BaseColor.Alpha() );
       }
-      myWriter->EndArray();
+      m_pWriter->EndArray();
 
-      if (const Handle(Image_Texture)& aBaseTexture = baseColorTexture (theStyle.GetMaterial()))
+      if ( const Handle(Image_Texture)& baseTexture = baseColorTexture( style.GetMaterial() ) )
       {
-        if (myImageMap.IsBound1 (aBaseTexture))
+        if ( m_imageMap.IsBound1(baseTexture) )
         {
-          myWriter->Key ("baseColorTexture");
-          myWriter->StartObject();
+          m_pWriter->Key("baseColorTexture");
+          m_pWriter->StartObject();
           {
-            myWriter->Key ("index");
-            const TCollection_AsciiString& anImageIdx = myImageMap.Find1 (aBaseTexture);
-            if (!anImageIdx.IsEmpty())
+            m_pWriter->Key("index");
+            const TCollection_AsciiString& imageIdx = m_imageMap.Find1(baseTexture);
+
+            if ( !imageIdx.IsEmpty() )
             {
-              myWriter->Int (anImageIdx.IntegerValue());
+              m_pWriter->Int( imageIdx.IntegerValue() );
             }
           }
-          myWriter->EndObject();
+          m_pWriter->EndObject();
         }
       }
 
-      if (hasMaterial
-       || aPbrMat.Metallic != 1.0f)
+      if ( hasMaterial || pbrMat.Metallic != 1.0f )
       {
-        myWriter->Key ("metallicFactor");
-        myWriter->Double (aPbrMat.Metallic);
+        m_pWriter->Key("metallicFactor");
+        m_pWriter->Double(pbrMat.Metallic);
       }
 
-      if (!aPbrMat.MetallicRoughnessTexture.IsNull()
-        && myImageMap.IsBound1 (aPbrMat.MetallicRoughnessTexture))
+      if ( !pbrMat.MetallicRoughnessTexture.IsNull()
+         && m_imageMap.IsBound1(pbrMat.MetallicRoughnessTexture) )
       {
-        myWriter->Key ("metallicRoughnessTexture");
-        myWriter->StartObject();
+        m_pWriter->Key("metallicRoughnessTexture");
+        m_pWriter->StartObject();
         {
-          myWriter->Key ("index");
-          const TCollection_AsciiString& anImageIdx = myImageMap.Find1 (aPbrMat.MetallicRoughnessTexture);
-          if (!anImageIdx.IsEmpty())
+          m_pWriter->Key("index");
+          const TCollection_AsciiString& imageIdx = m_imageMap.Find1(pbrMat.MetallicRoughnessTexture);
+
+          if ( !imageIdx.IsEmpty() )
           {
-            myWriter->Int (anImageIdx.IntegerValue());
+            m_pWriter->Int( imageIdx.IntegerValue() );
           }
         }
-        myWriter->EndObject();
+        m_pWriter->EndObject();
       }
 
-      if (hasMaterial
-       || aPbrMat.Roughness != 1.0f)
+      if ( hasMaterial || pbrMat.Roughness != 1.0f )
       {
-        myWriter->Key ("roughnessFactor");
-        myWriter->Double (aPbrMat.Roughness);
+        m_pWriter->Key("roughnessFactor");
+        m_pWriter->Double(pbrMat.Roughness);
       }
     }
-    myWriter->EndObject();
+    m_pWriter->EndObject();
 
-    if (theStyle.GetMaterial().IsNull()
-     || theStyle.GetMaterial()->IsDoubleSided())
+    if ( style.GetMaterial().IsNull() || style.GetMaterial()->IsDoubleSided() )
     {
-      myWriter->Key ("doubleSided");
-      myWriter->Bool (true);
+      m_pWriter->Key("doubleSided");
+      m_pWriter->Bool(true);
     }
 
-    const Graphic3d_AlphaMode anAlphaMode = !theStyle.GetMaterial().IsNull() ? theStyle.GetMaterial()->AlphaMode() : Graphic3d_AlphaMode_BlendAuto;
-    switch (anAlphaMode)
+    const Graphic3d_AlphaMode
+      alphaMode = !style.GetMaterial().IsNull() ? style.GetMaterial()->AlphaMode() : Graphic3d_AlphaMode_BlendAuto;
+    //
+    switch ( alphaMode )
     {
       case Graphic3d_AlphaMode_BlendAuto:
       {
-        if (aPbrMat.BaseColor.Alpha() < 1.0f)
+        if ( pbrMat.BaseColor.Alpha() < 1.0f )
         {
-          myWriter->Key ("alphaMode");
-          myWriter->String ("BLEND");
+          m_pWriter->Key("alphaMode");
+          m_pWriter->String("BLEND");
         }
         break;
       }
@@ -374,87 +346,84 @@ void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      theStyle,
       }
       case Graphic3d_AlphaMode_Mask:
       {
-        myWriter->Key ("alphaMode");
-        myWriter->String ("MASK");
+        m_pWriter->Key("alphaMode");
+        m_pWriter->String("MASK");
         break;
       }
       case Graphic3d_AlphaMode_Blend:
       {
-        myWriter->Key ("alphaMode");
-        myWriter->String ("BLEND");
+        m_pWriter->Key("alphaMode");
+        m_pWriter->String("BLEND");
         break;
       }
     }
-    if (!theStyle.GetMaterial().IsNull()
-      && theStyle.GetMaterial()->AlphaCutOff() != 0.5f)
+    if ( !style.GetMaterial().IsNull() && style.GetMaterial()->AlphaCutOff() != 0.5f )
     {
-      myWriter->Key ("alphaCutoff");
-      myWriter->Double (theStyle.GetMaterial()->AlphaCutOff());
+      m_pWriter->Key("alphaCutoff");
+      m_pWriter->Double( style.GetMaterial()->AlphaCutOff() );
     }
 
-    if ( !aPbrMat.EmissiveFactor.IsEqual( Graphic3d_Vec3 (0.0f, 0.0f, 0.0f) ) )
+    if ( !pbrMat.EmissiveFactor.IsEqual( Graphic3d_Vec3 (0.0f, 0.0f, 0.0f) ) )
     {
-      myWriter->Key ("emissiveFactor");
-      myWriter->StartArray();
+      m_pWriter->Key ("emissiveFactor");
+      m_pWriter->StartArray();
       {
-        myWriter->Double (aPbrMat.EmissiveFactor.r());
-        myWriter->Double (aPbrMat.EmissiveFactor.g());
-        myWriter->Double (aPbrMat.EmissiveFactor.b());
+        m_pWriter->Double( pbrMat.EmissiveFactor.r() );
+        m_pWriter->Double( pbrMat.EmissiveFactor.g() );
+        m_pWriter->Double( pbrMat.EmissiveFactor.b() );
       }
-      myWriter->EndArray();
+      m_pWriter->EndArray();
     }
-    if (!aPbrMat.EmissiveTexture.IsNull()
-      && myImageMap.IsBound1 (aPbrMat.EmissiveTexture))
+    if ( !pbrMat.EmissiveTexture.IsNull() && m_imageMap.IsBound1(pbrMat.EmissiveTexture) )
     {
-      myWriter->Key ("emissiveTexture");
-      myWriter->StartObject();
+      m_pWriter->Key("emissiveTexture");
+      m_pWriter->StartObject();
       {
-        myWriter->Key ("index");
-        const TCollection_AsciiString& anImageIdx = myImageMap.Find1 (aPbrMat.EmissiveTexture);
-        if (!anImageIdx.IsEmpty())
+        m_pWriter->Key("index");
+
+        const TCollection_AsciiString& imageIdx = m_imageMap.Find1(pbrMat.EmissiveTexture);
+
+        if ( !imageIdx.IsEmpty() )
         {
-          myWriter->Int (anImageIdx.IntegerValue());
+          m_pWriter->Int( imageIdx.IntegerValue() );
         }
       }
-      myWriter->EndObject();
+      m_pWriter->EndObject();
     }
 
-    if (!aPbrMat.NormalTexture.IsNull()
-      && myImageMap.IsBound1 (aPbrMat.NormalTexture))
+    if ( !pbrMat.NormalTexture.IsNull() && m_imageMap.IsBound1(pbrMat.NormalTexture) )
     {
-      myWriter->Key ("normalTexture");
-      myWriter->StartObject();
+      m_pWriter->Key("normalTexture");
+      m_pWriter->StartObject();
       {
-        myWriter->Key ("index");
-        const TCollection_AsciiString& anImageIdx = myImageMap.Find1 (aPbrMat.NormalTexture);
-        if (!anImageIdx.IsEmpty())
+        m_pWriter->Key("index");
+
+        const TCollection_AsciiString& imageIdx = m_imageMap.Find1(pbrMat.NormalTexture);
+        //
+        if ( !imageIdx.IsEmpty() )
         {
-          myWriter->Int (anImageIdx.IntegerValue());
+          m_pWriter->Int( imageIdx.IntegerValue() );
         }
       }
-      myWriter->EndObject();
+      m_pWriter->EndObject();
     }
 
-    if (!aPbrMat.OcclusionTexture.IsNull()
-      && myImageMap.IsBound1 (aPbrMat.OcclusionTexture))
+    if ( !pbrMat.OcclusionTexture.IsNull() && m_imageMap.IsBound1(pbrMat.OcclusionTexture) )
     {
-      myWriter->Key ("occlusionTexture");
-      myWriter->StartObject();
+      m_pWriter->Key("occlusionTexture");
+      m_pWriter->StartObject();
       {
-        myWriter->Key ("index");
-        const TCollection_AsciiString& anImageIdx = myImageMap.Find1 (aPbrMat.OcclusionTexture);
-        if (!anImageIdx.IsEmpty())
+        m_pWriter->Key("index");
+
+        const TCollection_AsciiString& imageIdx = m_imageMap.Find1(pbrMat.OcclusionTexture);
+        //
+        if ( !imageIdx.IsEmpty() )
         {
-          myWriter->Int (anImageIdx.IntegerValue());
+          m_pWriter->Int( imageIdx.IntegerValue() );
         }
       }
-      myWriter->EndObject();
+      m_pWriter->EndObject();
     }
   }
-  myWriter->EndObject();
-#else
-  // Suppress `unreferenced formal parameter` warning (C4100).
-  (void) theStyle;
-  (void) theName;
-#endif
+  m_pWriter->EndObject();
 }

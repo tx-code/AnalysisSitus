@@ -32,6 +32,7 @@
 #include <asiAlgo_CheckThickness.h>
 
 // asiAlgo includes
+#include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_HitFacet.h>
 #include <asiAlgo_MeshField.h>
 #include <asiAlgo_MeshMerge.h>
@@ -40,8 +41,13 @@
 #include <gp_Lin.hxx>
 
 #if defined USE_MOBIUS
-#include <mobius/cascade.h>
-using namespace mobius;
+  #include <mobius/cascade.h>
+  using namespace mobius;
+#endif
+
+#define DRAW_DEBUG
+#if defined DRAW_DEBUG
+  #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
 
 //-----------------------------------------------------------------------------
@@ -100,6 +106,13 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     m_progress.SendLogMessage(LogErr(Normal) << "Null triangulation.");
     return false;
   }
+
+#if defined DRAW_DEBUG
+  Handle(asiAlgo_BaseCloud<double>)
+    sourcePts = new asiAlgo_BaseCloud<double>; // source points.
+  Handle(asiAlgo_BaseCloud<double>)
+    sourceVectors = new asiAlgo_BaseCloud<double>; // source vectors.
+#endif
 
   asiAlgo_HitFacet HitFacet(m_bvh/*, m_progress, m_plotter*/);
 
@@ -190,6 +203,11 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
 
     gp_Lin ray    ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir ) );
     gp_Lin rayInv ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir.Reversed() ) );
+
+#if defined DRAW_DEBUG
+    sourcePts     -> AddElement( ray.Location() );
+    sourceVectors -> AddElement( ray.Direction().XYZ() );
+#endif
 
     // Do the intersection test. For the custom directions, the
     // test is done twice: in the forward and the reversed directions.
@@ -291,6 +309,11 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
   // Set extreme thickness values.
   m_fMinThick = minScalar;
   m_fMaxThick = maxScalar;
+
+#if defined DRAW_DEBUG
+  m_plotter.DRAW_POINTS(sourcePts->GetCoordsArray(), Color_Yellow, "sourcePts");
+  m_plotter.DRAW_VECTORS(sourcePts->GetCoordsArray(), sourceVectors->GetCoordsArray(), Color_Blue, "sourceRays");
+#endif
 
   return true;
 #else

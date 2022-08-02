@@ -26,55 +26,53 @@ using namespace asiAsm::xde;
 //-----------------------------------------------------------------------------
 
 glTFCSysConverter::glTFCSysConverter()
-: myInputLengthUnit (-1.0),
-  myOutputLengthUnit(-1.0),
-  myHasInputAx3 (false),
-  myHasOutputAx3(false),
-  //
-  myUnitFactor (1),
-  myHasScale (false),
-  myIsEmpty  (true)
-{
-  //
-}
+//
+: m_fInputLengthUnit  (-1.0),
+  m_fOutputLengthUnit (-1.0),
+  m_bHasInputAx3      (false),
+  m_bHasOutputAx3     (false),
+  m_fUnitFactor       (1.0),
+  m_bHasScale         (false),
+  m_bIsEmpty          (true)
+{}
 
 //-----------------------------------------------------------------------------
 
-void glTFCSysConverter::Init(const gp_Ax3& theInputSystem,
-                              double        theInputLengthUnit,
-                              const gp_Ax3& theOutputSystem,
-                              double        theOutputLengthUnit)
+void glTFCSysConverter::Init(const gp_Ax3& inputSystem,
+                             double        inputLengthUnit,
+                             const gp_Ax3& outputSystem,
+                             double        outputLengthUnit)
 {
-  myInputLengthUnit  = theInputLengthUnit;
-  myOutputLengthUnit = theOutputLengthUnit;
-  myInputAx3         = theInputSystem;
-  myOutputAx3        = theOutputSystem;
-  if (theInputLengthUnit  > 0.0
-   && theOutputLengthUnit > 0.0)
+  m_fInputLengthUnit  = inputLengthUnit;
+  m_fOutputLengthUnit = outputLengthUnit;
+  m_inputAx3          = inputSystem;
+  m_outputAx3         = outputSystem;
+
+  if ( inputLengthUnit > 0.0 && outputLengthUnit > 0.0 )
   {
-    myUnitFactor = theInputLengthUnit / theOutputLengthUnit;
-    myHasScale = Abs(myUnitFactor - 1.0) > gp::Resolution();
+    m_fUnitFactor = inputLengthUnit / outputLengthUnit;
+    m_bHasScale   = Abs(m_fUnitFactor - 1.0) > gp::Resolution();
   }
   else
   {
-    myUnitFactor = 1.0;
-    myHasScale = false;
+    m_fUnitFactor = 1.0;
+    m_bHasScale   = false;
   }
 
-  gp_Trsf aTrsf;
-  if (myHasInputAx3
-   && myHasOutputAx3)
+  gp_Trsf trsf;
+  if ( m_bHasInputAx3 && m_bHasOutputAx3 )
   {
-    aTrsf.SetTransformation (theOutputSystem, theInputSystem);
-    if (aTrsf.TranslationPart().IsEqual (gp_XYZ (0.0, 0.0, 0.0), gp::Resolution())
-     && aTrsf.GetRotation().IsEqual (gp_Quaternion()))
+    trsf.SetTransformation(outputSystem, inputSystem);
+
+    if ( trsf.TranslationPart().IsEqual( gp_XYZ(0.0, 0.0, 0.0), gp::Resolution() ) &&
+         trsf.GetRotation().IsEqual( gp_Quaternion() ) )
     {
-      aTrsf = gp_Trsf();
+      trsf = gp_Trsf();
     }
   }
 
-  myTrsf    = aTrsf;
-  myTrsfInv = aTrsf.Inverted();
-  myTrsf.GetMat4 (myNormTrsf);
-  myIsEmpty = !myHasScale && myTrsf.Form() == gp_Identity;
+  m_trsf    = trsf;
+  m_trsfInv = trsf.Inverted();
+  m_trsf.GetMat4(m_normTrsf);
+  m_bIsEmpty = !m_bHasScale && m_trsf.Form() == gp_Identity;
 }

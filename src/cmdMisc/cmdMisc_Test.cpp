@@ -56,104 +56,55 @@
 
 #include <asiEngine_Part.h>
 
+#include <Geom2d_Circle.hxx>
+#include <GCE2d_MakeCircle.hxx>
+#include <GeomAPI.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Quaternion.hxx>
+#include <BRepTools_WireExplorer.hxx>
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
-  TopoDS_Shape
-    partShape = Handle(asiEngine_Model)::DownCast( interp->GetModel() )->GetPartNode()->GetShape();
+  //Handle(Geom_Plane)    plane    = new Geom_Plane( gp::Origin(), gp_Dir(1,1,1) );
+  //Handle(Geom2d_Circle) circle2d = GCE2d_MakeCircle( gp::Origin2d(), 10 );
+  //Handle(Geom2d_Line)   lin2d    = */
 
-  if ( argc < 2 )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Pass face ID as the only argument.");
-    return TCL_ERROR;
-  }
+  Handle(Geom_TrimmedCurve) line = GC_MakeSegment( gp::Origin(), gp_Pnt(10, 10, 5) );
 
-  int faceId = atoi(argv[1]); // 1-based
+  TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(line);
 
-  TopTools_IndexedMapOfShape M, ME;
-  TopExp::MapShapes(partShape, TopAbs_FACE, M);
-  TopExp::MapShapes(partShape, TopAbs_EDGE, ME);
-  //
-  TopoDS_Face face = TopoDS::Face( M.FindKey(faceId) );
+  gp_Trsf R;
+  R.SetRotation( gp_Quaternion( gp::DZ(), 45./180.*M_PI ) );
 
-  // Attempt to get the highlighted sub-shapes.
-  TColStd_PackedMapOfInteger edgeIds;
-  //
-  if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
-  {
-    asiEngine_Part PartAPI( cmdMisc::model,
-                            cmdMisc::cf->ViewerPart->PrsMgr(),
-                            interp->GetProgress(),
-                            interp->GetPlotter() );
-    //
-    PartAPI.GetHighlightedEdges(edgeIds);
-  }
-  //
-  if ( edgeIds.IsEmpty() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No edge selected.");
-    return TCL_ERROR;
-  }
-  //
-  TopoDS_Edge refEdge;
+  edge.Move(R);
+
+  edge.Location(TopLoc_Location());
+  edge = TopoDS::Edge( BRepBuilderAPI_Transform(edge, R, true) );
+
+  interp->GetPlotter().REDRAW_SHAPE("edge", edge, Color_Blue, 1, true);
+
   BRepBuilderAPI_MakeWire mkWire;
-  for ( TColStd_PackedMapOfInteger::Iterator eit(edgeIds); eit.More(); eit.Next() )
-  {
-    const int   eid  = eit.Key();
-    TopoDS_Edge edge = TopoDS::Edge( ME.FindKey(eid) );
-
-    mkWire.Add(edge);
-
-    if ( refEdge.IsNull() )
-      refEdge = edge;
-  }
-  //
+  mkWire.Add(edge);
   TopoDS_Wire W = mkWire.Wire();
-  //
-  interp->GetPlotter().REDRAW_SHAPE("W", W, Color_Green, 1., true);
+  //mkWire.Add(edge);
 
-  TopoDS_Face extendedFace;
-  BRepLib::ExtendFace(face, 25, true, true, true, true, extendedFace);
+  /*TopTools_IndexedMapOfShape allEdges;
+  TopExp::MapShapes(W, TopAbs_EDGE, allEdges);*/
 
-  interp->GetPlotter().REDRAW_SHAPE("extendedFace", extendedFace);
+  std::vector<TopoDS_Edge> allEdges;
+  for ( BRepTools_WireExplorer wexp(W); wexp.More(); wexp.Next() )
+  {
+    const TopoDS_Edge& edge = wexp.Current();
+    allEdges.push_back(edge);
+  }
 
-  ShapeAnalysis_Edge edgeA = ShapeAnalysis_Edge();
-  gp_Pnt iniPt = BRep_Tool::Pnt( edgeA.FirstVertex(refEdge) );
+  // TopoDS_Iterator
+  // TopExp_Explorer
 
-  Handle(Geom_Curve) curve;
-  Standard_Real a, b;
-  edgeA.Curve3d(refEdge, curve, a, b);
-  gp_Pnt P;
-  gp_Vec V1;
-  curve->D1(0, P, V1);
-
-  auto circle = gp_Circ(gp_Ax2(iniPt, V1.Reversed()), 25);
-  auto profile_edge = BRepBuilderAPI_MakeEdge(circle).Edge();
-  auto pipe = BRepOffsetAPI_MakePipe(W, profile_edge).Shape();
-  //auto profile_wire = BRepBuilderAPI_MakeWire(profile_edge).Wire();
-  //auto profile_face = BRepBuilderAPI_MakeFace(profile_wire).Face();
-
-  interp->GetPlotter().REDRAW_SHAPE("pipe", pipe);
-
-  BRepAlgoAPI_Section intersection(pipe, extendedFace);
-  auto dbg = intersection.Shape();
-
-  interp->GetPlotter().DRAW_SHAPE(intersection, Color_Red, 1., true, "intersection");
-
- /* for (TopExp_Explorer it(dbg, TopAbs_EDGE); it.More(); it.Next()) {
-      auto checkEdge = TopoDS::Edge(it.Value());
-      auto intersectionChecker = IntTools_EdgeFace();
-      intersectionChecker.SetEdge(checkEdge);
-      intersectionChecker.SetFace(face);
-      intersectionChecker.Perform();
-      if (intersectionChecker.CommonParts().IsEmpty()) {
-          auto wireBuilder2 = BRepBuilderAPI_MakeWire();
-          wireBuilder2.Add(checkEdge);
-      }
-  }*/
 
   return TCL_OK;
 }

@@ -125,8 +125,8 @@ glTFWriter::~glTFWriter()
 
 //-----------------------------------------------------------------------------
 
-void glTFWriter::writeBinDataNodes(std::ostream&           binFile,
-                                   int&                     accessorNb) const
+void glTFWriter::writeBinDataNodes(std::ostream& binFile,
+                                   int&          accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives (m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -152,8 +152,8 @@ void glTFWriter::writeBinDataNodes(std::ostream&           binFile,
 
 //-----------------------------------------------------------------------------
 
-void glTFWriter::writeBinDataNormals(std::ostream&      binFile,
-                                     int&               accessorNb) const
+void glTFWriter::writeBinDataNormals(std::ostream& binFile,
+                                     int&          accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -179,8 +179,8 @@ void glTFWriter::writeBinDataNormals(std::ostream&      binFile,
 
 //-----------------------------------------------------------------------------
 
-void glTFWriter::writeBinDataTextCoords(std::ostream&            binFile,
-                                         int&                     accessorNb) const
+void glTFWriter::writeBinDataTextCoords(std::ostream& binFile,
+                                        int&          accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -205,7 +205,7 @@ void glTFWriter::writeBinDataTextCoords(std::ostream&            binFile,
 //-----------------------------------------------------------------------------
 
 void glTFWriter::writeBinDataNodalColors(std::ostream& binFile,
-                                          int& accessorNb) const
+                                         int&          accessorNb) const
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())
@@ -229,8 +229,8 @@ void glTFWriter::writeBinDataNodalColors(std::ostream& binFile,
 
 //-----------------------------------------------------------------------------
 
-void glTFWriter::writeBinDataIndices(std::ostream&    binFile,
-                                      int&             accessorNb)
+void glTFWriter::writeBinDataIndices(std::ostream& binFile,
+                                     int&          accessorNb)
 {
   t_Meshes2Primitives::Iterator itNodes2Primitives(m_dataProvider->GetSceneMeshes());
   for (; itNodes2Primitives.More(); itNodes2Primitives.Next())

@@ -76,7 +76,7 @@ public:
   //! \param[in] elemIndex element index.
   //! \return triangle requested.
   gltf_EXPORT Poly_Triangle
-    TriangleOriented(int elemIndex) const;
+    TriangleOriented(const int elemIndex) const;
 
 public:
 
@@ -90,7 +90,7 @@ public:
 
   //! Return normal at specified node index with face transformation applied and face orientation applied.
   gltf_EXPORT gp_Dir
-    NormalTransformed(int N);
+    NormalTransformed(const int N);
 
   //! Return number of nodes for the current face.
   gltf_EXPORT int
@@ -106,11 +106,11 @@ public:
 
   //! Return the node with specified index with applied transformation.
   gltf_EXPORT gp_Pnt
-    NodeTransformed(const int theNode) const;
+    NodeTransformed(const int N) const;
 
   //! Return texture coordinates for the node.
   gltf_EXPORT gp_Pnt2d
-    NodeTexCoord (const int theNode) const;
+    NodeTexCoord(const int N) const;
 
 private:
 
@@ -120,11 +120,11 @@ private:
 
   //! Return normal at specified node index without face transformation applied.
   gltf_EXPORT gp_Dir
-    normal(int N);
+    normal(const int N);
 
   //! Return triangle with specified index.
   gltf_EXPORT const Poly_Triangle&
-    triangle(int E) const;
+    triangle(const int E) const;
 
   //! Initializes face's properties.
   gltf_EXPORT void

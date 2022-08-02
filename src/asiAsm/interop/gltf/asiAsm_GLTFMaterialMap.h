@@ -31,8 +31,8 @@ public:
 
   //! Ctor.
   gltf_EXPORT
-    glTFMaterialMap(const TCollection_AsciiString& theFile,
-                    const int                      theDefSamplerId);
+    glTFMaterialMap(const TCollection_AsciiString& file,
+                    const int                      defSamplerId);
 
   //! Dtor.
   gltf_EXPORT virtual
@@ -42,70 +42,70 @@ public:
 
   //! Add material images.
   gltf_EXPORT void
-    AddImages(glTFJsonSerializer*       theWriter,
-              const glTFXdeVisualStyle& theStyle,
-              bool&                     theIsStarted);
+    AddImages(glTFJsonSerializer*       writer,
+              const glTFXdeVisualStyle& style,
+              bool&                     isStarted);
 
   //! Add material.
   gltf_EXPORT void
-    AddMaterial(glTFJsonSerializer*       theWriter,
-                const glTFXdeVisualStyle& theStyle,
-                bool&                     theIsStarted);
+    AddMaterial(glTFJsonSerializer*       writer,
+                const glTFXdeVisualStyle& style,
+                bool&                     isStarted);
 
   //! Add material textures.
   gltf_EXPORT void
-    AddTextures(glTFJsonSerializer*       theWriter,
-                const glTFXdeVisualStyle& theStyle,
-                bool&                     theIsStarted);
+    AddTextures(glTFJsonSerializer*       writer,
+                const glTFXdeVisualStyle& style,
+                bool&                     isStarted);
 
 public:
 
   //! Return extent of images map.
-  int NbImages() const { return myImageMap.Extent(); }
+  int NbImages() const { return m_imageMap.Extent(); }
 
   //! Return extent of textures map.
-  int NbTextures() const { return myTextureMap.Extent(); }
+  int NbTextures() const { return m_textureMap.Extent(); }
 
 public:
 
   //! Return base color texture.
   gltf_EXPORT static const Handle(Image_Texture)&
-    baseColorTexture(const Handle(glTFMaterialAttr)& theMat);
+    baseColorTexture(const Handle(glTFMaterialAttr)& mat);
 
 protected:
 
   //! Add texture image.
   gltf_EXPORT void
-    addImage(glTFJsonSerializer*          theWriter,
-             const Handle(Image_Texture)& theTexture,
-             bool&                        theIsStarted);
+    addImage(glTFJsonSerializer*          writer,
+             const Handle(Image_Texture)& texture,
+             bool&                        isStarted);
 
   //! Add texture.
   gltf_EXPORT void
-    addTexture(glTFJsonSerializer*          theWriter,
-               const Handle(Image_Texture)& theTexture,
-               bool&                        theIsStarted);
+    addTexture(glTFJsonSerializer*          writer,
+               const Handle(Image_Texture)& texture,
+               bool&                        isStarted);
 
   //! Add material
   gltf_EXPORT virtual TCollection_AsciiString
-    AddMaterial(const glTFXdeVisualStyle& theStyle) Standard_OVERRIDE;
+    AddMaterial(const glTFXdeVisualStyle& style) Standard_OVERRIDE;
 
   //! Virtual method actually defining the material (e.g. export to the file).
   gltf_EXPORT virtual void
-    DefineMaterial(const glTFXdeVisualStyle&      theStyle,
-                   const TCollection_AsciiString& theKey,
-                   const TCollection_AsciiString& theName) Standard_OVERRIDE;
+    DefineMaterial(const glTFXdeVisualStyle&      style,
+                   const TCollection_AsciiString& key,
+                   const TCollection_AsciiString& name) Standard_OVERRIDE;
 
 protected:
 
-  glTFJsonSerializer* myWriter;
+  glTFJsonSerializer* m_pWriter;
   NCollection_DoubleMap<Handle(Image_Texture), TCollection_AsciiString,
-                        Image_Texture, TCollection_AsciiString> myImageMap;
+                        Image_Texture, TCollection_AsciiString> m_imageMap;
 
-  NCollection_Map<Handle(Image_Texture), Image_Texture> myTextureMap;
+  NCollection_Map<Handle(Image_Texture), Image_Texture> m_textureMap;
 
-  int myDefSamplerId;
-  int myNbImages;
+  int m_iDefSamplerId;
+  int m_iNbImages;
 };
 } // xde
 } // asiAsm

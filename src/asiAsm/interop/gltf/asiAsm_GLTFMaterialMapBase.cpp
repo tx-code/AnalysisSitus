@@ -35,203 +35,216 @@ using namespace asiAsm::xde;
 
 //-----------------------------------------------------------------------------
 
-glTFMaterialMapBase::glTFMaterialMapBase(const TCollection_AsciiString& filename)
-: myFileName     (filename),
-  myKeyPrefix    ("mat_"),
-  myNbMaterials  (0),
-  myIsFailed     (false),
-  myMatNameAsKey (true)
+glTFMaterialMapBase::glTFMaterialMapBase(const TCollection_AsciiString& file)
+//
+: m_fileName     (file),
+  m_keyPrefix    ("mat_"),
+  m_nbMaterials  (0),
+  m_bIsFailed    (false),
+  m_matNameAsKey (true)
 {
-  TCollection_AsciiString aFileName, aFileExt;
-  OSD_Path::FolderAndFileFromPath(filename, myFolder, aFileName);
-  asiAlgo_Utils::Str::FileNameAndExtension(aFileName, myShortFileNameBase, aFileExt);
+  TCollection_AsciiString fileName, fileExt;
+  OSD_Path::FolderAndFileFromPath(file, m_folder, fileName);
+  asiAlgo_Utils::Str::FileNameAndExtension(fileName, m_shortFileNameBase, fileExt);
 }
 
 //-----------------------------------------------------------------------------
 
 glTFMaterialMapBase::~glTFMaterialMapBase()
-{
-  //
-}
+{}
 
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
   glTFMaterialMapBase::AddMaterial(const glTFXdeVisualStyle& style)
 {
-  if ( myStyles.IsBound1(style) )
+  if ( m_styles.IsBound1(style) )
   {
-    return myStyles.Find1(style);
+    return m_styles.Find1(style);
   }
 
-  TCollection_AsciiString aMatKey, aMatName, aMatNameSuffix;
-  int  aCounter    = 0;
-  int* aCounterPtr = &myNbMaterials;
-  if (myMatNameAsKey)
+  TCollection_AsciiString matKey, matName, matNameSuffix;
+  int  counter     = 0;
+  int* pCounterPtr = &m_nbMaterials;
+  //
+  if ( m_matNameAsKey )
   {
     if ( !style.GetMaterial().IsNull() && !style.GetMaterial()->IsEmpty() )
     {
-      aCounterPtr = &aCounter;
-      Handle(TDataStd_Name) aNodeName;
+      pCounterPtr = &counter;
+      Handle(TDataStd_Name) nodeName;
+      //
       if ( !style.GetMaterial()->Label().IsNull()
-        &&  style.GetMaterial()->Label().FindAttribute(TDataStd_Name::GetID(), aNodeName) )
+        &&  style.GetMaterial()->Label().FindAttribute(TDataStd_Name::GetID(), nodeName) )
       {
-        aMatName = aNodeName->Get();
+        matName = nodeName->Get();
       }
       else
       {
-        aMatName = "mat";
+        matName = "mat";
       }
-      aMatNameSuffix = aMatName;
+      matNameSuffix = matName;
     }
     else
     {
-      ++myNbMaterials;
-      aMatNameSuffix = myKeyPrefix;
-      aMatName = aMatNameSuffix + myNbMaterials;
+      ++m_nbMaterials;
+
+      matNameSuffix = m_keyPrefix;
+      matName       = matNameSuffix + m_nbMaterials;
     }
-    aMatKey = aMatName;
+    matKey = matName;
   }
   else
   {
-    aMatKey        = myNbMaterials++; // starts from 0
-    aMatNameSuffix = myKeyPrefix;
-    aMatName       = aMatNameSuffix + aMatKey;
+    matKey        = m_nbMaterials++; // starts from 0
+    matNameSuffix = m_keyPrefix;
+    matName       = matNameSuffix + matKey;
   }
 
-  for (;; ++(*aCounterPtr))
+  for ( ; ; ++(*pCounterPtr) )
   {
-    if (myStyles.IsBound2 (aMatKey))
+    if ( m_styles.IsBound2(matKey) )
     {
-      if (myMatNameAsKey)
+      if ( m_matNameAsKey )
       {
-        aMatName = aMatNameSuffix + (*aCounterPtr);
-        aMatKey  = aMatName;
+        matName = matNameSuffix + (*pCounterPtr);
+        matKey  = matName;
       }
       else
       {
-        aMatKey  = *aCounterPtr;
-        aMatName = aMatNameSuffix + aMatKey;
+        matKey  = *pCounterPtr;
+        matName =  matNameSuffix + matKey;
       }
       continue;
     }
     break;
   }
 
-  myStyles.Bind(style, aMatKey);
-  DefineMaterial(style, aMatKey, aMatName);
-  return aMatKey;
+  m_styles.Bind(style, matKey);
+  DefineMaterial(style, matKey, matName);
+  return matKey;
 }
 
 //-----------------------------------------------------------------------------
 
-bool glTFMaterialMapBase::copyFileTo(const TCollection_AsciiString& theFileSrc,
-                                      const TCollection_AsciiString& theFileDst)
+bool glTFMaterialMapBase::copyFileTo(const TCollection_AsciiString& fileSrc,
+                                     const TCollection_AsciiString& fileDst)
 {
-  if ( theFileSrc.IsEmpty() || theFileDst.IsEmpty() )
+  if ( fileSrc.IsEmpty() || fileDst.IsEmpty() )
   {
     return false;
   }
-  else if (theFileSrc == theFileDst)
+  else if ( fileSrc == fileDst )
   {
     return true;
   }
 
   try
   {
-    OSD_Path aSrcPath (theFileSrc);
-    OSD_Path aDstPath (theFileDst);
-    OSD_File aFileSrc (aSrcPath);
-    if (!aFileSrc.Exists())
+    OSD_Path SrcPath(fileSrc);
+    OSD_Path DstPath(fileDst);
+    OSD_File FileSrc(SrcPath);
+    //
+    if ( !FileSrc.Exists() )
     {
-      std::cout << "Failed to copy file - source file '" << theFileSrc + "' does not exist." << std::endl;
+      std::cout << "Failed to copy file - source file '" << fileSrc + "' does not exist." << std::endl;
       return false;
     }
-    aFileSrc.Copy (aDstPath);
-    return !aFileSrc.Failed();
+
+    FileSrc.Copy(DstPath);
+    return !FileSrc.Failed();
   }
-  catch (Standard_Failure const& theException)
+  catch ( Standard_Failure const& e )
   {
-    std::cout << "Failed to copy file: " << theException.GetMessageString() << std::endl;
+    std::cout << "Failed to copy file: " << e.GetMessageString() << std::endl;
     return false;
   }
 }
 
 //-----------------------------------------------------------------------------
 
-bool glTFMaterialMapBase::CopyTexture(TCollection_AsciiString&       theResTexture,
-                                       const Handle(Image_Texture)&   theTexture,
-                                       const TCollection_AsciiString& theKey)
+bool glTFMaterialMapBase::CopyTexture(TCollection_AsciiString&       resTexture,
+                                      const Handle(Image_Texture)&   texture,
+                                      const TCollection_AsciiString& key)
 {
   CreateTextureFolder();
 
-  TCollection_AsciiString aTexFileName;
-  TCollection_AsciiString aTextureSrc = theTexture->FilePath();
-  if (!aTextureSrc.IsEmpty()
-    && theTexture->FileOffset() <= 0
-    && theTexture->FileLength() <= 0)
+  TCollection_AsciiString texFileName;
+  TCollection_AsciiString textureSrc = texture->FilePath();
+  //
+  if ( !textureSrc.IsEmpty()
+     && texture->FileOffset() <= 0
+     && texture->FileLength() <= 0 )
   {
-    TCollection_AsciiString aSrcTexFolder;
-    OSD_Path::FolderAndFileFromPath (aTextureSrc, aSrcTexFolder, aTexFileName);
-    const TCollection_AsciiString aResTexFile = myTexFolder + aTexFileName;
-    theResTexture = myTexFolderShort + aTexFileName;
-    return copyFileTo (aTextureSrc, aResTexFile);
+    TCollection_AsciiString srcTexFolder;
+    OSD_Path::FolderAndFileFromPath(textureSrc, srcTexFolder, texFileName);
+
+    const TCollection_AsciiString resTexFile = m_texFolder + texFileName;
+    resTexture = m_texFolderShort + texFileName;
+    return copyFileTo(textureSrc, resTexFile);
   }
 
-  TCollection_AsciiString anExt = theTexture->ProbeImageFileFormat();
-  if (anExt.IsEmpty())
+  TCollection_AsciiString ext = texture->ProbeImageFileFormat();
+  //
+  if ( ext.IsEmpty() )
   {
-    anExt = "bin";
+    ext = "bin";
   }
-  aTexFileName = theKey + "." + anExt;
+  texFileName = key + "." + ext;
 
-  const TCollection_AsciiString aResTexFile = myTexFolder + aTexFileName;
-  theResTexture = myTexFolderShort + aTexFileName;
-  return theTexture->WriteImage (aResTexFile);
+  const TCollection_AsciiString resTexFile = m_texFolder + texFileName;
+  resTexture = m_texFolderShort + texFileName;
+  return texture->WriteImage(resTexFile);
 }
 
 //-----------------------------------------------------------------------------
 
 bool glTFMaterialMapBase::CreateTextureFolder()
 {
-  if (!myTexFolder.IsEmpty())
+  if ( !m_texFolder.IsEmpty() )
   {
     return true;
   }
 
-  myTexFolderShort = myShortFileNameBase + "_textures/";
-  myTexFolder      = myFolder + "/" + myTexFolderShort;
-  OSD_Path aTexFolderPath (myTexFolder);
-  OSD_Directory aTexDir (aTexFolderPath);
-  if (aTexDir.Exists())
+  m_texFolderShort = m_shortFileNameBase + "_textures/";
+  m_texFolder      = m_folder + "/" + m_texFolderShort;
+
+  OSD_Path texFolderPath(m_texFolder);
+  OSD_Directory texDir(texFolderPath);
+  //
+  if ( texDir.Exists() )
   {
     return true;
   }
 
-  OSD_Path aResFolderPath (myFolder);
-  OSD_Directory aResDir (aResFolderPath);
-  if (!aResDir.Exists())
+  OSD_Path resFolderPath(m_folder);
+  OSD_Directory resDir(resFolderPath);
+  //
+  if ( !resDir.Exists() )
   {
     return false;
   }
-  const OSD_Protection aParentProt = aResDir.Protection();
-  OSD_Protection aProt = aParentProt;
-  if (aProt.User() == OSD_None)
+
+  const OSD_Protection parentProt = resDir.Protection();
+  OSD_Protection prot = parentProt;
+  //
+  if ( prot.User() == OSD_None )
   {
-    aProt.SetUser (OSD_RWXD);
+    prot.SetUser(OSD_RWXD);
   }
-  if (aProt.System() == OSD_None)
+  if ( prot.System() == OSD_None )
   {
-    aProt.SetSystem (OSD_RWXD);
+    prot.SetSystem(OSD_RWXD);
   }
 
-  aTexDir.Build (aProt);
-  if (aTexDir.Failed())
+  texDir.Build(prot);
+  if ( texDir.Failed() )
   {
     // fallback to the same folder as output model file
-    myTexFolder = myFolder;
-    myTexFolderShort.Clear();
+    m_texFolder = m_folder;
+    m_texFolderShort.Clear();
     return true;
   }
+
   return true;
 }
