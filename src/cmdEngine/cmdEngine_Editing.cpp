@@ -3162,8 +3162,8 @@ int ENGINE_ConvertToBRep(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_ConvertToCanonical(const Handle(asiTcl_Interp)& interp,
-                              int                          /*argc*/,
-                              const char**                 /*argv*/)
+                              int                          argc,
+                              const char**                 argv)
 {
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
@@ -3176,8 +3176,12 @@ int ENGINE_ConvertToCanonical(const Handle(asiTcl_Interp)& interp,
   //
   TopoDS_Shape shape = partNode->GetShape();
 
-  // Use the default tolerance.
-  const double tol = asiAlgo_CheckValidity::MaxTolerance(shape);
+  // Use the default tolerance or the provided one.
+  double tol = asiAlgo_CheckValidity().MaxTolerance(shape);
+  //
+  interp->GetKeyValue(argc, argv, "tol", tol);
+  interp->GetProgress().SendLogMessage(LogNotice(Normal) << "Canonical conversion tolerance: %1."
+                                                         << tol);
 
   // Modify shape.
   cmdEngine::model->OpenCommand();
@@ -3725,7 +3729,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("convert-to-canonical",
     //
-    "convert-to-canonical\n"
+    "convert-to-canonical [-tol <tol>]\n"
     "\t Attempts to convert a shape to a canonical form.",
     //
     __FILE__, group, ENGINE_ConvertToCanonical);

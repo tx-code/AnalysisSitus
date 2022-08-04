@@ -2608,7 +2608,7 @@ bool asiAlgo_Utils::MaximizeFaces(TopoDS_Shape&              shape,
   ShapeUpgrade_UnifySameDomain Unify(shape);
   try
   {
-    Unify.SetAngularTolerance(1e-3);
+    Unify.SetAngularTolerance(1e-1);
     Unify.Build();
   }
   catch ( ... )

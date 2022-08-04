@@ -65,46 +65,40 @@
 
 //-----------------------------------------------------------------------------
 
+#include <BRepOffsetAPI_MakeOffset.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
+#include <asiAlgo_DivideByContinuity.h>
+
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
-  //Handle(Geom_Plane)    plane    = new Geom_Plane( gp::Origin(), gp_Dir(1,1,1) );
-  //Handle(Geom2d_Circle) circle2d = GCE2d_MakeCircle( gp::Origin2d(), 10 );
-  //Handle(Geom2d_Line)   lin2d    = */
+  std::vector<gp_XYZ> pts = { gp_XYZ(0,0,0), gp_XYZ(1,0,0), gp_XYZ(1,1,0), gp_XYZ(0,1,0), gp_XYZ(0,0,0) };
+  Handle(Geom_BSplineCurve) bspl = asiAlgo_Utils::PolylineAsSpline(pts);
 
-  Handle(Geom_TrimmedCurve) line = GC_MakeSegment( gp::Origin(), gp_Pnt(10, 10, 5) );
+  bspl->IncreaseDegree(3);
 
-  TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(line);
+  /*BRepBuilderAPI_MakePolygon mkPolygon;
+  for ( const auto& p : pts )
+    mkPolygon.Add(p);
 
-  gp_Trsf R;
-  R.SetRotation( gp_Quaternion( gp::DZ(), 45./180.*M_PI ) );
+  mkPolygon.Add(pts[0]);
+  TopoDS_Wire W = mkPolygon.Wire();*/
 
-  edge.Move(R);
+  TopoDS_Wire W = BRepBuilderAPI_MakeWire( BRepBuilderAPI_MakeEdge(bspl) );
 
-  edge.Location(TopLoc_Location());
-  edge = TopoDS::Edge( BRepBuilderAPI_Transform(edge, R, true) );
+  // Divide by C1.
+  asiAlgo_DivideByContinuity divider(nullptr, nullptr);
+  divider.Perform(W, GeomAbs_C1, 0.1);
 
-  interp->GetPlotter().REDRAW_SHAPE("edge", edge, Color_Blue, 1, true);
+  interp->GetPlotter().REDRAW_SHAPE("W", W, Color_Red, 1., true);
 
-  BRepBuilderAPI_MakeWire mkWire;
-  mkWire.Add(edge);
-  TopoDS_Wire W = mkWire.Wire();
-  //mkWire.Add(edge);
+  BRepOffsetAPI_MakeOffset mkOffset(W, GeomAbs_Arc, false);
+  mkOffset.Build();
+  mkOffset.Perform(Atof(argv[1]));
+  const TopoDS_Shape& res = mkOffset.Shape();
 
-  /*TopTools_IndexedMapOfShape allEdges;
-  TopExp::MapShapes(W, TopAbs_EDGE, allEdges);*/
-
-  std::vector<TopoDS_Edge> allEdges;
-  for ( BRepTools_WireExplorer wexp(W); wexp.More(); wexp.Next() )
-  {
-    const TopoDS_Edge& edge = wexp.Current();
-    allEdges.push_back(edge);
-  }
-
-  // TopoDS_Iterator
-  // TopExp_Explorer
-
+  interp->GetPlotter().REDRAW_SHAPE("res", res, Color_Green, 1., true);
 
   return TCL_OK;
 }
