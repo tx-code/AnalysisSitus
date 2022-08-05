@@ -198,6 +198,8 @@ set (dialogs_H_FILES
   dialogs/asiUI_DialogCommandsCommandItem.h
   dialogs/asiUI_DialogCommandsPluginItem.h
   dialogs/asiUI_DialogCommandsRootItem.h
+  dialogs/asiUI_TclCommandParsed.h
+  dialogs/asiUI_TclPluginToCommands.h
 )
 set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogCommands.h
@@ -218,8 +220,6 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogSTEPDelegate.h
   dialogs/asiUI_DialogTopoGraphDepth.h
   dialogs/asiUI_DialogXdeSummary.h
-  dialogs/asiUI_TclCommandParsed.h
-  dialogs/asiUI_TclPluginToCommands.h
 )
 set (dialogs_CPP_FILES 
   dialogs/asiUI_DialogCommands.cpp

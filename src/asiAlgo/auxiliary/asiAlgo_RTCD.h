@@ -91,6 +91,17 @@ namespace RTCD
 
     asiAlgo_EXPORT Point(const Vector& V);
 
+    double operator[](const int i)
+    {
+      switch ( i )
+      {
+        case 0: return x;
+        case 1: return y;
+        case 2: return z;
+      }
+      return DBL_MAX;
+    }
+
     Vector operator+(const Point& P) const
     {
       Vector result;
@@ -183,6 +194,14 @@ namespace RTCD
   //! Returns the squared distance between point `c` and segment `ab`.
   asiAlgo_EXPORT double
     SqDistPointSegment(const Point& a, const Point& b, const Point& c);
+
+  //! Intersects ray `R(t) = p + t*d` against AABB `a`.
+  //! When intersecting, returns intersection distance `tmin` and point `q`
+  //! of intersection.
+  //!
+  //! \sa sec. 5.3.3 in RTCD.
+  asiAlgo_EXPORT int
+    IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, Point &q);
 }
 
 #endif
