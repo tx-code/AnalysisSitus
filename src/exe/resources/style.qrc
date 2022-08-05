@@ -24,6 +24,7 @@
     <file>asitus/shape_edge_icon_16x16.png</file>
     <file>asitus/shape_vertex_icon_16x16.png</file>
     <file>asitus/shape_other_icon_16x16.png</file>
+    <file>asitus/search.svg</file>
   </qresource>
   <qresource prefix="qss_icons">
     <file>rc/up_arrow_disabled.png</file>

@@ -237,6 +237,7 @@ int ENGINE_ShowCommands(const Handle(asiTcl_Interp)& interp,
 
   asiUI_DialogCommands*
     pDlg = new asiUI_DialogCommands(interp, interp->GetProgress(), nullptr);
+  pDlg->setConsole(cmdEngine::cf->Console);
   //
   pDlg->show();
 

@@ -145,6 +145,13 @@ QSize asiUI_Console::sizeHint() const
 
 //-----------------------------------------------------------------------------
 
+void asiUI_Console::addCommand(QString command)
+{
+  textCursor().insertText(command);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_Console::keyPressEvent(QKeyEvent* e)
 {
   QTextCursor c = this->textCursor();

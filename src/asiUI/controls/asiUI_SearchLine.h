@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 19 September 2017
+// Created on: 06 June 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022-present, Natalia Ermolaeva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,96 +28,65 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_DialogCommands_h
-#define asiUI_DialogCommands_h
+#ifndef asiUI_SearchLine_h
+#define asiUI_SearchLine_h
 
 // asiUI includes
-#include <asiUI.h>
-#include <asiUI_SearchLine.h>
-
-// asiTcl includes
-#include <asiTcl_Interp.h>
+#include <asiUI_CommonFacilities.h>
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QDialog>
-#include <QModelIndexList>
-#include <QPushButton>
-#include <QTreeView>
-#include <QVBoxLayout>
+#include <QLineEdit>
 #pragma warning(pop)
+
+class QKeyEvent;
+class QPaintEvent;
 
 #pragma warning(disable : 4251)
 
-class asiUI_Console;
+//! Extending the line edit with the search button in the right part of the line.
+//! It emits signal about search change by text typing and about search deactivating by
+//! entering the empty text or pressing Escape button.
 
-//! Dialog to dump all available commands.
-class asiUI_EXPORT asiUI_DialogCommands : public QDialog
+class asiUI_EXPORT asiUI_SearchLine : public QLineEdit
 {
   Q_OBJECT
 
 public:
 
-  asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
-                       ActAPI_ProgressEntry         notifier,
-                       QWidget*                     parent = nullptr);
+  //! Creates a new instance of Json view.
+  //! \param[in] parent parent widget (if any).
+  asiUI_SearchLine(QWidget* parent = nullptr);
 
-  virtual ~asiUI_DialogCommands();
+  //! Destructor.
+  virtual ~asiUI_SearchLine();
 
-  void setConsole(asiUI_Console* console);
+  //! Sets the empty text and fill place holder.
+  void reset();
 
-public slots:
+  //! Paints the line edit an the button on the right.
+  //! \param[in] event painting event
+  void paintEvent(QPaintEvent* event) override;
 
-  void onClose();
+  //! Processes the key event escape.
+  //! \param [in] event
+  void keyPressEvent(QKeyEvent *event) override;
 
-protected:
+signals:
+  //! Signal about activation the search.
+  void searchActivated();
 
-  void initialize();
-
-  bool eventFilter(QObject* o, QEvent* e);
-
-protected slots:
-
-  void enterProcessing();
-
+  //! Signal about activation the search.
   void searchChanged();
 
+  //! Signal about deactivation the search.
   void searchDeactivated();
 
-  void doubleClickedTableView(QModelIndex index);
+protected slots:
+  //! Processing text change.
+  //! \param [in] current text
+  void onTextChanged(const QString& text);
 
-private:
-
-  QVBoxLayout* m_pMainLayout; //!< Layout of the widget.
-
-  //! Widgets.
-  struct t_widgets
-  {
-    asiUI_SearchLine* pSearchLine;   //!< search control.
-    QTreeView*        pCommandsView; //!< Table with commands.
-    QPushButton*      pClose;        //!< Button to close window.
-
-    t_widgets() : pSearchLine(nullptr),
-                  pCommandsView(nullptr),
-                  pClose(nullptr)
-    {}
-
-    void Release()
-    {
-      delete pSearchLine;   pSearchLine = nullptr;
-      delete pCommandsView; pCommandsView = nullptr;
-      delete pClose;        pClose = nullptr;
-    }
-  };
-
-  t_widgets             m_widgets;        //!< Involved widgets.
-  //
-  Handle(asiTcl_Interp) m_interp;         //!< Tcl interpreter.
-  asiUI_Console*        m_console;        //!< Tcl console.
-  ActAPI_ProgressEntry  m_notifier;       //!< Progress Notifier.
-  //
-  QString               m_searchValue;    //!< Current value of the search.
-  QModelIndexList       m_matchedIndices; //!< Matched values of tree for the current value of the search.
 };
 
 #pragma warning(default : 4251)

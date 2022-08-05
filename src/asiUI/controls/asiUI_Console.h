@@ -79,6 +79,10 @@ public:
     return m_interp;
   }
 
+  //! Appends text into console in the current cursor position.
+  //! \param[in] command text of the command for insertion
+  void addCommand(QString command);
+
 protected:
 
   virtual void keyPressEvent(QKeyEvent* e);

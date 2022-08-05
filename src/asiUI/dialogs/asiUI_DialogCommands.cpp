@@ -36,7 +36,12 @@
 
 // asiUI includes
 #include <asiUI_Common.h>
-#include <asiUI_DialogCommandsDelegate.h>
+#include <asiUI_CommonFacilities.h>
+#include <asiUI_Console.h>
+#include <asiUI_TclPluginToCommands.h>
+#include <asiUI_DialogCommandsRootItem.h>
+#include <asiUI_SearchLine.h>
+#include <asiUI_TreeModel.h>
 
 // asiVisu includes
 #include <asiVisu_PrsManager.h>
@@ -45,8 +50,165 @@
 #pragma warning(push, 0)
 #include <QApplication>
 #include <QHeaderView>
+#include <QStyleOptionViewItem>
 #pragma warning(pop)
 
+#define BTN_MIN_WIDTH 120
+
+namespace
+{
+  //! Customization of tree view for painting it in always active state, like it has the focus.
+  //! The puprose is having selected item in highlighted color in the tree even if the tree has no focus.
+  //! It looks clear with a combination of search control that should have focus for entering a value.
+  class asiUI_QTreeView : public QTreeView
+  {
+  public:
+    asiUI_QTreeView() : QTreeView() {};
+
+    void drawRow(QPainter*                   painter,
+                 const QStyleOptionViewItem& option,
+                 const QModelIndex&          index) const
+    {
+      // change tree view option to be active.
+      const QStyleOptionViewItem* viOption = qstyleoption_cast<const QStyleOptionViewItem*>(&option);
+      QStyleOptionViewItem viOptionCopy(*viOption);
+      viOptionCopy.state |= QStyle::State_Active;
+
+      QTreeView::drawRow(painter, viOptionCopy, index);
+    }
+  };
+
+  //-----------------------------------------------------------------------------
+
+  enum CommandsColumnType
+  {
+    CommandsColumnType_Name = 0,   //! name column
+    CommandsColumnType_Parameters, //! command line arguments
+    CommandsColumnType_Description //! command description
+  };
+
+  //-----------------------------------------------------------------------------
+
+  QString commandArguments(const asiTcl_CommandInfo& commandTcl)
+  {
+    QString command = commandTcl.Name.c_str();
+    QString help = commandTcl.Help.c_str();
+    if (help.indexOf(command) == -1)
+    {
+      return "";
+    }
+
+    QString arguments = help;
+    int lastIndexOfCommandName = arguments.indexOf(command);
+    if (lastIndexOfCommandName >= 0)
+      arguments = arguments.mid(lastIndexOfCommandName + command.length(), arguments.length());
+
+    int indexOnNewLine = arguments.indexOf('\n');
+    if (indexOnNewLine >= 0)
+      arguments = arguments.mid(0, indexOnNewLine);
+
+    return arguments;
+  }
+
+  //-----------------------------------------------------------------------------
+
+  void uniteCommandsByPlugin(const std::vector<asiTcl_CommandInfo>&  commandsFrom,
+                             std::vector<asiUI_TclPluginToCommands>& commandsTo)
+  {
+    int nbCommands = (int)commandsFrom.size();
+
+    std::vector<int> indices;
+    indices.reserve(nbCommands);
+
+    std::vector<std::string> commandNames;
+    commandNames.reserve(nbCommands);
+    for (int c = 0; c < nbCommands; ++c)
+    {
+      asiTcl_CommandInfo info = commandsFrom[c];
+      indices.push_back(c);
+      commandNames.push_back(info.Name);
+    }
+
+    // Sort commands by names.
+    std::sort(indices.begin(), indices.end(),
+      [&](const int a, const int b)
+      {
+        return commandNames[a] < commandNames[b];
+      });
+
+    std::vector<asiTcl_CommandInfo> sortCommandsFrom;
+    sortCommandsFrom.reserve(nbCommands);
+    for (int indexIter = 0; indexIter < (int)indices.size(); indexIter++)
+    {
+      sortCommandsFrom.push_back(commandsFrom[indices[indexIter]]);
+    }
+
+    // collect commands for each plugin name
+    std::map<std::string, std::vector<asiUI_TclCommandParsed> > commands;
+    for (int c = 0; c < nbCommands; ++c)
+    {
+      asiTcl_CommandInfo info = sortCommandsFrom[c];
+      QString curCommand = info.Name.c_str();
+      QString curHelp = info.Help.c_str();
+
+      QString arguments;
+      QString description;
+      if (curHelp.indexOf(curCommand) == -1)
+      {
+        arguments = QString();
+        description = curHelp;
+      }
+      else
+      {
+        arguments = commandArguments(info);
+
+        description = curHelp;
+        description = description.mid(curCommand.length() + arguments.length());
+        description = description.trimmed();
+        description = description.remove('\t');
+      }
+      arguments = arguments.trimmed(); // remove spaces in the start and end of the help text
+
+      asiUI_TclCommandParsed infoCommand(info.Name,
+                                         arguments.toStdString(),
+                                         description.toStdString(),
+                                         info.Filename);
+
+      std::vector<asiUI_TclCommandParsed> groupCommands;
+      if (commands.find(info.Group) != commands.end())
+        groupCommands = commands.at(info.Group);
+      groupCommands.push_back(infoCommand);
+      commands[info.Group] = groupCommands;
+    }
+
+    // move collected elements into output container
+    commandsTo.clear();
+    for (std::map<std::string, std::vector<asiUI_TclCommandParsed> >::const_iterator cit = commands.cbegin();
+         cit != commands.cend(); cit++)
+    {
+      commandsTo.push_back(asiUI_TclPluginToCommands(cit->first, cit->second));
+    }
+  }
+
+  //-----------------------------------------------------------------------------
+
+  QModelIndex findNext(const QModelIndex& index, const QModelIndexList& indices)
+  {
+    if (indices.isEmpty())
+      return index;
+
+    if (indices.contains(index)) // if the item belongs to the list, return the next item
+    {
+      for (int i = 0; i < indices.length() - 1; i++)
+      {
+        if (indices[i] == index)
+          return indices[i+1];
+      }
+      return indices[0];
+    }
+    return indices[0]; // if next item is not found, return the first index
+  }
+}
 //-----------------------------------------------------------------------------
 
 //! Constructor.
@@ -67,25 +229,26 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   m_pMainLayout = new QVBoxLayout();
 
   // Widgets
-  m_widgets.pCommands = new QTableWidget();
+  m_widgets.pClose = new QPushButton("Close");
+  m_widgets.pClose->setMinimumWidth(BTN_MIN_WIDTH);
 
-  // Configure table with options
-  QStringList headers;
-  headers.append("Name");
-  headers.append("Module");
-  headers.append("Source");
-  //
-  m_widgets.pCommands->setColumnCount( headers.size() );
-  m_widgets.pCommands->setHorizontalHeaderLabels( headers );
-  m_widgets.pCommands->horizontalHeader()->setStretchLastSection( true );
-  m_widgets.pCommands->verticalHeader()->setVisible( false );
-  m_widgets.pCommands->setSelectionMode( QAbstractItemView::SingleSelection );
-  m_widgets.pCommands->setItemDelegateForColumn( 1, new asiUI_DialogCommandsDelegate(this) );
+  // Set search control
+  m_widgets.pSearchLine = new asiUI_SearchLine();
+  connect(m_widgets.pSearchLine, SIGNAL (returnPressed()),     this, SLOT(enterProcessing()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchChanged()),     this, SLOT(searchChanged()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), this, SLOT(searchDeactivated()));
 
-  // Set layout
-  m_pMainLayout->setSpacing(10);
+  m_pMainLayout->addWidget(m_widgets.pSearchLine);
+
+  // Configure tree view
+  m_widgets.pCommandsView = new asiUI_QTreeView();
+  m_widgets.pCommandsView->installEventFilter(this);
   //
-  m_pMainLayout->addWidget(m_widgets.pCommands);
+  m_pMainLayout->addWidget(m_widgets.pCommandsView);
+  asiUI_TreeModel* model = new asiUI_TreeModel();
+  m_widgets.pCommandsView->setModel(model);
+  connect(m_widgets.pCommandsView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(doubleClickedTableView(QModelIndex)));
+
   //
   m_pMainLayout->setAlignment(Qt::AlignTop);
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
@@ -96,7 +259,30 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   this->initialize();
 
   // Set good initial size
-  this->setMinimumSize( QSize(400, 600) );
+  this->setMinimumSize( QSize(650, 600) );
+
+  m_pMainLayout->addWidget(m_widgets.pClose);
+
+  // Connect signals to slots
+  connect(m_widgets.pClose, SIGNAL(clicked()), SLOT(onClose()));
+
+  m_widgets.pClose->setAutoDefault(false);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::setConsole(asiUI_Console* console)
+{
+  m_console = console;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::doubleClickedTableView(QModelIndex index)
+{
+  asiUI_TreeItem* item = (asiUI_TreeItem*)index.internalPointer();
+  QString command = item->data(QModelIndex((index.row(), 0, index.parent()))).toString();
+  m_console->addCommand(command);
 }
 
 //-----------------------------------------------------------------------------
@@ -117,55 +303,160 @@ void asiUI_DialogCommands::initialize()
   std::vector<asiTcl_CommandInfo> commands;
   m_interp->GetAvailableCommands(commands);
 
-  // Gather all command names for sorting.
-  std::vector<int>         indices;
-  std::vector<std::string> commandNames;
-  //
-  for ( int c = 0; c < (int) commands.size(); ++c )
+  std::vector<asiUI_TclPluginToCommands> commandsTo;
+  uniteCommandsByPlugin(commands, commandsTo);
+
+  asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
+
+  asiUI_DialogCommandsRootItemPtr item;
+  item = asiUI_DialogCommandsRootItem::CreateItem(asiUI_TreeItemPtr(), 0, CommandsColumnType_Name);
+  model->setRootItem(CommandsColumnType_Name, "Name", item);
+  item->setValues(commandsTo);
+
+  item = asiUI_DialogCommandsRootItem::CreateItem(asiUI_TreeItemPtr(), 0, CommandsColumnType_Parameters);
+  model->setRootItem(CommandsColumnType_Parameters, "Parameters", item);
+
+  item = asiUI_DialogCommandsRootItem::CreateItem(asiUI_TreeItemPtr(), 0, CommandsColumnType_Description);
+  model->setRootItem(CommandsColumnType_Description, "Description", item);
+
+  m_widgets.pCommandsView->header()->setDefaultSectionSize(200);
+  m_widgets.pCommandsView->header()->setStretchLastSection(true);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiUI_DialogCommands::eventFilter( QObject* o, QEvent* e )
+{
+  if (o == m_widgets.pCommandsView && e->type() == QEvent::KeyPress)
   {
-    indices.push_back(c);
-    commandNames.push_back(commands[c].Name);
+    QKeyEvent* aKeyEvent = static_cast<QKeyEvent*>(e);
+    switch (aKeyEvent->key())
+    {
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+      {
+        enterProcessing();
+        return true;
+      }
+      default:
+        break;
+    }
+  }
+  return QDialog::eventFilter(o, e);
+}
+
+//-----------------------------------------------------------------------------
+
+void findMatchedIndices(const QString matchedValue,
+                        const asiUI_TreeModel* model,
+                        QModelIndexList& matchedIndices)
+{
+  QString value = ".*" + matchedValue + ".*";
+  matchedIndices = model->match(model->index(0,0),
+                                Qt::DisplayRole,
+                                value,
+                                -1,
+                                Qt::MatchRegExp | Qt::MatchWrap | Qt::MatchRecursive);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::enterProcessing()
+{
+  asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
+  if (m_matchedIndices.isEmpty())
+  {
+    m_searchValue = m_widgets.pSearchLine->text().toLower();
+    findMatchedIndices(m_searchValue, model, m_matchedIndices);
   }
 
-  // Sort commands by names.
-  std::sort( indices.begin(), indices.end(),
-             [&](const int a, const int b)
-             {
-               return commandNames[a] < commandNames[b];
-             } );
-
-  // Prepare properties to access the item.
-  const Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-
-  // Populate table.
-  int current_row = 0;
-  for ( int c = 0; c < (int) indices.size(); ++c )
+  if (m_matchedIndices.length() > 0)
   {
-    const asiTcl_CommandInfo& cmd = commands[indices[c]];
-
-    // Insert table row.
-    m_widgets.pCommands->insertRow(current_row);
-
-    // Table item for name.
-    QTableWidgetItem* pNameItem = new QTableWidgetItem( cmd.Name.c_str() );
-    pNameItem->setFlags(flags);
-    pNameItem->setToolTip( cmd.Help.c_str() );
-    m_widgets.pCommands->setItem(current_row, 0, pNameItem);
-
-    // Table item for module.
-    QTableWidgetItem* pModuleItem = new QTableWidgetItem( cmd.Group.c_str() );
-    pModuleItem->setFlags(flags);
-    m_widgets.pCommands->setItem(current_row, 1, pModuleItem);
-
-    // Table item for source.
-    QTableWidgetItem* pSourceItem = new QTableWidgetItem( cmd.Filename.c_str() );
-    pSourceItem->setFlags(flags);
-    m_widgets.pCommands->setItem(current_row, 2, pSourceItem);
-
-    // Switch to the next row.
-    current_row++;
+    auto selectionModel = m_widgets.pCommandsView->selectionModel();
+    auto selectedIndices = selectionModel->selectedIndexes();
+    auto nextId = m_matchedIndices[0];
+    if (!selectedIndices.isEmpty())
+    {
+      nextId = findNext(selectedIndices[0], m_matchedIndices);
+    }
+    selectionModel->select(nextId, QItemSelectionModel::SelectionFlag::Rows |
+                                   QItemSelectionModel::SelectionFlag::ClearAndSelect);
+    m_widgets.pCommandsView->scrollTo(nextId);
   }
 
-  // Choose good ratio of column sizes.
-  m_widgets.pCommands->resizeColumnsToContents();
+  model->setHighlighted(m_matchedIndices);
+  model->emitLayoutChanged();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::searchChanged()
+{
+  m_matchedIndices.clear();
+  m_searchValue = m_widgets.pSearchLine->text().toLower();
+
+  asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
+  auto selectionModel = m_widgets.pCommandsView->selectionModel();
+  // store text of the selected item
+  QString selectedText;
+  QModelIndexList selIndices = selectionModel->selectedIndexes();
+  if (!selIndices.isEmpty())
+  {
+    selectedText = model->data(selIndices.first()).toString();
+  }
+
+  findMatchedIndices(m_searchValue, model, m_matchedIndices);
+
+  bool isSelectedFound = false;
+  if (!selectedText.isEmpty())
+  {
+    // restore selection by stored selected text if the item exists
+    for (int i = 0; i < m_matchedIndices.size(); i++)
+    {
+      QModelIndex index = m_matchedIndices[i];
+      if (model->data(index).toString() != selectedText)
+        continue;
+      isSelectedFound = true;
+      break;
+    }
+  }
+  if (!isSelectedFound)
+  {
+    if (m_matchedIndices.length() == 0)
+    {
+      selectionModel->clearSelection();
+    }
+    else
+    {
+      auto idToSelect = m_matchedIndices[0];
+      if (!selIndices.isEmpty())
+      {
+        idToSelect = findNext(selIndices[0], m_matchedIndices);
+      }
+      selectionModel->select(idToSelect, QItemSelectionModel::SelectionFlag::Rows |
+                                         QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      m_widgets.pCommandsView->scrollTo(idToSelect);
+    }
+  }
+
+  model->setHighlighted(m_matchedIndices);
+  model->emitLayoutChanged();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::searchDeactivated()
+{
+  m_matchedIndices.clear();
+
+  asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
+  model->setHighlighted(m_matchedIndices);
+  model->emitLayoutChanged();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::onClose()
+{
+  this->close();
 }

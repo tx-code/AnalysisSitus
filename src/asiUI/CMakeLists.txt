@@ -21,6 +21,8 @@ set (controls_H_FILES
   controls/asiUI_ParamEditorImpl.h
   controls/asiUI_ParameterEditorItem.h
   controls/asiUI_StatusBarImpl.h
+  controls/asiUI_TreeItem.h
+  controls/asiUI_TreeModel.h
   controls/asiUI_WidgetFactory.h
 )
 set (controls_H_UI_FILES
@@ -46,6 +48,7 @@ set (controls_H_UI_FILES
   controls/asiUI_ParameterEditorListener.h
   controls/asiUI_ParameterEditorListenerDefault.h
   controls/asiUI_ParameterEditorView.h
+  controls/asiUI_SearchLine.h
   controls/asiUI_ShapeBrowser.h
   controls/asiUI_StatusBar.h
   controls/asiUI_StyledTextEdit.h
@@ -76,9 +79,12 @@ set (controls_CPP_FILES
   controls/asiUI_ParameterEditorListenerDefault.cpp
   controls/asiUI_ParameterEditorItem.cpp
   controls/asiUI_ParameterEditorView.cpp
+  controls/asiUI_SearchLine.cpp
   controls/asiUI_ShapeBrowser.cpp
   controls/asiUI_StatusBar.cpp
   controls/asiUI_StatusBarImpl.cpp
+  controls/asiUI_TreeItem.cpp
+  controls/asiUI_TreeModel.cpp
   controls/asiUI_StyledTextEdit.cpp
   controls/asiUI_WidgetFactory.cpp
   controls/asiUI_XdeBrowser.cpp
@@ -188,6 +194,11 @@ set (datum_CPP_FILES
 # Dialogs
 #------------------------------------------------------------------------------
 
+set (dialogs_H_FILES
+  dialogs/asiUI_DialogCommandsCommandItem.h
+  dialogs/asiUI_DialogCommandsPluginItem.h
+  dialogs/asiUI_DialogCommandsRootItem.h
+)
 set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogCommands.h
   dialogs/asiUI_DialogCommandsDelegate.h
@@ -207,10 +218,15 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogSTEPDelegate.h
   dialogs/asiUI_DialogTopoGraphDepth.h
   dialogs/asiUI_DialogXdeSummary.h
+  dialogs/asiUI_TclCommandParsed.h
+  dialogs/asiUI_TclPluginToCommands.h
 )
 set (dialogs_CPP_FILES 
   dialogs/asiUI_DialogCommands.cpp
+  dialogs/asiUI_DialogCommandsCommandItem.cpp
   dialogs/asiUI_DialogCommandsDelegate.cpp
+  dialogs/asiUI_DialogCommandsPluginItem.cpp
+  dialogs/asiUI_DialogCommandsRootItem.cpp
   dialogs/asiUI_DialogDump.cpp
   dialogs/asiUI_DialogEuler.cpp
   dialogs/asiUI_DialogFindEdge.cpp
@@ -535,6 +551,10 @@ endforeach (FILE)
 
 foreach (FILE ${datum_H_FILES})
   source_group ("Header Files\\Datum" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${dialogs_H_FILES})
+  source_group ("Header Files\\Dialogs" FILES "${FILE}")
 endforeach (FILE)
 
 foreach (FILE ${datum_H_UI_FILES})
