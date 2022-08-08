@@ -35,6 +35,7 @@
 #include <asiAlgo.h>
 
 // OpenCascade includes
+#include <Bnd_Box.hxx>
 #include <gp_Pln.hxx>
 
 //! Algorithms from "Real-Time Collision Detection" by Christer Ericson.
@@ -140,6 +141,9 @@ namespace RTCD
 
     AABB() : IsVoid(true) {} //!< Default ctor.
 
+    asiAlgo_EXPORT
+      AABB(const Bnd_Box& bbox); //!< Ctor from OpenCascade type.
+
     asiAlgo_EXPORT void
       Get(double& xmin, double& ymin, double& zmin,
           double& xmax, double& ymax, double& zmax) const;
@@ -201,7 +205,7 @@ namespace RTCD
   //!
   //! \sa sec. 5.3.3 in RTCD.
   asiAlgo_EXPORT int
-    IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, Point &q);
+    IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, double &tmax);
 }
 
 #endif

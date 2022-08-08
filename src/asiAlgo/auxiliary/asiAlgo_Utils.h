@@ -198,6 +198,20 @@ namespace asiAlgo_Utils
       return os.str();
     }
 
+    //! Converts the passed value to string. This function is used to
+    //! substitute std::to_string() for compilers incompatible with
+    //! C++ 11.
+    //! \param value [in] value to convert.
+    //! \return string.
+    template <typename T>
+    std::string ToString(T value, int prec)
+    {
+      std::ostringstream os;
+      os << std::setprecision(prec);
+      os << value;
+      return os.str();
+    }
+
     //! Converts the passed string to number.
     //! \param str           [in] string to convert.
     //! \param default_value [in] default value to use.
@@ -1897,6 +1911,14 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT void
     GetFacePoints(const TopoDS_Face&   face,
                   std::vector<gp_XYZ>& pts);
+
+  //! Returns a set of points lying on the triangulation of the given face.
+  //! \param[in]  face    the face in question.
+  //! \param[out] samples the sampled points on a face with their associated norms.
+  //! \return false if the face of interest is not triangulated, so sampling is impossible.
+  asiAlgo_EXPORT bool
+    GetFacePointsByFacets(const TopoDS_Face&   face,
+                          std::vector<gp_Ax1>& samples);
 
   //! Checks if the passed face is internal or external, depending
   //! on its norm field orientation.

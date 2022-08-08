@@ -84,6 +84,17 @@ RTCD::Point RTCD::Point::operator-(const Vector& V)
 
 //-----------------------------------------------------------------------------
 
+RTCD::AABB::AABB(const Bnd_Box& bbox)
+{
+  gp_Pnt Pmin = bbox.CornerMin();
+  gp_Pnt Pmax = bbox.CornerMax();
+
+  this->min = Point( Pmin.X(), Pmin.Y(), Pmin.Z() );
+  this->max = Point( Pmax.X(), Pmax.Y(), Pmax.Z() );
+}
+
+//-----------------------------------------------------------------------------
+
 void RTCD::AABB::Get(double& xmin, double& ymin, double& zmin,
                      double& xmax, double& ymax, double& zmax) const
 {
@@ -300,12 +311,12 @@ double RTCD::SqDistPointSegment(const Point& a, const Point& b, const Point& c)
 
 //-----------------------------------------------------------------------------
 
-int RTCD::IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, Point &q)
+int RTCD::IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, double &tmax)
 {
   const double EPSILON = RealEpsilon();
 
-  tmin = 0.0f; // set to -DBL_MAX to get first hit on line.
-  double tmax = DBL_MAX; // set to max distance ray can travel (for segment).
+  tmin = -DBL_MAX; // set to -DBL_MAX to get first hit on line.
+  tmax = DBL_MAX; // set to max distance ray can travel (for segment).
 
   // For all three slabs
   for ( int i = 0; i < 3; ++i )
@@ -337,7 +348,6 @@ int RTCD::IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, Point &q)
     }
   }
 
-  // Ray intersects all 3 slabs. Return point `q` and intersection `t` value (`tmin`).
-  q = p + d * tmin;
+  // Ray intersects all 3 slabs. Return `tmin` and `tmax`.
   return 1;
 }

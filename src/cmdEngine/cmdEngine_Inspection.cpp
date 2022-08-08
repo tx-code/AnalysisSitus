@@ -61,6 +61,7 @@
 #include <asiAlgo_RecognizeCavities.h>
 #include <asiAlgo_RecognizeConvexHull.h>
 #include <asiAlgo_RecognizeDrillHoles.h>
+#include <asiAlgo_RTCD.h>
 #include <asiAlgo_SampleFace.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -102,6 +103,28 @@
 #pragma warning(push, 0)
 #include <vtkBMPWriter.h>
 #pragma warning(pop)
+
+//-----------------------------------------------------------------------------
+
+namespace
+{
+  //! Axes vector field.
+  struct t_axField
+  {
+    Handle(asiAlgo_BaseCloud<double>) origins;
+    Handle(asiAlgo_BaseCloud<double>) vectors;
+
+    //! Default ctor.
+    t_axField() = default;
+
+    //! Allocates heap memory for the field.
+    void Alloc()
+    {
+      origins = new asiAlgo_BaseCloud<double>;
+      vectors = new asiAlgo_BaseCloud<double>;
+    }
+  };
+}
 
 //-----------------------------------------------------------------------------
 
@@ -4271,6 +4294,122 @@ int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
+                               int                          argc,
+                               const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get part shape.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::cf->Model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape partSh = partNode->GetShape();
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdEngine::cf.IsNull() )
+  {
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
+
+  // Compute AABB based on mesh.
+  Bnd_Box bbox;
+  asiAlgo_Utils::Bounds(partSh, true, true, bbox);
+  //
+  RTCD::AABB aabb(bbox);
+
+  /* For diagnostic dump */
+  t_axField                         distAxes;
+  Handle(asiAlgo_BaseCloud<double>) distHits = new asiAlgo_BaseCloud<double>;
+  distAxes.Alloc();
+
+  // Iterate over all faces of interest.
+  double minDist = DBL_MAX;
+  //
+  for ( TColStd_MapIteratorOfPackedMapOfInteger fit(selected); fit.More(); fit.Next() )
+  {
+    const int faceId = fit.Key();
+
+    // Get face.
+    const TopoDS_Face&
+      face = TopoDS::Face( M->GetPartNode()->GetAAG()->GetMapOfFaces()(faceId) );
+
+    // Get face points using its triangulation.
+    std::vector<gp_Ax1> probes;
+    //
+    if ( !asiAlgo_Utils::GetFacePointsByFacets(face, probes) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot sample points on the face %1." << fid);
+      return TCL_ERROR;
+    }
+
+    for ( const auto& probe : probes )
+    {
+      const gp_Pnt& xyz = probe.Location();
+      const gp_Dir& N   = probe.Direction();
+
+      distAxes.origins->AddElement( xyz );
+      distAxes.vectors->AddElement( N.XYZ() );
+
+      // Compose a probe point.
+      RTCD::Point  p( xyz.X(), xyz.Y(), xyz.Z() );
+      RTCD::Vector d( N.X(),   N.Y(),   N.Z() );
+
+      // Test w.r.t. AABB.
+      double tmin, tmax, dd = 0;
+      RTCD::Point q;
+      //
+      if ( RTCD::IntersectRayAABB(p, d, aabb, tmin, tmax) )
+      {
+        double t = (tmin < 0) ? tmax : tmin; // Negative `t` is in reversed direction.
+        q = p + d * t;
+
+        distHits->AddElement(q.x, q.y, q.z);
+
+        dd = (q - p).Modulus();
+
+        if ( dd < minDist )
+          minDist = dd;
+      }
+      else
+      {
+        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Cannot compute distance from the face %1." << fid);
+        continue;
+      }
+    }
+
+    TCollection_AsciiString distAxName("distAxes "), distHitName("distHit ");
+    distAxName += fid;
+    distHitName += fid;
+
+    interp->GetPlotter().REDRAW_POINTS  (distAxName,  distAxes.origins->GetCoordsArray(), Color_Yellow);
+    interp->GetPlotter().REDRAW_VECTORS (distAxName,  distAxes.origins->GetCoordsArray(), distAxes.vectors->GetCoordsArray(), Color_Violet);
+    interp->GetPlotter().REDRAW_POINTS  (distHitName, distHits->GetCoordsArray(), Color_Red);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Min distance to AABB from face %1: %2." << fid << minDist);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4774,4 +4913,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks convexity of all vertices in the given face.",
     //
     __FILE__, group, ENGINE_CheckVertexVexity);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-distance-to-bbox",
+    //
+    "check-distance-to-bbox [-fid <fid>]\n"
+    "\t Checks distance from the selected (or specified) face to AABB.",
+    //
+    __FILE__, group, ENGINE_CheckDistanceToBbox);
 }

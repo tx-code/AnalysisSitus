@@ -5397,6 +5397,71 @@ void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
+                                          std::vector<gp_Ax1>& samples)
+{
+  TopLoc_Location                   L;
+  const Handle(Poly_Triangulation)& T = BRep_Tool::Triangulation(face, L);
+  //
+  if ( T.IsNull() )
+  {
+    return false;
+  }
+
+  // Collect from mesh.
+  for ( int itri = 1; itri <= T->NbTriangles(); ++itri )
+  {
+    const Poly_Triangle& tri = T->Triangle(itri);
+
+    int nodes[3];
+    tri.Get(nodes[0], nodes[1], nodes[2]);
+
+    gp_XYZ P0 = T->Node(nodes[0]).XYZ();
+    gp_XYZ P1 = T->Node(nodes[1]).XYZ();
+    gp_XYZ P2 = T->Node(nodes[2]).XYZ();
+    gp_XYZ Pm = (P0 + P1 + P2)/3.;
+
+    gp_Vec N;
+
+    // Compute analytical norm whenever possible to avoid
+    // mesh distortions.
+    gp_Cylinder cyl;
+    if ( asiAlgo_Utils::IsCylindrical(face, cyl) )
+    {
+      gp_Lin axLin( cyl.Axis() );
+      //
+      gp_XYZ       axLinDir = axLin.Direction().XYZ();
+      gp_XYZ       O        = axLin.Location().XYZ();
+      gp_XYZ       V1       = Pm - O;
+      const double t        = V1.Dot(axLinDir);
+      gp_XYZ       V2       = t*axLinDir;
+
+      N = V1 - V2;
+    }
+    else
+    {
+      gp_Vec P0P1 = P1 - P0;
+      gp_Vec P0P2 = P2 - P0;
+
+      // Fallback on mesh.
+      N = P0P1.Crossed(P0P2);
+    }
+    //
+    if ( N.Magnitude() < gp::Resolution() )
+      continue;
+
+    N.Normalize();
+    if ( face.Orientation() == TopAbs_REVERSED )
+      N.Reverse();
+
+    samples.push_back( gp_Ax1(Pm, N) );
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
                                const double       diameter,
                                const gp_Ax1&      ax)
