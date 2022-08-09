@@ -5416,9 +5416,9 @@ bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
     int nodes[3];
     tri.Get(nodes[0], nodes[1], nodes[2]);
 
-    gp_XYZ P0 = T->Node(nodes[0]).XYZ();
-    gp_XYZ P1 = T->Node(nodes[1]).XYZ();
-    gp_XYZ P2 = T->Node(nodes[2]).XYZ();
+    gp_XYZ P0 = T->Node(nodes[0]).Transformed(L).XYZ();
+    gp_XYZ P1 = T->Node(nodes[1]).Transformed(L).XYZ();
+    gp_XYZ P2 = T->Node(nodes[2]).Transformed(L).XYZ();
     gp_XYZ Pm = (P0 + P1 + P2)/3.;
 
     gp_Vec N;

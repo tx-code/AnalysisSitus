@@ -207,7 +207,7 @@ namespace asiAlgo_Utils
     std::string ToString(T value, int prec)
     {
       std::ostringstream os;
-      os << std::setprecision(prec);
+      os << std::setprecision(prec) << std::fixed;
       os << value;
       return os.str();
     }
