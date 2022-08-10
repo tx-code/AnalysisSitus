@@ -1914,10 +1914,13 @@ namespace asiAlgo_Utils
 
   //! Returns a set of points lying on the triangulation of the given face.
   //! \param[in]  face    the face in question.
+  //! \param[in]  tol     the 3D tolerance to merge points close to each other. Pass
+  //!                     0 to avoid filtering.
   //! \param[out] samples the sampled points on a face with their associated norms.
   //! \return false if the face of interest is not triangulated, so sampling is impossible.
   asiAlgo_EXPORT bool
     GetFacePointsByFacets(const TopoDS_Face&   face,
+                          const double         tol,
                           std::vector<gp_Ax1>& samples);
 
   //! Checks if the passed face is internal or external, depending

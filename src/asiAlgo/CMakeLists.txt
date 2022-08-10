@@ -459,6 +459,7 @@ set (points_H_FILES
   points/asiAlgo_PointWithAttr.h
   points/asiAlgo_PurifyCloud.h
   points/asiAlgo_QuickHull2d.h
+  points/asiAlgo_RelievePointCloud.h
   points/asiAlgo_ReorientNorms.h
 )
 set (points_CPP_FILES
@@ -470,6 +471,7 @@ set (points_CPP_FILES
   points/asiAlgo_PointCloudUtils.cpp
   points/asiAlgo_PointWithAttr.cpp
   points/asiAlgo_QuickHull2d.cpp
+  points/asiAlgo_RelievePointCloud.cpp
   points/asiAlgo_ReorientNorms.cpp
 )
 

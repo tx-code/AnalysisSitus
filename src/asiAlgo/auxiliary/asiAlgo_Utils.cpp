@@ -45,6 +45,7 @@
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_RecognizeCanonical.h>
+#include <asiAlgo_RelievePointCloud.h>
 #include <asiAlgo_Timer.h>
 
 #if defined USE_MOBIUS
@@ -5398,6 +5399,7 @@ void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
+                                          const double         tol,
                                           std::vector<gp_Ax1>& samples)
 {
   TopLoc_Location                   L;
@@ -5455,6 +5457,16 @@ bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
       N.Reverse();
 
     samples.push_back( gp_Ax1(Pm, N) );
+  }
+
+  // Sparse the point cloud if requested.
+  if ( tol > Precision::Confusion() )
+  {
+    std::vector<gp_Ax1> sparsed;
+    asiAlgo_RelievePointCloud sparse;
+    sparse(samples, tol, sparsed);
+    //
+    samples = sparsed;
   }
 
   return true;

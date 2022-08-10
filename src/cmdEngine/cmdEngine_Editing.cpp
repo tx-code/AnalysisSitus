@@ -51,6 +51,7 @@
 #include <asiAlgo_PlateOnPoints.h>
 #include <asiAlgo_RebuildEdge.h>
 #include <asiAlgo_RecognizeBlends.h>
+#include <asiAlgo_RelievePointCloud.h>
 #include <asiAlgo_RepatchFaces.h>
 #include <asiAlgo_SmallEdges.h>
 #include <asiAlgo_SuppressBlendChain.h>
@@ -3299,6 +3300,54 @@ int ENGINE_ConnectEdgesToWires(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SparsePointCloud(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiData_IVPointSetNode)
+    ptsNode = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
+  //
+  if ( ptsNode.IsNull() || !ptsNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find points with the name '%1'." << argv[1]);
+    return TCL_ERROR;
+  }
+
+  // Get point cloud.
+  Handle(asiAlgo_BaseCloud<double>) pts = ptsNode->GetPoints();
+  //
+  if ( pts.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Selected point cloud is empty.");
+    return TCL_ERROR;
+  }
+
+  // Read the tolerance.
+  const double tol = Atof(argv[2]);
+  //
+  if ( tol < Precision::Confusion() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Too small tolerance passed.");
+    return TCL_ERROR;
+  }
+
+  // Sparse point cloud.
+  asiAlgo_RelievePointCloud sparse;
+  Handle(asiAlgo_BaseCloud<double>) res = sparse(pts, tol);
+
+  // Update cloud.
+  interp->GetPlotter().REDRAW_POINTS(argv[1], res->GetCoordsArray(), Color_White);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3750,4 +3799,12 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t from the Part Node.",
     //
     __FILE__, group, ENGINE_ConnectEdgesToWires);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("sparse-point-cloud",
+    //
+    "sparse-point-cloud <name> <tol>\n"
+    "\t Sparses the point cloud with the name <name> using the given spatial tolerance <tol>.",
+    //
+    __FILE__, group, ENGINE_SparsePointCloud);
 }

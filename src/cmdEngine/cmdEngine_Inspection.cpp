@@ -4353,7 +4353,7 @@ int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
     // Get face points using its triangulation.
     std::vector<gp_Ax1> probes;
     //
-    if ( !asiAlgo_Utils::GetFacePointsByFacets(face, probes) )
+    if ( !asiAlgo_Utils::GetFacePointsByFacets(face, 0., probes) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot sample points on the face %1." << fid);
       return TCL_ERROR;
