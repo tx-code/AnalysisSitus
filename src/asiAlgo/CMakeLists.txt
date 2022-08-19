@@ -19,6 +19,7 @@ set (CPP_FILES
 #------------------------------------------------------------------------------
 
 set (aux_H_FILES
+  auxiliary/algoBase_ConvertCurve.h
   auxiliary/asiAlgo_AttrFaceColor.h
   auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
@@ -66,6 +67,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_VisualSettings.h
 )
 set (aux_CPP_FILES
+  auxiliary/algoBase_ConvertCurve.cpp
   auxiliary/asiAlgo_BuildConvexHull.cpp
   auxiliary/asiAlgo_BuildHLR.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp

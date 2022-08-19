@@ -44,6 +44,8 @@
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_TopoKill.h>
 #include <asiAlgo_Utils.h>
+//
+#include <algoBase_ConvertCurve.h>
 
 // asiUI includes
 #include <asiUI_CommonFacilities.h>
@@ -705,49 +707,75 @@ int MISC_TestHexagonBopsFaces(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int MISC_PushPull(const Handle(asiTcl_Interp)& interp,
-                  int                          /*argc*/,
+                  int                          argc,
                   const char**                 argv)
 {
-  TopoDS_Shape
-    partShape = Handle(asiEngine_Model)::DownCast( interp->GetModel() )->GetPartNode()->GetShape();
+  Handle(asiData_PartNode)
+    partNode = Handle(asiEngine_Model)::DownCast( interp->GetModel() )->GetPartNode();
+  //
+  TopoDS_Shape result = partNode->GetShape();
 
-  int faceId = atoi(argv[1]); // 1-based
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdMisc::cf.IsNull() )
+  {
+    asiEngine_Part( cmdMisc::cf->Model,
+                    cmdMisc::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
 
   TopTools_IndexedMapOfShape M;
-  TopExp::MapShapes(partShape, TopAbs_FACE, M);
-  TopoDS_Face faceShape = TopoDS::Face( M.FindKey(faceId) );
+  TopExp::MapShapes(result, TopAbs_FACE, M);
 
-  interp->GetPlotter().DRAW_SHAPE(faceShape, Color_Blue, 1.0, true, "faceShape");
+  for ( asiAlgo_Feature::Iterator fit(selected); fit.More(); fit.Next() )
+  {
+    TopoDS_Face faceShape = TopoDS::Face( M.FindKey( fit.Key() ) );
 
-  Handle(Geom_Surface) surf = BRep_Tool::Surface(faceShape);
+    Handle(Geom_Surface) surf = BRep_Tool::Surface(faceShape);
 
-  double uMin, uMax, vMin, vMax;
-  BRepTools::UVBounds(faceShape, uMin, uMax, vMin, vMax);
+    double uMin, uMax, vMin, vMax;
+    BRepTools::UVBounds(faceShape, uMin, uMax, vMin, vMax);
 
-  double uMid = (uMin + uMax)*0.5;
-  double vMid = (vMin + vMax)*0.5;
+    double uMid = (uMin + uMax)*0.5;
+    double vMid = (vMin + vMax)*0.5;
 
-  gp_Pnt P;
-  gp_Vec dS_dU, dS_dV;
-  surf->D1(uMid, vMid, P, dS_dU, dS_dV);
+    gp_Pnt P;
+    gp_Vec dS_dU, dS_dV;
+    surf->D1(uMid, vMid, P, dS_dU, dS_dV);
 
-  gp_Dir norm = dS_dU^dS_dV;
+    gp_Dir norm = dS_dU^dS_dV;
 
-  if ( faceShape.Orientation() == TopAbs_REVERSED )
-    norm.Reverse();
+    if ( faceShape.Orientation() == TopAbs_REVERSED )
+      norm.Reverse();
 
-  gp_Vec offset = norm.XYZ() * atof(argv[2]);
+    gp_Vec offset = norm.XYZ() * atof(argv[argc - 1]);
 
-  TopoDS_Shape prism = BRepPrimAPI_MakePrism(faceShape, offset);
-  interp->GetPlotter().REDRAW_SHAPE("prism", prism, Color_Blue);
+    TopoDS_Shape prism = BRepPrimAPI_MakePrism(faceShape, offset);
+    TopoDS_Shape fused = BRepAlgoAPI_Fuse(prism, result);
 
-  TopoDS_Shape fused = BRepAlgoAPI_Fuse(prism, partShape);
+    ShapeUpgrade_UnifySameDomain Maximize(fused);
+    Maximize.Build();
+    result = Maximize.Shape();
+  }
 
-  ShapeUpgrade_UnifySameDomain Maximize(fused);
-  Maximize.Build();
-  fused = Maximize.Shape();
+  // Modify Data Model.
+  cmdMisc::model->OpenCommand();
+  {
+    asiEngine_Part partApi(cmdMisc::model);
+    //
+    partApi.Update(result);
+  }
+  cmdMisc::model->CommitCommand();
 
-  interp->GetPlotter().REDRAW_SHAPE("fused", fused, Color_Green);
+  // Update UI.
+  if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
+    cmdMisc::cf->ViewerPart->PrsMgr()->Actualize(partNode);
 
   return TCL_OK;
 }
@@ -3650,6 +3678,73 @@ int MISC_TestHelix(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Get shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  } 
+
+  double tol = 0.01;
+  interp->GetKeyValue(argc, argv, "tol", tol);
+  //
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Conversion tolerance: %1." << tol);
+
+  TopoDS_Compound comp;
+  BRep_Builder bb;
+  bb.MakeCompound(comp);
+
+  TIMER_NEW
+  TIMER_GO
+
+  for ( TopExp_Explorer exp(partShape, TopAbs_EDGE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
+
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+
+    TopoDS_Wire W;
+    if ( !pb::algoBase_ConvertCurve::Perform(curve, f, l, W, tol) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to convert curve.");
+      interp->GetPlotter().DRAW_CURVE(curve, Color_Red, true, "faulty");
+      continue;
+    }
+
+    bb.Add(comp, W);
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Convert curves")
+
+  // Modify shape.
+  M->OpenCommand();
+  {
+    asiEngine_Part(M).Update(comp);
+  }
+  M->CommitCommand();
+
+  // Update UI.
+  if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
+    cmdMisc::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
                       const Handle(Standard_Transient)& data)
 {
@@ -3888,6 +3983,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Constructs a helical curve.",
     //
     __FILE__, group, MISC_TestHelix);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-convert-curves",
+    //
+    "misc-convert-curves\n"
+    "\t Converts to arcs and lines.",
+    //
+    __FILE__, group, MISC_ConvertCurves);
 
   // Load more commands.
   Commands_Coons (interp, data);

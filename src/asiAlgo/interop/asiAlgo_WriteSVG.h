@@ -41,15 +41,25 @@
 //! Services to save a drawing as an SVG file.
 namespace asiAlgo_WriteSVG
 {
-  //! Saves the passed data to SVG.
+  //! Saves the passed data to SVG after preprocessing it with HLR algorithm.
   //! \param[in] shape the shape to dump to SVG.
   //! \param[in] dir   the projection direction.
   //! \param[in] path  the SVG path to save to.
   //! \param[in] tol   the discretization tolerance for edges.
   //! \return true if SVG file was saved, false -- otherwise.
   asiAlgo_EXPORT bool
+    WriteWithHLR(const TopoDS_Shape&            shape,
+                 const gp_Dir&                  dir,
+                 const TCollection_AsciiString& path,
+                 const double                   tol);
+
+  //! Saves the passed data to SVG .
+  //! \param[in] shape the shape to dump to SVG.
+  //! \param[in] path  the SVG path to save to.
+  //! \param[in] tol   the discretization tolerance for edges.
+  //! \return true if SVG file was saved, false -- otherwise.
+  asiAlgo_EXPORT bool
     Write(const TopoDS_Shape&            shape,
-          const gp_Dir&                  dir,
           const TCollection_AsciiString& path,
           const double                   tol);
 

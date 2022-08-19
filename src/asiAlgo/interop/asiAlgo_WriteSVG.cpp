@@ -200,10 +200,10 @@ namespace svg
 
   //-----------------------------------------------------------------------------
 
-  void printEdges(TopoDS_Shape&      shape,
-                  std::stringstream& result,
-                  const double       lineWidth,
-                  const double       tolerance)
+  void printEdges(const TopoDS_Shape& shape,
+                  std::stringstream&  result,
+                  const double        lineWidth,
+                  const double        tolerance)
   {
     if ( shape.IsNull() )
     {
@@ -220,19 +220,18 @@ namespace svg
     BRepMesh_IncrementalMesh(shape, tolerance);
 
     result << style.c_str()
-           << ExportEdges( shape )
+           << ExportEdges(shape)
            << "</g>"
            << std::endl;
   }
 }
 
-
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
-                             const gp_Dir&                  dir,
-                             const TCollection_AsciiString& path,
-                             const double                   tol)
+bool asiAlgo_WriteSVG::WriteWithHLR(const TopoDS_Shape&            shape,
+                                    const gp_Dir&                  dir,
+                                    const TCollection_AsciiString& path,
+                                    const double                   tol)
 {
   TIMER_NEW
   TIMER_GO
@@ -282,8 +281,17 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
 
   TopoDS_Shape V = svg::build3dCurves(hlrResult);
 
+  return Write(V, path, tol);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
+                             const TCollection_AsciiString& path,
+                             const double                   tol)
+{
   double xMin, yMin, zMin, xMax, yMax, zMax;
-  asiAlgo_Utils::Bounds(V, xMin, yMin, zMin, xMax, yMax, zMax);
+  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax);
 
   std::vector<double> dim = {xMax - xMin, yMax - yMin, zMax - zMin};
   std::sort( dim.begin(), dim.end() );
@@ -299,7 +307,7 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
   // Get results.
   std::stringstream result;
 
-  svg::printEdges(V, result, scaledLineWidth, tol);
+  svg::printEdges(shape, result, scaledLineWidth, tol);
 
   // Save results to file.
   std::ofstream FILE;

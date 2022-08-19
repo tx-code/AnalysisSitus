@@ -2463,15 +2463,15 @@ int ENGINE_SplitCurveBezier(const Handle(asiTcl_Interp)& interp,
   // Find Node by name.
   Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[2]);
   //
-  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+  Handle(asiData_IVCurveNode)
+    curveNode = Handle(asiData_IVCurveNode)::DownCast(node);
+  //
+  if ( curveNode.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a curve."
                                                         << argv[2]);
     return TCL_OK;
   }
-  //
-  Handle(asiData_IVCurveNode)
-    curveNode = Handle(asiData_IVCurveNode)::DownCast(node);
 
   // Get B-curve.
   double f, l;
