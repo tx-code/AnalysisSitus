@@ -92,11 +92,15 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
     commandNames << CStr2QStr( commands[c].Name.c_str() );
   }
 
+  // Sorts the list of strings in ascending order.
+  commandNames.sort();
+
   // Construct and initialize the completer.
   m_pCompleter = new QCompleter(commandNames, this);
   m_pCompleter->setWidget(this);
   m_pCompleter->setCompletionMode(QCompleter::PopupCompletion);
   m_pCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+  m_pCompleter->setMaxVisibleItems(15);
   //
   QObject::connect(m_pCompleter, QOverload<const QString&>::of(&QCompleter::activated),
                    this,         &asiUI_Console::insertCompletion);
