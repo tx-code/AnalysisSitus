@@ -1608,6 +1608,8 @@ void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)&    curve,
     m_lastObj = curve_n;
   }
 
+  curve_n->SetColor(asiVisu_Utils::ColorToInt(color));
+
   // Commit transaction
   if ( isTx )
     m_model->CommitCommand();

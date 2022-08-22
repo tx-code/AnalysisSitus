@@ -44,30 +44,51 @@ public:
 
 public:
 
+  //! Constructor.
+  //! \param N [in] source Node.
   asiVisu_EXPORT
     asiVisu_IVCurve2dDataProvider(const Handle(ActAPI_INode)& N);
 
 public:
 
+  //! \return curve type.
   asiVisu_EXPORT virtual Handle(Standard_Type)
     GetCurveType() const;
 
+  //! Accessor for curve.
+  //! \param f [out] first parameter.
+  //! \param l [out] last parameter.
+  //! \return curve.
   asiVisu_EXPORT virtual Handle(Geom2d_Curve)
     GetCurve2d(double& f, double& l) const;
 
+  //! Not used.
   asiVisu_EXPORT virtual Handle(Geom_Curve)
     GetCurve(double& f, double& l) const;
 
+  //! \return Boolean flag indicating whether to draw orientation tip.
+  asiVisu_EXPORT virtual bool
+    GetDrawOrientationTip() const;
+
+  //! Returns ID of the Data Node which is being sourced by the visualization
+  //! pipeline. This ID is bound to the pipeline's actor in order to have a
+  //! back-reference from Presentation to Data Object.
+  //! \return Node ID.
   asiVisu_EXPORT virtual ActAPI_DataObjectId
     GetNodeID() const;
 
 public:
 
+  //! Creates a copy of the Data Provider.
+  //! \return copy.
   asiVisu_EXPORT Handle(asiVisu_IVCurve2dDataProvider)
     Clone() const;
 
 private:
 
+  //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
+  //! translation process.
+  //! \return source Parameters.
   virtual Handle(ActAPI_HParameterList)
     translationSources() const;
 

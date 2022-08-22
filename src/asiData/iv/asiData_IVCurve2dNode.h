@@ -73,45 +73,95 @@ public:
     PID_Curve,        //!< Stored geometry.
     PID_Surface,      //!< Host surface for the 2D curve.
   //------------------//
+    PID_GroupPrs,     //!< Presentation group.
+    PID_DrawOriTip,   //!< Whether to draw orientation tip for the curve.
+    PID_HasColor,     //!< Indicates whether the Color Parameter is active.
+    PID_Color,        //!< Color.
+  //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
 public:
 
+  //! Returns new DETACHED instance of the Node ensuring its correct
+  //! allocation in a heap.
+  //! \return new instance of the Node.
   asiData_EXPORT static Handle(ActAPI_INode)
     Instance();
 
 // Generic naming support:
 public:
 
+  //! Accessor for the Node's name.
+  //! \return name of the Node.
   asiData_EXPORT virtual TCollection_ExtendedString
     GetName();
 
+  //! Sets name for the Node.
+  //! \param theName [in] name to set.
   asiData_EXPORT virtual void
     SetName(const TCollection_ExtendedString& name);
 
 // Handy accessors to the stored data:
 public:
 
+  //! Returns the stored geometry.
+  //! \param surface [out] host surface.
+  //! \param f       [out] first parameter.
+  //! \param l       [out] last parameter.
+  //! \return stored geometry.
   asiData_EXPORT Handle(Geom2d_Curve)
     GetCONS(Handle(Geom_Surface)& surface,
             double&               f,
             double&               l) const;
 
+  //! Sets curve to store.
+  //! \param curve   [in] geometry to store.
+  //! \param surface [in] host surface.
+  //! \param f       [in] first parameter of the curve.
+  //! \param l       [in] last parameter of the curve.
   asiData_EXPORT void
     SetCONS(const Handle(Geom2d_Curve)& curve,
             const Handle(Geom_Surface)& surface,
             const double                f,
             const double                l);
 
+  //! Sets the property indicating whether to draw the orientation tip
+  //! for the curve.
+  //! \param[in] on true/false.
+  asiData_EXPORT void
+    SetDrawOrientationTip(const bool on);
+
+  //! \return stored value of orientation tip flag.
+  asiData_EXPORT bool
+    GetDrawOrientationTip() const;
+
+  //! Sets the property indicating whether this Node has the Color Parameter activated.
+  asiData_EXPORT void
+    SetHasColor(const bool);
+
+  //! \return the Boolean flag indicating whether this Node has the Color Parameter activated.
+  asiData_EXPORT bool
+    HasColor() const;
+
+  //! Sets the color.
+  asiData_EXPORT void
+    SetColor(const int);
+
+  //! \return color.
+  asiData_EXPORT int
+    GetColor() const;
+
 // Initialization:
 public:
 
+  //! Performs initial actions required to make Node WELL-FORMED.
   asiData_EXPORT void
     Init();
 
 protected:
 
+  //! Default constructor. Registers all involved Parameters.
   //! Allocation is allowed only via Instance() method.
   asiData_EXPORT
     asiData_IVCurve2dNode();

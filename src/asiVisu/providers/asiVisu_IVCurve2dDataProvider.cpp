@@ -39,8 +39,6 @@
 
 //-----------------------------------------------------------------------------
 
-//! Constructor.
-//! \param N [in] source Node.
 asiVisu_IVCurve2dDataProvider::asiVisu_IVCurve2dDataProvider(const Handle(ActAPI_INode)& N)
 : asiVisu_CurveDataProvider(),
   m_node(N)
@@ -49,17 +47,14 @@ asiVisu_IVCurve2dDataProvider::asiVisu_IVCurve2dDataProvider(const Handle(ActAPI
 
 //-----------------------------------------------------------------------------
 
-//! \return curve type.
 Handle(Standard_Type) asiVisu_IVCurve2dDataProvider::GetCurveType() const
 {
   double f, l;
   return this->GetCurve2d(f, l)->DynamicType();
 }
 
-//! Accessor for curve.
-//! \param f [out] first parameter.
-//! \param l [out] last parameter.
-//! \return curve.
+//-----------------------------------------------------------------------------
+
 Handle(Geom2d_Curve) asiVisu_IVCurve2dDataProvider::GetCurve2d(double& f, double& l) const
 {
   Handle(asiData_IVCurve2dNode)
@@ -72,16 +67,15 @@ Handle(Geom2d_Curve) asiVisu_IVCurve2dDataProvider::GetCurve2d(double& f, double
   return curve_n->GetCONS(surf, f, l);
 }
 
-//! Not used.
+//-----------------------------------------------------------------------------
+
 Handle(Geom_Curve) asiVisu_IVCurve2dDataProvider::GetCurve(double&, double&) const
 {
   return nullptr;
 }
 
-//! Returns ID of the Data Node which is being sourced by the visualization
-//! pipeline. This ID is bound to the pipeline's actor in order to have a
-//! back-reference from Presentation to Data Object.
-//! \return Node ID.
+//-----------------------------------------------------------------------------
+
 ActAPI_DataObjectId asiVisu_IVCurve2dDataProvider::GetNodeID() const
 {
   return m_node->GetId();
@@ -89,8 +83,6 @@ ActAPI_DataObjectId asiVisu_IVCurve2dDataProvider::GetNodeID() const
 
 //-----------------------------------------------------------------------------
 
-//! Creates a copy of the Data Provider.
-//! \return copy.
 Handle(asiVisu_IVCurve2dDataProvider) asiVisu_IVCurve2dDataProvider::Clone() const
 {
   return new asiVisu_IVCurve2dDataProvider(m_node);
@@ -98,9 +90,6 @@ Handle(asiVisu_IVCurve2dDataProvider) asiVisu_IVCurve2dDataProvider::Clone() con
 
 //-----------------------------------------------------------------------------
 
-//! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
-//! translation process.
-//! \return source Parameters.
 Handle(ActAPI_HParameterList) asiVisu_IVCurve2dDataProvider::translationSources() const
 {
   // Resulting Parameters
@@ -114,7 +103,24 @@ Handle(ActAPI_HParameterList) asiVisu_IVCurve2dDataProvider::translationSources(
 
   // Register Parameter as sensitive
   out << curve_n->Parameter(asiData_IVCurve2dNode::PID_Curve)
-      << curve_n->Parameter(asiData_IVCurve2dNode::PID_Surface);
+      << curve_n->Parameter(asiData_IVCurve2dNode::PID_Surface)
+      << curve_n->Parameter(asiData_IVCurve2dNode::PID_DrawOriTip);
 
   return out;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiVisu_IVCurve2dDataProvider::GetDrawOrientationTip() const
+{
+  if (m_node.IsNull())
+    return false;
+
+  Handle(asiData_IVCurve2dNode)
+    curve_n = Handle(asiData_IVCurve2dNode)::DownCast(m_node);
+  //
+  if ( curve_n.IsNull() || !curve_n->IsWellFormed() )
+    return false;
+
+  return curve_n->GetDrawOrientationTip();
 }

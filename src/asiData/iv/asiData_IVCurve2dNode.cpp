@@ -44,44 +44,52 @@
 
 //-----------------------------------------------------------------------------
 
-//! Default constructor. Registers all involved Parameters.
 asiData_IVCurve2dNode::asiData_IVCurve2dNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name,  PID_Name);
   REGISTER_PARAMETER(Shape, PID_Curve);
   REGISTER_PARAMETER(Shape, PID_Surface);
+  REGISTER_PARAMETER(Group, PID_GroupPrs);
+  REGISTER_PARAMETER(Bool,  PID_HasColor);
+  REGISTER_PARAMETER(Int,   PID_Color);
+  REGISTER_PARAMETER(Bool,  PID_DrawOriTip);
 }
 
-//! Returns new DETACHED instance of the Node ensuring its correct
-//! allocation in a heap.
-//! \return new instance of the Node.
+//-----------------------------------------------------------------------------
+
 Handle(ActAPI_INode) asiData_IVCurve2dNode::Instance()
 {
   return new asiData_IVCurve2dNode();
 }
 
-//! Performs initial actions required to make Node WELL-FORMED.
+//-----------------------------------------------------------------------------
+
 void asiData_IVCurve2dNode::Init()
 {
   // Initialize name Parameter
-  this->InitParameter(PID_Name, "Name");
+  this->InitParameter (PID_Name,       "Name",            "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,   "Presentation",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,   "Colorized",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,      "Color",           "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawOriTip, "Orientation tip", "",               ParameterFlag_IsVisible, true);
   //
   this->SetCONS(nullptr, nullptr, 0.0, 0.0);
+  this->SetDrawOrientationTip(true);
+  this->SetHasColor(false);
+  this->SetColor(16777215);
 }
 
 //-----------------------------------------------------------------------------
 // Generic naming
 //-----------------------------------------------------------------------------
 
-//! Accessor for the Node's name.
-//! \return name of the Node.
 TCollection_ExtendedString asiData_IVCurve2dNode::GetName()
 {
   return ActParamTool::AsName( this->Parameter(PID_Name) )->GetValue();
 }
 
-//! Sets name for the Node.
-//! \param theName [in] name to set.
+//-----------------------------------------------------------------------------
+
 void asiData_IVCurve2dNode::SetName(const TCollection_ExtendedString& theName)
 {
   ActParamTool::AsName( this->Parameter(PID_Name) )->SetValue(theName);
@@ -91,11 +99,6 @@ void asiData_IVCurve2dNode::SetName(const TCollection_ExtendedString& theName)
 // Handy accessors
 //-----------------------------------------------------------------------------
 
-//! Returns the stored geometry.
-//! \param surface [out] host surface.
-//! \param f       [out] first parameter.
-//! \param l       [out] last parameter.
-//! \return stored geometry.
 Handle(Geom2d_Curve)
   asiData_IVCurve2dNode::GetCONS(Handle(Geom_Surface)& surface,
                                  double&               f,
@@ -125,11 +128,8 @@ Handle(Geom2d_Curve)
   return BRep_Tool::CurveOnSurface(E, F, f, l);
 }
 
-//! Sets curve to store.
-//! \param curve   [in] geometry to store.
-//! \param surface [in] host surface.
-//! \param f       [in] first parameter of the curve.
-//! \param l       [in] last parameter of the curve.
+//-----------------------------------------------------------------------------
+
 void asiData_IVCurve2dNode::SetCONS(const Handle(Geom2d_Curve)& curve,
                                     const Handle(Geom_Surface)& surface,
                                     const double                f,
@@ -147,4 +147,46 @@ void asiData_IVCurve2dNode::SetCONS(const Handle(Geom2d_Curve)& curve,
     ActParamTool::AsShape( this->Parameter(PID_Curve) )->SetShape(E);
     ActParamTool::AsShape( this->Parameter(PID_Surface) )->SetShape(F);
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVCurve2dNode::SetDrawOrientationTip(const bool on)
+{
+  ActParamTool::AsBool(this->Parameter(PID_DrawOriTip))->SetValue(on);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVCurve2dNode::GetDrawOrientationTip() const
+{
+  return ActParamTool::AsBool(this->Parameter(PID_DrawOriTip))->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVCurve2dNode::SetHasColor(const bool hasColor)
+{
+  ActParamTool::AsBool(this->Parameter(PID_HasColor))->SetValue(hasColor);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVCurve2dNode::HasColor() const
+{
+  return ActParamTool::AsBool(this->Parameter(PID_HasColor))->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVCurve2dNode::SetColor(const int color)
+{
+  ActParamTool::AsInt(this->Parameter(PID_Color))->SetValue(color);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_IVCurve2dNode::GetColor() const
+{
+  return ActParamTool::AsInt(this->Parameter(PID_Color))->GetValue();
 }

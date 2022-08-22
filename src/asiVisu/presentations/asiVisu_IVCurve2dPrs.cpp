@@ -40,8 +40,8 @@
 #include <vtkMapper.h>
 #include <vtkProperty.h>
 
-//! Creates a Presentation object for the passed Node.
-//! \param N [in] Node to create a Presentation for.
+//-----------------------------------------------------------------------------
+
 asiVisu_IVCurve2dPrs::asiVisu_IVCurve2dPrs(const Handle(ActAPI_INode)& N)
 : asiVisu_DefaultPrs(N)
 {
@@ -56,10 +56,58 @@ asiVisu_IVCurve2dPrs::asiVisu_IVCurve2dPrs(const Handle(ActAPI_INode)& N)
   this->GetPipeline(Pipeline_Main)->Actor()->GetProperty()->SetLineWidth(1.0f);
 }
 
-//! Factory method for Presentation.
-//! \param theNode [in] Node to create a Presentation for.
-//! \return new Presentation instance.
+//-----------------------------------------------------------------------------
+
 Handle(asiVisu_Prs) asiVisu_IVCurve2dPrs::Instance(const Handle(ActAPI_INode)& theNode)
 {
   return new asiVisu_IVCurve2dPrs(theNode);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiVisu_IVCurve2dPrs::Colorize(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_CurvePipeline)
+    pl = Handle(asiVisu_CurvePipeline)::DownCast(this->GetPipeline(Pipeline_Main));
+
+  pl->Actor()->GetProperty()->SetColor(color.Red(),
+                                       color.Green(),
+                                       color.Blue());
+}
+
+//-----------------------------------------------------------------------------
+
+void asiVisu_IVCurve2dPrs::renderPipelines(vtkRenderer* renderer) const
+{
+  Handle(asiVisu_HPipelineList) detectPls = this->GetDetectionPipelineList();
+
+  for ( asiVisu_HPipelineList::Iterator it(*detectPls); it.More(); it.Next() )
+    it.Value()->AddToRenderer(renderer);
+}
+//-----------------------------------------------------------------------------
+
+void asiVisu_IVCurve2dPrs::deRenderPipelines(vtkRenderer* renderer) const
+{
+  Handle(asiVisu_HPipelineList) detectPls = this->GetDetectionPipelineList();
+
+  for ( asiVisu_HPipelineList::Iterator it(*detectPls); it.More(); it.Next() )
+    it.Value()->RemoveFromRenderer(renderer);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiVisu_IVCurve2dPrs::afterUpdatePipelines() const
+{
+  Handle(asiData_IVCurve2dNode)
+    N = Handle(asiData_IVCurve2dNode)::DownCast(this->GetNode());
+
+  /* Actualize color */
+
+  if ( N->HasColor() )
+  {
+    ActAPI_Color color = asiVisu_Utils::IntToColor(N->GetColor());
+    this->Colorize(color);
+  }
+  else
+    this->Colorize(ActAPI_Color(Quantity_NOC_WHITE));
 }

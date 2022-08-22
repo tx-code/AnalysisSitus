@@ -58,12 +58,38 @@ public:
 
 public:
 
+  //! Factory method for Presentation.
+  //! \param theNode [in] Node to create a Presentation for.
+  //! \return new Presentation instance.
   asiVisu_EXPORT static Handle(asiVisu_Prs)
     Instance(const Handle(ActAPI_INode)& N);
+
+public:
+
+  //! Sets custom color.
+  //! \param[in] color color to set.
+  asiVisu_EXPORT void
+    Colorize(const ActAPI_Color& color) const;
+
+protected:
+
+  //! Callback on adding presentation pipelines to renderer.
+  virtual void
+    renderPipelines(vtkRenderer* renderer) const;
+
+  //! Callback on removing presentation pipelines from renderer.
+  virtual void
+    deRenderPipelines(vtkRenderer* renderer) const;
+
+  //! Callback for pipeline update.
+  virtual void
+    afterUpdatePipelines() const;
 
 private:
 
   //! Allocation is allowed only via Instance() method.
+  //! Creates a Presentation object for the passed Node.
+  //! \param N [in] Node to create a Presentation for.
   asiVisu_IVCurve2dPrs(const Handle(ActAPI_INode)& N);
 
 };
