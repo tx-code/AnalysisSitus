@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=AnalysisSitus
+Comment=open-source application for CAD feature recognition and more
+Exec=asiExe.sh
+Icon=asitus_setup_image
+Terminal=false
+Categories=Graphics;3DGraphics;
+
+Name[ru_RU]=AnalysisSitus.desktop
