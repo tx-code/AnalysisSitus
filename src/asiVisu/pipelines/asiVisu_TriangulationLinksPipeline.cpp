@@ -91,7 +91,7 @@ void asiVisu_TriangulationLinksPipeline::SetInput(const Handle(asiVisu_DataProvi
    * ============================ */
 
   // Update part-wise colors.
-  DP->GetColor(m_fPartRed, m_fPartGreen, m_fPartBlue);
+  DP->GetEdgesColor(m_fPartRed, m_fPartGreen, m_fPartBlue);
 
   // Update use of scalars flag.
   m_bScalarsOn = DP->HasScalars();
@@ -126,7 +126,8 @@ void asiVisu_TriangulationLinksPipeline::callback_update()
                                   ARRNAME_MESH_ITEM_TYPE,
                                   m_fPartRed,
                                   m_fPartGreen,
-                                  m_fPartBlue);
+                                  m_fPartBlue,
+                                  false);
   }
   else
   {

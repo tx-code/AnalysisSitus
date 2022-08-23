@@ -48,7 +48,8 @@ namespace asiVisu_MeshUtils
   asiVisu_EXPORT vtkSmartPointer<vtkLookupTable>
     InitLookupTable(const double ref_r,
                     const double ref_g,
-                    const double ref_b);
+                    const double ref_b,
+                    const bool   isDullColorEdge = true);
 
   asiVisu_EXPORT vtkSmartPointer<vtkLookupTable>
     InitLookupTable();
@@ -67,7 +68,8 @@ namespace asiVisu_MeshUtils
                const char*  pScalarsArrName,
                const double ref_r,
                const double ref_g,
-               const double ref_b);
+               const double ref_b,
+               const bool   isDullColorEdge = true);
 
   asiVisu_EXPORT double
     DefaultShrinkFactor();

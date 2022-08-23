@@ -66,10 +66,12 @@ public:
   //! \param[in] hasScalarsParam    Parameter holding the Boolean value that indicates
   //!                               whether to apply colors by scalars.
   //! \param[in] colorParam         Parameter holding the custom color.
+  //! \param[in] edgesColorParam    Parameter holding the custom edges color.
   asiVisu_EXPORT
     asiVisu_TriangulationDataProvider(const Handle(asiData_MeshParameter)& triangulationParam,
                                       const Handle(ActData_BoolParameter)& hasScalarsParam,
-                                      const Handle(ActData_IntParameter)&  colorParam);
+                                      const Handle(ActData_IntParameter)&  colorParam,
+                                      const Handle(ActData_IntParameter)&  edgesColorParam);
 
 public:
 
@@ -98,6 +100,13 @@ public:
   asiVisu_EXPORT void
     GetColor(double& r, double& g, double& b) const;
 
+  //! Returns persistent edges color.
+  //! \param[out] r red component.
+  //! \param[out] g green component.
+  //! \param[out] b blue component.
+  asiVisu_EXPORT void
+    GetEdgesColor(double& r, double& g, double& b) const;
+
 public:
 
   //! \return copy.
@@ -125,6 +134,9 @@ protected:
 
   //! Source Parameter with color.
   Handle(ActData_IntParameter) m_colorParam;
+
+  //! Source Parameter with edges color.
+  Handle(ActData_IntParameter) m_edgeColorParam;
 
 };
 

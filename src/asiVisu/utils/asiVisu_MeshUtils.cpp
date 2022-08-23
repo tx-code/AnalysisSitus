@@ -37,10 +37,13 @@
 vtkSmartPointer<vtkLookupTable>
   asiVisu_MeshUtils::InitLookupTable(const double ref_r,
                                      const double ref_g,
-                                     const double ref_b)
+                                     const double ref_b,
+                                     const bool   isDullColorEdge)
 {
-    vtkSmartPointer<vtkLookupTable>
-    colorTable = vtkSmartPointer<vtkLookupTable>::New();
+  vtkSmartPointer<vtkLookupTable>
+  colorTable = vtkSmartPointer<vtkLookupTable>::New();
+
+  double linkCoef = isDullColorEdge ? 0.25 : 1.0;
 
   // Set colors table for 3D shapes
   double range[2];
@@ -61,9 +64,9 @@ vtkSmartPointer<vtkLookupTable>
   colorTable->SetTableValue(MeshPrimitive_FreeLink,        0.75, 0.0, 0.0);
   colorTable->SetTableValue(MeshPrimitive_DanglingLink,    1.0,  0.0, 0.0);
   colorTable->SetTableValue(MeshPrimitive_BorderLink,      1.0,  0.0, 0.0);
-  colorTable->SetTableValue(MeshPrimitive_ManifoldLink,    ref_r / 4.,
-                                                           ref_g / 4.,
-                                                           ref_b / 4.);
+  colorTable->SetTableValue(MeshPrimitive_ManifoldLink,    ref_r * linkCoef,
+                                                           ref_g * linkCoef,
+                                                           ref_b * linkCoef);
   colorTable->SetTableValue(MeshPrimitive_NonManifoldLink, 1.0,  1.0, 0.0);
   //
   colorTable->SetTableValue(MeshPrimitive_CellTriangle,    ref_r, ref_g, ref_b);
@@ -118,9 +121,10 @@ void asiVisu_MeshUtils::InitMapper(vtkMapper*   pMapper,
                                    const char*  pScalarsArrName,
                                    const double ref_r,
                                    const double ref_g,
-                                   const double ref_b)
+                                   const double ref_b,
+                                   const bool   isDullColorEdge)
 {
-  vtkSmartPointer<vtkLookupTable> lookup = InitLookupTable(ref_r, ref_g, ref_b);
+  vtkSmartPointer<vtkLookupTable> lookup = InitLookupTable(ref_r, ref_g, ref_b, isDullColorEdge);
   InitMapper(pMapper, lookup, pScalarsArrName);
 }
 

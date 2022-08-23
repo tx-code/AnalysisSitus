@@ -52,6 +52,7 @@ asiData_TriangulationNode::asiData_TriangulationNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Int,           PID_DisplayMode);
   REGISTER_PARAMETER(Bool,          PID_UseScalars);
   REGISTER_PARAMETER(Int,           PID_Color);
+  REGISTER_PARAMETER(Int,           PID_EdgesColor);
   REGISTER_PARAMETER(Bool,          PID_HasVertices);
 
   // Non-standard Parameters.
@@ -81,15 +82,17 @@ void asiData_TriangulationNode::Init()
   this->SetBVH           (nullptr);
   this->SetUseScalars    (true);
   this->SetColor         (120 << 16 | 120 << 8 | 120); // Initial color.
+  this->SetEdgesColor    (0   << 16 | 0   << 8 | 0);   // Initial edge color.
   this->SetDisplayMode   (1);
   this->SetHasVertices   (false);
 
   // Initialize Parameter flags.
-  this->InitParameter(PID_GroupPrs,    "Presentation",  "",                   ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_DisplayMode, "Display mode",  "PrsMeshDisplayMode", 0,                       true);
-  this->InitParameter(PID_UseScalars,  "Use scalars",   "",                   ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Color,       "Color",         "PrsCustomColor",     ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_HasVertices, "Show vertices", "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupPrs,    "Presentation",   "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DisplayMode, "Display mode",   "PrsMeshDisplayMode", 0,                       true);
+  this->InitParameter(PID_UseScalars,  "Use scalars",    "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,       "Color",          "PrsCustomColor",     ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_EdgesColor,  "Color of edges", "PrsCustomColor",     ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HasVertices, "Show vertices",  "",                   ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -206,6 +209,20 @@ void asiData_TriangulationNode::SetColor(const int theColor) const
 int asiData_TriangulationNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+//! Sets edges color.
+//! \param color [in] color to set.
+void asiData_TriangulationNode::SetEdgesColor(const int color) const
+{
+  ActParamTool::AsInt(this->Parameter(PID_EdgesColor))->SetValue(color);
+}
+
+//! Accessor for the stored edges color value.
+//! \return color value.
+int asiData_TriangulationNode::GetEdgesColor() const
+{
+  return ActParamTool::AsInt(this->Parameter(PID_EdgesColor))->GetValue();
 }
 
 //! Sets display mode.

@@ -51,12 +51,14 @@ asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider()
 
 asiVisu_TriangulationDataProvider::asiVisu_TriangulationDataProvider(const Handle(asiData_MeshParameter)& triangulationParam,
                                                                      const Handle(ActData_BoolParameter)& hasScalarsParam,
-                                                                     const Handle(ActData_IntParameter)&  colorParam)
+                                                                     const Handle(ActData_IntParameter)&  colorParam,
+                                                                     const Handle(ActData_IntParameter)&  edgesColorParam)
 : asiVisu_DataProvider ( ),
   m_node               ( triangulationParam->GetNode() ),
   m_triangulationParam ( triangulationParam ),
   m_hasScalarsParam    ( hasScalarsParam ),
-  m_colorParam         ( colorParam )
+  m_colorParam         ( colorParam ),
+  m_edgeColorParam     ( edgesColorParam )
 {}
 
 //-----------------------------------------------------------------------------
@@ -101,12 +103,26 @@ void asiVisu_TriangulationDataProvider::GetColor(double& r, double& g, double& b
 
 //-----------------------------------------------------------------------------
 
+void asiVisu_TriangulationDataProvider::GetEdgesColor(double& r, double& g, double& b) const
+{
+  const int icolor = m_edgeColorParam->GetValue();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+
+  r = color.Red();
+  g = color.Green();
+  b = color.Blue();
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(asiVisu_TriangulationDataProvider)
   asiVisu_TriangulationDataProvider::Clone() const
 {
   return new asiVisu_TriangulationDataProvider(m_triangulationParam,
                                                m_hasScalarsParam,
-                                               m_colorParam);
+                                               m_colorParam,
+                                               m_edgeColorParam);
 }
 
 //-----------------------------------------------------------------------------
@@ -123,6 +139,9 @@ Handle(ActAPI_HParameterList)
 
   if ( !m_colorParam.IsNull() )
     params << m_colorParam;
+
+  if (!m_edgeColorParam.IsNull())
+    params << m_edgeColorParam;
 
   return params.List;
 }

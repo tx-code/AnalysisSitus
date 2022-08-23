@@ -92,6 +92,9 @@ public:
   asiVisu_EXPORT void
     Colorize(const ActAPI_Color& color) const;
 
+  asiVisu_EXPORT void
+    ColorizeEdges(const ActAPI_Color& color) const;
+
 public:
 
   asiVisu_EXPORT virtual void

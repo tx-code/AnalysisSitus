@@ -64,10 +64,13 @@ asiVisu_TriangulationPrs::asiVisu_TriangulationPrs(const Handle(ActAPI_INode)& N
   //
   Handle(ActData_IntParameter)
     colorP = Handle(ActData_IntParameter)::DownCast( TN->Parameter(asiData_TriangulationNode::PID_Color) );
+  //
+  Handle(ActData_IntParameter)
+    colorPE = Handle(ActData_IntParameter)::DownCast(TN->Parameter(asiData_TriangulationNode::PID_EdgesColor));
 
   // Create Data Provider
   Handle(asiVisu_TriangulationDataProvider)
-    dp = new asiVisu_TriangulationDataProvider(TP, scalarsP, colorP);
+    dp = new asiVisu_TriangulationDataProvider(TP, scalarsP, colorP, colorPE);
 
   // Main pipeline
   Handle(asiVisu_TriangulationPipeline) pl = new asiVisu_TriangulationPipeline();
@@ -214,6 +217,21 @@ void asiVisu_TriangulationPrs::Colorize(const ActAPI_Color& color) const
 
 //-----------------------------------------------------------------------------
 
+//! Sets custom color.
+//! \param[in] color color to set.
+void asiVisu_TriangulationPrs::ColorizeEdges(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_TriangulationLinksPipeline)
+    contourPl = Handle(asiVisu_TriangulationLinksPipeline)::DownCast(this->GetPipeline(Pipeline_TriangulationLinks));
+
+  if (!contourPl.IsNull())
+    contourPl->Actor()->GetProperty()->SetColor(color.Red(),
+                                                color.Green(),
+                                                color.Blue());
+}
+
+//-----------------------------------------------------------------------------
+
 void asiVisu_TriangulationPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& picker) const
 {
   picker->RemoveAllLocators();
@@ -288,6 +306,9 @@ void asiVisu_TriangulationPrs::afterUpdatePipelines() const
 
   ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
   this->Colorize(color);
+
+  ActAPI_Color colorE = asiVisu_Utils::IntToColor(N->GetEdgesColor());
+  this->ColorizeEdges(colorE);
 }
 
 //-----------------------------------------------------------------------------
