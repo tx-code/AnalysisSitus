@@ -122,46 +122,6 @@ namespace
     gp_XYZ           m_current; //!< Current point.
     Standard_Boolean m_isFind;  //!< Detection state.
   };
-
-  void FillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
-                       const unsigned int                       continuity,
-                       GeomPlate_BuildPlateSurface&             builder)
-  {
-    const double tol =  0.05;
-    NCollection_CellFilter<PlateInspector> cellFilter(tol);
-
-    // Iterate over edges to add point constraints.
-    for( int i = 1; i <= edges->Size(); ++i )
-    {
-      const TopoDS_Edge& edge = TopoDS::Edge(edges->Value(i));
-      BRepAdaptor_Curve curve(edge);
-      const double f = curve.FirstParameter();
-      const double l = curve.LastParameter();
-
-      // Get points from the current edge.
-      const int nbPnt = 23;
-      for( int j = 0; j < nbPnt; ++j )
-      {
-        const double param = f + j * (l - f) / (nbPnt - 1);
-        const gp_Pnt pnt = curve.Value(param);
-
-        PlateInspector inspector(tol);
-        const gp_XYZ min = inspector.Shift(pnt.XYZ(), -tol);
-        const gp_XYZ max = inspector.Shift(pnt.XYZ(),  tol);
-
-        inspector.ClearFind();
-        inspector.SetCurrent(pnt.XYZ());
-        cellFilter.Inspect(min, max, inspector);
-
-        if ( !inspector.IsFind() )
-        {
-          cellFilter.Add(pnt.XYZ(), pnt.XYZ());
-          Handle(GeomPlate_PointConstraint) pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
-          builder.Add(pntCon);
-        }
-      }
-    }
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -195,6 +155,13 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(const TopoDS_Shape&  shape,
   m_iNumDiscrPts    ( 10 ),
   m_fFairCoeff      ( 0.01 )
 {}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_PlateOnEdges::SetExtraPoints(const Handle(asiAlgo_BaseCloud<double>)& points)
+{
+  m_extraPts = points;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -278,7 +245,7 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
 
   // Create builder instance.
   GeomPlate_BuildPlateSurface builder;
-  ::FillConstraints(edges, continuity, builder);
+  this->fillConstraints(edges, continuity, builder);
 
   /* ======================
    *  STAGE 2: build plate
@@ -397,4 +364,70 @@ bool asiAlgo_PlateOnEdges::BuildFace(Handle(TopTools_HSequenceOfShape)& edges,
 
   result = newF;
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
+                                           const unsigned int                       continuity,
+                                           GeomPlate_BuildPlateSurface&             builder) const
+{
+  const double tol =  0.5;
+  NCollection_CellFilter<PlateInspector> cellFilter(tol);
+
+  /* ================================
+   *  Add constraints over the edges.
+   * ================================ */
+
+  // Iterate over edges to add point constraints.
+  for ( int i = 1; i <= edges->Size(); ++i )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( edges->Value(i) );
+    BRepAdaptor_Curve curve(edge);
+    const double f = curve.FirstParameter();
+    const double l = curve.LastParameter();
+
+    // Get points from the current edge.
+    const int nbPnt = 23;
+    for ( int j = 0; j < nbPnt; ++j )
+    {
+      const double param = f + j * (l - f) / (nbPnt - 1);
+      const gp_Pnt pnt = curve.Value(param);
+
+      PlateInspector inspector(tol);
+      const gp_XYZ min = inspector.Shift(pnt.XYZ(), -tol);
+      const gp_XYZ max = inspector.Shift(pnt.XYZ(),  tol);
+
+      inspector.ClearFind();
+      inspector.SetCurrent( pnt.XYZ() );
+      cellFilter.Inspect(min, max, inspector);
+
+      if ( !inspector.IsFind() )
+      {
+        cellFilter.Add( pnt.XYZ(), pnt.XYZ() );
+
+        Handle(GeomPlate_PointConstraint)
+          pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
+
+        builder.Add(pntCon);
+      }
+    }
+  }
+
+  /* ================================
+   *  Add optional inner constraints.
+   * ================================ */
+
+  if ( !m_extraPts.IsNull() )
+  {
+    for ( int i = 0; i < m_extraPts->GetNumberOfElements(); ++i )
+    {
+      gp_Pnt Pi = m_extraPts->GetElement(i);
+
+      Handle(GeomPlate_PointConstraint)
+        pntCon = new GeomPlate_PointConstraint(Pi, continuity, 1.0e-4);
+
+      builder.Add(pntCon);
+    }
+  }
 }

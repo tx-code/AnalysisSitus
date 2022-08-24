@@ -1788,8 +1788,6 @@ int ENGINE_Repatch(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
 {
-  const bool isInteractive = (argc == 1);
-
   // Get Part Node to access the selected faces.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -1804,37 +1802,19 @@ int ENGINE_Repatch(const Handle(asiTcl_Interp)& interp,
   // Get indices of faces to repatch.
   TColStd_PackedMapOfInteger fids;
   //
-  if ( isInteractive )
-  {
-    asiEngine_Part partAPI( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
-    partAPI.GetHighlightedFaces(fids);
-  }
-  else
-  {
-    for ( int k = 1; k < argc; ++k )
-    {
-      TCollection_AsciiString argStr(argv[k]);
-      //
-      if ( !argStr.IsIntegerValue() )
-        continue;
+  asiEngine_Part partAPI( cmdEngine::model, cmdEngine::cf->ViewerPart->PrsMgr() );
+  partAPI.GetHighlightedFaces(fids);
 
-      const int fid = atoi(argv[k]);
-      //
-      if ( !partNode->GetAAG()->HasFace(fid) )
-      {
-        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Face %1 does not exist in the working part."
-                                                             << fid);
-        continue;
-      }
-      //
-      fids.Add(fid);
-    }
-  }
+  // Get fairing coeff.
+  double lambda = 0.;
+  interp->GetKeyValue(argc, argv, "lambda", lambda);
 
   // Repatch.
   asiAlgo_RepatchFaces repatcher( shape,
                                   interp->GetProgress(),
                                   interp->GetPlotter() );
+  //
+  repatcher.SetFairingCoeff(lambda);
   //
   if ( !repatcher.Perform(fids) )
   {
@@ -3591,7 +3571,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("repatch",
     //
-    "repatch [<fid1> [<fid2> [...]]]\n"
+    "repatch [<fid1> [<fid2> [...]]] [-lambda <coeff>]\n"
     "\t Repatches faces which are selected interactively or specified as\n"
     "\t arguments (1-based face IDs).",
     //

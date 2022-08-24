@@ -34,6 +34,8 @@
 // asiAlgo includes
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_PlateOnEdges.h>
+#include <asiAlgo_RelievePointCloud.h>
+#include <asiAlgo_SampleFace.h>
 #include <asiAlgo_TopoKill.h>
 #include <asiAlgo_Utils.h>
 
@@ -109,7 +111,7 @@ namespace
 asiAlgo_RepatchFaces::asiAlgo_RepatchFaces(const TopoDS_Shape&  shape,
                                            ActAPI_ProgressEntry progress,
                                            ActAPI_PlotterEntry  plotter)
-: ActAPI_IAlgorithm(progress, plotter), m_input(shape)
+: ActAPI_IAlgorithm(progress, plotter), m_input(shape), m_fLambda(0.)
 {}
 
 //-----------------------------------------------------------------------------
@@ -341,16 +343,49 @@ bool asiAlgo_RepatchFaces::repatchGroup(const TColStd_PackedMapOfInteger& faceId
   TIMER_GO
 #endif
 
-  // Prepare a compound of faces in question.
+  // Prepare a compound of faces in question and collect inner points.
   TopoDS_Compound compFaces;
   BRep_Builder().MakeCompound(compFaces);
   //
+  Handle(asiAlgo_BaseCloud<double>) innerPts = new asiAlgo_BaseCloud<double>;
+  //
   for ( TColStd_MapIteratorOfPackedMapOfInteger fit(faceIds); fit.More(); fit.Next() )
   {
-    const int fid = fit.Key();
+    const int          fid  = fit.Key();
+    const TopoDS_Face& face = TopoDS::Face( facesMap(fid) );
 
-    BRep_Builder().Add( compFaces, facesMap(fid) );
+    BRep_Builder().Add(compFaces, face);
+
+    // Get inner points.
+    if ( asiAlgo_Utils::IsPlanar(face) )
+    {
+      asiAlgo_SampleFace sampleFace(face, m_progress);
+      //
+      sampleFace.SetSquare  ( false );
+      sampleFace.SetPmcAlgo ( asiAlgo_SampleFace::PmcAlgo_Precise );
+      //
+      if ( !sampleFace.Perform(10) )
+      {
+        m_progress.SendLogMessage(LogWarn(Normal) << "Failed to sample face %1." << fid);
+        continue;
+      }
+
+      Handle(asiAlgo_BaseCloud<double>) facePts = sampleFace.GetResult3d();
+      //
+      for ( int i = 0; i < facePts->GetNumberOfElements(); ++i )
+      {
+        gp_Pnt Pi = facePts->GetElement(i);
+        innerPts->AddElement(Pi);
+      }
+    }
   }
+
+  // Sparse inner points.
+  Handle(asiAlgo_BaseCloud<double>) sparsedInnerPts;
+  asiAlgo_RelievePointCloud sparse;
+  sparsedInnerPts = sparse(innerPts, 1);
+
+  //m_plotter.REDRAW_POINTS("innerConstraints", sparsedInnerPts->GetCoordsArray(), Color_Red);
 
   // Build map of edges to extract free ones.
   TopTools_IndexedDataMapOfShapeListOfShape edgesFaces;
@@ -415,6 +450,9 @@ bool asiAlgo_RepatchFaces::repatchGroup(const TColStd_PackedMapOfInteger& faceId
 
   // Prepare interpolation tool.
   asiAlgo_PlateOnEdges interpAlgo(m_input, m_progress, m_plotter);
+  //
+  interpAlgo.SetFairingCoeff(m_fLambda);
+  interpAlgo.SetExtraPoints(sparsedInnerPts);
 
   // Interpolate.
   Handle(Geom_BSplineSurface) repatchSurf;

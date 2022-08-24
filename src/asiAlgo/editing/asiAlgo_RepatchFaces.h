@@ -72,6 +72,13 @@ public:
     return m_history;
   }
 
+  //! Sets the fairing coefficient [0,1].
+  //! \param[in] lambda the coefficient to set.
+  void SetFairingCoeff(const double lambda)
+  {
+    m_fLambda = lambda;
+  }
+
 protected:
 
   asiAlgo_EXPORT bool
@@ -84,6 +91,7 @@ protected:
   TopoDS_Shape              m_input;   //!< Master model.
   TopoDS_Shape              m_result;  //!< Result.
   Handle(BRepTools_History) m_history; //!< Modification history.
+  double                    m_fLambda; //!< Fairing coefficient.
 
 };
 

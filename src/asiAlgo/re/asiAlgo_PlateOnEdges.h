@@ -42,13 +42,13 @@
 #include <TopoDS_Face.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
+class GeomPlate_BuildPlateSurface;
+
 //-----------------------------------------------------------------------------
 
 //! Utility to build a plate surface on the given edge set.
 class asiAlgo_PlateOnEdges : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_PlateOnEdges, ActAPI_IAlgorithm)
 
@@ -80,6 +80,11 @@ public:
                          ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
+
+  //! Set the passed extra points as supplementary pinpoint constraints.
+  //! \param[in] points the point cloud to set.
+  asiAlgo_EXPORT void
+    SetExtraPoints(const Handle(asiAlgo_BaseCloud<double>)& points);
 
   //! Constructs TPS (Thin Plate Spline) approximation for the passed edges.
   //! \param[in,out] edges       collection of edges. The edges can be
@@ -185,10 +190,19 @@ public:
 
 protected:
 
-  TopoDS_Shape        m_shape;        //!< Working shape.
-  Handle(asiAlgo_AAG) m_aag;          //!< AAG.
-  int                 m_iNumDiscrPts; //!< Number of discretization points.
-  double              m_fFairCoeff;   //!< Optional fairing coefficient.
+  //! Adds pinpoint constraints to the given plate builder.
+  asiAlgo_EXPORT void
+    fillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
+                    const unsigned int                       continuity,
+                    GeomPlate_BuildPlateSurface&             builder) const;
+
+protected:
+
+  TopoDS_Shape                      m_shape;        //!< Working shape.
+  Handle(asiAlgo_AAG)               m_aag;          //!< AAG.
+  int                               m_iNumDiscrPts; //!< Number of discretization points.
+  double                            m_fFairCoeff;   //!< Optional fairing coefficient.
+  Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
 
 };
 
