@@ -53,7 +53,7 @@ namespace asiAlgo_WriteSVG
                  const TCollection_AsciiString& path,
                  const double                   tol);
 
-  //! Saves the passed data to SVG .
+  //! Saves the passed data (XOY) to SVG.
   //! \param[in] shape the shape to dump to SVG.
   //! \param[in] path  the SVG path to save to.
   //! \param[in] tol   the discretization tolerance for edges.

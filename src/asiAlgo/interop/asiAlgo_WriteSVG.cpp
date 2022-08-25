@@ -43,6 +43,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 #include <gp_Circ.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <TopExp_Explorer.hxx>
@@ -54,8 +55,10 @@
 
 //-----------------------------------------------------------------------------
 
-#define DrawingCanvasSize 800
+#define DrawingCanvasSize    800
 #define DrawingCanvasPadding 25
+#define DiscrCurveLinDefl    0.001
+#define DiscrCurveAngDefl    0.5 * M_PI / 180.0
 
 //-----------------------------------------------------------------------------
 
@@ -156,6 +159,26 @@ namespace svg
           << e.Y()<< " ";
 
       out << "\" />" << std::endl;
+    }
+    else
+    {
+      GCPnts_TangentialDeflection pntGen(bac, DiscrCurveAngDefl, DiscrCurveLinDefl);
+      const int nbPnt = pntGen.NbPoints();
+      if ( nbPnt > 1 )
+      {
+        char c = 'M';
+
+        out << "  <path id= \"" /*<< ViewName*/ << id << "\" d=\" ";
+
+        for ( int index = 1; index <= nbPnt; ++index )
+        {
+          gp_Pnt pnt = bac.Value(pntGen.Parameter(index));
+          out << c << " " << pnt.X() << " " << pnt.Y() << " ";
+          c = 'L';
+        }
+
+        out << "\" />" << std::endl;
+      }
     }
   }
 
@@ -291,13 +314,12 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
                              const double                   tol)
 {
   double xMin, yMin, zMin, xMax, yMax, zMax;
-  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax);
+  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax, tol, true);
 
-  std::vector<double> dim = {xMax - xMin, yMax - yMin, zMax - zMin};
-  std::sort( dim.begin(), dim.end() );
+  std::vector<double> dim = {abs(xMax - xMin), abs(yMax - yMin), abs(zMax - zMin)};
 
   // Compute line width.
-  const double width  = dim[2] + DrawingCanvasPadding;
+  const double width  = dim[0] + DrawingCanvasPadding;
   const double height = dim[1] + DrawingCanvasPadding;
   const double maxDimension = Max( width, height );
 
@@ -323,6 +345,8 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
   head += DrawingCanvasSize + DrawingCanvasPadding;
   head += "\" height=\"";
   head += DrawingCanvasSize + DrawingCanvasPadding;
+  head += "\" saveAspectRatio=\"";
+  head += "xMinYMin meet";
   head += "\" viewBox=\"";
   head += xMin - scaledPadding;
   head += " ";
