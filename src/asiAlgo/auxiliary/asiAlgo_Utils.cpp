@@ -4188,13 +4188,13 @@ double asiAlgo_Utils::IntegralRect(math_Function& F,
                                    const double   b,
                                    const int      n)
 {
-  double step = (b - a) / n;  // width of each small rectangle.
+  double step = (b - a) / n; // width of each small rectangle.
   double area = 0.0; // signed area.
   for ( int i = 0; i < n; ++i )
   {
     double val = 0.0;
     F.Value(a + (i + 0.5) * step, val);
-    area +=  val*step; // sum up each small rectangle
+    area +=  val*step; // sum up each small rectangle.
   }
   return area;
 }
