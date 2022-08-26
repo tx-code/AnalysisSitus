@@ -70,7 +70,7 @@
 #include <asiAlgo_DivideByContinuity.h>
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
-              int                          argc,
+              int                          cmdMisc_NotUsed(argc),
               const char**                 argv)
 {
   std::vector<gp_XYZ> pts = { gp_XYZ(0,0,0), gp_XYZ(1,0,0), gp_XYZ(1,1,0), gp_XYZ(0,1,0), gp_XYZ(0,0,0) };

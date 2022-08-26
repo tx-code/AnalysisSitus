@@ -123,6 +123,20 @@ protected:
   //! \param[in] root_ui root item in a tree view.
   void addChildren(const Handle(ActAPI_INode)& root_n, QTreeWidgetItem* root_ui);
 
+  //! Removes all children of the specified widget.
+  //! \param[in] root_ui item in a tree view.
+  void deleteChildrenUI(QTreeWidgetItem* root_ui);
+
+  //! Removes all children of the specified node.
+  //! \param[in] root_n node in a Data Model.
+  //! \return true in case of success, false -- otherwise.
+  bool deleteChildrenNodes(const Handle(ActAPI_INode)& root_n);
+
+  //! Checks if the node and its children do not have the IsStructural flag.
+  //! \param[in] root_n node in a Data Model.
+  //! \return true/false.
+  bool checkIsNotStructural(const Handle(ActAPI_INode)& root_n);
+
 //-----------------------------------------------------------------------------
 signals:
 
@@ -161,6 +175,7 @@ protected slots:
   void onPrintParameters       ();
   void onCopyName              ();
   void onCopyID                ();
+  void onDeleteNode            ();
   //
   void onComputeNorms          (const bool);
   void onComputeNodalNorms     ();

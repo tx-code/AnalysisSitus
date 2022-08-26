@@ -58,7 +58,7 @@ Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
 
   // Initialize
   triangulation_n->Init();
-  triangulation_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  triangulation_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
   triangulation_n->SetName("Triangulation");
 
   // Return the just created Node

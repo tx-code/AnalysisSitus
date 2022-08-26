@@ -60,6 +60,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
   // Initialize Node
   iv_n->Init();
   iv_n->SetName("Imperative Viewer");
+  iv_n->SetUserFlags(NodeFlag_IsStructural);
 
   // Create underlying Points 2D
   {
@@ -70,6 +71,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVPoints2dNode) iv_points_2d_n = Handle(asiData_IVPoints2dNode)::DownCast(iv_points_2d_base);
     iv_points_2d_n->Init();
     iv_points_2d_n->SetName("Points 2D");
+    iv_points_2d_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_points_2d_n);
@@ -84,6 +86,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVPointsNode) iv_points_n = Handle(asiData_IVPointsNode)::DownCast(iv_points_base);
     iv_points_n->Init();
     iv_points_n->SetName("Points");
+    iv_points_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_points_n);
@@ -98,6 +101,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVVectorsNode) iv_vectors_n = Handle(asiData_IVVectorsNode)::DownCast(iv_vectors_base);
     iv_vectors_n->Init();
     iv_vectors_n->SetName("Vectors");
+    iv_vectors_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_vectors_n);
@@ -112,6 +116,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVCurves2dNode) iv_curves2d_n = Handle(asiData_IVCurves2dNode)::DownCast(iv_curves2d_base);
     iv_curves2d_n->Init();
     iv_curves2d_n->SetName("Curves 2D");
+    iv_curves2d_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_curves2d_n);
@@ -126,6 +131,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVCurvesNode) iv_curves_n = Handle(asiData_IVCurvesNode)::DownCast(iv_curves_base);
     iv_curves_n->Init();
     iv_curves_n->SetName("Curves");
+    iv_curves_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_curves_n);
@@ -140,6 +146,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVSurfacesNode) iv_surfaces_n = Handle(asiData_IVSurfacesNode)::DownCast(iv_surfaces_base);
     iv_surfaces_n->Init();
     iv_surfaces_n->SetName("Surfaces");
+    iv_surfaces_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_surfaces_n);
@@ -154,6 +161,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVTopoNode) iv_topo_n = Handle(asiData_IVTopoNode)::DownCast(iv_topo_base);
     iv_topo_n->Init();
     iv_topo_n->SetName("Topology");
+    iv_topo_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_topo_n);
@@ -168,6 +176,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVTessNode) iv_tess_n = Handle(asiData_IVTessNode)::DownCast(iv_tess_base);
     iv_tess_n->Init();
     iv_tess_n->SetName("Tessellation");
+    iv_tess_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_tess_n);
@@ -182,6 +191,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     Handle(asiData_IVTextNode) iv_text_n = Handle(asiData_IVTextNode)::DownCast(iv_text_base);
     iv_text_n->Init();
     iv_text_n->SetName("Text");
+    iv_text_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
     iv_n->AddChildNode(iv_text_n);

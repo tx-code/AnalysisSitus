@@ -331,6 +331,107 @@ void asiUI_ObjectBrowser::addChildren(const Handle(ActAPI_INode)& root_n,
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::deleteChildrenUI(QTreeWidgetItem* root_ui)
+{
+  if ( root_ui == nullptr )
+  {
+    return;
+  }
+
+  QList<QTreeWidgetItem*> children = root_ui->takeChildren();
+  QList<QTreeWidgetItem*>::const_iterator itChildren = children.cbegin();
+
+  for ( ; itChildren != children.cend(); ++itChildren )
+  {
+    QTreeWidgetItem* child = *itChildren;
+    if ( child == nullptr )
+    {
+      continue;
+    }
+
+    deleteChildrenUI(child);
+
+    if ( root_ui != nullptr && root_ui != child && child != nullptr )
+    {
+      // The removed item will not be deleted.
+      root_ui->removeChild(child);
+      delete child;
+    }
+  }
+
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiUI_ObjectBrowser::deleteChildrenNodes(const Handle(ActAPI_INode)& root_n)
+{
+  if ( root_n.IsNull() || !root_n->IsWellFormed() || root_n->GetUserFlags() & NodeFlag_IsStructural )
+    return false;
+
+  for ( Handle(ActAPI_IChildIterator) cit = root_n->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    Handle(ActAPI_INode) child_n = cit->Value();
+
+    if ( child_n.IsNull()                                ||
+         !child_n->IsWellFormed()                        ||
+         child_n->GetUserFlags() & NodeFlag_IsStructural )
+    {
+      return false;
+    }
+
+    if ( child_n->GetChildIterator()->More() && !deleteChildrenNodes(child_n) )
+    {
+      return false;
+    }
+
+    for ( size_t k = 0; k < m_viewers.size(); ++k )
+    {
+      if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(child_n) )
+        m_viewers[k]->PrsMgr()->DeRenderPresentation(child_n);
+    }
+
+    if ( !child_n->GetParentNode().IsNull() && child_n->GetParentNode()->IsWellFormed() &&
+         !child_n->GetParentNode()->RemoveChildNode(child_n) )
+    {
+      return false;
+    }
+
+    if ( !m_model->DeleteNode(child_n) )
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiUI_ObjectBrowser::checkIsNotStructural(const Handle(ActAPI_INode)& root_n)
+{
+  if ( root_n.IsNull() || !root_n->IsWellFormed() || root_n->GetUserFlags() & NodeFlag_IsStructural )
+    return false;
+
+  for ( Handle(ActAPI_IChildIterator) cit = root_n->GetChildIterator(); cit->More(); cit->Next() )
+  {
+    Handle(ActAPI_INode) child_n = cit->Value();
+
+    if ( child_n.IsNull() || !child_n->IsWellFormed() || child_n->GetUserFlags() & NodeFlag_IsStructural )
+    {
+      return false;
+    }
+
+    if ( child_n->GetChildIterator()->More() && !checkIsNotStructural(child_n) )
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_ObjectBrowser::onDataChanged(const QModelIndex&  topLeft,
                                         const QModelIndex&  asiUI_NotUsed(bottomRight),
                                         const QVector<int>& asiUI_NotUsed(roles))
@@ -909,6 +1010,63 @@ void asiUI_ObjectBrowser::onCopyID()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onDeleteNode()
+{
+  Handle(ActAPI_INode) selected_n;
+  QTreeWidgetItem* root_ui;
+
+  if ( !this->selectedNode(selected_n, root_ui)           ||
+       selected_n.IsNull()                                ||
+       !selected_n->IsWellFormed()                        ||
+       selected_n->GetUserFlags() & NodeFlag_IsStructural ||
+       root_ui == nullptr )
+  {
+    return;
+  }
+
+  QTreeWidgetItem* parentOfSelectedItem = root_ui->parent();
+
+  // Delete node.
+  m_model->OpenCommand();
+  {
+    if ( selected_n->GetUserFlags() & NodeFlag_IsStructural ||
+         !deleteChildrenNodes(selected_n) )
+    {
+      m_model->AbortCommand();
+      return;
+    }
+
+    for ( size_t k = 0; k < m_viewers.size(); ++k )
+    {
+      if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(selected_n) )
+        m_viewers[k]->PrsMgr()->DeRenderPresentation(selected_n);
+    }
+
+    if ( !m_model->DeleteNode(selected_n) )
+    {
+      m_model->AbortCommand();
+      return;
+    }
+  }
+  m_model->CommitCommand();
+
+  deleteChildrenUI(root_ui);
+
+  if ( parentOfSelectedItem != nullptr && parentOfSelectedItem != root_ui && root_ui != nullptr )
+  {
+    // The removed item will not be deleted.
+    parentOfSelectedItem->removeChild(root_ui);
+    delete root_ui;
+  }
+  else if ( parentOfSelectedItem == nullptr && root_ui != nullptr )
+  {
+    // QTreeWidget::removeItemWidget() already calls the deleteLater().
+    this->removeItemWidget(root_ui, 0);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_ObjectBrowser::onComputeNorms(const bool doElemNorms)
 {
   Handle(ActAPI_INode) selected_n;
@@ -1208,6 +1366,11 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
     pMenu->addAction( "Print parameters", this, SLOT( onPrintParameters () ) );
     pMenu->addAction( "Copy name",        this, SLOT( onCopyName        () ) );
     pMenu->addAction( "Copy ID",          this, SLOT( onCopyID          () ) );
+
+    if ( checkIsNotStructural(node) )
+    {
+      pMenu->addAction( "Delete node", this, SLOT( onDeleteNode() ) );
+    }
   }
   //
   if ( node->IsKind( STANDARD_TYPE(asiData_RootNode) ) )

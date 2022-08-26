@@ -84,7 +84,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
 
   // Initialize geometry
   geom_n->Init(true);
-  geom_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  geom_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
   geom_n->SetName("Part");
 
   // Create underlying face representation Node
@@ -95,7 +95,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_FaceNode) geom_face_n = Handle(asiData_FaceNode)::DownCast(geom_face_base);
     geom_face_n->Init();
-    geom_face_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible);
+    geom_face_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_face_n->SetName("Face domain");
 
     // Set as child
@@ -110,7 +110,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_FaceNormsNode) geom_face_norms_n = Handle(asiData_FaceNormsNode)::DownCast(geom_face_norms_base);
     geom_face_norms_n->Init();
-    geom_face_norms_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_face_norms_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_face_norms_n->SetName("Face norms");
 
     // Set as child
@@ -125,7 +125,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_SurfNode) geom_surf_n = Handle(asiData_SurfNode)::DownCast(geom_surf_base);
     geom_surf_n->Init();
-    geom_surf_n->SetUserFlags(NodeFlag_IsPresentedInHostView | NodeFlag_IsPresentationVisible);
+    geom_surf_n->SetUserFlags(NodeFlag_IsPresentedInHostView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_surf_n->SetName("Host surface");
 
     // Set as child
@@ -140,7 +140,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_FaceContourNode) geom_face_contour_n = Handle(asiData_FaceContourNode)::DownCast(geom_face_contour_base);
     geom_face_contour_n->Init();
-    geom_face_contour_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_face_contour_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_face_contour_n->SetName("Face contour");
 
     // Set as child
@@ -155,7 +155,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_HatchingNode) geom_face_hatching_n = Handle(asiData_HatchingNode)::DownCast(geom_face_hatching_base);
     geom_face_hatching_n->Init();
-    geom_face_hatching_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_face_hatching_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_face_hatching_n->SetName("Face hatching");
 
     // Set as child
@@ -170,7 +170,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_EdgeNode) geom_edge_n = Handle(asiData_EdgeNode)::DownCast(geom_edge_base);
     geom_edge_n->Init();
-    geom_edge_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible);
+    geom_edge_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_edge_n->SetName("Edge domain");
 
     // Set as child
@@ -190,7 +190,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_BoundaryEdgesNode) geom_edges_n = Handle(asiData_BoundaryEdgesNode)::DownCast(geom_edges_base);
     geom_edges_n->Init();
-    geom_edges_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_edges_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_edges_n->SetName("Boundary edges");
 
     // Set as child
@@ -205,7 +205,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_ContourNode) geom_contour_n = Handle(asiData_ContourNode)::DownCast(geom_contour_base);
     geom_contour_n->Init();
-    geom_contour_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+    geom_contour_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_contour_n->SetName("Custom contour");
 
     // Set as child
@@ -220,7 +220,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     // Initialize
     Handle(asiData_VertexNode) geom_vertex_n = Handle(asiData_VertexNode)::DownCast(geom_vertex_base);
     geom_vertex_n->Init();
-    geom_vertex_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible);
+    geom_vertex_n->SetUserFlags(NodeFlag_IsPresentedInDomainView | NodeFlag_IsPresentationVisible | NodeFlag_IsStructural);
     geom_vertex_n->SetName("Vertex");
 
     // Set as child
@@ -238,6 +238,7 @@ Handle(asiData_PartNode) asiEngine_Part::CreatePart()
     //
     tolshapes_n->Init();
     tolshapes_n->SetName("Tolerant shapes");
+    tolshapes_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Set as child
     geom_n->AddChildNode(tolshapes_n);
@@ -399,6 +400,7 @@ Handle(asiData_MetadataNode) asiEngine_Part::CreateMetadata()
   //
   metadata_n->Init();
   metadata_n->SetName("Metadata");
+  metadata_n->SetUserFlags(NodeFlag_IsStructural);
 
   // Set as child for the Part Node
   m_model->GetPartNode()->AddChildNode(metadata_n);

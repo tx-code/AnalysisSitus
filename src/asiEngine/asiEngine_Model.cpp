@@ -145,6 +145,7 @@ void asiEngine_Model::Populate()
   // Initialize the root Node.
   root_n->Init();
   root_n->SetName("Analysis Situs");
+  root_n->SetUserFlags(NodeFlag_IsStructural);
 
   // Add Part Node.
   root_n->AddChildNode( asiEngine_Part(this).CreatePart() );
