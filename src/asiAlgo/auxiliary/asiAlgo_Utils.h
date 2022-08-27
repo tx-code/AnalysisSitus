@@ -250,6 +250,17 @@ namespace asiAlgo_Utils
     asiAlgo_EXPORT std::string
       RefFilename(const std::string& filename,
                   const std::string& refExt);
+
+    //! Given the full filename, this function transforms it to the
+    //! suffixed filename as `<path>/<basename><suffix>.<ext>`,
+    //! where `ext` is the original extension.
+    //!
+    //! \param[in] filename input filename.
+    //! \param[in] suffix   suffix to insert.
+    //! \return full amended filename.
+    asiAlgo_EXPORT std::string
+      AmendedFilename(const std::string& filename,
+                      const std::string& suffix);
   } // Str namespace.
 
   //! Functions for working with environment.

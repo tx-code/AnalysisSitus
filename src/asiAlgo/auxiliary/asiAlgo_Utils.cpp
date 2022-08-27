@@ -697,6 +697,48 @@ std::string
 
 //-----------------------------------------------------------------------------
 
+std::string
+  asiAlgo_Utils::Str::AmendedFilename(const std::string& filename,
+                                      const std::string& suffix)
+{
+  // Split path to directory names.
+  std::vector<std::string> chunks;
+  Split(filename, "\\/", chunks);
+
+  // Get base filename and take its extension.
+  std::string baseFn = chunks[chunks.size() - 1];
+  std::vector<std::string> baseFnChunks;
+  Split(baseFn, ".", baseFnChunks);
+  //
+  baseFn = "";
+  for ( size_t k = 0; k < baseFnChunks.size() - 1; ++k )
+  {
+    baseFn += baseFnChunks[k]; // Base filename without extension.
+  }
+  baseFn += suffix;
+  baseFn += ".";
+  baseFn += baseFnChunks.back(); // Restore the original extension.
+
+  std::string resFilename;
+
+  // Add leading slash for the unix systems.
+  if ( filename[0] == '/' ) // unix
+    resFilename += "/";
+
+  // Compose full name.
+  for ( size_t k = 0; k < chunks.size() - 1; ++k )
+  {
+    resFilename += chunks[k];
+    resFilename += "/";
+  }
+  //
+  resFilename += baseFn;
+
+  return resFilename;
+}
+
+//-----------------------------------------------------------------------------
+
 //! Returns value of ASI_TEST_DATA environment variable. This variable is used to
 //! refer to the directory containing all data files playing as inputs for
 //! unit tests.
