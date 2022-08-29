@@ -1,5 +1,5 @@
 clear
-set datafile iges/grabcad_iges_1.iges
+set datafile cad/iges/grabcad_iges_1.iges
 
 # Read input geometry.
 set datadir $env(ASI_TEST_DATA)
