@@ -101,6 +101,9 @@ private:
   //! Optional reference to the Part viewer.
   asiUI_Viewer* m_pPartViewer;
 
+  //! Selected edge cache.
+  TColStd_PackedMapOfInteger m_selectedEdgesCache;
+
 };
 
 #endif

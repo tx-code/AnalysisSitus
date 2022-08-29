@@ -211,6 +211,7 @@ void asiUI_ViewerDomain::Repaint()
 void asiUI_ViewerDomain::onResetView()
 {
   asiVisu_Utils::CameraOnTop( m_prs_mgr->GetRenderer() );
+  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
   this->Repaint();
 }
 
@@ -222,7 +223,16 @@ void asiUI_ViewerDomain::onDomainPicked()
   Handle(asiData_PartNode) N = m_model->GetPartNode();
   //
   if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   // Get a map of shapes.
   const TopTools_IndexedMapOfShape& subShapesMap = N->GetAAG()->RequestMapOfSubShapes();
@@ -235,7 +245,16 @@ void asiUI_ViewerDomain::onDomainPicked()
     F = TopoDS::Face( subShapesMap.FindKey(fid) );
   //
   if ( F.IsNull() )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   //---------------------------------------------------------------------------
   // Retrieve current selection
@@ -246,90 +265,134 @@ void asiUI_ViewerDomain::onDomainPicked()
   const Handle(asiVisu_CellPickerResult)& pickRes = sel.GetCellPickerResult(SelectionNature_Persistent);
   //
   if ( pickRes.IsNull() )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   // Get the picked actor.
   const vtkSmartPointer<vtkActor>& actor = pickRes->GetPickedActor();
   //
   if ( !actor )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   // Access polygonal data mapper.
   vtkPolyDataMapper* pMapper = vtkPolyDataMapper::SafeDownCast( actor->GetMapper() );
   if ( !pMapper )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   // Access polygonal data
   vtkPolyData* pData = vtkPolyData::SafeDownCast( pMapper->GetInput() );
   if ( !pData )
+  {
+    m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+    if ( m_pPartViewer )
+    {
+      m_pPartViewer->PrsMgr()->ResetSelection();
+    }
+
     return;
+  }
 
   const TColStd_PackedMapOfInteger& cellGIDs = pickRes->GetPickedElementIds();
 
-  // Get edge. We make an exploration loop here in order not to miss seams.
-  const int   edgeId     = cellGIDs.GetMinimalMapped();
-  int         current_id = 0;
-  TopoDS_Edge edge;
+  // Get edges. We make an exploration loop here in order not to miss seams.
+  int current_id = 0;
+  std::map<int, TopoDS_Edge> edges;
+  TopTools_IndexedMapOfShape selected;
   //
   for ( TopExp_Explorer eexp(F, TopAbs_EDGE); eexp.More(); eexp.Next() )
   {
     ++current_id;
-    if ( current_id == edgeId )
+    if ( cellGIDs.Contains(current_id) )
     {
-      edge = TopoDS::Edge( eexp.Current() );
-      break;
+      edges[current_id] = ( TopoDS::Edge( eexp.Current() ) );
+      selected.Add(edges[current_id]);
     }
   }
   //
-  if ( edge.IsNull() )
-    return;
 
-  // Prepare label
-  TCollection_AsciiString TITLE  = "(Edge #";
-                          TITLE += edgeId;
-                          TITLE += ", ";
-                          TITLE += asiAlgo_Utils::ShapeAddr(edge).c_str();
-                          TITLE += ", ";
-                          TITLE += asiAlgo_Utils::OrientationToString(edge);
-                          TITLE += " in face)\n";
-  //
-  double f, l;
-  Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, f, l);
-  //
-  if ( !c3d.IsNull() )
+  std::map<int, TopoDS_Edge>::const_iterator itEdges = edges.cbegin();
+  for ( ; itEdges != edges.cend(); ++itEdges )
   {
-    TITLE += "3D: ";
-    TITLE += c3d->DynamicType()->Name();
-    TITLE += " [";
-    TITLE += f;
+    const int edgeId = itEdges->first;
+
+    if ( m_selectedEdgesCache.Contains(edgeId) )
+    {
+      continue;
+    }
+
+    // Prepare label
+    TCollection_AsciiString TITLE = "(Edge #";
+    TITLE += edgeId;
     TITLE += ", ";
-    TITLE += l;
-    TITLE += "]\n";
+    TITLE += asiAlgo_Utils::ShapeAddr(itEdges->second).c_str();
+    TITLE += ", ";
+    TITLE += asiAlgo_Utils::OrientationToString(itEdges->second);
+    TITLE += " in face)\n";
+    //
+    double f, l;
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(itEdges->second, f, l);
+    //
+    if ( !c3d.IsNull() )
+    {
+      TITLE += "3D: ";
+      TITLE += c3d->DynamicType()->Name();
+      TITLE += " [";
+      TITLE += f;
+      TITLE += ", ";
+      TITLE += l;
+      TITLE += "]\n";
+    }
+
+    double f2, l2;
+    Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(itEdges->second, F, f2, l2);
+    //
+    TITLE += "2D: ";
+    TITLE += c2d->DynamicType()->Name();
+    TITLE += " [";
+    TITLE += f2;
+    TITLE += ", ";
+    TITLE += l2;
+    TITLE += "]";
+
+    TITLE += "\nLocation: ";
+    TITLE += asiAlgo_Utils::LocationToString(itEdges->second.Location());
+    TITLE += "\n";
+
+    m_progress.SendLogMessage(LogInfo(Normal) << "%1" << TITLE);
   }
 
-  double f2, l2;
-  Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(edge, F, f2, l2);
-  //
-  TITLE += "2D: ";
-  TITLE += c2d->DynamicType()->Name();
-  TITLE += " [";
-  TITLE += f2;
-  TITLE += ", ";
-  TITLE += l2;
-  TITLE += "]";
-
-  TITLE += "\nLocation: ";
-  TITLE += asiAlgo_Utils::LocationToString( edge.Location() );
-  TITLE += "\n";
-
-  m_progress.SendLogMessage(LogInfo(Normal) << "%1" << TITLE);
+  m_selectedEdgesCache = cellGIDs;
 
   if ( m_pPartViewer )
   {
     // Highlight in the Part viewer.
-    TopTools_IndexedMapOfShape selected;
-    selected.Add(edge);
-    //
     asiEngine_Part( m_model,
                     m_pPartViewer->PrsMgr() ).HighlightSubShapes(selected);
   }
@@ -382,6 +445,8 @@ void asiUI_ViewerDomain::onKillEdges()
   }
   m_model->CommitCommand();
 
+  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
   // Update viewer
   this->PrsMgr()->DeleteAllPresentations();
   this->PrsMgr()->Actualize( N.get() );
@@ -423,6 +488,8 @@ void asiUI_ViewerDomain::onJoinEdges()
     asiEngine_Part(m_model).Update(result);
   }
   m_model->CommitCommand();
+
+  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
 
   // Update viewer
   this->PrsMgr()->DeleteAllPresentations();

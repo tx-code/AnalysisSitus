@@ -343,6 +343,9 @@ public:
               const int                         modes);
 
   asiVisu_EXPORT void
+    ResetSelection();
+
+  asiVisu_EXPORT void
     CleanDetection();
 
   asiVisu_EXPORT Handle(ActAPI_HNodeList)

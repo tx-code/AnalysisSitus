@@ -946,6 +946,42 @@ void asiVisu_PrsManager::Highlight(const Handle(ActAPI_INode)&       node,
 
 //-----------------------------------------------------------------------------
 
+//! Reset selection.
+void asiVisu_PrsManager::ResetSelection()
+{
+  // Reset current selection (if any)
+  m_currentSelection.PopAll(m_renderer, SelectionNature_Persistent);
+
+  {
+    const Handle(asiVisu_CellPickerResult)&
+      pickRes = m_currentSelection.GetCellPickerResult(SelectionNature_Persistent);
+
+    if ( !pickRes.IsNull() )
+      pickRes->Clear();
+  }
+
+  {
+    const Handle(asiVisu_PointPickerResult)&
+      pickRes = m_currentSelection.GetPointPickerResult(SelectionNature_Persistent);
+
+    if ( !pickRes.IsNull() )
+      pickRes->Clear();
+  }
+
+  {
+    const Handle(asiVisu_WorldPickerResult)&
+      pickRes = m_currentSelection.GetWorldPickerResult(SelectionNature_Persistent);
+
+    if ( !pickRes.IsNull() )
+      pickRes->Clear();
+  }
+
+  // Update view window
+  m_renderWindow->Render();
+}
+
+//-----------------------------------------------------------------------------
+
 //! Cleans up detection.
 void asiVisu_PrsManager::CleanDetection()
 {
