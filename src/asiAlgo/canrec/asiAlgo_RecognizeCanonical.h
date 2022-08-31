@@ -141,6 +141,14 @@ public:
                        ActAPI_ProgressEntry        progress = nullptr,
                        ActAPI_PlotterEntry         plotter  = nullptr);
 
+  //! Attempts to recognize a surface of linear extrusion from a freeform surface.
+  asiAlgo_EXPORT static bool
+    CheckIsLinearExtrusion(const Handle(Geom_Surface)& surf,
+                           const double                tol,
+                           Handle(Geom_Line)&          straightIso,
+                           ActAPI_ProgressEntry        progress = nullptr,
+                           ActAPI_PlotterEntry         plotter  = nullptr);
+
   //! Checks type of the passed surface.
   //!
   //! \param[in]  surface  the surface to check.

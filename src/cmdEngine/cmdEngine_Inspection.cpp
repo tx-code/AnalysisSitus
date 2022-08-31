@@ -58,6 +58,7 @@
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_RecognizeBlends.h>
+#include <asiAlgo_RecognizeCanonical.h>
 #include <asiAlgo_RecognizeCavities.h>
 #include <asiAlgo_RecognizeConvexHull.h>
 #include <asiAlgo_RecognizeDrillHoles.h>
@@ -4410,6 +4411,72 @@ int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckCanonical(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  // Get part.
+  Handle(asiData_PartNode) part_n;
+  TopoDS_Shape             part;
+  //
+  if ( !asiUI_Common::PartShape(cmdEngine::cf->Model, part_n, part) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_ERROR;
+  }
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = part_n->GetAAG();
+
+  // Access selected faces (if any).
+  TColStd_PackedMapOfInteger selected;
+  //
+  asiEngine_Part( cmdEngine::cf->Model,
+                  cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  //
+  if ( selected.IsEmpty() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select a face to check.");
+    return TCL_ERROR;
+  }
+
+  // Recognition tolerance.
+  double toler = 1.e-3;
+  interp->GetKeyValue<double>(argc, argv, "toler", toler);
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Canonical recognition tolerance: %1."
+                                                       << toler);
+
+  // Check the selected faces.
+  for ( TColStd_PackedMapOfInteger::Iterator fit(selected); fit.More(); fit.Next() )
+  {
+    const int          fid  = fit.Key();
+    const TopoDS_Face& face = aag->GetFace(fid);
+
+    // Get the host surface.
+    Handle(Geom_Surface) surface = BRep_Tool::Surface(face);
+
+    // Check canonical.
+    Handle(Standard_Type)
+      type = asiAlgo_RecognizeCanonical::CheckType( face, toler,
+                                                    interp->GetProgress(),
+                                                    interp->GetPlotter() );
+    //
+    if ( !type.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage( LogInfo(Normal) << "The actual type of the face %1 is %2."
+                                                            << fid << surface->DynamicType()->Name() );
+      //
+      interp->GetProgress().SendLogMessage( LogNotice(Normal) << "The recognized type for the face %1 is %2."
+                                                              << fid << type->Name() );
+    }
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4921,4 +4988,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks distance from the selected (or specified) face to AABB.",
     //
     __FILE__, group, ENGINE_CheckDistanceToBbox);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-canonical",
+    //
+    "check-canonical [-toler <tolerance>]\n"
+    "\t Checks if the selected face is of canonical type.",
+    //
+    __FILE__, group, ENGINE_CheckCanonical);
 }

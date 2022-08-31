@@ -858,6 +858,60 @@ bool
 
 //-----------------------------------------------------------------------------
 
+bool
+  asiAlgo_RecognizeCanonical::CheckIsLinearExtrusion(const Handle(Geom_Surface)& surf,
+                                                     const double                tol,
+                                                     Handle(Geom_Line)&          straightIso,
+                                                     ActAPI_ProgressEntry        progress,
+                                                     ActAPI_PlotterEntry         plotter)
+{
+  // Check for infinite bounds.
+  double U1, U2, V1, V2;
+  surf->Bounds(U1, U2, V1, V2);
+  //
+  if ( Precision::IsInfinite(U1) && Precision::IsInfinite(U2) )
+  {
+    U1 = -1.;
+    U2 =  1.;
+  }
+  if ( Precision::IsInfinite(V1) && Precision::IsInfinite(V2) )
+  {
+    V1 = -1.;
+    V2 =  1.;
+  }
+
+  // Convert middle isos to canonical representation.
+  double VMid = 0.5*(V1 + V2);
+  double UMid = 0.5*(U1 + U2);
+  //
+  Handle(Geom_Surface) TrSurf = new Geom_RectangularTrimmedSurface(surf, U1, U2, V1, V2);
+  Handle(Geom_Curve)   UIso   = TrSurf->UIso(UMid);
+  Handle(Geom_Curve)   VIso   = TrSurf->VIso(VMid);
+
+  double cuf, cul, cvf, cvl;
+  Handle(Geom_Curve)
+    umidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(UIso, tol, V1, V2, cuf, cul);
+  //
+  Handle(Geom_Curve)
+    vmidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(VIso, tol, U1, U2, cvf, cvl);
+
+  if ( !umidiso.IsNull() && umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
+  {
+    straightIso = Handle(Geom_Line)::DownCast(umidiso);
+    return true;
+  }
+
+  if ( !vmidiso.IsNull() && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
+  {
+    straightIso = Handle(Geom_Line)::DownCast(vmidiso);
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 Handle(Standard_Type)
   asiAlgo_RecognizeCanonical::CheckType(const Handle(Geom_Surface)& surface,
                                         const double                uMinSurf,
@@ -895,6 +949,19 @@ Handle(Standard_Type)
                             progress, plotter) )
     {
       return STANDARD_TYPE(Geom_CylindricalSurface);
+    }
+  }
+
+  // Check linear extrusion.
+  {
+    Handle(Geom_Line) straightIso;
+    //
+    if ( CheckIsLinearExtrusion(surface,
+                                toler,
+                                straightIso,
+                                progress, plotter) )
+    {
+      return STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion);
     }
   }
 
