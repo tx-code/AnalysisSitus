@@ -107,6 +107,8 @@ set (mesh_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (iv_H_FILES
+  iv/asiData_IVAxesNode.h
+  iv/asiData_IVAxesSetNode.h
   iv/asiData_IVCurve2dNode.h
   iv/asiData_IVCurveNode.h
   iv/asiData_IVCurves2dNode.h
@@ -128,6 +130,8 @@ set (iv_H_FILES
   iv/asiData_IVVectorsNode.h
 )
 set (iv_CPP_FILES
+  iv/asiData_IVAxesNode.cpp
+  iv/asiData_IVAxesSetNode.cpp
   iv/asiData_IVCurve2dNode.cpp
   iv/asiData_IVCurveNode.cpp
   iv/asiData_IVCurves2dNode.cpp

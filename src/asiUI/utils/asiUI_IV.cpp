@@ -545,6 +545,30 @@ void asiUI_IV::REDRAW_VECTORS_AT(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
+void asiUI_IV::DRAW_AXES(const gp_Pnt&                  origin,
+                         const gp_Dir&                  dx,
+                         const gp_Dir&                  dy,
+                         const gp_Dir&                  dz,
+                         const double                   scale,
+                         const TCollection_AsciiString& name)
+{
+  this->draw_axes(origin, dx, dy, dz, scale, name, true);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_AXES(const TCollection_AsciiString& name,
+                           const gp_Pnt&                  origin,
+                           const gp_Dir&                  dx,
+                           const gp_Dir&                  dy,
+                           const gp_Dir&                  dz,
+                           const double                   scale)
+{
+  this->draw_axes(origin, dx, dy, dz, scale, name, false);
+}
+
+//---------------------------------------------------------------------------//
+
 void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)&      curve,
                           const ActAPI_Color&            color,
                           const TCollection_AsciiString& name)
@@ -2040,4 +2064,53 @@ void asiUI_IV::draw_text(const TCollection_AsciiString& text,
 
   // Visualize
   this->visualize(false, item_n, false, ActAPI_Color(), 0.0, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::draw_axes(const gp_Pnt&                  origin,
+                         const gp_Dir&                  dx,
+                         const gp_Dir&                  dy,
+                         const gp_Dir&                  dz,
+                         const double                   scale,
+                         const TCollection_AsciiString& name,
+                         const bool                     newPrimitive)
+{
+  // Open transaction
+  bool isTx = false;
+  if ( !m_model->HasOpenCommand() )
+  {
+    m_model->OpenCommand();
+    isTx = true;
+  }
+
+  // Modify data
+  Handle(asiData_IVAxesNode) axes_n;
+  //
+  bool doCreate = newPrimitive;
+  //
+  if ( !doCreate )
+  {
+    axes_n = asiEngine_IV(m_model).Find_Axes(name);
+    //
+    if ( !axes_n.IsNull() )
+      asiEngine_IV(m_model).Update_Axes(axes_n, origin, dx, dy, dz, scale);
+    else
+      doCreate = true;
+  }
+
+  if ( doCreate )
+  {
+    axes_n = asiEngine_IV(m_model).Create_Axes(origin, dx, dy, dz, scale, name, newPrimitive);
+
+    // Update the last created object
+    m_lastObj = axes_n;
+  }
+
+  // Commit transaction
+  if ( isTx )
+    m_model->CommitCommand();
+
+  // Visualize
+  this->visualize(false, axes_n, true, Color_Default, 1.0, false);
 }

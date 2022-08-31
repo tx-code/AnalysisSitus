@@ -61,6 +61,7 @@
 #include <asiVisu_GeomSurfPrs.h>
 #include <asiVisu_Grid2dPrs.h>
 #include <asiVisu_HatchingPrs.h>
+#include <asiVisu_IVAxesPrs.h>
 #include <asiVisu_IVCurve2dPrs.h>
 #include <asiVisu_IVCurvePrs.h>
 #include <asiVisu_IVPointSet2dPrs.h>
@@ -186,6 +187,7 @@ int main(int argc, char** argv)
   REGISTER_PRESENTATION(asiVisu_ClearancePrs)
 
   // Imperative viewer.
+  REGISTER_PRESENTATION(asiVisu_IVAxesPrs)
   REGISTER_PRESENTATION(asiVisu_IVPointSet2dPrs)
   REGISTER_PRESENTATION(asiVisu_IVPointSetPrs)
   REGISTER_PRESENTATION(asiVisu_IVCurve2dPrs)

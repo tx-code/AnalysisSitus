@@ -197,6 +197,21 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     iv_n->AddChildNode(iv_text_n);
   }
 
+  // Create underlying Axes container
+  {
+    Handle(ActAPI_INode) iv_axes_base = asiData_IVAxesSetNode::Instance();
+    m_model->GetIVAxesSetPartition()->AddNode(iv_axes_base);
+
+    // Initialize
+    Handle(asiData_IVAxesSetNode) iv_axes_n = Handle(asiData_IVAxesSetNode)::DownCast(iv_axes_base);
+    iv_axes_n->Init();
+    iv_axes_n->SetName("Axes");
+    iv_axes_n->SetUserFlags(NodeFlag_IsStructural);
+
+    // Add as child
+    iv_n->AddChildNode(iv_axes_n);
+  }
+
   // Return the just created Node
   return iv_n;
 }
@@ -215,6 +230,7 @@ void asiEngine_IV::Clean_All()
   this->Clean_Tess();
   this->Clean_Text();
   this->Clean_Topo();
+  this->Clean_Axes();
 }
 
 //-----------------------------------------------------------------------------
@@ -1337,6 +1353,93 @@ void asiEngine_IV::Clean_Text()
 {
   Handle(asiData_IVTextNode)
     IV_Parent = m_model->GetIVNode()->Text();
+  //
+  this->_cleanChildren(IV_Parent);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_IVAxesNode)
+  asiEngine_IV::Find_Axes(const TCollection_AsciiString& name)
+{
+  // Find the first Node with the given name
+  for ( Handle(ActAPI_IChildIterator) cit = m_model->GetIVNode()->Text()->GetChildIterator(true);
+        cit->More(); cit->Next() )
+  {
+    Handle(ActAPI_INode) node = cit->Value();
+    //
+    if ( node.IsNull() || !node->IsWellFormed() )
+      continue;
+
+    TCollection_ExtendedString nodeName = node->GetName();
+    //
+    if ( nodeName.IsEqual(name) )
+      return Handle(asiData_IVAxesNode)::DownCast(node);
+  }
+
+  return nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiData_IVAxesNode)
+  asiEngine_IV::Create_Axes(const gp_Pnt&                  origin,
+                            const gp_Dir&                  dx,
+                            const gp_Dir&                  dy,
+                            const gp_Dir&                  dz,
+                            const double                   scale,
+                            const TCollection_AsciiString& name,
+                            const bool                     useAutoNaming)
+{
+  // Access Model and parent Node
+  Handle(asiData_IVTextNode) IV_Parent = m_model->GetIVNode()->Text();
+
+  // Add Axes Node to Partition
+  Handle(asiData_IVAxesNode) item_n = Handle(asiData_IVAxesNode)::DownCast( asiData_IVAxesNode::Instance() );
+  m_model->GetIVAxesPartition()->AddNode(item_n);
+
+  // Generate unique name
+  TCollection_ExtendedString item_name = ( name.IsEmpty() ? "Axes" : name );
+  if ( useAutoNaming )
+    item_name = ActData_UniqueNodeName::Generate(ActData_SiblingNodes::CreateForChild(item_n, IV_Parent), item_name);
+  //
+  item_n->SetName(item_name);
+
+  // Initialize
+  Update_Axes(item_n, origin, dx, dy, dz, scale);
+
+  // Add as child
+  IV_Parent->AddChildNode(item_n);
+
+  // Return the just created Node
+  return item_n;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+  asiEngine_IV::Update_Axes(const Handle(asiData_IVAxesNode)& node,
+                            const gp_Pnt&                     origin,
+                            const gp_Dir&                     dx,
+                            const gp_Dir&                     dy,
+                            const gp_Dir&                     dz,
+                            const double                      scale)
+{
+  node->Init();
+  node->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  node->SetOrigin(origin);
+  node->SetDX(dx);
+  node->SetDY(dy);
+  node->SetDZ(dz);
+  node->SetScaleCoeff(scale);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_IV::Clean_Axes()
+{
+  Handle(asiData_IVAxesSetNode)
+    IV_Parent = m_model->GetIVNode()->Axes();
   //
   this->_cleanChildren(IV_Parent);
 }

@@ -43,6 +43,7 @@ set (filters_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (pipelines_H_FILES
+  pipelines/asiVisu_AxesPipeline.h
   pipelines/asiVisu_BCurveHandlesPipeline.h
   pipelines/asiVisu_BCurveKnotsPipeline.h
   pipelines/asiVisu_BCurvePolesPipeline.h
@@ -88,6 +89,7 @@ set (pipelines_H_FILES
   pipelines/asiVisu_VectorsPipeline.h
 )
 set (pipelines_CPP_FILES 
+  pipelines/asiVisu_AxesPipeline.cpp
   pipelines/asiVisu_BCurveHandlesPipeline.cpp
   pipelines/asiVisu_BCurveKnotsPipeline.cpp
   pipelines/asiVisu_BCurvePolesPipeline.cpp
@@ -152,6 +154,7 @@ set (presentations_H_FILES
   presentations/asiVisu_GeomSurfPrs.h
   presentations/asiVisu_Grid2dPrs.h
   presentations/asiVisu_HatchingPrs.h
+  presentations/asiVisu_IVAxesPrs.h
   presentations/asiVisu_IVCurve2dPrs.h
   presentations/asiVisu_IVCurvePrs.h
   presentations/asiVisu_IVPointSet2dPrs.h
@@ -193,6 +196,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_GeomSurfPrs.cpp
   presentations/asiVisu_Grid2dPrs.cpp
   presentations/asiVisu_HatchingPrs.cpp
+  presentations/asiVisu_IVAxesPrs.cpp
   presentations/asiVisu_IVCurve2dPrs.cpp
   presentations/asiVisu_IVCurvePrs.cpp
   presentations/asiVisu_IVPointSet2dPrs.cpp
@@ -223,6 +227,7 @@ set (presentations_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (providers_H_FILES
+  providers/asiVisu_AxesDataProvider.h
   providers/asiVisu_ClearanceDataProvider.h
   providers/asiVisu_ContourDataProvider.h
   providers/asiVisu_ContourPointsDataProvider.h
@@ -241,6 +246,7 @@ set (providers_H_FILES
   providers/asiVisu_FuncUnivariateDataProvider.h
   providers/asiVisu_Grid2dDataProvider.h
   providers/asiVisu_HatchingDataProvider.h
+  providers/asiVisu_IVAxesDataProvider.h
   providers/asiVisu_IVCurve2dDataProvider.h
   providers/asiVisu_IVCurveDataProvider.h
   providers/asiVisu_IVPointSet2dDataProvider.h
@@ -269,7 +275,8 @@ set (providers_H_FILES
   providers/asiVisu_TriangulationDataProvider.h
   providers/asiVisu_VectorsDataProvider.h
 )
-set (providers_CPP_FILES 
+set (providers_CPP_FILES
+  providers/asiVisu_AxesDataProvider.cpp
   providers/asiVisu_ClearanceDataProvider.cpp
   providers/asiVisu_ContourDataProvider.cpp
   providers/asiVisu_ContourPointsDataProvider.cpp
@@ -284,6 +291,7 @@ set (providers_CPP_FILES
   providers/asiVisu_FaceNormalsDataProvider.cpp
   providers/asiVisu_Grid2dDataProvider.cpp
   providers/asiVisu_HatchingDataProvider.cpp
+  providers/asiVisu_IVAxesDataProvider.cpp
   providers/asiVisu_IVCurve2dDataProvider.cpp
   providers/asiVisu_IVCurveDataProvider.cpp
   providers/asiVisu_IVPointSet2dDataProvider.cpp
@@ -336,6 +344,7 @@ set (selection_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (sources_H_FILES
+  sources/asiVisu_AxesSource.h
   sources/asiVisu_BCurveHandlesSource.h
   sources/asiVisu_BCurveKnotsSource.h
   sources/asiVisu_BCurvePolesSource.h
@@ -368,6 +377,7 @@ set (sources_H_FILES
   sources/asiVisu_TriangulationSource.h
 )
 set (sources_CPP_FILES 
+  sources/asiVisu_AxesSource.cpp
   sources/asiVisu_BCurveHandlesSource.cpp
   sources/asiVisu_BCurveKnotsSource.cpp
   sources/asiVisu_BCurvePolesSource.cpp

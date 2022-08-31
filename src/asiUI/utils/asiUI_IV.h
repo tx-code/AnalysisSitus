@@ -203,6 +203,22 @@ public:
                       const ActAPI_Color&);
 
   asiUI_EXPORT virtual void
+    DRAW_AXES(const gp_Pnt&,
+              const gp_Dir&,
+              const gp_Dir&,
+              const gp_Dir&,
+              const double,
+              const TCollection_AsciiString&);
+
+  asiUI_EXPORT virtual void
+    REDRAW_AXES(const TCollection_AsciiString&,
+                const gp_Pnt&,
+                const gp_Dir&,
+                const gp_Dir&,
+                const gp_Dir&,
+                const double);
+
+  asiUI_EXPORT virtual void
     DRAW_CURVE(const Handle(Geom_Curve)&,
                const ActAPI_Color&,
                const TCollection_AsciiString&);
@@ -746,6 +762,15 @@ protected:
 
   asiUI_EXPORT void
     draw_text(const TCollection_AsciiString& text,
+              const TCollection_AsciiString& name,
+              const bool                     newPrimitive);
+
+  asiUI_EXPORT void
+    draw_axes(const gp_Pnt&                  origin,
+              const gp_Dir&                  dx,
+              const gp_Dir&                  dy,
+              const gp_Dir&                  dz,
+              const double                   scale,
               const TCollection_AsciiString& name,
               const bool                     newPrimitive);
 

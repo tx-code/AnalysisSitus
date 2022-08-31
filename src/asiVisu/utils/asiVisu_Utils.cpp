@@ -887,6 +887,26 @@ vtkSmartPointer<vtkLookupTable> asiVisu_Utils::InitKnotsIsosLookupTable()
 //-----------------------------------------------------------------------------
 
 //! Initializes VTK lookup table charged with a color scheme for
+//! 3D axes frame.
+//! \return VTK lookup table.
+vtkSmartPointer<vtkLookupTable> asiVisu_Utils::InitAxesLookupTable()
+{
+  vtkSmartPointer<vtkLookupTable> lookup = vtkSmartPointer<vtkLookupTable>::New();
+
+  double range[2] = {VisuAxis_X, VisuAxis_Z};
+  lookup->SetRange(range);
+  lookup->SetNumberOfColors(VisuAxis_Last);
+
+  lookup->SetTableValue(VisuAxis_X, 1.0, 0.0, 0.0);
+  lookup->SetTableValue(VisuAxis_Y, 0.0, 1.0, 0.0);
+  lookup->SetTableValue(VisuAxis_Z, 0.0, 0.0, 1.0);
+
+  return lookup;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Initializes VTK lookup table charged with a color scheme for
 //! curvilinear axes.
 //! \return VTK lookup table.
 vtkSmartPointer<vtkLookupTable> asiVisu_Utils::InitCurviAxesLookupTable()

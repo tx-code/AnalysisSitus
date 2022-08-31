@@ -186,3 +186,15 @@ Handle(asiData_IVTextNode) asiData_IVNode::Text()
   //
   return nullptr;
 }
+
+//! \return underlying axes container.
+Handle(asiData_IVAxesSetNode) asiData_IVNode::Axes()
+{
+  Handle(asiData_IVAxesSetNode)
+    axes_n = Handle(asiData_IVAxesSetNode)::DownCast( this->GetChildNode(Child_Axes) );
+  //
+  if ( !axes_n.IsNull() && axes_n->IsWellFormed() )
+    return axes_n;
+  //
+  return nullptr;
+}

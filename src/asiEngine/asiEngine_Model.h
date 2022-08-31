@@ -41,6 +41,7 @@
 #include <asiData_DeviationNode.h>
 #include <asiData_DiscrFaceNode.h>
 #include <asiData_Grid2dNode.h>
+#include <asiData_IVAxesSetNode.h>
 #include <asiData_IVCurve2dNode.h>
 #include <asiData_IVCurveNode.h>
 #include <asiData_IVCurves2dNode.h>
@@ -93,8 +94,6 @@
 //! initialization of Part Nodes).
 class asiEngine_Model : public ActData_BaseModel
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiEngine_Model, ActData_BaseModel)
 
@@ -527,6 +526,20 @@ public:
     return Handle(asiData_Partition<asiData_IVTextItemNode>)::DownCast( this->Partition(Partition_IV_TextItem) );
   }
 
+  //! Accessor for a Partition instance dedicated to IV Axes Set Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_IVAxesSetNode>) GetIVAxesSetPartition() const
+  {
+    return Handle(asiData_Partition<asiData_IVAxesSetNode>)::DownCast( this->Partition(Partition_IV_AxesSet) );
+  }
+
+  //! Accessor for a Partition instance dedicated to IV Axes Nodes.
+  //! \return requested Partition.
+  Handle(asiData_Partition<asiData_IVAxesNode>) GetIVAxesPartition() const
+  {
+    return Handle(asiData_Partition<asiData_IVAxesNode>)::DownCast( this->Partition(Partition_IV_Axes) );
+  }
+
   //! \return Partition of Thickness Nodes.
   Handle(asiData_Partition<asiData_ThicknessNode>) GetThicknessPartition() const
   {
@@ -636,6 +649,8 @@ protected:
     Partition_IV_TessItem,
     Partition_IV_Text,
     Partition_IV_TextItem,
+    Partition_IV_AxesSet,
+    Partition_IV_Axes,
   //---------------------------------------------------------------------------
     Partition_SurfDeviation,
     Partition_Thickness,

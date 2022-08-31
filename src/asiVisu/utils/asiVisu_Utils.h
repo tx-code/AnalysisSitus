@@ -123,6 +123,18 @@ enum asiVisu_IsosCont
 
 //-----------------------------------------------------------------------------
 
+//! 3D axes frame.
+enum asiVisu_Axis
+{
+  VisuAxis_Undefined = -1,
+  VisuAxis_X         =  0,
+  VisuAxis_Y         =  1,
+  VisuAxis_Z         =  2,
+  VisuAxis_Last
+};
+
+//-----------------------------------------------------------------------------
+
 //! Curvilinear axes.
 enum asiVisu_CurviAxis
 {
@@ -304,6 +316,9 @@ public:
 
   asiVisu_EXPORT static vtkSmartPointer<vtkLookupTable>
     InitKnotsIsosLookupTable();
+
+  asiVisu_EXPORT static vtkSmartPointer<vtkLookupTable>
+    InitAxesLookupTable();
 
   asiVisu_EXPORT static vtkSmartPointer<vtkLookupTable>
     InitCurviAxesLookupTable();

@@ -262,6 +262,31 @@ public:
   asiEngine_EXPORT void
     Clean_Text();
 
+//---------------------------------------------------------------------------//
+
+  asiEngine_EXPORT Handle(asiData_IVAxesNode)
+    Find_Axes(const TCollection_AsciiString& name);
+
+  asiEngine_EXPORT Handle(asiData_IVAxesNode)
+    Create_Axes(const gp_Pnt&                  origin,
+                const gp_Dir&                  dx,
+                const gp_Dir&                  dy,
+                const gp_Dir&                  dz,
+                const double                   scale,
+                const TCollection_AsciiString& name,
+                const bool                     useAutoNaming);
+
+  asiEngine_EXPORT void
+    Update_Axes(const Handle(asiData_IVAxesNode)& node,
+                const gp_Pnt&                     origin,
+                const gp_Dir&                     dx,
+                const gp_Dir&                     dy,
+                const gp_Dir&                     dz,
+                const double                      scale);
+
+  asiEngine_EXPORT void
+    Clean_Axes();
+
 };
 
 #endif

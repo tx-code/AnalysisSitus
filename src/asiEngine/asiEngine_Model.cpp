@@ -123,6 +123,8 @@ REGISTER_NODE_TYPE(asiData_IVTopoItemNode)
 REGISTER_NODE_TYPE(asiData_IVTopoNode)
 REGISTER_NODE_TYPE(asiData_IVTextItemNode)
 REGISTER_NODE_TYPE(asiData_IVTextNode)
+REGISTER_NODE_TYPE(asiData_IVAxesSetNode)
+REGISTER_NODE_TYPE(asiData_IVAxesNode)
 
 //-----------------------------------------------------------------------------
 
@@ -381,6 +383,8 @@ void asiEngine_Model::initPartitions()
   REGISTER_PARTITION(asiData_Partition<asiData_IVTessItemNode>,     Partition_IV_TessItem);
   REGISTER_PARTITION(asiData_Partition<asiData_IVTextNode>,         Partition_IV_Text);
   REGISTER_PARTITION(asiData_Partition<asiData_IVTextItemNode>,     Partition_IV_TextItem);
+  REGISTER_PARTITION(asiData_Partition<asiData_IVAxesSetNode>,      Partition_IV_AxesSet);
+  REGISTER_PARTITION(asiData_Partition<asiData_IVAxesNode>,         Partition_IV_Axes);
   //
   REGISTER_PARTITION(asiData_Partition<asiData_SurfDeviationNode>,  Partition_SurfDeviation);
   REGISTER_PARTITION(asiData_Partition<asiData_ThicknessNode>,      Partition_Thickness);

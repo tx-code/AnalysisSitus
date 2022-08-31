@@ -252,6 +252,24 @@ public:
   //-------------------------------------------------------------------------//
 
   virtual void
+    DRAW_AXES(const gp_Pnt&,
+              const gp_Dir&,
+              const gp_Dir&,
+              const gp_Dir&,
+              const double,
+              const TCollection_AsciiString&) {}
+
+  virtual void
+    REDRAW_AXES(const TCollection_AsciiString&,
+                const gp_Pnt&,
+                const gp_Dir&,
+                const gp_Dir&,
+                const gp_Dir&,
+                const double) {}
+
+  //-------------------------------------------------------------------------//
+
+  virtual void
     DRAW_CURVE(const Handle(Geom_Curve)&,
                const ActAPI_Color&,
                const bool,
@@ -854,6 +872,36 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_VECTORS_AT(name, origin, vectors, color);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    DRAW_AXES(const gp_Pnt&                  origin,
+              const gp_Dir&                  dx,
+              const gp_Dir&                  dy,
+              const gp_Dir&                  dz,
+              const double                   scale,
+              const TCollection_AsciiString& name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_AXES(origin, dx, dy, dz, scale, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    REDRAW_AXES(const TCollection_AsciiString& name,
+                const gp_Pnt&                  origin,
+                const gp_Dir&                  dx,
+                const gp_Dir&                  dy,
+                const gp_Dir&                  dz,
+                const double                   scale)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_AXES(name, origin, dx, dy, dz, scale);
   }
 
 //---------------------------------------------------------------------------//
