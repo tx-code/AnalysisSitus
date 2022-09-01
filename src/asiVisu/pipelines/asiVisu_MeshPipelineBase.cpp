@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 05 October 2018
+// Created on: 01 September 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2022, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,49 +29,54 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiVisu_TessellationPrs.h>
+#include <asiVisu_MeshPipelineBase.h>
 
 // asiVisu includes
-#include <asiVisu_MeshContourPipeline.h>
-#include <asiVisu_MeshDataProvider.h>
-#include <asiVisu_MeshPipeline.h>
-#include <asiVisu_Utils.h>
+#include <asiVisu_MeshSource.h>
+#include <asiVisu_MeshUtils.h>
 
 // VTK includes
-#include <vtkMapper.h>
+#include <vtkActor.h>
+#include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 
-//! Creates a Presentation object for the passed Node.
-//! \param[in] N Node to create a Presentation for.
-asiVisu_TessellationPrs::asiVisu_TessellationPrs(const Handle(ActAPI_INode)& N)
-: asiVisu_DefaultPrs(N)
+//-----------------------------------------------------------------------------
+
+asiVisu_MeshPipelineBase::asiVisu_MeshPipelineBase(const vtkSmartPointer<asiVisu_MeshSource>& source)
+//
+: asiVisu_Pipeline ( vtkSmartPointer<vtkPolyDataMapper>::New(),
+                     vtkSmartPointer<vtkActor>::New() )
 {
-  // Create Data Provider
-  Handle(asiVisu_MeshDataProvider)
-    DP = new asiVisu_MeshDataProvider( N->GetId(),
-                                       Handle(ActData_MeshParameter)::DownCast(N->Parameter(asiData_TessNode::PID_Mesh)),
-                                       Handle(ActData_IntParameter)::DownCast(N->Parameter(asiData_TessNode::PID_Color)),
-                                       nullptr );
-
-  // Pipeline for mesh
-  Handle(asiVisu_MeshPipeline) meshPipeline = new asiVisu_MeshPipeline();
-  this->addPipeline        ( Pipeline_Main, meshPipeline );
-  this->assignDataProvider ( Pipeline_Main, DP );
-
-  // Pipeline for mesh contour
-  this->addPipeline(Pipeline_MeshContour, new asiVisu_MeshContourPipeline(meshPipeline->GetSource()));
-  this->assignDataProvider(Pipeline_MeshContour, DP);
-
-  // We use CONTOUR mesh pipeline along with an ordinary one. Thus it is
-  // really necessary to resolve coincident primitives to avoid blinking
-  // on mesh edges
-  vtkMapper::SetResolveCoincidentTopology(1);
+  // Initialize Data Source
+  if ( !source.GetPointer() )
+    m_source = vtkSmartPointer<asiVisu_MeshSource>::New();
+  else
+    m_source = source;
 }
 
-//! Factory method for Presentation.
-//! \param[in] N Node to create a Presentation for.
-//! \return new Presentation instance.
-Handle(asiVisu_Prs) asiVisu_TessellationPrs::Instance(const Handle(ActAPI_INode)& N)
+//-----------------------------------------------------------------------------
+
+asiVisu_MeshPipelineBase::~asiVisu_MeshPipelineBase(){}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for AddToRenderer() routine. Good place to adjust visualization
+//! properties of the pipeline's actor.
+void asiVisu_MeshPipelineBase::callback_add_to_renderer(vtkRenderer*)
 {
-  return new asiVisu_TessellationPrs(N);
+  this->Actor()->GetProperty()->SetInterpolationToPhong();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for RemoveFromRenderer() routine.
+void asiVisu_MeshPipelineBase::callback_remove_from_renderer(vtkRenderer*)
+{}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for Update() routine.
+void asiVisu_MeshPipelineBase::callback_update()
+{
+  asiVisu_MeshUtils::InitMapper(m_mapper, ARRNAME_MESH_ITEM_TYPE);
 }

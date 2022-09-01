@@ -32,7 +32,7 @@
 #define asiVisu_MeshContourPipeline_h
 
 // asiVisu includes
-#include <asiVisu_MeshPipeline.h>
+#include <asiVisu_MeshPipelineBase.h>
 
 // OCCT includes
 #include <NCollection_DataMap.hxx>
@@ -40,17 +40,22 @@
 //-----------------------------------------------------------------------------
 
 //! Visualization pipeline for a tessellation represented with contour.
-class asiVisu_MeshContourPipeline : public asiVisu_MeshPipeline
+class asiVisu_MeshContourPipeline : public asiVisu_MeshPipelineBase
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshContourPipeline, asiVisu_MeshPipeline)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshContourPipeline, asiVisu_MeshPipelineBase)
 
 public:
 
   asiVisu_EXPORT
-    asiVisu_MeshContourPipeline(const bool doUseDefaultColor = true);
+    asiVisu_MeshContourPipeline(const vtkSmartPointer<asiVisu_MeshSource>& source);
+
+public:
+
+  asiVisu_EXPORT virtual void
+    SetInput(const Handle(asiVisu_DataProvider)& dataProvider);
 
 private:
 

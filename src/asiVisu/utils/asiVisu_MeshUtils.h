@@ -82,6 +82,11 @@ namespace asiVisu_MeshUtils
                         double& fG,
                         double& fB);
 
+  asiVisu_EXPORT void
+    DefaultElemColor(double& fR,
+                     double& fG,
+                     double& fB);
+
   asiVisu_EXPORT double
     DefaultContourLineWidth();
 

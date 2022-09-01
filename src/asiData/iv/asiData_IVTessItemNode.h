@@ -66,7 +66,8 @@ public:
   // Presentation     //
   //------------------//
     PID_GroupPrs,     //!< Presentation group.
-    PID_Color,        //!< Color.
+    PID_Color,        //!< Color of triangles.
+    PID_EdgesColor,   //!< Color of edges of triangles.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -99,6 +100,12 @@ public:
 
   asiData_EXPORT int
     GetColor() const;
+
+  asiData_EXPORT void
+    SetEdgesColor(const int color) const;
+
+  asiData_EXPORT int
+    GetEdgesColor() const;
 
 // Initialization:
 public:

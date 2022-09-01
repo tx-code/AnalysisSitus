@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 13 November 2015
+// Created on: 01 September 2022
 //-----------------------------------------------------------------------------
-// Copyright (c) 2017, Sergey Slyadnev
+// Copyright (c) 2022, Andrey Voevodin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,83 +28,67 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiVisu_MeshDataProvider_h
-#define asiVisu_MeshDataProvider_h
+#ifndef asiVisu_MeshPipelineBase_h
+#define asiVisu_MeshPipelineBase_h
 
 // asiVisu includes
 #include <asiVisu_DataProvider.h>
+#include <asiVisu_Pipeline.h>
 
-// Mesh (Active Data) includes
-#include <ActData_IntParameter.h>
-#include <ActData_MeshParameter.h>
-#include <ActData_Mesh_Group.h>
+class asiVisu_MeshSource;
 
-//! Provides data necessary for visualization of mesh structures.
-class asiVisu_MeshDataProvider : public asiVisu_DataProvider
+//-----------------------------------------------------------------------------
+
+//! Base class for all mesh pipelines.
+class asiVisu_MeshPipelineBase : public asiVisu_Pipeline
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshDataProvider, asiVisu_DataProvider)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshPipelineBase, asiVisu_Pipeline)
 
 public:
 
   asiVisu_EXPORT
-    asiVisu_MeshDataProvider();
+    asiVisu_MeshPipelineBase(const vtkSmartPointer<asiVisu_MeshSource>& source);
 
   asiVisu_EXPORT
-    asiVisu_MeshDataProvider(const ActAPI_DataObjectId&           nodeId,
-                             const Handle(ActData_MeshParameter)& meshParam,
-                             const Handle(ActData_IntParameter)&  colorParam,
-                             const Handle(ActData_IntParameter)&  edgesColorParam);
+    virtual ~asiVisu_MeshPipelineBase();
 
 public:
 
-  asiVisu_EXPORT virtual ActAPI_DataObjectId
-    GetNodeID() const;
-
-  asiVisu_EXPORT virtual Handle(ActData_Mesh)
-    GetMeshDS() const;
-
-  asiVisu_EXPORT virtual Handle(ActAPI_HParameterList)
-    SourceParameters() const;
-
-  asiVisu_EXPORT void
-    GetColor(double& r, double& g, double& b) const;
-
-  asiVisu_EXPORT void
-    GetEdgesColor(double& r, double& g, double& b) const;
-
-public:
-
-  //! Creates copy of Data Provider.
-  //! \return copy.
-  Handle(asiVisu_MeshDataProvider) Clone() const
+  //! \return data source.
+    const vtkSmartPointer<asiVisu_MeshSource>& GetSource() const
   {
-    return new asiVisu_MeshDataProvider(m_nodeID,
-                                        m_meshParam,
-                                        m_colorParam,
-                                        m_edgeColorParam);
+    return m_source;
   }
 
+protected:
+
+  //! Internally used filters.
+  enum FilterId
+  {
+    Filter_Last = 1
+  };
+
 private:
 
-  virtual Handle(ActAPI_HParameterList)
-    translationSources() const;
+  virtual void callback_add_to_renderer      (vtkRenderer* renderer);
+  virtual void callback_remove_from_renderer (vtkRenderer* renderer);
+  virtual void callback_update               ();
 
 private:
 
-  //!< Source Node ID.
-  ActAPI_DataObjectId           m_nodeID;
+  //! Copying prohibited.
+  asiVisu_MeshPipelineBase(const asiVisu_MeshPipelineBase&);
 
-  //! Source Parameter with triangulation.
-  Handle(ActData_MeshParameter) m_meshParam;
+  //! Assignment prohibited.
+  asiVisu_MeshPipelineBase& operator=(const asiVisu_MeshPipelineBase&);
 
-  //! Source Parameter with color.
-  Handle(ActData_IntParameter)  m_colorParam;
+protected:
 
-  //! Source Parameter with edges color.
-  Handle(ActData_IntParameter)  m_edgeColorParam;
+  //! Data source.
+  vtkSmartPointer<asiVisu_MeshSource> m_source;
 
 };
 

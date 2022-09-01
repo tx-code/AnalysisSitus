@@ -34,19 +34,26 @@
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
+// asiVisu includes
+#include <asiVisu_MeshUtils.h>
+#include <asiVisu_Utils.h>
+
 //! Default constructor.
 asiVisu_MeshDataProvider::asiVisu_MeshDataProvider() : asiVisu_DataProvider() {}
 
 //! Constructor accepting the set of source data structures.
 //! \param theNodeId    [in] ID of the target Data Node.
-//! \param theParamList [in] source Parameters.
-asiVisu_MeshDataProvider::asiVisu_MeshDataProvider(const ActAPI_DataObjectId&           theNodeId,
-                                                   const Handle(ActAPI_HParameterList)& theParamList)
-: asiVisu_DataProvider()
-{
-  m_nodeID = theNodeId;
-  m_params = theParamList;
-}
+//! \param theParamList [in] source Parameters: Mesh, Color, EdgesColors.
+asiVisu_MeshDataProvider::asiVisu_MeshDataProvider(const ActAPI_DataObjectId&           nodeId,
+                                                   const Handle(ActData_MeshParameter)& meshParam,
+                                                   const Handle(ActData_IntParameter)&  colorParam,
+                                                   const Handle(ActData_IntParameter)&  edgesColorParam)
+: asiVisu_DataProvider ( ),
+  m_nodeID             ( nodeId ),
+  m_meshParam          ( meshParam ),
+  m_colorParam         ( colorParam ),
+  m_edgeColorParam     ( edgesColorParam )
+{}
 
 //! Returns ID of the Data Node represented by VTK actor. This ID is bound to
 //! the pipeline's actor in order to have a back-reference from Presentation
@@ -61,7 +68,51 @@ ActAPI_DataObjectId asiVisu_MeshDataProvider::GetNodeID() const
 //! \return tessellation DS.
 Handle(ActData_Mesh) asiVisu_MeshDataProvider::GetMeshDS() const
 {
-  return ActParamTool::AsMesh( m_params->Value(1) )->GetMesh();
+  return m_meshParam->GetMesh();
+}
+
+//! Returns persistent color.
+//! \param[out] r red component.
+//! \param[out] g green component.
+//! \param[out] b blue component.
+void asiVisu_MeshDataProvider::GetColor(double& r, double& g, double& b) const
+{
+  asiVisu_MeshUtils::DefaultElemColor(r, g, b);
+
+  if ( m_colorParam.IsNull() )
+  {
+    return;
+  }
+
+  const int icolor = m_colorParam->GetValue();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+
+  r = color.Red();
+  g = color.Green();
+  b = color.Blue();
+}
+
+//! Returns persistent edges color.
+//! \param[out] r red component.
+//! \param[out] g green component.
+//! \param[out] b blue component.
+void asiVisu_MeshDataProvider::GetEdgesColor(double& r, double& g, double& b) const
+{
+  asiVisu_MeshUtils::DefaultContourColor(r, g, b);
+
+  if ( m_edgeColorParam.IsNull() )
+  {
+    return;
+  }
+
+  const int icolor = m_edgeColorParam->GetValue();
+
+  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+
+  r = color.Red();
+  g = color.Green();
+  b = color.Blue();
 }
 
 //! Accessor for the source Data Parameters.
@@ -77,6 +128,11 @@ Handle(ActAPI_HParameterList) asiVisu_MeshDataProvider::SourceParameters() const
 Handle(ActAPI_HParameterList) asiVisu_MeshDataProvider::translationSources() const
 {
   ActAPI_ParameterStream aResStream;
-  aResStream << m_params->Value(1); // Mesh Parameter [entire mesh]
+  if ( !m_meshParam.IsNull() )
+    aResStream << m_meshParam;       // Mesh Parameter [entire mesh]
+  if ( !m_colorParam.IsNull() )
+    aResStream << m_colorParam;      // Color.
+  if ( !m_edgeColorParam.IsNull() )
+    aResStream << m_edgeColorParam;  // Color of edges.
   return aResStream;
 }

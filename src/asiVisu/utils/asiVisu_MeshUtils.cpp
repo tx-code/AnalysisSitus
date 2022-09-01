@@ -153,6 +153,17 @@ void asiVisu_MeshUtils::DefaultContourColor(double& fR,
   fR = fG = fB = 0.0; // Everything is BLACK
 }
 
+//! Returns default color for mesh elements.
+//! \param fR [out] red component [0;1].
+//! \param fG [out] green component [0;1].
+//! \param fB [out] blue component [0;1].
+void asiVisu_MeshUtils::DefaultElemColor(double& fR,
+                                         double& fG,
+                                         double& fB)
+{
+  fR = fG = fB = 0.75;
+}
+
 //! Returns default opacity for mesh contour.
 //! \return opacity factor.
 double asiVisu_MeshUtils::DefaultContourOpacity()

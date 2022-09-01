@@ -43,6 +43,7 @@ asiData_IVTessItemNode::asiData_IVTessItemNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Mesh,  PID_Mesh);
   REGISTER_PARAMETER(Group, PID_GroupPrs);
   REGISTER_PARAMETER(Int,   PID_Color);
+  REGISTER_PARAMETER(Int,   PID_EdgesColor);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -58,12 +59,14 @@ void asiData_IVTessItemNode::Init()
 {
   this->InitParameter(PID_Name, "Name");
 
-  this->SetMesh  (new ActData_Mesh);
-  this->SetColor (190 << 16 | 190 << 8 | 190); // Initial color.
+  this->SetMesh       (new ActData_Mesh);
+  this->SetColor      (190 << 16 | 190 << 8 | 190); // Initial color.
+  this->SetEdgesColor (0   << 16 | 0   << 8 | 0);   // Initial edge color.
 
   // Initialize Parameter flags.
-  this->InitParameter(PID_GroupPrs, "Presentation",  "",               ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Color,    "Color",         "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupPrs,   "Presentation",   "",               ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Color,      "Color",          "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_EdgesColor, "Color of edges", "PrsCustomColor", ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -113,4 +116,19 @@ void asiData_IVTessItemNode::SetColor(const int color) const
 int asiData_IVTessItemNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+
+//! Sets edges color.
+//! \param color [in] color to set.
+void asiData_IVTessItemNode::SetEdgesColor(const int color) const
+{
+  ActParamTool::AsInt(this->Parameter(PID_EdgesColor))->SetValue(color);
+}
+
+//! Accessor for the stored edges color value.
+//! \return color value.
+int asiData_IVTessItemNode::GetEdgesColor() const
+{
+  return ActParamTool::AsInt(this->Parameter(PID_EdgesColor))->GetValue();
 }

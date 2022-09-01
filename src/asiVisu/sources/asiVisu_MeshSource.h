@@ -54,7 +54,7 @@ class asiVisu_MeshSource : public vtkPolyDataAlgorithm
 public:
 
   vtkTypeMacro(asiVisu_MeshSource, vtkPolyDataAlgorithm);
-  static asiVisu_MeshSource* New();
+  asiVisu_EXPORT static asiVisu_MeshSource* New();
 
 // Kernel:
 public:
@@ -65,13 +65,13 @@ public:
   void
     EmptyGroupForAllModeOff();
 
-  void
+  asiVisu_EXPORT void
     SetInputMesh(const Handle(ActData_Mesh)& theMesh);
 
   void
     SetInputElemGroup(const Handle(ActData_Mesh_Group)& theGroup);
 
-  const Handle(ActData_Mesh)&
+  asiVisu_EXPORT const Handle(ActData_Mesh)&
     GetInputMesh() const;
 
   const Handle(ActData_Mesh_Group)&

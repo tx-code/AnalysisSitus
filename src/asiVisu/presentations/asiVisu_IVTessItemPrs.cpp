@@ -49,14 +49,17 @@ asiVisu_IVTessItemPrs::asiVisu_IVTessItemPrs(const Handle(ActAPI_INode)& N)
   // Create Data Provider
   Handle(asiVisu_MeshDataProvider)
     DP = new asiVisu_MeshDataProvider( N->GetId(),
-                                       ActParamStream() << N->Parameter(asiData_IVTessItemNode::PID_Mesh) );
+                                       Handle(ActData_MeshParameter)::DownCast(N->Parameter(asiData_IVTessItemNode::PID_Mesh)),
+                                       Handle(ActData_IntParameter)::DownCast(N->Parameter(asiData_IVTessItemNode::PID_Color)),
+                                       Handle(ActData_IntParameter)::DownCast(N->Parameter(asiData_IVTessItemNode::PID_EdgesColor)) );
 
   // Pipeline for mesh
-  this->addPipeline        ( Pipeline_Main, new asiVisu_MeshPipeline );
+  Handle(asiVisu_MeshPipeline) meshPipeline = new asiVisu_MeshPipeline();
+  this->addPipeline        ( Pipeline_Main, meshPipeline );
   this->assignDataProvider ( Pipeline_Main, DP );
 
   // Pipeline for mesh contour
-  this->addPipeline(Pipeline_MeshContour, new asiVisu_MeshContourPipeline);
+  this->addPipeline(Pipeline_MeshContour, new asiVisu_MeshContourPipeline(meshPipeline->GetSource()));
   this->assignDataProvider(Pipeline_MeshContour, DP);
 
   // We use CONTOUR mesh pipeline along with an ordinary one. Thus it is
@@ -86,6 +89,19 @@ void asiVisu_IVTessItemPrs::Colorize(const ActAPI_Color& color) const
                                           color.Blue() );
 }
 
+//! Sets custom color.
+//! \param[in] color color to set.
+void asiVisu_IVTessItemPrs::ColorizeEdges(const ActAPI_Color& color) const
+{
+  Handle(asiVisu_MeshContourPipeline)
+    contourPl = Handle(asiVisu_MeshContourPipeline)::DownCast(this->GetPipeline(Pipeline_MeshContour));
+
+  if ( !contourPl.IsNull() )
+    contourPl->Actor()->GetProperty()->SetColor(color.Red(),
+                                                color.Green(),
+                                                color.Blue());
+}
+
 //! Callback for updating of Presentation pipelines invoked after the
 //! kernel update routine completes.
 void asiVisu_IVTessItemPrs::afterUpdatePipelines() const
@@ -97,4 +113,7 @@ void asiVisu_IVTessItemPrs::afterUpdatePipelines() const
 
   ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
   this->Colorize(color);
+
+  ActAPI_Color colorE = asiVisu_Utils::IntToColor(N->GetEdgesColor());
+  this->ColorizeEdges(colorE);
 }

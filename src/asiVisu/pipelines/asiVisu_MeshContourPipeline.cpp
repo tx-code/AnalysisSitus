@@ -32,7 +32,10 @@
 #include <asiVisu_MeshContourPipeline.h>
 
 // asiVisu includes
+#include <asiVisu_MeshDataProvider.h>
+#include <asiVisu_MeshSource.h>
 #include <asiVisu_MeshUtils.h>
+#include <asiVisu_NodeInfo.h>
 
 // VTK includes
 #include <vtkExtractEdges.h>
@@ -40,15 +43,14 @@
 
 //! Creates new Mesh Contour Pipeline instance.
 //! \param doUseDefaultColor [in] indicates whether to use default color.
-asiVisu_MeshContourPipeline::asiVisu_MeshContourPipeline(const bool doUseDefaultColor)
-: asiVisu_MeshPipeline()
+asiVisu_MeshContourPipeline::asiVisu_MeshContourPipeline(const vtkSmartPointer<asiVisu_MeshSource>& source)
+: asiVisu_MeshPipelineBase(source)
 {
   /* ======================
    *  Basic initialization
    * ====================== */
 
-  if ( doUseDefaultColor )
-    asiVisu_MeshUtils::DefaultContourColor(m_fColor[0], m_fColor[1], m_fColor[2]);
+  asiVisu_MeshUtils::DefaultContourColor(m_fColor[0], m_fColor[1], m_fColor[2]);
 
   m_fOpacity = asiVisu_MeshUtils::DefaultContourOpacity();
   m_fLineWidth = 1.0;
@@ -75,6 +77,34 @@ asiVisu_MeshContourPipeline::asiVisu_MeshContourPipeline(const bool doUseDefault
   this->append( m_filterMap.Find(Filter_ExtractEdges) );
 }
 
+//! Sets input data for the pipeline.
+//! This method performs translation of DOMAIN data to VTK polygonal data.
+//! \param dataProvider [in] Data Provider.
+void asiVisu_MeshContourPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataProvider)
+{
+  Handle(asiVisu_MeshDataProvider)
+    aMeshPrv = Handle(asiVisu_MeshDataProvider)::DownCast(dataProvider);
+
+  /* ============================
+   *  Prepare polygonal data set
+   * ============================ */
+
+  aMeshPrv->GetEdgesColor(m_fColor[0], m_fColor[1], m_fColor[2]);
+
+  if ( aMeshPrv->MustExecute(this->GetMTime()) )
+  {
+    // Bind actor to owning Node ID. Thus we set back reference from VTK
+    // entity to data object
+    asiVisu_NodeInfo::Store(aMeshPrv->GetNodeID(), this->Actor());
+
+    // Initialize pipeline
+    this->SetInputConnection(m_source->GetOutputPort());
+  }
+
+  // Update modification timestamp
+  this->Modified();
+}
+
 //! Callback for AddToRenderer() base routine. Good place to adjust visualization
 //! properties of the pipeline's actor.
 void asiVisu_MeshContourPipeline::callback_add_to_renderer(vtkRenderer*)
@@ -89,4 +119,10 @@ void asiVisu_MeshContourPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update() routine.
 void asiVisu_MeshContourPipeline::callback_update()
 {
+  asiVisu_MeshUtils::InitMapper(m_mapper,
+                                ARRNAME_MESH_ITEM_TYPE,
+                                m_fColor[0],
+                                m_fColor[1],
+                                m_fColor[2],
+                                false);
 }

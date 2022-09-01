@@ -48,8 +48,10 @@
 
 //! Creates new Mesh Pipeline instance.
 asiVisu_MeshPipeline::asiVisu_MeshPipeline()
-: asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
-                    vtkSmartPointer<vtkActor>::New() )
+: asiVisu_MeshPipelineBase(nullptr),
+  m_fPartRed(0.),
+  m_fPartGreen(0.),
+  m_fPartBlue(0.)
 {
   this->EmptyGroupForAllModeOn();
 
@@ -69,9 +71,11 @@ void asiVisu_MeshPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataProv
    *  Prepare polygonal data set
    * ============================ */
 
+  aMeshPrv->GetColor(m_fPartRed, m_fPartGreen, m_fPartBlue);
+
   if ( aMeshPrv->MustExecute( this->GetMTime() ) )
   {
-    vtkSmartPointer<asiVisu_MeshSource> aMeshSource = vtkSmartPointer<asiVisu_MeshSource>::New();
+    vtkSmartPointer<asiVisu_MeshSource> aMeshSource = m_source;
     aMeshSource->SetInputMesh( aMeshPrv->GetMeshDS() );
     if ( m_bIsEmptyGroupForAll )
       aMeshSource->EmptyGroupForAllModeOn();
@@ -118,9 +122,9 @@ void asiVisu_MeshPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update routine.
 void asiVisu_MeshPipeline::callback_update()
 {
-  //if ( !m_bMapperColorsSet )
-  //{
-  //  asiVisu_MeshUtils::InitMapper(m_mapper, ARRNAME_MESH_ITEM_TYPE);
-  //  m_bMapperColorsSet = true;
-  //}
+  asiVisu_MeshUtils::InitMapper(m_mapper,
+                                ARRNAME_MESH_ITEM_TYPE,
+                                m_fPartRed,
+                                m_fPartGreen,
+                                m_fPartBlue);
 }

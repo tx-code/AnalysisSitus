@@ -169,7 +169,6 @@ void asiVisu_TriangulationPrs::SetDiagnosticTools(ActAPI_ProgressEntry progress,
   pl->SetDiagnosticTools(m_progress, m_plotter);
 }
 
-
 //-----------------------------------------------------------------------------
 
 //! Enables visualization of vertices.

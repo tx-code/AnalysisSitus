@@ -32,18 +32,17 @@
 #define asiVisu_MeshPipeline_h
 
 // asiVisu includes
-#include <asiVisu_DataProvider.h>
-#include <asiVisu_Pipeline.h>
+#include <asiVisu_MeshPipelineBase.h>
 
 //-----------------------------------------------------------------------------
 
 //! Visualization pipeline for facets and meshes.
-class asiVisu_MeshPipeline : public asiVisu_Pipeline
+class asiVisu_MeshPipeline : public asiVisu_MeshPipelineBase
 {
 public:
 
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshPipeline, asiVisu_Pipeline)
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_MeshPipeline, asiVisu_MeshPipelineBase)
 
 public:
 
@@ -79,21 +78,12 @@ private:
 
 protected:
 
-  //! Internally used filters.
-  enum FilterId
-  {
-    Filter_Last = 1
-  };
-
-protected:
-
-  //! Technical flag indicating whether a GL-mapper is initialized with the
-  //! custom color scheme or not.
-  bool m_bMapperColorsSet;
-
   //! Indicates whether to treat empty mesh group as a signal to keep all
   //! mesh elements visualized. Otherwise all them are just skipped.
   bool m_bIsEmptyGroupForAll;
+
+  //! Components of part-wise color.
+  double m_fPartRed, m_fPartGreen, m_fPartBlue;
 
 };
 
