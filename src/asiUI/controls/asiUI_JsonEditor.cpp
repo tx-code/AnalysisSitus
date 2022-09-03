@@ -38,6 +38,7 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextBlock>
+#include <QWheelEvent>
 #pragma warning(pop)
 
 // STL includes
@@ -424,6 +425,20 @@ void asiUI_JsonEditor::updateValidity()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_JsonEditor::keyPressEvent(QKeyEvent *event)
+{
+  if (event->modifiers() == Qt::ControlModifier &&
+      (event->key() == Qt::Key_Up ||
+       event->key() == Qt::Key_Down))
+  {
+    zoomText(event->key() == Qt::Key_Up);
+  }
+  else
+    QPlainTextEdit::keyPressEvent(event);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::resizeEvent(QResizeEvent *e)
 {
   QPlainTextEdit::resizeEvent(e);
@@ -437,6 +452,16 @@ void asiUI_JsonEditor::resizeEvent(QResizeEvent *e)
                                       cr.top(),
                                       lineMarkerAreaWidth(),
                                       cr.height()));
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_JsonEditor::wheelEvent(QWheelEvent *event)
+{
+  if (event->modifiers() == Qt::ControlModifier)
+    zoomText(event->angleDelta().y() > 0);
+  else
+    QPlainTextEdit::wheelEvent(event);
 }
 
 //-----------------------------------------------------------------------------
@@ -877,3 +902,12 @@ void asiUI_JsonEditor::updateJsonUnderline()
   m_editBlocked = editBlockedPrev;
 }
 
+//-----------------------------------------------------------------------------
+
+void asiUI_JsonEditor::zoomText(bool positive)
+{
+  if (positive)
+    zoomIn();
+  else
+    zoomOut();
+}

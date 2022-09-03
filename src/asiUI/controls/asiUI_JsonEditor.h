@@ -48,6 +48,7 @@ class asiUI_JsonHighlighter;
 
 class QKeyEvent;
 class QPaintEvent;
+class QWheelEvent;
 
 //! The class is the plain text editor extended with:
 //! - column of line numbers,
@@ -125,9 +126,17 @@ protected:
                             asiUI_MapIntToRect&     rects);
 
 protected:
+  //! Scales text if event has Up or Down key with Ctrl modifier.
+  //! \param[in] event key info
+  void keyPressEvent(QKeyEvent *event);
+
   //! Updates geometry of line number and marker areas.
   //! \param[in] event resize info
   void resizeEvent(QResizeEvent* event) override;
+
+  //! Scales text if event has Ctrl modifier.
+  //! \param[in] event wheel info
+  void wheelEvent(QWheelEvent *event) override;
 
 private slots:
   //! Updates viewport margins by line number and marker areas width.
@@ -146,6 +155,10 @@ private slots:
   void updateOnContentsChange(int position,
                               int charsRemoved,
                               int charsAdded);
+
+  //! Zoom text font in editor.
+  //! \param[in] positive flag whether to increase text.
+  void zoomText(bool positive);
 
 private:
   asiUI_JsonHighlighter* m_highlighter;       //!< class to highlight Json forfmat
