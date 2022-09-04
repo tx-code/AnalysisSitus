@@ -500,7 +500,6 @@ QTextEdit
 QPlainTextEdit
 {
     background-color: #1E1E1E;
-    font-size: 14px;
 }
 
 QHeaderView::section
