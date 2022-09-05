@@ -1965,6 +1965,11 @@ void asiUI_IV::draw_triangulation(const Handle(Poly_Triangulation)& tris,
     m_lastObj = item_n;
   }
 
+  if ( !item_n.IsNull() && item_n->IsWellFormed() )
+  {
+    item_n->SetColor(asiVisu_Utils::ColorToInt(color));
+  }
+
   // Commit transaction
   if ( isTx )
     m_model->CommitCommand();
