@@ -1392,7 +1392,7 @@ Handle(asiData_IVAxesNode)
                             const bool                     useAutoNaming)
 {
   // Access Model and parent Node
-  Handle(asiData_IVTextNode) IV_Parent = m_model->GetIVNode()->Text();
+  Handle(asiData_IVAxesSetNode) IV_Parent = m_model->GetIVNode()->Axes();
 
   // Add Axes Node to Partition
   Handle(asiData_IVAxesNode) item_n = Handle(asiData_IVAxesNode)::DownCast( asiData_IVAxesNode::Instance() );
