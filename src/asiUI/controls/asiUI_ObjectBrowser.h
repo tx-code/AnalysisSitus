@@ -175,7 +175,7 @@ protected slots:
   void onPrintParameters       ();
   void onCopyName              ();
   void onCopyID                ();
-  void onDeleteNode            ();
+  void onDeleteNodes           ();
   //
   void onComputeNorms          (const bool);
   void onComputeNodalNorms     ();
@@ -197,6 +197,7 @@ protected:
   bool selectedNode  (Handle(ActAPI_INode)&     Node) const;
   bool selectedNode  (Handle(ActAPI_INode)&     Node, QTreeWidgetItem*& pItem) const;
   bool selectedNodes (Handle(ActAPI_HNodeList)& Nodes) const;
+  bool selectedNodes (std::vector<std::pair<Handle(ActAPI_INode), QTreeWidgetItem*>>& nodesWithWidgets) const;
 
   /* Show/hide */
 

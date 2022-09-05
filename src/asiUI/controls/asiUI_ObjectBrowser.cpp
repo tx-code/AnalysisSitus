@@ -1010,59 +1010,80 @@ void asiUI_ObjectBrowser::onCopyID()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ObjectBrowser::onDeleteNode()
+void asiUI_ObjectBrowser::onDeleteNodes()
 {
-  Handle(ActAPI_INode) selected_n;
-  QTreeWidgetItem* root_ui;
-
-  if ( !this->selectedNode(selected_n, root_ui)           ||
-       selected_n.IsNull()                                ||
-       !selected_n->IsWellFormed()                        ||
-       selected_n->GetUserFlags() & NodeFlag_IsStructural ||
-       root_ui == nullptr )
+  std::vector<std::pair<Handle(ActAPI_INode), QTreeWidgetItem*>> nodesWithWidgets;
+  if ( !selectedNodes(nodesWithWidgets) || nodesWithWidgets.empty())
   {
     return;
   }
 
-  QTreeWidgetItem* parentOfSelectedItem = root_ui->parent();
-
-  // Delete node.
+  bool isAborted = false;
+  bool isDeleted = false;
   m_model->OpenCommand();
+
+  std::vector<std::pair<Handle(ActAPI_INode), QTreeWidgetItem*>>::const_iterator itNodes =
+    nodesWithWidgets.cbegin();
+  for ( ; itNodes != nodesWithWidgets.cend(); ++itNodes )
   {
-    if ( selected_n->GetUserFlags() & NodeFlag_IsStructural ||
-         !deleteChildrenNodes(selected_n) )
+    Handle(ActAPI_INode) selected_n = itNodes->first;
+    QTreeWidgetItem* root_ui = itNodes->second;
+
+    if ( selected_n.IsNull()               ||
+         !selected_n->IsWellFormed()       ||
+         !checkIsNotStructural(selected_n) ||
+         root_ui == nullptr )
     {
-      m_model->AbortCommand();
-      return;
+      continue;
     }
 
-    for ( size_t k = 0; k < m_viewers.size(); ++k )
+    QTreeWidgetItem* parentOfSelectedItem = root_ui->parent();
+
+    // Delete node.
     {
-      if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(selected_n) )
-        m_viewers[k]->PrsMgr()->DeRenderPresentation(selected_n);
+      if ( selected_n->GetUserFlags() & NodeFlag_IsStructural ||
+           !deleteChildrenNodes(selected_n) )
+      {
+        isAborted = true;
+        m_model->AbortCommand();
+        break;
+      }
+
+      for ( size_t k = 0; k < m_viewers.size(); ++k )
+      {
+        if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(selected_n) )
+          m_viewers[k]->PrsMgr()->DeRenderPresentation(selected_n);
+      }
+
+      if ( !m_model->DeleteNode(selected_n) )
+      {
+        isAborted = true;
+        m_model->AbortCommand();
+        break;
+      }
     }
 
-    if ( !m_model->DeleteNode(selected_n) )
+    deleteChildrenUI(root_ui);
+
+    if ( parentOfSelectedItem != nullptr && parentOfSelectedItem != root_ui && root_ui != nullptr )
     {
-      m_model->AbortCommand();
-      return;
+      // The removed item will not be deleted.
+      parentOfSelectedItem->removeChild(root_ui);
+      delete root_ui;
     }
-  }
-  m_model->CommitCommand();
+    else if ( parentOfSelectedItem == nullptr && root_ui != nullptr )
+    {
+      // QTreeWidget::removeItemWidget() already calls the deleteLater().
+      this->removeItemWidget(root_ui, 0);
+    }
 
-  deleteChildrenUI(root_ui);
+    isDeleted = true;
+  }
 
-  if ( parentOfSelectedItem != nullptr && parentOfSelectedItem != root_ui && root_ui != nullptr )
-  {
-    // The removed item will not be deleted.
-    parentOfSelectedItem->removeChild(root_ui);
-    delete root_ui;
-  }
-  else if ( parentOfSelectedItem == nullptr && root_ui != nullptr )
-  {
-    // QTreeWidget::removeItemWidget() already calls the deleteLater().
-    this->removeItemWidget(root_ui, 0);
-  }
+  if ( m_model->HasOpenCommand() && !isAborted && isDeleted )
+    m_model->CommitCommand();
+  else if ( m_model->HasOpenCommand() )
+    m_model->AbortCommand();
 }
 
 //-----------------------------------------------------------------------------
@@ -1330,6 +1351,7 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
 
   // Check whether other Nodes are of the same type.
   bool isOfSameType = true;
+  bool hasNotStructuralNode = false;
   //
   for ( ActAPI_HNodeList::Iterator nit(*activeNodes); nit.More(); nit.Next() )
   {
@@ -1338,8 +1360,17 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
     if ( N->DynamicType() != type )
     {
       isOfSameType = false;
-      break;
     }
+
+    if ( checkIsNotStructural(N) )
+    {
+      hasNotStructuralNode = true;
+    }
+  }
+  //
+  if (hasNotStructuralNode)
+  {
+    pMenu->addAction("Delete", this, SLOT(onDeleteNodes()));
   }
   //
   if ( !isOfSameType )
@@ -1366,11 +1397,6 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
     pMenu->addAction( "Print parameters", this, SLOT( onPrintParameters () ) );
     pMenu->addAction( "Copy name",        this, SLOT( onCopyName        () ) );
     pMenu->addAction( "Copy ID",          this, SLOT( onCopyID          () ) );
-
-    if ( checkIsNotStructural(node) )
-    {
-      pMenu->addAction( "Delete node", this, SLOT( onDeleteNode() ) );
-    }
   }
   //
   if ( node->IsKind( STANDARD_TYPE(asiData_RootNode) ) )
@@ -1507,11 +1533,37 @@ bool asiUI_ObjectBrowser::selectedNode(Handle(ActAPI_INode)& Node) const
 //! \return true in case of success, false -- otherwise.
 bool asiUI_ObjectBrowser::selectedNodes(Handle(ActAPI_HNodeList)& Nodes) const
 {
+  Nodes = new ActAPI_HNodeList;
+
+  std::vector<std::pair<Handle(ActAPI_INode), QTreeWidgetItem*>> nodesWithWidgets;
+  if ( !selectedNodes(nodesWithWidgets) )
+  {
+    return false;
+  }
+
+  std::vector<std::pair<Handle(ActAPI_INode), QTreeWidgetItem*>>::const_iterator itNodes =
+    nodesWithWidgets.cbegin();
+  for ( ; itNodes != nodesWithWidgets.cend(); ++itNodes )
+  {
+    Nodes->Append(itNodes->first);
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Returns the currently active Nodes with widgets.
+//! \param[out] nodesWithWidgets requested Nodes.
+//! \return true in case of success, false -- otherwise.
+//! 
+bool asiUI_ObjectBrowser::
+  selectedNodes(std::vector<std::pair<Handle(ActAPI_INode),
+                                      QTreeWidgetItem*>>& nodesWithWidgets) const
+{
   QList<QTreeWidgetItem*> items = this->selectedItems();
   if ( !items.length() )
     return false;
-
-  Nodes = new ActAPI_HNodeList;
 
   for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it )
   {
@@ -1528,8 +1580,8 @@ bool asiUI_ObjectBrowser::selectedNodes(Handle(ActAPI_HNodeList)& Nodes) const
       continue;
     }
 
-    // Populate the output list.
-    Nodes->Append(selected_n);
+    std::pair<Handle(ActAPI_INode), QTreeWidgetItem*> pairNodeWidget(selected_n, item);
+    nodesWithWidgets.push_back(pairNodeWidget);
   }
 
   return true;
