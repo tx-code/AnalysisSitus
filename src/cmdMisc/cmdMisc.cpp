@@ -754,10 +754,16 @@ int MISC_PushPull(const Handle(asiTcl_Interp)& interp,
     if ( faceShape.Orientation() == TopAbs_REVERSED )
       norm.Reverse();
 
-    gp_Vec offset = norm.XYZ() * atof(argv[argc - 1]);
+    const double d      = atof(argv[argc - 1]);
+    gp_Vec       offset = norm.XYZ() * d;
 
     TopoDS_Shape prism = BRepPrimAPI_MakePrism(faceShape, offset);
-    TopoDS_Shape fused = BRepAlgoAPI_Fuse(prism, result);
+    TopoDS_Shape fused;
+
+    if ( d > 0 )
+      fused = BRepAlgoAPI_Fuse(prism, result);
+    else
+      fused = BRepAlgoAPI_Cut(result, prism);
 
     ShapeUpgrade_UnifySameDomain Maximize(fused);
     Maximize.Build();
@@ -3809,7 +3815,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("push-pull",
     //
-    "push-pull <faceId> <offset>\n"
+    "push-pull [-fid <faceId>] <offset>\n"
     "\t Dummy \"push/pull\" kind of operation. It is experimental and not recommended for use.",
     //
     __FILE__, group, MISC_PushPull);
