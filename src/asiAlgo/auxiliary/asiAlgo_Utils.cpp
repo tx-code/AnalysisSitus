@@ -707,17 +707,9 @@ std::string
 
   // Get base filename and take its extension.
   std::string baseFn = chunks[chunks.size() - 1];
-  std::vector<std::string> baseFnChunks;
-  Split(baseFn, ".", baseFnChunks);
-  //
-  baseFn = "";
-  for ( size_t k = 0; k < baseFnChunks.size() - 1; ++k )
-  {
-    baseFn += baseFnChunks[k]; // Base filename without extension.
-  }
-  baseFn += suffix;
-  baseFn += ".";
-  baseFn += baseFnChunks.back(); // Restore the original extension.
+
+  std::size_t dotPos = baseFn.find_last_of(".");
+  baseFn = baseFn.insert(dotPos, suffix);
 
   std::string resFilename;
 
