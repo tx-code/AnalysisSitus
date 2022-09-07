@@ -1093,6 +1093,81 @@ int ENGINE_Repair(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_RepairShifted(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) part_n = cmdEngine::model->GetPartNode();
+  //
+  if ( part_n.IsNull() || !part_n->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_OK;
+  }
+
+  // Get part shape.
+  TopoDS_Shape partShape = part_n->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part contains no B-Rep.");
+    return TCL_OK;
+  }
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdEngine::cf.IsNull() )
+  {
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
+
+  TopTools_IndexedMapOfShape M;
+  TopExp::MapShapes(partShape, TopAbs_FACE, M);
+
+  for ( asiAlgo_Feature::Iterator fit(selected); fit.More(); fit.Next() )
+  {
+    TopoDS_Face faceShape = TopoDS::Face( M.FindKey( fit.Key() ) );
+
+    // Fix shape.
+    Handle(ShapeFix_Face) sff = new ShapeFix_Face(faceShape);
+    //
+    sff->FixWireTool()->FixShiftedMode() = true;
+    sff->Perform();
+    //
+    TopoDS_Shape result = sff->Result();
+    interp->GetPlotter().DRAW_SHAPE(result, "fixed");
+  }
+
+  //// Modify Data Model.
+  //cmdEngine::model->OpenCommand();
+  //{
+  //  asiEngine_Part(cmdEngine::model).Update(result);
+  //}
+  //cmdEngine::model->CommitCommand();
+
+  //// Update UI.
+  //if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+  //  cmdEngine::cf->ViewerPart->PrsMgr()->Actualize( cmdEngine::model->GetPartNode() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_SetFaceTolerance(const Handle(asiTcl_Interp)& interp,
                             int                          argc,
                             const char**                 argv)
@@ -3468,6 +3543,14 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Performs automatic shape repair on the active part.",
     //
     __FILE__, group, ENGINE_Repair);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("repair-shifted",
+    //
+    "repair-shifted\n"
+    "\t Performs automatic repair of shifted pcurves on the active part.",
+    //
+    __FILE__, group, ENGINE_RepairShifted);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("set-face-tolerance",

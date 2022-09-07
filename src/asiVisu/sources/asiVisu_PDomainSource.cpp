@@ -174,7 +174,7 @@ int asiVisu_PDomainSource::RequestData(vtkInformation*        request,
         pcurveSource = asiVisu_PCurveSource::SafeDownCast(curveSource);
 
       // Initialize data source
-      pcurveSource->SetEdgeOnFace(E, m_face);
+      pcurveSource->SetEdgeOnFace(E, face2Iterate);
     }
     else
     {

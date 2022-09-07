@@ -63,6 +63,8 @@
 
 // OCCT includes
 #include <BRep_Tool.hxx>
+#include <Geom2d_Line.hxx>
+#include <ShapeAnalysis_Edge.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
@@ -326,7 +328,7 @@ void asiUI_ViewerDomain::onDomainPicked()
   std::map<int, TopoDS_Edge> edges;
   TopTools_IndexedMapOfShape selected;
   //
-  for ( TopExp_Explorer eexp(F, TopAbs_EDGE); eexp.More(); eexp.Next() )
+  for ( TopExp_Explorer eexp(F.Oriented(TopAbs_FORWARD), TopAbs_EDGE); eexp.More(); eexp.Next() )
   {
     ++current_id;
     if ( cellGIDs.Contains(current_id) )
@@ -370,16 +372,39 @@ void asiUI_ViewerDomain::onDomainPicked()
       TITLE += "]\n";
     }
 
+    ShapeAnalysis_Edge sae;
+    Handle(Geom2d_Curve) c2d;
     double f2, l2;
-    Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface(itEdges->second, F, f2, l2);
     //
-    TITLE += "2D: ";
-    TITLE += c2d->DynamicType()->Name();
-    TITLE += " [";
-    TITLE += f2;
-    TITLE += ", ";
-    TITLE += l2;
-    TITLE += "]";
+    if ( sae.PCurve(itEdges->second, F, c2d, f2, l2, true) )
+    {
+      TITLE += "2D: ";
+      TITLE += c2d->DynamicType()->Name();
+      TITLE += " [";
+      TITLE += f2;
+      TITLE += ", ";
+      TITLE += l2;
+      TITLE += "]";
+
+      gp_Pnt2d p2d1 = c2d->Value(f2);
+      gp_Pnt2d p2d2 = c2d->Value(l2);
+
+      TITLE += "\nCONS(";
+      TITLE += f2;
+      TITLE += ") = (";
+      TITLE += p2d1.X();
+      TITLE += ", ";
+      TITLE += p2d1.Y();
+      TITLE += ")";
+      //
+      TITLE += "\nCONS(";
+      TITLE += l2;
+      TITLE += ") = (";
+      TITLE += p2d2.X();
+      TITLE += ", ";
+      TITLE += p2d2.Y();
+      TITLE += ")";
+    }
 
     TITLE += "\nLocation: ";
     TITLE += asiAlgo_Utils::LocationToString(itEdges->second.Location());
