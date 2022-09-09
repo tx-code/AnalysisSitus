@@ -34,6 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Cloudify.h>
+#include <asiALgo_ConvertCurve.h>
 #include <asiAlgo_HitFacet.h>
 #include <asiAlgo_MeshGen.h>
 #include <asiAlgo_MeshMerge.h>
@@ -44,8 +45,6 @@
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_TopoKill.h>
 #include <asiAlgo_Utils.h>
-//
-#include <algoBase_ConvertCurve.h>
 
 // asiUI includes
 #include <asiUI_CommonFacilities.h>
@@ -98,6 +97,7 @@
 #include <NCollection_CellFilter.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeAnalysis_Surface.hxx>
+#include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopExp.hxx>
@@ -3700,16 +3700,14 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
     return TCL_ERROR;
-  } 
+  }
 
   double tol = 0.01;
   interp->GetKeyValue(argc, argv, "tol", tol);
   //
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Conversion tolerance: %1." << tol);
 
-  TopoDS_Compound comp;
-  BRep_Builder bb;
-  bb.MakeCompound(comp);
+  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
 
   TIMER_NEW
   TIMER_GO
@@ -3722,15 +3720,19 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
     Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
 
     TopoDS_Wire W;
-    if ( !pb::algoBase_ConvertCurve::Perform(curve, f, l, W, tol) )
+
+    if ( !asiAlgo_ConvertCurve::Perform(curve, f, l, W, tol) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to convert curve.");
       interp->GetPlotter().DRAW_CURVE(curve, Color_Red, true, "faulty");
       continue;
     }
-
-    bb.Add(comp, W);
+    //
+    if ( !W.IsNull() )
+      ctx->Replace(edge, W);
   }
+
+  TopoDS_Shape newShape = ctx->Apply(partShape);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Convert curves")
@@ -3738,13 +3740,63 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
   // Modify shape.
   M->OpenCommand();
   {
-    asiEngine_Part(M).Update(comp);
+    asiEngine_Part(M).Update(newShape);
   }
   M->CommitCommand();
 
   // Update UI.
   if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
     cmdMisc::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int MISC_CheckGaps(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Get shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  double maxGap = 0.;
+  //
+  if ( partShape.ShapeType() < TopAbs_WIRE )
+  {
+    for ( TopExp_Explorer exp(partShape, TopAbs_WIRE); exp.More(); exp.Next() )
+    {
+      const TopoDS_Wire& W = TopoDS::Wire( exp.Current() );
+
+      const double gap = asiAlgo_ConvertCurve::CheckGaps(W, interp->GetProgress(), interp->GetPlotter());
+      //
+      if ( gap > maxGap )
+        maxGap = gap;
+    }
+  }
+  else if ( partShape.ShapeType() == TopAbs_WIRE )
+  {
+    maxGap = asiAlgo_ConvertCurve::CheckGaps(TopoDS::Wire(partShape), interp->GetProgress(), interp->GetPlotter());
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Check gaps")
+
+  *interp << maxGap;
 
   return TCL_OK;
 }
@@ -3997,6 +4049,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Converts to arcs and lines.",
     //
     __FILE__, group, MISC_ConvertCurves);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-check-gaps",
+    //
+    "misc-check-gaps\n"
+    "\t Checks gaps in a wire.",
+    //
+    __FILE__, group, MISC_CheckGaps);
 
   // Load more commands.
   Commands_Coons (interp, data);

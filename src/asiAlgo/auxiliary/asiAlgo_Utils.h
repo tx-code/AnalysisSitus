@@ -524,6 +524,31 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT std::string
     ShapeAddr(const TopoDS_Shape& shape);
 
+  //! Checks curve type.
+  //! \param[in] curve curve to check.
+  //! \return true/false.
+  template<typename TCurve>
+  bool IsTypeOf(const Handle(Geom_Curve)& curve)
+  {
+    if ( curve->IsInstance( STANDARD_TYPE(TCurve) ) )
+      return true;
+
+    if ( curve->IsInstance( STANDARD_TYPE(Geom_TrimmedCurve) ) )
+    {
+      Handle(Geom_TrimmedCurve) trimmed =
+        Handle(Geom_TrimmedCurve)::DownCast(curve);
+
+      Handle(Geom_Curve) basis = trimmed->BasisCurve();
+
+      if ( IsTypeOf<TCurve>(basis) )
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   //! Checks edge type.
   //! \param[in]  edge      edge to check.
   //! \param[out] basecurve base curve.
