@@ -122,7 +122,7 @@ int ENGINE_CheckNumberOfMeshEntities(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 
 #else
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
 #endif
 }
@@ -230,7 +230,7 @@ int ENGINE_CheckAABBOfMesh(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 #else
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
 #endif
 }
@@ -296,7 +296,7 @@ int ENGINE_MakeTriangulationFromFacets(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 
 #else
-  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return TCL_ERROR;
 #endif
 }

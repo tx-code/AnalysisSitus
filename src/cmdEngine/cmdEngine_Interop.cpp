@@ -647,7 +647,7 @@ int ENGINE_SaveSTL(const Handle(asiTcl_Interp)& interp,
                    const char**                 argv)
 {
 #ifndef USE_MOBIUS
-  m_progress.SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
   return TCL_ERROR;
 #else
 
@@ -704,7 +704,7 @@ int ENGINE_SavePLY(const Handle(asiTcl_Interp)& interp,
                    const char**                 argv)
 {
 #ifndef USE_MOBIUS
-  m_progress.SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "MOBIUS is unavailable.");
   return TCL_ERROR;
 #else
 

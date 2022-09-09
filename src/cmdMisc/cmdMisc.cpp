@@ -34,7 +34,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Cloudify.h>
-#include <asiALgo_ConvertCurve.h>
+#include <asiAlgo_ConvertCurve.h>
 #include <asiAlgo_HitFacet.h>
 #include <asiAlgo_MeshGen.h>
 #include <asiAlgo_MeshMerge.h>
@@ -3807,7 +3807,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
                       const Handle(Standard_Transient)& data)
 {
   static const char* group = "cmdMisc";
-  
+
   /* ==========================
    *  Initialize UI facilities
    * ========================== */
