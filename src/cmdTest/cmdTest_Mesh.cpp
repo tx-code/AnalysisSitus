@@ -55,9 +55,9 @@ using namespace mobius;
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_CheckNumberOfMeshEntities(const Handle(asiTcl_Interp)& interp,
-                                     int                          argc,
-                                     const char**                 argv)
+int TEST_CheckNumberOfMeshEntities(const Handle(asiTcl_Interp)& interp,
+                                   int                          argc,
+                                   const char**                 argv)
 {
   if ( argc != 5 )
   {
@@ -129,9 +129,9 @@ int ENGINE_CheckNumberOfMeshEntities(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_CheckAABBOfMesh(const Handle(asiTcl_Interp)& interp,
-                           int                          argc,
-                           const char**                 argv)
+int TEST_CheckAABBOfMesh(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
 {
   if ( argc != 9 )
   {
@@ -237,9 +237,9 @@ int ENGINE_CheckAABBOfMesh(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_MakeTriangulationFromFacets(const Handle(asiTcl_Interp)& interp,
-                                       int                          argc,
-                                       const char**                 argv)
+int TEST_MakeTriangulationFromFacets(const Handle(asiTcl_Interp)& interp,
+                                     int                          argc,
+                                     const char**                 argv)
 {
   if ( argc != 1 )
   {
@@ -314,7 +314,7 @@ void cmdTest::Commands_Mesh(const Handle(asiTcl_Interp)&      interp,
     "test-check-number-mesh-entities -nodes <nbNodes> -tri <nbTriangles>\n"
     "\t Check number of mesh entities.",
     //
-    __FILE__, group, ENGINE_CheckNumberOfMeshEntities);
+    __FILE__, group, TEST_CheckNumberOfMeshEntities);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-check-mesh-aabb-dim",
@@ -322,7 +322,7 @@ void cmdTest::Commands_Mesh(const Handle(asiTcl_Interp)&      interp,
     "test-check-mesh-aabb-dim -xDim <xDim> -yDim <yDim> -zDim <zDim> -tol <tolerance>\n"
     "\t Check dimensions of AABB of mesh.",
     //
-    __FILE__, group, ENGINE_CheckAABBOfMesh);
+    __FILE__, group, TEST_CheckAABBOfMesh);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-make-triangulation-from-facets",
@@ -330,5 +330,5 @@ void cmdTest::Commands_Mesh(const Handle(asiTcl_Interp)&      interp,
     "test-make-triangulation-from-facets\n"
     "\t Make triangulation from facets.",
     //
-    __FILE__, group, ENGINE_MakeTriangulationFromFacets);
+    __FILE__, group, TEST_MakeTriangulationFromFacets);
 }

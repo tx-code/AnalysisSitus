@@ -51,6 +51,7 @@
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_CheckVertexVexity.h>
 #include <asiAlgo_CompleteEdgeLoop.h>
+#include <asiAlgo_ComputeNegativeVolume.h>
 #include <asiAlgo_ExtractFeatures.h>
 #include <asiAlgo_FeatureAttrBaseFace.h>
 #include <asiAlgo_FeatureType.h>
@@ -4477,6 +4478,102 @@ int ENGINE_CheckCanonical(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_NegativeVolume(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  // Get the part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+  //
+  Handle(asiAlgo_AAG) aag = partNode->GetAAG();
+
+  // Access the selected faces (if any and if UI facilities are available).
+  asiAlgo_Feature selected;
+  //
+  if ( interp->HasKeyword(argc, argv, "fids") )
+  {
+    std::vector<int> values;
+    if ( interp->CollectValues(argc, argv, "fids", values) )
+    {
+      std::vector<int>::const_iterator itV = values.cbegin();
+      for ( ; itV != values.cend(); ++itV )
+      {
+        selected.Add(*itV);
+      }
+    }
+  }
+  else if ( !cmdEngine::cf.IsNull() )
+  {
+    Handle(asiUI_IV) iv = Handle(asiUI_IV)::DownCast( interp->GetPlotter().Access() );
+
+    if ( !iv.IsNull() )
+    {
+      asiEngine_Part( iv->GetModel(),
+                      iv->GetPrsMgr3d() ).GetHighlightedFaces(selected);
+    }
+  }
+
+  if ( selected.IsEmpty() )
+  {
+    interp->GetProgress().SendLogMessage(LogNotice(Normal) << "No face selected.");
+    return TCL_ERROR;
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogNotice(Normal) << "The accessibility check will be done "
+                                                              "for the face(s) [%1]." << selected);
+  }
+
+  TIMER_NEW
+    TIMER_GO
+
+  ComputeNegativeVolumeAlgo algo(aag, selected, interp->GetProgress(), interp->GetPlotter());
+
+  if (!algo.Perform())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Volume calculation failed.");
+    return TCL_ERROR;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Computes negative volumes")
+
+  std::vector<std::tuple<asiAlgo_Feature,
+                         TopoDS_Shape,
+                         double>> negativeVolumes = algo.GetNegativeVolumes();
+
+  for ( int index = 0; index < negativeVolumes.size(); ++index )
+  {
+    TopoDS_Compound featureComp;
+    BRep_Builder bb;
+    bb.MakeCompound(featureComp);
+    asiAlgo_Feature featureFaceIds = std::get<0>(negativeVolumes[index]);
+    asiAlgo_Feature::Iterator itFFIds(featureFaceIds);
+    for ( ; itFFIds.More(); itFFIds.Next() )
+    {
+      bb.Add(featureComp, aag->GetFace(itFFIds.Key()));
+    }
+
+    if ( !(std::get<1>(negativeVolumes[index])).IsNull() && !featureComp.IsNull())
+    {
+      interp->GetProgress().SendLogMessage(LogNotice(Normal) << "Volume = %1 " << std::get<2>(negativeVolumes[index]));
+      interp->GetPlotter().DRAW_SHAPE(std::get<1>(negativeVolumes[index]), "negativeVolumeShape");
+      interp->GetPlotter().DRAW_SHAPE(featureComp, "feature");
+    }
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4996,4 +5093,12 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks if the selected face is of canonical type.",
     //
     __FILE__, group, ENGINE_CheckCanonical);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("compute-negative-volume",
+    //
+    "compute-negative-volume [-fids <fid1> <fid2> ...]\n"
+    "\t Computes negative volumes.",
+    //
+    __FILE__, group, ENGINE_NegativeVolume);
 }

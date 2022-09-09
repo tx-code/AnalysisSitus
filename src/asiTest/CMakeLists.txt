@@ -156,6 +156,7 @@ set (cases_framework_CPP_FILES
 
 set (cases_inspection_H_FILES
   cases/inspection/asiTest_AAG.h
+  cases/inspection/asiTest_ComputeNegativeVolume.h
   cases/inspection/asiTest_EdgeVexity.h
   cases/inspection/asiTest_FaceGrid.h
   cases/inspection/asiTest_IsContourClosed.h
@@ -165,6 +166,7 @@ set (cases_inspection_H_FILES
 )
 set (cases_inspection_CPP_FILES
   cases/inspection/asiTest_AAG.cpp
+  cases/inspection/asiTest_ComputeNegativeVolume.cpp
   cases/inspection/asiTest_EdgeVexity.cpp
   cases/inspection/asiTest_FaceGrid.cpp
   cases/inspection/asiTest_IsContourClosed.cpp

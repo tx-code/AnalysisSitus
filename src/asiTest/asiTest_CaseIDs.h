@@ -63,6 +63,7 @@ enum test_CaseID
 /* ------------------------------------------------------------------------ */
 
   CaseID_AAG,
+  CaseID_ComputeNegativeVolume,
   CaseID_IsContourClosed,
   CaseID_EdgeVexity,
   CaseID_FaceGrid,
