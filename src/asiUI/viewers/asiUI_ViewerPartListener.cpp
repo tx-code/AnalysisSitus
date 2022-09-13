@@ -451,6 +451,9 @@ void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
     return;
   }
 
+  if ( geom_n->GetAAG().IsNull() )
+    return;
+
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   const TopTools_IndexedMapOfShape& allFaces = geom_n->GetAAG()->GetMapOfFaces();
   if ( !m_statusBar.IsNull() )
@@ -491,6 +494,9 @@ void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
     return;
   }
 
+  if ( geom_n->GetAAG().IsNull() )
+    return;
+
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   const TopTools_IndexedMapOfShape& allEdges = geom_n->GetAAG()->RequestMapOfEdges();
   if ( !m_statusBar.IsNull() )
@@ -530,6 +536,9 @@ void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes
     }
     return;
   }
+
+  if ( geom_n->GetAAG().IsNull() )
+    return;
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   // Get map of vertices.
