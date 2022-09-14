@@ -55,6 +55,13 @@ namespace asiAlgo_ConvertCurve
     CheckGaps(const TopoDS_Wire&   w,
               ActAPI_ProgressEntry progress = nullptr,
               ActAPI_PlotterEntry  plotter  = nullptr);
+
+  asiAlgo_EXPORT bool
+    FixGaps(const TopoDS_Wire&   input,
+            const double         tol,
+            TopoDS_Wire&         result,
+            ActAPI_ProgressEntry progress = nullptr,
+            ActAPI_PlotterEntry  plotter  = nullptr);
 }
 
 #endif

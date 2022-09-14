@@ -3724,7 +3724,6 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
     if ( !asiAlgo_ConvertCurve::Perform(curve, f, l, W, tol) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to convert curve.");
-      interp->GetPlotter().DRAW_CURVE(curve, Color_Red, true, "faulty");
       continue;
     }
     //
@@ -3797,6 +3796,70 @@ int MISC_CheckGaps(const Handle(asiTcl_Interp)& interp,
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Check gaps")
 
   *interp << maxGap;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Get shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  }
+
+  double tol = 0.01;
+  interp->GetKeyValue(argc, argv, "tol", tol);
+  //
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Conversion tolerance: %1." << tol);
+
+  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
+
+  TIMER_NEW
+  TIMER_GO
+
+  for ( TopExp_Explorer exp(partShape, TopAbs_WIRE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Wire& wire = TopoDS::Wire( exp.Current() );
+    TopoDS_Wire        W;
+
+    if ( !asiAlgo_ConvertCurve::FixGaps(wire, tol, W) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to fix gaps in a wire.");
+      continue;
+    }
+    //
+    if ( !W.IsNull() )
+      ctx->Replace(wire, W);
+  }
+
+  TopoDS_Shape newShape = ctx->Apply(partShape);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Fix gaps")
+
+  // Modify shape.
+  M->OpenCommand();
+  {
+    asiEngine_Part(M).Update(newShape);
+  }
+  M->CommitCommand();
+
+  // Update UI.
+  if ( cmdMisc::cf && cmdMisc::cf->ViewerPart )
+    cmdMisc::cf->ViewerPart->PrsMgr()->Actualize(partNode);
 
   return TCL_OK;
 }
@@ -4057,6 +4120,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Checks gaps in a wire.",
     //
     __FILE__, group, MISC_CheckGaps);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-repair-gaps",
+    //
+    "misc-repair-gaps\n"
+    "\t Tries to fix gaps in a wire.",
+    //
+    __FILE__, group, MISC_RepairGaps);
 
   // Load more commands.
   Commands_Coons (interp, data);

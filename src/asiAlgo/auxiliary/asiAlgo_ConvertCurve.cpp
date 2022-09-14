@@ -54,6 +54,7 @@
 #include <ShapeAnalysis.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeExtend_WireData.hxx>
+#include <ShapeFix_Wire.hxx>
 #include <TopoDS.hxx>
 
 // Standard includes
@@ -917,4 +918,24 @@ double asiAlgo_ConvertCurve::CheckGaps(const TopoDS_Wire&   w,
   sw.CheckGaps3d();
 
   return sw.MaxDistance3d();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_ConvertCurve::FixGaps(const TopoDS_Wire&   input,
+                                   const double         tol,
+                                   TopoDS_Wire&         result,
+                                   ActAPI_ProgressEntry progress,
+                                   ActAPI_PlotterEntry  plotter)
+{
+  ShapeFix_Wire sfw;
+  sfw.Load(input);
+  sfw.ModifyGeometryMode() = true;
+  sfw.FixEdgeCurvesMode() = true;
+  sfw.FixLackingMode() = true;
+
+  const bool isOk = sfw.FixGaps3d();
+  result = sfw.Wire();
+
+  return isOk;
 }
