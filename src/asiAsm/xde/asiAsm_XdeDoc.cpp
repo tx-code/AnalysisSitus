@@ -46,6 +46,7 @@
 #include <APIHeaderSection_MakeHeader.hxx>
 #include <BRep_Builder.hxx>
 #include <CDM_MetaData.hxx>
+#include <gp_Quaternion.hxx>
 #include <IGESCAFControl_Reader.hxx>
 #include <Interface_Static.hxx>
 #include <Quantity_ColorRGBA.hxx>
@@ -64,6 +65,7 @@
 #include <TNaming_NamedShape.hxx>
 #include <TNaming_Tool.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopTools_MapOfOrientedShape.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
@@ -2144,10 +2146,27 @@ void Doc::UpdatePartShape(const PartId&                    partId,
 
 //-----------------------------------------------------------------------------
 
-void Doc::UpdateAssemblies()
+void Doc::UpdateAssemblies(const bool force)
 {
-  // This thing is made a part of OpenCascade, so why bother?
-  this->GetShapeTool()->UpdateAssemblies();
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+
+  // We start from the free shapes (roots in the assembly structure).
+  TDF_LabelSequence aRootLabels;
+  ST->GetFreeShapes(aRootLabels);
+
+  // Iterate over the free shapes
+  TDF_LabelMap anUpdated;
+  for ( TDF_LabelSequence::Iterator anIt(aRootLabels); anIt.More(); anIt.Next() )
+  {
+    TDF_Label aRefLabel = anIt.Value();
+    if ( ST->IsReference(aRefLabel)) 
+    {
+      ST->GetReferredShape(aRefLabel, aRefLabel);
+    }
+    const TDF_Label& aRootLab = aRefLabel;
+    TopoDS_Shape anAssemblyShape;
+    this->updateComponent(aRootLab, force, anAssemblyShape, anUpdated);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -2263,6 +2282,35 @@ void Doc::RemoveAllEmptyAssemblies()
 
   // Update necessary structures.
   this->UpdateAssemblies();
+}
+
+//-----------------------------------------------------------------------------
+
+void Doc::TransformItem(const AssemblyItemId& item,
+                        const double          tx,
+                        const double          ty,
+                        const double          tz,
+                        const double          rx,
+                        const double          ry,
+                        const double          rz,
+                        const bool            doUpdateAssemblies)
+{
+  TDF_Label lab = this->GetLabel(item);
+
+  // Prepare transformation.
+  gp_Vec Translation(tx, ty, tz);
+  gp_Quaternion RX(gp::DX(), rx/180.*M_PI);
+  gp_Quaternion RY(gp::DY(), ry/180.*M_PI);
+  gp_Quaternion RZ(gp::DZ(), rz/180.*M_PI);
+  //
+  gp_Trsf T;
+  T.SetRotation(RZ*RY*RX);
+  T.SetTranslationPart(Translation);
+
+  Handle(XCAFDoc_Location) attr = XCAFDoc_Location::Set(lab, T);
+
+  if ( doUpdateAssemblies )
+    this->UpdateAssemblies(true); // Forcibly, as location is the only thing changed.
 }
 
 //-----------------------------------------------------------------------------
@@ -3109,6 +3157,130 @@ void Doc::removeEmptySubAssemblies(const TDF_Label& assembly)
 
   if ( ST->NbComponents(asmLab) == 0 )
     this->removeEmptyAssembly(asmLab, false);
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::updateComponent(const TDF_Label& theItemLabel,
+                          const bool       force,
+                          TopoDS_Shape&    theUpdatedShape,
+                          TDF_LabelMap&    theUpdated) const
+{
+  if ( !IsAssembly(theItemLabel) )
+    return false; // Do nothing for non-assemblies.
+
+  Handle(XCAFDoc_ShapeTool) ST = this->GetShapeTool();
+
+  // Get the currently stored compound for the assembly
+  TopoDS_Shape aCurrentRootShape;
+  ST->GetShape(theItemLabel, aCurrentRootShape);
+
+  // Check if the given assembly is already updated
+  if (theUpdated.Contains(theItemLabel)) {
+    theUpdatedShape = aCurrentRootShape;
+    return Standard_True;
+  }
+
+  TopTools_MapOfOrientedShape aCurrentRootShapeMap (aCurrentRootShape.NbChildren());
+
+  // Get components of the assembly
+  TDF_LabelSequence aComponentLabs;
+  ST->GetComponents(theItemLabel, aComponentLabs);
+
+  // This flag indicates whether to update the compound of the assembly
+  Standard_Boolean isModified = force ? true : false;
+
+  // Compare the number of components in XDE structure with the number of
+  // components in topological structure. A component may happen to be removed,
+  // so we have to update the assembly compound.
+  if ( !force )
+  {
+    const Standard_Integer aNumTopoComponents = aCurrentRootShape.NbChildren();
+    //
+    if ( aNumTopoComponents != aComponentLabs.Length() )
+      isModified = Standard_True;
+  }
+
+  // Iterate over the assembly components. If at least one component is
+  // modified (this is the recursive check), then the actually stored
+  // compound has to be updated
+  TopTools_ListOfShape aComponentShapes;
+  //
+  for ( TDF_LabelSequence::Iterator aCompIt(aComponentLabs); aCompIt.More(); aCompIt.Next() )
+  {
+    const TDF_Label& aComponentLab = aCompIt.Value();
+
+    // Take the referred assembly item (ultimately, a part for an instance)
+    TDF_Label aComponentRefLab;
+    ST->GetReferredShape(aComponentLab, aComponentRefLab);
+
+    // Shape comes with some placement transformation here
+    TopoDS_Shape aComponentShape;
+    ST->GetShape(aComponentLab, aComponentShape);
+    TopLoc_Location aComponentLoc = aComponentShape.Location();
+
+    // If the component is a sub-assembly, then its associated compound
+    // has to be processed in the same manner
+    if ( IsAssembly(aComponentRefLab) )
+    {
+      // Recursive call
+      if ( updateComponent(aComponentRefLab, force, aComponentShape, theUpdated) )
+      {
+        isModified = Standard_True;
+        aComponentShape.Location(aComponentLoc); // Apply placement.
+      }
+    }
+    else
+    {
+      // Search for a part in the actual compound of the ultimate assembly.
+      // If the part is there, then the compound is up-to-date, so it does not require rebuilding
+      if (!isModified)
+      {
+        if (aCurrentRootShapeMap.IsEmpty())
+        {
+          // optimize search for next labels in aComponentLabs
+          for (TopoDS_Iterator aTopoIt(aCurrentRootShape); aTopoIt.More(); aTopoIt.Next())
+          {
+            aCurrentRootShapeMap.Add (aTopoIt.Value());
+          }
+        }
+        if ( !aCurrentRootShapeMap.Contains(aComponentShape) )
+        {
+          // Part has been modified somewhere, so the compound has to be rebuilt
+          isModified = Standard_True;
+        }
+      }
+    }
+
+    // Fill the list of shapes composing a new compound for the assembly
+    aComponentShapes.Append(aComponentShape);
+  }
+
+  // If any component is modified, we update the currently stored shape
+  if ( isModified )
+  {
+    TopoDS_Compound anUpdatedCompound;
+    BRep_Builder aBB;
+    aBB.MakeCompound(anUpdatedCompound);
+
+    // Compose new compound
+    for ( TopTools_ListIteratorOfListOfShape aShapeIt(aComponentShapes); aShapeIt.More(); aShapeIt.Next() )
+    {
+      aBB.Add( anUpdatedCompound, aShapeIt.Value() );
+    }
+
+    // Store the updated shape as an output
+    theUpdatedShape = anUpdatedCompound;
+
+    // Use topological naming services to store the updated shape in XDE
+    TNaming_Builder NB(theItemLabel);
+    NB.Generated(theUpdatedShape);
+  }
+
+  if (isModified)
+    theUpdated.Add(theItemLabel);
+
+  return isModified;
 }
 
 //-----------------------------------------------------------------------------

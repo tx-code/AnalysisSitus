@@ -816,8 +816,14 @@ public:
   //! The `asiAsm_XdeDoc` is responsible for calling this method internally in its
   //! API functions. Be careful not to forget calling it if you prefer modifying the parts
   //! outside this our API. Else, forget about it.
+  //!
+  //! \param[in] force the Boolean flag indicating whether to forcibly update compounds
+  //!                  regradless of whether any shape or location really changes. In the
+  //!                  default mode, it's a lazy update that will not do anything for
+  //!                  unchanged data. Make sure to pass `true` is you change locations
+  //!                  without changing geometries.
   asiAsm_EXPORT void
-    UpdateAssemblies();
+    UpdateAssemblies(const bool force = false);
 
   //! Turns the passed part into a subassembly in the case if this part contains
   //! TopoDS_Compound as its boundary representation.
@@ -872,6 +878,17 @@ public:
   //! Removes all empty assemblies and their components.
   asiAsm_EXPORT void
     RemoveAllEmptyAssemblies();
+
+  //! Applies tranformation to the given assembly item.
+  asiAsm_EXPORT void
+    TransformItem(const AssemblyItemId& item,
+                  const double          tx,
+                  const double          ty,
+                  const double          tz,
+                  const double          rx,
+                  const double          ry,
+                  const double          rz,
+                  const bool            doUpdateAssemblies = true);
 
 public:
 
@@ -1063,6 +1080,18 @@ protected:
   //! \param[in] assembly the target assembly label.
   asiAsm_EXPORT void
     removeEmptySubAssemblies(const TDF_Label& assembly);
+
+  //! Checks recursively if the given assembly item is modified. If so, its
+  //! associated compound is updated. Returns true if the assembly item is
+  //! modified, false -- otherwise.
+  //!
+  //! In the forced mode (`force` flag is on), no modification checks are
+  //! done and the component's compound is simply reconstructed.
+  asiAsm_EXPORT bool
+    updateComponent(const TDF_Label& itemLabel,
+                    const bool       force,
+                    TopoDS_Shape&    updatedShape,
+                    TDF_LabelMap&    updated) const;
 
 private:
 

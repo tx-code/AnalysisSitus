@@ -1489,6 +1489,74 @@ int ASMXDE_RemoveParts(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_Transform(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Get the item in question.
+  std::string itemIdStr;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "item", itemIdStr) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Assembly item is not defined.");
+    return TCL_ERROR;
+  }
+  //
+  AssemblyItemId aiid( itemIdStr.c_str() );
+
+  // Get transformation coefficients.
+  std::vector<double> coeffs;
+  int tIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "t", tIdx) )
+  {
+    for ( int ii = tIdx + 1; ii < argc; ++ii )
+    {
+      if ( interp->IsKeyword(argv[ii]) )
+        break;
+
+      coeffs.push_back( Atof(argv[ii]) );
+    }
+  }
+  //
+  if ( coeffs.size() != 6 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "You are supposed to pass 6 values for transformation: "
+                                                        << "<x> <y> <z> <a> <b> <c>. Check help for details.");
+    return TCL_ERROR;
+  }
+
+  // Apply transformation and update compounds (hell, yes, compounds).
+  xdeDoc->TransformItem(aiid,
+                        coeffs[0], coeffs[1], coeffs[2],
+                        coeffs[3], coeffs[4], coeffs[5],
+                        true);
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -1686,4 +1754,13 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t while all other parts will be removed instead.",
     //
     __FILE__, group, ASMXDE_RemoveParts);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-transform",
+    //
+    "asm-xde-transform -model <M> -item <id> [-t <x> <y> <z> <a> <b> <c>]\n"
+    "\t Applies transformation to the given assembly item. The angles <a>, <b> and <c>\n"
+    "\t are specified in degrees.",
+    //
+    __FILE__, group, ASMXDE_Transform);
 }
