@@ -74,6 +74,7 @@
 #include <DFBrowser.hxx>
 
 // OpenCascade includes
+#include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 #include <UnitsMethods.hxx>
@@ -752,12 +753,25 @@ int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 2 )
+  if ( argc < 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
+  const bool isAdd = interp->HasKeyword(argc, argv, "add");
+
   TCollection_AsciiString filename(argv[1]);
+
+  // Get Part Node and its AAG.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape partShape = partNode->GetShape();
 
   // Read BREP
   TopoDS_Shape shape;
@@ -767,7 +781,28 @@ int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  onModelLoaded(shape);
+  if ( partShape.IsNull() )
+  {
+    partShape = shape;
+  }
+  else
+  {
+    if ( partShape.ShapeType() == TopAbs_COMPOUND )
+    {
+      BRep_Builder().Add(partShape, shape);
+    }
+    else
+    {
+      TopoDS_Compound comp;
+      BRep_Builder().MakeCompound(comp);
+      BRep_Builder().Add(comp, partShape);
+      BRep_Builder().Add(comp, shape);
+      //
+      partShape = comp;
+    }
+  }
+
+  onModelLoaded(partShape);
 
   return TCL_OK;
 }
@@ -813,6 +848,7 @@ int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
 
   asiAlgo_FileFormat
     format = asiAlgo_FileFormatTool::FormatFromFileContent(filename);
+  //
   if ( format == FileFormat_Unknown )
   {
     // Recognize file format from file extension.
@@ -1276,8 +1312,9 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-brep",
     //
-    "load-brep <filename>\n"
-    "\t Loads BREP file to the active part.",
+    "load-brep <filename> [-add]\n"
+    "\t Loads BREP file to the active part. If the '-add' flag is passed,\n"
+    "\t the loaded geometry is appended to the active part.",
     //
     __FILE__, group, ENGINE_LoadBRep);
 
