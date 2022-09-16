@@ -53,7 +53,7 @@ asiUI_DialogDump::asiUI_DialogDump(const QString& title,
   m_pMainLayout = new QVBoxLayout();
 
   // Search control.
-  m_widgets.pSearchLine = new asiUI_SearchLine();
+  m_widgets.pSearchLine = new asiUI_SearchLine("Search");
 
   // Editors.
   m_widgets.pEditor = new asiUI_JsonEditor(this);

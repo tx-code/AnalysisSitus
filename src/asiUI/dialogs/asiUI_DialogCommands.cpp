@@ -210,7 +210,7 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   m_widgets.pClose->setMinimumWidth(BTN_MIN_WIDTH);
 
   // Set search control
-  m_widgets.pSearchLine = new asiUI_SearchLine();
+  m_widgets.pSearchLine = new asiUI_SearchLine("Type command");
   connect(m_widgets.pSearchLine, SIGNAL (returnPressed()),     this, SLOT(searchEntered()));
   connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), this, SLOT(searchDeactivated()));
   connect(m_widgets.pSearchLine, SIGNAL (searchChanged(const QString&)),

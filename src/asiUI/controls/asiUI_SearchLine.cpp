@@ -40,8 +40,10 @@
 
 //-----------------------------------------------------------------------------
 
-asiUI_SearchLine::asiUI_SearchLine(QWidget* parent)
-: QLineEdit(parent)
+asiUI_SearchLine::asiUI_SearchLine(const QString& placeHolderText,
+                                   QWidget*       parent)
+: QLineEdit(parent),
+  m_placeHolderText(placeHolderText)
 {
   connect (this, SIGNAL(returnPressed()),             this, SIGNAL(searchEntered()));
   connect (this, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
@@ -58,7 +60,7 @@ asiUI_SearchLine::~asiUI_SearchLine()
 void asiUI_SearchLine::reset()
 {
   setText(QString());
-  setPlaceholderText("Type command");
+  setPlaceholderText(m_placeHolderText);
 }
 
 //-----------------------------------------------------------------------------

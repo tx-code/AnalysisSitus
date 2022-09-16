@@ -55,8 +55,9 @@ class asiUI_EXPORT asiUI_SearchLine : public QLineEdit
 public:
 
   //! Creates a new instance of Json view.
-  //! \param[in] parent parent widget (if any).
-  asiUI_SearchLine(QWidget* parent = nullptr);
+  //! \param[in] placeHolderText invitation that is shown when the line is empty
+  //! \param[in] parent          parent widget (if any).
+  asiUI_SearchLine(const QString& placeHolerText, QWidget* parent = nullptr);
 
   //! Destructor.
   virtual ~asiUI_SearchLine();
@@ -87,6 +88,8 @@ protected slots:
   //! \param [in] current text
   void onTextChanged(const QString& text);
 
+private:
+  QString m_placeHolderText; //!< text for place holder
 };
 
 #pragma warning(default : 4251)
