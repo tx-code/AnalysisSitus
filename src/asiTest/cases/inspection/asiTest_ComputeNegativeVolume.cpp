@@ -269,3 +269,83 @@ outcome asiTest_ComputeNegativeVolume::test_negative_volume_22(const int funcID)
 {
   return runTestScript(funcID, "inspection/negative-volume/negative_volume_22.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 23.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_23(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_23.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 24.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_24(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_24.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 25.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_25(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_25.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 26.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_26(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_26.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 27.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_27(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_27.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 28.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_28(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_28.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 29.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_29(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_29.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 30.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ComputeNegativeVolume::test_negative_volume_30(const int funcID)
+{
+  return runTestScript(funcID, "inspection/negative-volume/negative_volume_30.tcl");
+}

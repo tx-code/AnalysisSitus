@@ -40,13 +40,16 @@ namespace {
 // function: MakeSolid
 // purpose: Make solid.
 //=======================================================================
-bool MakeSolid(const TopTools_ListOfShape& listOfShape,
-               TopoDS_Shape&               result)
+bool MakeSolid(const TopTools_ListOfShape&          listOfShape,
+               TopoDS_Shape&                        result,
+               TopTools_IndexedDataMapOfShapeShape& modifiedShapesInv)
 {
+  modifiedShapesInv.Clear();
   TopoDS_Shape negativeVolumeShape;
-  TopoDS_Shell shell;
+  std::vector<TopoDS_Shell> shells;
   try
   {
+    TopoDS_Shell shell;
     BRep_Builder bb;
     bb.MakeShell(shell);
 
@@ -62,17 +65,47 @@ bool MakeSolid(const TopTools_ListOfShape& listOfShape,
     }
 
     BRepBuilderAPI_Sewing tool;
-    tool.Init(Precision::Confusion());
+    tool.Init(1.0e-4, true, true, true, true);
     tool.Add(shell);
     tool.Perform();
-    if (tool.SewedShape().IsNull())
+    TopoDS_Shape sewedShape = tool.SewedShape();
+    if (sewedShape.IsNull())
     {
       return false;
     }
 
-    shell = TopoDS::Shell(tool.SewedShape());
+    itFaces.Initialize(listOfShape);
+    for (; itFaces.More(); itFaces.Next())
+    {
+      if (tool.IsModified(itFaces.Value()))
+      {
+        modifiedShapesInv.Add(tool.Modified(itFaces.Value()), itFaces.Value());
+      }
+      else if (tool.IsModifiedSubShape(itFaces.Value()))
+      {
+        modifiedShapesInv.Add(tool.ModifiedSubShape(itFaces.Value()), itFaces.Value());
+      }
+      else
+      {
+        modifiedShapesInv.Add(itFaces.Value(), itFaces.Value());
+      }
+    }
 
-    negativeVolumeShape = shell;
+    TopExp_Explorer exp(sewedShape, TopAbs_SHELL);
+    for (; exp.More(); exp.Next())
+    {
+      if (!exp.Value().IsNull())
+      {
+        shells.push_back(TopoDS::Shell(exp.Value()));
+      }
+    }
+
+    if (shells.empty())
+    {
+      return false;
+    }
+
+    negativeVolumeShape = sewedShape;
   }
   catch (...)
   {
@@ -81,8 +114,16 @@ bool MakeSolid(const TopTools_ListOfShape& listOfShape,
 
   try
   {
-    negativeVolumeShape = BRepBuilderAPI_MakeSolid(shell);
+    TopoDS_Solid solid;
+    BRep_Builder solidBuilder;
+    solidBuilder.MakeSolid(solid);
+    std::vector<TopoDS_Shell>::const_iterator itShells = shells.cbegin();
+    for (; itShells != shells.cend(); ++itShells)
+    {
+      solidBuilder.Add(solid, *itShells);
+    }
 
+    negativeVolumeShape = solid;
     if (negativeVolumeShape.IsNull())
     {
       return false;
@@ -511,112 +552,184 @@ private: //! @name Private methods performing the operation
       TrimFace(aFExt, aFOriginal, aFeatureEdgesMap, anEFExtMap, aGFInter, notDefinedFacesMap);
     }
 
-    TopoDS_Shape negativeVolumeShape;
-    if (notDefinedFacesMap.Extent())
+    int nbNotDefinedFaces = 0;
     {
-      TopTools_ListOfShape listOfShape;
-      TopTools_ListOfShape::Iterator itFaces(myUniqueFaces);
-      for (; itFaces.More(); itFaces.Next())
+      TopTools_IndexedDataMapOfShapeListOfShape::Iterator itNDFM(notDefinedFacesMap);
+      for (; itNDFM.More(); itNDFM.Next())
       {
-        listOfShape.Append(itFaces.Value());
-      }
-
-      asiAlgo_Feature::Iterator itFFIds(myFaceIDs);
-      for (; itFFIds.More(); itFFIds.Next())
-      {
-        listOfShape.Append(myAAG->GetFace(itFFIds.Key()).Reversed());
-      }
-
-      if (!MakeSolid(listOfShape, negativeVolumeShape))
-      {
-        return;
+        TopTools_ListOfShape notDefinedFaces = itNDFM.Value();
+        nbNotDefinedFaces += notDefinedFaces.Size();
       }
     }
 
-    // Considering that the final result includes faces for which the
-    // validity/non-validity status has not been determined, it is
-    // necessary to check such faces.
-    TopTools_IndexedDataMapOfShapeListOfShape::Iterator itNDFM(notDefinedFacesMap);
-    for ( ; itNDFM.More(); itNDFM.Next() )
+    int nbNotDefinedFacesLoc = 0;
+    int nbStep = 0;
+    int maxNbStep = 100;
+    while (nbNotDefinedFaces != nbNotDefinedFacesLoc && nbStep < maxNbStep)
     {
-      TopTools_ListOfShape notDefinedFaces = itNDFM.Value();
+      ++nbStep;
+      nbNotDefinedFaces = nbNotDefinedFacesLoc;
+      nbNotDefinedFacesLoc = 0;
 
-      TopTools_ListOfShape::Iterator itNDF(notDefinedFaces);
-      for (; itNDF.More(); itNDF.Next())
+      TopoDS_Shape negativeVolumeShape;
+      TopTools_IndexedDataMapOfShapeShape modifiedShapesInv;
+      if (notDefinedFacesMap.Extent())
       {
-        gp_Pnt checkedPnt;
-        gp_Vec D1U, D1V;
-        bool isFound = false;
-        BRepAdaptor_Surface   checkedfaceAdapt(TopoDS::Face(itNDF.Value()));
-        math_BullardGenerator RNG;
-        int numSamples = 10;
-        for (int i = 0; i < numSamples; ++i)
+        TopTools_ListOfShape listOfShape;
+        TopTools_ListOfShape::Iterator itFaces(myUniqueFaces);
+        for (; itFaces.More(); itFaces.Next())
         {
-          // Get a random sample point.
-          gp_Pnt2d uv;
-          if (!asiAlgo_Utils::GetRandomPoint(checkedfaceAdapt.Face(), RNG, uv))
+          listOfShape.Append(itFaces.Value());
+        }
+
+        asiAlgo_Feature::Iterator itFFIds(myFaceIDs);
+        for (; itFFIds.More(); itFFIds.Next())
+        {
+          listOfShape.Append(myAAG->GetFace(itFFIds.Key()).Reversed());
+        }
+
+        if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv))
+        {
+          return;
+        }
+      }
+
+      int nbTopoRemove = 0;
+      int nbTopoStep = 0;
+      do
+      {
+        ++nbTopoStep;
+        nbTopoRemove = 0;
+        TopTools_IndexedDataMapOfShapeListOfShape edgesFacesMap;
+        TopExp::MapShapesAndAncestors(negativeVolumeShape, TopAbs_EDGE, TopAbs_FACE, edgesFacesMap);
+        for (int index = 1; index <= edgesFacesMap.Extent(); ++index)
+        {
+          const TopTools_ListOfShape& faces = edgesFacesMap(index);
+          if (faces.Extent() == 1 && modifiedShapesInv.Contains(faces.First()))
           {
+            const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(faces.First());
+
+            myUniqueFaces.Remove(faceToRemove);
+            //BRep_Builder().Remove(negativeVolumeShape, faces.First());
+            ++nbTopoRemove;
+
+            TopTools_ListOfShape listOfRemovedfaces;
+            listOfRemovedfaces.Append(faceToRemove);
+            BRepTools_History history;
+            MakeRemoved(listOfRemovedfaces, history, TopTools_IndexedMapOfShape());
+            myHistory->Merge(history);
+
+            //modifiedShapesInv.RemoveKey(faces.First());
+          }
+        }
+
+        {
+          TopTools_ListOfShape listOfShape;
+          TopTools_ListOfShape::Iterator itFaces(myUniqueFaces);
+          for (; itFaces.More(); itFaces.Next())
+          {
+            listOfShape.Append(itFaces.Value());
+          }
+
+          asiAlgo_Feature::Iterator itFFIds(myFaceIDs);
+          for (; itFFIds.More(); itFFIds.Next())
+          {
+            listOfShape.Append(myAAG->GetFace(itFFIds.Key()).Reversed());
+          }
+          modifiedShapesInv.Clear();
+          if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv))
+          {
+            return;
+          }
+        }
+      } while (nbTopoRemove != 0 && myUniqueFaces.Extent() && nbTopoStep < maxNbStep);
+
+      // Considering that the final result includes faces for which the
+      // validity/non-validity status has not been determined, it is
+      // necessary to check such faces.
+      TopTools_IndexedDataMapOfShapeListOfShape::Iterator itNDFM(notDefinedFacesMap);
+      for (; itNDFM.More(); itNDFM.Next())
+      {
+        TopTools_ListOfShape notDefinedFaces = itNDFM.Value();
+
+        TopTools_ListOfShape::Iterator itNDF(notDefinedFaces);
+        for (; itNDF.More(); itNDF.Next())
+        {
+          gp_Pnt checkedPnt;
+          gp_Vec D1U, D1V;
+          bool isFound = false;
+          BRepAdaptor_Surface   checkedfaceAdapt(TopoDS::Face(itNDF.Value()));
+          math_BullardGenerator RNG;
+          int numSamples = 10;
+          for (int i = 0; i < numSamples; ++i)
+          {
+            // Get a random sample point.
+            gp_Pnt2d uv;
+            if (!asiAlgo_Utils::GetRandomPoint(checkedfaceAdapt.Face(), RNG, uv))
+            {
+              continue;
+            }
+
+            checkedfaceAdapt.D1(uv.X(), uv.Y(), checkedPnt, D1U, D1V);
+            isFound = true;
+            break;
+          }
+
+          if (!isFound)
+          {
+            TopTools_ListOfShape* pShapes = myFaces.ChangeSeek(itNDFM.Key());
+            if (pShapes)
+            {
+              pShapes->Remove(itNDF.Value());
+            }
+            myUniqueFaces.Remove(itNDF.Value());
+
+            TopTools_ListOfShape listOfRemovedfaces;
+            listOfRemovedfaces.Append(itNDF.Value());
+            BRepTools_History history;
+            MakeRemoved(listOfRemovedfaces, history, TopTools_IndexedMapOfShape());
+            myHistory->Merge(history);
+
             continue;
           }
 
-          checkedfaceAdapt.D1(uv.X(), uv.Y(), checkedPnt, D1U, D1V);
-          isFound = true;
-          break;
-        }
+          gp_Vec normal = (D1U ^ D1V).Normalized();
+          //
+          if (TopoDS::Face(itNDF.Value()).Orientation() == TopAbs_REVERSED)
+            normal *= -1.0;
 
-        if (!isFound)
-        {
-          TopTools_ListOfShape* pShapes = myFaces.ChangeSeek(itNDFM.Key());
-          if (pShapes)
+          checkedPnt = checkedPnt.XYZ() + 2.0 * normal.XYZ();
+
+          gp_Lin sampleRay(checkedPnt, -normal);
+
+          IntCurvesFace_ShapeIntersector intersector;
+          intersector.Load(negativeVolumeShape, 1.0e-4);
+          intersector.Perform(sampleRay, 0.0, 1e100);
+
+          if (!intersector.IsDone() || intersector.NbPnt() % 2 == 1 || intersector.NbPnt() == 0)
           {
-            pShapes->Remove(itNDF.Value());
+            TopTools_ListOfShape* pShapes = myFaces.ChangeSeek(itNDFM.Key());
+            if (pShapes)
+            {
+              pShapes->Remove(itNDF.Value());
+            }
+            myUniqueFaces.Remove(itNDF.Value());
+
+            TopTools_ListOfShape listOfRemovedfaces;
+            listOfRemovedfaces.Append(itNDF.Value());
+            BRepTools_History history;
+            MakeRemoved(listOfRemovedfaces, history, TopTools_IndexedMapOfShape());
+            myHistory->Merge(history);
+
+            continue;
           }
 
-          myUniqueFaces.Remove(itNDF.Value());
-
-          TopTools_ListOfShape listOfRemovedfaces;
-          listOfRemovedfaces.Append(itNDF.Value());
-          BRepTools_History history;
-          MakeRemoved(listOfRemovedfaces, history, TopTools_IndexedMapOfShape());
-          myHistory->Merge(history);
-
-          continue;
-        }
-
-        gp_Vec normal = (D1U ^ D1V).Normalized();
-        //
-        if (TopoDS::Face(itNDF.Value()).Orientation() == TopAbs_REVERSED)
-          normal *= -1.0;
-
-        checkedPnt = checkedPnt.XYZ() + 2.0 * normal.XYZ();
-
-        gp_Lin sampleRay(checkedPnt, -normal);
-
-        IntCurvesFace_ShapeIntersector intersector;
-        intersector.Load(negativeVolumeShape, 1.0e-4);
-        intersector.Perform(sampleRay, 0.0, 1e100);
-
-        if (!intersector.IsDone() || intersector.NbPnt() % 2 == 1)
-        {
-          TopTools_ListOfShape* pShapes = myFaces.ChangeSeek(itNDFM.Key());
-          if (pShapes)
-          {
-            pShapes->Remove(itNDF.Value());
-          }
-
-          myUniqueFaces.Remove(itNDF.Value());
-
-          TopTools_ListOfShape listOfRemovedfaces;
-          listOfRemovedfaces.Append(itNDF.Value());
-          BRepTools_History history;
-          MakeRemoved(listOfRemovedfaces, history, TopTools_IndexedMapOfShape());
-          myHistory->Merge(history);
-
-          continue;
+          ++nbNotDefinedFacesLoc;
         }
       }
 
-    }
+    } // while
+
   }
 
   //! Trim the extended faces by the bounds of the original face,
@@ -1071,8 +1184,26 @@ bool ComputeNegativeVolumeAlgo::perform()
       listOfShape.Append(m_aag->GetFace(itFFIds.Key()).Reversed());
     }
 
+    TopTools_IndexedDataMapOfShapeShape modifiedShapesInv;
     TopoDS_Shape negativeVolumeShape;
-    if (!MakeSolid(listOfShape, negativeVolumeShape))
+    if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv))
+    {
+      continue;
+    }
+
+    TopTools_IndexedDataMapOfShapeListOfShape edgesFacesMap;
+    TopExp::MapShapesAndAncestors(negativeVolumeShape, TopAbs_EDGE, TopAbs_FACE, edgesFacesMap);
+    bool isNotValid = false;
+    for ( int index = 1; index <= edgesFacesMap.Extent(); ++index )
+    {
+      const TopTools_ListOfShape& faces = edgesFacesMap(index);
+      if ( faces.Extent() != 2 )
+      {
+        isNotValid = true;
+        break;
+      }
+    }
+    if (isNotValid)
     {
       continue;
     }

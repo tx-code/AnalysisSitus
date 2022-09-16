@@ -87,6 +87,14 @@ public:
               << &test_negative_volume_20
               << &test_negative_volume_21
               << &test_negative_volume_22
+              << &test_negative_volume_23
+              << &test_negative_volume_24
+              << &test_negative_volume_25
+              << &test_negative_volume_26
+              << &test_negative_volume_27
+              << &test_negative_volume_28
+              << &test_negative_volume_29
+              << &test_negative_volume_30
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -117,6 +125,14 @@ private:
   static outcome test_negative_volume_20(const int funcID);
   static outcome test_negative_volume_21(const int funcID);
   static outcome test_negative_volume_22(const int funcID);
+  static outcome test_negative_volume_23(const int funcID);
+  static outcome test_negative_volume_24(const int funcID);
+  static outcome test_negative_volume_25(const int funcID);
+  static outcome test_negative_volume_26(const int funcID);
+  static outcome test_negative_volume_27(const int funcID);
+  static outcome test_negative_volume_28(const int funcID);
+  static outcome test_negative_volume_29(const int funcID);
+  static outcome test_negative_volume_30(const int funcID);
 
 };
 
