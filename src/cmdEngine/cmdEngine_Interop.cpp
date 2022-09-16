@@ -781,24 +781,31 @@ int ENGINE_LoadBRep(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  if ( partShape.IsNull() )
+  if ( !isAdd )
   {
     partShape = shape;
   }
   else
   {
-    if ( partShape.ShapeType() == TopAbs_COMPOUND )
+    if ( partShape.IsNull() )
     {
-      BRep_Builder().Add(partShape, shape);
+      partShape = shape;
     }
     else
     {
-      TopoDS_Compound comp;
-      BRep_Builder().MakeCompound(comp);
-      BRep_Builder().Add(comp, partShape);
-      BRep_Builder().Add(comp, shape);
-      //
-      partShape = comp;
+      if ( partShape.ShapeType() == TopAbs_COMPOUND )
+      {
+        BRep_Builder().Add(partShape, shape);
+      }
+      else
+      {
+        TopoDS_Compound comp;
+        BRep_Builder().MakeCompound(comp);
+        BRep_Builder().Add(comp, partShape);
+        BRep_Builder().Add(comp, shape);
+        //
+        partShape = comp;
+      }
     }
   }
 
