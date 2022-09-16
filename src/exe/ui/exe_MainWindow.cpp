@@ -90,18 +90,7 @@ exe_MainWindow::exe_MainWindow(const bool offscreen)
   //---------------------------------------------------------------------------
   // Apply fantastic dark theme
   //---------------------------------------------------------------------------
-
-  QFile f(":qdarkstyle/style.qss");
-  if ( !f.exists() )
-  {
-    printf("Unable to set stylesheet, file not found\n");
-  }
-  else
-  {
-    f.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ts(&f);
-    qApp->setStyleSheet( ts.readAll() );
-  }
+  setApplicationStyle(":qdarkstyle/style.qss");
 
   // Set this main window to common facilities.
   Handle(exe_CommonFacilities) cf = exe_CommonFacilities::Instance();
@@ -114,6 +103,23 @@ exe_MainWindow::exe_MainWindow(const bool offscreen)
 //! Destructor.
 exe_MainWindow::~exe_MainWindow()
 {}
+
+//-----------------------------------------------------------------------------
+
+void exe_MainWindow::setApplicationStyle(const QString& stylePath)
+{
+  QFile f(stylePath);
+  if ( !f.exists() )
+  {
+    printf("Unable to set stylesheet, file not found\n");
+  }
+  else
+  {
+    f.open(QFile::ReadOnly | QFile::Text);
+    QTextStream ts(&f);
+    qApp->setStyleSheet( ts.readAll() );
+  }
+}
 
 //-----------------------------------------------------------------------------
 

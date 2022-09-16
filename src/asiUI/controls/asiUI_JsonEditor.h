@@ -34,17 +34,17 @@
 // asiUI includes
 #include <asiUI_CommonFacilities.h>
 #include <asiUI_JsonBlock.h>
+#include <asiUI_JsonHighlighter.h>
 
 // Qt includes
 #pragma warning(push, 0)
 #include <QPlainTextEdit>
 #pragma warning(pop)
 
-#include <set>
-
 class asiUI_JsonLineNumberArea;
 class asiUI_JsonLineMarkerArea;
 class asiUI_JsonHighlighter;
+class asiUI_JsonSearchThread;
 
 class QKeyEvent;
 class QPaintEvent;
@@ -78,6 +78,15 @@ public:
   //! Underlines the text with red waved line if not valid.
   void updateValidity();
 
+  //! Do expand for all collapsed blocks of text.
+  void expandAllBlocks();
+
+  //! Adjust scroll bar range.
+  void emulateAdjustScrollbars();
+
+  //! Returns text that block is collapsed
+  static QString collapseText();
+
 protected:
   //! Changes flag about blocking changes processing.
   //! \param[in] value check validity state.
@@ -93,25 +102,24 @@ protected:
   //! Returns width for the marker area column.
   int lineMarkerAreaWidth();
 
-  //! Underlines the text with red waved line if not valid.
-  void updateJsonUnderline();
-
   //! Fills containers of values by the current document.
-  //! \param[in]  collapsedBlocks container of collapsed block numbers
+  //! \param[in]  collapsedBlocks container of collapsed blocks
   //! \param[out] markers         container of collapsable blocks
   //! \param[out] blockParents    container of block hierarchy
   //! \param[out] blockPositions  container of each block position
-  void calculateMarkers(const std::set<int>&   collapsedBlocks,
-                        asiUI_JsonBlocks&      markers,
-                        asiUI_ListOfListOfInt& blockParents,
-                        asiUI_MapIntToInt&     blockPositions) const;
+  void calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
+                        asiUI_JsonBlocks&       markers,
+                        asiUI_ListOfListOfInt&  blockParents,
+                        asiUI_MapIntToInt&      blockPositions) const;
 
   //! Changes the editor text to move text block into collapsed or expanded state.
   //! Appends ' ...' if collapsed, remove it if it's expanded.
   //! \param[in] textBlock  block to process
+  //! \param[in] block      json block structure to obtain open and close positions
   //! \param[in] toCollapse state whether the block becomes collapsed or expanded
-  void changeTextToCollapse(const QTextBlock& textBlock,
-                            const bool        toCollapse);
+  static void changeTextToCollapse(const QTextBlock&      textBlock,
+                                   const asiUI_JsonBlock& block,
+                                   const bool             toCollapse);
 
   //! Paints line numbers depending on the event rect.
   //! \param[in] event paint event
@@ -138,6 +146,17 @@ protected:
   //! \param[in] event wheel info
   void wheelEvent(QWheelEvent *event) override;
 
+public slots:
+  //! Reaction on enter clicked on search. It performs the search.
+  void searchEntered();
+
+  //! Reaction on enter clicked on search. It performs the search.
+  //! \param[in] value search value
+  void searchChanged(const QString& value);
+
+  //! Reaction on escape clicked on search or nullify text. It hides results of the search.
+  void searchDeactivated();
+
 private slots:
   //! Updates viewport margins by line number and marker areas width.
   void updateLineNumberAreaWidth();
@@ -156,18 +175,36 @@ private slots:
                               int charsRemoved,
                               int charsAdded);
 
+  //! Update highlighter by search performed.
+  void searchFinished();
+
+private:
   //! Zoom text font in editor.
   //! \param[in] positive flag whether to increase text.
   void zoomText(bool positive);
 
-private:
-  asiUI_JsonHighlighter* m_highlighter;       //!< class to highlight Json forfmat
-  QWidget*               m_lineNumberArea;    //!< control to paint line numbers
-  QWidget*               m_lineMarkerArea;    //!< control to paint collapse/expand markers
+  //! Starts the search
+  void startSearch();
 
-  bool                   m_documentValid;     //!< flag whether the text is valid as a Json document
-  bool                   m_immediateValidate; //!< flag whether the validation is performed by text edit
-  bool                   m_editBlocked;       //!< flag whether editing is processed
+  //! Stops the search.
+  void stopSearch();
+
+  //! Selects next found search value.
+  void selectNextFound();
+
+  //! Returns control.
+  asiUI_JsonLineMarkerArea* lineMarkerArea() const;
+
+private:
+  asiUI_JsonHighlighter*  m_highlighter;       //!< class to highlight Json forfmat
+  asiUI_JsonSearchThread* m_searchThread;      //!< search thread
+  bool                    m_searchStarted;     //!< state is search is started
+  QString                 m_searchValue;       //!< value to search
+  QWidget*                m_lineNumberArea;    //!< control to paint line numbers
+  QWidget*                m_lineMarkerArea;    //!< control to paint collapse/expand markers
+
+  bool                    m_immediateValidate; //!< flag whether the validation is performed by text edit
+  bool                    m_editBlocked;       //!< flag whether editing is processed
 
   friend asiUI_JsonLineNumberArea;
   friend asiUI_JsonLineMarkerArea;

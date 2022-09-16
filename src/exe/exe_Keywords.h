@@ -33,9 +33,10 @@
 
 //-----------------------------------------------------------------------------
 
-#define ASITUS_KW_runscript  "runscript"
-#define ASITUS_KW_runcommand "runcommand"
-#define ASITUS_KW_gendoc     "gendoc"
+#define ASITUS_KW_runscript   "runscript"
+#define ASITUS_KW_runcommand  "runcommand"
+#define ASITUS_KW_runjsonview "runjsonview"
+#define ASITUS_KW_gendoc      "gendoc"
 
 //-----------------------------------------------------------------------------
 

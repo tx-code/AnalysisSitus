@@ -33,9 +33,7 @@
 
 // asiUI includes
 #include <asiUI_StyledTextEdit.h>
-
-// Active Data includes
-#include <ActAPI_IProgressNotifier.h>
+#include <asiUI_SearchLine.h>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -54,13 +52,11 @@ class asiUI_DialogDump : public QDialog
 public:
 
   //! Ctor.
-  //! \param[in] title    the dialog title to set.
-  //! \param[in] progress the progress notifier.
-  //! \param[in] parent   the optional parent widget.
+  //! \param[in] title  the dialog title to set.
+  //! \param[in] parent the optional parent widget.
   asiUI_EXPORT
-    asiUI_DialogDump(const QString&       title,
-                     ActAPI_ProgressEntry progress,
-                     QWidget*             parent = nullptr);
+    asiUI_DialogDump(const QString& title,
+                     QWidget*       parent = nullptr);
 
   //! Dtor.
   asiUI_EXPORT virtual
@@ -85,25 +81,24 @@ protected:
   //! Widgets.
   struct t_base_widgets
   {
-    asiUI_JsonEditor* pEditor; //!< Text editor.
-    QPushButton*      pClose;  //!< Close button.
+    asiUI_SearchLine* pSearchLine; //!< search control.
+    asiUI_JsonEditor* pEditor;     //!< Text editor.
+    QPushButton*      pClose;      //!< Close button.
 
-    t_base_widgets() : pEditor (nullptr),
+    t_base_widgets() : pSearchLine(nullptr),
+                       pEditor (nullptr),
                        pClose  (nullptr)
     {}
 
     void Release()
     {
       pEditor = nullptr;
-      delete pClose;  pClose = nullptr;
+      delete pSearchLine; pSearchLine = nullptr;
+      delete pClose;      pClose = nullptr;
     }
   };
 
   t_base_widgets m_widgets; //!< Involved widgets.
-
-protected:
-
-  ActAPI_ProgressEntry m_notifier; //!< Progress Notifier.
 
 };
 

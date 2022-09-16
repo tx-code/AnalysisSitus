@@ -78,9 +78,9 @@ protected:
 
 protected slots:
 
-  void enterProcessing();
+  void searchEntered();
 
-  void searchChanged();
+  void searchChanged(const QString& text);
 
   void searchDeactivated();
 

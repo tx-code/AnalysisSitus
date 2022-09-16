@@ -1046,7 +1046,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     std::string buff;
     if ( asiAlgo_ShapeSerializer::Serialize(shape2Serialize, buff) )
     {
-      asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump("Shape BLOB (base64-encoded)", m_progress);
+      asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump("Shape BLOB (base64-encoded)");
       pDumpDlg->Populate(buff);
       pDumpDlg->show();
     }

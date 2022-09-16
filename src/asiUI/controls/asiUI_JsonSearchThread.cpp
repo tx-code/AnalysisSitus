@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------------
-// Created on: 06 June 2022
+// Created on: 11 September 2022
 //-----------------------------------------------------------------------------
 // Copyright (c) 2022-present, Natalia Ermolaeva
 // All rights reserved.
@@ -29,88 +29,37 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include <asiUI_SearchLine.h>
+#include <asiUI_JsonSearchThread.h>
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QKeyEvent>
-#include <QPaintEvent>
-#include <QPainter>
+#include <QRegularExpression>
+#include <QTextDocument>
 #pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 
-asiUI_SearchLine::asiUI_SearchLine(QWidget* parent)
-: QLineEdit(parent)
+void asiUI_JsonSearchThread::run()
 {
-  connect (this, SIGNAL(returnPressed()),             this, SIGNAL(searchEntered()));
-  connect (this, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
-
-  reset();
-}
-
-//-----------------------------------------------------------------------------
-
-asiUI_SearchLine::~asiUI_SearchLine()
-{}
-
-//-----------------------------------------------------------------------------
-void asiUI_SearchLine::reset()
-{
-  setText(QString());
-  setPlaceholderText("Type command");
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_SearchLine::paintEvent(QPaintEvent* event)
-{
-  QLineEdit::paintEvent(event);
-
-  QPainter p(this);
-
-  QStyleOptionFrame option;
-  initStyleOption(&option);
-  QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &option, this);
-
-  int height = r.height();
-  int marginOfLine = 5; /*defined in style.qss*/
-  int iconSize = 20; /*size of the icon*/
-
-  int centerOfLine = 0.5 * (height + 2 * marginOfLine);
-  int centerOfIcon = 0.5 * iconSize;
-
-  int margin = (centerOfLine - centerOfIcon) - marginOfLine;
-
-  QImage img(":icons/asitus/search.svg");
-  if (!img.isNull())
-  {
-    img = img.scaled(iconSize, iconSize);
-    QPoint pos(r.right() - iconSize - margin, r.top() + margin);
-    p.drawImage(pos, img);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_SearchLine::keyPressEvent(QKeyEvent *event)
-{
-  if (event->key() == Qt::Key_Escape)
-  {
-    reset();
-    emit searchDeactivated();
+  if (!m_document)
     return;
-  }
-  QLineEdit::keyPressEvent(event);
-}
 
-//-----------------------------------------------------------------------------
+  QMutexLocker aLocker(&m_mutex);
+  m_matchedIndices.clear();
 
-void asiUI_SearchLine::onTextChanged(const QString& text)
-{
-  emit searchChanged(text);
-  if (text.isEmpty())
+  QRegularExpression regExp(m_search);
+
+  QTextCursor currentCursor;
+  QTextCursor cursor;
+  int counter = 0; // bounding value to avoid cycling
+  while (counter < 10000)
   {
-    emit searchDeactivated();
+    cursor = m_document->find(regExp, currentCursor);
+    if (cursor.isNull())
+      break;
+
+    m_matchedIndices.push_back(cursor);
+    currentCursor = cursor;
+    counter++;
   }
 }

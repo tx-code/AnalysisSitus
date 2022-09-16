@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 06 June 2022
+// Created on: 11 September 2022
 //-----------------------------------------------------------------------------
 // Copyright (c) 2022-present, Natalia Ermolaeva
 // All rights reserved.
@@ -28,67 +28,48 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_SearchLine_h
-#define asiUI_SearchLine_h
-
-// asiUI includes
-#include <asiUI_CommonFacilities.h>
+#ifndef asiUI_JsonSearchThread_h
+#define asiUI_JsonSearchThread_h
 
 // Qt includes
 #pragma warning(push, 0)
-#include <QLineEdit>
+#include <QMutex>
+#include <QTextCursor>
+#include <QThread>
 #pragma warning(pop)
 
-class QKeyEvent;
-class QPaintEvent;
+class QTextDocument;
 
-#pragma warning(disable : 4251)
-
-//! Extending the line edit with the search button in the right part of the line.
-//! It emits signal about search change by text typing and about search deactivating by
-//! entering the empty text or pressing Escape button.
-
-class asiUI_EXPORT asiUI_SearchLine : public QLineEdit
+//! Prepares structure of found text key in json document.
+class asiUI_JsonSearchThread : public QThread
 {
   Q_OBJECT
 
 public:
+  asiUI_JsonSearchThread() : m_document(nullptr) {}
+  ~asiUI_JsonSearchThread() {}
 
-  //! Creates a new instance of Json view.
-  //! \param[in] parent parent widget (if any).
-  asiUI_SearchLine(QWidget* parent = nullptr);
+  //! Sets the value to search
+  //! \param[in] value the text key
+  void setSearchValue(const QString& value) { m_search = value; }
 
-  //! Destructor.
-  virtual ~asiUI_SearchLine();
+  //! Returns value of search
+  QString searchValue() const { return m_search; }
 
-  //! Sets the empty text and fill place holder.
-  void reset();
+  //! Sets the document for search
+  //! \param[in] doc the document
+  void setDocument(QTextDocument* doc) { m_document = doc; }
 
-  //! Paints the line edit an the button on the right.
-  //! \param[in] event painting event
-  void paintEvent(QPaintEvent* event) override;
+  //!< Returns found indices.
+  std::list<QTextCursor> matchedIndices() const { return m_matchedIndices; }
 
-  //! Processes the key event escape.
-  //! \param [in] event
-  void keyPressEvent(QKeyEvent *event) override;
+  virtual void run();
 
-signals:
-  //! Signal about activation the search.
-  void searchEntered();
-
-  //! Signal about activation the search.
-  void searchChanged(const QString& text);
-
-  //! Signal about deactivation the search.
-  void searchDeactivated();
-
-protected slots:
-  //! Processing text change.
-  //! \param [in] current text
-  void onTextChanged(const QString& text);
-
+private:
+  QTextDocument*         m_document;       //! document to search
+  QMutex                 m_mutex;          //! locking thread
+  QString                m_search;         //!< value to search
+  std::list<QTextCursor> m_matchedIndices; //!< found indices
 };
-
-#pragma warning(default : 4251)
 
 #endif

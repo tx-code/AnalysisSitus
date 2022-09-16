@@ -45,25 +45,23 @@
 
 //-----------------------------------------------------------------------------
 
-asiUI_DialogDump::asiUI_DialogDump(const QString&       title,
-                                   ActAPI_ProgressEntry progress,
-                                   QWidget*             parent)
-: QDialog    (parent),
-  m_notifier (progress)
+asiUI_DialogDump::asiUI_DialogDump(const QString& title,
+                                   QWidget*       parent)
+: QDialog (parent)
 {
   // Main layout.
   m_pMainLayout = new QVBoxLayout();
 
-  // Group box.
-  QGroupBox* pGroup = new QGroupBox("Text dump");
+  // Search control.
+  m_widgets.pSearchLine = new asiUI_SearchLine();
 
   // Editors.
   m_widgets.pEditor = new asiUI_JsonEditor(this);
   m_widgets.pEditor->setImmediateValidate(true);
-
-  //
-  QVBoxLayout* boxLayout = new QVBoxLayout(pGroup);
-  boxLayout->addWidget(m_widgets.pEditor);
+  connect(m_widgets.pSearchLine, SIGNAL (searchEntered()),     m_widgets.pEditor, SLOT(searchEntered()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), m_widgets.pEditor, SLOT(searchDeactivated()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchChanged(const QString&)),
+          m_widgets.pEditor,     SLOT   (searchChanged(const QString&)));
 
   // Button.
   m_widgets.pClose = new QPushButton("Close");
@@ -73,9 +71,11 @@ asiUI_DialogDump::asiUI_DialogDump(const QString&       title,
 
   // Reaction.
   connect( m_widgets.pClose, SIGNAL( clicked() ), this, SLOT( onClose() ) );
+  m_widgets.pClose->setAutoDefault(false);
 
   // Set up main layout.
-  m_pMainLayout->addWidget(pGroup);
+  m_pMainLayout->addWidget(m_widgets.pSearchLine);
+  m_pMainLayout->addWidget(m_widgets.pEditor);
   m_pMainLayout->addWidget(m_widgets.pClose);
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
@@ -86,6 +86,7 @@ asiUI_DialogDump::asiUI_DialogDump(const QString&       title,
 
   // Set good initial size
   this->resize( QSize(900, 600) );
+  m_widgets.pSearchLine->setFocus();
 }
 
 //-----------------------------------------------------------------------------

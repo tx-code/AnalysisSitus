@@ -31,9 +31,11 @@
 // Own include
 #include <asiUI_JsonEditor.h>
 #include <asiUI_JsonHighlighter.h>
+#include <asiUI_JsonSearchThread.h>
 
 // Qt includes
 #pragma warning(push, 0)
+#include <QResizeEvent>
 #include <QJsonDocument>
 #include <QPainter>
 #include <QScrollBar>
@@ -52,10 +54,6 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  int iconSize()                 { return 16; }
-
-  //-----------------------------------------------------------------------------
-
   QColor backgroundColor()       { return QColor("#1E1E1E"); }
 
   //-----------------------------------------------------------------------------
@@ -68,10 +66,6 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  QColor invalidUnderlineColor() { return QColor(255, 0, 0); }
-
-  //-----------------------------------------------------------------------------
-
   void printJsonBlocks(const asiUI_JsonBlocks& markers)
   {
     std::cout << "blocks: " << markers.size() << std::endl;
@@ -80,7 +74,10 @@ namespace
       asiUI_JsonBlock block = pair.second;
       std::cout << block.m_isCollapsed << " start, end: "
                 << block.m_blockNumber + 1 << ", "
-                << block.m_blockNumberClose + 1 << std::endl;
+                << block.m_blockNumberClose + 1 << ", "
+                << block.m_positionOpen << ", "
+                << block.m_positionClose
+                << std::endl;
     }
   }
 
@@ -104,12 +101,12 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  void printCollapsed(const std::set<int>& collapsedBlocks)
+  void printCollapsed(const asiUI_JsonBlocks& collapsedBlocks)
   {
     std::cout << "collapsed: " << collapsedBlocks.size() << std::endl;
-    for (auto& pair : collapsedBlocks)
+    for (auto& item : collapsedBlocks)
     {
-      std::cout << pair << " ";
+      std::cout << item.first << " ";
     }
     if (collapsedBlocks.size() > 0)
       std::cout << std::endl;
@@ -126,6 +123,26 @@ namespace
     }
   }
 }
+
+//-----------------------------------------------------------------------------
+
+//! Redefined layout to improve performance of collapse item in the editor.
+class asiUI_Layout : public QPlainTextDocumentLayout
+{
+public:
+  asiUI_Layout(QTextDocument *doc) : QPlainTextDocumentLayout(doc) {}
+  ~asiUI_Layout() {}
+
+public:
+  QRectF blockBoundingRect(const QTextBlock &block) const
+  {
+    // improves performance on very long file as it's called in line number and marker repaint
+    if (!block.isVisible())
+      return QRectF();
+
+    return QPlainTextDocumentLayout::blockBoundingRect(block);
+  }
+};
 
 //-----------------------------------------------------------------------------
 
@@ -189,7 +206,7 @@ public:
 
   //! Recomputes markers.
   //! \param[in] collapsedBlocks container of collapsed block numbers
-  void recompute(const std::set<int>& collapsedBlocks)
+  void recompute(const asiUI_JsonBlocks& collapsedBlocks)
   {
     if (m_codeEditor->isEditBlocked())
       return;
@@ -225,6 +242,17 @@ public:
     return true;
   }
 
+  //! Sets block information for the text block number
+  //! \param[in] blockNumber index of block in text document
+  //! \param[out] block      block information
+  void setBlockRect(const int blockNumber, const asiUI_JsonBlock& block)
+  {
+    m_blockRects[blockNumber] = block;
+  }
+
+  //!< Returns block items.
+  const asiUI_JsonBlocks blockRects() const { return m_blockRects; }
+
   //! Returns number of blocks of the document.
   int numberOfBlocks() const { return (int)m_blockPositions.size(); }
 
@@ -239,6 +267,23 @@ public:
 
     position = m_blockPositions.at(blockNumber);
     return true;
+  }
+
+  void setBlockCollapsed(const int blockNumber, const bool toCollapse)
+  {
+    asiUI_JsonBlock blockR = m_blockRects.at(blockNumber);
+
+    blockR.m_isCollapsed = toCollapse;
+    m_blockRects[blockNumber] = blockR;
+
+    QTextBlock textBlock = m_codeEditor->document()->findBlockByNumber(blockNumber);
+    bool wasBlocked = m_codeEditor->editBlocked(true);
+    m_codeEditor->changeTextToCollapse(textBlock, blockR, blockR.m_isCollapsed);
+    m_codeEditor->editBlocked(wasBlocked);
+
+    updateCollapseToVisibility(blockNumber);
+
+    m_codeEditor->emulateAdjustScrollbars();
   }
 
 protected:
@@ -271,19 +316,7 @@ protected:
         return false;
 
       asiUI_JsonBlock blockR = m_blockRects.at(blockNumber);
-
-      blockR.m_isCollapsed = !blockR.m_isCollapsed;
-      m_blockRects[blockNumber] = blockR;
-
-      QTextBlock textBlock = m_codeEditor->document()->findBlockByNumber(blockNumber);
-      bool wasBlocked = m_codeEditor->editBlocked(true);
-      m_codeEditor->changeTextToCollapse(textBlock, blockR.m_isCollapsed);
-      m_codeEditor->editBlocked(wasBlocked);
-
-      updateCollapseToVisibility(blockNumber);
-      // update underline to calculate scroll bar correctly
-      m_codeEditor->updateJsonUnderline();
-
+      setBlockCollapsed(blockNumber, !blockR.m_isCollapsed);
       return true;
     }
     return QWidget::event(event);
@@ -316,11 +349,13 @@ private:
 
 asiUI_JsonEditor::asiUI_JsonEditor(QWidget* parent)
 : QPlainTextEdit(parent),
-  m_documentValid(true),
+  m_searchStarted(false),
   m_immediateValidate(true),
   m_editBlocked(false)
 {
-  m_highlighter = new asiUI_JsonHighlighter(document());
+  document()->setDocumentLayout(new asiUI_Layout(document()));
+
+  m_highlighter = new asiUI_JsonHighlighter(this);
   m_lineNumberArea = new asiUI_JsonLineNumberArea(this);
   m_lineMarkerArea = new asiUI_JsonLineMarkerArea(this);
 
@@ -339,9 +374,11 @@ asiUI_JsonEditor::asiUI_JsonEditor(QWidget* parent)
   fmt.setFontFixedPitch(true);
   fmt.setFontStyleHint(QFont::Monospace);
   fmt.setFontFamily("Consolas");
-  updateJsonUnderline();
 
   setCurrentCharFormat(fmt);
+
+  m_searchThread = new asiUI_JsonSearchThread();
+  connect(m_searchThread, SIGNAL(finished()), this, SLOT(searchFinished()));
 }
 
 //-----------------------------------------------------------------------------
@@ -351,6 +388,8 @@ asiUI_JsonEditor::~asiUI_JsonEditor()
   m_highlighter = nullptr;
   m_lineNumberArea = nullptr;
   m_lineMarkerArea = nullptr;
+
+  delete m_searchThread;
 }
 
 //-----------------------------------------------------------------------------
@@ -372,7 +411,7 @@ int asiUI_JsonEditor::lineNumberAreaWidth()
 
 int asiUI_JsonEditor::lineMarkerAreaWidth()
 {
-  return iconSize() + 2 * iconMargin();
+  return fontMetrics().height() + 2 * iconMargin();
 }
 
 //-----------------------------------------------------------------------------
@@ -413,14 +452,156 @@ void asiUI_JsonEditor::updateValidity()
 
     if (blockR.m_isCollapsed)
     {
-      changeTextToCollapse(clonnedDoc->findBlockByNumber(blockR.m_blockNumber), false);
+      changeTextToCollapse(clonnedDoc->findBlockByNumber(blockR.m_blockNumber), blockR, false);
     }
   }
 
   QJsonDocument loadDoc(QJsonDocument::fromJson(clonnedDoc->toPlainText().toUtf8()));
-  m_documentValid = !loadDoc.isNull();
+  m_highlighter->setUnderlined(loadDoc.isNull());
+}
 
-  updateJsonUnderline();
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::expandAllBlocks()
+{
+  bool wasBlocked = editBlocked(true);
+  auto markerArea = lineMarkerArea();
+  for (auto& blockRect : markerArea->blockRects())
+  {
+    asiUI_JsonBlock blockR = blockRect.second;
+    if (!blockR.m_isCollapsed)
+      continue;
+    markerArea->setBlockCollapsed(blockR.m_blockNumber, false);
+  }
+  editBlocked(wasBlocked);
+
+  repaint();
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::emulateAdjustScrollbars()
+{
+  // to update length of the vertical scroll bar, it should be text changed or
+  // document set or resize event. The implementation is QPlainTextEditPrivate::_q_adjustScrollbars
+  // This update also is required when we collapse/expand blocks.
+  // So, this method emulated resize event to adjust size.
+  QResizeEvent event(QSize(size().width() + 10, size().height()), size());
+  resizeEvent(&event);
+  repaint();
+}
+
+//-----------------------------------------------------------------------------
+
+QTextCursor findNext(const QTextCursor&                           currentCursor,
+                     const std::list<asiUI_JsonHighlighterBlock>& indices,
+                     const QString&                               value)
+{
+  if (indices.empty())
+    return QTextCursor();
+
+  int currentBlockPos = currentCursor.block().position();
+  int currentCursorPos = currentCursor.position();
+
+  for (auto& element : indices)
+  {
+    int elementBlockPos = element.TextBlock.position();
+    int elementStartPos = element.StartPosition;
+
+    if (elementBlockPos < currentBlockPos)
+      continue;
+    else if (elementBlockPos == currentBlockPos)
+    {
+      if (elementStartPos > currentCursorPos)
+      {
+        QTextCursor cursor(element.TextBlock);
+        cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
+                            elementStartPos - elementBlockPos);
+        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
+                            value.length());
+        return cursor;
+      }
+    }
+    else // next block
+    {
+      int blockPos = element.TextBlock.position();
+      QTextCursor cursor(element.TextBlock);
+      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
+                          elementStartPos - blockPos);
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
+                          value.length());
+      return cursor;
+    }
+  }
+
+  auto& element = indices.front();
+  int blockPos = element.TextBlock.position();
+  int elementStartPos = element.StartPosition;
+  QTextCursor cursor(element.TextBlock);
+  cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
+                      elementStartPos - blockPos);
+  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
+                      value.length());
+  return cursor;
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::searchEntered()
+{
+  if (m_highlighter->highlighted().size() == 0)
+  {
+    expandAllBlocks();
+    selectNextFound();
+  }
+  else
+  {
+    // indices are already found and highlighted, set selected the next one
+    expandAllBlocks();
+    QTextCursor cursorOfSearch = findNext(textCursor(), m_highlighter->highlighted(), m_searchValue);
+    setTextCursor(cursorOfSearch);
+    if (!cursorOfSearch.isNull())
+    {
+      ensureCursorVisible();
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::searchChanged(const QString& value)
+{
+  m_searchValue = value.toLower();
+  expandAllBlocks();
+
+  // unhighlight previous value
+  m_highlighter->setHighlighted(std::list<asiUI_JsonHighlighterBlock>());
+
+  // select next found fragment
+  selectNextFound();
+
+  // search/highlight all matched values
+  if (m_searchValue.isEmpty())
+  {
+    stopSearch();
+  }
+  else if (!m_searchStarted)
+  {
+    startSearch();
+  }
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::searchDeactivated()
+{
+  m_searchValue = "";
+
+  stopSearch();
+}
+
+//-----------------------------------------------------------------------------
+QString asiUI_JsonEditor::collapseText()
+{
+  return " ... ";
 }
 
 //-----------------------------------------------------------------------------
@@ -473,11 +654,12 @@ void asiUI_JsonEditor::updateOnContentsChange(int position,
   if (m_editBlocked)
     return;
 
-  asiUI_JsonLineMarkerArea* markerArea = (asiUI_JsonLineMarkerArea*)m_lineMarkerArea;
+  asiUI_JsonLineMarkerArea* markerArea = lineMarkerArea();
   if (markerArea->isEmpty())
   {
-    std::set<int> collapsedBlocks;
-    ((asiUI_JsonLineMarkerArea*)m_lineMarkerArea)->recompute(collapsedBlocks);
+    // initialize
+    asiUI_JsonBlocks collapsedBlocks;
+    markerArea->recompute(collapsedBlocks);
 
     m_editBlocked = true;
     updateValidity();
@@ -504,12 +686,10 @@ void asiUI_JsonEditor::updateOnContentsChange(int position,
   if (editedBlockNumber <= 0)
     return;
 
-  asiUI_JsonLineMarkerArea* lineMarkerArea = ((asiUI_JsonLineMarkerArea*)m_lineMarkerArea);
-
   int blockCount = doc->blockCount();
-  int blockCountPrev = lineMarkerArea->numberOfBlocks();
+  int blockCountPrev = markerArea->numberOfBlocks();
 
-  std::set<int> collapsedBlocks;
+  asiUI_JsonBlocks collapsedBlocks;
   // collapsed before edited item
   for (int i = 0; i < editedBlockNumber; i++)
   {
@@ -517,7 +697,7 @@ void asiUI_JsonEditor::updateOnContentsChange(int position,
     if (!markerArea->blockRect(i, block))
       continue;
     if (block.m_isCollapsed)
-      collapsedBlocks.insert(i);
+      collapsedBlocks[i] = block;
   }
   // collapsed after edited item
   int deltaOfCount = blockCount - blockCountPrev;
@@ -528,15 +708,43 @@ void asiUI_JsonEditor::updateOnContentsChange(int position,
     if (!markerArea->blockRect(i, block))
       continue;
     if (block.m_isCollapsed)
-      collapsedBlocks.insert(i + deltaOfCount);
+      collapsedBlocks[i + deltaOfCount] = block;
   }
-  ((asiUI_JsonLineMarkerArea*)m_lineMarkerArea)->recompute(collapsedBlocks);
+  lineMarkerArea()->recompute(collapsedBlocks);
 
   if (m_immediateValidate)
   {
     m_editBlocked = true;
     updateValidity();
     m_editBlocked = false;
+  }
+
+  stopSearch();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_JsonEditor::searchFinished()
+{
+  std::list<QTextCursor> indices = m_searchThread->matchedIndices();
+
+  std::list<asiUI_JsonHighlighterBlock> matchedIndices;
+  for (auto& cursor : indices)
+  {
+    QTextBlock textBlock = document()->findBlock(cursor.position());
+    int startId = cursor.selectionStart();
+    int endId = cursor.selectionEnd();
+
+    matchedIndices.push_back(asiUI_JsonHighlighterBlock(startId, endId,textBlock));
+  }
+
+  m_highlighter->setHighlighted(matchedIndices);
+  m_searchStarted = false;
+
+  if (!m_searchValue.isEmpty() &&
+      m_searchValue != m_searchThread->searchValue())
+  {
+    startSearch();
   }
 }
 
@@ -648,13 +856,13 @@ void findEndInBlocks(const int              startBlockNumber,
 
 //-----------------------------------------------------------------------------
 
-bool findUnions(const int              blockNumber,
-                const QTextDocument*   document,
-                const int              startInBlock,
-                asiUI_ListOfInt&       listOfParents,
-                asiUI_ListOfListOfInt& blockParents,
-                bool&                  isUnionBrace,
-                int&                   blockNumberEnd)
+bool findUnions(const int               blockNumber,
+                const QTextDocument*    document,
+                const int               startInBlock,
+                const asiUI_JsonBlocks& collapsedBlocks,
+                asiUI_ListOfInt&        listOfParents,
+                asiUI_ListOfListOfInt&  blockParents,
+                asiUI_JsonBlock&        block)
 {
   QTextBlock startblock = document->findBlockByNumber(blockNumber);
   QString blockText = startblock.text();
@@ -671,14 +879,39 @@ bool findUnions(const int              blockNumber,
   int indexOfEnd = findEnd(blockText, indexOfStart, isBrace);
   if (indexOfEnd > indexOfStart)
   {
-    return false; // opened and closed
+    block.m_isBrace = isBrace;
+    block.m_blockNumberClose = blockNumber;
+
+    block.m_isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
+    if (!block.m_isCollapsed)
+    {
+      block.m_positionOpen = indexOfStart;
+      block.m_positionClose = indexOfEnd;
+      block.m_collapsedInRow = blockText.mid(indexOfStart + 1, indexOfEnd - (indexOfStart + 1));
+    }
+    else
+    {
+      asiUI_JsonBlock collapsedBlock = collapsedBlocks.at(blockNumber);
+      block.m_positionOpen = collapsedBlock.m_positionOpen;
+      block.m_positionClose = collapsedBlock.m_positionClose;
+      block.m_collapsedInRow = collapsedBlock.m_collapsedInRow;
+    }
+
+    // opened and closed in one block. Collapse shown only when there's some symbol between start and end.
+    return indexOfEnd - indexOfStart > 1;
   }
 
   int endId = 0;
   listOfParents.push_back(blockNumber);
-  findEndInBlocks(blockNumber + 1, document, isUnionBrace, -1, listOfParents, blockParents, endId, blockNumberEnd);
+  int blockNumberClose;
+  findEndInBlocks(blockNumber + 1, document, isBrace, -1, listOfParents, blockParents, endId, blockNumberClose);
+  block.m_isBrace = isBrace;
+  block.m_isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
+  block.m_blockNumberClose = blockNumberClose;
+  block.m_positionOpen = indexOfStart;
+  block.m_positionClose = indexOfEnd;
 
-  return blockNumberEnd > blockNumber;
+  return blockNumberClose > blockNumber;
 }
 
 //-----------------------------------------------------------------------------
@@ -692,20 +925,18 @@ bool asiUI_JsonEditor::editBlocked(const bool value)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_JsonEditor::calculateMarkers(const std::set<int>&   collapsedBlocks,
-                                        asiUI_JsonBlocks&      markers,
-                                        asiUI_ListOfListOfInt& blockParents,
-                                        asiUI_MapIntToInt&     blockPositions) const
+void asiUI_JsonEditor::calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
+                                        asiUI_JsonBlocks&       markers,
+                                        asiUI_ListOfListOfInt&  blockParents,
+                                        asiUI_MapIntToInt&      blockPositions) const
 {
   markers.clear();
   QTextBlock block = document()->firstBlock();
   int blockNumber = block.blockNumber();
-  int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
-  int bottom = top + qRound(blockBoundingRect(block).height());
 
   blockParents.clear();
   blockPositions.clear();
-  
+
   asiUI_ListOfInt listOfParents;
   while (block.isValid())
   {
@@ -714,23 +945,13 @@ void asiUI_JsonEditor::calculateMarkers(const std::set<int>&   collapsedBlocks,
       asiUI_JsonBlock rect;
       rect.m_blockNumber = blockNumber;
       listOfParents.clear();
-      bool isBrace;
-      int blockNumberClose;
-      if (findUnions(blockNumber, document(), -1, listOfParents, blockParents, isBrace, blockNumberClose) &&
-          rect.m_blockNumber != rect.m_blockNumberClose)
+      if (findUnions(blockNumber, document(), -1, collapsedBlocks, listOfParents, blockParents, rect))
       {
-        rect.m_isBrace = isBrace;
-        rect.m_blockNumberClose = blockNumberClose;
-        rect.m_isCollapsed = false;
-        if (collapsedBlocks.find(blockNumber) != collapsedBlocks.end())
-          rect.m_isCollapsed = true;
         markers[blockNumber] = rect;
       }
     }
     blockPositions[blockNumber] = block.position();
     block = block.next();
-    top = bottom;
-    bottom = top + qRound(blockBoundingRect(block).height());
     ++blockNumber;
   }
   //printCollapsed(collapsedBlocks);
@@ -742,25 +963,58 @@ void asiUI_JsonEditor::calculateMarkers(const std::set<int>&   collapsedBlocks,
 //-----------------------------------------------------------------------------
 
 void asiUI_JsonEditor::changeTextToCollapse(const QTextBlock& textBlock,
+                                            const asiUI_JsonBlock& block,
                                             const bool toCollapse)
 {
   QTextCursor cursor = QTextCursor(textBlock);
-  cursor.movePosition(QTextCursor::EndOfBlock);
-  if (toCollapse)
-  {
-    QTextCharFormat charFormat;
-    charFormat.setForeground(lineNumberColor());
-    cursor.insertText(" ...", charFormat);
-  }
-  else // to expand
-  {
-    cursor.clearSelection();
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
 
-    cursor.removeSelectedText();
+  int textLength = textBlock.text().length();
+  if (!toCollapse)
+    textLength -= collapseText().length();
+  if (block.m_positionOpen == textLength - 1)
+  {
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::MoveAnchor);
+    if (toCollapse)
+    {
+      cursor.insertText(collapseText());
+    }
+    else // to expand
+    {
+      cursor.clearSelection();
+      cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor, collapseText().length());
+      cursor.removeSelectedText();
+    }
+  }
+  else
+  {
+    if (toCollapse)
+    {
+      cursor.clearSelection();
+
+      int startPos = block.m_positionOpen  + 1;
+      int stopPos  = block.m_positionClose;
+
+      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPos);
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, stopPos - startPos);
+      cursor.removeSelectedText();
+
+      cursor.insertText(collapseText());
+    }
+    else // to expand
+    {
+      cursor.clearSelection();
+
+      int startPos = block.m_positionOpen  + 1;
+
+      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPos);
+
+      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveMode::KeepAnchor, collapseText().length());
+      cursor.removeSelectedText();
+
+      cursor.insertText(block.m_collapsedInRow);
+    }
   }
 }
 
@@ -816,90 +1070,45 @@ void asiUI_JsonEditor::paintMarkerAreaRects(QPaintEvent*            event,
   bool recalculateRect = event->rect().top() == 0; // do not update rects when cursor is painted only
   if (recalculateRect)
     rects.clear();
+  bool blockVisible = lineMarkerArea()->isBlockVisible(blockNumber);
   while (block.isValid() && top <= event->rect().bottom())
   {
-    bool blockVisible = ((asiUI_JsonLineMarkerArea*)m_lineMarkerArea)->isBlockVisible(blockNumber);
     if (bottom >= event->rect().top())
     {
       if (blockVisible && markers.find(blockNumber) != markers.end())
       {
         asiUI_JsonBlock markerRect = markers.at(blockNumber);
 
-        int width = iconSize();
-        int height = iconSize();
+        int height = fontMetrics().height();
+        int width = height;
         QImage img(!markerRect.m_isCollapsed ? ":icons/asitus/arrow_down.svg" : ":icons/asitus/arrow_right.svg");
-        int span = iconMargin();
-        QRect rect = QRect(span, top, width, height);
-        painter.drawImage(rect, img);
-
+        QRect rect = QRect(iconMargin(), top, width, height);
+        if (!img.isNull())
+        {
+          painter.drawImage(rect, img);
+        }
+        else
+        {
+          painter.drawPixmap(rect, style()->standardIcon(
+            !markerRect.m_isCollapsed ? QStyle::SP_ArrowDown : QStyle::SP_ArrowRight).pixmap(width, height));
+        }
         if (recalculateRect)
           rects[blockNumber] = rect;
       }
     }
 
+    ++blockNumber;
     block = document()->findBlockByNumber(blockNumber);
+    blockVisible = lineMarkerArea()->isBlockVisible(blockNumber);
     if (blockVisible)
     {
       top = bottom;
       bottom = top + qRound(blockBoundingRect(block).height());
     }
-    ++blockNumber;
   }
 
   painter.setPen(lineNumberColor());
   painter.drawLine(evRect.right() - 1, evRect.top(), evRect.right() - 1, 5000/*infinite*/);
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_JsonEditor::updateJsonUnderline()
-{
-  bool editBlockedPrev = m_editBlocked;
-  m_editBlocked = true;
-
-  QTextCursor cursor(document());
-  cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
-  cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-  QTextCharFormat fmt = currentCharFormat();
-  if (m_documentValid)
-  {
-    fmt.setUnderlineStyle(QTextCharFormat::NoUnderline);
-  }
-  else
-  {
-    fmt.setUnderlineStyle(QTextCharFormat::WaveUnderline);
-    fmt.setUnderlineColor(invalidUnderlineColor());
-  }
-  cursor.setCharFormat(fmt);
-
-  QTextDocument* doc = document();
-  for (int i = 0; i < doc->blockCount(); i++)
-  {
-    asiUI_JsonBlock blockR;
-    if (!((asiUI_JsonLineMarkerArea*)m_lineMarkerArea)->blockRect(i, blockR))
-      continue;
-
-    if (blockR.m_isCollapsed)
-    {
-      QTextBlock textBlock = doc->findBlockByNumber(i);
-      cursor = QTextCursor(textBlock);
-      cursor.movePosition(QTextCursor::EndOfBlock);
-      {
-        cursor.clearSelection();
-        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveMode::KeepAnchor);
-
-        fmt = QTextCharFormat();
-        fmt.setForeground(lineNumberColor());
-        fmt.setFontFixedPitch(false);
-        fmt.setFontStyleHint(QFont::Times);
-        cursor.setCharFormat(fmt);
-      }
-    }
-  }
-  m_editBlocked = editBlockedPrev;
 }
 
 //-----------------------------------------------------------------------------
@@ -909,5 +1118,54 @@ void asiUI_JsonEditor::zoomText(bool positive)
   if (positive)
     zoomIn();
   else
+  {
+    // do not perform scroll out when new size is less than minimum possible value.
+    float newSize = font().pointSizeF() - 1/*range*/;
+    if (newSize < 1)
+      return;
     zoomOut();
+  }
+  ensureCursorVisible();
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::startSearch()
+{
+  m_searchThread->setSearchValue(m_searchValue);
+  m_searchThread->setDocument(document()->clone());
+  m_searchThread->start();
+  m_searchStarted = true;
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::stopSearch()
+{
+  if (m_searchStarted)
+  {
+    m_searchThread->terminate();
+    m_searchStarted = false;
+  }
+  m_highlighter->setHighlighted(std::list<asiUI_JsonHighlighterBlock>());
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::selectNextFound()
+{
+  QTextCursor cursor = textCursor();
+  int pos = cursor.anchor();
+  cursor.clearSelection();
+  cursor.setPosition(pos);
+  QTextCursor cursorOfSearch = document()->find(m_searchValue, cursor);
+  setTextCursor(cursorOfSearch);
+  if (!cursorOfSearch.isNull())
+  {
+    ensureCursorVisible();
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+asiUI_JsonLineMarkerArea* asiUI_JsonEditor::lineMarkerArea() const
+{
+  return (asiUI_JsonLineMarkerArea*)m_lineMarkerArea;
 }

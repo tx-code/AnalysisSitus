@@ -49,7 +49,9 @@ public:
    : m_blockNumber(-1),
      m_isCollapsed(false),
      m_isBrace(false),
-     m_blockNumberClose(-1)
+     m_blockNumberClose(-1),
+     m_positionOpen(-1),
+     m_positionClose(-1)
   {}
 
   //! Constructor.
@@ -57,16 +59,24 @@ public:
    : m_blockNumber(blockNumber),
      m_isCollapsed(collapsed),
      m_isBrace(false),
-     m_blockNumberClose(-1)
+     m_blockNumberClose(-1),
+     m_positionOpen(-1),
+     m_positionClose(-1)
   {}
 
   //! Returns true if the instance is valid.
   bool isValid() const { return m_blockNumber >= 0; }
 
-  int       m_blockNumber;      //!< block number
   bool      m_isCollapsed;      //!< flag whether the block is collapsed or not
   bool      m_isBrace;          //!< if true, it's the {} else it's []
+
+  int       m_blockNumber;      //!< block number
+  int       m_positionOpen;     //!< position in block number
+
   int       m_blockNumberClose; //!< block number end
+  int       m_positionClose;    //!< position in block number close
+
+  QString   m_collapsedInRow;   //!< collapsed text if blockNumber equals to blockNumberClose
 };
 
 typedef std::map<int, asiUI_JsonBlock> asiUI_JsonBlocks;

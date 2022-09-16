@@ -211,9 +211,10 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
 
   // Set search control
   m_widgets.pSearchLine = new asiUI_SearchLine();
-  connect(m_widgets.pSearchLine, SIGNAL (returnPressed()),     this, SLOT(enterProcessing()));
-  connect(m_widgets.pSearchLine, SIGNAL (searchChanged()),     this, SLOT(searchChanged()));
+  connect(m_widgets.pSearchLine, SIGNAL (returnPressed()),     this, SLOT(searchEntered()));
   connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), this, SLOT(searchDeactivated()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchChanged(const QString&)),
+          this,                  SLOT   (searchChanged(const QString&)));
 
   m_pMainLayout->addWidget(m_widgets.pSearchLine);
 
@@ -312,7 +313,7 @@ bool asiUI_DialogCommands::eventFilter( QObject* o, QEvent* e )
       case Qt::Key_Enter:
       case Qt::Key_Return:
       {
-        enterProcessing();
+        searchEntered();
         return true;
       }
       default:
@@ -338,7 +339,7 @@ void findMatchedIndices(const QString matchedValue,
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogCommands::enterProcessing()
+void asiUI_DialogCommands::searchEntered()
 {
   asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
   if (m_matchedIndices.isEmpty())
@@ -367,10 +368,10 @@ void asiUI_DialogCommands::enterProcessing()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogCommands::searchChanged()
+void asiUI_DialogCommands::searchChanged(const QString& text)
 {
   m_matchedIndices.clear();
-  m_searchValue = m_widgets.pSearchLine->text().toLower();
+  m_searchValue = text.toLower();
 
   asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
   auto selectionModel = m_widgets.pCommandsView->selectionModel();

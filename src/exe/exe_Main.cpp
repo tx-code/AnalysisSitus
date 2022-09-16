@@ -88,6 +88,9 @@
 #include <asiAlgo_Dictionary.h>
 #include <asiAlgo_FileFormat.h>
 
+// asiUI includes
+#include <dialogs/asiUI_DialogDump.h>
+
 // Qt includes
 #pragma warning(push, 0)
 #include <QApplication>
@@ -134,6 +137,31 @@ VTK_MODULE_INIT(vtkRenderingGL2PSOpenGL2)
     __cf->Progress.SendLogMessage(LogInfo(Normal) << "Loaded %1 commands." << name); \
 }
 
+int runJsonView(int argc,
+                char** argv,
+                const std::string& scriptArg)
+{
+  if (scriptArg.empty())
+    return 1;
+
+  QApplication app(argc, argv);
+  exe_MainWindow::setApplicationStyle(":qdarkstyle/style.qss");
+
+  std::string fileName = scriptArg;
+  QFile file(fileName.c_str());
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    return 0;
+
+  QString fileBuff = file.readAll().constData();
+
+  asiUI_DialogDump* dlg = new asiUI_DialogDump("Json text");
+  dlg->Populate(fileBuff.toStdString());
+  dlg->show();
+
+  app.exec();
+  return 0;
+}
+
 //-----------------------------------------------------------------------------
 // Entry point
 //-----------------------------------------------------------------------------
@@ -148,9 +176,16 @@ int main(int argc, char** argv)
   const bool
     isRunCommand = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runcommand, scriptArg);
   const bool
+    isRunJsonView = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runjsonview, scriptArg);
+  const bool
     isGenDoc = asiExe::HasKeyword(argc, argv, ASITUS_KW_gendoc);
   const bool
     isBatch = isRunScript || isRunCommand || isGenDoc;
+
+  if (isRunJsonView)
+  {
+    return runJsonView(argc, argv, scriptArg);
+  }
 
   std::cout << "Batch mode: " << (isBatch ? "true" : "false") << std::endl;
 

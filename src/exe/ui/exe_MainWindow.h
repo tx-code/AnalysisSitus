@@ -61,6 +61,8 @@ public:
   exe_MainWindow(const bool offscreen);
   virtual ~exe_MainWindow();
 
+  static void setApplicationStyle(const QString& stylePath);
+
 public:
 
   void closeEvent(QCloseEvent* evt);
