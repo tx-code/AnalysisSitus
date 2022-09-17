@@ -3403,6 +3403,36 @@ int ENGINE_SparsePointCloud(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ClearPart(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+
+  // Modify Data Model.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part(cmdEngine::model).Update( TopoDS_Shape() );
+  }
+  cmdEngine::model->CommitCommand();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3870,4 +3900,12 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Sparses the point cloud with the name <name> using the given spatial tolerance <tol>.",
     //
     __FILE__, group, ENGINE_SparsePointCloud);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("clear-part",
+    //
+    "clear-part\n"
+    "\t Resets part shape to empty state.",
+    //
+    __FILE__, group, ENGINE_ClearPart);
 }
