@@ -102,14 +102,17 @@ enum asiVisu_SelectionMode
 //! shoot the actual picking request.
 struct asiVisu_PickInput
 {
+  std::pair<int, int> Initial;    //!< Picked (X, Y) coordinates of start event.
   std::pair<int, int> Start;      //!< Picked (X, Y) coordinates of start event.
-  std::pair<int, int> Finish;     //!< Picked (X, Y) coordinates of finish event.
+  //std::pair<int, int> Finish;     //!< Picked (X, Y) coordinates of finish event.
   bool                IsMultiple; //!< Indicates whether the multiple picking is enabled.
+  bool                IsRectangular; //!< Indicates whether rectangle selection is activated.
 
   //! Default constructor
   asiVisu_PickInput()
   {
     this->IsMultiple = false;
+    this->IsRectangular = false;
   }
 
   //! Complete constructor.
@@ -121,8 +124,9 @@ struct asiVisu_PickInput
                     const bool                 isMultiple)
   {
     this->Start      = start;
-    this->Finish     = finish;
+    //this->Finish     = finish;
     this->IsMultiple = isMultiple;
+    this->IsRectangular = false;
   }
 };
 

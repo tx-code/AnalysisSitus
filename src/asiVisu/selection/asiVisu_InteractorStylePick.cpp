@@ -33,6 +33,7 @@
 
 // VTK includes
 #include <vtkCallbackCommand.h>
+#include <vtkInteractorStyleRubberBandPick.h>
 #include <vtkObjectFactory.h>
 #include <vtkRenderWindowInteractor.h>
 
@@ -45,13 +46,14 @@ vtkStandardNewMacro(asiVisu_InteractorStylePick)
 
 //! Default constructor.
 asiVisu_InteractorStylePick::asiVisu_InteractorStylePick()
-: vtkInteractorStyleTrackballCamera (),
+: vtkInteractorStyleRubberBandPick(),//vtkInteractorStyleTrackballCamera (),
   m_bIsLeftButtonDown               (false),
   m_bIsRotation                     (false)
 {
   m_pPickInput = new asiVisu_PickInput();
   //
-  m_PickedPos[0] = m_PickedPos[1] = 0;
+  m_PickedPos[0]      = m_PickedPos[1]      = 0;
+  m_PickedStartPos[0] = m_PickedStartPos[1] = 0;
 }
 
 //! Default destructor.
@@ -62,7 +64,7 @@ asiVisu_InteractorStylePick::~asiVisu_InteractorStylePick()
 
 //! Prohibited copy constructor.
 asiVisu_InteractorStylePick::asiVisu_InteractorStylePick(const asiVisu_InteractorStylePick&)
-: vtkInteractorStyleTrackballCamera (),
+: vtkInteractorStyleRubberBandPick(),//vtkInteractorStyleTrackballCamera (),
   m_pPickInput                      (nullptr),
   m_bIsLeftButtonDown               (false),
   m_bIsRotation                     (false)
@@ -91,22 +93,28 @@ const vtkSmartPointer<vtkRenderer>& asiVisu_InteractorStylePick::GetRenderer() c
 void asiVisu_InteractorStylePick::OnMouseMove()
 {
   // Invoke basic method
-  vtkInteractorStyleTrackballCamera::OnMouseMove();
+  /*vtkInteractorStyleTrackballCamera::*/vtkInteractorStyleRubberBandPick::OnMouseMove();
 
   m_PickedPos[0] = this->Interactor->GetEventPosition()[0];
   m_PickedPos[1] = this->Interactor->GetEventPosition()[1];
 
   std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
   m_pPickInput->Start      = pickPoint;
-  m_pPickInput->Finish     = pickPoint;
+  //m_pPickInput->Finish     = pickPoint;
   m_pPickInput->IsMultiple = false;
 
   if ( m_bIsLeftButtonDown )
   {
-    if ( !m_bIsRotation )
-      m_bIsRotation = true;
+    if (m_pPickInput->IsRectangular)
+    {
+    }
+    else
+    {
+      if ( !m_bIsRotation )
+        m_bIsRotation = true;
 
-    this->InvokeEvent(EVENT_ROTATION_START, m_pPickInput);
+      this->InvokeEvent(EVENT_ROTATION_START, m_pPickInput);
+    }
     return;
   }
 
@@ -132,7 +140,7 @@ void asiVisu_InteractorStylePick::OnRightButtonDown()
   // Otherwise, we'd like to use our custom behavior such as popping
   // up context menus.
   if ( this->Interactor->GetControlKey() )
-    vtkInteractorStyleTrackballCamera::OnRightButtonDown();
+    /*vtkInteractorStyleTrackballCamera::*/vtkInteractorStyleRubberBandPick::OnRightButtonDown();
 }
 
 //! Callback for "Left Button Down" event.
@@ -149,13 +157,40 @@ void asiVisu_InteractorStylePick::OnLeftButtonDown()
   m_PickedPos[0] = this->Interactor->GetEventPosition()[0];
   m_PickedPos[1] = this->Interactor->GetEventPosition()[1];
 
-  this->StartRotate();
+  m_PickedStartPos[0] = m_PickedPos[0];
+  m_PickedStartPos[1] = m_PickedPos[1];
+
+  std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
+  m_pPickInput->Initial  = pickPoint;
+  m_pPickInput->Start  = pickPoint;
+  //m_pPickInput->Finish = pickPoint;
+
+  m_pPickInput->IsRectangular = false;
+  if ( this->Interactor->GetControlKey() )
+  {
+    m_pPickInput->IsRectangular = this->Interactor->GetControlKey();
+      int _currentMode = CurrentMode;
+
+    StartSelect();
+    //this->CurrentMode = VTKISRBP_SELECT;
+    //    }
+    //    else
+    //    {
+    //      this->CurrentMode = VTKISRBP_ORIENT;
+
+    /*vtkInteractorStyleTrackballCamera::*/vtkInteractorStyleRubberBandPick::OnLeftButtonDown();
+    //this->CurrentMode = _currentMode;
+    std::cout << "OnLeftButtonDown" << std::endl;
+  }
+  else
+    this->StartRotate();
 }
 
 //! Callback for "Left Button Up" event.
 void asiVisu_InteractorStylePick::OnLeftButtonUp()
 {
-  vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+  std::cout << "OnLeftButtonUp" << std::endl;
+  /*vtkInteractorStyleTrackballCamera::*/vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
   m_bIsLeftButtonDown = false;
 
   const int pos[2] = { this->Interactor->GetEventPosition()[0],
@@ -165,7 +200,7 @@ void asiVisu_InteractorStylePick::OnLeftButtonUp()
   {
     std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
     m_pPickInput->Start  = pickPoint;
-    m_pPickInput->Finish = pickPoint;
+    //m_pPickInput->Finish = pickPoint;
 
     if ( this->Interactor->GetShiftKey() )
     {
@@ -187,9 +222,15 @@ void asiVisu_InteractorStylePick::OnLeftButtonUp()
   }
 
   // Invoke observers
-  m_bIsRotation = false;
-  this->EndRotate();
-  this->InvokeEvent(EVENT_ROTATION_END, nullptr);
+  if (m_pPickInput->IsRectangular)
+  {
+  }
+  else
+  {
+    m_bIsRotation = false;
+    this->EndRotate();
+    this->InvokeEvent(EVENT_ROTATION_END, nullptr);
+  }
 }
 
 //! Callback for "Key Press" event.
@@ -233,7 +274,7 @@ bool asiVisu_InteractorStylePick::IsAltPressed() const
 //! Callback for rotation finishing action.
 void asiVisu_InteractorStylePick::EndRotate()
 {
-  vtkInteractorStyleTrackballCamera::EndRotate();
+  /*vtkInteractorStyleTrackballCamera::*/vtkInteractorStyleRubberBandPick::EndRotate();
 }
 
 //! Adds custom callback.

@@ -36,7 +36,8 @@
 
 // VTK includes
 #pragma warning(push, 0)
-#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkInteractorStyleRubberBandPick.h>
 #include <vtkSmartPointer.h>
 #pragma warning(pop)
 
@@ -45,11 +46,11 @@
 
 //! Class representing a specific VTK Interactor Style propagating picking
 //! event for a 3D viewer.
-class asiVisu_InteractorStylePick : public vtkInteractorStyleTrackballCamera
+class asiVisu_InteractorStylePick : public vtkInteractorStyleRubberBandPick//vtkInteractorStyleTrackballCamera
 {
 public:
 
-  vtkTypeMacro(asiVisu_InteractorStylePick, vtkInteractorStyleTrackballCamera);
+  vtkTypeMacro(asiVisu_InteractorStylePick, vtkInteractorStyleRubberBandPick);//vtkInteractorStyleTrackballCamera);
 
   asiVisu_EXPORT static asiVisu_InteractorStylePick*
     New();
@@ -137,6 +138,8 @@ private:
   //! Currently picked display position.
   int m_PickedPos[2];
 
+  //! Currently picked display position.
+  int m_PickedStartPos[2];
 };
 
 #endif

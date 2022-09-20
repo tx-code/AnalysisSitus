@@ -95,7 +95,7 @@ void asiVisu_InteractorStylePick2d::OnMouseMove()
 
   std::pair<int, int> pickPoint = {pos[0], pos[1]};
   m_pPickInput->Start      = pickPoint;
-  m_pPickInput->Finish     = pickPoint;
+  //m_pPickInput->Finish     = pickPoint;
   m_pPickInput->IsMultiple = false;
 
   // Invoke observers
@@ -115,8 +115,9 @@ void asiVisu_InteractorStylePick2d::OnLeftButtonDown()
   m_PickedPos[1] = this->Interactor->GetEventPosition()[1];
   //
   std::pair<int, int> pickPoint = {m_PickedPos[0], m_PickedPos[1]};
+  m_pPickInput->Initial  = pickPoint;
   m_pPickInput->Start  = pickPoint;
-  m_pPickInput->Finish = pickPoint;
+  //m_pPickInput->Finish = pickPoint;
 
   if ( this->Interactor->GetShiftKey() )
     m_pPickInput->IsMultiple = true;

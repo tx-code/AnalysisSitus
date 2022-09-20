@@ -481,6 +481,11 @@ protected:
                      const Handle(asiVisu_CellPickerResult)& pickRes);
 
   asiVisu_EXPORT bool
+    cellPickedResultById(const asiVisu_SelectionNature           selNature,
+                         const vtkIdType cellId,
+                         const Handle(asiVisu_CellPickerResult)& pickRes);
+
+  asiVisu_EXPORT bool
     pointPickerResult(const asiVisu_SelectionNature            selNature,
                       const Handle(asiVisu_PointPickerResult)& pickRes);
 

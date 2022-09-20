@@ -43,6 +43,8 @@
 
 // VTK includes
 #pragma warning(push, 0)
+#include <vtkAreaPicker.h>
+#include <vtkAssemblyPath.h>
 #include <vtkCamera.h>
 #include <vtkCellData.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -51,11 +53,18 @@
 #include <vtkObjectFactory.h>
 #include <vtkPNGWriter.h>
 #include <vtkPolyData.h>
+#include <vtkExtractPolyDataGeometry.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkPlanes.h>
 #include <vtkProperty.h>
+#include <vtkProp3DCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkWidgetRepresentation.h>
 #include <vtkWindowToImageFilter.h>
+
+#include <vtkExtractGeometry.h>
+#include <vtkVertexGlyphFilter.h>
+
 #pragma warning(pop)
 
 // OCCT includes
@@ -605,6 +614,7 @@ void asiVisu_PrsManager::InitPicker(const Handle(ActAPI_INode)& node)
 
 void asiVisu_PrsManager::InitPicker(const ActAPI_DataObjectId& nodeId)
 {
+  return;
   if ( !m_nodePresentations.IsBound(nodeId) )
   {
     vtkErrorMacro( << "Presentation does not exist" );
@@ -663,9 +673,10 @@ bool
    *  Some preparations
    * =================== */
 
-  const int  xStart     = pickInput->Start.first;
-  const int  yStart     = pickInput->Start.second;
-  const bool isMultiple = pickInput->IsMultiple;
+  const int  xStart        = pickInput->Start.first;
+  const int  yStart        = pickInput->Start.second;
+  const bool isMultiple    = pickInput->IsMultiple;
+  const bool isRectangular = pickInput->IsRectangular;
 
   // Reset current selection (if any).
   if ( !isMultiple )
@@ -676,11 +687,296 @@ bool
    * ===================== */
 
   // Use try-catch as sometimes VTK 7.1 crashes if cell locators are used.
+  vtkSmartPointer<vtkAreaPicker> areaPicker;
+  //vtkSmartPointer<vtkCellPicker> cellPicker;
   try
   {
     if ( pickType & PickerType_Cell ) // Cell (VTK topology) picker.
     {
-      m_cellPicker->Pick(xStart, yStart, 0, m_renderer);
+      //cellPicker = vtkSmartPointer<vtkCellPicker>::New();
+      //cellPicker->SetTolerance(0.005);
+
+      if (!isRectangular)
+        m_cellPicker->Pick(xStart, yStart, 0, m_renderer);
+      else
+      {
+        const int xInit = /*xStart;// - 10;//*/pickInput->Initial.first;
+        const int yInit = /*yStart;// - 10;//*/pickInput->Initial.second;
+
+        areaPicker = vtkSmartPointer<vtkAreaPicker>::New();
+        //m_renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+        areaPicker->SetRenderer(this->m_renderer);
+        {
+          //areaPicker->SetTolerance(0.005);
+
+          //areaPicker->AreaPick(xInit, yInit, xStart + 10, yStart + 10, m_renderer);
+          areaPicker->AreaPick(xInit, yInit, xStart, yStart, m_renderer);
+
+          vtkDataSet* dataSet = areaPicker->GetDataSet();
+          if (dataSet)
+          {
+            vtkIdType aNbCells  = dataSet->GetNumberOfCells();
+
+            std::cout << "Picked dataset: " << aNbCells << " - " << dataSet << std::endl;
+
+        //    // Global IDs.
+        //    vtkSmartPointer<vtkIdTypeArray>
+        //      gids = vtkIdTypeArray::SafeDownCast( m_cellPicker->GetDataSet()->GetCellData()->GetGlobalIds() );
+        //    //
+        //    if ( gids )
+        //    {
+        //      //gid = gids->GetValue(cellId);
+        //#if defined COUT_DEBUG
+        //      //std::cout << "Picked GID (Global ID) = " << gid << std::endl;
+        //#endif
+        //    }
+          }
+
+        {
+          vtkPlanes* frustum = areaPicker->GetFrustum();
+
+          //vtkPlanes* frustum = static_cast<vtkAreaPicker*>(this->GetInteractor()->GetPicker())->GetFrustum();
+ 
+      vtkSmartPointer<vtkExtractGeometry> extractGeometry =
+        vtkSmartPointer<vtkExtractGeometry>::New();
+      extractGeometry->SetImplicitFunction(frustum);
+
+      auto actors = m_renderer->GetActors();
+
+      bool first = true;
+      actors->InitTraversal();
+      auto actor = actors->GetNextActor();
+
+      int count = 0;
+      while (actor)
+      {
+        auto poly = dynamic_cast<vtkPolyDataMapper*>(actor->GetMapper());
+        if (poly) {
+          auto x = dynamic_cast<vtkPolyData*>(poly->GetInput());
+          //extractPolyDataGeometry->SetInputData(x);
+          //extractPolyDataGeometry->Update();
+
+          extractGeometry->SetInputData(x);
+          extractGeometry->Update();
+ 
+          vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =
+            vtkSmartPointer<vtkVertexGlyphFilter>::New();
+          glyphFilter->SetInputConnection(extractGeometry->GetOutputPort());
+          glyphFilter->Update();
+ 
+          vtkPolyData* selected = glyphFilter->GetOutput();
+          //std::cout << "Selected " << selected->GetNumberOfPoints() << " points." << std::endl;
+          std::cout << "Selected " << selected->GetNumberOfCells() << " cells." << std::endl;
+
+          //for (int it = 
+          //vtkIdType cellId = m_cellPicker->GetCellId();
+          //selected->GetCell(
+
+          // When picking erase detection at first in order to prevent blinking.
+          //if ( selNature == SelectionNature_Persistent )
+          //  m_currentSelection.PopAll(m_renderer, SelectionNature_Detection);
+
+          for ( vtkIdType cellId = 0; cellId < selected->GetNumberOfCells(); ++cellId )
+          {
+            Handle(asiVisu_CellPickerResult) pickRes = m_currentSelection.GetCellPickerResult(selNature);
+            pickRes->SetPickedActor(actor);
+            //lastPickerRes->SetPickedPos();
+
+            //bool isPicked = this->cellPickedResultById( selNature,
+            //                                            cellId,
+            //                                            m_currentSelection.GetCellPickerResult(selNature) );
+            // Push ID to result: ID can be either a pedigree ID or a global ID
+
+            vtkIdType gid    = -1;
+            vtkIdType pid    = -1;
+            //
+            #if defined COUT_DEBUG
+              std::cout << "Picked Cell ID = " << cellId << std::endl;
+            #endif
+
+            // Global IDs.
+              vtkSmartPointer<vtkIdTypeArray>
+                gids = vtkIdTypeArray::SafeDownCast( x->GetCellData()/*m_cellPicker->GetDataSet()->GetCellData()*/->GetGlobalIds() );
+              //
+              if ( gids )
+              {
+                gid = gids->GetValue(cellId);
+          #if defined COUT_DEBUG
+                std::cout << "Picked GID (Global ID) = " << gid << std::endl;
+          #endif
+              }
+
+              // Pedigree IDs.
+              vtkSmartPointer<vtkIdTypeArray>
+                pids = vtkIdTypeArray::SafeDownCast( x->GetCellData()/*m_cellPicker->GetDataSet()->GetCellData()*/->GetPedigreeIds() );
+              //
+              if ( pids && cellId < pids->GetNumberOfValues() )
+              {
+                pid = pids->GetValue(cellId);
+          #if defined COUT_DEBUG
+                std::cout << "Picked PID (Pedigree ID) = " << pid << std::endl;
+          #endif
+              }
+
+            // depending on the context.
+            if ( pid != -1 )
+            {
+              // Let the user unpick the already selected elements.
+              if ( (selNature == SelectionNature_Persistent) && pickRes->GetPickedElementIds().Contains(pid) )
+              {
+                //pickRes->RemovePickedElementId(pid);
+              }
+              else
+                pickRes->AddPickedElementId(pid);
+            }
+            else if ( gid != -1 )
+            {
+              // Let the user unpick the already selected elements.
+              if ( (selNature == SelectionNature_Persistent) && pickRes->GetPickedElementIds().Contains(gid) )
+              {
+                //pickRes->RemovePickedElementId(gid);
+              }
+              else
+                pickRes->AddPickedElementId(gid);
+            }
+
+            // Let the user unpick the already selected elements.
+            if ( (selNature == SelectionNature_Persistent) && pickRes->GetPickedCellIds().Contains(cellId) )
+            {
+              //pickRes->RemovePickedCellId(cellId);
+            }
+            else
+              pickRes->AddPickedCellId(cellId);
+
+            //if ( selNature == SelectionNature_Detection )
+            //  this->InvokeEvent(EVENT_DETECT_CELL, &*pickRes);
+            //else
+            //  this->InvokeEvent(EVENT_SELECT_CELL, &*pickRes);
+
+
+            //if (!isPicked)
+            //  continue;
+            Handle(asiVisu_Prs) prs3D = this->preparePickedPrs(selNature, pickRes);
+
+            // Push selection to renderer.
+            m_currentSelection.PushToRender(prs3D, m_renderer, selNature);
+          }
+          actor = actors->GetNextActor();
+        }
+      }
+
+      // Update view window.
+      m_renderWindow->Render();
+
+      return true;
+
+
+          //frustum = vtk.vtkAreaPicker(self.GetInteractor().GetPicker()).GetFrustum()
+
+          //vtkNew<vtkExtractPolyDataGeometry> extractPolyDataGeometry;
+          //extractPolyDataGeometry->SetImplicitFunction(frustum);
+
+          //auto actors = m_renderer->GetActors();
+
+          //bool first = true;
+          //actors->InitTraversal();
+          //auto actor = actors->GetNextActor();
+
+          //int count = 0;
+          //while (actor)
+          //{
+          //  auto poly = dynamic_cast<vtkPolyDataMapper*>(actor->GetMapper());
+          //  if (poly) {
+          //    auto x = dynamic_cast<vtkPolyData*>(poly->GetInput());
+          //    extractPolyDataGeometry->SetInputData(x);
+          //    extractPolyDataGeometry->Update();
+
+          //    //this->SelectedMapper->SetInputData(extractPolyDataGeometry->GetOutput());
+          //    //this->SelectedMapper->ScalarVisibilityOff();
+          //    //renderer->AddActor(this->SelectedActor);
+          //  }
+          //  actor = actors->GetNextActor();
+          //  count++;
+          //}
+          //std::cout << "count = " << count << std::endl;
+
+          //extractGeometry = vtk.vtkExtractGeometry.New()
+          //extractGeometry.SetImplicitFunction(frustum)
+
+          //if VTK_MAJOR_VERSION <= 5:
+          //    extractGeometry.SetInput(this.Points)
+          //else:
+          //    extractGeometry.SetInputData(this.Points)
+          //extractGeometry.Update()
+
+          //glyphFilter = vtk.vtkVertexGlyphFilter()
+          //glyphFilter.SetInputConnection(extractGeometry.GetOutputPort())
+          //glyphFilter.Update()
+
+          //selected = glyphFilter.GetOutput()
+          //print("Selected %s points" % selected.GetNumberOfPoints())
+          //print("Selected %s cells" % selected.GetNumberOfCells())
+          //if vtk.VTK_MAJOR_VERSION <= 5:
+          //    self.SelectedMapper.SetInput(selected)
+          //else:
+          //    self.SelectedMapper.SetInputData(selected)
+
+          //self.SelectedMapper.ScalarVisibilityOff()
+
+          //ids = vtkIdTypeArray.SafeDownCast(selected.GetPointData().GetArray("OriginalIds"))
+          //for i in range(ids.GetNumberOfTuples()):
+          //    print("Id %s : %s" % (i, ids.GetValue(i)))          }
+          }
+          vtkProp3DCollection* props = areaPicker->GetProp3Ds();
+          props->InitTraversal();
+
+          //for (vtkIdType i = 0; i < props->GetNumberOfItems(); i++)
+          //{
+          //  vtkProp3D* prop = props->GetNextProp3D();
+          //  std::cout << "Picked prop: " << i << " - " << prop << std::endl;
+          //}
+          //props->InitTraversal();
+          while( vtkProp* aProp = props->GetNextProp() ) {
+            aProp->InitPathTraversal();
+            while( vtkAssemblyPath* aPath = aProp->GetNextPath() ) {
+              vtkMapper *aMapper = NULL;
+              bool anIsPickable = false;
+              vtkActor* anActor = NULL;
+              vtkProp *aPropCandidate = aPath->GetLastNode()->GetViewProp();
+              if ( aPropCandidate->GetPickable() && aPropCandidate->GetVisibility() ) {
+                anIsPickable = true;
+                anActor = vtkActor::SafeDownCast( aPropCandidate );
+                if ( anActor ) {
+                  aMapper = anActor->GetMapper();
+                  if ( anActor->GetProperty()->GetOpacity() <= 0.0 ) anIsPickable =
+                      false;
+                }
+              }
+              if ( anIsPickable && aMapper && aMapper->GetInput() ) {
+                //if ( this->PickPoints ) {
+                //  TVectorIds& aVisibleIds = myPointIdsMap[anActor];
+                //  TVectorIds anInVisibleIds;
+                //  SelectVisiblePoints( thePoints, theRenderer, aMapper->GetInput(),
+                //      aVisibleIds, anInVisibleIds, this->Tolerance, theMode );
+                //  if ( aVisibleIds.empty() ) {
+                //    myPointIdsMap.erase( myPointIdsMap.find( anActor ) );
+                //  }
+                //}
+                //else {
+                //  TVectorIds& aVectorIds = myCellIdsMap[anActor];
+                //  SelectVisibleCells( thePoints, theRenderer, aMapper->GetInput(),
+                //      aVectorIds, this->Tolerance, theMode );
+                //  if ( aVectorIds.empty() ) {
+                //    myCellIdsMap.erase( myCellIdsMap.find( anActor ) );
+                //  }
+                //}
+              }
+            }
+          }
+
+
+        }
+      }
     }
     if ( pickType & PickerType_Point ) // Point (VTK geometry) picker.
     {
@@ -706,11 +1002,17 @@ bool
 
   if ( pickType & PickerType_Cell )
   {
-    isPicked = this->cellPickerResult( selNature,
-                                       m_currentSelection.GetCellPickerResult(selNature) );
-    //
-    if ( isPicked )
-      lastPickerRes = m_currentSelection.GetCellPickerResult(selNature);
+    if (!isRectangular)
+    {
+      isPicked = this->cellPickerResult( selNature,
+                                         m_currentSelection.GetCellPickerResult(selNature) );
+      if ( isPicked )
+        lastPickerRes = m_currentSelection.GetCellPickerResult(selNature);
+    }
+    else
+    {
+      return false;
+    }
   }
 
   //--------------//
@@ -765,6 +1067,8 @@ bool
 //! \param[in] nodeList list of Nodes allowed for picking.
 void asiVisu_PrsManager::SetPickList(const Handle(ActAPI_HNodeList)& nodeList)
 {
+  std::cout << "SetPickList: " << nodeList->Size() << std::endl;
+  return;
   m_bAllowedNodes = nodeList;
   m_cellPicker->InitializePickList();
 
@@ -818,7 +1122,7 @@ const Handle(ActAPI_HNodeList)& asiVisu_PrsManager::GetPickList() const
 //! \param[in] isEnabled true/false.
 void asiVisu_PrsManager::SetPickFromList(const bool isEnabled) const
 {
-  m_cellPicker->SetPickFromList(isEnabled ? 1 : 0);
+  //m_cellPicker->SetPickFromList(isEnabled ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -1270,6 +1574,17 @@ bool
                                        const Handle(asiVisu_CellPickerResult)& pickRes)
 {
   vtkIdType cellId = m_cellPicker->GetCellId();
+
+  return cellPickedResultById(selNature, cellId, pickRes);
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+  asiVisu_PrsManager::cellPickedResultById(const asiVisu_SelectionNature           selNature,
+                                       const vtkIdType cellId,
+                                       const Handle(asiVisu_CellPickerResult)& pickRes)
+{
   vtkIdType gid    = -1;
   vtkIdType pid    = -1;
   //
