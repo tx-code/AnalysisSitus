@@ -608,6 +608,8 @@ set (OCCT_LIB_FILES
   TKHLR
   TKFillet
   TKSTL
+  TKV3d
+  TKOpenGl
 )
 #------------------------------------------------------------------------------
 if (USE_MOBIUS)

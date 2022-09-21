@@ -28,13 +28,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-// Own include
-#include <asiAlgo_Utils.h>
-
 // OS-dependent
 #ifdef _WIN32
-  #include <windows.h>
+  #include <Windows.h>
+  #include <WNT_Window.hxx>
+  #include <WNT_WClass.hxx>
+#else
+  #include <Xw_Window.hxx>
+  #include <X11/Xlib.h>
+  #include <X11/Xutil.h>
+
+  // Get rid of X11 macro conflicting with Eigen.
+  #ifdef Success
+    #undef Success
+  #endif
 #endif
+
+// Own include
+#include <asiAlgo_Utils.h>
 
 // asiAlgo includes
 #include <asiAlgo_BuildCoonsSurf.h>
@@ -143,6 +154,13 @@
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+
+// For offscreen rendering
+#include <AIS_InteractiveContext.hxx>
+#include <AIS_Shape.hxx>
+#include <Image_AlienPixMap.hxx>
+#include <V3d_View.hxx>
+#include <OpenGl_GraphicDriver.hxx>
 
 // Rapidjson includes (should be hidden in cpp)
 #if defined USE_RAPIDJSON
@@ -591,6 +609,39 @@ bool asiAlgo_Utils::Str::IsNumber(const std::string& str)
   char* cnv;
   strtod(str.c_str(), &cnv);
   return cnv != str.data();
+}
+
+//-----------------------------------------------------------------------------
+
+std::string
+  asiAlgo_Utils::Str::FileDirectory(const std::string& filename)
+{
+  // Split path to directory names.
+  std::vector<std::string> chunks;
+  Split(filename, "\\/", chunks);
+
+  std::string resPath;
+
+  // Add leading slash for the unix systems.
+  if (filename[0] == '/') // unix
+    resPath += "/";
+
+  // Compose full path.
+  for (size_t k = 0; k < chunks.size() - 1; ++k)
+  {
+    resPath += chunks[k];
+    resPath += "/";
+  }
+
+  return resPath;
+}
+
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString
+  asiAlgo_Utils::Str::FileDirectory(const TCollection_AsciiString& filename)
+{
+  return FileDirectory(std::string(filename.ToCString())).c_str();
 }
 
 //-----------------------------------------------------------------------------
@@ -5553,4 +5604,103 @@ bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
   }
 
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(Image_AlienPixMap) asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape& shape,
+                                                                  const int           width,
+                                                                  const int           height)
+{
+  Handle(Aspect_DisplayConnection)
+    _displayConnection = new Aspect_DisplayConnection();
+
+  // don't waste the time waiting for VSync when window is not displayed on the screen
+  OpenGl_Caps _caps;
+  _caps.buffersNoSwap = true;
+
+  Handle(OpenGl_GraphicDriver)
+    _graphicDriver = new OpenGl_GraphicDriver(_displayConnection, false);
+  //
+  _graphicDriver->ChangeOptions() = _caps;
+  _graphicDriver->InitContext();
+
+  //* Viewer setup
+  Handle(V3d_Viewer) _viewer = new V3d_Viewer(_graphicDriver);
+  Quantity_Color bgColor(255. / 255, 255. / 255, 255. / 255, Quantity_TOC_RGB);
+  _viewer->SetDefaultBackgroundColor(bgColor);
+  _viewer->SetDefaultLights();
+  _viewer->SetLightOn();
+
+  Handle(V3d_View)
+    _view = new V3d_View(_viewer, _viewer->DefaultTypeOfView());
+
+#ifdef _WIN32
+  /* Window - create a so called "virtual" WNT window that is a pure WNT window
+     redefined to be never shown. */
+  Handle(WNT_WClass) _wClass = new WNT_WClass("GW3D_Class", (void*)DefWindowProcW,
+                                              CS_VREDRAW | CS_HREDRAW, 0, 0,
+                                              ::LoadCursor(NULL, IDC_ARROW));
+
+  Handle(WNT_Window) _win = new WNT_Window("",
+    _wClass,
+    WS_POPUP,
+    0, 0,
+    width, height,
+    Quantity_NOC_BLACK);
+
+  _win->SetVirtual(true);
+  _view->SetWindow(_win);
+
+#else // Linux
+  Handle(Xw_Window) _win = new Xw_Window(_graphicDriver->GetDisplayConnection(),
+                                         "",
+                                         0, 0,
+                                         width, height);
+                                         _win->SetVirtual(true);
+                                         _view->SetWindow(_win);
+#endif
+
+  //* View setup
+  _view->SetWindow(_win);
+  _view->SetComputedMode(false);
+  _view->SetProj(V3d_XposYnegZpos);
+  _view->AutoZFit();
+
+  //* AIS context
+  Handle(AIS_InteractiveContext) _context = new AIS_InteractiveContext(_viewer);
+  _context->SetDisplayMode(AIS_Shaded, false);
+  _context->DefaultDrawer()->SetFaceBoundaryDraw(true);
+
+  // Render immediate structures into back buffer rather than front.
+  _view->View()->SetImmediateModeDrawToFront(false);
+
+  //* Dump
+  Handle(Image_AlienPixMap) pixmap = new Image_AlienPixMap;
+  Quantity_Color _shapeColor(200. / 255, 200. / 255, 200. / 255, Quantity_TOC_RGB);
+
+  Handle(AIS_Shape) _shapePrs = new AIS_Shape(shape);
+  _shapePrs->SetColor(_shapeColor);
+  _context->Display(_shapePrs, false);
+  _view->FitAll(0.1, true);
+
+  bool isOk = _view->ToPixMap(*pixmap, width, height);
+
+  return isOk ? pixmap : nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
+                                              const int           width,
+                                              const int           height,
+                                              const std::string&  filename)
+{
+  Handle(Image_AlienPixMap)
+    pixmap = GeneratePixmap(shape, width, height);
+
+  if (pixmap.IsNull())
+    return false;
+
+  return pixmap->Save(filename.c_str());
 }

@@ -97,6 +97,11 @@
 
 //-----------------------------------------------------------------------------
 
+// Forward declarations.
+class Image_AlienPixMap;
+
+//-----------------------------------------------------------------------------
+
 //! Auxiliary functions facilitating working with OCCT topological shapes.
 namespace asiAlgo_Utils
 {
@@ -225,6 +230,20 @@ namespace asiAlgo_Utils
       (is >> result) ? result : default_value;
       return result;
     }
+
+    //! Derives the name of the directory which contains the file with
+    //! the passed filename.
+    //! \param[in] filename input filename.
+    //! \return directory name.
+    asiAlgo_EXPORT std::string
+      FileDirectory(const std::string& filename);
+
+    //! Derives the name of the directory which contains the file with
+    //! the passed filename.
+    //! \param[in] filename input filename.
+    //! \return directory name.
+    asiAlgo_EXPORT TCollection_AsciiString
+      FileDirectory(const TCollection_AsciiString& filename);
 
     //! Extracts the name of the last directory from the
     //! given path.
@@ -438,7 +457,34 @@ namespace asiAlgo_Utils
       AreEqualDirs(const tl::optional<gp_Dir>& a,
                    const tl::optional<gp_Dir>& b,
                    const double                angTolerDeg);
-  }
+  } // Verify namespace
+
+  namespace Graphics
+  {
+    //! Generates the picture of the given shape from the axonometric camera view.
+    //! The off-screen rendering technique is used.
+    //! \param[in] shape  the shape to screeenshot.
+    //! \param[in] width  the target width of the output image.
+    //! \param[in] height the target height of the output image.
+    //! \return the generated in-memory pixmap.
+    asiAlgo_EXPORT Handle(Image_AlienPixMap)
+      GeneratePixmap(const TopoDS_Shape& shape,
+                     const int           width,
+                     const int           height);
+
+    //! Generates the picture of the given shape from the axonometric camera view.
+    //! The off-screen rendering technique is used.
+    //! \param[in] shape    the shape to screeenshot.
+    //! \param[in] width    the target width of the output image.
+    //! \param[in] height   the target height of the output image.
+    //! \param[in] filename the outcome filename.
+    //! \return true in case of success, false -- otherwise.
+    asiAlgo_EXPORT bool
+      GeneratePicture(const TopoDS_Shape& shape,
+                      const int           width,
+                      const int           height,
+                      const std::string&  filename);
+  } // Graphics namespace.
 
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.
