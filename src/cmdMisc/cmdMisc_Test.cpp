@@ -69,36 +69,31 @@
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <asiAlgo_DivideByContinuity.h>
 
+#include <asiAlgo_BuildConvexHull.h>
+
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          cmdMisc_NotUsed(argc),
               const char**                 argv)
 {
-  std::vector<gp_XYZ> pts = { gp_XYZ(0,0,0), gp_XYZ(1,0,0), gp_XYZ(1,1,0), gp_XYZ(0,1,0), gp_XYZ(0,0,0) };
-  Handle(Geom_BSplineCurve) bspl = asiAlgo_Utils::PolylineAsSpline(pts);
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
 
-  bspl->IncreaseDegree(3);
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
 
-  /*BRepBuilderAPI_MakePolygon mkPolygon;
-  for ( const auto& p : pts )
-    mkPolygon.Add(p);
+  // Get shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  }
 
-  mkPolygon.Add(pts[0]);
-  TopoDS_Wire W = mkPolygon.Wire();*/
+  Handle(Poly_Triangulation) hull;
+  asiAlgo_BuildConvexHull buildHull;
+  buildHull.Perform(partShape, hull);
 
-  TopoDS_Wire W = BRepBuilderAPI_MakeWire( BRepBuilderAPI_MakeEdge(bspl) );
-
-  // Divide by C1.
-  asiAlgo_DivideByContinuity divider(nullptr, nullptr);
-  divider.Perform(W, GeomAbs_C1, 0.1);
-
-  interp->GetPlotter().REDRAW_SHAPE("W", W, Color_Red, 1., true);
-
-  BRepOffsetAPI_MakeOffset mkOffset(W, GeomAbs_Arc, false);
-  mkOffset.Build();
-  mkOffset.Perform(Atof(argv[1]));
-  const TopoDS_Shape& res = mkOffset.Shape();
-
-  interp->GetPlotter().REDRAW_SHAPE("res", res, Color_Green, 1., true);
+  interp->GetPlotter().REDRAW_TRIANGULATION("chull", hull, Color_Default, 1);
 
   return TCL_OK;
 }

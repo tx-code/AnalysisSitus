@@ -1,3 +1,40 @@
-<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M51.7663 29.8655L48.139 26.2617L34.6712 39.8225L21.1155 26.3494L17.5117 29.9766L32.881 45.2462L36.4964 45.2344L51.7663 29.8655Z" fill="#EFF0F1"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="70"
+   height="70"
+   viewBox="0 0 70 70"
+   fill="none"
+   version="1.1"
+   id="svg834"
+   sodipodi:docname="arrow_down.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs838" />
+  <sodipodi:namedview
+     id="namedview836"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     showgrid="false"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="-40.12831"
+     inkscape:cy="19.79899"
+     inkscape:window-width="3840"
+     inkscape:window-height="2050"
+     inkscape:window-x="-12"
+     inkscape:window-y="-12"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg834" />
+  <path
+     d="M 52,29.416914 48.39966,26 35.031961,38.857563 21.577014,26.083152 18,29.522252 33.255066,44 36.843595,43.98881 Z"
+     fill="#eff0f1"
+     id="path832"
+     style="stroke-width:0.970101" />
 </svg>
