@@ -194,9 +194,9 @@ Handle(asiAlgo_BaseCloud<double>)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_RelievePointCloud::operator()(const std::vector<gp_Ax1>& pc,
-                                           const double               tol,
-                                           std::vector<gp_Ax1>&       res) const
+void asiAlgo_RelievePointCloud::operator()(const std::vector< std::pair<int, gp_Ax1> >& pc,
+                                           const double                                 tol,
+                                           std::vector< std::pair<int, gp_Ax1> >&       res) const
 {
   // Working tools and variables.
   int curID = 0;
@@ -207,7 +207,7 @@ void asiAlgo_RelievePointCloud::operator()(const std::vector<gp_Ax1>& pc,
   std::vector<int> resIds;
   for ( const auto& pt : pc )
   {
-    gp_XYZ currP = pt.Location().XYZ();
+    gp_XYZ currP = pt.second.Location().XYZ();
 
     // Add point to the result passing it through the spatial cell filter.
     relieve::filterPoint(idx, curID, currP, tol, resIds, PointFilter);

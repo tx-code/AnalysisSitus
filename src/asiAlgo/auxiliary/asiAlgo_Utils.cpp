@@ -5432,9 +5432,9 @@ void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
-                                          const double         tol,
-                                          std::vector<gp_Ax1>& samples)
+bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&                     face,
+                                          const double                           tol,
+                                          std::vector< std::pair<int, gp_Ax1> >& samples)
 {
   TopLoc_Location                   L;
   const Handle(Poly_Triangulation)& T = BRep_Tool::Triangulation(face, L);
@@ -5490,13 +5490,13 @@ bool asiAlgo_Utils::GetFacePointsByFacets(const TopoDS_Face&   face,
     if ( face.Orientation() == TopAbs_REVERSED )
       N.Reverse();
 
-    samples.push_back( gp_Ax1(Pm, N) );
+    samples.push_back( {itri, gp_Ax1(Pm, N)} );
   }
 
   // Sparse the point cloud if requested.
   if ( tol > Precision::Confusion() )
   {
-    std::vector<gp_Ax1> sparsed;
+    std::vector< std::pair<int, gp_Ax1> > sparsed;
     asiAlgo_RelievePointCloud sparse;
     sparse(samples, tol, sparsed);
     //

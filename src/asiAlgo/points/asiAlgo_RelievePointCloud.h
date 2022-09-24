@@ -61,11 +61,11 @@ public:
   //! Sparses the passed point cloud.
   //! \param[in]  pc  the point cloud to thin out.
   //! \param[in]  tol the spatial tolerance to use.
-  //! \param[out] res the sparsed point cloud.
+  //! \param[out] res the sparsed point cloud over triangles.
   asiAlgo_EXPORT void
-    operator()(const std::vector<gp_Ax1>& pc,
-               const double               tol,
-               std::vector<gp_Ax1>&       res) const;
+    operator()(const std::vector< std::pair<int, gp_Ax1> >& pc,
+               const double                                 tol,
+               std::vector< std::pair<int, gp_Ax1> >&       res) const;
 
 };
 

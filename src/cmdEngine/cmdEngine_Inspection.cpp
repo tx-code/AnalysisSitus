@@ -4352,7 +4352,7 @@ int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
       face = TopoDS::Face( M->GetPartNode()->GetAAG()->GetMapOfFaces()(faceId) );
 
     // Get face points using its triangulation.
-    std::vector<gp_Ax1> probes;
+    std::vector< std::pair<int, gp_Ax1> > probes;
     //
     if ( !asiAlgo_Utils::GetFacePointsByFacets(face, 0., probes) )
     {
@@ -4362,8 +4362,8 @@ int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
 
     for ( const auto& probe : probes )
     {
-      const gp_Pnt& xyz = probe.Location();
-      const gp_Dir& N   = probe.Direction();
+      const gp_Pnt& xyz = probe.second.Location();
+      const gp_Dir& N   = probe.second.Direction();
 
       distAxes.origins->AddElement( xyz );
       distAxes.vectors->AddElement( N.XYZ() );
