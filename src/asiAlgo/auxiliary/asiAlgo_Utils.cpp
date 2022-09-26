@@ -162,6 +162,8 @@
 #include <V3d_View.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 
+#include <BRepBuilderAPI_Transform.hxx>
+
 // Rapidjson includes (should be hidden in cpp)
 #if defined USE_RAPIDJSON
   #include <rapidjson/document.h>
@@ -3166,6 +3168,20 @@ TopoDS_Shape asiAlgo_Utils::BooleanCut(const TopoDS_Shape&         object,
 {
   BRepAlgoAPI_Cut API;
   //
+  return BooleanCut(object, tools, isParallel, fuzz, API);
+}
+
+//-----------------------------------------------------------------------------
+
+TopoDS_Shape asiAlgo_Utils::BooleanCut(const TopoDS_Shape& object,
+                                       const TopoDS_Shape& tool,
+                                       const bool          isParallel,
+                                       const double        fuzz,
+                                       BRepAlgoAPI_Cut&    API)
+{
+  TopTools_ListOfShape tools;
+  tools.Append(tool);
+
   return BooleanCut(object, tools, isParallel, fuzz, API);
 }
 

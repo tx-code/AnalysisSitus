@@ -1267,6 +1267,13 @@ namespace asiAlgo_Utils
                const double                fuzz = 0.0);
 
   asiAlgo_EXPORT TopoDS_Shape
+    BooleanCut(const TopoDS_Shape& object,
+               const TopoDS_Shape& tool,
+               const bool          isParallel,
+               const double        fuzz,
+               BRepAlgoAPI_Cut&    API);
+
+  asiAlgo_EXPORT TopoDS_Shape
     BooleanCut(const TopoDS_Shape&         object,
                const TopTools_ListOfShape& tools,
                const bool                  isParallel,

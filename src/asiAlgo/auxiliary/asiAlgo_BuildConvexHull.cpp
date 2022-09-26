@@ -44,12 +44,13 @@
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_BuildConvexHull::Perform(const TopoDS_Shape&         shape,
-                                      Handle(Poly_Triangulation)& hull)
+                                      Handle(Poly_Triangulation)& hull,
+                                      const bool                  forceTriangulate)
 {
   // Check if the shape should be meshed beforehand.
   asiAlgo_MeshInfo meshInfo = asiAlgo_MeshInfo::Extract(shape);
   //
-  if ( !meshInfo.nFacets )
+  if ( !meshInfo.nFacets || forceTriangulate )
   {
     const double linDefl = asiAlgo_MeshGen::AutoSelectLinearDeflection(shape);
     const double angDefl = asiAlgo_MeshGen::AutoSelectAngularDeflection(shape);
@@ -69,7 +70,7 @@ bool asiAlgo_BuildConvexHull::Perform(const TopoDS_Shape&         shape,
   }
 
   // Merge meshes into one piece.
-  asiAlgo_MeshMerge meshMerge(shape);
+  asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode::Mode_Mesh);
   //
   Handle(Poly_Triangulation)
     inputTris = meshMerge.GetResultPoly()->GetTriangulation();

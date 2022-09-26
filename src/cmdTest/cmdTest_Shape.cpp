@@ -40,12 +40,20 @@
 
 // OCCT includes
 #include <BRepBndLib.hxx>
+#include <BRepCheck_Analyzer.hxx>
+#include <BRepGProp.hxx>
+#include <BRepTools.hxx>
+#include <GProp_GProps.hxx>
+#include <TopExp_Explorer.hxx>
+
+// STL includes
+#include <vector>
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_CheckNumberOfShapeEntities(const Handle(asiTcl_Interp)& interp,
-                                      int                          argc,
-                                      const char**                 argv)
+int TEST_CheckNumberOfShapeEntities(const Handle(asiTcl_Interp)& interp,
+                                    int                          argc,
+                                    const char**                 argv)
 {
   if ( argc != 17 )
   {
@@ -154,9 +162,9 @@ int ENGINE_CheckNumberOfShapeEntities(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_CheckAABBOfShape(const Handle(asiTcl_Interp)& interp,
-                            int                          argc,
-                            const char**                 argv)
+int TEST_CheckAABBOfShape(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
 {
   if ( argc != 9 )
   {
@@ -238,6 +246,122 @@ int ENGINE_CheckAABBOfShape(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int TEST_CheckSolidsVolumes(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+  if ( argc < 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  const double tol = std::atof(argv[1]);
+
+  std::vector<double> volumes;
+  for ( int index = 2; index < argc; ++index )
+  {
+    volumes.push_back(std::atof(argv[index]));
+  }
+
+  // Get shape to analyze.
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast(interp->GetModel());
+  if ( M.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model is NULL.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape partShape = M->GetPartNode()->GetShape();
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is NULL.");
+    return TCL_ERROR;
+  }
+
+  bool isOK = true;
+  std::vector<double>::const_iterator itVolumes = volumes.cbegin();
+  TopExp_Explorer exp(partShape, TopAbs_SOLID);
+  if (!exp.More())
+  {
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "No solids");
+    return TCL_ERROR;
+  }
+
+  for (; itVolumes != volumes.cend() && exp.More(); ++itVolumes, exp.Next())
+  {
+    GProp_GProps props;
+    BRepGProp::VolumeProperties(exp.Value(), props);
+
+    if (abs(props.Mass() - *itVolumes) > tol)
+    {
+      isOK = false;
+    }
+  }
+
+  if ( itVolumes != volumes.cend() || exp.More() || !isOK )
+  {
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Volumes: ");
+    exp.Init(partShape, TopAbs_SOLID);
+    for (; exp.More(); exp.Next())
+    {
+      GProp_GProps props;
+      BRepGProp::VolumeProperties(exp.Value(), props);
+      interp->GetProgress().SendLogMessage(LogInfo(Normal) << "%1" << props.Mass());
+    }
+
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int TEST_CheckPartShape(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get shape to analyze.
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast(interp->GetModel());
+  if ( M.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model is NULL.");
+    return TCL_ERROR;
+  }
+  //
+  TopoDS_Shape partShape = M->GetPartNode()->GetShape();
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is NULL.");
+    return TCL_ERROR;
+  }
+
+  try
+  {
+    BRepCheck_Analyzer analyzer(partShape, true);
+    if ( !analyzer.IsValid() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is not valid.");
+      return TCL_ERROR;
+    }
+  }
+  catch ( ... )
+  {
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdTest::Commands_Shape(const Handle(asiTcl_Interp)&      interp,
                              const Handle(Standard_Transient)& cmdTest_NotUsed(data))
 {
@@ -250,7 +374,7 @@ void cmdTest::Commands_Shape(const Handle(asiTcl_Interp)&      interp,
     " -face <nbFaces> -shell <nbShells> -solid <nbsolids> -compsolid <nbCompsolids> -compound <nbCompound>\n"
     "\t Check number of shape entities.",
     //
-    __FILE__, group, ENGINE_CheckNumberOfShapeEntities);
+    __FILE__, group, TEST_CheckNumberOfShapeEntities);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("test-check-shape-aabb-dim",
@@ -258,5 +382,21 @@ void cmdTest::Commands_Shape(const Handle(asiTcl_Interp)&      interp,
     "test-check-shape-aabb-dim -xDim <xDim> -yDim <yDim> -zDim <zDim> -tol <tolerance>\n"
     "\t Check dimensions of AABB of mesh.",
     //
-    __FILE__, group, ENGINE_CheckAABBOfShape);
+    __FILE__, group, TEST_CheckAABBOfShape);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("test-check-solids-volumes",
+    //
+    "test-check-solids-volumes <tolerance> <vol1> <vol2> <vol3> ...\n"
+    "\t Checks volumes of solids.",
+    //
+    __FILE__, group, TEST_CheckSolidsVolumes);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("test-check-part-shape",
+    //
+    "test-check-part-shape\n"
+    "\t Checks part shape.",
+    //
+    __FILE__, group, TEST_CheckPartShape);
 }

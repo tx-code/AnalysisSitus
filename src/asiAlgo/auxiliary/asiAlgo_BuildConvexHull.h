@@ -70,7 +70,8 @@ public:
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     Perform(const TopoDS_Shape&         shape,
-            Handle(Poly_Triangulation)& hull);
+            Handle(Poly_Triangulation)& hull,
+            const bool                  forceTriangulate = false);
 
   //! Constructs convex hull.
   //! \param[in]  data the input vector of points, data is stored in x0, y0, z0, x1, y1, z1 order.

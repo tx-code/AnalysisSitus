@@ -32,6 +32,7 @@
 #include <asiTest_AAG.h>
 #include <asiTest_ChangeColor.h>
 #include <asiTest_CommonFacilities.h>
+#include <asiTest_ComputeNegativeVolume.h>
 #include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
 #include <asiTest_Exchange.h>
@@ -134,22 +135,23 @@ int main(int argc, char* argv[])
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
   // Main tests.
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>        );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                 );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>         );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeBlends>     );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeCavities>   );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeConvexHull> );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>      );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AAG>                 );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>          );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_FaceGrid>            );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>     );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>               );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>              );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>    );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_GenerateFacets>      );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>         );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>          );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>           );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeBlends>       );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeCavities>     );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RecognizeConvexHull>   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>        );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AAG>                   );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>            );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_FaceGrid>              );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>       );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>                 );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>                );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_GenerateFacets>        );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>           );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ComputeNegativeVolume> );
 
   // Data exchange tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );
