@@ -91,6 +91,7 @@ void glTFMaterialMap::addImage(glTFJsonSerializer*          writer,
                                const Handle(Image_Texture)& texture,
                                bool&                        isStarted)
 {
+#if defined USE_RAPIDJSON
   if ( texture.IsNull() || m_imageMap.IsBound1(texture) || m_imageFailMap.Contains(texture) )
   {
     return;
@@ -126,6 +127,9 @@ void glTFMaterialMap::addImage(glTFJsonSerializer*          writer,
     writer->String( textureUri.ToCString() );
   }
   writer->EndObject();
+#else
+  throw Standard_ProgramError("rapidjson is not available");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -134,6 +138,7 @@ void glTFMaterialMap::AddMaterial(glTFJsonSerializer*       writer,
                                   const glTFXdeVisualStyle& style,
                                   bool&                     isStarted)
 {
+#if defined USE_RAPIDJSON
   if ( writer == NULL || ( ( style.GetMaterial().IsNull() || style.GetMaterial()->IsEmpty() )
                        && !( style.IsSetColorSurf() || style.IsSetColorCurve() ) ) )
   {
@@ -150,6 +155,9 @@ void glTFMaterialMap::AddMaterial(glTFJsonSerializer*       writer,
   m_pWriter = writer;
   AddMaterial(style);
   m_pWriter = NULL;
+#else
+  throw Standard_ProgramError("rapidjson is not available");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -176,6 +184,7 @@ void glTFMaterialMap::addTexture(glTFJsonSerializer*          writer,
                                  const Handle(Image_Texture)& texture,
                                  bool&                        isStarted)
 {
+#if defined USE_RAPIDJSON
   if ( texture.IsNull() || m_textureMap.Contains(texture) || !m_imageMap.IsBound1(texture) )
   {
     return;
@@ -204,6 +213,9 @@ void glTFMaterialMap::addTexture(glTFJsonSerializer*          writer,
     writer->Int( imgKey.IntegerValue() );
   }
   writer->EndObject();
+#else
+  throw Standard_ProgramError("rapidjson is not available");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -220,6 +232,7 @@ void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      style,
                                      const TCollection_AsciiString&,
                                      const TCollection_AsciiString& name)
 {
+#if defined USE_RAPIDJSON
   if ( m_pWriter == NULL )
   {
     Standard_ProgramError::Raise ("glTFMaterialMap::DefineMaterial() should be called with JSON Writer");
@@ -426,4 +439,7 @@ void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      style,
     }
   }
   m_pWriter->EndObject();
+#else
+  throw Standard_ProgramError("rapidjson is not available");
+#endif
 }

@@ -66,9 +66,9 @@ namespace relieve
 
   private:
 
-    gp_XYZ m_P;      //!< Source point.
-    bool   m_bFound; //!< Whether two points are coincident or not.
     double m_fTol;   //!< Resolution to check for coincidence.
+    bool   m_bFound; //!< Whether two points are coincident or not.
+    gp_XYZ m_P;      //!< Source point.
 
   };
 
@@ -159,7 +159,7 @@ namespace relieve
     }
   }
 
-};
+}
 
 //-----------------------------------------------------------------------------
 
