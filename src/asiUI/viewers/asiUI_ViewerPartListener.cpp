@@ -183,14 +183,14 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*              wViewerPart,
-                                                   asiUI_ViewerDomain*            wViewerDomain,
-                                                   asiUI_ViewerHost*              wViewerHost,
-                                                   asiUI_ObjectBrowser*           wBrowser,
-                                                   const Handle(asiEngine_Model)& model,
-                                                   ActAPI_ProgressEntry           progress,
-                                                   ActAPI_PlotterEntry            plotter,
-                                                   Handle(asiUI_IStatusBar)       statusBar)
+asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
+                                                   asiUI_ViewerDomain*             wViewerDomain,
+                                                   asiUI_ViewerHost*               wViewerHost,
+                                                   asiUI_ObjectBrowser*            wBrowser,
+                                                   const Handle(asiUI_IStatusBar)& statusBar,
+                                                   const Handle(asiEngine_Model)&  model,
+                                                   ActAPI_ProgressEntry            progress,
+                                                   ActAPI_PlotterEntry             plotter)
 //
 : asiUI_Viewer3dListener  (wViewerPart, model, progress, plotter),
   m_wViewerDomain         (wViewerDomain),

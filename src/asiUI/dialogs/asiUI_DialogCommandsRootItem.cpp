@@ -42,7 +42,7 @@ void asiUI_DialogCommandsRootItem::setValues(const std::vector<asiUI_TclPluginTo
 
 asiUI_TclPluginToCommands asiUI_DialogCommandsRootItem::value(const int rowId) const
 {
-  if (rowId >= m_values.size())
+  if (rowId >= (int) (m_values.size()))
     return asiUI_TclPluginToCommands("", std::vector<asiUI_TclCommandParsed>());
 
   return m_values[rowId];

@@ -55,18 +55,18 @@ public:
   //! \param[in] wViewerDomain domain viewer.
   //! \param[in] wViewerHost   host viewer.
   //! \param[in] wBrowser      object browser.
+  //! \param[in] statusBar     status bar interface.
   //! \param[in] model         Data Model instance.
   //! \param[in] progress      progress notifier.
   //! \param[in] plotter       imperative plotter.
-  //! \param[in] statusBar     status bar string.
-  asiUI_ViewerPartListener(asiUI_ViewerPart*              wViewerPart,
-                           asiUI_ViewerDomain*            wViewerDomain,
-                           asiUI_ViewerHost*              wViewerHost,
-                           asiUI_ObjectBrowser*           wBrowser,
-                           const Handle(asiEngine_Model)& model,
-                           ActAPI_ProgressEntry           progress,
-                           ActAPI_PlotterEntry            plotter,
-                           Handle(asiUI_IStatusBar)       statusBar);
+  asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
+                           asiUI_ViewerDomain*             wViewerDomain,
+                           asiUI_ViewerHost*               wViewerHost,
+                           asiUI_ObjectBrowser*            wBrowser,
+                           const Handle(asiUI_IStatusBar)& statusBar,
+                           const Handle(asiEngine_Model)&  model,
+                           ActAPI_ProgressEntry            progress,
+                           ActAPI_PlotterEntry             plotter);
 
   //! Dtor.
   virtual
@@ -124,10 +124,10 @@ protected:
 
 protected:
 
-  asiUI_ViewerDomain*  m_wViewerDomain; //!< Domain viewer.
-  asiUI_ViewerHost*    m_wViewerHost;   //!< Host viewer.
-  asiUI_ObjectBrowser* m_wBrowser;      //!< Object browser.
-  Handle(asiUI_IStatusBar) m_statusBar; //!< Status bar string.
+  asiUI_ViewerDomain*      m_wViewerDomain; //!< Domain viewer.
+  asiUI_ViewerHost*        m_wViewerHost;   //!< Host viewer.
+  asiUI_ObjectBrowser*     m_wBrowser;      //!< Object browser.
+  Handle(asiUI_IStatusBar) m_statusBar;     //!< Status bar string.
 
   //! Custom actions.
   QAction* m_pSaveBREPAction;

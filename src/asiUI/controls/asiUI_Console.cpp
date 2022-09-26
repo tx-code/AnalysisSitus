@@ -63,7 +63,7 @@ namespace
     if (curCommand.isEmpty())
       return "";
 
-    for (int commandIter = 0; commandIter < commands.size(); commandIter++)
+    for ( size_t commandIter = 0; commandIter < commands.size(); commandIter++ )
     {
       QString command(commands[commandIter].Name.c_str());
       if (command != curCommand)
@@ -74,7 +74,7 @@ namespace
     }
     return "";
   }
-};
+}
 
 //-----------------------------------------------------------------------------
 

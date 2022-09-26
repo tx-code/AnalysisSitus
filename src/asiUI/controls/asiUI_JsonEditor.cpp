@@ -58,7 +58,7 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  QColor highlightColor()        { return QColor("#18465d"); }
+  //QColor highlightColor()        { return QColor("#18465d"); }
 
   //-----------------------------------------------------------------------------
 
@@ -66,62 +66,62 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  void printJsonBlocks(const asiUI_JsonBlocks& markers)
-  {
-    std::cout << "blocks: " << markers.size() << std::endl;
-    for (auto& pair : markers)
-    {
-      asiUI_JsonBlock block = pair.second;
-      std::cout << block.m_isCollapsed << " start, end: "
-                << block.m_blockNumber + 1 << ", "
-                << block.m_blockNumberClose + 1 << ", "
-                << block.m_positionOpen << ", "
-                << block.m_positionClose
-                << std::endl;
-    }
-  }
+  //void printJsonBlocks(const asiUI_JsonBlocks& markers)
+  //{
+  //  std::cout << "blocks: " << markers.size() << std::endl;
+  //  for (auto& pair : markers)
+  //  {
+  //    asiUI_JsonBlock block = pair.second;
+  //    std::cout << block.m_isCollapsed << " start, end: "
+  //              << block.m_blockNumber + 1 << ", "
+  //              << block.m_blockNumberClose + 1 << ", "
+  //              << block.m_positionOpen << ", "
+  //              << block.m_positionClose
+  //              << std::endl;
+  //  }
+  //}
+
+  ////-----------------------------------------------------------------------------
+
+  //void printBlockParents(const asiUI_ListOfListOfInt& blockParents)
+  //{
+  //  std::cout << "parents: " << blockParents.size() << std::endl;
+  //  for (auto& pair : blockParents)
+  //  {
+  //    asiUI_ListOfInt parents = pair.second;
+
+  //    std::cout << pair.first + 1 << ": ";
+  //    for (auto& id : parents)
+  //    {
+  //      std::cout << id + 1 << " ";
+  //    }
+  //    std::cout << std::endl;
+  //  }
+  //}
+
+  ////-----------------------------------------------------------------------------
+
+  //void printCollapsed(const asiUI_JsonBlocks& collapsedBlocks)
+  //{
+  //  std::cout << "collapsed: " << collapsedBlocks.size() << std::endl;
+  //  for (auto& item : collapsedBlocks)
+  //  {
+  //    std::cout << item.first << " ";
+  //  }
+  //  if (collapsedBlocks.size() > 0)
+  //    std::cout << std::endl;
+  //}
 
   //-----------------------------------------------------------------------------
 
-  void printBlockParents(const asiUI_ListOfListOfInt& blockParents)
-  {
-    std::cout << "parents: " << blockParents.size() << std::endl;
-    for (auto& pair : blockParents)
-    {
-      asiUI_ListOfInt parents = pair.second;
-
-      std::cout << pair.first + 1 << ": ";
-      for (auto& id : parents)
-      {
-        std::cout << id + 1 << " ";
-      }
-      std::cout << std::endl;
-    }
-  }
-
-  //-----------------------------------------------------------------------------
-
-  void printCollapsed(const asiUI_JsonBlocks& collapsedBlocks)
-  {
-    std::cout << "collapsed: " << collapsedBlocks.size() << std::endl;
-    for (auto& item : collapsedBlocks)
-    {
-      std::cout << item.first << " ";
-    }
-    if (collapsedBlocks.size() > 0)
-      std::cout << std::endl;
-  }
-
-  //-----------------------------------------------------------------------------
-
-  void printPositions(const asiUI_MapIntToInt& positions)
+  /*void printPositions(const asiUI_MapIntToInt& positions)
   {
     std::cout << "positions: " << positions.size() << std::endl;
     for (auto& pair : positions)
     {
        std::cout << pair.first + 1 << " : " << pair.second << std::endl;
     }
-  }
+  }*/
 }
 
 //-----------------------------------------------------------------------------

@@ -415,10 +415,10 @@ void exe_MainWindow::createDockWindows()
                                                        Widgets.wViewerDomain,
                                                        Widgets.wViewerSurface,
                                                        Widgets.wBrowser,
+                                                       cf->StatusBar,
                                                        cf->Model,
                                                        cf->Progress,
-                                                       cf->Plotter,
-                                                       cf->StatusBar);
+                                                       cf->Plotter);
 
   // Listener for domain viewer.
   Listeners.pViewerDomain = new asiUI_ViewerDomainListener(Widgets.wViewerPart,
