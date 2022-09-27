@@ -282,6 +282,9 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   if ( nCrossEdges == 1 || nCrossEdges == 2 )
   {
     blendAttr->Confirmed = true;
+
+    // Get length of the cross edge.
+    blendAttr->CrossLength = this->testLength( crossEdgeIndices.GetMinimalMapped() );
   }
 
   for ( int eidx = 1; eidx <= nCrossEdges; ++eidx )

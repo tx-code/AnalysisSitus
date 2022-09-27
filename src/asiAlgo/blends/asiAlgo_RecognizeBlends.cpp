@@ -91,8 +91,6 @@ namespace
 //! \brief Function to filter the extracted blend candidates by radius.
 class asiAlgo_ExtractBlendsFilter : public asiAlgo_ExtractFeaturesFilter
 {
-public:
-
   // OCCT RTTI.
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ExtractBlendsFilter, asiAlgo_ExtractFeaturesFilter)
 
@@ -664,7 +662,8 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
   // subcomponents all having the same radius.
   for ( const auto& ccomp : ccomps )
   {
-    std::unordered_map<double, asiAlgo_Feature> byRadii;
+    // radius : <fids, cross-edge length>
+    std::unordered_map<double, std::pair<asiAlgo_Feature, double>> byRadii;
 
     // Distribute feature faces by fillet radii.
     for ( asiAlgo_Feature::Iterator fit(ccomp); fit.More(); fit.Next() )
@@ -684,7 +683,7 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
 
         // Find with tolerance.
         auto tuple =
-          std::find_if(byRadii.begin(), byRadii.end(), [&](const std::pair<double, asiAlgo_Feature>& t) {
+          std::find_if(byRadii.begin(), byRadii.end(), [&](const std::pair<double, std::pair<asiAlgo_Feature, double>>& t) {
             return ( Abs(t.first - rr)*100/rr < rDevPerc );
           });
 
@@ -693,11 +692,11 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
           asiAlgo_Feature feat;
           feat.Add(fid);
           //
-          byRadii.insert({rr, feat});
+          byRadii.insert({rr, {feat, bc->CrossLength}});
         }
         else
         {
-          tuple->second.Add(fid);
+          tuple->second.first.Add(fid);
         }
       }
     }
@@ -709,7 +708,8 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
     for ( const auto& tuple : byRadii )
     {
       const double           r    = tuple.first;
-      const asiAlgo_Feature& fids = tuple.second;
+      const asiAlgo_Feature& fids = tuple.second.first;
+      const double           cel  = tuple.second.second;
 
       // Prepare connected components out of the recognition result.
       std::vector<asiAlgo_Feature> localChains;
@@ -725,7 +725,7 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
       {
         const double len = ::BlendChainLength(localChain, m_aag);
 
-        rawChains.push_back( {localChain, {len, r}} );
+        rawChains.push_back( {localChain, {len, r, cel}} );
       }
     }
 
@@ -788,8 +788,9 @@ void asiAlgo_RecognizeBlends::GetChains(std::vector<asiAlgo_BlendChain>& chains,
   {
     if ( !chainedFids.Contains(tuple.first) )
     {
-      asiAlgo_BlendChainProps props( tuple.second->Length,
-                                     tuple.second->GetMaxRadius() );
+      asiAlgo_BlendChainProps props(tuple.second->Length,
+                                    tuple.second->GetMaxRadius(),
+                                    tuple.second->CrossLength);
 
       asiAlgo_Feature oneFaceFeature;
       oneFaceFeature.Add(tuple.first);

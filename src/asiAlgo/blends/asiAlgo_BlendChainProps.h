@@ -39,22 +39,26 @@
 //! Fillet chain properties.
 struct asiAlgo_BlendChainProps
 {
-  double Length; //!< Chain total length.
-  double Radius; //!< Blending radius.
+  double Length;          //!< Chain total length.
+  double Radius;          //!< Blending radius.
+  double CrossEdgeLength; //!< Cross-edge length.
 
   //! Default ctor.
   asiAlgo_BlendChainProps()
-  : Length (0.),
-    Radius (0.)
+  : Length          (0.),
+    Radius          (0.),
+    CrossEdgeLength (0.)
   {}
 
-  //! Ctor accepting length and radius.
+  //! Complete ctor.
   //! \param[in] len the length to set.
   //! \param[in] r   the radius to set.
   asiAlgo_BlendChainProps(const double len,
-                          const double r)
-  : Length (len),
-    Radius (r)
+                          const double r,
+                          const double cel)
+  : Length          (len),
+    Radius          (r),
+    CrossEdgeLength (cel)
   {}
 };
 

@@ -58,6 +58,7 @@ public:
   : asiAlgo_FeatureAttrFace (featureId),
     Kind                    (BlendType_Uncertain),
     Length                  (0.),
+    CrossLength             (0.),
     Confirmed               (false)
   {}
 
@@ -179,6 +180,7 @@ public:
   std::vector<asiAlgo_BlendVexity> Vexities;               //!< Blend vexity (several for VBFs).
   std::set<double>                 Radii;                  //!< Blend radius or perhaps several radii for VBFs.
   double                           Length;                 //!< Blend length.
+  double                           CrossLength;            //!< Cross-edge length.
   bool                             Confirmed;              //!< Confirmed/unconfirmed blend.
   TColStd_PackedMapOfInteger       SmoothEdgeIndices;      //!< Smooth edges.
   TColStd_PackedMapOfInteger       SpringEdgeIndices;      //!< Spring edges.
