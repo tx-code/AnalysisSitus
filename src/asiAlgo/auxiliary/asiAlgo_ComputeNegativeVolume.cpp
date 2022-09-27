@@ -7,11 +7,13 @@
 #include "asiAlgo_ComputeNegativeVolume.h"
 
 // asiAlgo includes
+#include <asiAlgo_ClassifyPointSolid.h>
 #include <asiAlgo_ClassifyPt.h>
 #include <asiAlgo_Cloudify.h>
 #include <asiAlgo_BuildConvexHull.h>
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_InvertShells.h>
+#include <asiAlgo_MeshGen.h>
 
 // OCCT includes
 #include <BOPAlgo_Builder.hxx>
@@ -32,15 +34,92 @@
 #include <Geom2dAdaptor_Curve.hxx>
 #include <GProp_GProps.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
+#include <Poly_CoherentTriangulation.hxx>
 #include <ShapeAnalysis_ShapeTolerance.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
 
+// STL includes
+#include <unordered_map>
+
 //-----------------------------------------------------------------------------
 
 namespace {
+
+
+bool GetPointInShape(const TopoDS_Shape& shape,
+                     gp_Pnt&             pnt,
+                     const double        toler)
+{
+  gp_Pnt point;
+
+  gp_Lin lin;
+  bool isFound = false;
+  TopExp_Explorer itFaces(shape, TopAbs_FACE);
+  for (; itFaces.More(); itFaces.Next())
+  {
+    // For adjacent faces that form a single surface, only one
+    // extension needs to be kept (otherwise, we have an overlay).
+    gp_Pnt checkedPnt;
+    gp_Vec D1U, D1V, normal;
+    BRepAdaptor_Surface   checkedfaceAdapt(TopoDS::Face(itFaces.Value()));
+    math_BullardGenerator RNG;
+    int numSamples = 10;
+    for (int i = 0; i < numSamples; ++i)
+    {
+      // Get a random sample point.
+      gp_Pnt2d uv;
+      if (!asiAlgo_Utils::GetRandomPoint(checkedfaceAdapt.Face(), RNG, uv))
+      {
+        continue;
+      }
+
+      checkedfaceAdapt.D1(uv.X(), uv.Y(), checkedPnt, D1U, D1V);
+      isFound = true;
+      break;
+    }
+
+    if (!isFound)
+    {
+      continue;
+    }
+
+    if (checkedfaceAdapt.Face().Orientation() == TopAbs_REVERSED)
+    {
+      normal *= -1.0;
+    }
+
+    if (normal.Magnitude() > gp::Resolution())
+    {
+      normal.Normalize();
+    }
+    else
+    {
+      continue;
+    }
+
+    lin = gp_Lin(checkedPnt, -1.0 * normal);
+
+    break;
+  }
+
+  if (!isFound)
+  {
+    return false;
+  }
+
+  ShapeAnalysis_ShapeTolerance tolerChecker;
+  double maxToler = tolerChecker.Tolerance(itFaces.Value(), 1);
+  maxToler = std::max(toler + 1.0e-4, maxToler);
+  maxToler = std::max(1.0e-4, maxToler);
+
+  point = lin.Location().XYZ() + (2.0 * maxToler) * lin.Direction().XYZ();
+
+  pnt = point;
+  return true;
+}
 
 //=======================================================================
 // function: MakeSolid
@@ -49,7 +128,8 @@ namespace {
 bool MakeSolid(const TopTools_ListOfShape&          listOfShape,
                TopoDS_Shape&                        result,
                TopTools_IndexedDataMapOfShapeShape& modifiedShapesInv,
-               TopTools_IndexedDataMapOfShapeShape& modifiedShapes)
+               TopTools_IndexedDataMapOfShapeShape& modifiedShapes,
+               const bool                           checkOrientation = false)
 {
   modifiedShapesInv.Clear();
   TopoDS_Shape negativeVolumeShape;
@@ -139,23 +219,108 @@ bool MakeSolid(const TopTools_ListOfShape&          listOfShape,
       return false;
     }
 
-    try
+    if (checkOrientation)
     {
-      BRepClass3d_SolidClassifier classifier(negativeVolumeShape);
-      classifier.PerformInfinitePoint(Precision::Confusion());
-      if (classifier.State() == TopAbs_IN)
+      try
       {
-        asiAlgo_InvertShells inverter(negativeVolumeShape);
-        if (!inverter.Perform() || inverter.GetResult().IsNull())
+        //bool isOnMesh = true;
+        //asiAlgo_MeshInfo meshInfo;
+        //{
+        //  const double linDefl = asiAlgo_MeshGen::AutoSelectLinearDeflection(negativeVolumeShape);
+        //  const double angDefl = asiAlgo_MeshGen::AutoSelectAngularDeflection(negativeVolumeShape);
+        //  if (!asiAlgo_MeshGen::DoNative(negativeVolumeShape,
+        //                                 linDefl,
+        //                                 angDefl,
+        //                                 meshInfo))
+        //  {
+        //    isOnMesh = false;
+        //  }
+        //}
+        //
+        //if (isOnMesh)
+        //{
+        //  Handle(Poly_CoherentTriangulation)
+        //    tris = new Poly_CoherentTriangulation;
+        //
+        //  // Add all triangulations from faces to the common collection.
+        //  for (TopExp_Explorer fexp(negativeVolumeShape, TopAbs_FACE); fexp.More(); fexp.Next())
+        //  {
+        //    const TopoDS_Face& face = TopoDS::Face(fexp.Current());
+        //
+        //    // Poly_MeshPurpose was introduced in OpenCascade 7.6 and remained
+        //    // undocumented.
+        //    TopLoc_Location L;
+        //    const Handle(Poly_Triangulation)&
+        //      poly = BRep_Tool::Triangulation(face, L);
+        //    //
+        //    if (poly.IsNull())
+        //      continue;
+        //
+        //    // Add nodes.
+        //    std::unordered_map<int, int> nodesMap;
+        //    for (int iNode = 1; iNode <= poly->NbNodes(); ++iNode)
+        //    {
+        //      // Make sure to apply location, e.g., see the effect in /cad/ANC101.brep
+        //      const int n = tris->SetNode(poly->Node(iNode).Transformed(L).XYZ());
+        //
+        //      // Local to global node index mapping.
+        //      nodesMap.insert({ iNode, n });
+        //    }
+        //
+        //    // Add triangles.
+        //    for (int iTri = 1; iTri <= poly->NbTriangles(); ++iTri)
+        //    {
+        //      const Poly_Triangle& tri = poly->Triangle(iTri);
+        //
+        //      int iNodes[3];
+        //      tri.Get(iNodes[0], iNodes[1], iNodes[2]);
+        //
+        //      // Try disabling this and check how mesh is visualized.
+        //      if (face.Orientation() == TopAbs_REVERSED)
+        //        std::swap(iNodes[1], iNodes[2]);
+        //
+        //      tris->AddTriangle(nodesMap[iNodes[0]], nodesMap[iNodes[1]], nodesMap[iNodes[2]]);
+        //    }
+        //  }
+        //  gp_Pnt pointInSolid;
+        //  if (GetPointInShape(negativeVolumeShape, pointInSolid, meshInfo.maxDeflection))
+        //  {
+        //    asiAlgo_ClassifyPointSolid sc(tris->GetTriangulation());
+        //    if (!sc.IsIn(pointInSolid.XYZ(), Precision::Confusion()))
+        //    {
+        //      asiAlgo_InvertShells inverter(negativeVolumeShape);
+        //      if (!inverter.Perform() || inverter.GetResult().IsNull())
+        //      {
+        //        return false;
+        //      }
+        //      negativeVolumeShape = inverter.GetResult();
+        //    }
+        //  }
+        //  else
+        //  {
+        //    isOnMesh = false;
+        //  }
+        //}
+        //
+        //if (!isOnMesh)
         {
-          return false;
+          BRepClass3d_SolidClassifier classifier(negativeVolumeShape);
+          classifier.PerformInfinitePoint(Precision::Confusion());
+          if (classifier.State() == TopAbs_IN)
+          {
+            asiAlgo_InvertShells inverter(negativeVolumeShape);
+            if (!inverter.Perform() || inverter.GetResult().IsNull())
+            {
+              return false;
+            }
+            negativeVolumeShape = inverter.GetResult();
+          }
         }
-        negativeVolumeShape = inverter.GetResult();
       }
-    }
-    catch (...)
-    {
-      return false;
+      catch (...)
+      {
+        return false;
+      }
     }
   }
   catch (...)
@@ -587,6 +752,70 @@ private: //! @name Private methods performing the operation
 
     // Remove faces into initial shape.
     {
+      bool isOnMesh = true;
+      asiAlgo_MeshInfo meshInfo = asiAlgo_MeshInfo::Extract(myAAG->GetMasterShape());
+      if (!meshInfo.nFacets)
+      {
+        const double linDefl = asiAlgo_MeshGen::AutoSelectLinearDeflection(myAAG->GetMasterShape());
+        const double angDefl = asiAlgo_MeshGen::AutoSelectAngularDeflection(myAAG->GetMasterShape());
+        if (!asiAlgo_MeshGen::DoNative(myAAG->GetMasterShape(),
+                                       linDefl,
+                                       angDefl,
+                                       meshInfo))
+        {
+          isOnMesh = false;
+        }
+      }
+
+      Handle(Poly_CoherentTriangulation) tris = new Poly_CoherentTriangulation;
+
+      if (isOnMesh)
+      {
+        // Add all triangulations from faces to the common collection.
+        for (TopExp_Explorer fexp(myAAG->GetMasterShape(), TopAbs_FACE); fexp.More(); fexp.Next())
+        {
+          const TopoDS_Face& face = TopoDS::Face(fexp.Current());
+
+          // Poly_MeshPurpose was introduced in OpenCascade 7.6 and remained
+          // undocumented.
+          TopLoc_Location L;
+          const Handle(Poly_Triangulation)&
+            poly = BRep_Tool::Triangulation(face, L);
+          //
+          if (poly.IsNull())
+            continue;
+
+          // Add nodes.
+          std::unordered_map<int, int> nodesMap;
+          for (int iNode = 1; iNode <= poly->NbNodes(); ++iNode)
+          {
+            // Make sure to apply location, e.g., see the effect in /cad/ANC101.brep
+            const int n = tris->SetNode(poly->Node(iNode).Transformed(L).XYZ());
+
+            // Local to global node index mapping.
+            nodesMap.insert({ iNode, n });
+          }
+
+          // Add triangles.
+          for (int iTri = 1; iTri <= poly->NbTriangles(); ++iTri)
+          {
+            const Poly_Triangle& tri = poly->Triangle(iTri);
+
+            int iNodes[3];
+            tri.Get(iNodes[0], iNodes[1], iNodes[2]);
+
+            // Try disabling this and check how mesh is visualized.
+            if (face.Orientation() == TopAbs_REVERSED)
+              std::swap(iNodes[1], iNodes[2]);
+
+            tris->AddTriangle(nodesMap[iNodes[0]], nodesMap[iNodes[1]], nodesMap[iNodes[2]]);
+          }
+        }
+      }
+
+      BRepClass3d_SolidClassifier solidClassifier(myAAG->GetMasterShape());
+      asiAlgo_ClassifyPointSolid sc(tris->GetTriangulation());
+
       TopExp_Explorer exp(negativeVolumeShape, TopAbs_FACE);
       for (; exp.More(); exp.Next())
       {
@@ -620,18 +849,33 @@ private: //! @name Private methods performing the operation
           continue;
         }
 
-        BRepClass3d_SolidClassifier solidClassifier(myAAG->GetMasterShape());
-        solidClassifier.Perform(checkedPnt, 1.0e-4);
-        TopAbs_State state = solidClassifier.State();
-        if (state == TopAbs_IN)
+        if (isOnMesh)
         {
-          if (modifiedShapesInv.Contains(exp.Value()))
+          if (sc.IsIn(checkedPnt.XYZ(), std::max(1.0e-4, meshInfo.maxDeflection + 1.0e-4)))
           {
-            const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(exp.Value());
+            if (modifiedShapesInv.Contains(exp.Value()))
+            {
+              const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(exp.Value());
 
-            myUniqueFaces.Remove(faceToRemove);
+              myUniqueFaces.Remove(faceToRemove);
+            }
+            continue;
           }
-          continue;
+        }
+        else
+        {
+          solidClassifier.Perform(checkedPnt, 1.0e-4);
+          TopAbs_State state = solidClassifier.State();
+          if (state == TopAbs_IN)
+          {
+            if (modifiedShapesInv.Contains(exp.Value()))
+            {
+              const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(exp.Value());
+
+              myUniqueFaces.Remove(faceToRemove);
+            }
+            continue;
+          }
         }
       }
     }
@@ -704,6 +948,7 @@ private: //! @name Private methods performing the operation
       TopExp::MapShapes(boxShape, TopAbs_FACE, boxShapeMap);
 
       BRepAlgoAPI_Cut API;
+      API.SetCheckInverted(false);
       asiAlgo_Utils::BooleanCut(boxShape, negativeVolumeShape, false, 0.0, API);
       TopoDS_Shape cutShape = API.Shape();
 
@@ -834,7 +1079,7 @@ private: //! @name Private methods performing the operation
 
             solidsToRecheck.push_back(expSolids.Value());
 
-          }
+          } // for (solids)
           cutShape = comp;
         }
 
@@ -977,7 +1222,7 @@ private: //! @name Private methods performing the operation
           listOfShape.Append(itFaces.Value());
         }
 
-        if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes))
+        if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes, true))
         {
           return;
         }
@@ -1021,6 +1266,7 @@ private: //! @name Private methods performing the operation
         TopExp::MapShapes(boxShape, TopAbs_FACE, boxShapeMap);
 
         BRepAlgoAPI_Cut API;
+        API.SetCheckInverted(false);
         asiAlgo_Utils::BooleanCut(boxShape, negativeVolumeShape, false, 0.0, API);
         TopoDS_Shape cutShape = API.Shape();
 
@@ -1119,7 +1365,7 @@ private: //! @name Private methods performing the operation
               listOfShape.Append(itFaces.Value());
             }
 
-            if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes))
+            if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes, true))
             {
               return;
             }

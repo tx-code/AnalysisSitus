@@ -3,8 +3,8 @@
 // All rights reserved.
 //-----------------------------------------------------------------------------
 
-#ifndef ClassifyPt_h
-#define ClassifyPt_h
+#ifndef ClassifyPtS_h
+#define ClassifyPtS_h
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>

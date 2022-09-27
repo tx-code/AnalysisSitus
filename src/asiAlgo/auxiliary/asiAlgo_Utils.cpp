@@ -5720,3 +5720,74 @@ bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
 
   return pixmap->Save(filename.c_str());
 }
+
+//-----------------------------------------------------------------------------
+
+gp_Pnt asiAlgo_Utils::GetInfPoint(const TopoDS_Shape& shape)
+{
+  gp_Pnt infPoint;
+
+  gp_Lin lin;
+  bool isFound = false;
+  TopExp_Explorer itFaces(shape, TopAbs_FACE);
+  for (; itFaces.More(); itFaces.Next())
+  {
+    // For adjacent faces that form a single surface, only one
+    // extension needs to be kept (otherwise, we have an overlay).
+    gp_Pnt checkedPnt;
+    gp_Vec D1U, D1V, normal;
+    BRepAdaptor_Surface   checkedfaceAdapt(TopoDS::Face(itFaces.Value()));
+    math_BullardGenerator RNG;
+    int numSamples = 10;
+    for (int i = 0; i < numSamples; ++i)
+    {
+      // Get a random sample point.
+      gp_Pnt2d uv;
+      if (!asiAlgo_Utils::GetRandomPoint(checkedfaceAdapt.Face(), RNG, uv))
+      {
+        continue;
+      }
+
+      checkedfaceAdapt.D1(uv.X(), uv.Y(), checkedPnt, D1U, D1V);
+      isFound = true;
+      break;
+    }
+
+    if (!isFound)
+    {
+      continue;
+    }
+
+    if (checkedfaceAdapt.Face().Orientation() == TopAbs_REVERSED)
+    {
+      normal *= -1.0;
+    }
+
+    if (normal.Magnitude() > gp::Resolution())
+    {
+      normal.Normalize();
+    }
+    else
+    {
+      continue;
+    }
+
+    lin = gp_Lin(checkedPnt, normal);
+
+    break;
+  }
+
+  if (!isFound)
+  {
+    infPoint = gp_Pnt(Precision::Infinite(), Precision::Infinite(), Precision::Infinite());
+  }
+  else
+  {
+    Bnd_Box bndBox;
+    BRepBndLib::Add(shape, bndBox, false);
+    double diag = bndBox.CornerMax().Distance(bndBox.CornerMin());
+    infPoint = lin.Location().XYZ() + (diag + 1.0) * lin.Direction().XYZ();
+  }
+
+  return infPoint;
+}

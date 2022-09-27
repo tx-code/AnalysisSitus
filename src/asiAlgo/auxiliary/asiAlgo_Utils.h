@@ -2039,6 +2039,12 @@ namespace asiAlgo_Utils
                const double       v,
                const gp_Ax1&      ax);
 
+  //! Get inf point.
+  //! \param[in] shape shape.
+  //! \return inf point.
+  asiAlgo_EXPORT gp_Pnt
+    GetInfPoint(const TopoDS_Shape& shape);
+
 } // asiAlgo_Utils namespace.
 
 #endif
