@@ -129,6 +129,25 @@ public:
               << &test_negative_volume_62
               << &test_negative_volume_63
               << &test_negative_volume_64
+              << &test_negative_volume_65
+              << &test_negative_volume_66
+              << &test_negative_volume_67
+              << &test_negative_volume_68
+              << &test_negative_volume_69
+              << &test_negative_volume_70
+              << &test_negative_volume_71
+              << &test_negative_volume_72
+              << &test_negative_volume_73
+              << &test_negative_volume_74
+              << &test_negative_volume_75
+              << &test_negative_volume_76
+              //<< &test_negative_volume_77
+              //<< &test_negative_volume_78
+              //<< &test_negative_volume_79
+              << &test_negative_volume_80
+              //<< &test_negative_volume_81
+              //<< &test_negative_volume_82
+              << &test_negative_volume_83
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -201,6 +220,25 @@ private:
   static outcome test_negative_volume_62(const int funcID);
   static outcome test_negative_volume_63(const int funcID);
   static outcome test_negative_volume_64(const int funcID);
+  static outcome test_negative_volume_65(const int funcID);
+  static outcome test_negative_volume_66(const int funcID);
+  static outcome test_negative_volume_67(const int funcID);
+  static outcome test_negative_volume_68(const int funcID);
+  static outcome test_negative_volume_69(const int funcID);
+  static outcome test_negative_volume_70(const int funcID);
+  static outcome test_negative_volume_71(const int funcID);
+  static outcome test_negative_volume_72(const int funcID);
+  static outcome test_negative_volume_73(const int funcID);
+  static outcome test_negative_volume_74(const int funcID);
+  static outcome test_negative_volume_75(const int funcID);
+  static outcome test_negative_volume_76(const int funcID);
+  static outcome test_negative_volume_77(const int funcID);
+  static outcome test_negative_volume_78(const int funcID);
+  static outcome test_negative_volume_79(const int funcID);
+  static outcome test_negative_volume_80(const int funcID);
+  static outcome test_negative_volume_81(const int funcID);
+  static outcome test_negative_volume_82(const int funcID);
+  static outcome test_negative_volume_83(const int funcID);
 
 };
 
