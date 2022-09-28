@@ -5791,3 +5791,147 @@ gp_Pnt asiAlgo_Utils::GetInfPoint(const TopoDS_Shape& shape)
 
   return infPoint;
 }
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::DistanceBetweenPlanes(const gp_Pln& firstPlane,
+                                          const gp_Pln& secondPlane,
+                                          const double  angPrec,
+                                          double&       distance)
+{
+  if ((firstPlane.Axis().Direction()).IsParallel(secondPlane.Axis().Direction(), angPrec))
+  {
+    const gp_Pnt& pnt1 = firstPlane.Axis().Location();
+    const gp_Pnt& pnt2 = secondPlane.Axis().Location();
+    const gp_Dir& dir1 = firstPlane.Axis().Direction();
+
+    distance = (dir1.X() * (pnt2.X() - pnt1.X()) +
+                dir1.Y() * (pnt2.Y() - pnt1.Y()) +
+                dir1.Z() * (pnt2.Z() - pnt1.Z()));
+    if (distance < 0)
+    {
+      distance = -distance;
+    }
+  }
+  else
+  {
+    return false;
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::CalculateNormalOfPlanarFace(const TopoDS_Face&  face,
+                                                gp_Vec&             normal,
+                                                gp_Pln&             plane,
+                                                Handle(Geom_Plane)& gplane)
+{
+  if (!asiAlgo_Utils::IsPlanar(face, gplane) || gplane.IsNull())
+  {
+    return false;
+  }
+  plane = gplane->Pln();
+
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+  gp_Pnt pnt;
+  gp_Vec uD1, vD1;
+  gplane->D1(uMin, vMin, pnt, uD1, vD1);
+  normal = (uD1 ^ vD1).Normalized();
+  if (face.Orientation() == TopAbs_REVERSED)
+  {
+    normal *= -1.0;
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+gp_Trsf asiAlgo_Utils::
+  GetTransitionMatrix(const gp_Ax3& oldBasisVecs,
+                      const gp_Ax3& newBasisVecs)
+{
+  // a' = a * P[a->a']
+  // a'' = a' * P[a'->a''] = a * P[a->a'] * P[a'->a'']
+  // P[a->a''] = P[a->a'] * P[a'->a'']
+  //
+  // P   - operator.
+  // a   - oldBasisVecs.
+  // a'  - intermediate CS.
+  // a'' - newBasisVecs.
+  gp_Trsf tmFromOldToIntermediate = GetTransitionMatrix(oldBasisVecs).Inverted();
+  gp_Trsf tmFromIntermediateToNew = GetTransitionMatrix(newBasisVecs);
+  gp_Trsf tmFromOldToNew          = tmFromOldToIntermediate.Multiplied(tmFromIntermediateToNew);
+  return tmFromOldToNew;
+}
+
+//-----------------------------------------------------------------------------
+
+gp_Trsf asiAlgo_Utils::
+GetTransitionMatrix(const gp_Ax3& newBasisVecs)
+{
+  gp_Trsf transitionMatrix;
+  gp_XYZ v1(newBasisVecs.XDirection().XYZ());
+  gp_XYZ v2(newBasisVecs.YDirection().XYZ());
+  gp_XYZ v3(newBasisVecs.Direction().XYZ());
+  transitionMatrix.SetValues(v1.X(), v2.X(), v3.X(), 0.0,
+                             v1.Y(), v2.Y(), v3.Y(), 0.0,
+                             v1.Z(), v2.Z(), v3.Z(), 0.0);
+  transitionMatrix.SetTranslationPart(newBasisVecs.Location().Coord());
+  return transitionMatrix;
+}
+
+//-----------------------------------------------------------------------------
+
+gp_Trsf asiAlgo_Utils::
+  GetTMToGCSWithCoordInGCS(const gp_Ax3& oldBasisVecs)
+{
+  return asiAlgo_Utils::GetTransitionMatrix(oldBasisVecs).Inverted();
+}
+
+//-----------------------------------------------------------------------------
+
+gp_Trsf asiAlgo_Utils::
+  GetTMFromGCSWithCoordInGCS(const gp_Ax3& newBasisVecs)
+{
+  return asiAlgo_Utils::GetTransitionMatrix(newBasisVecs);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::ComputeAABB(const TopoDS_Shape& originalShape,
+                                const gp_Ax3&       localCS,
+                                gp_Trsf&            transitionMatrixLocaltoGCS,
+                                Bnd_Box&            bbox)
+{
+  bbox = Bnd_Box();
+
+  transitionMatrixLocaltoGCS = asiAlgo_Utils::GetTMToGCSWithCoordInGCS(localCS);
+  TopoDS_Shape shape = originalShape;
+  if ( !shape.Location().IsIdentity() )
+  {
+    BRepBuilderAPI_Transform transf(shape, shape.Location().Transformation(), true);
+    if ( !transf.IsDone() )
+    {
+      return false;
+    }
+    shape = transf.Shape();
+  }
+
+  BRepBuilderAPI_Transform transfOriginalShape(shape, transitionMatrixLocaltoGCS, true);
+  if ( !transfOriginalShape.IsDone() )
+  {
+    return false;
+  }
+  shape = transfOriginalShape.Shape();
+
+  BRepBndLib::AddOptimal(shape, bbox, false);
+  if ( bbox.IsVoid() )
+  {
+    return false;
+  }
+
+  return true;
+}

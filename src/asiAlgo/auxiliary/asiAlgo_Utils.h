@@ -2039,11 +2039,81 @@ namespace asiAlgo_Utils
                const double       v,
                const gp_Ax1&      ax);
 
-  //! Get inf point.
+  //! Gets inf point.
   //! \param[in] shape shape.
   //! \return inf point.
   asiAlgo_EXPORT gp_Pnt
     GetInfPoint(const TopoDS_Shape& shape);
+
+  //! Gets distance between planes.
+  //! \param[in] firstPlane  first plane.
+  //! \param[in] secondPlane second plane.
+  //! \param[in] angPrec     angular tolerance.
+  //! \param[in] distance    distance.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    DistanceBetweenPlanes(const gp_Pln& firstPlane,
+                          const gp_Pln& secondPlane,
+                          const double  angPrec,
+                          double&       distance);
+
+  //! Calculate normal of planar face.
+  //! \param[in]  face   original face.
+  //! \param[out] normal normal of face.
+  //! \param[out] plane  plane.
+  //! \param[out] gplane plane.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    CalculateNormalOfPlanarFace(const TopoDS_Face&  face,
+                                gp_Vec&             normal,
+                                gp_Pln&             plane,
+                                Handle(Geom_Plane)& gplane);
+
+  //! Gets transition matrix from old to new basis. The coordinates of
+  //! the basis vectors of the systems must be expressed in the same
+  //! intermediate basis.
+  //! \param[in] oldBasisVecs - old basis vectors.
+  //! \param[in] newBasisVecs - new basis vectors.
+  //! \return transition matrix.
+  asiAlgo_EXPORT gp_Trsf
+    GetTransitionMatrix(const gp_Ax3& oldBasisVecs,
+                        const gp_Ax3& newBasisVecs);
+
+  //! Gets transition matrix from old to new basis. The coordinates
+  //! of the new basis vectors must be expressed in the old basis.
+  //! \param[in] newBasisVecs - new basis vectors (coordinates in old basis).
+  //! \return transition matrix.
+  asiAlgo_EXPORT gp_Trsf
+    GetTransitionMatrix(const gp_Ax3& newBasisVecs);
+
+  //! Transition matrix from old basis (coordinates are expressed in GCS)
+  //! to global coordinate system.
+  //! \param[in] oldBasisVecs - old basis vectors (coordinates in GCS).
+  //! \return transition matrix.
+  asiAlgo_EXPORT gp_Trsf
+    GetTMToGCSWithCoordInGCS(const gp_Ax3& oldBasisVecs);
+
+  //! Transition matrix from global coordinate system to new basis
+  //! (coordinates are expressed in GCS).
+  //! \param[in] newBasisVecs - new basis vectors (coordinates in GCS).
+  //! \return transition matrix.
+  asiAlgo_EXPORT gp_Trsf
+    GetTMFromGCSWithCoordInGCS(const gp_Ax3& newBasisVecs);
+
+  //! Compute AABB of shape in local CS.
+  //! \param[in]  originalShape              Shape.
+  //! \param[in]  localCS                    Local CS.
+  //! \param[out] transitionMatrixLocaltoGCS Transition matrix to global CS
+  //!                                        from local CS with coordinates
+  //!                                        in global CS.
+  //! \param[out] bbox                       AABB in local CS.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ComputeAABB(const TopoDS_Shape& originalShape,
+                const gp_Ax3&       localCS,
+                gp_Trsf&            transitionMatrixLocaltoGCS,
+                Bnd_Box&            bbox);
+
 
 } // asiAlgo_Utils namespace.
 

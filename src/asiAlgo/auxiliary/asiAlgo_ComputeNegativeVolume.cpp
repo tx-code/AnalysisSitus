@@ -7,6 +7,8 @@
 #include "asiAlgo_ComputeNegativeVolume.h"
 
 // asiAlgo includes
+#include <asiAlgo_AnalyzeWire.h>
+#include <asiAlgo_ClassifyPointFace.h>
 #include <asiAlgo_ClassifyPointSolid.h>
 #include <asiAlgo_ClassifyPt.h>
 #include <asiAlgo_Cloudify.h>
@@ -21,6 +23,7 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepBndLib.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepCheck_Analyzer.hxx>
@@ -35,6 +38,7 @@
 #include <GProp_GProps.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <Poly_CoherentTriangulation.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeAnalysis_ShapeTolerance.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <ShapeFix_Shape.hxx>
@@ -42,6 +46,7 @@
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
 
 // STL includes
+#include <map>
 #include <unordered_map>
 
 //-----------------------------------------------------------------------------
@@ -113,7 +118,6 @@ bool GetPointInShape(const TopoDS_Shape& shape,
   ShapeAnalysis_ShapeTolerance tolerChecker;
   double maxToler = tolerChecker.Tolerance(itFaces.Value(), 1);
   maxToler = std::max(toler + 1.0e-4, maxToler);
-  maxToler = std::max(1.0e-4, maxToler);
 
   point = lin.Location().XYZ() + (2.0 * maxToler) * lin.Direction().XYZ();
 
@@ -596,11 +600,17 @@ public: //! @name Perform the operation
     {
       // Find the faces adjacent to the faces of the feature
       TopTools_IndexedMapOfShape aMFAdjacent;
-      FindAdjacentFaces(aMFAdjacent);
+      asiAlgo_Feature featureNeighbors;
+      FindAdjacentFaces(aMFAdjacent, featureNeighbors);
 
       myHasAdjacentFaces = (aMFAdjacent.Extent() > 0);
       if (!myHasAdjacentFaces)
         return;
+
+      if (CheckSimpleCappping(featureNeighbors))
+      {
+        return;
+      }
 
       // Extend the adjacent faces keeping the connection to the original faces
       TopTools_IndexedDataMapOfShapeShape aFaceExtFaceMap;
@@ -637,9 +647,9 @@ public: //! @name Obtain the result
 private: //! @name Private methods performing the operation
 
   //! Finds the faces adjacent to the feature and stores them into outgoing map.
-  void FindAdjacentFaces(TopTools_IndexedMapOfShape& theMFAdjacent)
+  void FindAdjacentFaces(TopTools_IndexedMapOfShape& theMFAdjacent,
+                         asiAlgo_Feature&            featureNeighbors)
   {
-    asiAlgo_Feature featureNeighbors;
     asiAlgo_Feature::Iterator it(myFaceIDs);
     for (; it.More(); it.Next())
     {
@@ -653,6 +663,403 @@ private: //! @name Private methods performing the operation
     {
       theMFAdjacent.Add(myAAG->GetFace(it.Key()));
     }
+  }
+
+  bool CheckSimpleCappping(asiAlgo_Feature& featureNeighbors)
+  {
+    const double angPrec = 0.1 / 180. * M_PI;
+
+    // Check that the neighbor-face is planar.
+    asiAlgo_Feature::Iterator itFN(featureNeighbors);
+    for (; itFN.More(); itFN.Next())
+    {
+      const TopoDS_Face& face = myAAG->GetFace(itFN.Key());
+      if (!asiAlgo_Utils::IsPlanar(face))
+      {
+        myUniqueFaces.Clear();
+        return false;
+      }
+    }
+
+    // Find gaps.
+    // <wire/gap, <faceId, edgeIds/gap>>
+    std::vector<std::pair<TopoDS_Wire, std::map<int, asiAlgo_Feature>>> gapsFeatureFacesVec;
+    {
+      TopTools_IndexedDataMapOfShapeListOfShape edgesFaces;
+      TopExp::MapShapesAndAncestors(myFeature, TopAbs_EDGE, TopAbs_FACE, edgesFaces);
+
+      // Find open edges.
+      Handle(TopTools_HSequenceOfShape) openEdges = new TopTools_HSequenceOfShape();
+      for (int index = 1; index <= edgesFaces.Extent(); ++index)
+      {
+        const TopTools_ListOfShape& faces = edgesFaces(index);
+        if (faces.Extent() == 1)
+        {
+          const TopoDS_Edge& edge = TopoDS::Edge(edgesFaces.FindKey(index));
+          if (BRep_Tool::Degenerated(edge))
+          {
+            continue;
+          }
+          openEdges->Append(edge);
+        }
+      }
+
+      Handle(TopTools_HSequenceOfShape) checkedWires;
+      ShapeAnalysis_FreeBounds::ConnectEdgesToWires(openEdges, 1.0e-4, 0, checkedWires);
+
+      if (checkedWires.IsNull())
+      {
+        myUniqueFaces.Clear();
+        return false;
+      }
+
+      const TopTools_IndexedMapOfShape& aagEdges = myAAG->RequestMapOfEdges();
+
+      for (TopTools_HSequenceOfShape::Iterator wit(*checkedWires); wit.More(); wit.Next())
+      {
+        const TopoDS_Wire& wire = TopoDS::Wire(wit.Value());
+        std::map<int, asiAlgo_Feature> faceEdgesMap;
+        TopExp_Explorer exp(wire, TopAbs_EDGE);
+        for (; exp.More(); exp.Next())
+        {
+          if (!edgesFaces.Contains(exp.Value()) || !aagEdges.Contains(exp.Value()))
+          {
+            continue;
+          }
+
+          const TopTools_ListOfShape& connectedFaces = edgesFaces.FindFromKey(exp.Value());
+          TopTools_ListOfShape::Iterator itCF(connectedFaces);
+          for (; itCF.More(); itCF.Next())
+          {
+            const int id = myAAG->GetFaceId(itCF.Value());
+            if (id && !featureNeighbors.Contains(id))
+            {
+              faceEdgesMap[id].Add(aagEdges.FindIndex(exp.Value()));
+            }
+          }
+        }
+
+        if (!faceEdgesMap.empty())
+        {
+          gapsFeatureFacesVec.push_back(std::pair<TopoDS_Wire, std::map<int, asiAlgo_Feature>>(wire, faceEdgesMap));
+        }
+        else
+        {
+          myUniqueFaces.Clear();
+          return false;
+        }
+      }
+
+    }
+
+    //
+    // <wireId, wireProps>; wireProps: Box, diag of Box, Plane, Wire, neighborId, face formed by wire>
+    std::map<int, std::tuple<Bnd_Box, double, Handle(Geom_Plane), TopoDS_Wire, int, TopoDS_Face>> indexWireMap;
+    // <wireId, groupId>
+    std::map<int, int> wireGroupMap;
+    // <groupId, wireIds>
+    std::map<int, asiAlgo_Feature> groupWiresMap;
+    // <groupId, groupProps(plane, normal)>
+    std::map<int, std::pair<Handle(Geom_Plane), gp_Vec>> groupPropsMap;
+    {
+      std::vector<std::pair<TopoDS_Wire, std::map<int, asiAlgo_Feature>>>::const_iterator itGFFV =
+        gapsFeatureFacesVec.cbegin();
+      for ( int index = 1; itGFFV != gapsFeatureFacesVec.cend(); ++itGFFV, ++index)
+      {
+        asiAlgo_Feature neighborsForGap;
+        const TopoDS_Wire& wire = (*itGFFV).first;
+        const std::map<int, asiAlgo_Feature>& faceEdgesMap = (*itGFFV).second;
+        std::map<int, asiAlgo_Feature>::const_iterator itFEM = faceEdgesMap.cbegin();
+        for (; itFEM != faceEdgesMap.cend(); ++itFEM)
+        {
+          neighborsForGap.Unite(myAAG->GetNeighborsThru((*itFEM).first, (*itFEM).second));
+        }
+
+        if (neighborsForGap.Extent() != 1)
+        {
+          myUniqueFaces.Clear();
+          return false;
+        }
+
+        const TopoDS_Face& face = myAAG->GetFace(neighborsForGap.GetMaximalMapped());
+        gp_Vec normal;
+        gp_Pln plane;
+        Handle(Geom_Plane) gplane;
+        if (!asiAlgo_Utils::CalculateNormalOfPlanarFace(face, normal, plane, gplane))
+        {
+          myUniqueFaces.Clear();
+          return false;
+        }
+
+        bool isNewGroup = false;
+        std::map<int, std::pair<Handle(Geom_Plane), gp_Vec>>::const_iterator itGPM =
+          groupPropsMap.cbegin();
+        for (; itGPM != groupPropsMap.cend(); ++itGPM)
+        {
+          const int groupId = itGPM->first;
+          const Handle(Geom_Plane)& groupGPlane = itGPM->second.first;
+          const gp_Vec& groupNormal = itGPM->second.second;
+
+          if (groupNormal.Angle(normal) >= Precision::Angular())
+          {
+            isNewGroup = true;
+            break;
+          }
+
+          double distance = 0.0;
+          if (!asiAlgo_Utils::DistanceBetweenPlanes(groupGPlane->Pln(), plane, angPrec, distance) ||
+              abs(distance) < Precision::Confusion() )
+          {
+            isNewGroup = true;
+            break;
+          }
+        }
+
+        int wireGroupIndex = 0;
+        if (isNewGroup)
+        {
+          const int groupId = groupWiresMap.size() + 1;
+          wireGroupMap[index] = groupId;
+          groupWiresMap[groupId].Add(index);
+          groupPropsMap[groupId] = std::pair<Handle(Geom_Plane), gp_Vec>(gplane, normal);
+          wireGroupIndex = groupId;
+        }
+        else
+        {
+          wireGroupMap[index] = itGPM->first;
+          groupWiresMap[itGPM->first].Add(index);
+          wireGroupIndex = itGPM->first;
+        }
+
+        Bnd_Box wireBox;
+        gp_Trsf transitionMatrixLocaltoGCS;
+        gp_Ax3 localCS;
+        localCS.SetLocation(groupPropsMap[wireGroupIndex].first->Axis().Location());
+        localCS.SetDirection(groupPropsMap[wireGroupIndex].first->Axis().Direction());
+        if (!asiAlgo_Utils::ComputeAABB(wire, localCS, transitionMatrixLocaltoGCS, wireBox))
+        {
+          myUniqueFaces.Clear();
+          return false;
+        }
+        double diagOfBBox = wireBox.CornerMin().Distance(wireBox.CornerMax());
+
+        const TopoDS_Face& gapFace = BRepBuilderAPI_MakeFace(gplane, wire);
+        indexWireMap[index] =
+          std::tuple<Bnd_Box, double, Handle(Geom_Plane),
+                     TopoDS_Wire, int, TopoDS_Face>(wireBox, diagOfBBox, gplane, wire,
+                                                    neighborsForGap.GetMaximalMapped(),
+                                                    gapFace);
+
+        //const TopoDS_Face& gapFace = BRepBuilderAPI_MakeFace(surfAdapt.Surface().Surface() , wire);
+        //myUniqueFaces.Append(gapFace);
+      }
+
+    }
+
+    // Additional filtering within groups to recognize nested contours.
+    {
+      // Although we have divided the contours into groups, the contours may
+      // or may not be nested inside each other.
+      //
+      // Suppose we are considering one group.
+      // 1) For each contour, find the contours in which it is nested. We use the
+      //    classification of a point in a face. Internally, each list is sorted
+      //    by the closest nesting. If C1 is nested in C2 and C2 is nested in C3,
+      //    then the list for C1 will look like this - {C2, C3}. Use the Bounding
+      //    Boxes information to compare the diagonals.
+      //
+      //    It may happen that a contour is nested within a smaller contour.
+      //    Here we also use information about Bounding Boxes.
+      // 
+      // 2) As a result, we get nesting lists. If the number of elements in the list
+      //    is odd, then the current wire must form a new face together with the nearest
+      //    nesting. If the number of elements in the list is honest, then the current
+      //    wire must form a new face. Considering that a contour can contain several
+      //    independent nested contours, a new (final) list of groups is formed.
+      //
+      // Below is an example.
+      //
+      //     ____________________________________________________________________________________________
+      //    |                                                                                            |
+      //    |   ____________________________                                                             |
+      //    |  |   _______________________  |      ____________________________      _______________     |
+      //    |  |  |                       | |     |   _______________________  |    |               |    |
+      //    |  |  |   __________________  | |     |  |                       | |    |               |    |
+      //    |  |  |  |   ____________   | | |     |  |   __________________  | |    |               |    |
+      //    |  |  |  |  |            |  | | |     |  |  |                  | | |    |   _________   |    |
+      //    |  |  |  |  |            |  | | |     |  |  |                  | | |    |  |         |  |    |
+      //    |  |  |  |  | 1          |  | | |     |  |  |                  | | |    |  |         |  |    |
+      //    |  |  |  |  |____________|  | | |     |  |  |                  | | |    |  |         |  |    |
+      //    |  |  |  |   2              | | |     |  |  |        11        | | |    |  |         |  |    |
+      //    |  |  |  |__________________| | |     |  |  |                  | | |    |  |      6  |  |    |
+      //    |  |  |     3                 | |     |  |  |__________________| | |    |  |_________|  |    |
+      //    |  |  |_______________________| |     |  |           10          | |    |               |    |
+      //    |  |       4                    |     |  |_______________________| |    |               |    |
+      //    |  |____________________________|     |               9            |    |        7      |    |
+      //    |                      ____________   |____________________________|    |_______________|    |
+      //    |                     |     5      |                                                         |
+      //    |                     |____________|                                                         |
+      //    |                                                              8                             |
+      //    |____________________________________________________________________________________________|
+      //
+      //       _________
+      //      |         |
+      //      |     12  |
+      //      |_________|
+      //
+      //
+      // Lists of nestings:    |  For (lists of nestings):
+      //                       |-------------------------
+      // 1    { 2, 3, 4, 8 }   | steps:
+      // 2    { 3, 4, 8 }      |_________________________________________________________________________________________________________
+      // 3    { 4, 8 }         | 1 |  2  |  3  |  4  |   5   |   6   |    7    |    8    |     9     |    10     | 11        |    12     |
+      // 4    { 8 }            |---|-----|-----|-----|-------|-------|---------|---------|-----------|-----------|-----------|-----------|
+      // 5    { 8 }            | 1 | 1   | 1   | 1   | 1     | 1     | 1       | 1       | 1         | 1         | 1         | 1         |
+      // 6    { 7, 8 }         |   | 2,3 | 2,3 | 2,3 | 2,3   | 2,3   | 2,3     | 2,3     | 2,3       | 2,3       | 2,3       | 2,3       |
+      // 7    { 8 }            |   |     |     | 4,8 | 4,8,5 | 4,8,5 | 4,8,5,7 | 4,8,5,7 | 4,8,5,7,9 | 4,8,5,7,9 | 4,8,5,7,9 | 4,8,5,7,9 |
+      // 8    {}               |   |     |     |     |       | 6     | 6       | 6       | 6         | 6         | 6         | 6         |
+      // 9    { 8 }            |   |     |     |     |       |       |         |         |           | 10        | 10,11     | 10,11     |
+      // 10   { 9, 8}          |   |     |     |     |       |       |         |         |           |           |           | 12        |
+      // 11   { 10, 9, 8 }     |___|_____|_____|_____|_______|_______|_________|_________|___________|___________|___________|___________|
+      // 12   {}                                                            _||_
+      //                                                                    \  /
+      //                                                                     \/
+      //                                                  {1}, {2,3}, {4,8,5,7,9}, {6}, {10,11}, {12} form new faces.
+      //
+
+      std::map<int, asiAlgo_Feature>::const_iterator itGWM = groupWiresMap.cbegin();
+      for (; itGWM != groupWiresMap.cend(); ++itGWM)
+      {
+        // First stage.
+        std::map<int, std::vector<int>> nestingsMap;
+        std::map<int, asiAlgo_Feature> nestingsUnderstudyMap;
+
+        const asiAlgo_Feature& groupWireIds = itGWM->second;
+        asiAlgo_Feature::Iterator itGWIDs(groupWireIds);
+        for (; itGWIDs.More(); itGWIDs.Next())
+        {
+          const int wireId = itGWIDs.Key();
+          const TopoDS_Face& abstractFace = std::get<5>(indexWireMap[wireId]);
+          math_BullardGenerator RNG;
+          gp_Pnt2d uv;
+          if (!asiAlgo_Utils::GetRandomPoint(abstractFace, RNG, uv))
+          {
+            return false;
+          }
+
+          const Handle(Geom_Plane)& plane = std::get<2>(indexWireMap[wireId]);
+          gp_Pnt point = plane->Value(uv.X(), uv.Y());
+          const double diag = std::get<1>(indexWireMap[wireId]);
+
+          asiAlgo_Feature::Iterator itLocGWIDs(groupWireIds);
+          for (; itLocGWIDs.More(); itLocGWIDs.Next())
+          {
+            if (itLocGWIDs.Key() == wireId)
+            {
+              continue;
+            }
+
+            // PMC.
+            const TopoDS_Face& abstractCheckedFace = std::get<5>(indexWireMap[itLocGWIDs.Key()]);
+            const Handle(Geom_Plane)& checkedPlane = std::get<2>(indexWireMap[wireId]);
+            ShapeAnalysis_Surface analysisSurface(checkedPlane);
+            gp_Pnt2d checkedPoint = analysisSurface.ValueOfUV(point, 1.0e-4);
+
+            asiAlgo_ClassifyPointFace classifier(abstractCheckedFace,
+                                                 BRep_Tool::Tolerance(abstractCheckedFace),
+                                                 0.5, true);
+            asiAlgo_Membership pmc = classifier(checkedPoint);
+            if (pmc & Membership_Out)
+            {
+              continue;
+            }
+
+            // Check Bounding Box.
+            const double checkedDiag = std::get<1>(indexWireMap[wireId]);
+            if (checkedDiag - diag < Precision::Confusion())
+            {
+              continue;
+            }
+
+            if (nestingsMap.count(wireId))
+            {
+              nestingsMap[wireId].push_back(itLocGWIDs.Key());
+            }
+            else if (!nestingsUnderstudyMap[wireId].Contains(itLocGWIDs.Key()))
+            {
+              std::vector<int>& nestingVec = nestingsMap[wireId];
+              std::vector<int>::iterator itNV = nestingVec.begin();
+              for (; itNV != nestingVec.end(); ++itNV)
+              {
+                const double sortDiag = std::get<1>(indexWireMap[*itNV]);
+                if (sortDiag - checkedDiag < Precision::Confusion())
+                {
+                  continue;
+                }
+                else
+                {
+                  break;
+                }
+              }
+
+              nestingVec.insert(itNV, itLocGWIDs.Key());
+              nestingsUnderstudyMap[wireId].Add(itLocGWIDs.Key());
+            }
+
+          } // for loc
+
+        } // for wires
+
+        // Second stage.
+        std::map<int, asiAlgo_Feature> newGroups;
+
+
+
+
+
+
+
+      } // for group
+
+
+    }
+
+    // Check the overlap of the new faces.
+    {
+
+    }
+
+    //
+    {
+      asiAlgo_Feature::Iterator it(myFaceIDs);
+      for (; it.More(); it.Next())
+      {
+        myUniqueFaces.Append(myAAG->GetFace(it.Key()));
+      }
+
+      TopoDS_Shape negativeVolumeShape;
+      TopTools_IndexedDataMapOfShapeShape modifiedShapesInv;
+      TopTools_IndexedDataMapOfShapeShape modifiedShapes;
+
+      if (!MakeSolid(myUniqueFaces, negativeVolumeShape, modifiedShapesInv, modifiedShapes, true))
+      {
+        myUniqueFaces.Clear();
+        return false;
+      }
+
+      myResultShape = negativeVolumeShape;
+
+      if (myIsOneSolid)
+      {
+        if (!CheckOneSolid(myResultShape, myUniqueFaces))
+        {
+          myUniqueFaces.Clear();
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   //! Extends the found adjacent faces and binds them to the original faces.
@@ -1234,159 +1641,173 @@ private: //! @name Private methods performing the operation
     // Final filter.
     if (myIsOneSolid)
     {
-      TopTools_IndexedMapOfShape finalShapesMap;
-      TopExp::MapShapes(myResultShape, TopAbs_SOLID, finalShapesMap);
-      if (finalShapesMap.Size() == 1)
+      if (!CheckOneSolid(myResultShape, myUniqueFaces))
       {
-        myResultShape = TopoDS::Solid(finalShapesMap(1));
+        return;
       }
-      else if (finalShapesMap.Size() > 1)
+    } // Final filter.
+
+  }
+
+  bool CheckOneSolid(TopoDS_Shape&         resultShape,
+                     TopTools_ListOfShape& uniqueFaces)
+  {
+    TopoDS_Shape negativeVolumeShape;
+    TopTools_IndexedDataMapOfShapeShape modifiedShapesInv;
+    TopTools_IndexedDataMapOfShapeShape modifiedShapes;
+
+    TopTools_IndexedMapOfShape finalShapesMap;
+    TopExp::MapShapes(resultShape, TopAbs_SOLID, finalShapesMap);
+    if (finalShapesMap.Size() == 1)
+    {
+      resultShape = TopoDS::Solid(finalShapesMap(1));
+    }
+    else if (finalShapesMap.Size() > 1)
+    {
       {
+        modifiedShapesInv.Clear();
+        modifiedShapes.Clear();
+        TopTools_ListOfShape listOfShape;
+        TopTools_ListOfShape::Iterator itFaces(uniqueFaces);
+        for (; itFaces.More(); itFaces.Next())
+        {
+          listOfShape.Append(itFaces.Value());
+        }
+
+        if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes))
+        {
+          return false;
+        }
+      }
+
+      Bnd_Box bndBox;
+      BRepBndLib::AddOptimal(negativeVolumeShape, bndBox, false, false);
+      bndBox.Enlarge(1.0);
+      TopoDS_Shape boxShape = BRepPrimAPI_MakeBox(bndBox.CornerMin(), bndBox.CornerMax());
+      TopTools_IndexedMapOfShape boxShapeMap;
+      TopExp::MapShapes(boxShape, TopAbs_FACE, boxShapeMap);
+
+      BRepAlgoAPI_Cut API;
+      API.SetCheckInverted(false);
+      asiAlgo_Utils::BooleanCut(boxShape, negativeVolumeShape, false, 0.0, API);
+      TopoDS_Shape cutShape = API.Shape();
+
+      Handle(BRepTools_History) history = API.History();
+      if (!history.IsNull() && !cutShape.IsNull())
+      {
+        bool isFound = false;
+        TopExp_Explorer expSolids(cutShape, TopAbs_SOLID);
+        for (; expSolids.More(); expSolids.Next())
+        {
+          TopExp_Explorer expFaces(expSolids.Value(), TopAbs_FACE);
+          for (; expFaces.More(); expFaces.Next())
+          {
+            if (boxShapeMap.Contains(expFaces.Value()))
+            {
+              isFound = true;
+              break;
+            }
+          }
+          if (isFound)
+          {
+            cutShape = expSolids.Value();
+            break;
+          }
+        }
+
+        TopTools_IndexedMapOfShape cutFaceMap;
+        TopExp::MapShapes(cutShape, TopAbs_FACE, cutFaceMap);
+
+        TopExp_Explorer exp(negativeVolumeShape, TopAbs_FACE);
+        for (; exp.More(); exp.Next())
+        {
+          bool hasShape = cutFaceMap.Contains(exp.Value());
+
+          if (!hasShape && history->HasRemoved() && history->IsRemoved(exp.Value()))
+          {
+            hasShape = false;
+          }
+
+          if (!hasShape && history->HasGenerated())
+          {
+            const TopTools_ListOfShape& generatedShape = history->Generated(exp.Value());
+            TopTools_ListOfShape::Iterator itG(generatedShape);
+            for (; itG.More(); itG.Next())
+            {
+              const TopoDS_Shape& locGen = itG.Value();
+              TopExp_Explorer expLG(locGen, TopAbs_FACE);
+              for (; expLG.More(); expLG.Next())
+              {
+                if (cutFaceMap.Contains(expLG.Value()))
+                {
+                  hasShape = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (!hasShape && history->HasModified())
+          {
+            const TopTools_ListOfShape& modifiedShape = history->Modified(exp.Value());
+            TopTools_ListOfShape::Iterator itM(modifiedShape);
+            for (; itM.More(); itM.Next())
+            {
+              const TopoDS_Shape& locMod = itM.Value();
+              TopExp_Explorer expLM(locMod, TopAbs_FACE);
+              for (; expLM.More(); expLM.Next())
+              {
+                if (cutFaceMap.Contains(expLM.Value()))
+                {
+                  hasShape = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (!hasShape)
+          {
+            if (modifiedShapesInv.Contains(exp.Value()))
+            {
+              const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(exp.Value());
+
+              uniqueFaces.Remove(faceToRemove);
+            }
+          }
+        }
+
         {
           modifiedShapesInv.Clear();
           modifiedShapes.Clear();
           TopTools_ListOfShape listOfShape;
-          TopTools_ListOfShape::Iterator itFaces(myUniqueFaces);
+          TopTools_ListOfShape::Iterator itFaces(uniqueFaces);
           for (; itFaces.More(); itFaces.Next())
           {
             listOfShape.Append(itFaces.Value());
           }
 
-          if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes))
+          if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes, true))
           {
-            return;
-          }
-        }
-
-        Bnd_Box bndBox;
-        BRepBndLib::AddOptimal(negativeVolumeShape, bndBox, false, false);
-        bndBox.Enlarge(1.0);
-        TopoDS_Shape boxShape = BRepPrimAPI_MakeBox(bndBox.CornerMin(), bndBox.CornerMax());
-        TopTools_IndexedMapOfShape boxShapeMap;
-        TopExp::MapShapes(boxShape, TopAbs_FACE, boxShapeMap);
-
-        BRepAlgoAPI_Cut API;
-        API.SetCheckInverted(false);
-        asiAlgo_Utils::BooleanCut(boxShape, negativeVolumeShape, false, 0.0, API);
-        TopoDS_Shape cutShape = API.Shape();
-
-        Handle(BRepTools_History) history = API.History();
-        if (!history.IsNull() && !cutShape.IsNull())
-        {
-          bool isFound = false;
-          TopExp_Explorer expSolids(cutShape, TopAbs_SOLID);
-          for (; expSolids.More(); expSolids.Next())
-          {
-            TopExp_Explorer expFaces(expSolids.Value(), TopAbs_FACE);
-            for (; expFaces.More(); expFaces.Next())
-            {
-              if (boxShapeMap.Contains(expFaces.Value()))
-              {
-                isFound = true;
-                break;
-              }
-            }
-            if (isFound)
-            {
-              cutShape = expSolids.Value();
-              break;
-            }
+            return false;
           }
 
-          TopTools_IndexedMapOfShape cutFaceMap;
-          TopExp::MapShapes(cutShape, TopAbs_FACE, cutFaceMap);
-
-          TopExp_Explorer exp(negativeVolumeShape, TopAbs_FACE);
-          for (; exp.More(); exp.Next())
-          {
-            bool hasShape = cutFaceMap.Contains(exp.Value());
-
-            if (!hasShape && history->HasRemoved() && history->IsRemoved(exp.Value()))
-            {
-              hasShape = false;
-            }
-
-            if (!hasShape && history->HasGenerated())
-            {
-              const TopTools_ListOfShape& generatedShape = history->Generated(exp.Value());
-              TopTools_ListOfShape::Iterator itG(generatedShape);
-              for (; itG.More(); itG.Next())
-              {
-                const TopoDS_Shape& locGen = itG.Value();
-                TopExp_Explorer expLG(locGen, TopAbs_FACE);
-                for (; expLG.More(); expLG.Next())
-                {
-                  if (cutFaceMap.Contains(expLG.Value()))
-                  {
-                    hasShape = true;
-                    break;
-                  }
-                }
-              }
-            }
-
-            if (!hasShape && history->HasModified())
-            {
-              const TopTools_ListOfShape& modifiedShape = history->Modified(exp.Value());
-              TopTools_ListOfShape::Iterator itM(modifiedShape);
-              for (; itM.More(); itM.Next())
-              {
-                const TopoDS_Shape& locMod = itM.Value();
-                TopExp_Explorer expLM(locMod, TopAbs_FACE);
-                for (; expLM.More(); expLM.Next())
-                {
-                  if (cutFaceMap.Contains(expLM.Value()))
-                  {
-                    hasShape = true;
-                    break;
-                  }
-                }
-              }
-            }
-
-            if (!hasShape)
-            {
-              if (modifiedShapesInv.Contains(exp.Value()))
-              {
-                const TopoDS_Shape& faceToRemove = modifiedShapesInv.FindFromKey(exp.Value());
-
-                myUniqueFaces.Remove(faceToRemove);
-              }
-            }
-          }
-
-          {
-            modifiedShapesInv.Clear();
-            modifiedShapes.Clear();
-            TopTools_ListOfShape listOfShape;
-            TopTools_ListOfShape::Iterator itFaces(myUniqueFaces);
-            for (; itFaces.More(); itFaces.Next())
-            {
-              listOfShape.Append(itFaces.Value());
-            }
-
-            if (!MakeSolid(listOfShape, negativeVolumeShape, modifiedShapesInv, modifiedShapes, true))
-            {
-              return;
-            }
-
-            myResultShape = negativeVolumeShape;
-          }
-
+          resultShape = negativeVolumeShape;
         }
 
       }
 
-      finalShapesMap.Clear();
-      TopExp::MapShapes(myResultShape, TopAbs_SOLID, finalShapesMap);
-      if (finalShapesMap.Size() != 1)
-      {
-        myResultShape = TopoDS_Shape();
-        return;
-      }
+    }
 
-    } // Final filter.
+    finalShapesMap.Clear();
+    TopExp::MapShapes(resultShape, TopAbs_SOLID, finalShapesMap);
+    if (finalShapesMap.Size() != 1)
+    {
+      resultShape = TopoDS_Shape();
+      return false;
+    }
 
+    return true;
   }
 
   //! Trim the extended faces by the bounds of the original face,
