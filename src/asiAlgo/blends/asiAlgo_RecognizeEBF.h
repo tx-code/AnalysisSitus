@@ -117,6 +117,12 @@ protected:
   asiAlgo_EXPORT asiAlgo_BlendVexity
     testVexity(const int fid) const;
 
+  //! Computes cross length for the fillet face.
+  //! \param[in] fid the 1-based ID of a blend face in question.
+  //! \return the computed cross-length.
+  asiAlgo_EXPORT double
+    computeCrossLength(const int fid) const;
+
 protected:
 
   Handle(asiAlgo_AAG)              m_aag;            //!< Attributed Adjacency Graph instance.

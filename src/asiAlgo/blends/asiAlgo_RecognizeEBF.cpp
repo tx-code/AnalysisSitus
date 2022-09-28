@@ -41,7 +41,9 @@
 #include <asiAlgo_FindTermEdges.h>
 
 // OpenCascade includes
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepGProp.hxx>
+#include <BRepTools.hxx>
 #include <gp_Cylinder.hxx>
 #include <GProp_GProps.hxx>
 
@@ -286,6 +288,11 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
     // Get length of the cross edge.
     blendAttr->CrossLength = this->testLength( crossEdgeIndices.GetMinimalMapped() );
   }
+  else if ( !nCrossEdges )
+  {
+    // Fallback solution for cross-lengths.
+    blendAttr->CrossLength = this->computeCrossLength(fid);
+  }
 
   for ( int eidx = 1; eidx <= nCrossEdges; ++eidx )
   {
@@ -455,7 +462,7 @@ asiAlgo_BlendVexity
     {
       const bool
         isInternal = ( face.Orientation() == TopAbs_REVERSED );
-      
+
       return isInternal ? BlendVexity_Concave : BlendVexity_Convex;
     }
   }
@@ -474,4 +481,24 @@ asiAlgo_BlendVexity
   }
 
   return BlendVexity_Uncertain;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_RecognizeEBF::computeCrossLength(const int fid) const
+{
+  const TopoDS_Face&  face = m_aag->GetFace(fid);
+  BRepAdaptor_Surface bas(face);
+
+  if ( bas.GetType() == GeomAbs_Cylinder )
+  {
+    // Take face domain
+    double uMin, uMax, vMin, vMax;
+    BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+    const double l = (uMax - uMin)*bas.Cylinder().Radius();
+    return l;
+  }
+
+  return 0.;
 }
