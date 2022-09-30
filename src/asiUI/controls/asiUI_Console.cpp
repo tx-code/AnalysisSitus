@@ -62,15 +62,16 @@ namespace
   {
     if (curCommand.isEmpty())
       return "";
+      return "";
 
+    int positionAfter;	
     for ( size_t commandIter = 0; commandIter < commands.size(); commandIter++ )
     {
       QString command(commands[commandIter].Name.c_str());
       if (command != curCommand)
         continue;
 
-      QString arguments = asiUI_Console::commandArguments(commands[commandIter]);
-      return arguments.trimmed(); // remove spaces in the start and end of the help text
+      return asiUI_Console::commandArguments(commands[commandIter], positionAfter);
     }
     return "";
   }
@@ -188,12 +189,14 @@ void asiUI_Console::addCommand(QString command)
 
 //-----------------------------------------------------------------------------
 
-QString asiUI_Console::commandArguments(const asiTcl_CommandInfo& commandTcl)
+QString asiUI_Console::commandArguments(const asiTcl_CommandInfo& commandTcl,
+                                        int& positionAfter)
 {
   QString command = commandTcl.Name.c_str();
   QString help = commandTcl.Help.c_str();
   if (help.indexOf(command) == -1)
   {
+    positionAfter = 0;
     return "";
   }
 
@@ -202,9 +205,20 @@ QString asiUI_Console::commandArguments(const asiTcl_CommandInfo& commandTcl)
   if (lastIndexOfCommandName >= 0)
     arguments = arguments.mid(lastIndexOfCommandName + command.length(), arguments.length());
 
-  int indexOnNewLine = arguments.indexOf('\n');
-  if (indexOnNewLine >= 0)
-    arguments = arguments.mid(0, indexOnNewLine);
+  int indexOnTab = arguments.indexOf('\t');
+  if (indexOnTab >= 0)
+    arguments = arguments.mid(0, indexOnTab);
+  positionAfter = lastIndexOfCommandName + command.length() + indexOnTab + 1;
+
+  // regular expression used to remove whitespaced before bracket.
+  arguments = arguments.replace(QRegularExpression("\\s*[[]-"), "\n[-");
+  arguments.replace(" -", "\n -");
+  arguments.replace("{-", "\n{-");
+
+  // it should not start from the line feed
+  arguments.replace(QRegularExpression("^[\n]+"), "");
+  arguments.replace("\n\n", "\n");
+  arguments.replace(QRegularExpression("[\n]$"), "");
 
   return arguments;
 }
@@ -587,12 +601,13 @@ void asiUI_Console::showCommandDescription( const QString& description,
     m_description = new QLabel( view );
     m_description->setStyleSheet(
       QString::fromUtf8( "background-color: rgb(30, 30, 30); color: rgb(230, 230, 230); border: 1px solid #76797C;" ) );
+    m_description->setMargin( 5 );
     m_description->setWindowFlags( Qt::ToolTip );
   }
   m_description->setText( description );
-
-  QFontMetrics fmetrics( m_description->font() );
-  m_description->setFixedWidth( fmetrics.width( description ) + 2 * 2/*description margin*/ + 2 * 1 /*border width*/ );
+  // in order to update the label size, there is revisualize of it.
+  m_description->hide();
+  m_description->show();
 
   QStyleOptionSlider opt;
   QPoint rightTop = view->mapToGlobal( QPoint( selectedRect.right(), selectedRect.top() ) );

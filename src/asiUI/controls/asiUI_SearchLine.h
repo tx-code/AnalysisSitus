@@ -83,6 +83,12 @@ signals:
   //! Signal about deactivation the search.
   void searchDeactivated();
 
+  //! Signal about key 'Up' clicked in the search.
+  void searchUp();
+
+  //! Signal about key 'Down' clicked in the search.
+  void searchDown();
+
 protected slots:
   //! Processing text change.
   //! \param [in] current text

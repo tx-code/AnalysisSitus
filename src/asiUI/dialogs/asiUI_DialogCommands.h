@@ -84,7 +84,15 @@ protected slots:
 
   void searchDeactivated();
 
+  void searchUp();
+
+  void searchDown();
+
   void doubleClickedTableView(QModelIndex index);
+
+private:
+  
+  void selectMatchedIndex(const bool nextMatched);
 
 private:
 

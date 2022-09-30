@@ -97,11 +97,24 @@ void asiUI_SearchLine::paintEvent(QPaintEvent* event)
 
 void asiUI_SearchLine::keyPressEvent(QKeyEvent *event)
 {
-  if (event->key() == Qt::Key_Escape)
+  switch (event->key())
   {
-    reset();
-    emit searchDeactivated();
-    return;
+    case Qt::Key_Escape:
+    {
+      reset();
+      emit searchDeactivated();
+      return;
+    }
+    case Qt::Key_Up:
+    {
+      emit searchUp();
+      return;
+    }
+    case Qt::Key_Down:
+    {
+      emit searchDown();
+      return;
+    }
   }
   QLineEdit::keyPressEvent(event);
 }

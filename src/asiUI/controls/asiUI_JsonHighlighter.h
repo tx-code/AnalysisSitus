@@ -63,6 +63,27 @@ public:
   QTextBlock TextBlock;     //!< text block of highlight
 };
 
+class asiUI_EXPORT asiUI_JsonHighlightRule
+{
+public:
+  //! Constructor
+  asiUI_JsonHighlightRule() {}
+
+  //! Constructor
+  //! \param[in] textFormat     style of text
+  //! \param[in] TypeExpression condition to find the text
+  //! \param[in] marginFromStop number of symbols from the end
+  asiUI_JsonHighlightRule(const QTextCharFormat&    textFormat,
+                          const QRegularExpression& expression,
+                          const int                 marginFromStop = 0)
+  : TypeFormat(textFormat), TypeExpression(expression), MarginFromStop(marginFromStop) {}
+  ~asiUI_JsonHighlightRule() {}
+
+  QTextCharFormat    TypeFormat;      //!< text formats to highlight
+  QRegularExpression TypeExpression;  //!< expression for format
+  int                MarginFromStop;  //!< number of symbols to not highlight at the end of expression
+};
+
 //! Syntax highlighter for text editor following Json rules.
 class asiUI_JsonHighlighter : public QSyntaxHighlighter
 {
@@ -114,11 +135,12 @@ protected:
                              const FormatType formatType);
 
 protected:
-  asiUI_JsonEditor*                        m_editor;         //!< source editor
-  bool                                     m_underlined;     //!< flag whether the text is underlined or not
-  std::list<asiUI_JsonHighlighterBlock>    m_highlighted;    //!< positions to be highlighted
-  std::map<FormatType, QTextCharFormat>    m_typeFormat;     //!< text formats to highlight
-  std::map<FormatType, QRegularExpression> m_typeExpression; //!< expression for format
+  asiUI_JsonEditor*                              m_editor;      //!< source editor
+  bool                                           m_underlined;  //!< flag whether the text is underlined or not
+  std::list<asiUI_JsonHighlighterBlock>          m_highlighted; //!< positions to be highlighted
+  std::map <FormatType, asiUI_JsonHighlightRule> m_rules;       //!< format rules
+  //std::map<FormatType, QTextCharFormat>    m_typeFormat;     //!< text formats to highlight
+  //std::map<FormatType, QRegularExpression> m_typeExpression; //!< expression for format
 };
 
 #endif

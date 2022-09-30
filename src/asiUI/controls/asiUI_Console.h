@@ -85,10 +85,11 @@ public:
   //! \param[in] command text of the command for insertion
   void addCommand(QString command);
 
-  //! Returns command arguments defined in Tcl command.
-  //! \param commandTcl [in] the command information.
-  static QString commandArguments(const asiTcl_CommandInfo& commandTcl);
-
+  //! Returns command arguments defined in help of Tcl command.
+  //! \param commandTcl    [in]  the command information.
+  //! \param positionAfter [out] the position in help where arguments end.
+  static QString commandArguments(const asiTcl_CommandInfo& commandTcl,
+                                  int& positionAfter);
 
 protected:
   //! Processes Hide even for completer object. It hides the command description label.

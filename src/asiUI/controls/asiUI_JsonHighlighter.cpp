@@ -69,6 +69,23 @@ namespace
   //-----------------------------------------------------------------------------
 
   QColor invalidUnderlineColor() { return QColor(255, 0, 0); }
+
+  //-----------------------------------------------------------------------------
+
+  QColor levelColor(const int level)
+  {
+    int levelId = level % 3;
+
+    switch (levelId)
+    {
+      case 0: return QColor(254, 180, 23);
+      case 1: return QColor("#C586C0");
+      case 2: return keywordColor();
+      default: break;
+    }
+
+    return Qt::white;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -86,38 +103,38 @@ asiUI_JsonHighlighter::asiUI_JsonHighlighter(asiUI_JsonEditor* editor)
   m_editor(editor),
   m_underlined(false)
 {
-  m_typeFormat[FormatType_Doc] = QTextCharFormat();
+  QTextCharFormat editorFormat = editor->currentCharFormat();
 
-  m_typeFormat[FormatType_Key] = QTextCharFormat();
-  m_typeFormat[FormatType_Key].setFontWeight(QFont::Bold);
-  m_typeFormat[FormatType_Key].setForeground(keyColor());
+  m_rules[FormatType_Doc] = asiUI_JsonHighlightRule(editorFormat, QRegularExpression());
 
-  m_typeFormat[FormatType_Value] = QTextCharFormat();
-  m_typeFormat[FormatType_Value].setFontWeight(QFont::Bold);
-  m_typeFormat[FormatType_Value].setForeground(valueColor());
+  QTextCharFormat format = editorFormat;
+  format.setForeground(keyColor());
+  m_rules[FormatType_Key] = asiUI_JsonHighlightRule(format, QRegularExpression("\"\\w+\":"), 1);
 
-  m_typeFormat[FormatType_Digit] = QTextCharFormat();
-  m_typeFormat[FormatType_Digit].setFontWeight(QFont::Bold);
-  m_typeFormat[FormatType_Digit].setForeground(digitColor());
+  format = editorFormat;
+  format.setForeground(valueColor());
+  m_rules[FormatType_Value] = asiUI_JsonHighlightRule(format, QRegularExpression("\"[^\"]*\""));
 
-  m_typeFormat[FormatType_Keyword] = QTextCharFormat();
-  m_typeFormat[FormatType_Keyword].setFontWeight(QFont::Bold);
-  m_typeFormat[FormatType_Keyword].setForeground(keywordColor());
+  format = editorFormat;
+  format.setForeground(digitColor());
+  m_rules[FormatType_Digit] = asiUI_JsonHighlightRule(format,
+    QRegularExpression("-?[0-9]*(.?[0-9]+(e[+-]?[0-9]+)?)"));
 
-  m_typeFormat[FormatType_Collapse] = QTextCharFormat();
-  m_typeFormat[FormatType_Collapse].setFontFixedPitch(false);
-  m_typeFormat[FormatType_Collapse].setFontStyleHint(QFont::Times);
-  m_typeFormat[FormatType_Collapse].setForeground(collapseColor());
+  format = editorFormat;
+  format.setForeground(keywordColor());
+  m_rules[FormatType_Keyword] = asiUI_JsonHighlightRule(format,
+    QRegularExpression("true|false|null"));
 
-  m_typeFormat[FormatType_Highlight] = QTextCharFormat();
-  m_typeFormat[FormatType_Highlight].setBackground(highlightColor());
+  format = editorFormat;
+  format.setFontFixedPitch(false);
+  format.setFontStyleHint(QFont::Times);
+  format.setForeground(collapseColor());
+  m_rules[FormatType_Collapse] = asiUI_JsonHighlightRule(format,
+    QRegularExpression(asiUI_JsonEditor::collapseText()));
 
-  m_typeExpression[FormatType_Key]       = QRegularExpression("\"\\w+\":");
-  m_typeExpression[FormatType_Value]     = QRegularExpression("\"[^\"]*\"");
-  m_typeExpression[FormatType_Digit]     = QRegularExpression("-?[0-9]*(.?[0-9]+(e[+-]?[0-9]+)?)");
-  m_typeExpression[FormatType_Keyword]   = QRegularExpression("true|false|null");
-  m_typeExpression[FormatType_Collapse]  = QRegularExpression(asiUI_JsonEditor::collapseText());
-  m_typeExpression[FormatType_Highlight] = QRegularExpression(); // not necessary as defined by cursor
+  format = editorFormat;
+  format.setBackground(highlightColor());
+  m_rules[FormatType_Highlight] = asiUI_JsonHighlightRule(format, QRegularExpression());
 }
 
 //-----------------------------------------------------------------------------
@@ -134,16 +151,16 @@ void asiUI_JsonHighlighter::setUnderlined(const bool value,
 {
   m_underlined = value;
 
-  for (auto& pair : m_typeFormat)
+  for (auto& pair : m_rules)
   {
     if (m_underlined)
     {
-      m_typeFormat[pair.first].setUnderlineStyle(QTextCharFormat::WaveUnderline);
-      m_typeFormat[pair.first].setUnderlineColor(invalidUnderlineColor());
+      m_rules[pair.first].TypeFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+      m_rules[pair.first].TypeFormat.setUnderlineColor(invalidUnderlineColor());
     }
     else
     {
-      m_typeFormat[pair.first].setUnderlineStyle(QTextCharFormat::NoUnderline);
+      m_rules[pair.first].TypeFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
     }
   }
 
@@ -180,12 +197,14 @@ void asiUI_JsonHighlighter::setHighlighted(const std::list<asiUI_JsonHighlighter
 void asiUI_JsonHighlighter::highlightBlockForType(const QString& text,
                                                   const FormatType formatType)
 {
-  QRegularExpressionMatchIterator iter = m_typeExpression[formatType].globalMatch(text);
+  QRegularExpressionMatchIterator iter = m_rules[formatType].TypeExpression.globalMatch(text);
 
   while (iter.hasNext())
   {
     QRegularExpressionMatch match = iter.next();
-    setFormat(match.capturedStart(), match.capturedLength(), m_typeFormat[formatType]);
+    setFormat(match.capturedStart(),
+              match.capturedLength() - m_rules[formatType].MarginFromStop,
+              m_rules[formatType].TypeFormat);
   }
 }
 
@@ -193,7 +212,7 @@ void asiUI_JsonHighlighter::highlightBlockForType(const QString& text,
 
 void asiUI_JsonHighlighter::highlightBlock(const QString& text)
 {
-  setFormat(0, text.length(), m_typeFormat[FormatType_Doc]);
+  setFormat(0, text.length(), m_rules[FormatType_Doc].TypeFormat);
 
   highlightBlockForType(text, FormatType_Collapse);
   highlightBlockForType(text, FormatType_Keyword);
@@ -212,7 +231,19 @@ void asiUI_JsonHighlighter::highlightBlock(const QString& text)
       int endId = element.StopPosition - element.TextBlock.position();
       setFormat(startId,
                 endId - startId,
-                m_typeFormat[FormatType_Highlight]);
+                m_rules[FormatType_Highlight].TypeFormat);
     }
+  }
+
+  // colorise braces and brackets
+  std::map<int, int> posToLevel;
+  m_editor->getJsonBracketPositions(currentBlock(), posToLevel);
+
+  QTextCharFormat editorFormat = m_editor->currentCharFormat();
+  for (auto& element : posToLevel)
+  {
+    QTextCharFormat format = editorFormat;
+    format.setForeground(levelColor(element.second));
+    setFormat(element.first, 1, format);
   }
 }

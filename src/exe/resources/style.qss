@@ -927,6 +927,16 @@ QTreeView, QListView
     background-color: #232629;
 }
 
+QTreeView:item
+{               
+    padding: 12;
+}
+
+QTreeView:item:selected, QTreeView:item:hover
+{               
+    padding: 0;
+}
+
 QTreeView:branch:selected, QTreeView:branch:hover
 {
     background: url(:/qss_icons/rc/transparent.png);

@@ -122,6 +122,42 @@ namespace
        std::cout << pair.first + 1 << " : " << pair.second << std::endl;
     }
   }*/
+
+  //-----------------------------------------------------------------------------
+
+  int findStart(const QString& blockText,
+                const int      indexStart,
+                const bool     fromEnd,
+                bool&          isBrace)
+  {
+    if (indexStart >= blockText.length())
+      return -1;
+
+    int indexOfStart1 = fromEnd ? blockText.lastIndexOf("{", indexStart)
+                                : blockText.indexOf("{", indexStart);
+    int indexOfStart2 = fromEnd ? blockText.lastIndexOf("[", indexStart)
+                                : blockText.indexOf("[", indexStart);
+
+    if (indexOfStart1 == -1 && indexOfStart2 == -1)
+      return -1;
+
+    isBrace = indexOfStart1 > indexOfStart2;
+    return isBrace ? indexOfStart1 : indexOfStart2;
+  }
+
+  //-----------------------------------------------------------------------------
+
+  int findEnd(const QString& blockText,
+              const int      indexStart,
+              const bool&    isBrace)
+  {
+    if (indexStart >= blockText.length())
+      return -1;
+
+    int indexOfEnd = isBrace ? blockText.indexOf("}", indexStart)
+                             : blockText.indexOf("]", indexStart);
+    return indexOfEnd;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -190,6 +226,7 @@ public:
     m_Rects.clear();
     m_blockParents.clear();
     m_blockPositions.clear();
+    m_blockBracketPositions.clear();
   }
 
   //! Returns recommended size for the widget.
@@ -211,7 +248,8 @@ public:
     if (m_codeEditor->isEditBlocked())
       return;
 
-    m_codeEditor->calculateMarkers(collapsedBlocks, m_blockRects, m_blockParents, m_blockPositions);
+    m_codeEditor->calculateMarkers(collapsedBlocks, m_blockRects, m_blockParents, m_blockPositions,
+                                   m_blockBracketPositions);
   }
 
   //! Returns true if the block is visible
@@ -250,11 +288,21 @@ public:
     m_blockRects[blockNumber] = block;
   }
 
-  //!< Returns block items.
+  //! Returns block items.
   const asiUI_JsonBlocks blockRects() const { return m_blockRects; }
 
   //! Returns number of blocks of the document.
   int numberOfBlocks() const { return (int)m_blockPositions.size(); }
+
+  void getJsonBracketPositions(const QTextBlock&   block,
+                               std::map<int, int>& positionToLevel)
+  {
+    int blockNumber = block.blockNumber();
+    if (m_blockBracketPositions.find(blockNumber) == m_blockBracketPositions.end())
+      return;
+
+    positionToLevel = m_blockBracketPositions[blockNumber];
+  }
 
   //! Returns block position.
   //! \param[in] blockNumber index of block in text document
@@ -317,9 +365,42 @@ protected:
 
       asiUI_JsonBlock blockR = m_blockRects.at(blockNumber);
       setBlockCollapsed(blockNumber, !blockR.m_isCollapsed);
+      updateBracketPositions(blockNumber);
+      m_codeEditor->rehighlight(blockNumber);
+      m_codeEditor->document()->clearUndoRedoStacks();
       return true;
     }
     return QWidget::event(event);
+  }
+
+  void updateBracketPositions(const int blockNumber)
+  {
+    if (m_blockBracketPositions.find(blockNumber) == m_blockBracketPositions.end())
+      return;
+
+    asiUI_MapIntToInt positions = m_blockBracketPositions[blockNumber];
+    if (positions.empty())
+      return;
+
+    int level = positions.begin()->second;
+    positions.clear();
+
+    QTextBlock startblock = m_codeEditor->document()->findBlockByNumber(blockNumber);
+    QString blockText = startblock.text();
+
+    bool isBrace;
+    int indexOfStart = findStart(blockText, -1, true, isBrace);
+    if (indexOfStart != -1) // no start in this row
+    {
+      positions[indexOfStart] = level;
+    }
+
+    int indexOfEnd = findEnd(blockText, indexOfStart, isBrace);
+    if (indexOfEnd > indexOfStart)
+    {
+      positions[indexOfEnd] = level;
+    }
+    m_blockBracketPositions[blockNumber] = positions;
   }
 
   //! Updates visibility state of the blocks for the given block between open and close block indices.
@@ -341,8 +422,9 @@ private:
   asiUI_JsonEditor*     m_codeEditor;     //!< source text editor.
   asiUI_JsonBlocks      m_blockRects;     //!< contains block number to json block item. Only for collapsible.
   asiUI_MapIntToRect    m_Rects;          //!< contains block number to rect. It's only for visible text.
-  asiUI_ListOfListOfInt m_blockParents;   //!< contains block number to list of block number parents.
+  asiUI_MapOfListOfInt  m_blockParents;   //!< contains block number to list of block number parents.
   asiUI_MapIntToInt     m_blockPositions; //!< the index of the block's first character within the document.
+  asiUI_MapOfMapToInt   m_blockBracketPositions; //!< contains block number to json brace or bracket positions.
 };
 
 //-----------------------------------------------------------------------------
@@ -366,8 +448,6 @@ asiUI_JsonEditor::asiUI_JsonEditor(QWidget* parent)
   connect(document(), SIGNAL(contentsChange(int, int, int)),
           this,       SLOT(updateOnContentsChange(int, int, int)));
 
-  document()->setUndoRedoEnabled(false);
-
   updateLineNumberAreaWidth();
 
   QTextCharFormat fmt = currentCharFormat();
@@ -379,6 +459,9 @@ asiUI_JsonEditor::asiUI_JsonEditor(QWidget* parent)
 
   m_searchThread = new asiUI_JsonSearchThread();
   connect(m_searchThread, SIGNAL(finished()), this, SLOT(searchFinished()));
+
+  zoomText(true);
+  zoomText(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -390,6 +473,14 @@ asiUI_JsonEditor::~asiUI_JsonEditor()
   m_lineMarkerArea = nullptr;
 
   delete m_searchThread;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_JsonEditor::getJsonBracketPositions(const QTextBlock&   block,
+                                               std::map<int, int>& positionToLevel)
+{
+  lineMarkerArea()->getJsonBracketPositions(block, positionToLevel);
 }
 
 //-----------------------------------------------------------------------------
@@ -461,23 +552,36 @@ void asiUI_JsonEditor::updateValidity()
 }
 
 //-----------------------------------------------------------------------------
+void asiUI_JsonEditor::rehighlight(const int blockNumber)
+{
+  m_highlighter->rehighlightBlock(document()->findBlockByNumber(blockNumber));
+}
+
+//-----------------------------------------------------------------------------
 void asiUI_JsonEditor::expandAllBlocks()
 {
   bool wasBlocked = editBlocked(true);
   auto markerArea = lineMarkerArea();
+
+  bool changed = false;
   for (auto& blockRect : markerArea->blockRects())
   {
     asiUI_JsonBlock blockR = blockRect.second;
     if (!blockR.m_isCollapsed)
       continue;
     markerArea->setBlockCollapsed(blockR.m_blockNumber, false);
+    changed = true;
   }
   editBlocked(wasBlocked);
+
+  if (changed)
+    document()->clearUndoRedoStacks();
 
   repaint();
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::emulateAdjustScrollbars()
 {
   // to update length of the vertical scroll bar, it should be text changed or
@@ -491,6 +595,20 @@ void asiUI_JsonEditor::emulateAdjustScrollbars()
 
 //-----------------------------------------------------------------------------
 
+QTextCursor select(const QTextBlock textBlock,
+            const int startPosition,
+            const int length)
+{
+  QTextCursor cursor(textBlock);
+  cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPosition);
+  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, length);
+
+  return cursor;
+}
+
+//-----------------------------------------------------------------------------
+
 QTextCursor findNext(const QTextCursor&                           currentCursor,
                      const std::list<asiUI_JsonHighlighterBlock>& indices,
                      const QString&                               value)
@@ -499,6 +617,7 @@ QTextCursor findNext(const QTextCursor&                           currentCursor,
     return QTextCursor();
 
   int currentBlockPos = currentCursor.block().position();
+  // get the last position of the cursor (if it has selection)
   int currentCursorPos = currentCursor.position();
 
   for (auto& element : indices)
@@ -506,48 +625,64 @@ QTextCursor findNext(const QTextCursor&                           currentCursor,
     int elementBlockPos = element.TextBlock.position();
     int elementStartPos = element.StartPosition;
 
-    if (elementBlockPos < currentBlockPos)
+    if (elementBlockPos < currentBlockPos ||
+       (elementBlockPos == currentBlockPos && elementStartPos < currentCursorPos))
       continue;
-    else if (elementBlockPos == currentBlockPos)
-    {
-      if (elementStartPos > currentCursorPos)
-      {
-        QTextCursor cursor(element.TextBlock);
-        cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
-        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
-                            elementStartPos - elementBlockPos);
-        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
-                            value.length());
-        return cursor;
-      }
-    }
-    else // next block
-    {
-      int blockPos = element.TextBlock.position();
-      QTextCursor cursor(element.TextBlock);
-      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
-      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
-                          elementStartPos - blockPos);
-      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
-                          value.length());
-      return cursor;
-    }
+
+    return select(element.TextBlock, elementStartPos - elementBlockPos, value.length());
   }
 
   auto& element = indices.front();
   int blockPos = element.TextBlock.position();
   int elementStartPos = element.StartPosition;
-  QTextCursor cursor(element.TextBlock);
-  cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
-  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor,
-                      elementStartPos - blockPos);
-  cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,
-                      value.length());
-  return cursor;
+
+  return select(element.TextBlock, elementStartPos - blockPos, value.length());
+}
+
+//-----------------------------------------------------------------------------
+
+QTextCursor findPrev(const QTextCursor&                           currentCursor,
+                     const std::list<asiUI_JsonHighlighterBlock>& indices,
+                     const QString&                               value)
+{
+  if (indices.empty())
+    return QTextCursor();
+
+  int currentBlockPos = currentCursor.block().position();
+  // get the first position of the cursor (if it has selection)
+  int currentCursorAnchor = currentCursor.anchor();
+
+  std::list<asiUI_JsonHighlighterBlock> indices_rev = indices;
+  indices_rev.reverse();
+
+  for (auto& element : indices_rev)
+  {
+    int elementBlockPos = element.TextBlock.position();
+    int elementStartPos = element.StartPosition;
+
+    if (elementBlockPos > currentBlockPos ||
+       (elementBlockPos == currentBlockPos &&
+       (elementStartPos + value.length()) > currentCursorAnchor))
+      continue;
+
+    return select(element.TextBlock, elementStartPos - elementBlockPos, value.length());
+  }
+
+  auto& element = indices_rev.front();
+  int blockPos = element.TextBlock.position();
+  int elementStartPos = element.StartPosition;
+
+  return select(element.TextBlock, elementStartPos - blockPos, value.length());
 }
 
 //-----------------------------------------------------------------------------
 void asiUI_JsonEditor::searchEntered()
+{
+  selectMatchedText(true);
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::selectMatchedText(const bool nextMatched)
 {
   if (m_highlighter->highlighted().size() == 0)
   {
@@ -558,7 +693,12 @@ void asiUI_JsonEditor::searchEntered()
   {
     // indices are already found and highlighted, set selected the next one
     expandAllBlocks();
-    QTextCursor cursorOfSearch = findNext(textCursor(), m_highlighter->highlighted(), m_searchValue);
+    QTextCursor cursorOfSearch;
+    if (nextMatched)
+      cursorOfSearch = findNext(textCursor(), m_highlighter->highlighted(), m_searchValue);
+    else
+      cursorOfSearch = findPrev(textCursor(), m_highlighter->highlighted(), m_searchValue);
+
     setTextCursor(cursorOfSearch);
     if (!cursorOfSearch.isNull())
     {
@@ -596,6 +736,18 @@ void asiUI_JsonEditor::searchDeactivated()
   m_searchValue = "";
 
   stopSearch();
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::searchUp()
+{
+  selectMatchedText(false);
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_JsonEditor::searchDown()
+{
+  selectMatchedText(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -749,39 +901,22 @@ void asiUI_JsonEditor::searchFinished()
 }
 
 //-----------------------------------------------------------------------------
-
-int findStart(const QString& blockText,
-              const int      indexStart,
-              const bool     fromEnd,
-              bool&          isBrace)
+void appendBracketPosition(const int               blockNumber,
+                           const int               position,
+                           asiUI_MapOfListOfInt&   blockParents,
+                           asiUI_MapOfMapToInt&    blockBracketPositions)
 {
-  if (indexStart >= blockText.length())
-    return -1;
+  int level = 0;
+  if (blockParents.find(blockNumber) != blockParents.end())
+    level = (int)blockParents[blockNumber].size();
 
-  int indexOfStart1 = fromEnd ? blockText.lastIndexOf("{", indexStart)
-                              : blockText.indexOf("{", indexStart);
-  int indexOfStart2 = fromEnd ? blockText.lastIndexOf("[", indexStart)
-                              : blockText.indexOf("[", indexStart);
+  asiUI_MapIntToInt list;
+  if (blockBracketPositions.find(blockNumber) != blockBracketPositions.end())
+    list = blockBracketPositions[blockNumber];
 
-  if (indexOfStart1 == -1 && indexOfStart2 == -1)
-    return -1;
+  list[position] = level;
 
-  isBrace = indexOfStart1 > indexOfStart2;
-  return isBrace ? indexOfStart1 : indexOfStart2;
-}
-
-//-----------------------------------------------------------------------------
-
-int findEnd(const QString& blockText,
-            const int      indexStart,
-            const bool&    isBrace)
-{
-  if (indexStart >= blockText.length())
-    return -1;
-
-  int indexOfEnd = isBrace ? blockText.indexOf("}", indexStart)
-                           : blockText.indexOf("]", indexStart);
-  return indexOfEnd;
+  blockBracketPositions[blockNumber] = list;
 }
 
 //-----------------------------------------------------------------------------
@@ -791,7 +926,8 @@ void findEndInBlocks(const int              startBlockNumber,
                      bool                   isBrace,
                      const int              indexOfStart,
                      asiUI_ListOfInt&       listOfParents,
-                     asiUI_ListOfListOfInt& blockParents,
+                     asiUI_MapOfListOfInt&  blockParents,
+                     asiUI_MapOfMapToInt&   blockBracketPositions,
                      int&                   endId,
                      int&                   endBlockId)
 {
@@ -814,12 +950,14 @@ void findEndInBlocks(const int              startBlockNumber,
     int indexOfStartNext = findStart(blockText, indexOfStartSearch, false, isBraceNext);
     if (indexOfStartNext > -1) // start in this row
     {
+      appendBracketPosition(blockNumber, indexOfStartNext, blockParents, blockBracketPositions);
+
       int endIdNext = 0;
       int endBlockIdNext = 0;
 
       listOfParents.push_back(blockNumber);
       findEndInBlocks(blockNumber, document, isBraceNext, indexOfStartNext,
-                      listOfParents, blockParents, endIdNext, endBlockIdNext);
+                      listOfParents, blockParents, blockBracketPositions, endIdNext, endBlockIdNext);
       listOfParents.pop_back();
 
       if (endBlockIdNext >= 0) // closing of the block is found
@@ -829,6 +967,7 @@ void findEndInBlocks(const int              startBlockNumber,
           block = block.next();
         }
         blockNumber = endBlockIdNext;
+        appendBracketPosition(blockNumber, endIdNext, blockParents, blockBracketPositions);
         indexOfStartSearch = endIdNext + 1;
         block = document->findBlockByNumber(blockNumber);
         blockText = block.text();
@@ -840,6 +979,7 @@ void findEndInBlocks(const int              startBlockNumber,
       {
         if (filledBlockNumber == blockNumber)
          blockParents[blockNumber].pop_back();
+        appendBracketPosition(blockNumber, indexOfEnd, blockParents, blockBracketPositions);
 
         endId = indexOfEnd;
         endBlockId = blockNumber;
@@ -861,7 +1001,8 @@ bool findUnions(const int               blockNumber,
                 const int               startInBlock,
                 const asiUI_JsonBlocks& collapsedBlocks,
                 asiUI_ListOfInt&        listOfParents,
-                asiUI_ListOfListOfInt&  blockParents,
+                asiUI_MapOfListOfInt&   blockParents,
+                asiUI_MapOfMapToInt&    blockBracketPositions,
                 asiUI_JsonBlock&        block)
 {
   QTextBlock startblock = document->findBlockByNumber(blockNumber);
@@ -875,10 +1016,13 @@ bool findUnions(const int               blockNumber,
   {
     return false;
   }
+  appendBracketPosition(blockNumber, indexOfStart, blockParents, blockBracketPositions);
 
   int indexOfEnd = findEnd(blockText, indexOfStart, isBrace);
   if (indexOfEnd > indexOfStart)
   {
+    appendBracketPosition(blockNumber, indexOfEnd, blockParents, blockBracketPositions);
+
     block.m_isBrace = isBrace;
     block.m_blockNumberClose = blockNumber;
 
@@ -904,7 +1048,7 @@ bool findUnions(const int               blockNumber,
   int endId = 0;
   listOfParents.push_back(blockNumber);
   int blockNumberClose;
-  findEndInBlocks(blockNumber + 1, document, isBrace, -1, listOfParents, blockParents, endId, blockNumberClose);
+  findEndInBlocks(blockNumber + 1, document, isBrace, -1, listOfParents, blockParents, blockBracketPositions, endId, blockNumberClose);
   block.m_isBrace = isBrace;
   block.m_isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
   block.m_blockNumberClose = blockNumberClose;
@@ -927,8 +1071,9 @@ bool asiUI_JsonEditor::editBlocked(const bool value)
 
 void asiUI_JsonEditor::calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
                                         asiUI_JsonBlocks&       markers,
-                                        asiUI_ListOfListOfInt&  blockParents,
-                                        asiUI_MapIntToInt&      blockPositions) const
+                                        asiUI_MapOfListOfInt&   blockParents,
+                                        asiUI_MapIntToInt&      blockPositions,
+                                        asiUI_MapOfMapToInt&    blockBracketPositions) const
 {
   markers.clear();
   QTextBlock block = document()->firstBlock();
@@ -936,6 +1081,7 @@ void asiUI_JsonEditor::calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
 
   blockParents.clear();
   blockPositions.clear();
+  blockBracketPositions.clear();
 
   asiUI_ListOfInt listOfParents;
   while (block.isValid())
@@ -945,7 +1091,7 @@ void asiUI_JsonEditor::calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
       asiUI_JsonBlock rect;
       rect.m_blockNumber = blockNumber;
       listOfParents.clear();
-      if (findUnions(blockNumber, document(), -1, collapsedBlocks, listOfParents, blockParents, rect))
+      if (findUnions(blockNumber, document(), -1, collapsedBlocks, listOfParents, blockParents, blockBracketPositions, rect))
       {
         markers[blockNumber] = rect;
       }
@@ -1125,6 +1271,7 @@ void asiUI_JsonEditor::zoomText(bool positive)
       return;
     zoomOut();
   }
+
   ensureCursorVisible();
 }
 

@@ -60,6 +60,8 @@ asiUI_DialogDump::asiUI_DialogDump(const QString& title,
   m_widgets.pEditor->setImmediateValidate(true);
   connect(m_widgets.pSearchLine, SIGNAL (searchEntered()),     m_widgets.pEditor, SLOT(searchEntered()));
   connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), m_widgets.pEditor, SLOT(searchDeactivated()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchUp()),          m_widgets.pEditor, SLOT(searchUp()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchDown()),        m_widgets.pEditor, SLOT(searchDown()));
   connect(m_widgets.pSearchLine, SIGNAL (searchChanged(const QString&)),
           m_widgets.pEditor,     SLOT   (searchChanged(const QString&)));
 
@@ -84,9 +86,11 @@ asiUI_DialogDump::asiUI_DialogDump(const QString& title,
   this->setWindowModality (Qt::WindowModal);
   this->setWindowTitle    (title);
 
+  setTabOrder(m_widgets.pSearchLine, m_widgets.pEditor);
+  m_widgets.pSearchLine->setFocus();
+
   // Set good initial size
   this->resize( QSize(900, 600) );
-  m_widgets.pSearchLine->setFocus();
 }
 
 //-----------------------------------------------------------------------------
@@ -102,6 +106,7 @@ asiUI_DialogDump::~asiUI_DialogDump()
 void asiUI_DialogDump::Populate(const std::string& buff)
 {
   m_widgets.pEditor->insertPlainText(buff.c_str());
+  m_widgets.pEditor->document()->clearUndoRedoStacks();
   m_widgets.pEditor->moveCursor(QTextCursor::MoveOperation::Start);
   m_widgets.pEditor->ensureCursorVisible();
 }

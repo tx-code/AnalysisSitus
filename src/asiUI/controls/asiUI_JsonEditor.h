@@ -69,6 +69,10 @@ public:
   //! Destructor.
   virtual ~asiUI_JsonEditor();
 
+  //! Collects container of brace and bracket positions to level of hierarchy.
+  void getJsonBracketPositions(const QTextBlock&   block,
+                               std::map<int, int>& positionToLevel);
+
   //! Sets whether the Json validity should be checked by any text change.
   //! If it's false, to check just call updateValidity.
   //! \param[in] value check validity state.
@@ -77,6 +81,9 @@ public:
   //! Checks whether the text is valid in terms of Json format.
   //! Underlines the text with red waved line if not valid.
   void updateValidity();
+
+  //! Rehighlight block by number.
+  void rehighlight(const int blockNumber);
 
   //! Do expand for all collapsed blocks of text.
   void expandAllBlocks();
@@ -109,8 +116,9 @@ protected:
   //! \param[out] blockPositions  container of each block position
   void calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
                         asiUI_JsonBlocks&       markers,
-                        asiUI_ListOfListOfInt&  blockParents,
-                        asiUI_MapIntToInt&      blockPositions) const;
+                        asiUI_MapOfListOfInt&   blockParents,
+                        asiUI_MapIntToInt&      blockPositions,
+                        asiUI_MapOfMapToInt&    blockBracketPositions) const;
 
   //! Changes the editor text to move text block into collapsed or expanded state.
   //! Appends ' ...' if collapsed, remove it if it's expanded.
@@ -157,6 +165,12 @@ public slots:
   //! Reaction on escape clicked on search or nullify text. It hides results of the search.
   void searchDeactivated();
 
+  //! Reaction on enter key 'Up' clicked in the search.
+  void searchUp();
+
+  //! Reaction on enter key 'Down' clicked in the search.
+  void searchDown();
+
 private slots:
   //! Updates viewport margins by line number and marker areas width.
   void updateLineNumberAreaWidth();
@@ -177,6 +191,11 @@ private slots:
 
   //! Update highlighter by search performed.
   void searchFinished();
+
+private:
+  //! Select next or previous found text of current search.
+  //! \param[in] nextMatched if true, to find the next or the previous value
+  void selectMatchedText(const bool nextMatched);
 
 private:
   //! Zoom text font in editor.

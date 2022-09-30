@@ -83,7 +83,9 @@ typedef std::map<int, asiUI_JsonBlock> asiUI_JsonBlocks;
 typedef std::map<int, QRect>           asiUI_MapIntToRect;
 
 typedef std::list<int>                 asiUI_ListOfInt;
-typedef std::map<int, asiUI_ListOfInt> asiUI_ListOfListOfInt;
+typedef std::map<int, asiUI_ListOfInt> asiUI_MapOfListOfInt;
+
 typedef std::map<int, int>             asiUI_MapIntToInt;
+typedef std::map<int, asiUI_MapIntToInt>  asiUI_MapOfMapToInt;
 
 #endif

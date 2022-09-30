@@ -137,12 +137,13 @@ namespace
       }
       else
       {
-        arguments = asiUI_Console::commandArguments(info);
+        int positionAfter;
+        arguments = asiUI_Console::commandArguments(info, positionAfter);
 
         description = curHelp;
-        description = description.mid(curCommand.length() + arguments.length());
+        description = description.mid(positionAfter);//curCommand.length() + arguments.length());
         description = description.trimmed();
-        description = description.remove('\t');
+        description = description.replace('\t', ' ');
       }
       arguments = arguments.trimmed(); // remove spaces in the start and end of the help text
 
@@ -181,9 +182,28 @@ namespace
         if (indices[i] == index)
           return indices[i+1];
       }
-      return indices[0];
+      return indices.first();
     }
-    return indices[0]; // if next item is not found, return the first index
+    return indices.first(); // if next item is not found, return the first index
+  }
+
+  //-----------------------------------------------------------------------------
+
+  QModelIndex findPrev(const QModelIndex& index, const QModelIndexList& indices)
+  {
+    if (indices.isEmpty())
+      return index;
+
+    if (indices.contains(index)) // if the item belongs to the list, return the next item
+    {
+      for (int i = indices.length() - 1; i > 0; i--)
+      {
+        if (indices[i] == index)
+          return indices[i-1];
+      }
+      return indices.last();
+    }
+    return indices.last(); // if next item is not found, return the first index
   }
 }
 //-----------------------------------------------------------------------------
@@ -207,12 +227,15 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
 
   // Widgets
   m_widgets.pClose = new QPushButton("Close");
-  m_widgets.pClose->setMinimumWidth(BTN_MIN_WIDTH);
+  m_widgets.pClose->setMaximumWidth(BTN_MIN_WIDTH);
 
   // Set search control
   m_widgets.pSearchLine = new asiUI_SearchLine("Type command");
+
   connect(m_widgets.pSearchLine, SIGNAL (returnPressed()),     this, SLOT(searchEntered()));
   connect(m_widgets.pSearchLine, SIGNAL (searchDeactivated()), this, SLOT(searchDeactivated()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchUp()),          this, SLOT(searchUp()));
+  connect(m_widgets.pSearchLine, SIGNAL (searchDown()),        this, SLOT(searchDown()));
   connect(m_widgets.pSearchLine, SIGNAL (searchChanged(const QString&)),
           this,                  SLOT   (searchChanged(const QString&)));
 
@@ -245,6 +268,7 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   connect(m_widgets.pClose, SIGNAL(clicked()), SLOT(onClose()));
 
   m_widgets.pClose->setAutoDefault(false);
+  m_widgets.pSearchLine->setFocus();
 }
 
 //-----------------------------------------------------------------------------
@@ -297,8 +321,14 @@ void asiUI_DialogCommands::initialize()
   item = asiUI_DialogCommandsRootItem::CreateItem(asiUI_TreeItemPtr(), 0, CommandsColumnType_Description);
   model->setRootItem(CommandsColumnType_Description, "Description", item);
 
+  model->emitLayoutChanged();
+
   m_widgets.pCommandsView->header()->setDefaultSectionSize(200);
   m_widgets.pCommandsView->header()->setStretchLastSection(true);
+
+  m_widgets.pCommandsView->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+  // to wrap text in the description column.
+  m_widgets.pCommandsView->setWordWrap(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -313,7 +343,7 @@ bool asiUI_DialogCommands::eventFilter( QObject* o, QEvent* e )
       case Qt::Key_Enter:
       case Qt::Key_Return:
       {
-        searchEntered();
+        selectMatchedIndex(true);
         return true;
       }
       default:
@@ -341,29 +371,29 @@ void findMatchedIndices(const QString matchedValue,
 
 void asiUI_DialogCommands::searchEntered()
 {
-  asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
-  if (m_matchedIndices.isEmpty())
-  {
-    m_searchValue = m_widgets.pSearchLine->text().toLower();
-    findMatchedIndices(m_searchValue, model, m_matchedIndices);
-  }
+  selectMatchedIndex(true);
+}
 
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogCommands::selectMatchedIndex(const bool nextMatched)
+{
   if (m_matchedIndices.length() > 0)
   {
     auto selectionModel = m_widgets.pCommandsView->selectionModel();
     auto selectedIndices = selectionModel->selectedIndexes();
-    auto nextId = m_matchedIndices[0];
+    auto toSelectId = m_matchedIndices[0];
     if (!selectedIndices.isEmpty())
     {
-      nextId = findNext(selectedIndices[0], m_matchedIndices);
+      if (nextMatched)
+        toSelectId = findNext(selectedIndices[0], m_matchedIndices);
+      else
+        toSelectId = findPrev(selectedIndices[0], m_matchedIndices);
     }
-    selectionModel->select(nextId, QItemSelectionModel::SelectionFlag::Rows |
-                                   QItemSelectionModel::SelectionFlag::ClearAndSelect);
-    m_widgets.pCommandsView->scrollTo(nextId);
+    selectionModel->select(toSelectId, QItemSelectionModel::SelectionFlag::Rows |
+                                       QItemSelectionModel::SelectionFlag::ClearAndSelect);
+    m_widgets.pCommandsView->scrollTo(toSelectId, QAbstractItemView::PositionAtCenter);
   }
-
-  model->setHighlighted(m_matchedIndices);
-  model->emitLayoutChanged();
 }
 
 //-----------------------------------------------------------------------------
@@ -430,6 +460,18 @@ void asiUI_DialogCommands::searchDeactivated()
   asiUI_TreeModel* model = dynamic_cast<asiUI_TreeModel*>(m_widgets.pCommandsView->model());
   model->setHighlighted(m_matchedIndices);
   model->emitLayoutChanged();
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_DialogCommands::searchUp()
+{
+  selectMatchedIndex(false);
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_DialogCommands::searchDown()
+{
+  selectMatchedIndex(true);
 }
 
 //-----------------------------------------------------------------------------
