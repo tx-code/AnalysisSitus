@@ -28,6 +28,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+// Rapidjson includes (should be hidden in cpp)
+#if defined USE_RAPIDJSON
+#include <rapidjson/document.h>
+
+typedef rapidjson::Document::Array     t_jsonArray;
+typedef rapidjson::Document::ValueType t_jsonValue;
+typedef rapidjson::Document::Object    t_jsonObject;
+#endif
+
 // OS-dependent
 #ifdef _WIN32
   #include <Windows.h>
@@ -163,15 +172,6 @@
 #include <OpenGl_GraphicDriver.hxx>
 
 #include <BRepBuilderAPI_Transform.hxx>
-
-// Rapidjson includes (should be hidden in cpp)
-#if defined USE_RAPIDJSON
-  #include <rapidjson/document.h>
-
-  typedef rapidjson::Document::Array     t_jsonArray;
-  typedef rapidjson::Document::ValueType t_jsonValue;
-  typedef rapidjson::Document::Object    t_jsonObject;
-#endif
 
 // Eigen includes
 #pragma warning(push, 0)
