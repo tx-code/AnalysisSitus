@@ -844,6 +844,36 @@ public:
   asiAsm_EXPORT void
     ExpandCompounds(const AssemblyItemIds& items);
 
+  //! \Create new part with empty compound as shape.
+  asiAsm_EXPORT TDF_Label CreateEmptyPart();
+
+  //! \Create new empty assembly.
+  asiAsm_EXPORT TDF_Label CreateEmptyAssembly();
+
+  //! Adda a new component with the given location to the passed assembly.
+  //! \param[in] assemblyLabel the target assembly's label.
+  //! \param[in] compLabel     the component to add.
+  //! \param[in] location      the location to attach to the added instance.
+  //! \return label of the newly added component.
+  asiAsm_EXPORT TDF_Label
+    AddComponent(const TDF_Label&       assemblyLabel,
+                 const TDF_Label&       compLabel,
+                 const TopLoc_Location& location);
+
+  //! Sets mesh as facets in auxiliary empty shape for the part.
+  //! \param[in] partLabel root Label for part.
+  //! \param[in] mesh      mesh to set.
+  asiAsm_EXPORT void
+    SetFacets(const TDF_Label&                  partLabel,
+              const Handle(Poly_Triangulation)& mesh);
+
+  //! Sets mesh as a secondary representation for the part.
+  //! \param[in] partLabel root Label for part.
+  //! \param[in] mesh      mesh to set.
+  asiAsm_EXPORT void
+    SetMesh(const TDF_Label&                  partLabel,
+            const Handle(Poly_Triangulation)& mesh);
+
   //! Creates a new part with the given shape as a primary representation.
   //! \param[in] shape the shape to add as a part.
   //! \param[in] name  the part's name.
@@ -1041,16 +1071,6 @@ protected:
   asiAsm_EXPORT void
     copyAttributes(const TDF_Label from,
                    TDF_Label&      to);
-
-  //! Adda a new component with the given location to the passed assembly.
-  //! \param[in] assemblyLabel the target assembly's label.
-  //! \param[in] compLabel     the component to add.
-  //! \param[in] location      the location to attach to the added instance.
-  //! \return label of the newly added component.
-  asiAsm_EXPORT TDF_Label
-    addComponent(const TDF_Label&       assemblyLabel,
-                 const TDF_Label&       compLabel,
-                 const TopLoc_Location& location);
 
   //! Finds assembly items targeting a persistent label with the specified
   //! name. This is a recursive DFS method.

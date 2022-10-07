@@ -69,7 +69,6 @@ struct asiAsm::xde::t_fbxState
   typedef NCollection_DataMap<TopoDS_Shape, FbxMesh*>                          ShapeFbxMeshMap;
   typedef NCollection_DataMap<TDF_Label, FbxMesh*, TDF_LabelMapHasher>         LabelFbxMeshMap;
   typedef NCollection_DataMap<TDF_Label, FbxSurfacePhong*, TDF_LabelMapHasher> LabelFbxSurfacePhongMap;
-  typedef NCollection_DataMap<FbxMesh*, TDF_Label>                             FbxMeshLabelMap;
 
   FbxScene*                 fbxScene;
   ShapeFbxMeshMap           shapeFbxMeshMap;           //!< Map which stores converted meshes for shape with facets.

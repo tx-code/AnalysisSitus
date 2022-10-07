@@ -2184,6 +2184,28 @@ void Doc::ExpandCompounds(const AssemblyItemIds& items)
 
 //-----------------------------------------------------------------------------
 
+TDF_Label Doc::CreateEmptyPart()
+{
+  BRep_Builder builder;
+  TopoDS_Compound comp;
+  builder.MakeCompound(comp);
+  TDF_Label result = GetShapeTool()->AddShape(comp, false);
+  return result;
+}
+
+//-----------------------------------------------------------------------------
+
+TDF_Label Doc::CreateEmptyAssembly()
+{
+  BRep_Builder builder;
+  TopoDS_Compound comp;
+  builder.MakeCompound(comp);
+  TDF_Label result = GetShapeTool()->AddShape(comp, true);
+  return result;
+}
+
+//-----------------------------------------------------------------------------
+
 PartId Doc::AddPart(const TopoDS_Shape& shape,
                     const std::string&  name)
 {
@@ -2642,7 +2664,7 @@ void Doc::expand(const TDF_Label&                                    expandedLab
     }
 
     // Add a new component.
-    this->addComponent( expandedLabel, partL, childShape.Location() );
+    this->AddComponent( expandedLabel, partL, childShape.Location() );
 
     // Remove new part from subshapes map.
     std::pair<TDF_Label, TopLoc_Location> oldLabel;
@@ -3015,7 +3037,7 @@ void Doc::copyAttributes(const TDF_Label from,
 
 //-----------------------------------------------------------------------------
 
-TDF_Label Doc::addComponent(const TDF_Label&       assemblyLabel,
+TDF_Label Doc::AddComponent(const TDF_Label&       assemblyLabel,
                             const TDF_Label&       compLabel,
                             const TopLoc_Location& location)
 {
@@ -3040,6 +3062,33 @@ TDF_Label Doc::addComponent(const TDF_Label&       assemblyLabel,
   }
 
   return result;
+}
+
+//-----------------------------------------------------------------------------
+
+void Doc::SetFacets(const TDF_Label&                  partLabel,
+                    const Handle(Poly_Triangulation)& mesh)
+{
+  if (partLabel.IsNull())
+    return;
+
+  TopoDS_Face fictiveFace;
+  BRep_Builder().MakeFace(fictiveFace);
+  BRep_Builder().UpdateFace(fictiveFace, mesh);
+
+  UpdatePartShape(partLabel, fictiveFace, NULL, false);
+}
+
+//-----------------------------------------------------------------------------
+
+void Doc::SetMesh(const TDF_Label&                  partLabel,
+                  const Handle(Poly_Triangulation)& mesh)
+{
+  if (partLabel.IsNull())
+    return;
+
+  Handle(TDataXtd_Triangulation) attr = TDataXtd_Triangulation::Set(partLabel);
+  attr->Set(mesh);
 }
 
 //-----------------------------------------------------------------------------

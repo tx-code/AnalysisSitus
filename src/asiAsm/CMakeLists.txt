@@ -43,9 +43,11 @@ set (xde_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (interop_H_FILES
+  interop/fbx_XdeReader.h
   interop/fbx_XdeWriter.h
 )
 set (interop_CPP_FILES
+  interop/fbx_XdeReader.cpp
   interop/fbx_XdeWriter.cpp
 )
 

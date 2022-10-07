@@ -49,6 +49,7 @@
 #include <asiAsm_GLTFXdeDataSourceProvider.h>
 
 // FBX includes
+#include <fbx_XdeReader.h>
 #include <fbx_XdeWriter.h>
 
 // asiUI includes
@@ -925,6 +926,56 @@ int ASMXDE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_LoadFBX(const Handle(asiTcl_Interp)& interp,
+                   int                          argc,
+                   const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get filename.
+  std::string filename;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Filename is not specified. "
+                                                           "Did you forget the '-filename' key?");
+    return TCL_ERROR;
+  }
+
+  // Create a new empty XDE document.
+  Handle(Doc) doc = new Doc( interp->GetProgress(),
+                             interp->GetPlotter() );
+
+  TIMER_NEW
+  TIMER_GO
+
+  fbxReader cafReader( filename.c_str(),
+                       interp->GetProgress(),
+                       interp->GetPlotter() );
+
+  if ( !cafReader.Perform(doc) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "FBX load failed.");
+    return TCL_ERROR;
+  }
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-load-fbx")
+
+  // Set as variable.
+  interp->SetVar( name, new cmdAsm_XdeModel(doc) );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ASMXDE_SaveFBX(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
@@ -1689,6 +1740,15 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Exports the passed XDE model to glTF format.",
     //
     __FILE__, group, ASMXDE_SaveGLTF);
+
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-load-fbx",
+    //
+    "asm-xde-load-fbx -model <M> -filename <filename>\n"
+    "\t Loads FBX file to fill XDE model.",
+    //
+    __FILE__, group, ASMXDE_LoadFBX);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-save-fbx",
