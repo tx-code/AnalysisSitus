@@ -862,7 +862,7 @@ int ENGINE_LoadPart(const Handle(asiTcl_Interp)& interp,
     format = asiAlgo_FileFormatTool::FormatFromFileExtension(filename);
   }
 
-  if ( asiAlgo_Utils::IsMeshFormat(format) )
+  if ( asiAlgo_FileFormatTool::IsMeshFormat(format) )
   {
     cmdEngine::model->OpenCommand();
     {

@@ -211,3 +211,17 @@ bool asiAlgo_FileFormatTool::IsImportSupported(const asiAlgo_FileFormat& format)
   return false;
 }
 
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_FileFormatTool::IsMeshFormat(const asiAlgo_FileFormat& fileFormat)
+{
+  switch ( fileFormat )
+  {
+    case FileFormat_STL:
+    case FileFormat_PLY:
+    case FileFormat_OBJ:
+      return true;
+    default:
+      return false;
+  }
+}

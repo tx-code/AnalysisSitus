@@ -1112,12 +1112,6 @@ namespace asiAlgo_Utils
              const TCollection_AsciiString&    filename,
              ActAPI_ProgressEntry              progress);
 
-  //! Checks if file format is a mesh format.
-  //! \param[in] fileFormat file format.
-  //! \return true/false.
-  asiAlgo_EXPORT bool
-    IsMeshFormat(const asiAlgo_FileFormat& fileFormat);
-
   //! Collects summary information for the given shape.
   //! \param shape   [in]  input shape.
   //! \param summary [out] shape summary.

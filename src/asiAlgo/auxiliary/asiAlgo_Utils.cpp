@@ -2496,21 +2496,6 @@ bool asiAlgo_Utils::WritePly(const Handle(Poly_Triangulation)& triangulation,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::IsMeshFormat(const asiAlgo_FileFormat& fileFormat)
-{
-  switch (fileFormat)
-  {
-    case FileFormat_STL:
-    case FileFormat_PLY:
-    case FileFormat_OBJ:
-      return true;
-    default:
-      return false;
-  }
-}
-
-//-----------------------------------------------------------------------------
-
 void asiAlgo_Utils::ShapeSummary(const TopoDS_Shape&  shape,
                                  asiAlgo_TopoSummary& summary)
 {

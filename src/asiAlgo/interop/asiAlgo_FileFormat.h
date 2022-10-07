@@ -147,14 +147,19 @@ public:
   //! Returns true if the passed CAD data format can be exported.
   //! \param[in] format data format in question.
   //! \return true/false.
-  asiAlgo_EXPORT virtual bool
+  asiAlgo_EXPORT static bool
     IsExportSupported(const asiAlgo_FileFormat& format);
 
   //! Returns true if the passed CAD data format can be imported.
   //! \param[in] format data format in question.
   //! \return true/false.
-  asiAlgo_EXPORT virtual bool
+  asiAlgo_EXPORT static bool
     IsImportSupported(const asiAlgo_FileFormat& format);
+
+  //! Returns true if the passed file format is a mesh one.
+  //! \param[in] fileFormat the file format to check.
+  asiAlgo_EXPORT static bool
+    IsMeshFormat(const asiAlgo_FileFormat& fileFormat);
 
 protected:
 
