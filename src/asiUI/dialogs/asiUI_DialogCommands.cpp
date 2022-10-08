@@ -425,6 +425,7 @@ void asiUI_DialogCommands::searchChanged(const QString& text)
       if (model->data(index).toString() != selectedText)
         continue;
       isSelectedFound = true;
+      m_widgets.pCommandsView->scrollTo(index, QAbstractItemView::PositionAtCenter);
       break;
     }
   }
@@ -443,7 +444,7 @@ void asiUI_DialogCommands::searchChanged(const QString& text)
       }
       selectionModel->select(idToSelect, QItemSelectionModel::SelectionFlag::Rows |
                                          QItemSelectionModel::SelectionFlag::ClearAndSelect);
-      m_widgets.pCommandsView->scrollTo(idToSelect);
+      m_widgets.pCommandsView->scrollTo(idToSelect, QAbstractItemView::PositionAtCenter);
     }
   }
 

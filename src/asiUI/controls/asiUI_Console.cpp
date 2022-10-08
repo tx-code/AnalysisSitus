@@ -62,7 +62,6 @@ namespace
   {
     if (curCommand.isEmpty())
       return "";
-      return "";
 
     int positionAfter;	
     for ( size_t commandIter = 0; commandIter < commands.size(); commandIter++ )
