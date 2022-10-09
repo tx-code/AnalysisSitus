@@ -244,6 +244,8 @@ asiUI_DialogCommands::asiUI_DialogCommands(const Handle(asiTcl_Interp)& interp,
   // Configure tree view
   m_widgets.pCommandsView = new asiUI_QTreeView();
   m_widgets.pCommandsView->installEventFilter(this);
+  m_widgets.pCommandsView->setProperty("class", "commandsTreeView");
+
   //
   m_pMainLayout->addWidget(m_widgets.pCommandsView);
   asiUI_TreeModel* model = new asiUI_TreeModel();

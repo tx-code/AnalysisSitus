@@ -927,12 +927,12 @@ QTreeView, QListView
     background-color: #232629;
 }
 
-QTreeView:item
+.commandsTreeView:item
 {               
     padding: 12;
 }
 
-QTreeView:item:selected, QTreeView:item:hover
+.commandsTreeView:item:selected, .commandsTreeView:item:hover
 {               
     padding: 0;
 }
