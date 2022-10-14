@@ -3820,11 +3820,6 @@ int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  double tol = 0.01;
-  interp->GetKeyValue(argc, argv, "tol", tol);
-  //
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Conversion tolerance: %1." << tol);
-
   Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
 
   TIMER_NEW
@@ -3835,7 +3830,7 @@ int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
     const TopoDS_Wire& wire = TopoDS::Wire( exp.Current() );
     TopoDS_Wire        W;
 
-    if ( !asiAlgo_ConvertCurve::FixGaps(wire, tol, W) )
+    if ( !asiAlgo_ConvertCurve::FixGaps(wire, W) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to fix gaps in a wire.");
       continue;
