@@ -52,13 +52,22 @@ namespace asiAlgo_ConvertCurve
             double                    tolerance = 0.001);
 
   asiAlgo_EXPORT double
+    CheckMaxGap(const TopoDS_Shape&  shape,
+                ActAPI_ProgressEntry progress = nullptr,
+                ActAPI_PlotterEntry  plotter  = nullptr);
+
+  asiAlgo_EXPORT double
     CheckGaps(const TopoDS_Wire&   w,
               ActAPI_ProgressEntry progress = nullptr,
               ActAPI_PlotterEntry  plotter  = nullptr);
 
+  asiAlgo_EXPORT void
+    FixGaps(TopoDS_Shape&        shape,
+            ActAPI_ProgressEntry progress = nullptr,
+            ActAPI_PlotterEntry  plotter  = nullptr);
+
   asiAlgo_EXPORT bool
     FixGaps(const TopoDS_Wire&   input,
-            const double         tol,
             TopoDS_Wire&         result,
             ActAPI_ProgressEntry progress = nullptr,
             ActAPI_PlotterEntry  plotter  = nullptr);

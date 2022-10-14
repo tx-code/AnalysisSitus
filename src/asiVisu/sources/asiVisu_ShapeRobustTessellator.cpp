@@ -482,9 +482,13 @@ bool asiVisu_ShapeRobustTessellator::isValidFace(const TopoDS_Face& face) const
   // Location just to access triangulation.
   TopLoc_Location loc;
 
-  return checker.HasAllClosedWires(face, tol) &&
-        !checker.HasEdgesWithoutVertices(face) &&
-        !BRep_Tool::Triangulation(face, loc).IsNull();
+  const bool hasAllClosedWires       = checker.HasAllClosedWires(face, tol);
+  const bool hasEdgesWithoutVertices = checker.HasEdgesWithoutVertices(face);
+  const bool hasEmptyMeshes          = BRep_Tool::Triangulation(face, loc).IsNull();
+
+  return hasAllClosedWires &&
+        !hasEdgesWithoutVertices &&
+        !hasEmptyMeshes;
 }
 
 //-----------------------------------------------------------------------------

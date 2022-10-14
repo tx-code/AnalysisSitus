@@ -53,8 +53,10 @@
 #include <gp_Lin.hxx>
 #include <ShapeAnalysis.hxx>
 #include <ShapeAnalysis_Curve.hxx>
+#include <ShapeBuild_ReShape.hxx>
 #include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Wire.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
 // Standard includes
@@ -909,6 +911,36 @@ bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
 
 //-----------------------------------------------------------------------------
 
+double
+  asiAlgo_ConvertCurve::CheckMaxGap(const TopoDS_Shape&  shape,
+                                    ActAPI_ProgressEntry progress,
+                                    ActAPI_PlotterEntry  plotter)
+{
+  // Find max gap.
+  double maxGap = 0.;
+  //
+  if ( shape.ShapeType() < TopAbs_WIRE )
+  {
+    for ( TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next() )
+    {
+      const TopoDS_Wire& W = TopoDS::Wire( exp.Current() );
+
+      const double gap = CheckGaps(W, progress);
+      //
+      if ( gap > maxGap )
+        maxGap = gap;
+    }
+  }
+  else if ( shape.ShapeType() == TopAbs_WIRE )
+  {
+    maxGap = CheckGaps(TopoDS::Wire(shape), progress);
+  }
+
+  return maxGap;
+}
+
+//-----------------------------------------------------------------------------
+
 double asiAlgo_ConvertCurve::CheckGaps(const TopoDS_Wire&   w,
                                        ActAPI_ProgressEntry progress,
                                        ActAPI_PlotterEntry  plotter)
@@ -922,8 +954,33 @@ double asiAlgo_ConvertCurve::CheckGaps(const TopoDS_Wire&   w,
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_ConvertCurve::FixGaps(TopoDS_Shape&        shape,
+                                   ActAPI_ProgressEntry progress,
+                                   ActAPI_PlotterEntry  plotter)
+{
+  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
+
+  for ( TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Wire& wire = TopoDS::Wire( exp.Current() );
+    TopoDS_Wire        W;
+
+    if ( !FixGaps(wire, W) )
+    {
+      continue;
+    }
+    //
+    if ( !W.IsNull() )
+      ctx->Replace(wire, W);
+  }
+
+  TopoDS_Shape newShape = ctx->Apply(shape);
+  shape = newShape;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_ConvertCurve::FixGaps(const TopoDS_Wire&   input,
-                                   const double         tol,
                                    TopoDS_Wire&         result,
                                    ActAPI_ProgressEntry progress,
                                    ActAPI_PlotterEntry  plotter)
