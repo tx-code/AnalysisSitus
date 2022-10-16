@@ -108,7 +108,7 @@ bool asiAlgo_ExtractFeatures::Perform(const Handle(asiAlgo_AAG)&                
           continue;
 
         // Dump graphically.
-        attr->DumpGraphically(m_plotter);
+        //attr->DumpGraphically(m_plotter);
 
         // Get group of face indices representing a single feature.
         TColStd_PackedMapOfInteger&

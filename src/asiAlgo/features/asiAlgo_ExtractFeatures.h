@@ -45,8 +45,6 @@ class asiAlgo_FeatureAttrFace;
 //! \brief Function to filter the extracted faces by attributes.
 class asiAlgo_ExtractFeaturesFilter : public Standard_Transient
 {
-public:
-
   // OCCT RTTI.
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ExtractFeaturesFilter, Standard_Transient)
 
@@ -90,8 +88,6 @@ public:
 //! \sa asiAlgo_ExtractFeaturesResult, asiAlgo_FeatureAttrFace, asiAlgo_AAG
 class asiAlgo_ExtractFeatures : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ExtractFeatures, ActAPI_IAlgorithm)
 

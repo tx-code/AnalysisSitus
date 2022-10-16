@@ -80,3 +80,10 @@ bool asiAlgo_ExtractFeaturesResult::ContainsFeature(const int type,
 
   return (*featuresPtr).IsBound(featId);
 }
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ExtractFeaturesResult::GetFeatures(asiAlgo_FeaturesByType& res) const
+{
+  res = m_data;
+}

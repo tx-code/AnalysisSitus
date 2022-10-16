@@ -32,7 +32,7 @@
 #define asiAlgo_ExtractFeaturesResult_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
+#include <asiAlgo_FeatureFaces.h>
 
 // OCCT includes
 #include <NCollection_DataMap.hxx>
@@ -45,8 +45,6 @@
 //! \sa asiAlgo_AAG, asiAlgo_ExtractFeatures
 class asiAlgo_ExtractFeaturesResult : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ExtractFeaturesResult, Standard_Transient)
 
@@ -99,6 +97,10 @@ public:
   asiAlgo_EXPORT bool
     ContainsFeature(const int type,
                     const int featId) const;
+
+  //! Collects grouped features.
+  asiAlgo_EXPORT void
+    GetFeatures(asiAlgo_FeaturesByType& res) const;
 
 protected:
 

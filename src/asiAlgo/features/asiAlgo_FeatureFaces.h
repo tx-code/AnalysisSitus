@@ -75,7 +75,7 @@ typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features
 //-----------------------------------------------------------------------------
 
 //! Handy typedef for indices of feature faces organized by feature types.
-typedef NCollection_DataMap<asiAlgo_FeatureType, asiAlgo_Features> asiAlgo_FeaturesByType;
+typedef NCollection_DataMap<int, asiAlgo_Features> asiAlgo_FeaturesByType;
 
 //-----------------------------------------------------------------------------
 
