@@ -68,6 +68,12 @@ m_layerName("none")
     m_ssEntity    = new std::ostringstream();
     m_ssLayer     = new std::ostringstream();
 
+    // Set max precision for streams to avoid geometric gaps due to writer's imprecision.
+    *m_ssBlock     << std::setprecision( std::numeric_limits<double>::max_digits10 );
+    *m_ssBlkRecord << std::setprecision( std::numeric_limits<double>::max_digits10 );
+    *m_ssEntity    << std::setprecision( std::numeric_limits<double>::max_digits10 );
+    *m_ssLayer     << std::setprecision( std::numeric_limits<double>::max_digits10 );
+
     if(!(*m_ofs)){
         m_fail = true;
         return;
