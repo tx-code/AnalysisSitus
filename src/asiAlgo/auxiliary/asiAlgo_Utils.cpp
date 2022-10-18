@@ -1766,6 +1766,49 @@ bool asiAlgo_Utils::IsStraight(const TopoDS_Edge& edge,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsStraight(const TopoDS_Edge& edge,
+                               gp_Lin&            lin,
+                               const bool         canrec)
+{
+  Handle(Geom_Line) hostLine;
+  //
+  if ( IsStraight(edge, hostLine) )
+  {
+    lin = hostLine->Lin();
+    return true;
+  }
+
+  // Get curve.
+  double f, l;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+  //
+  if ( curve.IsNull() )
+    return false;
+
+  // If canonical conversion is allowed, let's do the last-chance check for splines.
+  if ( canrec )
+  {
+    if ( curve->IsKind( STANDARD_TYPE(Geom_BSplineCurve) ) )
+    {
+      Handle(Geom_BSplineCurve)
+        spl = Handle(Geom_BSplineCurve)::DownCast(curve);
+
+      gp_Lin linFit;
+      double dev = 0.;
+      //
+      if ( asiAlgo_RecognizeCanonical::IsLinear(spl->Poles(), 1.e-2, dev, linFit) )
+      {
+        lin = linFit;
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsStraightPCurve(const Handle(Geom2d_Curve)& pcu,
                                      const bool                  canrec)
 {

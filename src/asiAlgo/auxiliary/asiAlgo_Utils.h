@@ -850,6 +850,17 @@ namespace asiAlgo_Utils
     IsStraight(const TopoDS_Edge& edge,
                Handle(Geom_Line)& line);
 
+  //! Checks if the passed edge is straight with canonical conversion for freeform
+  //! curves plugged in.
+  //! \param[in]  edge   edge to check.
+  //! \param[out] lin    line props for a straight edge.
+  //! \param[in]  canrec whether to try canonical recognition.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsStraight(const TopoDS_Edge& edge,
+               gp_Lin&            lin,
+               const bool         canrec);
+
   //! Checks if the passed pcurve is a straight line.
   //! \param[in] pcu    pcurve to check.
   //! \param[in] canrec whether to try canonical recognition.
