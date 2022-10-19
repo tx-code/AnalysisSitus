@@ -307,23 +307,23 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
 
 void asiVisu_PartPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& picker) const
 {
-  if ( !this->IsVisible() )
-    return;
+  //if ( !this->IsVisible() )
+  //  return;
 
-  picker->RemoveAllLocators();
+  //picker->RemoveAllLocators();
 
-  // Set octree locators to speed up cell picking
-  if ( this->MainActor() )
-  {
-    vtkSmartPointer<vtkCellTreeLocator>
-      facetLocator = vtkSmartPointer<vtkCellTreeLocator>::New();
-    //
-    facetLocator->SetDataSet( this->MainActor()->GetMapper()->GetInput() );
-    facetLocator->AutomaticOn();
-    facetLocator->BuildLocator();
-    //
-    picker->AddLocator(facetLocator);
-  }
+  //// Set octree locators to speed up cell picking
+  //if ( this->MainActor() )
+  //{
+  //  vtkSmartPointer<vtkCellTreeLocator>
+  //    facetLocator = vtkSmartPointer<vtkCellTreeLocator>::New();
+  //  //
+  //  facetLocator->SetDataSet( this->MainActor()->GetMapper()->GetInput() );
+  //  facetLocator->AutomaticOn();
+  //  facetLocator->BuildLocator();
+  //  //
+  //  picker->AddLocator(facetLocator);
+  //}
 
   // NOTICE: we do not apply cell locator as it seems
   //         to work weird for isolines (broken faces).

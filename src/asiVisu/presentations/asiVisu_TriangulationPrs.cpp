@@ -233,27 +233,27 @@ void asiVisu_TriangulationPrs::ColorizeEdges(const ActAPI_Color& color) const
 
 void asiVisu_TriangulationPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& picker) const
 {
-  picker->RemoveAllLocators();
+  //picker->RemoveAllLocators();
 
-  try
-  {
-    // Set octee locators to speed up cell picking
-    if ( this->MainActor() )
-    {
-      vtkSmartPointer<vtkCellTreeLocator>
-        facetLocator = vtkSmartPointer<vtkCellTreeLocator>::New();
-      //
-      facetLocator->SetDataSet( this->MainActor()->GetMapper()->GetInput() );
-      facetLocator->AutomaticOn();
-      facetLocator->BuildLocator();
-      //
-      picker->AddLocator(facetLocator);
-    }
-  }
-  catch ( ... )
-  {
-    std::cout << "Crash in cell locator." << std::endl;
-  }
+  //try
+  //{
+  //  // Set octee locators to speed up cell picking
+  //  if ( this->MainActor() )
+  //  {
+  //    vtkSmartPointer<vtkCellTreeLocator>
+  //      facetLocator = vtkSmartPointer<vtkCellTreeLocator>::New();
+  //    //
+  //    facetLocator->SetDataSet( this->MainActor()->GetMapper()->GetInput() );
+  //    facetLocator->AutomaticOn();
+  //    facetLocator->BuildLocator();
+  //    //
+  //    picker->AddLocator(facetLocator);
+  //  }
+  //}
+  //catch ( ... )
+  //{
+  //  std::cout << "Crash in cell locator." << std::endl;
+  //}
 
   // NOTICE: we do not apply cell locator for selection of edges as it seems
   //         to work weird (at least for vtkCellTreeLocator)
