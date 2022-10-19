@@ -135,6 +135,26 @@ asiEngine_Model::asiEngine_Model() : ActData_BaseModel(true)
 
 //-----------------------------------------------------------------------------
 
+bool asiEngine_Model::Open(const TCollection_AsciiString& filename,
+                           ActAPI_ProgressEntry           progress)
+{
+  if ( !ActData_BaseModel::Open(filename, progress) )
+    return false;
+
+  // Prepare Part Node (build AAG).
+  asiEngine_Part partApi(this);
+  //
+  this->DisableTransactions();
+  {
+    partApi.Update( partApi.GetShape() );
+  }
+  this->EnableTransactions();
+  //
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 //! Populates Data Model.
 void asiEngine_Model::Populate()
 {

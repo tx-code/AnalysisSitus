@@ -103,8 +103,12 @@ public:
     asiEngine_Model();
 
 //-----------------------------------------------------------------------------
-// Populate and clear:
+
 public:
+
+  asiEngine_EXPORT virtual bool
+    Open(const TCollection_AsciiString& filename,
+         ActAPI_ProgressEntry           progress = nullptr);
 
   asiEngine_EXPORT virtual void
     Populate();
