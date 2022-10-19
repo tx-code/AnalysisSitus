@@ -142,16 +142,14 @@ int asiVisu_PointsSource<REAL_TYPE>::RequestData(vtkInformation*        request,
 {
   if ( m_points.IsNull() )
   {
-    vtkErrorMacro( << "Invalid input: nullptr point cloud" );
-    return 0;
+    return 1;
   }
 
   Handle(TColStd_HArray1OfReal) coords = asiAlgo_PointCloudUtils::AsRealArray(m_points);
   //
   if ( coords.IsNull() )
   {
-    vtkErrorMacro( << "Invalid input: nullptr point cloud" );
-    return 0;
+    return 1;
   }
 
   /* ==============================
