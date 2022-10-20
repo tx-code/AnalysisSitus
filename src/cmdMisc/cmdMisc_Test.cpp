@@ -31,6 +31,11 @@
 // cmdMisc includes
 #include <cmdMisc.h>
 
+// asiAlgo includes
+#include <asiAlgo_PointWithAttr.h>
+#include <asiAlgo_PurifyCloud.h>
+#include <asiAlgo_QuickHull2d.h>
+
 // OpenCascade includes
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -255,11 +260,86 @@ int MISC_TestBottle(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MISC_TestQuickHull(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  // Find Points Node by name.
+  Handle(asiData_IVPointSetNode)
+    pointsNode = Handle(asiData_IVPointSetNode)::DownCast( interp->GetModel()->FindNodeByName(argv[1]) );
+  //
+  if ( pointsNode.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a point cloud."
+                                                        << argv[2]);
+    return TCL_ERROR;
+  }
+
+  // Get point cloud.
+  Handle(asiAlgo_BaseCloud<double>) pts = pointsNode->GetPoints();
+
+  // Get output points.
+  Handle(asiAlgo_PointWithAttrCloud<gp_XY>) cloud = new asiAlgo_PointWithAttrCloud<gp_XY>;
+  //
+  for ( int ipt = 0; ipt < pts->GetNumberOfElements(); ++ipt )
+  {
+    gp_XYZ P     = pts->GetElement(ipt);
+    gp_XY  Pproj = gp_XY(P.X(), P.Z());
+
+    cloud->AddElement( asiAlgo_PointWithAttr<gp_XY>(Pproj, 0, ipt) );
+  }
+
+
+  ///
+  Handle(asiAlgo_PointWithAttrCloud<gp_XY>) sparsedCloud;
+
+  // Sparse cloud using the appropriate type of inspector.
+  asiAlgo_PurifyCloud sparser( interp->GetProgress(), interp->GetPlotter() );
+  //
+  sparser.PerformCommon< asiAlgo_PointWithAttrCloud<gp_XY>,
+                         asiAlgo_PointWithAttrInspector2d<gp_XY> >(0.01, cloud, sparsedCloud);
+  ///
+
+
+  asiAlgo_QuickHull2d<gp_XY> qHull( sparsedCloud, interp->GetProgress(), interp->GetPlotter() );
+  //
+  if ( !qHull.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Quick hull failed.");
+    return TCL_ERROR;
+  }
+
+  // Get hull indices.
+  const Handle(TColStd_HSequenceOfInteger)& hull = qHull.GetHull();
+
+  // Make polygon
+  BRepBuilderAPI_MakePolygon mkPolygon;
+  for ( int hidx = hull->Lower(); hidx <= hull->Upper(); ++hidx )
+  {
+    const int index = hull->Value(hidx);
+
+    gp_XY Pproj = sparsedCloud->GetElement(index).Coord;
+
+    mkPolygon.Add( gp_Pnt( Pproj.X(), 0., Pproj.Y() ) );
+  }
+  //
+  mkPolygon.Close(); // Polygon should be closed
+  mkPolygon.Build();
+  //
+  const TopoDS_Wire& W = mkPolygon.Wire();
+
+  interp->GetPlotter().REDRAW_SHAPE("hull", W, Color_Green, 1., true);
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMisc::Commands_Test(const Handle(asiTcl_Interp)&      interp,
                             const Handle(Standard_Transient)& cmdMisc_NotUsed(data))
 {
   static const char* group = "cmdMisc";
 
-  interp->AddCommand("test",        "Test anything.", __FILE__, group, MISC_Test);
-  interp->AddCommand("test-bottle", "Test bottle.",   __FILE__, group, MISC_TestBottle);
+  interp->AddCommand("test",        "Test anything.",     __FILE__, group, MISC_Test);
+  interp->AddCommand("test-bottle", "Test bottle.",       __FILE__, group, MISC_TestBottle);
+  interp->AddCommand("test-qhull",  "Test Quick Hull.",   __FILE__, group, MISC_TestQuickHull);
 }
