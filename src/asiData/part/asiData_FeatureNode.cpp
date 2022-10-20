@@ -45,10 +45,11 @@ Handle(ActAPI_INode) asiData_FeatureNode::Instance()
 
 asiData_FeatureNode::asiData_FeatureNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name,      PID_Name);
-  REGISTER_PARAMETER(Int,       PID_FeatureId);
-  REGISTER_PARAMETER(Selection, PID_Mask);
-  REGISTER_PARAMETER(Int,       PID_Color);
+  REGISTER_PARAMETER(Name,        PID_Name);
+  REGISTER_PARAMETER(Int,         PID_FeatureId);
+  REGISTER_PARAMETER(Selection,   PID_Mask);
+  REGISTER_PARAMETER(Int,         PID_Color);
+  REGISTER_PARAMETER(AsciiString, PID_Comment);
 }
 
 //-----------------------------------------------------------------------------
@@ -59,10 +60,11 @@ void asiData_FeatureNode::Init()
   this->SetFeatureId ( 0 );
   this->SetMask      ( nullptr );
   this->SetColor     ( -1 );
+  this->SetComment   ( "" );
 
   // Initialize properties.
-  this->InitParameter (PID_Name,  "Name",  "",               ParameterFlag_IsVisible, true);
-  //this->InitParameter (PID_Color, "Color", "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name,    "Name",    "",                ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Comment, "Comment", "FreeTextComment", ParameterFlag_IsVisible, true);
 
 }
 
@@ -137,4 +139,18 @@ void asiData_FeatureNode::SetColor(const int color)
 int asiData_FeatureNode::GetColor() const
 {
   return ActParamTool::AsInt( this->Parameter(PID_Color) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_FeatureNode::SetComment(const TCollection_AsciiString& comment)
+{
+  ActParamTool::AsAsciiString( this->Parameter(PID_Comment) )->SetValue(comment);
+}
+
+//-----------------------------------------------------------------------------
+
+TCollection_AsciiString asiData_FeatureNode::GetComment() const
+{
+  return ActParamTool::AsAsciiString( this->Parameter(PID_Comment) )->GetValue();
 }

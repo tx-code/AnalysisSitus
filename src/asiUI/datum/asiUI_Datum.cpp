@@ -452,23 +452,23 @@ void asiUI_Datum::init(QDS_Datum* theDatum)
   connect(theDatum, SIGNAL(paramChanged(QString&)), this, SLOT(onValueChanged(QString&)));
 }
 
-//! Convert asiUI_Datum flags to QDS_Datum flags.
-//! \param theDatumFlags [in] flags to be converted.
-//! \return converted flags for QDS_Datum
-int asiUI_Datum::convertFlags(const int theDatumFlags) const
+//! Convert the passed UI flags to QDS datum flags.
+//! \param[in] datumFlags the flags to convert.
+//! \return converted flags for QDS datum
+int asiUI_Datum::convertFlags(const int datumFlags) const
 {
   // convert flags to QDS definition.
-  int aFlags = convertWidgets(theDatumFlags);
-  if ( theDatumFlags & NotFormat )
-    aFlags |= QDS::NotFormat;
-  if ( theDatumFlags & NotAccel )
-    aFlags |= QDS::NotAccel;
-  if ( theDatumFlags & NotConvert )
-    aFlags |= QDS::NotConvert;
-  if ( theDatumFlags & UnitsWithLabel )
-    aFlags |= QDS::UnitsWithLabel;
+  int flags = convertWidgets(datumFlags);
+  if ( datumFlags & NotFormat )
+    flags |= QDS::NotFormat;
+  if ( datumFlags & NotAccel )
+    flags |= QDS::NotAccel;
+  if ( datumFlags & NotConvert )
+    flags |= QDS::NotConvert;
+  if ( datumFlags & UnitsWithLabel )
+    flags |= QDS::UnitsWithLabel;
 
-  return aFlags;
+  return flags;
 }
 
 //! Convert asiUI_Datum widget flags to QDS_Datum widget flags.

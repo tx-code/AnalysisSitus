@@ -63,6 +63,7 @@ public:
     PID_FeatureId,    //!< Feature ID.
     PID_Mask,         //!< Sub-shape IDs comprising a feature.
     PID_Color,        //!< Color associated with the feature.
+    PID_Comment,      //!< Free text comment.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -133,6 +134,15 @@ public:
   //! \return the integer representation of feature's color.
   asiData_EXPORT int
     GetColor() const;
+
+  //! Sets free text comment associated with the feature.
+  //! \param[in] comment the comment to set.
+  asiData_EXPORT void
+    SetComment(const TCollection_AsciiString& comment);
+
+  //! \return the free text comment associated with the feature.
+  asiData_EXPORT TCollection_AsciiString
+    GetComment() const;
 
 protected:
 

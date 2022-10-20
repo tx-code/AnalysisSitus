@@ -163,6 +163,7 @@ set (datum_H_UI_FILES
   datum/asiUI_DatumSelector.h
   datum/asiUI_DatumSpinBox.h
   datum/asiUI_DatumSpinBoxDbl.h
+  datum/asiUI_DatumTextEdit.h
   datum/asiUI_DatumViewBase.h
   datum/asiUI_DatumViewDelegate.h
   datum/asiUI_DatumViewModel.h
@@ -186,6 +187,7 @@ set (datum_CPP_FILES
   datum/asiUI_DatumSelector.cpp
   datum/asiUI_DatumSpinBox.cpp
   datum/asiUI_DatumSpinBoxDbl.cpp
+  datum/asiUI_DatumTextEdit.cpp
   datum/asiUI_DatumViewBase.cpp
   datum/asiUI_DatumViewItem.cpp
   datum/asiUI_DatumViewDelegate.cpp

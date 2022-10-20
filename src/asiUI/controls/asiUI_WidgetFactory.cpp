@@ -47,8 +47,7 @@
 #include <asiUI_DatumSelector.h>
 #include <asiUI_DatumLabel.h>
 #include <asiUI_DatumCustomSelector.h>
-//#include <asiUI_DatumTable.h>
-//#include <asiUI_DatumTree.h>
+#include <asiUI_DatumTextEdit.h>
 #include <asiUI_Logger.h>
 
 // asiAlgo includes
@@ -284,6 +283,10 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
           }
           return aDatum;
         }
+      }
+      else if ( aWidgetType == asiAlgo_DictionaryItem::WT_TextEditor )
+      {
+        new asiUI_DatumTextEdit(theDataDicID, theParent, theDatumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_DatePicker )
       {
