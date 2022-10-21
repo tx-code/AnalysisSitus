@@ -1,6 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 June 2022
-// Created by: Andrey Voevodin
+// Created on: 12 May 2022
 //-----------------------------------------------------------------------------
 // Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
@@ -29,53 +28,56 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-// cmdTest includes
-#include <cmdTest.h>
+#ifndef asiTest_BuildQuickHull_HeaderFile
+#define asiTest_BuildQuickHull_HeaderFile
 
-// asiTcl includes
-#include <asiTcl_PluginMacro.h>
+// asiTest includes
+#include <asiTest_CaseIDs.h>
+#include <asiTest_TclTestCase.h>
 
-// asiUI includes
-#include <asiUI_CommonFacilities.h>
-
-//-----------------------------------------------------------------------------
-
-Handle(asiEngine_Model) cmdTest::model = nullptr;
-
-//-----------------------------------------------------------------------------
-
-void cmdTest::Factory(const Handle(asiTcl_Interp)&      interp,
-                      const Handle(Standard_Transient)& data)
+//! Test functions for constructing quick hull.
+class asiTest_BuildQuickHull : public asiTest_TclTestCase
 {
-  //static const char* group = "cmdTest";
+public:
 
-  /* ==========================
-   *  Initialize UI facilities
-   * ========================== */
-
-  interp->GetProgress().SendLogMessage(LogWarn(Normal) << "[cmdTest] UI facilities are not available. GUI may not be updated.");
-
-  /* ================================
-   *  Initialize Data Model instance
-   * ================================ */
-
-  model = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
-  //
-  if ( model.IsNull() )
+  //! Returns Test Case ID.
+  //! \return ID of the Test Case.
+  static int ID()
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "[cmdTest] Data Model instance is null or not of asiEngine_Model kind.");
-    return;
+    return CaseID_BuildQuickHull;
   }
 
-  /* =====================
-   *  Add custom commands
-   * ===================== */
+  //! Returns filename for the description.
+  //! \return filename for the description of the Test Case.
+  static std::string DescriptionFn()
+  {
+    return "asiTest_BuildQuickHull";
+  }
 
-  // Load sub-modules.
-  Commands_Mesh(interp, data);
-  Commands_Points(interp, data);
-  Commands_Shape(interp, data);
-}
+  //! Returns Test Case description directory.
+  //! \return description directory for the Test Case.
+  static std::string DescriptionDir()
+  {
+    return "inspection";
+  }
 
-// Declare entry point PLUGINFACTORY
-ASIPLUGIN(cmdTest)
+  //! Returns pointers to the Test Functions to launch.
+  //! \param[out] functions output collection of pointers.
+  static void Functions(asiTestFunctions& functions)
+  {
+    functions << &test_build_quick_hull_01
+              << &test_build_quick_hull_02
+    ; // Put semicolon here for convenient adding new functions above ;)
+  }
+
+private:
+
+  static outcome runTestScript(const int   funcID,
+                               const char* filename);
+
+  static outcome test_build_quick_hull_01(const int funcID);
+  static outcome test_build_quick_hull_02(const int funcID);
+
+};
+
+#endif

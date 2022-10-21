@@ -1,6 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 25 June 2022
-// Created by: Andrey Voevodin
+// Created on: 12 May 2022
 //-----------------------------------------------------------------------------
 // Copyright (c) 2022-present, Andrey Voevodin
 // All rights reserved.
@@ -29,70 +28,44 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef cmdTest_h
-#define cmdTest_h
-
-#define cmdTest_NotUsed(x)
-
-#ifdef _WIN32
-  #ifdef cmdTest_EXPORTS
-    #define cmdTest_EXPORT __declspec(dllexport)
-  #else
-    #define cmdTest_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define cmdTest_EXPORT
-#endif
+// Own include
+#include <asiTest_BuildQuickHull.h>
 
 //-----------------------------------------------------------------------------
 
-// asiTcl includes
-#include <asiTcl_Interp.h>
-
-// asiEngine includes
-#include <asiEngine_Model.h>
-
-//-----------------------------------------------------------------------------
-
-//! Tcl commands for working with CAD assemblies.
-class cmdTest
+outcome asiTest_BuildQuickHull::runTestScript(const int   funcID,
+                                              const char* filename)
 {
-public:
+  // Get filename of script to execute.
+  TCollection_AsciiString fullFilename = GetFilename(filename);
 
-  //! Entry point to the plugin.
-  //! \param[in] interp the Tcl interpretor.
-  //! \param[in] data   the passed client's data.
-  cmdTest_EXPORT static void
-    Factory(const Handle(asiTcl_Interp)&      interp,
-            const Handle(Standard_Transient)& data);
+  // Execute test script.
+  outcome res = evaluate(fullFilename, DescriptionFn(), funcID);
 
-public:
+  // Set description variables.
+  SetVarDescr("filename", fullFilename, ID(), funcID);
+  SetVarDescr("time", res.elapsedTimeSec, ID(), funcID);
 
-  //! Tcl commands for working with mesh.
-  //! \param[in] interp the Tcl interpretor.
-  //! \param[in] data   the passed client's data.
-  cmdTest_EXPORT static void
-    Commands_Mesh(const Handle(asiTcl_Interp)&      interp,
-                  const Handle(Standard_Transient)& data);
+  // Return status.
+  return res;
+}
 
-  //! Tcl commands for working with shape.
-  //! \param[in] interp the Tcl interpretor.
-  //! \param[in] data   the passed client's data.
-  cmdTest_EXPORT static void
-    Commands_Shape(const Handle(asiTcl_Interp)&      interp,
-                   const Handle(Standard_Transient)& data);
+//-----------------------------------------------------------------------------
 
-  //! Tcl commands for working with points.
-  //! \param[in] interp the Tcl interpretor.
-  //! \param[in] data   the passed client's data.
-  cmdTest_EXPORT static void
-    Commands_Points(const Handle(asiTcl_Interp)&      interp,
-                    const Handle(Standard_Transient)& data);
+//! Test scenario 01.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_BuildQuickHull::test_build_quick_hull_01(const int funcID)
+{
+  return runTestScript(funcID, "inspection/build-quick-hull/build_quick_hull_01.tcl");
+}
 
-public:
+//-----------------------------------------------------------------------------
 
-  static Handle(asiEngine_Model) model; //!< Data Model instance.
-
-};
-
-#endif
+//! Test scenario 02.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_BuildQuickHull::test_build_quick_hull_02(const int funcID)
+{
+  return runTestScript(funcID, "inspection/build-quick-hull/build_quick_hull_02.tcl");
+}

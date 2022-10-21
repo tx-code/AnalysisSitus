@@ -5748,3 +5748,26 @@ bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
 
   return pixmap->Save(filename.c_str());
 }
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::ProjectPointOnPlane(const Handle(Geom_Plane)& plane,
+                                        const gp_Dir&             dir,
+                                        const gp_Pnt&             point,
+                                        gp_Pnt&                   proj)
+{
+  gp_Vec vec(point, plane->Location());
+
+  Standard_Real alpha = vec * gp_Vec(plane->Axis().Direction());
+
+  if ( Abs(dir * plane->Axis().Direction()) < Precision::SquareConfusion() )
+  {
+    return false;
+  }
+
+  alpha /= dir * plane->Axis().Direction();
+
+  proj.SetXYZ(point.XYZ() + alpha * dir.XYZ());
+
+  return true;
+}

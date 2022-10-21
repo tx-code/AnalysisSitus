@@ -2044,6 +2044,18 @@ namespace asiAlgo_Utils
                const double       v,
                const gp_Ax1&      ax);
 
+  //! Projects a point onto a plane in a specified direction.
+  //! \param[in]  plane plane.
+  //! \param[in]  dir   direction.
+  //! \param[in]  point point.
+  //! \param[out] proj  projection of point.
+  //! \return true in case of success false -- otherwise.
+  asiAlgo_EXPORT bool
+    ProjectPointOnPlane(const Handle(Geom_Plane)& plane,
+                        const gp_Dir&             dir,
+                        const gp_Pnt&             point,
+                        gp_Pnt&                   proj);
+
 } // asiAlgo_Utils namespace.
 
 #endif

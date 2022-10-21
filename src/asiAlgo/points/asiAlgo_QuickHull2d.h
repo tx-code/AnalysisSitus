@@ -40,6 +40,12 @@
 // OCCT includes
 #include <TColgp_HSequenceOfXY.hxx>
 #include <TColStd_HSequenceOfInteger.hxx>
+#include <TColStd_PackedMapOfInteger.hxx>
+
+//-----------------------------------------------------------------------------
+
+//! Feature as a set of indices of points.
+typedef TColStd_PackedMapOfInteger asiAlgo_PointIds;
 
 //-----------------------------------------------------------------------------
 
@@ -124,16 +130,18 @@ private:
                        const bool up) const;
 
   //! Recursive processing.
-  //! \param prev [in] previous node.
-  //! \param curr [in] current node.
-  //! \param left [in] indicates whether to look-up for a point on the left
-  //!                  (true) or on the right (false) regarding to the current point.
-  //! \param up   [in] indicates whether to look-up for a point above (true)
-  //!                  or below (false) the line.
-  void process(PNode*     prev,
-               PNode*     curr,
-               const bool left,
-               const bool up);
+  //! \param prev         [in] previous node.
+  //! \param curr         [in] current node.
+  //! \param traversedIds [in] traversed points.
+  //! \param left         [in] indicates whether to look-up for a point on the left
+  //!                          (true) or on the right (false) regarding to the current point.
+  //! \param up           [in] indicates whether to look-up for a point above (true)
+  //!                          or below (false) the line.
+  void process(PNode*            prev,
+               PNode*            curr,
+               asiAlgo_PointIds& traversedIds,
+               const bool        left,
+               const bool        up);
 
   //! Recursive iteration of tree by triplets, where {parent} can possess
   //! {left} and {right} children. The traversing order is

@@ -22,7 +22,7 @@ set resultName "result.xyz"
 save-xyz $ptsName $tmpDir$resultName
 
 # Load auxiliary procedures.
-set proceduresName inspection/face-grid/auxiliary_procedures.tcl
+set proceduresName auxiliary_procedures/points_procedures.tcl
 if {[info procs ComparePointsCoordProc] eq ""} {
     puts "ComparePointsCoordProc does not exist.  sourcing $proceduresName"
 	set scriptsdir $env(ASI_TEST_SCRIPTS)
