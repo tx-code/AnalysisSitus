@@ -9,6 +9,7 @@ set (H_FILES
 )
 set (CPP_FILES
   cmdTest.cpp
+  cmdTest_Clock.cpp
   cmdTest_Mesh.cpp
   cmdTest_Points.cpp
   cmdTest_Shape.cpp

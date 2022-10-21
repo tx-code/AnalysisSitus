@@ -72,6 +72,7 @@ void cmdTest::Factory(const Handle(asiTcl_Interp)&      interp,
    * ===================== */
 
   // Load sub-modules.
+  Commands_Clock(interp, data);
   Commands_Mesh(interp, data);
   Commands_Points(interp, data);
   Commands_Shape(interp, data);

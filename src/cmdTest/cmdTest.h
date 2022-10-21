@@ -68,6 +68,13 @@ public:
 
 public:
 
+  //! Tcl commands for working with clock.
+  //! \param[in] interp the Tcl interpretor.
+  //! \param[in] data   the passed client's data.
+  cmdTest_EXPORT static void
+    Commands_Clock(const Handle(asiTcl_Interp)&      interp,
+                   const Handle(Standard_Transient)& data);
+
   //! Tcl commands for working with mesh.
   //! \param[in] interp the Tcl interpretor.
   //! \param[in] data   the passed client's data.

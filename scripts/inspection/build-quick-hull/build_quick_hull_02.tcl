@@ -7,8 +7,12 @@ set refPntsName reference/quickHull/ref_quick_hull_PC3.xyz
 set datadir $env(ASI_TEST_DATA)
 load-points pointsName $datadir/$datafile
 
+cpulimit 100
+
 # Build quick hull.
 test-build-quick-hull pointsName -50.000000000000000 25.000000000000000 45.000000000000000 0.0000000000000000 0.0000000000000000 1.0000000000000000
+
+cpulimit-stop
 
 # Make temprary folder.
 set subDir "/quick_hull_02/"
