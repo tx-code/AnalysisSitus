@@ -76,6 +76,7 @@ public:
     WT_OpenFilePath,
     WT_SaveFilePath,
     WT_DirPath,
+    WT_TextEditor,
     WT_CheckBox,
     WT_DatePicker,
     WT_ColorPicker,

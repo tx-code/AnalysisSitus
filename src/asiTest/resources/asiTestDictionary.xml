@@ -56,6 +56,13 @@
     <description>Directory selector</description>
   </datum>
 
+  <!-- Free text comment -->
+  <datum id="FreeTextComment" format="" label="Comment">
+    <domain type="String" />
+    <ui widget="TextEditor" />
+    <description>Free text comment</description>
+  </datum>
+
   <!-- ==================================================================== -->
   <!-- Semantic IDs for PROJECT Node                                        -->
   <!-- ==================================================================== -->

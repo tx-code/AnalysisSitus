@@ -233,6 +233,8 @@ void asiAlgo_DictionaryItem::FillDataMap(TCollection_AsciiString theID,
       setWidgetType(WT_SaveFilePath);
     else if ( aWidget.IsEqual( "DirPath" ) )
       setWidgetType(WT_DirPath);
+    else if ( aWidget.IsEqual( "TextEditor" ) )
+      setWidgetType(WT_TextEditor);
     else if ( aWidget.IsEqual( "CheckBox" ) )
       setWidgetType(WT_CheckBox);
     else if ( aWidget.IsEqual( "DatePicker" ) )

@@ -163,6 +163,7 @@ set (datum_H_UI_FILES
   datum/asiUI_DatumSelector.h
   datum/asiUI_DatumSpinBox.h
   datum/asiUI_DatumSpinBoxDbl.h
+  datum/asiUI_DatumTextEdit.h
   datum/asiUI_DatumViewBase.h
   datum/asiUI_DatumViewDelegate.h
   datum/asiUI_DatumViewModel.h
@@ -186,6 +187,7 @@ set (datum_CPP_FILES
   datum/asiUI_DatumSelector.cpp
   datum/asiUI_DatumSpinBox.cpp
   datum/asiUI_DatumSpinBoxDbl.cpp
+  datum/asiUI_DatumTextEdit.cpp
   datum/asiUI_DatumViewBase.cpp
   datum/asiUI_DatumViewItem.cpp
   datum/asiUI_DatumViewDelegate.cpp
@@ -208,6 +210,7 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogCommandsDelegate.h
   dialogs/asiUI_DialogDump.h
   dialogs/asiUI_DialogEuler.h
+  dialogs/asiUI_DialogFeatureComments.h
   dialogs/asiUI_DialogFindEdge.h
   dialogs/asiUI_DialogFindFace.h
   dialogs/asiUI_DialogFindVertex.h
@@ -231,6 +234,7 @@ set (dialogs_CPP_FILES
   dialogs/asiUI_DialogCommandsRootItem.cpp
   dialogs/asiUI_DialogDump.cpp
   dialogs/asiUI_DialogEuler.cpp
+  dialogs/asiUI_DialogFeatureComments.cpp
   dialogs/asiUI_DialogFindEdge.cpp
   dialogs/asiUI_DialogFindFace.cpp
   dialogs/asiUI_DialogFindVertex.cpp

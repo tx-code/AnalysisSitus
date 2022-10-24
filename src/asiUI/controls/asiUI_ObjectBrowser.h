@@ -185,6 +185,8 @@ protected slots:
   //
   void onDumpJoint             ();
   void onUnifyKnotsAndAlign    ();
+  //
+  void onFeatureComments       ();
 
 protected:
 

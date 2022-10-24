@@ -47,8 +47,7 @@
 #include <asiUI_DatumSelector.h>
 #include <asiUI_DatumLabel.h>
 #include <asiUI_DatumCustomSelector.h>
-//#include <asiUI_DatumTable.h>
-//#include <asiUI_DatumTree.h>
+#include <asiUI_DatumTextEdit.h>
 #include <asiUI_Logger.h>
 
 // asiAlgo includes
@@ -141,27 +140,28 @@ asiUI_Datum* asiUI_WidgetFactory::CreateEditor(const QString& theDataDicID,
 //}
 
 //! Create datum editor for dictionary item.
-//! \param theDataDicID [in] data dictionary identifier string.
-//! \param theParent [in] parent widget for datum editor.
-//! \param theDatumFlags [in] flags defining options and subwidgets controls
+//! \param dataDicID [in] data dictionary identifier string.
+//! \param parent [in] parent widget for datum editor.
+//! \param datumFlags [in] flags defining options and subwidgets controls
 //!        for datum editor (see asiUI_Datum).
 //! \return datum pointer, or null pointer if data dictionary id is invalid.
-asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
-                                           QWidget* theParent,
-                                           int theDatumFlags)
+asiUI_Datum*
+  asiUI_WidgetFactory::editor(const QString& dataDicID,
+                              QWidget*       parent,
+                              int            datumFlags)
 {
-  if ( theDataDicID.isEmpty() )
+  if ( dataDicID.isEmpty() )
     return NULL;
 
   // Try to get a dictionary item.
   Handle(asiAlgo_DictionaryItem)
-    dicItem = asiAlgo_Dictionary::GetDictionaryItem( QStr2AsciiStr(theDataDicID) );
+    dicItem = asiAlgo_Dictionary::GetDictionaryItem( QStr2AsciiStr(dataDicID) );
   //
   if ( dicItem.IsNull() )
   {
     if ( m_pCommonFacilities )
       m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Invalid dictionary ID '%1'."
-                                                                   << QStr2AsciiStr(theDataDicID) );
+                                                                   << QStr2AsciiStr(dataDicID) );
 
     return nullptr;
   }
@@ -170,9 +170,9 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
   asiAlgo_DictionaryItem::DataType   aDataType   = dicItem->GetDataType();
   asiAlgo_DictionaryItem::WidgetType aWidgetType = dicItem->GetWidgetType();
 
-  bool isDelegateEditor = ( theParent != 0 && (
-      qobject_cast<QAbstractItemView*>( theParent ) != 0 ||
-      qobject_cast<QAbstractItemView*>( theParent->parent() ) != 0 ) );
+  bool isDelegateEditor = ( parent != 0 && (
+      qobject_cast<QAbstractItemView*>( parent ) != 0 ||
+      qobject_cast<QAbstractItemView*>( parent->parent() ) != 0 ) );
 
   //-------------------------------------------------------------------------
   // Create editor widget which types is independent from the data type
@@ -181,10 +181,10 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
   switch ( aWidgetType )
   {
     case asiAlgo_DictionaryItem::WT_Selector:
-      return new asiUI_DatumSelector(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumSelector(dataDicID, parent, datumFlags);
 
     case asiAlgo_DictionaryItem::WT_CustomSelector:
-      return new asiUI_DatumCustomSelector(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumCustomSelector(dataDicID, parent, datumFlags);
 
     default:
       break; // continue -->
@@ -202,30 +202,30 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
     {
       if ( aWidgetType == asiAlgo_DictionaryItem::WT_LineEdit )
       {
-        return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_ColorPicker )
       {
         return isDelegateEditor ? (asiUI_Datum*)
-          new asiUI_DatumColorItem(theDataDicID, theParent, theDatumFlags) :
-          new asiUI_DatumColorEdit(theDataDicID, theParent, theDatumFlags);
+          new asiUI_DatumColorItem(dataDicID, parent, datumFlags) :
+          new asiUI_DatumColorEdit(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_SpinBox )
       {
-        return new asiUI_DatumSpinBox(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumSpinBox(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_Label )
       {
-        return new asiUI_DatumLabel(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLabel(dataDicID, parent, datumFlags);
       }
 
       // notify that the inappropriate editor type specified.
       if ( m_pCommonFacilities )
         m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Inappropriate editor '%1' : '%2'."
-                                                                     << QStr2AsciiStr(theDataDicID)
+                                                                     << QStr2AsciiStr(dataDicID)
                                                                      << "LineEdit" );
 
-      return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
     }
 
     // Float data type
@@ -234,24 +234,24 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
     {
       if ( aWidgetType == asiAlgo_DictionaryItem::WT_LineEdit )
       {
-        return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_SpinBox )
       {
-        return new asiUI_DatumSpinBoxDbl(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumSpinBoxDbl(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_Label )
       {
-        return new asiUI_DatumLabel(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLabel(dataDicID, parent, datumFlags);
       }
 
       // notify that the inappropriate editor type specified.
       if ( m_pCommonFacilities )
         m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Inappropriate editor '%1' : '%2'."
-                                                                     << QStr2AsciiStr(theDataDicID)
+                                                                     << QStr2AsciiStr(dataDicID)
                                                                      << "LineEdit" );
 
-      return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
     }
 
     // String data type
@@ -260,15 +260,15 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
     {
       if ( aWidgetType == asiAlgo_DictionaryItem::WT_LineEdit )
       {
-        return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_OpenFilePath ||
-                aWidgetType == asiAlgo_DictionaryItem::WT_SaveFilePath || 
+                aWidgetType == asiAlgo_DictionaryItem::WT_SaveFilePath ||
                 aWidgetType == asiAlgo_DictionaryItem::WT_DirPath )
       {
         if (isDelegateEditor)
         {
-          asiUI_DatumPathItem* aDatum = new asiUI_DatumPathItem(theDataDicID, theParent, theDatumFlags);
+          asiUI_DatumPathItem* aDatum = new asiUI_DatumPathItem(dataDicID, parent, datumFlags);
           if ( m_pCommonFacilities )
           {
             aDatum->SetDirectory( m_pCommonFacilities->GetDefaultDirectory() );
@@ -277,7 +277,7 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
         }
         else
         {
-          asiUI_DatumPathEdit* aDatum = new asiUI_DatumPathEdit(theDataDicID, theParent, theDatumFlags);
+          asiUI_DatumPathEdit* aDatum = new asiUI_DatumPathEdit(dataDicID, parent, datumFlags);
           if ( m_pCommonFacilities )
           {
             aDatum->SetDirectory( m_pCommonFacilities->GetDefaultDirectory() );
@@ -285,22 +285,26 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
           return aDatum;
         }
       }
+      else if ( aWidgetType == asiAlgo_DictionaryItem::WT_TextEditor )
+      {
+        return new asiUI_DatumTextEdit(dataDicID, parent, datumFlags);
+      }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_DatePicker )
       {
-        return new asiUI_DatumDateEdit(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumDateEdit(dataDicID, parent, datumFlags);
       }
       else if ( aWidgetType == asiAlgo_DictionaryItem::WT_Label )
       {
-        return new asiUI_DatumLabel(theDataDicID, theParent, theDatumFlags);
+        return new asiUI_DatumLabel(dataDicID, parent, datumFlags);
       }
 
       // notify that the inappropriate editor type specified.
       if ( m_pCommonFacilities )
         m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Inappropriate editor '%1' : '%2'."
-                                                                     << QStr2AsciiStr(theDataDicID)
+                                                                     << QStr2AsciiStr(dataDicID)
                                                                      << "LineEdit" );
 
-      return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
     }
 
     // List data type
@@ -312,11 +316,11 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
       {
         if ( m_pCommonFacilities )
           m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Inappropriate editor '%1' : '%2'."
-                                                                       << QStr2AsciiStr(theDataDicID)
+                                                                       << QStr2AsciiStr(dataDicID)
                                                                        << "ComboBox" );
       }
 
-      return new asiUI_DatumComboBox(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumComboBox(dataDicID, parent, datumFlags);
     }
 
     case asiAlgo_DictionaryItem::Bool :
@@ -325,11 +329,11 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
       {
         if ( m_pCommonFacilities )
           m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Inappropriate editor '%1' : '%2'."
-                                                                       << QStr2AsciiStr(theDataDicID)
+                                                                       << QStr2AsciiStr(dataDicID)
                                                                        << "CheckBox" );
       }
 
-      return new asiUI_DatumCheckBox(theDataDicID, theParent, theDatumFlags);
+      return new asiUI_DatumCheckBox(dataDicID, parent, datumFlags);
     }
     case asiAlgo_DictionaryItem::Unknown : break;
   }
@@ -337,8 +341,8 @@ asiUI_Datum* asiUI_WidgetFactory::editor(const QString& theDataDicID,
   // notify that the unknown data type specified
   if ( m_pCommonFacilities )
     m_pCommonFacilities->Progress.SendLogMessage( LogErr(Normal) << "Unknown data type for editor '%1' : '%2'."
-                                                                 << QStr2AsciiStr(theDataDicID)
+                                                                 << QStr2AsciiStr(dataDicID)
                                                                  << "LineEdit" );
 
-  return new asiUI_DatumLineEdit(theDataDicID, theParent, theDatumFlags);
+  return new asiUI_DatumLineEdit(dataDicID, parent, datumFlags);
 }
