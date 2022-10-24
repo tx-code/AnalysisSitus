@@ -50,9 +50,20 @@ struct asiAlgo_BlendChainProps
     CrossEdgeLength (0.)
   {}
 
+  //! Ctor.
+  //! \param[in] len the length to set.
+  //! \param[in] r   the radius to set.
+  asiAlgo_BlendChainProps(const double len,
+                          const double r)
+  : Length          (len),
+    Radius          (r),
+    CrossEdgeLength (0.)
+  {}
+
   //! Complete ctor.
   //! \param[in] len the length to set.
   //! \param[in] r   the radius to set.
+  //! \param[in] cel the cross-edge length.
   asiAlgo_BlendChainProps(const double len,
                           const double r,
                           const double cel)
