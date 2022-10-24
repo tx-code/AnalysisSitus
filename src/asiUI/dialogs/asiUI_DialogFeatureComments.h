@@ -38,6 +38,7 @@
 #include <asiData_FeatureNode.h>
 
 // Active Data includes
+#include <ActAPI_IModel.h>
 #include <ActAPI_IPlotter.h>
 #include <ActAPI_IProgressNotifier.h>
 
@@ -59,7 +60,8 @@ class asiUI_DialogFeatureComments : public QDialog
 public:
 
   asiUI_EXPORT
-    asiUI_DialogFeatureComments(const Handle(asiData_FeatureNode)& node,
+    asiUI_DialogFeatureComments(const Handle(ActAPI_IModel)&       model,
+                                const Handle(asiData_FeatureNode)& node,
                                 ActAPI_ProgressEntry               progress,
                                 ActAPI_PlotterEntry                plotter,
                                 QWidget*                           parent = nullptr);
@@ -105,6 +107,7 @@ protected:
 
 protected:
 
+  Handle(ActAPI_IModel)       m_model;    //!< Data Model instance.
   Handle(asiData_FeatureNode) m_node;     //!< Data Node.
   ActAPI_ProgressEntry        m_progress; //!< Progress notifier.
   ActAPI_PlotterEntry         m_plotter;  //!< Imperative plotter.

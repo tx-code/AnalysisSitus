@@ -63,8 +63,7 @@ void asiData_FeatureNode::Init()
   this->SetComment   ( "" );
 
   // Initialize properties.
-  this->InitParameter (PID_Name,    "Name",    "",                ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_Comment, "Comment", "FreeTextComment", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name, "Name", "", ParameterFlag_IsVisible, true);
 
 }
 

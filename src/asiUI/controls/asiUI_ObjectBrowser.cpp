@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_Common.h>
 #include <asiUI_DependencyGraph.h>
+#include <asiUI_DialogFeatureComments.h>
 #include <asiUI_DialogDump.h>
 #include <asiUI_DialogOCAFDump.h>
 #include <asiUI_DialogPipelines.h>
@@ -1348,8 +1349,10 @@ void asiUI_ObjectBrowser::onFeatureComments()
   Handle(asiData_FeatureNode)
     featNode = Handle(asiData_FeatureNode)::DownCast(selected_n);
 
-  asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump("Feature comments");
-  pDumpDlg->Populate( featNode->GetComment().ToCString() );
+  asiUI_DialogFeatureComments*
+    pDumpDlg = new asiUI_DialogFeatureComments(m_model, featNode, m_progress, m_plotter);
+  //
+  pDumpDlg->Initialize();
   pDumpDlg->show();
 }
 

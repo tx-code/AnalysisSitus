@@ -49,11 +49,13 @@
 // Construction & destruction
 //-----------------------------------------------------------------------------
 
-asiUI_DialogFeatureComments::asiUI_DialogFeatureComments(const Handle(asiData_FeatureNode)& node,
+asiUI_DialogFeatureComments::asiUI_DialogFeatureComments(const Handle(ActAPI_IModel)&       model,
+                                                         const Handle(asiData_FeatureNode)& node,
                                                          ActAPI_ProgressEntry               progress,
                                                          ActAPI_PlotterEntry                plotter,
                                                          QWidget*                           parent)
 : QDialog    (parent),
+  m_model    (model),
   m_node     (node),
   m_progress (progress),
   m_plotter  (plotter)
@@ -64,8 +66,8 @@ asiUI_DialogFeatureComments::asiUI_DialogFeatureComments(const Handle(asiData_Fe
   // Editors.
   m_widgets.pText = new asiUI_StyledTextEdit();
 
-  // Group box for text.
-  QGroupBox* pTextGroup = new QGroupBox("Feature comment");
+  // Frame for text.
+  QFrame* pTextGroup = new QFrame;
 
   // JSON definition layout.
   QVBoxLayout* pBoxLayout = new QVBoxLayout(pTextGroup);
@@ -128,63 +130,30 @@ asiUI_DialogFeatureComments::~asiUI_DialogFeatureComments()
 //! Fills editor with data.
 void asiUI_DialogFeatureComments::Initialize()
 {
-//  if ( m_node.IsNull() )
-//    return;
-//
-//  // Set text.
-//  m_widgets.pText->setText( m_node->GetComment() );
+  if ( m_node.IsNull() )
+    return;
+
+  // Set text.
+  m_widgets.pText->setText( AsciiStr2QStr( m_node->GetComment() ) );
 }
-//
-////-----------------------------------------------------------------------------
-//// Slots
-////-----------------------------------------------------------------------------
-//
+
+//-----------------------------------------------------------------------------
+// Slots
+//-----------------------------------------------------------------------------
+
 //! Reaction on apply.
 void asiUI_DialogFeatureComments::onApply()
 {
-}
+  TCollection_AsciiString comment = QStr2AsciiStr( m_widgets.pText->toPlainText() );
 
-//  TCollection_AsciiString varName = QStr2AsciiStr( m_widgets.pName->text() );
-//  varName.LeftAdjust();
-//  varName.RightAdjust();
-//  //
-//  if ( varName.IsEmpty() )
-//  {
-//    m_progress.SendLogMessage(LogErr(Normal) << "Name of entity is empty.");
-//    return;
-//  }
-//
-//  // Prepare JSON tool on the contents of definition text area.
-//  asiAlgo_JSON jsonTool( QStr2AsciiStr( m_widgets.pDefinition->toPlainText() ).ToCString() );
-//
-//  // Create/update curve.
-//  if ( jsonTool.IsCurve() )
-//  {
-//    Handle(Geom_BSplineCurve) curve;
-//    //
-//    if ( !jsonTool.ExtractBCurve(curve) )
-//    {
-//      m_progress.SendLogMessage(LogErr(Normal) << "Cannot construct curve: incorrect format.");
-//      return;
-//    }
-//
-//    m_plotter.REDRAW_CURVE(varName, curve, Color_Default, true);
-//  }
-//
-//  // Create/update surface.
-//  else if ( jsonTool.IsSurface() )
-//  {
-//    Handle(Geom_BSplineSurface) surf;
-//    //
-//    if ( !jsonTool.ExtractBSurface(surf) )
-//    {
-//      m_progress.SendLogMessage(LogErr(Normal) << "Cannot construct surface: incorrect format.");
-//      return;
-//    }
-//
-//    m_plotter.REDRAW_SURFACE(varName, surf, Color_Default);
-//  }
-//}
+  m_model->OpenCommand();
+  {
+    m_node->SetComment(comment);
+  }
+  m_model->CommitCommand();
+
+  this->close();
+}
 
 //! Reaction on close.
 void asiUI_DialogFeatureComments::onClose()
