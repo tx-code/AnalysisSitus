@@ -59,46 +59,6 @@ QDS_Datum* asiUI_DatumTextEdit::getDatum() const
   return m_pEditor;
 }
 
-bool asiUI_DatumDateEdit::IsCalendarPopup() const
-{
-  return m_pEditor->IsCalendarPopup();
-}
-
-QDate asiUI_DatumDateEdit::GetDate() const
-{
-  return m_pEditor->GetDate();
-}
-
-QDateTime asiUI_DatumDateEdit::GetDateTime() const
-{
-  return m_pEditor->GetDateTime();
-}
-
-QTime asiUI_DatumDateEdit::GetTime() const
-{
-  return m_pEditor->GetTime();
-}
-
-void asiUI_DatumDateEdit::SetCalendarPopup(bool theIsEnabled)
-{
-  m_pEditor->SetCalendarPopup(theIsEnabled);
-}
-
-void asiUI_DatumDateEdit::SetDate(const QDate& theDate)
-{
-  m_pEditor->SetDate(theDate);
-}
-
-void asiUI_DatumDateEdit::SetTime(const QTime& theTime)
-{
-  m_pEditor->SetTime(theTime);
-}
-
-void asiUI_DatumTextEdit::SetDateTime(const QDateTime& theDateTime)
-{
-  m_pEditor->SetDateTime(theDateTime);
-}
-
 //-----------------------------------------------------------------------------
 
 //! Update unit system.
@@ -154,130 +114,49 @@ asiUI_StyledTextEdit* asiUI_DatumTextEdit::Editor::textEdit() const
   return ::qobject_cast<asiUI_StyledTextEdit*>( controlWidget() );
 }
 
-//! Get calendar popup showing mode.
-//! \return true if enabled or false if disabled.
-bool asiUI_DatumDateEdit::Editor::IsCalendarPopup() const
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-
-  if ( !anEdit )
-    return false;
-
-  return anEdit->calendarPopup();
-}
-
-//! Get date.
-//! \return date value.
-QDate asiUI_DatumDateEdit::Editor::GetDate() const
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-
-  if ( !anEdit )
-    return QDate();
-  
-  return anEdit->date();
-}
-
-//! Get date time.
-//! \return date time value.
-QDateTime asiUI_DatumDateEdit::Editor::GetDateTime() const
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-
-  if ( !anEdit )
-    return QDateTime();
-  
-  return anEdit->dateTime();
-}
-
-//! Get time.
-//! \return time value.
-QTime asiUI_DatumDateEdit::Editor::GetTime() const
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-
-  if ( !anEdit )
-    return QTime();
-  
-  return anEdit->time();
-}
-
-//! Set calendar popup showing mode.
-//! The calendar pop-up will be shown upon clicking the arrow button.
-//! This popup is valid only if there is a valid date display format.
-//! \param theIsEnabled [in] enable/disable calendar popup.
-void asiUI_DatumDateEdit::Editor::SetCalendarPopup(bool theIsEnabled)
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-    anEdit->setCalendarPopup(theIsEnabled);
-}
-
-//! Set date.
-//! \param theDate [in] the date to be set.
-void asiUI_DatumDateEdit::Editor::SetDate(const QDate& theDate)
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-    anEdit->setDate(theDate);
-}
-
-//! Set time.
-//! \param theTime [in] the time to be set.
-void asiUI_DatumDateEdit::Editor::SetTime(const QTime& theTime)
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-    anEdit->setTime(theTime);
-}
-
-//! Set date,time value.
-//! \param theDateTime [in] the date,time to be set
-void asiUI_DatumDateEdit::Editor::SetDateTime(const QDateTime& theDateTime)
-{
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-    anEdit->setDateTime(theDateTime);
-}
-
-//! Get string value from date time editor.
+//! Get string value from the text editor.
 //! \return string value.
 QString asiUI_DatumTextEdit::Editor::getString() const
 {
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  
-  if ( !anEdit )
-      return QString();
+  asiUI_StyledTextEdit* pEditor = this->textEdit();
 
-  return anEdit->dateTime().toString(anEdit->displayFormat());
+  if ( !pEditor )
+    return QString();
+
+  return pEditor->toPlainText();
 }
 
-//! Set string value to date time editor.
-//! \param theString [in] the input value.
-void asiUI_DatumTextEdit::Editor::setString(const QString& theString)
+//! Set string value to the text editor.
+//! \param[in] string the input value.
+void asiUI_DatumTextEdit::Editor::setString(const QString& string)
 {
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-  {
-    QDateTime aDateTime = QDateTime::fromString(theString, anEdit->displayFormat());
-    anEdit->setDateTime(aDateTime);
-  }
+  asiUI_StyledTextEdit* pEditor = this->textEdit();
+
+  if ( !pEditor )
+    return;
+
+  pEditor->setText(string);
 }
 
-//! Set Date and Time from qvariant value.
-//! \param theValue [in] date in form of qvariant value.
-void asiUI_DatumDateEdit::Editor::setValue(const QVariant& theValue)
+//! Sets text from QVariant value.
+//! \param[in] value string as QVariant value.
+void asiUI_DatumTextEdit::Editor::setValue(const QVariant& value)
 {
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  if ( anEdit )
-    anEdit->setDateTime(theValue.toDateTime());
+  asiUI_StyledTextEdit* pEditor = this->textEdit();
+
+  if ( !pEditor )
+    return;
+
+  pEditor->setText( value.toString() );
 }
 
-//! Get date in time converted to qvariant value.
-//! \return qvariant date and time.
-QVariant asiUI_DatumDateEdit::Editor::value() const
+//! \return text as QVariant.
+QVariant asiUI_DatumTextEdit::Editor::value() const
 {
-  QDateTimeEdit* anEdit = dateTimeEdit();
-  
-  return anEdit != 0 ? QVariant(anEdit->dateTime()) : QVariant();
+  asiUI_StyledTextEdit* pEditor = this->textEdit();
+
+  if ( !pEditor )
+    return QVariant();
+
+  return QVariant( pEditor->toPlainText() );
 }

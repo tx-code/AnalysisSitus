@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_Common.h>
 #include <asiUI_DependencyGraph.h>
+#include <asiUI_DialogDump.h>
 #include <asiUI_DialogOCAFDump.h>
 #include <asiUI_DialogPipelines.h>
 #include <asiUI_ShapeBrowser.h>
@@ -1335,6 +1336,25 @@ void asiUI_ObjectBrowser::onUnifyKnotsAndAlign()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onFeatureComments()
+{
+  Handle(ActAPI_INode) selected_n;
+  if ( !this->selectedNode(selected_n) ) return;
+
+  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_FeatureNode) ) )
+    return;
+
+  // Get Feature Node.
+  Handle(asiData_FeatureNode)
+    featNode = Handle(asiData_FeatureNode)::DownCast(selected_n);
+
+  asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump("Feature comments");
+  pDumpDlg->Populate( featNode->GetComment().ToCString() );
+  pDumpDlg->show();
+}
+
+//-----------------------------------------------------------------------------
+
 //! Populates context menu with actions.
 //! \param[in]     activeNodes currently active Nodes.
 //! \param[in,out] pMenu       menu to populate.
@@ -1362,15 +1382,15 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
       isOfSameType = false;
     }
 
-    if ( checkIsNotStructural(N) )
+    if ( this->checkIsNotStructural(N) )
     {
       hasNotStructuralNode = true;
     }
   }
   //
-  if (hasNotStructuralNode)
+  if ( hasNotStructuralNode )
   {
-    pMenu->addAction("Delete", this, SLOT(onDeleteNodes()));
+    pMenu->addAction( "Delete", this, SLOT( onDeleteNodes() ) );
   }
   //
   if ( !isOfSameType )
@@ -1409,6 +1429,12 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
   {
     pMenu->addSeparator();
     pMenu->addAction( "Print contents", this, SLOT( onPrintMetadataContents () ) );
+  }
+  //
+  if ( node->IsKind( STANDARD_TYPE(asiData_FeatureNode) ) )
+  {
+    pMenu->addSeparator();
+    pMenu->addAction( "Comments...", this, SLOT( onFeatureComments () ) );
   }
   //
   if ( isPresented )
