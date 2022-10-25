@@ -3093,6 +3093,20 @@ void Doc::SetMesh(const TDF_Label&                  partLabel,
 
 //-----------------------------------------------------------------------------
 
+Handle(Poly_Triangulation) Doc::GetMesh(const TDF_Label& partLabel) const
+{
+  if ( partLabel.IsNull() )
+    return NULL;
+
+  Handle(TDataXtd_Triangulation) attr;
+  if ( !partLabel.FindAttribute( TDataXtd_Triangulation::GetID(), attr ) )
+    return NULL;
+
+  return attr->Get();
+}
+
+//-----------------------------------------------------------------------------
+
 void Doc::findItemsRecursively(const Handle(Graph)&         asmGraph,
                                const int                    parentId,
                                const std::string&           name,

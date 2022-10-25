@@ -874,6 +874,12 @@ public:
     SetMesh(const TDF_Label&                  partLabel,
             const Handle(Poly_Triangulation)& mesh);
 
+  //! Returns mesh stored as a secondary representation for the part.
+  //! \param[in] partLabel part label.
+  //! \return mesh associated with part id.
+  asiAsm_EXPORT Handle(Poly_Triangulation)
+    GetMesh(const TDF_Label& partLabel) const;
+
   //! Creates a new part with the given shape as a primary representation.
   //! \param[in] shape the shape to add as a part.
   //! \param[in] name  the part's name.
