@@ -3707,31 +3707,10 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
   //
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Conversion tolerance: %1." << tol);
 
-  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
-
   TIMER_NEW
   TIMER_GO
 
-  for ( TopExp_Explorer exp(partShape, TopAbs_EDGE); exp.More(); exp.Next() )
-  {
-    const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
-
-    double f, l;
-    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
-
-    TopoDS_Wire W;
-
-    if ( !asiAlgo_ConvertCurve::Perform(curve, f, l, W, tol) )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to convert curve.");
-      continue;
-    }
-    //
-    if ( !W.IsNull() )
-      ctx->Replace(edge, W);
-  }
-
-  TopoDS_Shape newShape = ctx->Apply(partShape);
+  asiAlgo_ConvertCurve::Convert2ArcLines(partShape, tol);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Convert curves")
@@ -3739,7 +3718,7 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
   // Modify shape.
   M->OpenCommand();
   {
-    asiEngine_Part(M).Update(newShape);
+    asiEngine_Part(M).Update(partShape);
   }
   M->CommitCommand();
 

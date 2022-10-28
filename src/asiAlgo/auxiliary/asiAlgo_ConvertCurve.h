@@ -45,11 +45,26 @@
 namespace asiAlgo_ConvertCurve
 {
   asiAlgo_EXPORT bool
-    Perform(const Handle(Geom_Curve)& curve,
-            double                    first,
-            double                    last,
-            TopoDS_Wire&              wire,
-            double                    tolerance = 0.001);
+    Convert2ArcLines(const Handle(Geom_Curve)& curve,
+                     double                    first,
+                     double                    last,
+                     TopoDS_Wire&              wire,
+                     double                    tolerance = 0.001);
+
+  asiAlgo_EXPORT void
+    Convert2ArcLines(TopoDS_Shape& shape,
+                     double        tolerance = 0.001);
+
+  asiAlgo_EXPORT void
+    Convert2Polyline(const TopoDS_Wire&   wire,
+                     std::vector<gp_Pnt>& points);
+
+  asiAlgo_EXPORT void
+    Convert2Polyline(const TopoDS_Wire& wire,
+                     TopoDS_Wire&       polyWire);
+
+  asiAlgo_EXPORT void
+    Convert2Polyline(TopoDS_Shape& shape);
 
   asiAlgo_EXPORT double
     CheckMaxGap(const TopoDS_Shape&  shape,

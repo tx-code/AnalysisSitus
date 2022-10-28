@@ -34,7 +34,10 @@
 #include <asiAlgo_Utils.h>
 
 // OCCT includes
+#include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
+#include <BRepMesh_ShapeTool.hxx>
 #include <DBRep.hxx>
 #include <ElCLib.hxx>
 #include <Extrema_ExtElC.hxx>
@@ -42,6 +45,7 @@
 #include <GccAna_Circ2d3Tan.hxx>
 #include <gce_MakeCirc.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GCPnts_QuasiUniformAbscissa.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include <Geom_Circle.hxx>
@@ -110,12 +114,13 @@ namespace
   //-----------------------------------------------------------------------------
 
   template<typename T>
-  inline bool CheckRes(GeomAdaptor_Curve& adaptor,
-                       const double       f,
-                       const double       l,
-                       const double       t,
-                       T&                 res,
-                       const int          nbPts = 20)
+  inline bool CheckRes(GeomAdaptor_Curve&          adaptor,
+                       const double                f,
+                       const double                l,
+                       const double                t,
+                       const TColStd_Array1OfReal& knots,
+                       T&                          res,
+                       const int                   nbPts = 20)
   {
     // Check the result.
     const double du = ( l - f ) / nbPts;
@@ -125,6 +130,54 @@ namespace
       double u = f + ( du * i );
 
       gp_Pnt PP = adaptor.Value( u );
+
+      double dist = res.Distance( PP );
+
+      if ( dist > t )
+      {
+        return false;
+      }
+    }
+
+    // Check points before, between and after correspoding knots.
+    TColStd_Array1OfReal::Iterator iter( knots );
+
+    tl::optional<double> savedU;
+    tl::optional<double> u;
+
+    for ( ; iter.More(); iter.Next() )
+    {
+      const double& curK = iter.Value();
+
+      if ( curK > f && curK < l )
+      {
+        if ( !savedU.has_value() )
+        {
+          u = ( curK + f ) / 2.;
+        }
+        else
+        {
+          u = ( curK + *savedU ) / 2.;
+        }
+
+        gp_Pnt PP = adaptor.Value( *u );
+
+        double dist = res.Distance( PP );
+
+        if ( dist > t )
+        {
+          return false;
+        }
+
+        savedU = curK;
+      }
+    }
+
+    if ( savedU.has_value() )
+    {
+      u = ( *savedU + l ) / 2.;
+
+      gp_Pnt PP = adaptor.Value( *u );
 
       double dist = res.Distance( PP );
 
@@ -201,11 +254,12 @@ namespace
 
   // Tries to convert a curve 'c' between 'f' and 'l' parameters using the passed
   // tolerance 't'.
-  inline bool HandleArc(GeomAdaptor_Curve&      adaptor,
-                        const double            f,
-                        const double            l,
-                        const double            t,
-                        std::vector< arcInfo >& arcs)
+  inline bool HandleArc(GeomAdaptor_Curve&          adaptor,
+                        const double                f,
+                        const double                l,
+                        const double                t,
+                        std::vector< arcInfo >&     arcs,
+                        const TColStd_Array1OfReal& knots)
   {
     // Get first and last points.
     gp_Pnt p0 = adaptor.Value( f );
@@ -245,7 +299,7 @@ namespace
 
       if ( line.Distance( PM ) <= t )
       {
-        if ( CheckRes< gp_Lin >( adaptor, f, l, t, line ) )
+        if ( CheckRes< gp_Lin >( adaptor, f, l, t, knots, line ) )
         {
           p0new = p0;
           p1new = p1;
@@ -313,7 +367,7 @@ namespace
         circ = gp_Circ( gp_Ax2( gp_Pnt( c.Location().X(), c.Location().Y(), 0.0 ), gp::DZ() ).Transformed( T.Inverted() ), c.Radius() );
 
         // Check the resulting circle.
-        if ( !CheckRes< gp_Circ >( adaptor, f, l, t, circ ) )
+        if ( !CheckRes< gp_Circ >( adaptor, f, l, t, knots, circ ) )
         {
           return false;
         }
@@ -596,11 +650,11 @@ namespace
             {
               gp_Lin newL( penult.m_p0, gp_Vec( penult.m_p0, pIP ) );
 
-              isOk = CheckRes< gp_Lin >( adaptor, penult.m_t1, f, halfTol, newL );
+              isOk = CheckRes< gp_Lin >( adaptor, penult.m_t1, f, halfTol, knots, newL );
             }
             else
             {
-              isOk = CheckRes< gp_Circ >( adaptor, penult.m_t1, f, halfTol, penult.m_c );
+              isOk = CheckRes< gp_Circ >( adaptor, penult.m_t1, f, halfTol, knots, penult.m_c );
             }
 
             if ( isOk )
@@ -635,11 +689,11 @@ namespace
             {
               gp_Lin newL( p1new, gp_Vec( p1new, pIP ) );
 
-              isOk = CheckRes< gp_Lin >( adaptor, penult.m_t1, f, halfTol, newL );
+              isOk = CheckRes< gp_Lin >( adaptor, penult.m_t1, f, halfTol, knots, newL );
             }
             else // Penult segment is an arc.
             {
-              isOk = CheckRes< gp_Circ >( adaptor, penult.m_t1, f, halfTol, circ );
+              isOk = CheckRes< gp_Circ >( adaptor, penult.m_t1, f, halfTol, knots, circ );
             }
 
             if ( isOk )
@@ -680,8 +734,8 @@ namespace
                 {
                   gp_Lin newL0( penult.m_p0, gp_Vec( penult.m_p0, pIP ) );
 
-                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t0, tIP1, halfTol, newL0 ) &&
-                       CheckRes< gp_Circ >( adaptor, tIP1, f, halfTol, circ ) )
+                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t0, tIP1, halfTol, knots, newL0 ) &&
+                       CheckRes< gp_Circ >( adaptor, tIP1, f, halfTol, knots, circ ) )
                   {
                     penult.m_p1 = pIP;
                     penult.m_t1 = tIP1;
@@ -701,8 +755,8 @@ namespace
                 {
                   gp_Lin newL0( pIP, gp_Vec( pIP, p0new ) );
 
-                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t1, tIP1, halfTol, newL0 ) &&
-                       CheckRes< gp_Circ >( adaptor, tIP1, l, halfTol, penult.m_c ) )
+                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t1, tIP1, halfTol, knots, newL0 ) &&
+                       CheckRes< gp_Circ >( adaptor, tIP1, l, halfTol, knots, penult.m_c ) )
                   {
                     penult.m_p1 = pIP;
                     penult.m_t1 = tIP1;
@@ -720,8 +774,8 @@ namespace
                 }
                 case SegmentsTypes::SegmentsTypes_TwoArcs:
                 {
-                  if ( CheckRes< gp_Circ >( adaptor, penult.m_t1, tIP1, t / 2., penult.m_c ) &&
-                       CheckRes< gp_Circ >( adaptor, tIP1, f, t / 2., circ ) )
+                  if ( CheckRes< gp_Circ >( adaptor, penult.m_t1, tIP1, t / 2., knots, penult.m_c ) &&
+                       CheckRes< gp_Circ >( adaptor, tIP1, f, t / 2., knots, circ ) )
                   {
                     penult.m_p1 = pIP;
                     penult.m_t1 = tIP1;
@@ -742,8 +796,8 @@ namespace
                   gp_Lin newL0( penult.m_p1, gp_Vec( penult.m_p1, pIP ) );
                   gp_Lin newL1( pIP,         gp_Vec( pIP,  p0new ) );
 
-                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t1, tIP1, t / 2., newL0 ) &&
-                       CheckRes< gp_Lin >( adaptor, tIP1, f, t / 2., newL1 ) )
+                  if ( CheckRes< gp_Lin >( adaptor, penult.m_t1, tIP1, t / 2., knots, newL0 ) &&
+                       CheckRes< gp_Lin >( adaptor, tIP1, f, t / 2., knots, newL1 ) )
                   {
                     penult.m_p1 = pIP;
                     penult.m_t1 = tIP1;
@@ -787,11 +841,11 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
-                                   const double              f,
-                                   const double              l,
-                                   TopoDS_Wire&              w,
-                                   double                    t)
+bool asiAlgo_ConvertCurve::Convert2ArcLines(const Handle(Geom_Curve)& c,
+                                            const double              f,
+                                            const double              l,
+                                            TopoDS_Wire&              w,
+                                            double                    t)
 {
   // Skip invalid curves.
   if ( c.IsNull() )
@@ -820,6 +874,10 @@ bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
   Handle(Geom_BSplineCurve) bspline =
     GeomConvert::CurveToBSplineCurve( trim );
 
+  const int nbKnots = bspline->NbKnots();
+  TColStd_Array1OfReal knots( 1, nbKnots );
+  bspline->Knots( knots );
+
   GeomAdaptor_Curve adaptorCurve;
   adaptorCurve.Load( bspline,
                      bspline->FirstParameter(),
@@ -844,7 +902,7 @@ bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
     {
       try
       {
-        isOk = HandleArc( adaptorCurve, u0, u1, t, arcs );
+        isOk = HandleArc( adaptorCurve, u0, u1, t, arcs, knots );
       }
       catch (...)
       {
@@ -898,8 +956,17 @@ bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
 
   for ( const arcInfo& arc : arcs )
   {
-    TopoDS_Shape edge = arc.IsLine() ? BRepBuilderAPI_MakeEdge( arc.m_p0, arc.m_p1 )
-                                     : BRepBuilderAPI_MakeEdge( arc.m_c,  arc.m_p0, arc.m_p1 );
+    TopoDS_Shape edge;
+
+    try
+    {
+      edge = arc.IsLine() ? BRepBuilderAPI_MakeEdge( arc.m_p0, arc.m_p1 )
+                          : BRepBuilderAPI_MakeEdge( arc.m_c,  arc.m_p0, arc.m_p1 );
+    }
+    catch ( ... )
+    {
+      return false;
+    }
 
     wdata.Add( TopoDS::Edge( edge ) );
   }
@@ -907,6 +974,168 @@ bool asiAlgo_ConvertCurve::Perform(const Handle(Geom_Curve)& c,
   w = wdata.WireAPIMake();
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ConvertCurve::Convert2ArcLines(TopoDS_Shape& shape,
+                                            double        tolerance)
+{
+  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
+
+  for ( TopExp_Explorer exp(shape, TopAbs_EDGE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
+
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+
+    TopoDS_Wire W;
+
+    if ( !Convert2ArcLines(curve, f, l, W, tolerance) )
+    {
+      continue;
+    }
+    //
+    if ( !W.IsNull() )
+      ctx->Replace(edge, W);
+  }
+
+  TopoDS_Shape newShape = ctx->Apply(shape);
+  shape = newShape;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ConvertCurve::Convert2Polyline(const TopoDS_Wire&   wire,
+                                            std::vector<gp_Pnt>& points)
+{
+  double length    = 0.0;
+  int    nbSeg     = 0;
+  int    nbPoints  = 0;
+  int    loopStart = 0;
+  int    loopEnd   = 0;
+  int    loopStep  = 0;
+
+  gp_Pnt pnt;
+
+  bool isForward = true;
+
+  TopExp_Explorer exp( wire, TopAbs_EDGE );
+  for ( ; exp.More(); exp.Next() )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
+
+    if ( edge.IsNull() )
+    {
+      continue;
+    }
+
+    BRepAdaptor_Curve curve( edge );
+
+    // Compute the number of segments dividing length by distance.
+    length = GCPnts_AbscissaPoint::Length( curve );
+
+    if ( length < Precision::Confusion() )
+      continue;
+
+    nbSeg = curve.GetType() == GeomAbs_CurveType::GeomAbs_Line ? 1
+                                                               : (int) ( length );
+
+    if ( nbSeg == 0 )
+      nbSeg = 1;
+
+    // Compute distribution.
+    GCPnts_QuasiUniformAbscissa tool( curve, nbSeg + 1 );
+    //
+    if ( !tool.IsDone() || tool.NbPoints() < 2 )
+    {
+      continue;
+    }
+
+    // Store the results.
+    nbPoints = tool.NbPoints();
+
+    isForward = edge.Orientation() == TopAbs_FORWARD;
+
+    loopStart = isForward ? 1 : nbPoints;
+    loopStep =  isForward ? 1 : -1;
+    loopEnd = ( isForward ? nbPoints : 1 ) + loopStep;
+
+    std::vector<gp_Pnt> edgePts;
+
+    for ( int i = loopStart; i != loopEnd; i += loopStep )
+    {
+      curve.D0( tool.Parameter( i ), pnt );
+
+      if ( points.empty() ||
+           ( !points.empty() && !points.back().IsEqual( pnt, Precision::Confusion() ) ) )
+      {
+        points.push_back( pnt );
+      }
+
+      edgePts.push_back( pnt );
+    }
+
+    /* Add discretization to the edge. */
+
+    TColgp_Array1OfPnt polyPts( 1, (int) edgePts.size() );
+    //
+    int polyPtIdx = 1;
+    for ( const auto& polyPt : edgePts )
+      polyPts.ChangeValue(polyPtIdx++) = polyPt;
+
+    Handle(Poly_Polygon3D) polygon = new Poly_Polygon3D(polyPts);
+
+    // Store edge discretization right in the edge, so we can reuse its polygonal
+    // representation later on, e.g., for glTF export.
+    BRepMesh_ShapeTool::UpdateEdge(edge, polygon);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ConvertCurve::Convert2Polyline(const TopoDS_Wire& wire,
+                                            TopoDS_Wire&       polyWire)
+{
+  // Extract points.
+  std::vector<gp_Pnt> points;
+  Convert2Polyline(wire, points);
+
+  // Create a new polygonal wire.
+  BRepBuilderAPI_MakePolygon mkPolygon;
+  //
+  for ( const auto& pt : points )
+  {
+    mkPolygon.Add(pt);
+  }
+
+  if ( wire.Closed() )
+    mkPolygon.Add( points[0] );
+
+  polyWire = mkPolygon.Wire();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ConvertCurve::Convert2Polyline(TopoDS_Shape& shape)
+{
+  Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
+
+  for ( TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next() )
+  {
+    const TopoDS_Wire& W = TopoDS::Wire( exp.Current() );
+
+    TopoDS_Wire polyWire;
+
+    Convert2Polyline(W, polyWire);
+    //
+    if ( !polyWire.IsNull() )
+      ctx->Replace(W, polyWire);
+  }
+
+  TopoDS_Shape newShape = ctx->Apply(shape);
+  shape = newShape;
 }
 
 //-----------------------------------------------------------------------------
