@@ -1198,7 +1198,7 @@ int ENGINE_EvalCurve(const Handle(asiTcl_Interp)& interp,
         clProp.Normal(norm_onCurve);
         gp_Dir axDir_ofCircle = norm_onCurve ^ tang_onCurve; // Cross product.
         gp_Ax2 ax_ofCircle(center_onCurve, axDir_ofCircle, norm_onCurve);
-      
+
         // Construct the osculating circle.
         interp->GetPlotter().REDRAW_CURVE( "osculatingCircle",
                                            new Geom_Circle(ax_ofCircle, r_onCurve),
@@ -4551,7 +4551,7 @@ int ENGINE_NegativeVolume(const Handle(asiTcl_Interp)& interp,
                          TopoDS_Shape,
                          double>> negativeVolumes = algo.GetNegativeVolumes();
 
-  for ( int index = 0; index < negativeVolumes.size(); ++index )
+  for ( int index = 0; index < (int) (negativeVolumes.size()); ++index )
   {
     TopoDS_Compound featureComp;
     BRep_Builder bb;

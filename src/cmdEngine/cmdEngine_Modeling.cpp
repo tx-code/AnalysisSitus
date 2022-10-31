@@ -1620,6 +1620,7 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
                                  int                          argc,
                                  const char**                 argv)
 {
+#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
@@ -1652,6 +1653,11 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
   interp->GetPlotter().REDRAW_SHAPE(argv[1], obb, Color_Yellow, 1.0, true);
 
   return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, compile with USE_MOBIUS enabled to use this function.");
+#endif
 }
 
 //-----------------------------------------------------------------------------
