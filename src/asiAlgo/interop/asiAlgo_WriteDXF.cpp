@@ -511,8 +511,8 @@ void asiAlgo_WriteDXF::exportBSpline(const BRepAdaptor_Curve& c)
       l = c.LastParameter();
       s = c.Value(f);
       ePt = c.Value(l);
-      m_progress.SendLogMessage( LogWarn(Normal) << "DxfWrite::exportBSpline - no result- from:(%1, %2) to:(%3, %4) poles: %5."
-                                                 << s.X() << s.Y() << ePt.X() << ePt.Y() << spline->NbPoles() );
+      m_progress.SendLogMessage( LogWarn(Normal) << "DxfWrite::exportBSpline - no result- from: (%1, %2) to: (%3, %4)."
+                                                 << s.X() << s.Y() << ePt.X() << ePt.Y() );
       TColgp_Array1OfPnt controlPoints(0,1);
       controlPoints.SetValue(0,s);
       controlPoints.SetValue(1,ePt);

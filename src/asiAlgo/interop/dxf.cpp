@@ -12,13 +12,13 @@
 
 // Standard includes
 #include <unordered_map>
-
-// required by windows for M_PI definition
-#define _USE_MATH_DEFINES
-#include <cmath>
+#include <math.h>
 #include <iomanip>
 #include <stddef.h>
 #include <limits.h>
+
+// required by windows for M_PI definition
+#define _USE_MATH_DEFINES
 
 using namespace std;
 
@@ -65,16 +65,16 @@ m_layerName("none")
     m_fail        = false;
     m_version     = 12;
     m_ofs         = new ofstream(filepath, ios::out);
-    m_ssBlock     = new std::ostringstream();
-    m_ssBlkRecord = new std::ostringstream();
-    m_ssEntity    = new std::ostringstream();
-    m_ssLayer     = new std::ostringstream();
+    m_ssBlock     = new ostringstream();
+    m_ssBlkRecord = new ostringstream();
+    m_ssEntity    = new ostringstream();
+    m_ssLayer     = new ostringstream();
 
     // Set max precision for streams to avoid geometric gaps due to writer's imprecision.
-    *m_ssBlock     << std::setprecision( std::numeric_limits<double>::max_digits10 );
-    *m_ssBlkRecord << std::setprecision( std::numeric_limits<double>::max_digits10 );
-    *m_ssEntity    << std::setprecision( std::numeric_limits<double>::max_digits10 );
-    *m_ssLayer     << std::setprecision( std::numeric_limits<double>::max_digits10 );
+    *m_ssBlock     << std::setprecision( numeric_limits<double>::max_digits10 );
+    *m_ssBlkRecord << std::setprecision( numeric_limits<double>::max_digits10 );
+    *m_ssEntity    << std::setprecision( numeric_limits<double>::max_digits10 );
+    *m_ssLayer     << std::setprecision( numeric_limits<double>::max_digits10 );
 
     if(!(*m_ofs)){
         m_fail = true;
