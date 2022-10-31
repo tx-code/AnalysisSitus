@@ -50,6 +50,7 @@ struct asiAlgo_OBB
   gp_Pnt LocalCornerMin; //!< Min corner.
   gp_Pnt LocalCornerMax; //!< Max corner.
 
+  // Dumps OBB to the output stream.
   void Dump() const
   {
     // Access data
@@ -67,6 +68,33 @@ struct asiAlgo_OBB
     std::cout << "MinCorner = (" << MinCorner.X() << ", " << MinCorner.Y() << ", " << MinCorner.Z() << ")" << std::endl;
     std::cout << "MaxCorner = (" << MaxCorner.X() << ", " << MaxCorner.Y() << ", " << MaxCorner.Z() << ")" << std::endl;
   }
+
+  //! Builds transformation to move object to the OBB placement.
+  //! \return placement transformation.
+  asiAlgo_EXPORT gp_Trsf
+    BuildTrsf() const;
+
+  //! Creates a topological solid representing the oriented bounding box. This
+  //! solid will be positioned according to the known placement.
+  //! \param[out] T the outcome placement transformation.
+  //! \return the constructed solid.
+  asiAlgo_EXPORT TopoDS_Shape
+    BuildSolid(gp_Trsf& T) const;
+
+  //! Builds a medial line segment representing the longer OBB axis.
+  //! \param[out] P1 the first point on the axial range.
+  //! \param[out] P2 the second point on the axial range.
+  asiAlgo_EXPORT void
+    BuildMedialAxis(gp_Pnt& P1,
+                    gp_Pnt& P2) const;
+
+  //! Builds an equivalent cylinder for the OBB of a part in question.
+  //! \param[out] T   the placement transformation.
+  //! \param[out] Ax2 the local axes of the constructed cylinder.
+  //! \return equivalent tight cylinder.
+  asiAlgo_EXPORT TopoDS_Shape
+    BuildEquiCylinder(gp_Trsf& T,
+                      gp_Ax2&  Ax2) const;
 };
 
 
@@ -76,21 +104,28 @@ struct asiAlgo_OBB
 //! of a covariance matrix.
 class asiAlgo_MeshOBB : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshOBB, ActAPI_IAlgorithm)
 
 public:
 
   //! Constructor.
-  //! \param[in] mesh     triangulation to build OBB for.
-  //! \param[in] progress Progress Entry.
-  //! \param[in] plotter  Imperative Plotter.
+  //! \param[in] mesh     the triangulation to build an OBB for.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
   asiAlgo_EXPORT
     asiAlgo_MeshOBB(const Handle(Poly_Triangulation)& mesh,
                     ActAPI_ProgressEntry              progress = nullptr,
                     ActAPI_PlotterEntry               plotter  = nullptr);
+
+  //! Constructor.
+  //! \param[in] part     the input part.
+  //! \param[in] progress the progress entry.
+  //! \param[in] plotter  the imperative plotter.
+  asiAlgo_EXPORT
+    asiAlgo_MeshOBB(const TopoDS_Shape&  part,
+                    ActAPI_ProgressEntry progress = nullptr,
+                    ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
@@ -98,6 +133,8 @@ public:
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     Perform();
+
+public:
 
   //! \return resulting OBB.
   asiAlgo_EXPORT const asiAlgo_OBB&
@@ -109,7 +146,7 @@ public:
     GetResultTrsf() const;
 
   //! \return resulting OBB as a B-Rep box.
-  asiAlgo_EXPORT TopoDS_Solid
+  asiAlgo_EXPORT TopoDS_Shape
     GetResultBox() const;
 
 protected:

@@ -146,7 +146,7 @@ int ENGINE_MoveCurveHandle(const Handle(asiTcl_Interp)& interp,
   }
   cmdEngine::model->CommitCommand();
 
-  // Get Triangulaion Node.
+  // Get Triangulation Node.
   Handle(asiData_TriangulationNode) tris_n = cmdEngine::model->GetTriangulationNode();
   //
   if ( !tris_n->GetTriangulation().IsNull() )

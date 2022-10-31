@@ -1620,13 +1620,12 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
                                  int                          argc,
                                  const char**                 argv)
 {
-#if defined USE_MOBIUS
   if ( argc != 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  // Get Triangulaion.
+  // Get Triangulation.
   Handle(asiData_TriangulationNode) tris_n = cmdEngine::model->GetTriangulationNode();
   //
   if ( tris_n.IsNull() || !tris_n->IsWellFormed() )
@@ -1648,18 +1647,62 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get result as a solid.
-  TopoDS_Solid obb = mkOBB.GetResultBox();
+  TopoDS_Shape obb = mkOBB.GetResultBox();
   //
   interp->GetPlotter().REDRAW_SHAPE(argv[1], obb, Color_Yellow, 1.0, true);
 
   return TCL_OK;
-#else
-  (void) argc;
-  (void) argv;
+}
 
-  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
-  return TCL_ERROR;
-#endif
+//-----------------------------------------------------------------------------
+
+int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc < 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get part.
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+  TopoDS_Shape             partSh   = partNode->GetShape();
+
+  // Build OBB.
+  asiAlgo_MeshOBB mkOBB(partSh);
+  //
+  if ( !mkOBB.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Operation failed.");
+    return TCL_ERROR;
+  }
+
+  // Get OBB data structure.
+  const asiAlgo_OBB& obb = mkOBB.GetResult();
+
+  TopoDS_Shape obbShape;
+
+  // Check if an equivalent cylinder is requested.
+  const bool isCyl = interp->HasKeyword(argc, argv, "cyl");
+  //
+  if ( isCyl )
+  {
+    gp_Trsf T;
+    gp_Ax2 ax;
+    obbShape = obb.BuildEquiCylinder(T, ax);
+  }
+  else
+  {
+    obbShape = mkOBB.GetResultBox();
+  }
+
+  interp->GetPlotter().REDRAW_SHAPE(argv[1], obbShape, Color_Yellow, 1.0, true);
+
+  return TCL_OK;
 }
 
 //-----------------------------------------------------------------------------
@@ -2120,6 +2163,16 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t Builds the oriented bounding box (OBB) for triangulation.",
     //
     __FILE__, group, ENGINE_BuildTriangulationOBB);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-obb",
+    //
+    "build-obb <res> [-cyl]\n"
+    "\t Builds the oriented bounding box (OBB) for the active part.\n"
+    "\t If the '-cyl' flag is passed, the constructed OBB is turned\n"
+    "\t into an equivalent cylindrical bar.",
+    //
+    __FILE__, group, ENGINE_BuildOBB);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("fill",
