@@ -56,7 +56,7 @@ void ActData_BinDrivers::AddDrivers(const Handle(BinMDF_ADriverTable)& theDriver
 
 void ActData_BinDrivers::DefineFormat(const Handle(TDocStd_Application)& theApp)
 {
-  theApp->DefineFormat(ACTBinFormat, "Binary OCAF Document", "cbf",
+  theApp->DefineFormat(ACTBinFormat, "Binary OCAF Document", ACTBinExt,
                        new ActData_BinRetrievalDriver,
                        new ActData_BinStorageDriver);
 }

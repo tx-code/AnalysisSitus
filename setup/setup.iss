@@ -3,7 +3,7 @@
 #define MyAppGlobalName "Analysis Situs"
 #define MyAppName "Analysis Situs"
 #define MyAppDefaultDir "ASitus"
-#define MyAppPublisher "Sergey Slyadnev"
+#define MyAppPublisher "Quaoar Studio LLC"
 #define MyAppURL "http://analysissitus.org/"
 
 [Setup]
@@ -42,7 +42,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon";   Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "flagFileAssoc"; Description: "&Associate files of supported formats (BREP, STEP) with Analysis Situs"; GroupDescription: "File associations";
+Name: "flagFileAssoc"; Description: "&Associate files of supported formats (BREP, STEP, CBF) with Analysis Situs"; GroupDescription: "File associations";
 
 [Files]
 Source: {#BIN_INPUT}\{#MyAppExeName};        DestDir: {app}; Flags: ignoreversion
@@ -64,6 +64,7 @@ Root: HKCR; Subkey: ".brep";                                    ValueType: strin
 Root: HKCR; Subkey: ".rle";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: ".bin";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: ".binbrep";                                 ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
+Root: HKCR; Subkey: ".cbf";                                     ValueType: string; ValueName: ""; ValueData: "AnalysisSitys"; Flags: uninsdeletevalue; Tasks: flagFileAssoc
 Root: HKCR; Subkey: "AnalysisSitys";                            ValueType: string; ValueName: ""; ValueData: "AnalysisSitus"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "AnalysisSitys\DefaultIcon";                ValueType: string; ValueName: ""; ValueData: "{app}\icon.ico"
 Root: HKCR; Subkey: "AnalysisSitys\FriendlyAppName";            ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"

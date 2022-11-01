@@ -370,10 +370,20 @@ int main(int argc, char** argv)
       TCollection_AsciiString
         arg1Str = QStr2AsciiStr( QDir::fromNativeSeparators( qtArgs.at(1) ) );
 
+      // Check format.
+      TCollection_AsciiString ext = asiAlgo_FileFormatTool::GetFileExtension(arg1Str);
+
       // Prepare Tcl command.
       TCollection_AsciiString cmd;
       //
-      cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += "\"";
+      if ( ext == ACTBinExt )
+      {
+        cmd = "load"; cmd += " \""; cmd += arg1Str; cmd += "\"";
+      }
+      else
+      {
+        cmd = "load-part"; cmd += " \""; cmd += arg1Str; cmd += "\"";
+      }
 
       // Execute command.
       if ( !cmd.IsEmpty() )

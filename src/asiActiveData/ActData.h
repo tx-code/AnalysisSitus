@@ -52,6 +52,7 @@
 //   extension points of TKBin library, not TKBinL (the latter is not
 //   suitable for all ACT Parameters).
 #define ACTBinFormat "ACTBin" // "ACTBin" or "BinOcaf"
+#define ACTBinExt    "cbf"
 
 // Macro to silent compiler warnings on unused function arguments
 #define ActData_NotUsed(x)
