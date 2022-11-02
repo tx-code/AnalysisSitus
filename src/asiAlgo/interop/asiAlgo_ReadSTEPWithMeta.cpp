@@ -90,7 +90,16 @@ void asiAlgo_ReadSTEPWithMeta::Init(const Handle(XSControl_WorkSession)& WS,
 
 IFSelect_ReturnStatus asiAlgo_ReadSTEPWithMeta::ReadFile(const char* filename)
 {
-  IFSelect_ReturnStatus status = m_reader.ReadFile(filename);
+  IFSelect_ReturnStatus status = IFSelect_RetFail;
+
+  try
+  {
+    status = m_reader.ReadFile(filename);
+  }
+  catch (...)
+  {
+    return status;
+  }
 
   if ( status == IFSelect_RetDone )
   {
@@ -200,15 +209,25 @@ bool asiAlgo_ReadSTEPWithMeta::transfer(STEPControl_Reader& reader,
   // Read all shapes
   int num = reader.NbRootsForTransfer();
   if (num <= 0) return false;
-  if (nroot)
+
+  try
   {
-    if (nroot > num) return false;
-    reader.TransferOneRoot(nroot);
+    if (nroot)
+    {
+      if (nroot > num) return false;
+
+      reader.TransferOneRoot(nroot);
+    }
+    else
+    {
+      for (i = 1; i <= num; i++) reader.TransferOneRoot(i);
+    }
   }
-  else
+  catch (...)
   {
-    for (i = 1; i <= num; i++) reader.TransferOneRoot(i);
+    return false;
   }
+
   num = reader.NbShapes();
   if (num <= 0) return false;
 
