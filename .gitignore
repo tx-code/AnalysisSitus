@@ -28,6 +28,7 @@ install-sdk/
 *.log
 log.txt
 *.obj
+.VSCodeCounter
 
 # Temporary MS Office files
 ~$*

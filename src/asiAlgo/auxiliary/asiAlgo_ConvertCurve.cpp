@@ -326,12 +326,16 @@ namespace
         }
 
         // Move all staff to the XOY plane.
+        bool isXOY = true;
+
         gp_Trsf T;
 
         gp_Vec n = vPMP0.Crossed( vPMP1 );
 
         if ( !n.IsParallel( gp::DZ(), Precision::Angular() ) )
         {
+          isXOY = false;
+
           // B goes to global origin.
           gp_Trsf T_B;
           T_B.SetTransformation( gp_Ax3( PM, n ) );
@@ -364,7 +368,9 @@ namespace
         // Return to the 3D space.
         gp_Circ2d c = builder.ThisSolution( 1 );
 
-        circ = gp_Circ( gp_Ax2( gp_Pnt( c.Location().X(), c.Location().Y(), 0.0 ), gp::DZ() ).Transformed( T.Inverted() ), c.Radius() );
+        const double zCoord = isXOY ? p0.Z() : 0.0;
+
+        circ = gp_Circ( gp_Ax2( gp_Pnt( c.Location().X(), c.Location().Y(), zCoord ), gp::DZ() ).Transformed( T.Inverted() ), c.Radius() );
 
         // Check the resulting circle.
         if ( !CheckRes< gp_Circ >( adaptor, f, l, t, knots, circ ) )
@@ -384,8 +390,8 @@ namespace
         builder.Tangency1( 1, parSol1, parAng1, pSol1 );
         builder.Tangency3( 1, parSol3, parAng3, pSol3 );
 
-        p0new = gp_Pnt( pSol1.X(), pSol1.Y(), 0.0 ).Transformed( T.Inverted() );
-        p1new = gp_Pnt( pSol3.X(), pSol3.Y(), 0.0 ).Transformed( T.Inverted() );
+        p0new = gp_Pnt( pSol1.X(), pSol1.Y(), zCoord ).Transformed( T.Inverted() );
+        p1new = gp_Pnt( pSol3.X(), pSol3.Y(), zCoord ).Transformed( T.Inverted() );
 
         if ( !circ.Axis().Direction().IsOpposite( n, Precision::Confusion() ) )
         {
