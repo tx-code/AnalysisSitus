@@ -68,6 +68,8 @@ set (aux_H_FILES
   auxiliary/asiAlgo_UniformGrid.h
   auxiliary/asiAlgo_Utils.h
   auxiliary/asiAlgo_VisualSettings.h
+  auxiliary/modelRefine.h
+  auxiliary/ShapeUpgrade_UnifySameDomain1.hxx
 )
 set (aux_CPP_FILES
   auxiliary/asiAlgo_AnalyzeWire.cpp
@@ -104,6 +106,8 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_SampleFace.cpp
   auxiliary/asiAlgo_ShapeSerializer.cpp
   auxiliary/asiAlgo_Utils.cpp
+  auxiliary/modelRefine.cpp
+  auxiliary/ShapeUpgrade_UnifySameDomain1.cxx
 )
 
 if (USE_MOBIUS)

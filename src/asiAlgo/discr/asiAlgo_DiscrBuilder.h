@@ -92,7 +92,8 @@ public:
 
 public:
 
-  Builder(const TopoDS_Shape& shape)
+  asiAlgo_EXPORT
+    Builder(const TopoDS_Shape& shape)
   //
   : m_shape       (shape),
     m_iCompStatus (0),
@@ -103,22 +104,26 @@ public:
 
 public:
 
-  void Tessellate();
+  asiAlgo_EXPORT
+    void Tessellate();
 
 public:
 
   //! Adds computation status.
-  void AddCompStatus(const int status)
+  asiAlgo_EXPORT
+    void AddCompStatus(const int status)
   {
     m_iCompStatus |= status;
   }
 
-  void SetParams(const Params& params)
+  asiAlgo_EXPORT
+    void SetParams(const Params& params)
   {
     m_meshParams = params;
   }
 
-  const Handle(Model)& GetModel() const
+  asiAlgo_EXPORT
+    const Handle(Model)& GetModel() const
   {
     return m_model;
   }
