@@ -13,7 +13,10 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+// Own include
+#include <asiAlgo_UnifySameDomain.h>
 
+// OpenCascade includes
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepLib.hxx>
@@ -56,7 +59,6 @@
 #include <ShapeFix_Face.hxx>
 #include <ShapeFix_Shell.hxx>
 #include <ShapeFix_Wire.hxx>
-#include <ShapeUpgrade_UnifySameDomain1.hxx>
 #include <Standard_Type.hxx>
 #include <TColGeom2d_Array1OfBSplineCurve.hxx>
 #include <TColGeom2d_HArray1OfBSplineCurve.hxx>
@@ -95,7 +97,7 @@
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
 
-IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_UnifySameDomain1,Standard_Transient)
+IMPLEMENT_STANDARD_RTTIEXT(asiAlgo_UnifySameDomain,Standard_Transient)
 
 struct SubSequenceOfEdges
 {
@@ -422,7 +424,7 @@ static void InsertWiresIntoFaces(const TopTools_SequenceOfShape& theWires,
     }
     else
     {
-      Standard_ASSERT_INVOKE ("ShapeUpgrade_UnifySameDomain1: wire remains unclassified");
+      Standard_ASSERT_INVOKE ("asiAlgo_UnifySameDomain: wire remains unclassified");
     }
   }
 }
@@ -1911,11 +1913,11 @@ static bool CheckClosedContours(const TopoDS_Shape& shape)
 }
 
 //=======================================================================
-//function : ShapeUpgrade_UnifySameDomain1
+//function : asiAlgo_UnifySameDomain
 //purpose  : Constructor
 //=======================================================================
 
-ShapeUpgrade_UnifySameDomain1::ShapeUpgrade_UnifySameDomain1(ActAPI_ProgressEntry progress,
+asiAlgo_UnifySameDomain::asiAlgo_UnifySameDomain(ActAPI_ProgressEntry progress,
                                                              ActAPI_PlotterEntry  plotter)
   : ActAPI_IAlgorithm(progress, plotter),
     myLinTol(Precision::Confusion()),
@@ -1931,11 +1933,11 @@ ShapeUpgrade_UnifySameDomain1::ShapeUpgrade_UnifySameDomain1(ActAPI_ProgressEntr
 }
 
 //=======================================================================
-//function : ShapeUpgrade_UnifySameDomain1
+//function : asiAlgo_UnifySameDomain
 //purpose  : Constructor
 //=======================================================================
 
-ShapeUpgrade_UnifySameDomain1::ShapeUpgrade_UnifySameDomain1(const TopoDS_Shape&    aShape,
+asiAlgo_UnifySameDomain::asiAlgo_UnifySameDomain(const TopoDS_Shape&    aShape,
                                                              const Standard_Boolean UnifyEdges,
                                                              const Standard_Boolean UnifyFaces,
                                                              const Standard_Boolean ConcatBSplines,
@@ -1961,7 +1963,7 @@ ShapeUpgrade_UnifySameDomain1::ShapeUpgrade_UnifySameDomain1(const TopoDS_Shape&
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::Initialize(const TopoDS_Shape& aShape,
+void asiAlgo_UnifySameDomain::Initialize(const TopoDS_Shape& aShape,
                                               const Standard_Boolean UnifyEdges,
                                               const Standard_Boolean UnifyFaces,
                                               const Standard_Boolean ConcatBSplines)
@@ -1981,7 +1983,7 @@ void ShapeUpgrade_UnifySameDomain1::Initialize(const TopoDS_Shape& aShape,
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::AllowInternalEdges (const Standard_Boolean theValue)
+void asiAlgo_UnifySameDomain::AllowInternalEdges (const Standard_Boolean theValue)
 {
   myAllowInternal = theValue;
 }
@@ -1991,7 +1993,7 @@ void ShapeUpgrade_UnifySameDomain1::AllowInternalEdges (const Standard_Boolean t
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::SetSafeInputMode(Standard_Boolean theValue)
+void asiAlgo_UnifySameDomain::SetSafeInputMode(Standard_Boolean theValue)
 {
   mySafeInputMode = theValue;
 }
@@ -2001,7 +2003,7 @@ void ShapeUpgrade_UnifySameDomain1::SetSafeInputMode(Standard_Boolean theValue)
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::KeepShape(const TopoDS_Shape& theShape)
+void asiAlgo_UnifySameDomain::KeepShape(const TopoDS_Shape& theShape)
 {
   if (theShape.ShapeType() == TopAbs_EDGE || theShape.ShapeType() == TopAbs_VERTEX)
     myKeepShapes.Add(theShape);
@@ -2012,7 +2014,7 @@ void ShapeUpgrade_UnifySameDomain1::KeepShape(const TopoDS_Shape& theShape)
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::KeepShapes(const TopTools_MapOfShape& theShapes)
+void asiAlgo_UnifySameDomain::KeepShapes(const TopTools_MapOfShape& theShapes)
 {
   for (TopTools_MapIteratorOfMapOfShape it(theShapes); it.More(); it.Next()) {
     if (it.Value().ShapeType() == TopAbs_EDGE || it.Value().ShapeType() == TopAbs_VERTEX)
@@ -2025,7 +2027,7 @@ void ShapeUpgrade_UnifySameDomain1::KeepShapes(const TopTools_MapOfShape& theSha
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_UnifySameDomain1::UnifyFaces()
+void asiAlgo_UnifySameDomain::UnifyFaces()
 {
   // creating map of edge faces for the whole shape
   TopTools_IndexedDataMapOfShapeListOfShape aGMapEdgeFaces;
@@ -2078,7 +2080,7 @@ static void SetFixWireModes(ShapeFix_Face& theSff)
 //purpose  : 
 //=======================================================================
 
-bool ShapeUpgrade_UnifySameDomain1::IntUnifyFaces(const TopoDS_Shape&                        theInpShape,
+bool asiAlgo_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape&                        theInpShape,
                                                   TopTools_IndexedDataMapOfShapeListOfShape& theGMapEdgeFaces)
 {
   // creating map of edge faces for the shape
@@ -2831,7 +2833,7 @@ bool ShapeUpgrade_UnifySameDomain1::IntUnifyFaces(const TopoDS_Shape&           
 //function : UnifyEdges
 //purpose  : 
 //=======================================================================
-void ShapeUpgrade_UnifySameDomain1::UnifyEdges()
+void asiAlgo_UnifySameDomain::UnifyEdges()
 {
   TopoDS_Shape aRes = myContext->Apply(myShape);
   // creating map of edge faces
@@ -2944,7 +2946,7 @@ void ShapeUpgrade_UnifySameDomain1::UnifyEdges()
 //function : Build
 //purpose  : builds the resulting shape
 //=======================================================================
-bool ShapeUpgrade_UnifySameDomain1::Build() 
+bool asiAlgo_UnifySameDomain::Build() 
 {
 #if defined DRAW_DEBUG
   bool wasValid = false;

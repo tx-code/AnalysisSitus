@@ -14,8 +14,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _ShapeUpgrade_UnifySameDomain1_HeaderFile
-#define _ShapeUpgrade_UnifySameDomain1_HeaderFile
+#ifndef _asiAlgo_UnifySameDomain_HeaderFile
+#define _asiAlgo_UnifySameDomain_HeaderFile
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -35,18 +35,16 @@ class ShapeBuild_ReShape;
 class TopoDS_Shape;
 
 
-class ShapeUpgrade_UnifySameDomain1;
-DEFINE_STANDARD_HANDLE(ShapeUpgrade_UnifySameDomain1, Standard_Transient)
+class asiAlgo_UnifySameDomain;
+DEFINE_STANDARD_HANDLE(asiAlgo_UnifySameDomain, Standard_Transient)
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! This tool tries to unify faces and edges of the shape which lie on the same geometry.
 //! Faces/edges are considering as 'same-domain' if a group of neighbouring faces/edges
 //! are lying on coincident surfaces/curves.
 //! In this case these faces/edges can be unified into one face/edge.
-//! ShapeUpgrade_UnifySameDomain1 is initialized by a shape and the next optional parameters:
+//! asiAlgo_UnifySameDomain is initialized by a shape and the next optional parameters:
 //! UnifyFaces - tries to unify all possible faces
 //! UnifyEdges - tries to unify all possible edges
 //! ConcatBSplines - if this flag is set to true then all neighbouring edges, which lay
@@ -70,25 +68,25 @@ DEFINE_STANDARD_HANDLE(ShapeUpgrade_UnifySameDomain1, Standard_Transient)
 //! The algorithm provides a place holder for the history and collects the
 //! history by default.
 //! To avoid collecting of the history the place holder should be set to null handle.
-class ShapeUpgrade_UnifySameDomain1 : public ActAPI_IAlgorithm
+class asiAlgo_UnifySameDomain : public ActAPI_IAlgorithm
 {
 
 public:
 
   //! Empty constructor
   Standard_EXPORT
-    ShapeUpgrade_UnifySameDomain1(ActAPI_ProgressEntry progress = nullptr,
-                                  ActAPI_PlotterEntry  plotter  = nullptr);
+    asiAlgo_UnifySameDomain(ActAPI_ProgressEntry progress = nullptr,
+                            ActAPI_PlotterEntry  plotter  = nullptr);
 
   //! Constructor defining input shape and necessary flags.
   //! It does not perform unification.
   Standard_EXPORT
-    ShapeUpgrade_UnifySameDomain1(const TopoDS_Shape&    aShape,
-                                  const Standard_Boolean UnifyEdges = Standard_True,
-                                  const Standard_Boolean UnifyFaces = Standard_True,
-                                  const Standard_Boolean ConcatBSplines = Standard_False,
-                                  ActAPI_ProgressEntry   progress = nullptr,
-                                  ActAPI_PlotterEntry    plotter  = nullptr);
+    asiAlgo_UnifySameDomain(const TopoDS_Shape&    aShape,
+                            const Standard_Boolean UnifyEdges = Standard_True,
+                            const Standard_Boolean UnifyFaces = Standard_True,
+                            const Standard_Boolean ConcatBSplines = Standard_False,
+                            ActAPI_ProgressEntry   progress = nullptr,
+                            ActAPI_PlotterEntry    plotter  = nullptr);
   
   //! Initializes with a shape and necessary flags.
   //! It does not perform unification.
@@ -147,7 +145,7 @@ public:
     return myShape;
   }
 
-  DEFINE_STANDARD_RTTIEXT(ShapeUpgrade_UnifySameDomain1,ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTIEXT(asiAlgo_UnifySameDomain,ActAPI_IAlgorithm)
 
 protected:
 
@@ -179,4 +177,4 @@ private:
   Standard_Boolean myFailed;
 };
 
-#endif // _ShapeUpgrade_UnifySameDomain1_HeaderFile
+#endif // _asiAlgo_UnifySameDomain_HeaderFile

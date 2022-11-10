@@ -62,38 +62,37 @@ public:
   //! Computation status.
   enum CompStatus
   {
-    FailureNullShape                = 1<<0,  //!< Initial shape is null
-    FailureShapeWithoutFaces        = 1<<1,  //!< Initial shape does not contain faces
-    FailureShapeWithoutEdges        = 1<<2,  //!< Initial shape does not contain edges
-    FailureDiscretizeCurve          = 1<<3,  //!< Failure discretisation of 3D curve
-    FailureNonMonifoldWires         = 1<<4,  //!< Non-manifold wires in face (skip)
-    FailureFaceWithoutWires         = 1<<5,  //!< Face does not contain wires
-    FailureDiscretizeFace           = 1<<6,  //!< Failure triangulating face
-    FailureOrderOfEdges             = 1<<7,  //!< Impossible to detect order of edges in wire
-    FailureDiscretizeWire           = 1<<8,  //!< Failure discretization of wire
-    FailureDiscretizePCurve         = 1<<9, //!< Failure discretisation of pcurve
-    FailureDegeneratedEdge          = 1<<10, //!< Degenerated edge
-    FailurePCurveOnSurface          = 1<<11, //!< Edge has no pcurve on the face
-    FailureEdgeWithout3DCurve       = 1<<12, //!< A non-degenerated edge has no 3D curve
-    FailurePCurveRedundancy         = 1<<13, //!< Edge has more than 2 pcurves on the same face
-    FailureProcessEdge              = 1<<14, //!< Cannot process non-SameParameter edge
-    FailureInvalidEdge              = 1<<15, //!< Invalid edge
-    FailureInvalidWire              = 1<<16, //!< Invalid wire
-    FailureNullTargetMesh           = 1<<17, //!< Null output mesh for non-triangle meshing
-    FailureUserBreak                = 1<<18, //!< User break
+    FailureNullShape          = 1<<0,  //!< Initial shape is null
+    FailureShapeWithoutFaces  = 1<<1,  //!< Initial shape does not contain faces
+    FailureShapeWithoutEdges  = 1<<2,  //!< Initial shape does not contain edges
+    FailureDiscretizeCurve    = 1<<3,  //!< Failure discretisation of 3D curve
+    FailureNonMonifoldWires   = 1<<4,  //!< Non-manifold wires in face (skip)
+    FailureFaceWithoutWires   = 1<<5,  //!< Face does not contain wires
+    FailureDiscretizeFace     = 1<<6,  //!< Failure triangulating face
+    FailureOrderOfEdges       = 1<<7,  //!< Impossible to detect order of edges in wire
+    FailureDiscretizeWire     = 1<<8,  //!< Failure discretization of wire
+    FailureDiscretizePCurve   = 1<<9,  //!< Failure discretisation of pcurve
+    FailureDegeneratedEdge    = 1<<10, //!< Degenerated edge
+    FailurePCurveOnSurface    = 1<<11, //!< Edge has no pcurve on the face
+    FailureEdgeWithout3DCurve = 1<<12, //!< A non-degenerated edge has no 3D curve
+    FailurePCurveRedundancy   = 1<<13, //!< Edge has more than 2 pcurves on the same face
+    FailureProcessEdge        = 1<<14, //!< Cannot process non-SameParameter edge
+    FailureInvalidEdge        = 1<<15, //!< Invalid edge
+    FailureInvalidWire        = 1<<16, //!< Invalid wire
+    FailureNullTargetMesh     = 1<<17, //!< Null output mesh for non-triangle meshing
+    FailureUserBreak          = 1<<18, //!< User break
 
     // Warnings
-    WarningLargeTolerance           = 1<<19, //!< Tolerance of some edges is more then mesh parameters
-    WarningNeedToReorderEdges       = 1<<20, //!< Some edges in wire need to be reversed
-    WarningInternalEdges            = 1<<21, //!< mixture of oriented and not oriented edges in a wire
-    WarningWireWithoutEdges         = 1<<22, //!< Wire does not contain edges
-    WarningHoles                    = 1<<23  //!< Some areas left not meshed
+    WarningLargeTolerance     = 1<<19, //!< Tolerance of some edges is more then mesh parameters
+    WarningNeedToReorderEdges = 1<<20, //!< Some edges in wire need to be reversed
+    WarningInternalEdges      = 1<<21, //!< mixture of oriented and not oriented edges in a wire
+    WarningWireWithoutEdges   = 1<<22, //!< Wire does not contain edges
+    WarningHoles              = 1<<23  //!< Some areas left not meshed
   };
 
 public:
 
-  asiAlgo_EXPORT
-    Builder(const TopoDS_Shape& shape)
+  Builder(const TopoDS_Shape& shape)
   //
   : m_shape       (shape),
     m_iCompStatus (0),
@@ -104,26 +103,23 @@ public:
 
 public:
 
-  asiAlgo_EXPORT
-    void Tessellate();
+  asiAlgo_EXPORT void
+    Tessellate();
 
 public:
 
   //! Adds computation status.
-  asiAlgo_EXPORT
-    void AddCompStatus(const int status)
+  void AddCompStatus(const int status)
   {
     m_iCompStatus |= status;
   }
 
-  asiAlgo_EXPORT
-    void SetParams(const Params& params)
+  void SetParams(const Params& params)
   {
     m_meshParams = params;
   }
 
-  asiAlgo_EXPORT
-    const Handle(Model)& GetModel() const
+  const Handle(Model)& GetModel() const
   {
     return m_model;
   }

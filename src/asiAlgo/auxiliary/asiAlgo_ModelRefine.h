@@ -39,28 +39,19 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 
- //! \ingroup ASIEXT_SheetMetal
- //!
- //! ModelRefine namespace.
-namespace ModelRefine
+ //! asiAlgo_ModelRefine namespace.
+namespace asiAlgo_ModelRefine
 {
-//! \ingroup ASIEXT_SheetMetal
-//!
+
 //! Vector of faces.
 typedef std::vector<TopoDS_Face>  FaceVectorType;
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Vector of edges.
 typedef std::vector<TopoDS_Edge>  EdgeVectorType;
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Vector of shapes.
 typedef std::vector<TopoDS_Shape> ShapeVectorType;
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Pair <shape, shape>.
 typedef std::pair<TopoDS_Shape, TopoDS_Shape> ShapePairType;
 
@@ -80,8 +71,6 @@ void boundaryEdges(const FaceVectorType &faces, EdgeVectorType &edgesOut);
 //! \return rebuilt shell.
 TopoDS_Shell removeFaces(const TopoDS_Shell &shell, const FaceVectorType &faces);
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Base type of face.
 class FaceTypedBase
 {
@@ -127,8 +116,6 @@ protected:
   GeomAbs_SurfaceType surfaceType; //!< Type of surface.
 };
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Planar face.
 class FaceTypedPlane : public FaceTypedBase
 {
@@ -162,8 +149,6 @@ public:
 //! \return planar object.
 FaceTypedPlane& getPlaneObject();
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Cylindrical face.
 class FaceTypedCylinder : public FaceTypedBase
 {
@@ -204,8 +189,6 @@ protected:
 //! \return cylindrical object.
 FaceTypedCylinder& getCylinderObject();
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! BSpline face.
 class FaceTypedBSpline : public FaceTypedBase
 {
@@ -239,8 +222,6 @@ public:
 //! \return BSpline object.
 FaceTypedBSpline& getBSplineObject();
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Splitter face.
 class FaceTypeSplitter
 {
@@ -279,8 +260,6 @@ private:
   TopoDS_Shell shell;   //!< Shell.
 };
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Adjacency splitter face.
 class FaceAdjacencySplitter
 {
@@ -322,8 +301,6 @@ private:
   TopTools_IndexedDataMapOfShapeListOfShape edgeToFaceMap;  //!< Edge-face map.
 };
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Equality splitter face.
 class FaceEqualitySplitter
 {
@@ -351,8 +328,6 @@ private:
   std::vector<FaceVectorType> equalityVector; //!< Equality groups.
 };
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Uniter of faces.
 class FaceUniter
 {
@@ -415,13 +390,9 @@ GeomAbs_OtherSurface
 };
 */
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Part namespace.
 namespace Part {
 
-//! \ingroup ASIEXT_SheetMetal
-//!
 //! Refinement of model.
 class BRepBuilderAPI_RefineModel : public BRepBuilderAPI_MakeShape
 {
@@ -452,7 +423,7 @@ private:
 
   //! Logs modifications.
   //! \param [in] uniter uniter.
-  void LogModifications(const ModelRefine::FaceUniter& uniter);
+  void LogModifications(const asiAlgo_ModelRefine::FaceUniter& uniter);
 
 private:
 

@@ -65,21 +65,19 @@
 # include <Standard_Version.hxx>
 #endif // _PreComp_
 
-#include "modelRefine.h"
+// Own include
+#include "asiAlgo_ModelRefine.h"
 
+using namespace asiAlgo_ModelRefine;
 
-using namespace ModelRefine;
-
-
-
-void ModelRefine::getFaceEdges(const TopoDS_Face &face, EdgeVectorType &edges)
+void asiAlgo_ModelRefine::getFaceEdges(const TopoDS_Face &face, EdgeVectorType &edges)
 {
     TopExp_Explorer it;
     for (it.Init(face, TopAbs_EDGE); it.More(); it.Next())
         edges.push_back(TopoDS::Edge(it.Current()));
 }
 
-void ModelRefine::boundaryEdges(const FaceVectorType &faces, EdgeVectorType &edgesOut)
+void asiAlgo_ModelRefine::boundaryEdges(const FaceVectorType &faces, EdgeVectorType &edgesOut)
 {
     //this finds all the boundary edges. Maybe more than one boundary.
     std::list<TopoDS_Edge> edges;
@@ -111,7 +109,7 @@ void ModelRefine::boundaryEdges(const FaceVectorType &faces, EdgeVectorType &edg
     std::copy(edges.begin(), edges.end(), back_inserter(edgesOut));
 }
 
-TopoDS_Shell ModelRefine::removeFaces(const TopoDS_Shell &shell, const FaceVectorType &faces)
+TopoDS_Shell asiAlgo_ModelRefine::removeFaces(const TopoDS_Shell &shell, const FaceVectorType &faces)
 {
     ShapeBuild_ReShape rebuilder;
     FaceVectorType::const_iterator it;
@@ -120,7 +118,7 @@ TopoDS_Shell ModelRefine::removeFaces(const TopoDS_Shell &shell, const FaceVecto
     return TopoDS::Shell(rebuilder.Apply(shell));
 }
 
-namespace ModelRefine
+namespace asiAlgo_ModelRefine
 {
     class WireSort
     {
@@ -402,7 +400,7 @@ TopoDS_Face FaceTypedPlane::buildFace(const FaceVectorType &faces) const
         wires.push_back(currentWire);
     }
 
-    std::sort(wires.begin(), wires.end(), ModelRefine::WireSort());
+    std::sort(wires.begin(), wires.end(), asiAlgo_ModelRefine::WireSort());
 
     BRepLib_MakeFace faceMaker(wires.at(0), Standard_True);
     if (faceMaker.Error() != BRepLib_FaceDone)
@@ -427,7 +425,7 @@ TopoDS_Face FaceTypedPlane::buildFace(const FaceVectorType &faces) const
     return current;
 }
 
-FaceTypedPlane& ModelRefine::getPlaneObject()
+FaceTypedPlane& asiAlgo_ModelRefine::getPlaneObject()
 {
     static FaceTypedPlane object;
     return object;
@@ -639,7 +637,7 @@ TopoDS_Face FaceTypedCylinder::buildFace(const FaceVectorType &faces) const
         return dummy;
 
     // Sort wires by size, that is, the innermost wire comes last
-    std::sort(allWires.begin(), allWires.end(), ModelRefine::WireSort());
+    std::sort(allWires.begin(), allWires.end(), asiAlgo_ModelRefine::WireSort());
 
     // Find outer boundary wires that cut the cylinder into segments. This will be the case f we
     // have removed the seam edges of a complete (360 degrees) cylindrical face
@@ -717,7 +715,7 @@ void FaceTypedCylinder::boundarySplit(const FaceVectorType &facesIn, std::vector
 {
     //normal edges.
     EdgeVectorType normalEdges;
-    ModelRefine::boundaryEdges(facesIn, normalEdges);
+    asiAlgo_ModelRefine::boundaryEdges(facesIn, normalEdges);
 
     std::list<TopoDS_Edge> sortedEdges;
     std::copy(normalEdges.begin(), normalEdges.end(), back_inserter(sortedEdges));
@@ -773,7 +771,7 @@ void FaceTypedCylinder::boundarySplit(const FaceVectorType &facesIn, std::vector
     }
 }
 
-FaceTypedCylinder& ModelRefine::getCylinderObject()
+FaceTypedCylinder& asiAlgo_ModelRefine::getCylinderObject()
 {
     static FaceTypedCylinder object;
     return object;
@@ -968,7 +966,7 @@ TopoDS_Face FaceTypedBSpline::buildFace(const FaceVectorType &faces) const
         wires.push_back(currentWire);
     }
 
-    std::sort(wires.begin(), wires.end(), ModelRefine::WireSort());
+    std::sort(wires.begin(), wires.end(), asiAlgo_ModelRefine::WireSort());
 
     //make face from surface and outer wire.
     Handle(Geom_BSplineSurface) surface = Handle(Geom_BSplineSurface)::DownCast(BRep_Tool::Surface(faces.at(0)));
@@ -1002,7 +1000,7 @@ TopoDS_Face FaceTypedBSpline::buildFace(const FaceVectorType &faces) const
     return faceFixer.Face();
 }
 
-FaceTypedBSpline& ModelRefine::getBSplineObject()
+FaceTypedBSpline& asiAlgo_ModelRefine::getBSplineObject()
 {
     static FaceTypedBSpline object;
     return object;
@@ -1026,22 +1024,22 @@ bool FaceUniter::process()
     typeObjects.push_back(&getBSplineObject());
     //add more face types.
 
-    ModelRefine::FaceTypeSplitter splitter;
+    asiAlgo_ModelRefine::FaceTypeSplitter splitter;
     splitter.addShell(workShell);
     std::vector<FaceTypedBase *>::iterator typeIt;
     for(typeIt = typeObjects.begin(); typeIt != typeObjects.end(); ++typeIt)
         splitter.registerType((*typeIt)->getType());
     splitter.split();
 
-    ModelRefine::FaceVectorType facesToRemove;
-    ModelRefine::FaceVectorType facesToSew;
+    asiAlgo_ModelRefine::FaceVectorType facesToRemove;
+    asiAlgo_ModelRefine::FaceVectorType facesToSew;
 
-    ModelRefine::FaceAdjacencySplitter adjacencySplitter(workShell);
+    asiAlgo_ModelRefine::FaceAdjacencySplitter adjacencySplitter(workShell);
 
     for(typeIt = typeObjects.begin(); typeIt != typeObjects.end(); ++typeIt)
     {
-        ModelRefine::FaceVectorType typedFaces = splitter.getTypedFaceVector((*typeIt)->getType());
-        ModelRefine::FaceEqualitySplitter equalitySplitter;
+        asiAlgo_ModelRefine::FaceVectorType typedFaces = splitter.getTypedFaceVector((*typeIt)->getType());
+        asiAlgo_ModelRefine::FaceEqualitySplitter equalitySplitter;
         equalitySplitter.split(typedFaces, *typeIt);
         for (std::size_t indexEquality(0); indexEquality < equalitySplitter.getGroupCount(); ++indexEquality)
         {
@@ -1075,7 +1073,7 @@ bool FaceUniter::process()
     if (facesToSew.size() > 0)
     {
         modifiedSignal = true;
-        workShell = ModelRefine::removeFaces(workShell, facesToRemove);
+        workShell = asiAlgo_ModelRefine::removeFaces(workShell, facesToRemove);
         TopExp_Explorer xp;
         bool emptyShell = true;
         for (xp.Init(workShell, TopAbs_FACE); xp.More();)
@@ -1198,7 +1196,7 @@ void Part::BRepBuilderAPI_RefineModel::Build()
         TopExp_Explorer it;
         for (it.Init(solid, TopAbs_SHELL); it.More(); it.Next()) {
             const TopoDS_Shell &currentShell = TopoDS::Shell(it.Current());
-            ModelRefine::FaceUniter uniter(currentShell);
+            asiAlgo_ModelRefine::FaceUniter uniter(currentShell);
             if (uniter.process()) {
                 if (uniter.isModified()) {
                     const TopoDS_Shell &newShell = uniter.getShell();
@@ -1227,7 +1225,7 @@ void Part::BRepBuilderAPI_RefineModel::Build()
     }
     else if (myShape.ShapeType() == TopAbs_SHELL) {
         const TopoDS_Shell& shell = TopoDS::Shell(myShape);
-        ModelRefine::FaceUniter uniter(shell);
+        asiAlgo_ModelRefine::FaceUniter uniter(shell);
         if (uniter.process()) {
             // TODO: Why not check for uniter.isModified()?
             myShape = uniter.getShell();
@@ -1250,7 +1248,7 @@ void Part::BRepBuilderAPI_RefineModel::Build()
             TopExp_Explorer it;
             for (it.Init(solid, TopAbs_SHELL); it.More(); it.Next()) {
                 const TopoDS_Shell &currentShell = TopoDS::Shell(it.Current());
-                ModelRefine::FaceUniter uniter(currentShell);
+                asiAlgo_ModelRefine::FaceUniter uniter(currentShell);
                 if (uniter.process()) {
                     if (uniter.isModified()) {
                         const TopoDS_Shell &newShell = uniter.getShell();
@@ -1264,7 +1262,7 @@ void Part::BRepBuilderAPI_RefineModel::Build()
         // free shells
         for (xp.Init(myShape, TopAbs_SHELL, TopAbs_SOLID); xp.More(); xp.Next()) {
             const TopoDS_Shell& shell = TopoDS::Shell(xp.Current());
-            ModelRefine::FaceUniter uniter(shell);
+            asiAlgo_ModelRefine::FaceUniter uniter(shell);
             if (uniter.process()) {
                 builder.Add(comp, uniter.getShell());
                 LogModifications(uniter);
@@ -1294,7 +1292,7 @@ void Part::BRepBuilderAPI_RefineModel::Build()
     Done();
 }
 
-void Part::BRepBuilderAPI_RefineModel::LogModifications(const ModelRefine::FaceUniter& uniter)
+void Part::BRepBuilderAPI_RefineModel::LogModifications(const asiAlgo_ModelRefine::FaceUniter& uniter)
 {
     const std::vector<ShapePairType>& modShapes = uniter.getModifiedShapes();
     for (std::vector<ShapePairType>::const_iterator it = modShapes.begin(); it != modShapes.end(); ++it) {
