@@ -305,7 +305,7 @@ void asiVisu_PartPrs::SetDisplayMode(const asiVisu_ShapeDisplayMode displayMode,
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_PartPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& picker) const
+void asiVisu_PartPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& /*picker*/) const
 {
   //if ( !this->IsVisible() )
   //  return;

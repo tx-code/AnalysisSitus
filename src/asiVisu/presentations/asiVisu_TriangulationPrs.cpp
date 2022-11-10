@@ -231,7 +231,7 @@ void asiVisu_TriangulationPrs::ColorizeEdges(const ActAPI_Color& color) const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_TriangulationPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& picker) const
+void asiVisu_TriangulationPrs::InitializePicker(const vtkSmartPointer<vtkCellPicker>& /*picker*/) const
 {
   //picker->RemoveAllLocators();
 
