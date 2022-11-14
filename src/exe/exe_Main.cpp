@@ -182,10 +182,13 @@ int main(int argc, char** argv)
   const bool
     isBatch = isRunScript || isRunCommand || isGenDoc;
 
-  if (isRunJsonView)
+  if ( isRunJsonView )
   {
     return runJsonView(argc, argv, scriptArg);
   }
+
+  OSD::SetSignal(true);
+  OSD::SetFloatingSignal(false);
 
   std::cout << "Batch mode: " << (isBatch ? "true" : "false") << std::endl;
 
