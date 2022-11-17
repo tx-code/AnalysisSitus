@@ -99,6 +99,7 @@
 
 // Forward declarations.
 class Image_AlienPixMap;
+class asiAlgo_AAG;
 
 //-----------------------------------------------------------------------------
 
@@ -1018,6 +1019,40 @@ namespace asiAlgo_Utils
            double& XMin, double& YMin, double& ZMin,
            double& XMax, double& YMax, double& ZMax,
            const double tolerance = 0.0);
+
+  //! Computes axis-aligned bounding box volume of the passed shape.
+  //! \param[in] shape     the shape in question.
+  //! \param[in] tolerance the tolerance to use.
+  //! \param[in] isPrecise the Boolean flag indicating whether to use precise
+  //!                      bbox computation.
+  //! \return the computed volume.
+  asiAlgo_EXPORT double
+    ComputeAABBVolume(const TopoDS_Shape& shape,
+                      const double        tolerance = 0.0,
+                      const bool          isPrecise = false);
+
+  //! Handles getting areas of faces using the AAG as a cache.
+  //! \param[in] fid the AAG node id of the face.
+  //! \param[in] aag the AAG instance.
+  //! \return the area of the face of interest.
+  asiAlgo_EXPORT double
+    CacheFaceArea(const int                  fid,
+                  const Handle(asiAlgo_AAG)& aag);
+
+  //! Computes surface area of the passed shape.
+  //! \param[in] shape shape in question.
+  //! \return computed area.
+  asiAlgo_EXPORT double
+    ComputeArea(const TopoDS_Shape& shape);
+
+  //! Finds trasformation to move the reference frame `B` so that it is
+  //! superimposed with the reference frame `A`.
+  //! \param[in] A target reference frame.
+  //! \param[in] B reference frame to move.
+  //! \return computed transformation.
+  asiAlgo_EXPORT gp_Trsf
+    GetAlignmentTrsf(const gp_Ax3& A,
+                     const gp_Ax3& B);
 
   //! Cleans up polygonal data from the passed shape.
   asiAlgo_EXPORT void

@@ -3840,6 +3840,32 @@ int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MISC_TestSection(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Get shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+  //
+  if ( partShape.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
+    return TCL_ERROR;
+  }
+
+  TopoDS_Shape res = BRepAlgoAPI_Section( partShape, gp_Pln( gp::XOY() ) );
+
+  interp->GetPlotter().REDRAW_SHAPE("section", res, Color_Red, 1., true);
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
                       const Handle(Standard_Transient)& data)
 {
@@ -4102,6 +4128,14 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Tries to fix gaps in a wire.",
     //
     __FILE__, group, MISC_RepairGaps);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("misc-test-section",
+    //
+    "misc-test-section\n"
+    "\t Sections the active part.",
+    //
+    __FILE__, group, MISC_TestSection);
 
   // Load more commands.
   Commands_Coons (interp, data);

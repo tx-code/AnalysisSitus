@@ -57,11 +57,13 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <asiAlgo_Utils.h>
 
 // asiAlgo includes
+#include <asiAlgo_AAG.h>
 #include <asiAlgo_BuildCoonsSurf.h>
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_ClassifyPointFace.h>
 #include <asiAlgo_ConvertCanonical.h>
 #include <asiAlgo_IGES.h>
+#include <asiAlgo_FeatureAttrArea.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_RecognizeCanonical.h>
@@ -108,6 +110,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <BRepCheck_Status.hxx>
 #include <BRepCheck_Wire.hxx>
 #include <BRepClass_FClassifier.hxx>
+#include <BRepGProp.hxx>
 #include <BRepLProp_SLProps.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepTools.hxx>
@@ -139,6 +142,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <gp_Pln.hxx>
 #include <gp_Quaternion.hxx>
 #include <gp_Vec.hxx>
+#include <GProp_GProps.hxx>
 #include <math_Matrix.hxx>
 #include <NCollection_IncAllocator.hxx>
 #include <OSD_Environment.hxx>
@@ -2132,6 +2136,76 @@ bool asiAlgo_Utils::Bounds(const Handle(Poly_Triangulation)& tris,
   BRep_Builder().UpdateFace(fictiveFace, tris);
 
   return Bounds(fictiveFace, XMin, YMin, ZMin, XMax, YMax, ZMax, tolerance);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_Utils::ComputeAABBVolume(const TopoDS_Shape& shape,
+                                        const double        tolerance,
+                                        const bool          isPrecise)
+{
+  double xMin, yMin, zMin, xMax, yMax, zMax;
+  Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax, tolerance, isPrecise);
+
+  return Abs(xMax - xMin) * Abs(yMax - yMin) * Abs(zMax - zMin);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_Utils::CacheFaceArea(const int                  fid,
+                                    const Handle(asiAlgo_AAG)& aag)
+{
+  double area = 0.;
+
+  // Access the AAG attribute.
+  Handle(asiAlgo_FeatureAttrArea)
+    areaAttr = aag->ATTR_NODE<asiAlgo_FeatureAttrArea>(fid);
+
+  // Compute or use the cached value.
+  if ( areaAttr.IsNull() )
+  {
+    area = ComputeArea( aag->GetFace(fid) );
+    aag->SetNodeAttribute( fid, new asiAlgo_FeatureAttrArea(area) );
+  }
+  else
+  {
+    if ( !areaAttr->GetArea() )
+    {
+      areaAttr->SetArea( ComputeArea( aag->GetFace(fid) ) );
+    }
+    area = areaAttr->GetArea();
+  }
+  return area;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_Utils::ComputeArea(const TopoDS_Shape& shape)
+{
+  GProp_GProps props;
+  BRepGProp::SurfaceProperties(shape, props, 1.0e-2);
+  //
+  return props.Mass();
+}
+
+//-----------------------------------------------------------------------------
+
+gp_Trsf asiAlgo_Utils::GetAlignmentTrsf(const gp_Ax3& A,
+                                        const gp_Ax3& B)
+{
+  // B goes to global origin.
+  gp_Trsf T_B;
+  T_B.SetTransformation(B);
+
+  // Global origin goes to A.
+  gp_Trsf T_A;
+  T_A.SetTransformation(A);
+  T_A.Invert();
+
+  // Final transformation from B to A.
+  gp_Trsf T = T_A*T_B;
+
+  return T;
 }
 
 //-----------------------------------------------------------------------------

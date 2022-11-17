@@ -47,6 +47,7 @@
 #include <asiAlgo_InvertShells.h>
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_MeshMerge.h>
+#include <asiAlgo_OrientCnc.h>
 #include <asiAlgo_PlateOnEdges.h>
 #include <asiAlgo_PlateOnPoints.h>
 #include <asiAlgo_RebuildEdge.h>
@@ -3433,6 +3434,57 @@ int ENGINE_ClearPart(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_OrientPart(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  if ( argc != 1 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+
+  // Find a better orientation.
+  asiAlgo_OrientCnc orient( partNode->GetAAG(),
+                            interp->GetProgress(),
+                            interp->GetPlotter() );
+  //
+  if ( !orient.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Reorientation failed.");
+    return TCL_ERROR;
+  }
+
+  // Make another shape.
+  auto transform = BRepBuilderAPI_Transform( orient.GetTrsf() );
+  transform.Perform(partNode->GetShape(), true);
+  //
+  const TopoDS_Shape& orientedCopy = transform.Shape();
+
+  // Modify Data Model.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part(cmdEngine::model).Update(orientedCopy);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3908,4 +3960,13 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Resets part shape to empty state.",
     //
     __FILE__, group, ENGINE_ClearPart);
+
+  
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("orient-part",
+    //
+    "orient-part\n"
+    "\t Reorients the active part so it gets a more suitable axis.",
+    //
+    __FILE__, group, ENGINE_OrientPart);
 }

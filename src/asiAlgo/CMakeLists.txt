@@ -57,6 +57,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_Membership.h
   auxiliary/asiAlgo_ModelRefine.h
   auxiliary/asiAlgo_Optional.h
+  auxiliary/asiAlgo_OrientCnc.h
   auxiliary/asiAlgo_PointInPoly.h
   auxiliary/asiAlgo_ProjectPointOnMesh.h
   auxiliary/asiAlgo_QuickHull.h
@@ -98,6 +99,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_IntersectCS.cpp
   auxiliary/asiAlgo_IntersectSS.cpp
   auxiliary/asiAlgo_ModelRefine.cpp
+  auxiliary/asiAlgo_OrientCnc.cpp
   auxiliary/asiAlgo_PointInPoly.cpp
   auxiliary/asiAlgo_ProjectPointOnMesh.cpp
   auxiliary/asiAlgo_QuickHull.cpp
