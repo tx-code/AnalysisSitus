@@ -77,10 +77,24 @@ public:
     return m_T;
   }
 
+  //! \return the detected local axes.
+  const tl::optional<gp_Ax3>& GetAxes() const
+  {
+    return m_ax;
+  }
+
+  //! \return linear characteristic part's extents.
+  double GetExtents() const
+  {
+    return m_fExtents;
+  }
+
 protected:
 
-  Handle(asiAlgo_AAG) m_aag; //!< The AAG instance.
-  gp_Trsf             m_T;   //!< The computed transformation.
+  Handle(asiAlgo_AAG)  m_aag;      //!< The AAG instance.
+  gp_Trsf              m_T;        //!< The computed transformation.
+  tl::optional<gp_Ax3> m_ax;       //!< Local part's axes.
+  double               m_fExtents; //!< Linear characteristic part extents.
 
 };
 

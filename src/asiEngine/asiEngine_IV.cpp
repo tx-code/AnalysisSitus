@@ -1363,7 +1363,7 @@ Handle(asiData_IVAxesNode)
   asiEngine_IV::Find_Axes(const TCollection_AsciiString& name)
 {
   // Find the first Node with the given name
-  for ( Handle(ActAPI_IChildIterator) cit = m_model->GetIVNode()->Text()->GetChildIterator(true);
+  for ( Handle(ActAPI_IChildIterator) cit = m_model->GetIVNode()->Axes()->GetChildIterator(true);
         cit->More(); cit->Next() )
   {
     Handle(ActAPI_INode) node = cit->Value();

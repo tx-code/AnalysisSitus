@@ -43,7 +43,6 @@
 
 // Standard includes
 #include <algorithm>
-#include <optional>
 #include <vector>
 
 const double MINIMUM_RELATIVE_AREA = 0.1;
@@ -54,7 +53,8 @@ asiAlgo_OrientCnc::asiAlgo_OrientCnc(const Handle(asiAlgo_AAG)& aag,
                                      ActAPI_ProgressEntry       progress,
                                      ActAPI_PlotterEntry        plotter)
 : ActAPI_IAlgorithm (progress, plotter),
-  m_aag             (aag)
+  m_aag             (aag),
+  m_fExtents        (0.)
 {}
 
 //-----------------------------------------------------------------------------
@@ -68,6 +68,8 @@ bool asiAlgo_OrientCnc::Perform()
 
   // Calculate geometric mean of AABB face areas.
   const double basisArea = Pow(asiAlgo_Utils::ComputeAABBVolume(partShape), 2.0 / 3.0);
+  //
+  m_fExtents = Sqrt(basisArea);
 
   std::vector<int>    candidates;
   std::vector<gp_Dir> cylAxes;
@@ -139,18 +141,17 @@ bool asiAlgo_OrientCnc::Perform()
     break;
   }
 
-
   if ( !result.has_value() )
   {
     // there are no base faces
     // take the most common cylinder axis
-    int32_t bestCount = -1;
-    gp_Dir  bestAxis;
+    int    bestCount = -1;
+    gp_Dir bestAxis;
 
     for ( const auto& cylAxis: cylAxes )
     {
-      int32_t curCount = std::count_if( cylAxes.begin(), cylAxes.end(),
-                                       [cylAxis](auto other) { return cylAxis.IsParallel( other, Precision::Angular() ); }
+      int curCount = std::count_if( cylAxes.begin(), cylAxes.end(),
+                                   [cylAxis](auto other) { return cylAxis.IsParallel( other, Precision::Angular() ); }
       );
 
       if ( curCount > bestCount )
@@ -171,6 +172,8 @@ bool asiAlgo_OrientCnc::Perform()
     // Just use the pre-existing OZ axis.
     return false;
   }
+
+  m_ax = result;
 
   gp_Dir OZ = gp::DZ();
   gp_Ax3 XOY( gp::Origin(), OZ );

@@ -46,8 +46,7 @@
 
 asiVisu_AxesPipeline::asiVisu_AxesPipeline()
   : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
-                      vtkSmartPointer<vtkActor>::New() ),
-    m_bMapperColorsSet(false)
+                      vtkSmartPointer<vtkActor>::New() )
 {
   // Set line width.
   this->Actor()->GetProperty()->SetLineWidth(3);
@@ -100,10 +99,6 @@ void asiVisu_AxesPipeline::callback_remove_from_renderer(vtkRenderer* asiVisu_No
 
 void asiVisu_AxesPipeline::callback_update()
 {
-  if ( !m_bMapperColorsSet )
-  {
-    vtkSmartPointer<vtkLookupTable> lookup = asiVisu_Utils::InitAxesLookupTable();
-    asiVisu_Utils::InitMapper(m_mapper, lookup, ARRNAME_AXES_SCALARS);
-    m_bMapperColorsSet = true;
-  }
+  vtkSmartPointer<vtkLookupTable> lookup = asiVisu_Utils::InitAxesLookupTable();
+  asiVisu_Utils::InitMapper(m_mapper, lookup, ARRNAME_AXES_SCALARS);
 }

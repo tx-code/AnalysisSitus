@@ -3438,11 +3438,6 @@ int ENGINE_OrientPart(const Handle(asiTcl_Interp)& interp,
                       int                          argc,
                       const char**                 argv)
 {
-  if ( argc != 1 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -3451,6 +3446,8 @@ int ENGINE_OrientPart(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
     return TCL_ERROR;
   }
+
+  const bool apply = interp->HasKeyword(argc, argv, "apply");
 
   // Find a better orientation.
   asiAlgo_OrientCnc orient( partNode->GetAAG(),
@@ -3463,22 +3460,40 @@ int ENGINE_OrientPart(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Make another shape.
-  auto transform = BRepBuilderAPI_Transform( orient.GetTrsf() );
-  transform.Perform(partNode->GetShape(), true);
-  //
-  const TopoDS_Shape& orientedCopy = transform.Shape();
-
-  // Modify Data Model.
-  cmdEngine::model->OpenCommand();
+  if ( apply )
   {
-    asiEngine_Part(cmdEngine::model).Update(orientedCopy);
-  }
-  cmdEngine::model->CommitCommand();
+    // Make another shape.
+    auto transform = BRepBuilderAPI_Transform( orient.GetTrsf() );
+    transform.Perform(partNode->GetShape(), true);
+    //
+    const TopoDS_Shape& orientedCopy = transform.Shape();
 
-  // Update UI.
-  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
-    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+    // Modify Data Model.
+    cmdEngine::model->OpenCommand();
+    {
+      asiEngine_Part(cmdEngine::model).Update(orientedCopy);
+    }
+    cmdEngine::model->CommitCommand();
+
+    // Update UI.
+    if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+      cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+  }
+
+  tl::optional<gp_Ax3> ax = orient.GetAxes();
+
+  if ( ax.has_value() )
+  {
+    if ( apply )
+      ax->Transform( orient.GetTrsf() );
+
+    interp->GetPlotter().REDRAW_AXES( "oriAxes",
+                                       ax->Location(),
+                                       ax->XDirection(),
+                                       ax->YDirection(),
+                                       ax->Direction(),
+                                       orient.GetExtents() );
+  }
 
   return TCL_OK;
 }
@@ -3965,8 +3980,10 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("orient-part",
     //
-    "orient-part\n"
-    "\t Reorients the active part so it gets a more suitable axis.",
+    "orient-part [-apply]\n"
+    "\t Reorients the active part so it gets more suitable axes frame.\n"
+    "\t Pass the '-apply' flag to change the transformation of the shape.\n"
+    "\t Otherwise, only local axes are detected but the shape is not changed.",
     //
     __FILE__, group, ENGINE_OrientPart);
 }

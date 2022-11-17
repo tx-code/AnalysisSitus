@@ -67,10 +67,6 @@ private:
   //! Assignment prohibited.
   asiVisu_AxesPipeline& operator=(const asiVisu_AxesPipeline&);
 
-private:
-
-  bool m_bMapperColorsSet;
-
 };
 
 #endif
