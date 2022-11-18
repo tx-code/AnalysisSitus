@@ -71,29 +71,16 @@
 
 #include <asiAlgo_BuildConvexHull.h>
 
+#include <mobius/poly_Mesh.h>
+
+using namespace mobius;
+
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          cmdMisc_NotUsed(argc),
               const char**                 argv)
 {
-  Handle(asiEngine_Model)
-    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
-
-  Handle(asiData_PartNode) partNode = M->GetPartNode();
-
-  // Get shape.
-  TopoDS_Shape partShape = partNode->GetShape();
-  //
-  if ( partShape.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Shape is null.");
-    return TCL_ERROR;
-  }
-
-  Handle(Poly_Triangulation) hull;
-  asiAlgo_BuildConvexHull buildHull;
-  buildHull.Perform(partShape, hull);
-
-  interp->GetPlotter().REDRAW_TRIANGULATION("chull", hull, Color_Default, 1);
+  t_ptr<poly_Mesh> mobMesh = new poly_Mesh;
+  mobMesh->AddVertex(0,0,0);
 
   return TCL_OK;
 }
