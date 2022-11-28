@@ -1017,7 +1017,6 @@ void asiAlgo_ConvertCurve::Convert2Polyline(const TopoDS_Wire&   wire,
                                             std::vector<gp_Pnt>& points)
 {
   double length    = 0.0;
-  int    nbSeg     = 0;
   int    nbPoints  = 0;
   int    loopStart = 0;
   int    loopEnd   = 0;
@@ -1041,20 +1040,15 @@ void asiAlgo_ConvertCurve::Convert2Polyline(const TopoDS_Wire&   wire,
 
     // Compute the number of segments dividing length by distance.
     length = GCPnts_AbscissaPoint::Length( curve );
-
+    //
     if ( length < Precision::Confusion() )
       continue;
 
-    nbSeg = curve.GetType() == GeomAbs_CurveType::GeomAbs_Line ? 1
-                                                               : (int) ( length );
-
-    if ( nbSeg == 0 )
-      nbSeg = 1;
-
-    // Compute distribution.
-    GCPnts_QuasiUniformAbscissa tool( curve, nbSeg + 1 );
+    GCPnts_TangentialDeflection tool(curve,
+                                     curve.FirstParameter(), curve.LastParameter(),
+                                     5 * M_PI/180, length / 30);
     //
-    if ( !tool.IsDone() || tool.NbPoints() < 2 )
+    if ( tool.NbPoints() < 2 )
     {
       continue;
     }
