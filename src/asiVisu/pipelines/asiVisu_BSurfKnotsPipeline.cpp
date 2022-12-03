@@ -50,8 +50,7 @@
 asiVisu_BSurfKnotsPipeline::asiVisu_BSurfKnotsPipeline()
 //
 : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
-                    vtkSmartPointer<vtkActor>::New() ),
-  m_bMapperColorsSet ( false )
+                    vtkSmartPointer<vtkActor>::New() )
 {
   this->Actor()->GetProperty()->SetLineWidth(1.0);
 }
@@ -136,10 +135,6 @@ void asiVisu_BSurfKnotsPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update() routine.
 void asiVisu_BSurfKnotsPipeline::callback_update()
 {
-  if ( !m_bMapperColorsSet )
-  {
-    vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitKnotsIsosLookupTable();
-    asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_ISOSMULTS_SCALARS);
-    m_bMapperColorsSet = true;
-  }
+  vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitKnotsIsosLookupTable();
+  asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_ISOSMULTS_SCALARS);
 }

@@ -146,8 +146,13 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     for ( int k = 0; k < 3; ++k )
       m_resField.triangulation->GetVertex(vh[k], P[k]);
 
-    // Center point.
-    t_xyz C = (P[0] + P[1] + P[2]) / 3.;
+    // Sample points.
+    t_xyz C[1];
+    //
+    C[0] = 1./3.*P[0] + 1./3.*P[1] + 1./3.*P[2];
+    /*C[1] = 1./2.*P[0] + 1./4.*P[1] + 1./4.*P[2];
+    C[2] = 1./4.*P[0] + 1./2.*P[1] + 1./4.*P[2];
+    C[3] = 1./4.*P[0] + 1./4.*P[1] + 1./2.*P[2];*/
 
     /* Initialize norm. */
 
@@ -199,109 +204,117 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
     HitFacet.SetFaceToSkip(th.iIdx);
 
     // Thickness scalar.
-    double thickness = 0.;
+    tl::optional<double> triThickness;
 
-    gp_Lin ray    ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir ) );
-    gp_Lin rayInv ( cascade::GetOpenCascadePnt(C), cascade::GetOpenCascadeVec( dir.Reversed() ) );
+    for ( int jj = 0; jj < 1/*4*/; ++jj )
+    {
+      gp_Lin ray    ( cascade::GetOpenCascadePnt(C[jj]), cascade::GetOpenCascadeVec( dir ) );
+      gp_Lin rayInv ( cascade::GetOpenCascadePnt(C[jj]), cascade::GetOpenCascadeVec( dir.Reversed() ) );
 
 #if defined DRAW_DEBUG
-    sourcePts     -> AddElement( ray.Location() );
-    sourceVectors -> AddElement( ray.Direction().XYZ() );
+      sourcePts     -> AddElement( ray.Location() );
+      sourceVectors -> AddElement( ray.Direction().XYZ() );
 #endif
 
-    // Do the intersection test. For the custom directions, the
-    // test is done twice: in the forward and the reversed directions.
-    gp_XYZ hit1, hit2, hit;
-    int facetIdx1, facetIdx2, facetIdx = -1;
-    //
-    bool isHit1 = HitFacet(ray, facetIdx1, hit1);
-    bool isHit2 = false;
-    //
-    if ( m_bIsCustomDir )
-    {
-      isHit2 = HitFacet(rayInv, facetIdx2, hit2);
+      // Do the intersection test. For the custom directions, the
+      // test is done twice: in the forward and the reversed directions.
+      gp_XYZ hit1, hit2, hit;
+      int facetIdx1, facetIdx2, facetIdx = -1;
+      //
+      bool isHit1 = HitFacet(ray, facetIdx1, hit1);
+      bool isHit2 = false;
+      //
+      if ( m_bIsCustomDir )
+      {
+        isHit2 = HitFacet(rayInv, facetIdx2, hit2);
 
-      /*if ( tidx == 51121 )
+        /*if ( tidx == 51121 )
+        {
+          m_plotter.REDRAW_POINT("C", C, Color_Blue);
+          m_plotter.REDRAW_POINT("hit1", hit1, Color_Red);
+          m_plotter.REDRAW_POINT("hit2", hit2, Color_Red);
+          m_plotter.REDRAW_VECTOR_AT("dir1", C, dir, Color_Blue);
+          m_plotter.REDRAW_VECTOR_AT("dir2", C, dir.Reversed(), Color_Blue);
+
+          return false;
+        }*/
+
+        if ( !isHit1 && !isHit2 )
+        {
+          m_progress.SendLogMessage(LogWarn(Normal) << "Cannot find the intersected facet.");
+        }
+        else if ( isHit1 && !isHit2 )
+        {
+          hit      = hit1;
+          facetIdx = facetIdx1;
+        }
+        else if ( !isHit1 && isHit2 )
+        {
+          hit      = hit2;
+          facetIdx = facetIdx2;
+        }
+        else
+        {
+          // Choose the closest one.
+          const double d1 = cascade::GetOpenCascadePnt(C[jj]).Distance(hit1);
+          const double d2 = cascade::GetOpenCascadePnt(C[jj]).Distance(hit2);
+          //
+          hit      = ( (d1 < d2) ? hit1      : hit2 );
+          facetIdx = ( (d1 < d2) ? facetIdx1 : facetIdx2 );
+        }
+      }
+      else
+      {
+        if ( !isHit1 )
+        {
+          m_progress.SendLogMessage(LogWarn(Normal) << "Cannot find the intersected facet.");
+        }
+        else
+        {
+          hit      = hit1;
+          facetIdx = facetIdx1;
+        }
+      }
+
+      // Now thickness is simply a distance.
+      if ( facetIdx != -1 )
+      {
+        const double thickness = cascade::GetOpenCascadePnt(C[jj]).Distance(hit);
+
+        if ( !triThickness.has_value() )
+          triThickness = thickness;
+        else
+          triThickness = Max(*triThickness, thickness);
+      }
+
+      /*if ( !m_bIsCustomDir && (tidx == 51121) )
       {
         m_plotter.REDRAW_POINT("C", C, Color_Blue);
-        m_plotter.REDRAW_POINT("hit1", hit1, Color_Red);
-        m_plotter.REDRAW_POINT("hit2", hit2, Color_Red);
-        m_plotter.REDRAW_VECTOR_AT("dir1", C, dir, Color_Blue);
-        m_plotter.REDRAW_VECTOR_AT("dir2", C, dir.Reversed(), Color_Blue);
+        m_plotter.REDRAW_POINT("hit", hit, Color_Red);
+        m_plotter.REDRAW_VECTOR_AT("N", C, N.Reversed(), Color_Blue);
 
         return false;
       }*/
-
-      if ( !isHit1 && !isHit2 )
-      {
-        m_progress.SendLogMessage(LogWarn(Normal) << "Cannot find the intersected facet.");
-      }
-      else if ( isHit1 && !isHit2 )
-      {
-        hit      = hit1;
-        facetIdx = facetIdx1;
-      }
-      else if ( !isHit1 && isHit2 )
-      {
-        hit      = hit2;
-        facetIdx = facetIdx2;
-      }
-      else
-      {
-        // Choose the closest one.
-        const double d1 = cascade::GetOpenCascadePnt(C).Distance(hit1);
-        const double d2 = cascade::GetOpenCascadePnt(C).Distance(hit2);
-        //
-        hit      = ( (d1 < d2) ? hit1      : hit2 );
-        facetIdx = ( (d1 < d2) ? facetIdx1 : facetIdx2 );
-      }
     }
-    else
-    {
-      if ( !isHit1 )
-      {
-        m_progress.SendLogMessage(LogWarn(Normal) << "Cannot find the intersected facet.");
-      }
-      else
-      {
-        hit      = hit1;
-        facetIdx = facetIdx1;
-      }
-    }
-
-    // Now thickness is simply a distance.
-    if ( facetIdx != -1 )
-    {
-      thickness = cascade::GetOpenCascadePnt(C).Distance(hit);
-    }
-
-    /*if ( !m_bIsCustomDir && (tidx == 51121) )
-    {
-      m_plotter.REDRAW_POINT("C", C, Color_Blue);
-      m_plotter.REDRAW_POINT("hit", hit, Color_Red);
-      m_plotter.REDRAW_VECTOR_AT("N", C, N.Reversed(), Color_Blue);
-
-      return false;
-    }*/
 
     // Store scalars in the field.
-    if ( facetIdx != -1 )
+    if ( triThickness.has_value() )
     {
       double *pThick = field->data.ChangeSeek(th.iIdx);
       //
       if ( pThick == nullptr )
-        field->data.Bind(th.iIdx, thickness);
-      else if ( thickness > *pThick)
-        *pThick = thickness;
+        field->data.Bind(th.iIdx, *triThickness);
+      else if ( *triThickness > *pThick)
+        *pThick = *triThickness;
 
       // Update the extreme values.
-      if ( thickness < minScalar )
+      if ( *triThickness < minScalar )
       {
-        minScalar = thickness;
+        minScalar = *triThickness;
       }
-      if ( thickness > maxScalar )
+      if ( *triThickness > maxScalar )
       {
-        maxScalar = thickness;
+        maxScalar = *triThickness;
       }
     }
   }

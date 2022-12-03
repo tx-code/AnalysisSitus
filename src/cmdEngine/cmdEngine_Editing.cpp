@@ -2466,15 +2466,15 @@ int ENGINE_ExchangeUV(const Handle(asiTcl_Interp)& interp,
   // Find Node by name.
   Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[1]);
   //
-  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+  Handle(asiData_IVSurfaceNode)
+    surfaceNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
+  //
+  if ( surfaceNode.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a surface."
                                                         << argv[1]);
     return TCL_OK;
   }
-  //
-  Handle(asiData_IVSurfaceNode)
-    surfaceNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
 
   // Get B-surface.
   Handle(Geom_BSplineSurface)

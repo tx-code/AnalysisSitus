@@ -94,7 +94,6 @@ private:
 private:
 
   bool                                 m_bForced;          //!< Forced update.
-  bool                                 m_bMapperColorsSet; //!< Boolean flag indicating whether lookup table is set.
   vtkSmartPointer<vtkIdTypeArray>      m_selected;         //!< Poles selected for visualization.
   vtkSmartPointer<vtkSelectionNode>    m_selectionNode;    //!< VTK selection node.
   vtkSmartPointer<vtkSelection>        m_selection;        //!< VTK selection.

@@ -51,8 +51,7 @@
 asiVisu_BCurvePolesPipeline::asiVisu_BCurvePolesPipeline()
 //
 : asiVisu_Pipeline   ( vtkSmartPointer<vtkPolyDataMapper>::New(), vtkSmartPointer<vtkActor>::New() ),
-  m_bForced          ( false ),
-  m_bMapperColorsSet ( false )
+  m_bForced          ( false )
 {
   this->Actor()->GetProperty()->SetLineWidth(1.0);
   this->Actor()->GetProperty()->SetLineStipplePattern(0xf0f0);
@@ -208,10 +207,6 @@ void asiVisu_BCurvePolesPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update() routine.
 void asiVisu_BCurvePolesPipeline::callback_update()
 {
-  if ( !m_bMapperColorsSet )
-  {
-    vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitDomainLookupTable();
-    asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_ORIENT_SCALARS);
-    m_bMapperColorsSet = true;
-  }
+  vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitDomainLookupTable();
+  asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_ORIENT_SCALARS);
 }

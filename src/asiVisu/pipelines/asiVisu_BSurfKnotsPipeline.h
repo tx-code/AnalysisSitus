@@ -69,10 +69,6 @@ private:
   //! Assignment prohibited.
   asiVisu_BSurfKnotsPipeline& operator=(const asiVisu_BSurfKnotsPipeline&);
 
-protected:
-
-  bool m_bMapperColorsSet; //!< Indicates whether scalars are set.
-
 };
 
 #endif

@@ -50,8 +50,7 @@
 asiVisu_BSurfAxesPipeline::asiVisu_BSurfAxesPipeline()
 //
 : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
-                    vtkSmartPointer<vtkActor>::New() ),
-  m_bMapperColorsSet ( false )
+                    vtkSmartPointer<vtkActor>::New() )
 {
   this->Actor()->GetProperty()->SetLineWidth(2.0);
 }
@@ -136,10 +135,6 @@ void asiVisu_BSurfAxesPipeline::callback_remove_from_renderer(vtkRenderer*)
 //! Callback for Update() routine.
 void asiVisu_BSurfAxesPipeline::callback_update()
 {
-  if ( !m_bMapperColorsSet )
-  {
-    vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitCurviAxesLookupTable();
-    asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_CURVIAXES_SCALARS);
-    m_bMapperColorsSet = true;
-  }
+  vtkSmartPointer<vtkLookupTable> aLookup = asiVisu_Utils::InitCurviAxesLookupTable();
+  asiVisu_Utils::InitMapper(m_mapper, aLookup, ARRNAME_CURVIAXES_SCALARS);
 }

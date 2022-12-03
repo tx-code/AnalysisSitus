@@ -69,10 +69,6 @@ private:
   //! Assignment prohibited.
   asiVisu_BSurfAxesPipeline& operator=(const asiVisu_BSurfAxesPipeline&);
 
-protected:
-
-  bool m_bMapperColorsSet; //!< Indicates whether scalars are set.
-
 };
 
 #endif
