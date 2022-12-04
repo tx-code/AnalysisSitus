@@ -488,7 +488,18 @@ void asiUI_IV::DRAW_VECTOR_AT(const gp_Pnt&                  P,
                               const ActAPI_Color&            color,
                               const TCollection_AsciiString& name)
 {
-  this->DRAW_LINK(P, P.XYZ() + V.XYZ(), color, name);
+  Handle(HRealArray) points  = new HRealArray(0, 2);
+  Handle(HRealArray) vectors = new HRealArray(0, 2);
+
+  points->ChangeValue(0) = P.X();
+  points->ChangeValue(1) = P.Y();
+  points->ChangeValue(2) = P.Z();
+
+  vectors->ChangeValue(0) = V.X();
+  vectors->ChangeValue(1) = V.Y();
+  vectors->ChangeValue(2) = V.Z();
+
+  this->draw_vectors(points, vectors, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
@@ -498,7 +509,18 @@ void asiUI_IV::REDRAW_VECTOR_AT(const TCollection_AsciiString& name,
                                 const gp_Vec&                  V,
                                 const ActAPI_Color&            color)
 {
-  this->REDRAW_LINK(name, P, P.XYZ() + V.XYZ(), color);
+  Handle(HRealArray) points  = new HRealArray(0, 2);
+  Handle(HRealArray) vectors = new HRealArray(0, 2);
+
+  points->ChangeValue(0) = P.X();
+  points->ChangeValue(1) = P.Y();
+  points->ChangeValue(2) = P.Z();
+
+  vectors->ChangeValue(0) = V.X();
+  vectors->ChangeValue(1) = V.Y();
+  vectors->ChangeValue(2) = V.Z();
+
+  this->draw_vectors(points, vectors, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
