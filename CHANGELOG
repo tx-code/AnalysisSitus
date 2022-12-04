@@ -1,6 +1,107 @@
 Release notes:
 
 -------------------------------------------------------------------------------
+v1.2.0, 11 December 2022
+
+Milestone "ver 1.2": https://gitlab.com/ssv/AnalysisSitus/-/milestones/1#tab-issues
+-------------------------------------------------------------------------------
+- Add integration with NetGen.
+- Add Collpase() method for virtual collapsing of graph nodes.
+- Add IGES import.
+- Introduce 'dump-autoread' command for saving and autoloading script window contents.
+- Make it possible to drag & drop filenames into the scripting window.
+- Enable interactive selection of edges in the wireframe mode.
+- Enable "Explore..." action for the Part Node.
+- Get rid of optionals and avoid using C++17 for better compatibility with older envs.
+- Add point size parameter for point clouds visualization.
+- Add color parameter for point clouds.
+- Read part color defined in a STEP file into the Color parameter of the active part.
+- Fix incorrect colors of imported STEP file for a turned part.
+- Make it possible to select all faces with "Ctrl+A" key combination.
+- Add color parameter for curves in the imperative viewer.
+- Turn on visibility of the part on 'set-as-part' command.
+- Add a bunch of useful interfaces to the imperative viewer.
+- Introduce visual presentation parameters for vectors in the imperative viewer.
+- If a cylinder/cone is selected, allow measuring its angle (#124).
+- Make app icon red for the debug builds.
+- Introduce a tool for checking the validity of facets (#127).
+- Add a bunch of fixes for SDK installation.
+- Enable /runcommand syntax for batch.
+- Fix minor bug with color persistence in IV topo shapes.
+- Add Tcl command to save XDE to STEP.
+- Introduce specific treatment for seams on rotational surfaces (#133).
+- Let convert-to-bsurf command operate on the entire part.
+- Add yet another inspection tool to analyze vertex vexity.
+- Add "find vertex" GUI dialog and `select-vertices` Tcl command.
+- Add unit tests for the active data framework.
+- Add optional vertex adjacency relations to AAG.
+- Add non-manifold dihedral angle type.
+- Enable subdomains in thickness calculator.
+- Add SVG export.
+- Make topo killer allow reducing shape dimensionality.
+- Read original units from STEP files (#154).
+- Add distance field based on boundary crossing splitting criterion.
+- Add UV bounds AAG attribute.
+- Print OpenCascade version in the console on start.
+- Introduce check-clearance Tcl command.
+- Add "clear" toolbar button.
+- Configure num of UV isolines in the Hatching Node.
+- Fix isoparametric lines are rendered far from the face location (#160).
+- Add point-solid classifier.
+- Add visualization facilities for discrete model (#164).
+- Fix 'save-step' command that does not pass colors through (#138).
+- Fix crash on adding BREP model to empty project.
+- Fix weird result of blend recognition (#166).
+- Fix incorrect construction of grid (discrete case) (#165).
+- Store vexity array in VBFs.
+- Make recognition of conical EBFs an option.
+- Add possibility to generate facets for the active part without using XDE assets (#139).
+- Polish helping hints for Tcl commands.
+- Add `dfbrowse` command for the active project.
+- Get rid of metadata element nodes (#170).
+- Active Data: reuse labels of dead Nodes to expand newly added Nodes on.
+- Hide "check dihedral angle" if only one face is selected (#126).
+- Make asiExe the default startup project in cmake (#153).
+- Add control of accuracy over surface entities (#100).
+- Make edge/face/vertex finders work on nested arrays of indices (#172).
+- Fix lost colors after part transformation and saving to STEP (#179).
+- Add "Del" shortcut as defeaturing hotkey (#144).
+- Move "resolve coincident topology" setting to Analysis Situs Node (#92).
+- Add a function to reset colors in an XDE document.
+- Add possibility to check thickness by click on a face (#57).
+- Expose persistent props of curvature combs for edges (#180).
+- Introduce help command to return the hints for commands (#149).
+- Add possibility to save individual STEP files from XDE parts.
+- Introduce JSON viewer with collapsible sections (#173).
+- Show face/edge ID on detection (mouse move) (#21).
+- Redesign command list dialog (#72).
+- Add RTCD::IntersectRayAABB for point-to-bbox checking.
+- Add sparse-point-cloud Tcl command.
+- UI: Active Script - sort list of completer (#187).
+- Add inner points for planar faces in repatch.
+- Add asiAlgo_Utils::Str::AmendedFilename().
+- Shift selection is not synchronized between UV and 3D viewers (#175).
+- Make it possible to remove nodes (#193).
+- Add coloring of the mesh edges (#190).
+- Add IV interface for local axes frames.
+- Add simple recognition of linearly extruded surfaces; Add 'check-canonical' command.
+- Add possibility to scale up and down the text in the JSON viewer (#185).
+- Make push-pull work in the negative direction as well.
+- Fix UpdateAssemblies() and add asm-xde-transform.
+- Fix problem in FBX reader (#207).
+- Restore 'save-as' and 'load' commands for native file format (cbf).
+- Disable cell locators again (45DQW005A.stp, issue #211).
+- Make feature comment visible in the parameter editor.
+- Add a function to automatically reorient a part.
+-------------------------------------------------------------------------------
+v1.1.0, 13 September 2021
+-------------------------------------------------------------------------------
+ - Read here: http://quaoar.su/blog/page/meet-analysis-situs-11
+-------------------------------------------------------------------------------
+v1.0.0, 20 March 2021
+-------------------------------------------------------------------------------
+ - Read here: http://quaoar.su/blog/page/analysis-situs-100
+-------------------------------------------------------------------------------
 v0.4.0, 15 May 2020
 -------------------------------------------------------------------------------
 - Linux-ready.
