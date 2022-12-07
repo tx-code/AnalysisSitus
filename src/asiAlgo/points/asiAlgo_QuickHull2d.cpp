@@ -154,12 +154,24 @@ bool asiAlgo_QuickHull2d<TPoint>::Perform()
   m_P_down  = new PNode(p_down_idx);
 
   // Up
-  this->process(m_P_left, m_P_up,    true,  true);
-  this->process(m_P_up,   m_P_right, false, true);
+  {
+    TColStd_PackedMapOfInteger visited;
+    this->process(m_P_left, m_P_up,    visited, true,  true);
+  }
+  {
+    TColStd_PackedMapOfInteger visited;
+    this->process(m_P_up,   m_P_right, visited, false, true);
+  }
 
   // Down
-  this->process(m_P_left, m_P_down,  true,  false);
-  this->process(m_P_down, m_P_right, false, false);
+  {
+    TColStd_PackedMapOfInteger visited;
+    this->process(m_P_left, m_P_down,  visited, true,  false);
+  }
+  {
+    TColStd_PackedMapOfInteger visited;
+    this->process(m_P_down, m_P_right, visited, false, false);
+  }
 
   //-------------------------------------------------------------
   // Traverse the prepared binary tree in order to extract nodes
@@ -235,15 +247,21 @@ int asiAlgo_QuickHull2d<TPoint>::findDistantPoint(const int  p1_idx,
 //-----------------------------------------------------------------------------
 
 template <typename TPoint>
-void asiAlgo_QuickHull2d<TPoint>::process(PNode*     prev,
-                                          PNode*     curr,
-                                          const bool left,
-                                          const bool up)
+void asiAlgo_QuickHull2d<TPoint>::process(PNode*                      prev,
+                                          PNode*                      curr,
+                                          TColStd_PackedMapOfInteger& visited,
+                                          const bool                  left,
+                                          const bool                  up)
 {
   const int next_idx = this->findDistantPoint(prev->idx, curr->idx, up);
 
   if ( next_idx == -1 )
-    return; // No more points to proceed
+    return; // No more points to proceed with.
+
+  if ( visited.Contains(next_idx) )
+    return; // Do not go back.
+  //
+  visited.Add(next_idx);
 
 #if defined DRAW_DEBUG
   DRAW_INITGROUP(distant)
@@ -260,9 +278,9 @@ void asiAlgo_QuickHull2d<TPoint>::process(PNode*     prev,
   else
     prev->right = next;
 
-  // Traverse recursively
-  this->process(prev, next, true, up);
-  this->process(next, curr, false, up);
+  // Proceed. recursively
+  this->process(prev, next, visited, true, up);
+  this->process(next, curr, visited, false, up);
 }
 
 //-----------------------------------------------------------------------------
