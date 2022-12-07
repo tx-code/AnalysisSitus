@@ -40,6 +40,7 @@
 // OCCT includes
 #include <TColgp_HSequenceOfXY.hxx>
 #include <TColStd_HSequenceOfInteger.hxx>
+#include <TColStd_PackedMapOfInteger.hxx>
 
 //-----------------------------------------------------------------------------
 
