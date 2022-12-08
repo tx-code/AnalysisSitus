@@ -415,9 +415,10 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
                     const char**                 argv)
 {
   // Get Part Node to access shape.
-  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  asiEngine_Part partApi(cmdEngine::model);
   //
-  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  auto partNode = partApi.GetPart();
+  if (partNode.IsNull() || !partNode->IsWellFormed())
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
     return TCL_ERROR;
@@ -436,7 +437,7 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
   ext.LowerCase();
 
   // Get solid shape as currently glTF works only for solids.
-  TopoDS_Shape partShape = partNode->GetShape();
+  TopoDS_Shape partShape = partApi.GetShape();
   //
   TopTools_IndexedMapOfShape partSolids;
   TopExp::MapShapes(partShape, TopAbs_SOLID, partSolids);
@@ -449,8 +450,40 @@ int ENGINE_SaveGLTF(const Handle(asiTcl_Interp)& interp,
 
   // Prepare XDE document.
   Handle(asiAsm::xde::Doc) xdeDoc = new asiAsm::xde::Doc;
-  //
+
+  // Add the shape's color. It is necessary to do because partApi.GetMetadata()
+  // does not store solids, so we need to add part node to the doc separately.
   xdeDoc->GetShapeTool()->AddShape(partShape);
+  //
+  TDF_Label label;
+  xdeDoc->GetShapeTool()->FindShape(partShape, label);
+  //
+  auto colorInt = partNode->GetColor();
+  auto color = asiVisu_Utils::IntToColor(colorInt);
+  auto colorRGB = Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
+  xdeDoc->SetColor(label, colorRGB);
+
+  // Add colors that are stored in metadata.
+  Handle(asiData_MetadataNode) meta_n = partApi.GetMetadata();
+  // Get shapes with colors.
+  asiData_MetadataAttr::t_shapeColorMap map;
+  meta_n->GetShapeColorMap(map);
+  // Add all colors from meta.
+  asiData_MetadataAttr::t_shapeColorMap::Iterator iter(map);
+  for (; iter.More(); iter.Next())
+  {
+      colorInt = iter.Value();
+      auto shape = iter.Key();
+      bool found = xdeDoc->GetShapeTool()->FindShape(shape, label);
+      if (!found)
+      {
+          xdeDoc->GetShapeTool()->AddShape(shape);
+          xdeDoc->GetShapeTool()->FindShape(shape, label);
+      }
+      color = asiVisu_Utils::IntToColor(colorInt);
+      colorRGB = Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
+      xdeDoc->SetColor(label, colorRGB);
+  }
 
   // Browse XDE document if requested.
   if ( interp->HasKeyword(argc, argv, "browse") )
