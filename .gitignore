@@ -1,6 +1,6 @@
 products
 3rd-parties-arc
-cmake*
+cmake-*
 3rd-parties
 custom.bat
 win64/

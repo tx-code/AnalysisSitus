@@ -1122,7 +1122,7 @@ void asiAlgo_ConvertCurve::Convert2Polyline(TopoDS_Shape& shape)
 {
   Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
 
-  for ( TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); exp.Next() )
+  for ( TopExp_Explorer exp(shape.Oriented(TopAbs_FORWARD), TopAbs_WIRE); exp.More(); exp.Next() )
   {
     const TopoDS_Wire& W = TopoDS::Wire( exp.Current() );
 
