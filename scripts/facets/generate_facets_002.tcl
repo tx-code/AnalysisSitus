@@ -16,16 +16,16 @@ if { ![file isdirectory $tmpDir] } {
 }
 
 # Save in gltf.
-set resultName "result.glb"
+set resultName "result_002.glb"
 save-gltf -filename $tmpDir$resultName
 
 # Check size.
-set expectedSize 117724
+set expectedSize 121128
 set precision 20
 set size [file size $tmpDir$resultName]
 if { [expr abs($expectedSize - $size) ] <= $precision } {
   file delete -force $tmpDir
 } else {
-  file delete -force $tmpDir
+ # file delete -force $tmpDir
   return -code error "Error: actual size of $resultName is $size"
 }
