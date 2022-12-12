@@ -46,6 +46,11 @@
 // STL includes
 #include <map>
 
+//#define DEBUG_IN_INSPECTOR
+#ifdef DEBUG_IN_INSPECTOR
+#include <asiAlgo_Message.h>
+#endif
+
 namespace
 {
   //-----------------------------------------------------------------------------
@@ -58,105 +63,205 @@ namespace
 
   //-----------------------------------------------------------------------------
 
-  //QColor highlightColor()        { return QColor("#18465d"); }
-
-  //-----------------------------------------------------------------------------
-
   QColor lineNumberColor()       { return QColor(128, 128, 128); }
 
   //-----------------------------------------------------------------------------
 
-  //void printJsonBlocks(const asiUI_JsonBlocks& markers)
-  //{
-  //  std::cout << "blocks: " << markers.size() << std::endl;
-  //  for (auto& pair : markers)
-  //  {
-  //    asiUI_JsonBlock block = pair.second;
-  //    std::cout << block.m_isCollapsed << " start, end: "
-  //              << block.m_blockNumber + 1 << ", "
-  //              << block.m_blockNumberClose + 1 << ", "
-  //              << block.m_positionOpen << ", "
-  //              << block.m_positionClose
-  //              << std::endl;
-  //  }
-  //}
+  struct SymbolPosition
+  {
+    SymbolPosition(const QChar symbol, const int blockNumber, const int positionNumber)
+      : Symbol(symbol), BlockNumber(blockNumber), Position(positionNumber) {}
 
-  ////-----------------------------------------------------------------------------
+    SymbolPosition()
+     : Symbol(QChar()), BlockNumber(0), Position(0) {}
 
-  //void printBlockParents(const asiUI_ListOfListOfInt& blockParents)
-  //{
-  //  std::cout << "parents: " << blockParents.size() << std::endl;
-  //  for (auto& pair : blockParents)
-  //  {
-  //    asiUI_ListOfInt parents = pair.second;
-
-  //    std::cout << pair.first + 1 << ": ";
-  //    for (auto& id : parents)
-  //    {
-  //      std::cout << id + 1 << " ";
-  //    }
-  //    std::cout << std::endl;
-  //  }
-  //}
-
-  ////-----------------------------------------------------------------------------
-
-  //void printCollapsed(const asiUI_JsonBlocks& collapsedBlocks)
-  //{
-  //  std::cout << "collapsed: " << collapsedBlocks.size() << std::endl;
-  //  for (auto& item : collapsedBlocks)
-  //  {
-  //    std::cout << item.first << " ";
-  //  }
-  //  if (collapsedBlocks.size() > 0)
-  //    std::cout << std::endl;
-  //}
+    QChar Symbol;
+    int   BlockNumber;
+    int   Position;
+  };
 
   //-----------------------------------------------------------------------------
 
-  /*void printPositions(const asiUI_MapIntToInt& positions)
+  struct SymbolCouple
   {
-    std::cout << "positions: " << positions.size() << std::endl;
-    for (auto& pair : positions)
-    {
-       std::cout << pair.first + 1 << " : " << pair.second << std::endl;
-    }
-  }*/
+    SymbolCouple(const int level,
+                 const SymbolPosition open,
+                 const SymbolPosition close,
+                 const QString collapsedInRow)
+      : Level(level), Open(open), Close(close), CollapsedInRow(collapsedInRow) {}
+
+    int            Level;
+    QString        CollapsedInRow;
+    SymbolPosition Open;
+    SymbolPosition Close;
+  };
 
   //-----------------------------------------------------------------------------
 
-  int findStart(const QString& blockText,
-                const int      indexStart,
-                const bool     fromEnd,
-                bool&          isBrace)
+  QChar findCloseSymbol(const QChar& openSymbol)
   {
-    if (indexStart >= blockText.length())
-      return -1;
+    // it processes only '{' and '[' symbols
+    if (openSymbol == '{')
+      return '}';
 
-    int indexOfStart1 = fromEnd ? blockText.lastIndexOf("{", indexStart)
-                                : blockText.indexOf("{", indexStart);
-    int indexOfStart2 = fromEnd ? blockText.lastIndexOf("[", indexStart)
-                                : blockText.indexOf("[", indexStart);
-
-    if (indexOfStart1 == -1 && indexOfStart2 == -1)
-      return -1;
-
-    isBrace = indexOfStart1 > indexOfStart2;
-    return isBrace ? indexOfStart1 : indexOfStart2;
+    return ']';
   }
 
   //-----------------------------------------------------------------------------
 
-  int findEnd(const QString& blockText,
-              const int      indexStart,
-              const bool&    isBrace)
+  bool findNextPosition(const QString& blockText,
+                        const int      startPosition,
+                        const QChar&   symbol,
+                        int&           position)
   {
-    if (indexStart >= blockText.length())
-      return -1;
+    position = -1;
+    if (startPosition >= blockText.length())
+      return false;
 
-    int indexOfEnd = isBrace ? blockText.indexOf("}", indexStart)
-                             : blockText.indexOf("]", indexStart);
-    return indexOfEnd;
+    position = blockText.indexOf(symbol, startPosition);
+    return position >= 0;
+  }
+
+  //-----------------------------------------------------------------------------
+
+  bool getOpenPosition(const bool positionOpen1Found,
+                       const bool positionOpen2Found,
+                       const int  positionOpen1,
+                       const int  positionOpen2,
+                       int&       positionOpen,
+                       QChar&     openSymbol)
+  {
+    if (!positionOpen1Found && !positionOpen2Found)
+      return false; // moving to the next block
+    else if (positionOpen1Found && positionOpen2Found)
+    {
+      bool isOpen1 = positionOpen1 < positionOpen2;
+      positionOpen = isOpen1 ? positionOpen1 : positionOpen2;
+      openSymbol   = isOpen1 ? '{' : '[';
+    }
+    else if (positionOpen1Found)
+    {
+      positionOpen = positionOpen1;
+      openSymbol   = '{';
+    }
+    else if (positionOpen2Found)
+    {
+      positionOpen = positionOpen2;
+      openSymbol   = '[';
+    }
+    return true;
+  }
+
+  //-----------------------------------------------------------------------------
+
+  void printJsonBlocks(const asiUI_JsonBlocks& markers)
+  {
+    markers;
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("printJsonBlocks:") +
+                                    "[" + (int)markers.size() + "]";
+    MESSAGE_INFO_LEVEL(info);
+
+   QString str;
+    for (auto& pair : markers)
+    {
+      asiUI_JsonBlock block = pair.second;
+
+      info = TCollection_AsciiString("start/end: ")
+           + "["
+           + TCollection_AsciiString((int)block.m_blockNumber + 1)
+           + "] / "
+           + "["
+           + TCollection_AsciiString((int)block.m_blockNumberClose + 1)
+           + "] - collapsed: "
+           + block.m_isCollapsed
+           + " - open / close: "
+           + block.m_positionOpen
+           + " / "
+           + block.m_positionClose;
+      MESSAGE_INFO_CUSTOM(info);
+    }
+#endif
+  }
+
+  //-----------------------------------------------------------------------------
+
+  void printBlockParents(const asiUI_MapOfListOfInt& blockParents)
+  {
+    blockParents;
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("printBlockParents: ") +
+                                    "[" + (int)blockParents.size() + "]";
+    MESSAGE_INFO_LEVEL(info);
+    for (auto& pair : blockParents)
+    {
+      asiUI_ListOfInt parents = pair.second;
+      //info = TCollection_AsciiString(pair.first + 1) + ": ";
+      QString str = QString::number(pair.first + 1);
+      str += ": ";
+      for (auto& id : parents)
+      {
+        str += QString::number(id + 1) + " ";
+      }
+      MESSAGE_INFO_CUSTOM(str.toStdString().c_str());
+    }
+#endif
+  }
+
+  //-----------------------------------------------------------------------------
+
+  void printCollapsed(const asiUI_JsonBlocks& collapsedBlocks)
+  {
+    collapsedBlocks;
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("printCollapsed: ") +
+                                    "[" + (int)collapsedBlocks.size() + "]";
+    MESSAGE_INFO_LEVEL(info);
+    info = TCollection_AsciiString();
+    for (auto& item : collapsedBlocks)
+    {
+      info += item.first + " ";
+    }
+    MESSAGE_INFO_CUSTOM(info);
+#endif
+  }
+ 
+   //-----------------------------------------------------------------------------
+ 
+  void printPositions(const asiUI_MapIntToInt& positions)
+   {
+    positions;
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("printPositions: ") +
+                                    "[" + (int)positions.size() + "]";
+    MESSAGE_INFO_LEVEL(info);
+
+    //std::cout << "positions: " << positions.size() << std::endl;
+     for (auto& pair : positions)
+     {
+      info = TCollection_AsciiString("") + (pair.first + 1) + " : " + pair.second;
+      MESSAGE_INFO_CUSTOM(info);
+     }
+#endif
+  }
+
+
+  void printCouples(const std::list <SymbolCouple>& couples)
+  {
+    couples;
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("printCouples: ") +
+                                    "[" + (int)couples.size() + "]";
+    MESSAGE_INFO_LEVEL(info);
+
+    for (auto& couple : couples)
+    {
+      QString str = QString("%1: [%2, %4, %5] - [%6, %7, %8]").arg(couple.Level)
+                                              .arg(couple.Open.BlockNumber).arg(couple.Open.Position).arg(couple.Open.Symbol)
+                                              .arg(couple.Close.BlockNumber).arg(couple.Close.Position).arg(couple.Close.Symbol);
+      MESSAGE_INFO_CUSTOM(str.toStdString().c_str());
+    }
+#endif
   }
 }
 
@@ -227,6 +332,7 @@ public:
     m_blockParents.clear();
     m_blockPositions.clear();
     m_blockBracketPositions.clear();
+    m_blockBracketPositionsCollapsed.clear();
   }
 
   //! Returns recommended size for the widget.
@@ -250,6 +356,7 @@ public:
 
     m_codeEditor->calculateMarkers(collapsedBlocks, m_blockRects, m_blockParents, m_blockPositions,
                                    m_blockBracketPositions);
+    m_blockBracketPositionsCollapsed = m_blockBracketPositions;
   }
 
   //! Returns true if the block is visible
@@ -298,10 +405,10 @@ public:
                                std::map<int, int>& positionToLevel)
   {
     int blockNumber = block.blockNumber();
-    if (m_blockBracketPositions.find(blockNumber) == m_blockBracketPositions.end())
+    if (m_blockBracketPositionsCollapsed.find(blockNumber) == m_blockBracketPositionsCollapsed.end())
       return;
 
-    positionToLevel = m_blockBracketPositions[blockNumber];
+    positionToLevel = m_blockBracketPositionsCollapsed[blockNumber];
   }
 
   //! Returns block position.
@@ -364,8 +471,9 @@ protected:
         return false;
 
       asiUI_JsonBlock blockR = m_blockRects.at(blockNumber);
-      setBlockCollapsed(blockNumber, !blockR.m_isCollapsed);
-      updateBracketPositions(blockNumber);
+      bool toCollapse = !blockR.m_isCollapsed;
+      setBlockCollapsed(blockNumber, toCollapse);
+      updateBracketPositions(blockNumber, toCollapse);
       m_codeEditor->rehighlight(blockNumber);
       m_codeEditor->document()->clearUndoRedoStacks();
       return true;
@@ -373,34 +481,53 @@ protected:
     return QWidget::event(event);
   }
 
-  void updateBracketPositions(const int blockNumber)
+  void updateBracketPositions(const int  blockNumber,
+                              const bool isCollapsed)
   {
-    if (m_blockBracketPositions.find(blockNumber) == m_blockBracketPositions.end())
+    if (m_blockBracketPositionsCollapsed.find(blockNumber) == m_blockBracketPositionsCollapsed.end())
       return;
 
-    asiUI_MapIntToInt positions = m_blockBracketPositions[blockNumber];
+    asiUI_MapIntToInt positions = m_blockBracketPositionsCollapsed[blockNumber];
     if (positions.empty())
       return;
 
-    int level = positions.begin()->second;
-    positions.clear();
-
-    QTextBlock startblock = m_codeEditor->document()->findBlockByNumber(blockNumber);
-    QString blockText = startblock.text();
-
-    bool isBrace;
-    int indexOfStart = findStart(blockText, -1, true, isBrace);
-    if (indexOfStart != -1) // no start in this row
+    if (isCollapsed)
     {
-      positions[indexOfStart] = level;
-    }
+      int level = positions.begin()->second;
+      positions.clear();
 
-    int indexOfEnd = findEnd(blockText, indexOfStart, isBrace);
-    if (indexOfEnd > indexOfStart)
-    {
-      positions[indexOfEnd] = level;
+      QTextBlock startblock = m_codeEditor->document()->findBlockByNumber(blockNumber);
+      QString blockText = startblock.text();
+
+      QChar openSymbol;
+      int positionOpen;
+      int positionOpen1, positionOpen2, positionClose;
+      bool positionOpen1Found, positionOpen2Found;
+
+      int startPosition = 0;
+      positionOpen1Found = findNextPosition(blockText, startPosition, '{', positionOpen1);
+      positionOpen2Found = findNextPosition(blockText, startPosition, '[', positionOpen2);
+      if (positionOpen1Found || positionOpen2Found)
+      {
+        getOpenPosition(positionOpen1Found,
+                        positionOpen2Found,
+                        positionOpen1,
+                        positionOpen2,
+                        positionOpen,
+                        openSymbol);
+        positions[positionOpen] = level;
+      }
+      QChar closeSymbol = findCloseSymbol(openSymbol);
+      if (findNextPosition(blockText, startPosition, closeSymbol, positionClose))
+      {
+        positions[positionClose] = level;
+      }
+      m_blockBracketPositionsCollapsed[blockNumber] = positions;
     }
-    m_blockBracketPositions[blockNumber] = positions;
+    else
+    {
+      m_blockBracketPositionsCollapsed[blockNumber] = m_blockBracketPositions[blockNumber];
+    }
   }
 
   //! Updates visibility state of the blocks for the given block between open and close block indices.
@@ -425,6 +552,7 @@ private:
   asiUI_MapOfListOfInt  m_blockParents;   //!< contains block number to list of block number parents.
   asiUI_MapIntToInt     m_blockPositions; //!< the index of the block's first character within the document.
   asiUI_MapOfMapToInt   m_blockBracketPositions; //!< contains block number to json brace or bracket positions.
+  asiUI_MapOfMapToInt   m_blockBracketPositionsCollapsed; //!< contains block number to json brace or bracket positions.
 };
 
 //-----------------------------------------------------------------------------
@@ -468,7 +596,7 @@ asiUI_JsonEditor::asiUI_JsonEditor(QWidget* parent)
 
 asiUI_JsonEditor::~asiUI_JsonEditor()
 {
-  m_highlighter = nullptr;
+  m_highlighter    = nullptr;
   m_lineNumberArea = nullptr;
   m_lineMarkerArea = nullptr;
 
@@ -552,12 +680,14 @@ void asiUI_JsonEditor::updateValidity()
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::rehighlight(const int blockNumber)
 {
   m_highlighter->rehighlightBlock(document()->findBlockByNumber(blockNumber));
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::expandAllBlocks()
 {
   bool wasBlocked = editBlocked(true);
@@ -596,11 +726,11 @@ void asiUI_JsonEditor::emulateAdjustScrollbars()
 //-----------------------------------------------------------------------------
 
 QTextCursor select(const QTextBlock textBlock,
-            const int startPosition,
-            const int length)
+                   const int        startPosition,
+                   const int        length)
 {
   QTextCursor cursor(textBlock);
-  cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::StartOfBlock,  QTextCursor::MoveAnchor);
   cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPosition);
   cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, length);
 
@@ -676,12 +806,14 @@ QTextCursor findPrev(const QTextCursor&                           currentCursor,
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::searchEntered()
 {
   selectMatchedText(true);
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::selectMatchedText(const bool nextMatched)
 {
   if (m_highlighter->highlighted().size() == 0)
@@ -708,6 +840,7 @@ void asiUI_JsonEditor::selectMatchedText(const bool nextMatched)
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::searchChanged(const QString& value)
 {
   m_searchValue = value.toLower();
@@ -731,6 +864,7 @@ void asiUI_JsonEditor::searchChanged(const QString& value)
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::searchDeactivated()
 {
   m_searchValue = "";
@@ -739,18 +873,21 @@ void asiUI_JsonEditor::searchDeactivated()
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::searchUp()
 {
   selectMatchedText(false);
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::searchDown()
 {
   selectMatchedText(true);
 }
 
 //-----------------------------------------------------------------------------
+
 QString asiUI_JsonEditor::collapseText()
 {
   return " ... ";
@@ -901,164 +1038,6 @@ void asiUI_JsonEditor::searchFinished()
 }
 
 //-----------------------------------------------------------------------------
-void appendBracketPosition(const int               blockNumber,
-                           const int               position,
-                           asiUI_MapOfListOfInt&   blockParents,
-                           asiUI_MapOfMapToInt&    blockBracketPositions)
-{
-  int level = 0;
-  if (blockParents.find(blockNumber) != blockParents.end())
-    level = (int)blockParents[blockNumber].size();
-
-  asiUI_MapIntToInt list;
-  if (blockBracketPositions.find(blockNumber) != blockBracketPositions.end())
-    list = blockBracketPositions[blockNumber];
-
-  list[position] = level;
-
-  blockBracketPositions[blockNumber] = list;
-}
-
-//-----------------------------------------------------------------------------
-
-void findEndInBlocks(const int              startBlockNumber,
-                     const QTextDocument*   document,
-                     bool                   isBrace,
-                     const int              indexOfStart,
-                     asiUI_ListOfInt&       listOfParents,
-                     asiUI_MapOfListOfInt&  blockParents,
-                     asiUI_MapOfMapToInt&   blockBracketPositions,
-                     int&                   endId,
-                     int&                   endBlockId)
-{
-  QTextBlock block = document->findBlockByNumber(startBlockNumber);;
-  if (!block.isValid())
-    return;
-
-  int blockNumber = block.blockNumber();
-  int indexOfStartSearch = indexOfStart + 1;
-  while (block.isValid())
-  {
-    QString blockText = block.text();
-    int filledBlockNumber = -1;
-    if (blockParents.find(blockNumber) == blockParents.end())
-    {
-      filledBlockNumber = blockNumber;
-      blockParents[blockNumber] = listOfParents;
-    }
-    bool isBraceNext;
-    int indexOfStartNext = findStart(blockText, indexOfStartSearch, false, isBraceNext);
-    if (indexOfStartNext > -1) // start in this row
-    {
-      appendBracketPosition(blockNumber, indexOfStartNext, blockParents, blockBracketPositions);
-
-      int endIdNext = 0;
-      int endBlockIdNext = 0;
-
-      listOfParents.push_back(blockNumber);
-      findEndInBlocks(blockNumber, document, isBraceNext, indexOfStartNext,
-                      listOfParents, blockParents, blockBracketPositions, endIdNext, endBlockIdNext);
-      listOfParents.pop_back();
-
-      if (endBlockIdNext >= 0) // closing of the block is found
-      {
-        for (int i = blockNumber; i < endBlockIdNext; i++)
-        {
-          block = block.next();
-        }
-        blockNumber = endBlockIdNext;
-        appendBracketPosition(blockNumber, endIdNext, blockParents, blockBracketPositions);
-        indexOfStartSearch = endIdNext + 1;
-        block = document->findBlockByNumber(blockNumber);
-        blockText = block.text();
-      }
-    }
-    int indexOfEnd = findEnd(blockText, indexOfStartSearch, isBrace);
-    {
-      if (indexOfEnd > -1)
-      {
-        if (filledBlockNumber == blockNumber)
-         blockParents[blockNumber].pop_back();
-        appendBracketPosition(blockNumber, indexOfEnd, blockParents, blockBracketPositions);
-
-        endId = indexOfEnd;
-        endBlockId = blockNumber;
-        return;
-      }
-    }
-    block = block.next();
-    ++blockNumber;
-    indexOfStartSearch = 0;
-  }
-  endId = -1;
-  endBlockId = -1;
-}
-
-//-----------------------------------------------------------------------------
-
-bool findUnions(const int               blockNumber,
-                const QTextDocument*    document,
-                const int               startInBlock,
-                const asiUI_JsonBlocks& collapsedBlocks,
-                asiUI_ListOfInt&        listOfParents,
-                asiUI_MapOfListOfInt&   blockParents,
-                asiUI_MapOfMapToInt&    blockBracketPositions,
-                asiUI_JsonBlock&        block)
-{
-  QTextBlock startblock = document->findBlockByNumber(blockNumber);
-  QString blockText = startblock.text();
-
-  bool isBrace;
-  int indexOfStart = 0;
-
-  indexOfStart = findStart(blockText, startInBlock, true, isBrace);
-  if (indexOfStart == -1) // no start in this row
-  {
-    return false;
-  }
-  appendBracketPosition(blockNumber, indexOfStart, blockParents, blockBracketPositions);
-
-  int indexOfEnd = findEnd(blockText, indexOfStart, isBrace);
-  if (indexOfEnd > indexOfStart)
-  {
-    appendBracketPosition(blockNumber, indexOfEnd, blockParents, blockBracketPositions);
-
-    block.m_isBrace = isBrace;
-    block.m_blockNumberClose = blockNumber;
-
-    block.m_isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
-    if (!block.m_isCollapsed)
-    {
-      block.m_positionOpen = indexOfStart;
-      block.m_positionClose = indexOfEnd;
-      block.m_collapsedInRow = blockText.mid(indexOfStart + 1, indexOfEnd - (indexOfStart + 1));
-    }
-    else
-    {
-      asiUI_JsonBlock collapsedBlock = collapsedBlocks.at(blockNumber);
-      block.m_positionOpen = collapsedBlock.m_positionOpen;
-      block.m_positionClose = collapsedBlock.m_positionClose;
-      block.m_collapsedInRow = collapsedBlock.m_collapsedInRow;
-    }
-
-    // opened and closed in one block. Collapse shown only when there's some symbol between start and end.
-    return indexOfEnd - indexOfStart > 1;
-  }
-
-  int endId = 0;
-  listOfParents.push_back(blockNumber);
-  int blockNumberClose;
-  findEndInBlocks(blockNumber + 1, document, isBrace, -1, listOfParents, blockParents, blockBracketPositions, endId, blockNumberClose);
-  block.m_isBrace = isBrace;
-  block.m_isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
-  block.m_blockNumberClose = blockNumberClose;
-  block.m_positionOpen = indexOfStart;
-  block.m_positionClose = indexOfEnd;
-
-  return blockNumberClose > blockNumber;
-}
-
-//-----------------------------------------------------------------------------
 
 bool asiUI_JsonEditor::editBlocked(const bool value)
 {
@@ -1075,42 +1054,219 @@ void asiUI_JsonEditor::calculateMarkers(const asiUI_JsonBlocks& collapsedBlocks,
                                         asiUI_MapIntToInt&      blockPositions,
                                         asiUI_MapOfMapToInt&    blockBracketPositions) const
 {
+#ifdef DEBUG_IN_INSPECTOR
+    TCollection_AsciiString info = TCollection_AsciiString("calculateMarkers:");
+    MESSAGE_INFO_LEVEL(info);
+#endif
+
   markers.clear();
   QTextBlock block = document()->firstBlock();
-  int blockNumber = block.blockNumber();
+  //int blockNumber = block.blockNumber();
 
   blockParents.clear();
   blockPositions.clear();
   blockBracketPositions.clear();
 
+  std::list <SymbolCouple>   couples;
+  std::map <int, SymbolPosition> opened;
+
+  QChar openSymbol;
+  int positionOpen;
+  int positionOpen1, positionOpen2, positionClose;
+  bool positionOpen1Found, positionOpen2Found, positionCloseFound;
+
+  QChar closeSymbol;
+  int level = 0;
   asiUI_ListOfInt listOfParents;
   while (block.isValid())
   {
-    if (block.text().contains("{") || block.text().contains("["))
+    QString blockText = block.text();
+    int blockNumber = block.blockNumber();
+    int textLength = blockText.length();
+
+    int filledBlockNumber = -1;
+    if (blockParents.find(blockNumber) == blockParents.end())
     {
-      asiUI_JsonBlock rect;
-      rect.m_blockNumber = blockNumber;
-      listOfParents.clear();
-      if (findUnions(blockNumber, document(), -1, collapsedBlocks, listOfParents, blockParents, blockBracketPositions, rect))
+      filledBlockNumber = blockNumber;
+      blockParents[blockNumber] = listOfParents;
+    }
+#ifdef DEBUG_IN_INSPECTOR
+    QString str = QString("processing block: %1 - %2").arg(blockNumber).arg(blockText);
+    MESSAGE_INFO_CUSTOM(str.toStdString().c_str());
+#endif
+    int startPosition = 0;
+    positionOpen1Found = findNextPosition(blockText, startPosition, '{', positionOpen1);
+    positionOpen2Found = findNextPosition(blockText, startPosition, '[', positionOpen2);
+
+    // there is no found any opened symbol yet
+    if (opened.empty())
+    {
+      getOpenPosition(positionOpen1Found,
+                      positionOpen2Found,
+                      positionOpen1,
+                      positionOpen2,
+                      positionOpen,
+                      openSymbol);
+      opened[level] = SymbolPosition(openSymbol, blockNumber, positionOpen);
+      closeSymbol = findCloseSymbol(openSymbol);
+      listOfParents.push_back(blockNumber);
+      level++;
+
+      startPosition = positionOpen + 1;
+    }
+
+    while (startPosition < textLength)
+    {
+      positionOpen1Found = findNextPosition(blockText, startPosition, '{',         positionOpen1);
+      positionOpen2Found = findNextPosition(blockText, startPosition, '[',         positionOpen2);
+      positionCloseFound = findNextPosition(blockText, startPosition, closeSymbol, positionClose);
+      if (positionCloseFound)
       {
-        markers[blockNumber] = rect;
+        bool toClose = false;
+        if (positionOpen1Found && positionOpen2Found)
+          toClose = positionClose < positionOpen1 && positionClose < positionOpen2;
+        else if (positionOpen1Found)
+          toClose = positionClose < positionOpen1;
+        else if (positionOpen2Found)
+          toClose = positionClose < positionOpen2;
+        else // no open found
+          toClose = true;
+        if (toClose)
+        {
+          SymbolPosition closeSymbolPos(closeSymbol, blockNumber, positionClose);
+
+          level--;
+          listOfParents.pop_back();
+
+          SymbolPosition openSymbolPos = opened[level];
+          opened.erase(level); // remove it from container for processing
+
+          if (openSymbolPos.BlockNumber!= closeSymbolPos.BlockNumber) // on row where the block is closed, top parent removed
+            blockParents[blockNumber].pop_back();
+
+          QString collapsedInRow;
+          if (openSymbolPos.BlockNumber == closeSymbolPos.BlockNumber)
+          // opened and closed in one block. Collapse shown only when there's some symbol between start and end.
+          {
+
+            bool isCollapsed = collapsedBlocks.find(blockNumber) != collapsedBlocks.end();
+            if (!isCollapsed)
+            {
+              collapsedInRow = blockText.mid(openSymbolPos.Position + 1, closeSymbolPos.Position - (openSymbolPos.Position + 1));
+            }
+            else
+            {
+              asiUI_JsonBlock collapsedBlock = collapsedBlocks.at(blockNumber);
+              openSymbolPos.Position = collapsedBlock.m_positionOpen;
+              closeSymbolPos.Position   = collapsedBlock.m_positionClose;
+              collapsedInRow      = collapsedBlock.m_collapsedInRow;
+            }
+          }
+
+          couples.push_back(SymbolCouple((int)opened.size(), openSymbolPos, closeSymbolPos, collapsedInRow)); // push it into ready container
+          startPosition = positionClose + 1;
+
+          closeSymbol = findCloseSymbol(opened[level-1].Symbol);
+        }
+        else // not closed, but opened
+        {
+          getOpenPosition(positionOpen1Found,
+                          positionOpen2Found,
+                          positionOpen1,
+                          positionOpen2,
+                          positionOpen,
+                          openSymbol);
+
+          opened[level] = SymbolPosition(openSymbol, blockNumber, positionOpen);
+          closeSymbol = findCloseSymbol(openSymbol);
+          level++;
+          listOfParents.push_back(blockNumber);
+
+          startPosition = positionOpen + 1;
+        }
       }
+      else if (positionOpen1Found || positionOpen2Found) // only open found
+      {
+        getOpenPosition(positionOpen1Found,
+                        positionOpen2Found,
+                        positionOpen1,
+                        positionOpen2,
+                        positionOpen,
+                        openSymbol);
+
+        opened[level] = SymbolPosition(openSymbol, blockNumber, positionOpen);
+        closeSymbol = findCloseSymbol(openSymbol);
+        level++;
+        listOfParents.push_back(blockNumber);
+
+        startPosition = positionOpen + 1;
+      }
+      else // no one found in the row
+        break;
     }
     blockPositions[blockNumber] = block.position();
     block = block.next();
     ++blockNumber;
   }
-  //printCollapsed(collapsedBlocks);
-  //printJsonBlocks(markers);
-  //printBlockParents(blockParents);
-  //printPositions(blockPositions);
+  printCouples(couples);
+
+  for (auto& couple : couples)
+  {
+    level = couple.Level;
+    SymbolPosition open  = couple.Open;
+    SymbolPosition close = couple.Close;
+
+    int blockNumberOpen  = open.BlockNumber;
+    int blockNumberClose = close.BlockNumber;
+    {
+      // highlight bracket information.
+      // it's the data in the format: map<blockNumber, map<position, level> >
+      asiUI_MapIntToInt list;
+      {
+        if (blockBracketPositions.find(blockNumberOpen) != blockBracketPositions.end())
+          list = blockBracketPositions[blockNumberOpen];
+        list[open.Position]  = level;
+        blockBracketPositions[blockNumberOpen] = list;
+      }
+      list.clear();
+      {
+        if (blockBracketPositions.find(blockNumberClose) != blockBracketPositions.end())
+          list = blockBracketPositions[blockNumberClose];
+        list[close.Position]  = level;
+        blockBracketPositions[blockNumberClose] = list;
+      }
+    }
+
+    asiUI_JsonBlock blockJson;
+    if (markers.find(blockNumberOpen) != markers.end())
+    {
+      blockJson = markers[blockNumberOpen];
+      if (blockJson.m_positionOpen < open.Position) // in markers we store only the first opened position
+        continue;
+    }
+
+    blockJson = asiUI_JsonBlock();
+    blockJson.m_blockNumber = blockNumberOpen;
+    blockJson.m_isBrace = open.Symbol == '[';
+    blockJson.m_blockNumberClose = blockNumberClose;
+    blockJson.m_positionOpen = open.Position;
+    blockJson.m_positionClose = close.Position;
+    blockJson.m_isCollapsed = collapsedBlocks.find(blockNumberOpen) != collapsedBlocks.end();
+    blockJson.m_collapsedInRow = couple.CollapsedInRow;
+
+    markers[blockNumberOpen] = blockJson;
+  }
+  printCollapsed(collapsedBlocks);
+  printJsonBlocks(markers);
+  printBlockParents(blockParents);
+  printPositions(blockPositions);
 }
 
 //-----------------------------------------------------------------------------
 
-void asiUI_JsonEditor::changeTextToCollapse(const QTextBlock& textBlock,
+void asiUI_JsonEditor::changeTextToCollapse(const QTextBlock&      textBlock,
                                             const asiUI_JsonBlock& block,
-                                            const bool toCollapse)
+                                            const bool             toCollapse)
 {
   QTextCursor cursor = QTextCursor(textBlock);
 
@@ -1140,7 +1296,7 @@ void asiUI_JsonEditor::changeTextToCollapse(const QTextBlock& textBlock,
       int startPos = block.m_positionOpen  + 1;
       int stopPos  = block.m_positionClose;
 
-      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+      cursor.movePosition(QTextCursor::StartOfBlock,  QTextCursor::MoveAnchor);
       cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPos);
       cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, stopPos - startPos);
       cursor.removeSelectedText();
@@ -1153,7 +1309,7 @@ void asiUI_JsonEditor::changeTextToCollapse(const QTextBlock& textBlock,
 
       int startPos = block.m_positionOpen  + 1;
 
-      cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+      cursor.movePosition(QTextCursor::StartOfBlock,  QTextCursor::MoveAnchor);
       cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, startPos);
 
       cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveMode::KeepAnchor, collapseText().length());
@@ -1276,6 +1432,7 @@ void asiUI_JsonEditor::zoomText(bool positive)
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::startSearch()
 {
   m_searchThread->setSearchValue(m_searchValue);
@@ -1285,6 +1442,7 @@ void asiUI_JsonEditor::startSearch()
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::stopSearch()
 {
   if (m_searchStarted)
@@ -1296,6 +1454,7 @@ void asiUI_JsonEditor::stopSearch()
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_JsonEditor::selectNextFound()
 {
   QTextCursor cursor = textCursor();

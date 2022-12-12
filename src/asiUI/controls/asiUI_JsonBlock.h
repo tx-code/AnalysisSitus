@@ -61,7 +61,8 @@ public:
      m_isBrace(false),
      m_blockNumberClose(-1),
      m_positionOpen(-1),
-     m_positionClose(-1)
+     m_positionClose(-1),
+     m_collapsedInRow("")
   {}
 
   //! Returns true if the instance is valid.
