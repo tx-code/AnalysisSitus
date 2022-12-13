@@ -44,10 +44,13 @@
 //! at inner contours of its base faces.
 class asiAlgo_RecognizeCavities : public asiAlgo_Recognizer
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeCavities, asiAlgo_Recognizer)
+
+public:
+
+  //! The recognized cavities with their base (capping) faces.
+  typedef std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> > t_cavities;
 
 public:
 
@@ -81,7 +84,7 @@ public:
     GetMaxSize() const;
 
   //! \return cavity features distributed by their base faces.
-  asiAlgo_EXPORT const std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> >&
+  asiAlgo_EXPORT const t_cavities&
     GetCavities() const;
 
 public:
@@ -109,7 +112,7 @@ protected:
   double m_fMaxSize;
 
   //! Recognized cavities and their base faces.
-  std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> > m_cavities;
+  t_cavities m_cavities;
 
 };
 

@@ -309,6 +309,7 @@ set (features_H_FILES
   features/asiAlgo_FindFeatureHints.h
   features/asiAlgo_InsertionType.h
   features/asiAlgo_Isomorphism.h
+  features/asiAlgo_PartBodyType.h
   features/asiAlgo_RecognitionRule.h
   features/asiAlgo_RecognizeCavities.h
   features/asiAlgo_RecognizeCavitiesRule.h

@@ -83,7 +83,7 @@ double asiAlgo_RecognizeCavities::GetMaxSize() const
 
 //-----------------------------------------------------------------------------
 
-const std::vector< std::pair<asiAlgo_Feature, asiAlgo_Feature> >&
+const asiAlgo_RecognizeCavities::t_cavities&
   asiAlgo_RecognizeCavities::GetCavities() const
 {
   return m_cavities;

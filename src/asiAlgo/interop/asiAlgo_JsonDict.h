@@ -31,6 +31,38 @@
 #ifndef asiAlgo_JsonDict_HeaderFile
 #define asiAlgo_JsonDict_HeaderFile
 
+// Filename extension.
+#define Ref_Ext "ref"
+
+// Consts
+#define PropVal_OS_Win                            "win"
+#define PropVal_OS_Lin                            "lin"
+#define PropVal_Type_Unrecognized                 "UNRECOGNIZED"
+#define PropVal_Type_FlatShape                    "SHEET_METAL_FLAT"
+#define PropVal_Type_FoldedSheetMetal             "SHEET_METAL_FOLDED"
+#define PropVal_Type_RectTube                     "TUBE_RECTANGULAR"
+#define PropVal_Type_CylTube                      "TUBE_ROUND"
+#define PropVal_Type_Profile                      "PROFILE"
+#define PropVal_Type_OtherTube                    "TUBE_OTHER"
+#define PropVal_Type_CncMilling                   "CNC_MILLING"
+#define PropVal_Type_CncLathe                     "CNC_LATHE"
+#define PropVal_Type_CncLatheMilling              "CNC_LATHE_MILLING"
+#define PropVal_Type_Unknown                      "UNKNOWN"
+
+// Common props
+#define PropName_Sdk                              "sdk"
+#define PropName_SdkVersion                       "sdkVersion"
+#define PropName_Bad                              "bad"
+#define PropName_Ignore                           "ignore"
+#define PropName_File                             "file"
+#define PropName_Parts                            "parts"
+#define PropName_Id                               "id"
+#define PropName_Name                             "name"
+#define PropName_Quantity                         "numOccurrences"
+#define PropName_Bodies                           "bodies"
+#define PropName_Type                             "type"
+#define PropName_Volume                           "volume"
+
 // JSON properties
 #define asiPropName_ExtrasCanRecSummary            "canrecSummary"
 #define asiPropName_ExtrasCanRecSurfBezier         "nbSurfBezier"
