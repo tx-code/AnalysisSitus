@@ -805,6 +805,31 @@ namespace asiAlgo_Utils
     IsConical(const TopoDS_Face& face,
               gp_Ax1&            ax1);
 
+  //! Checks if the passed face is conical and, if so, extract its
+  //! properties.
+  //! \param[in]  face          the face to check.
+  //! \param[out] ax            the cone axis.
+  //! \param[in]  computeBounds the Boolean flag indicating whether to compute
+  //!                           UV bounds of a face. This operation can be computationally
+  //!                           costly, so it should be asked specifically.
+  //! \param[out] angle_min     the min angle (U min).
+  //! \param[out] angle_max     the max angle (U max).
+  //! \param[out] h_min         the min height parameter (V min).
+  //! \param[out] h_max         the max height parameter (V max).
+  //! \param[out] minRadius     the min extracted radius.
+  //! \param[out] maxRadius     the max extracted radius.
+  //! \return true if the passed face is conical, false -- otherwise.
+  asiAlgo_EXPORT bool
+    IsConical(const TopoDS_Face& face,
+              gp_Ax1&            ax,
+              const bool         computeBounds,
+              double&            angle_min,
+              double&            angle_max,
+              double&            h_min,
+              double&            h_max,
+              double&            minRadius,
+              double&            maxRadius);
+
   //! Checks whether the passed face has spherical support.
   //! \param[in] face face to check.
   //! \return true/false.

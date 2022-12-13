@@ -1660,6 +1660,65 @@ bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsConical(const TopoDS_Face& face,
+                              gp_Ax1&            ax,
+                              const bool         computeBounds,
+                              double&            angle_min,
+                              double&            angle_max,
+                              double&            h_min,
+                              double&            h_max,
+                              double&            minRadius,
+                              double&            maxRadius)
+{
+  bool isConical = false;
+  Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
+  Handle(Geom_ConicalSurface) conesurf;
+  //
+  if ( surf->IsInstance( STANDARD_TYPE(Geom_ConicalSurface) ) )
+  {
+    isConical = true;
+
+    // Get host surface.
+    conesurf = Handle(Geom_ConicalSurface)::DownCast(surf);
+  }
+  else if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
+  {
+    Handle(Geom_RectangularTrimmedSurface)
+      RT = Handle(Geom_RectangularTrimmedSurface)::DownCast(surf);
+
+    if ( RT->BasisSurface()->IsInstance( STANDARD_TYPE(Geom_ConicalSurface) ) )
+    {
+      isConical = true;
+
+      // Get host surface.
+      conesurf = Handle(Geom_ConicalSurface)::DownCast( RT->BasisSurface() );
+    }
+  }
+
+  if ( isConical && !conesurf.IsNull() )
+  {
+    ax = conesurf->Axis();
+
+    if ( computeBounds )
+    {
+      BRepTools::UVBounds(face, angle_min, angle_max, h_min, h_max);
+
+      Handle(Geom_Circle) isos[2] = { Handle(Geom_Circle)::DownCast( conesurf->VIso(h_min) ),
+                                      Handle(Geom_Circle)::DownCast( conesurf->VIso(h_max) ) };
+
+      const double radii[2] = { isos[0]->Radius(), isos[1]->Radius() };
+
+      // Select the extremity radii.
+      minRadius = ( (radii[0] < radii[1]) ? radii[0] : radii[1] );
+      maxRadius = ( (radii[0] > radii[1]) ? radii[0] : radii[1] );
+    }
+  }
+
+  return isConical;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsSpherical(const TopoDS_Face& face)
 {
   Handle(Geom_SphericalSurface) surf;
