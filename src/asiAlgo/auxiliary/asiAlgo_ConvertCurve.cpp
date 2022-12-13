@@ -38,6 +38,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepMesh_ShapeTool.hxx>
+#include <BRepTools_WireExplorer.hxx>
 #include <DBRep.hxx>
 #include <ElCLib.hxx>
 #include <Extrema_ExtElC.hxx>
@@ -1026,7 +1027,7 @@ void asiAlgo_ConvertCurve::Convert2Polyline(const TopoDS_Wire&   wire,
 
   bool isForward = true;
 
-  TopExp_Explorer exp( wire, TopAbs_EDGE );
+  BRepTools_WireExplorer exp( wire );
   for ( ; exp.More(); exp.Next() )
   {
     const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
@@ -1219,6 +1220,7 @@ bool asiAlgo_ConvertCurve::FixGaps(const TopoDS_Wire&   input,
   sfw.ModifyGeometryMode() = true;
   sfw.FixEdgeCurvesMode() = true;
   sfw.FixLackingMode() = true;
+  sfw.FixReorderMode() = true;
 
   const bool isOk = sfw.FixGaps3d();
   result = sfw.Wire();
