@@ -73,9 +73,10 @@
 #include <asiAlgo_BuildConvexHull.h>
 #include <asiAlgo_QuickHull2d.h>
 
-#include <mobius/poly_Mesh.h>
-
-using namespace mobius;
+#if defined USE_MOBIUS
+  #include <mobius/poly_Mesh.h>
+  using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 

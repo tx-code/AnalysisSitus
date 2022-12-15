@@ -1657,6 +1657,8 @@ int ENGINE_BuildTriangulationOBB(const Handle(asiTcl_Interp)& interp,
   (void) argc;
   (void) argv;
   interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, compile with USE_MOBIUS enabled to use this function.");
+
+  return TCL_ERROR;
 #endif
 }
 
