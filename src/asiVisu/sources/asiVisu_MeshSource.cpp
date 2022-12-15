@@ -99,6 +99,8 @@ void asiVisu_MeshSource::EmptyGroupForAllModeOff()
 void asiVisu_MeshSource::SetInputMesh(const Handle(ActData_Mesh)& theMesh)
 {
   m_mesh = theMesh;
+  m_regPoints.Clear();
+  this->Modified();
 }
 
 //-----------------------------------------------------------------------------
