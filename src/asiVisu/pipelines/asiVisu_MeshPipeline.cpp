@@ -75,7 +75,7 @@ void asiVisu_MeshPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataProv
 
   if ( aMeshPrv->MustExecute( this->GetMTime() ) )
   {
-    vtkSmartPointer<asiVisu_MeshSource> aMeshSource = m_source;
+    vtkSmartPointer<asiVisu_MeshSource> aMeshSource = vtkSmartPointer<asiVisu_MeshSource>::New();
     aMeshSource->SetInputMesh( aMeshPrv->GetMeshDS() );
     if ( m_bIsEmptyGroupForAll )
       aMeshSource->EmptyGroupForAllModeOn();
