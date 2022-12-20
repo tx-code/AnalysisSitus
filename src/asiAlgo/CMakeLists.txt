@@ -36,6 +36,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_ClassifyPointFace.h
   auxiliary/asiAlgo_ClassifyPointSolid.h
   auxiliary/asiAlgo_ClassifyPt.h
+  auxiliary/asiAlgo_CodeReporter.h
   auxiliary/asiAlgo_Collections.h
   auxiliary/asiAlgo_CompleteEdgeLoop.h
   auxiliary/asiAlgo_ComputeNegativeVolume.h
@@ -65,6 +66,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_ResampleADF.h
   auxiliary/asiAlgo_RTCD.h
   auxiliary/asiAlgo_SampleFace.h
+  auxiliary/asiAlgo_SemanticCode.h
   auxiliary/asiAlgo_ShapeSerializer.h
   auxiliary/asiAlgo_TopoSummary.h
   auxiliary/asiAlgo_UniformGrid.h
