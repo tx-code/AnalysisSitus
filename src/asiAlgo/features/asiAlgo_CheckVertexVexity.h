@@ -52,27 +52,21 @@ public:
   struct t_edgeInfo
   {
     TopoDS_Edge             edge;
-    bool                    isConcave;
     bool                    isStraight;
     bool                    isCircular;
-    bool                    isSharp;
     asiAlgo_BorderTrihedron axes;
 
     //! Default ctor.
     t_edgeInfo()
-    : isConcave  (false),
-      isStraight (false),
-      isCircular (false),
-      isSharp    (false)
+    : isStraight (false),
+      isCircular (false)
     {}
 
     //! Conversion ctor.
     t_edgeInfo(const TopoDS_Edge& E)
     : edge       (E),
-      isConcave  (false),
       isStraight (false),
-      isCircular (false),
-      isSharp    (false)
+      isCircular (false)
     {}
   };
 

@@ -96,6 +96,11 @@ public slots:
 
 protected:
 
+  //! Callback on showing the dialog.
+  virtual void showEvent(QShowEvent* evt) override;
+
+protected:
+
   //! Widgets.
   struct t_widgets
   {

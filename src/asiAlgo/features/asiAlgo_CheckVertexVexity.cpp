@@ -64,53 +64,21 @@ void asiAlgo_CheckVertexVexity::CollectEdges(const int      fid,
   if ( asiAlgo_Utils::IsPlanar(face) ||
        asiAlgo_Utils::IsCylindrical(face) )
   {
-    // Collect all the edges.
-    const asiAlgo_Feature& nids = m_aag->GetNeighbors(fid);
-    //
-    for ( asiAlgo_Feature::Iterator nit(nids); nit.More(); nit.Next() )
+    for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
     {
-      const int nid = nit.Key();
+      const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
 
-      asiAlgo_AAG::t_arc arc(fid, nid);
-
-      Handle(asiAlgo_FeatureAttrAngle)
-        DA = m_aag->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
+      // Prepare edge info descriptor.
+      t_edgeInfo edgeInfo;
+      edgeInfo.edge       = edge;
+      edgeInfo.isStraight = asiAlgo_Utils::IsStraight(edge);
       //
-      if ( DA.IsNull() )
-        continue;
-
-      const bool isConcave =  asiAlgo_FeatureAngle::IsConcave ( DA->GetAngleType() );
-      const bool isSharp   = !asiAlgo_FeatureAngle::IsSmooth  ( DA->GetAngleType() );
-
-      // Get edges realizing the adjacency.
-      Handle(asiAlgo_FeatureAttrAdjacency)
-        attrAdj = m_aag->ATTR_ARC<asiAlgo_FeatureAttrAdjacency>( arc);
+      if ( !edgeInfo.isStraight )
+        edgeInfo.isCircular = asiAlgo_Utils::IsCircular(edge);
       //
-      if ( attrAdj.IsNull() )
-        continue;
-
-      // Get the edges realizing adjacency.
-      TopTools_IndexedMapOfShape edges;
-      attrAdj->GetEdges(edges);
+      asiAlgo_Utils::ComputeBorderTrihedron(face, edge, edgeInfo.axes);
       //
-      for ( int kk = 1; kk <= edges.Extent(); ++kk )
-      {
-        const TopoDS_Edge& edge = TopoDS::Edge( edges(kk) );
-
-        // Prepare edge info descriptor.
-        t_edgeInfo edgeInfo;
-        edgeInfo.edge       = edge;
-        edgeInfo.isConcave  = isConcave;
-        edgeInfo.isSharp    = isSharp;
-        edgeInfo.isStraight = asiAlgo_Utils::IsStraight(edge);
-        //
-        if ( !edgeInfo.isStraight )
-          edgeInfo.isCircular = asiAlgo_Utils::IsCircular(edge);
-        //
-        asiAlgo_Utils::ComputeBorderTrihedron(face, edge, edgeInfo.axes);
-        //
-        edgesInfo.Add(edge, edgeInfo);
-      }
+      edgesInfo.Add(edge, edgeInfo);
     }
   }
 }

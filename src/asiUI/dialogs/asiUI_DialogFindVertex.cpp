@@ -140,9 +140,6 @@ asiUI_DialogFindVertex::asiUI_DialogFindVertex(const Handle(asiEngine_Model)&   
 
   // Adjust initial state
   this->onUseAddress();
-
-  // Set initial focus to reduce excessive clicks
-  m_widgets.pIndex->setFocus();
 }
 
 //! Destructor.
@@ -229,4 +226,14 @@ void asiUI_DialogFindVertex::onFind()
 
   // Close
   this->close();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogFindVertex::showEvent(QShowEvent* evt)
+{
+  QDialog::showEvent(evt);
+
+  // Set initial focus to reduce excessive clicks.
+  m_widgets.pIndex->setFocus();
 }

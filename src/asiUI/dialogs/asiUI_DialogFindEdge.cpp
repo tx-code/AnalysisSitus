@@ -140,9 +140,6 @@ asiUI_DialogFindEdge::asiUI_DialogFindEdge(const Handle(asiEngine_Model)&       
 
   // Adjust initial state
   this->onUseAddress();
-
-  // Set initial focus to reduce excessive clicks
-  m_widgets.pIndex->setFocus();
 }
 
 //! Destructor.
@@ -229,4 +226,14 @@ void asiUI_DialogFindEdge::onFind()
 
   // Close
   this->close();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogFindEdge::showEvent(QShowEvent* evt)
+{
+  QDialog::showEvent(evt);
+
+  // Set initial focus to reduce excessive clicks.
+  m_widgets.pIndex->setFocus();
 }

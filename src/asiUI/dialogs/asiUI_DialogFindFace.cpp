@@ -146,9 +146,6 @@ asiUI_DialogFindFace::asiUI_DialogFindFace(const Handle(asiEngine_Model)&       
 
   // Adjust initial state.
   this->onChangeIdType(0);
-
-  // Set initial focus to reduce excessive clicks.
-  m_widgets.pIdSerial->setFocus();
 }
 
 //-----------------------------------------------------------------------------
@@ -270,4 +267,14 @@ void asiUI_DialogFindFace::onFind()
 
   // Close.
   this->close();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogFindFace::showEvent(QShowEvent* evt)
+{
+  QDialog::showEvent(evt);
+
+  // Set initial focus to reduce excessive clicks.
+  m_widgets.pIdSerial->setFocus();
 }
