@@ -31,8 +31,12 @@
 #ifndef asiAlgo_JoinEdges_h
 #define asiAlgo_JoinEdges_h
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
+
+// Active Data includes
+#include <ActAPI_IPlotter.h>
+#include <ActAPI_IProgressNotifier.h>
 
 // OCCT includes
 #include <TopoDS_Edge.hxx>
@@ -47,7 +51,9 @@ class asiAlgo_JoinEdges
 public:
 
   asiAlgo_EXPORT
-    asiAlgo_JoinEdges(const TopoDS_Shape& masterCAD);
+    asiAlgo_JoinEdges(const TopoDS_Shape&  masterCAD,
+                      ActAPI_ProgressEntry progress = nullptr,
+                      ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
@@ -78,6 +84,9 @@ protected:
 
   TopoDS_Shape m_master; //!< Master model.
   TopoDS_Shape m_result; //!< Result.
+
+  mutable ActAPI_ProgressEntry m_progress; //!< Progress notifier.
+  mutable ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
 
 };
 

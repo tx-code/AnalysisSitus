@@ -31,13 +31,15 @@
 // Own include
 #include <asiUI_ViewerDomain.h>
 
+// asiUI includes
+#include <asiUI_IV.h>
+
 // asiAlgo includes
 #include <asiAlgo_DeleteEdges.h>
 #include <asiAlgo_JoinEdges.h>
 #include <asiAlgo_Utils.h>
 
 // asiEngine includes
-#include <asiEngine_Domain.h>
 #include <asiEngine_Part.h>
 
 // asiVisu includes
@@ -222,6 +224,209 @@ void asiUI_ViewerDomain::onResetView()
 //! Callback for picking event.
 void asiUI_ViewerDomain::onDomainPicked()
 {
+  std::map<int, TopoDS_Edge> edges;
+  this->getSelectedEdges(edges);
+
+  auto itEdges = edges.cbegin();
+  for ( ; itEdges != edges.cend(); ++itEdges )
+  {
+    const int edgeIdInFace = itEdges->first;
+
+    // Prepare label
+    TCollection_AsciiString TITLE = "(Edge #";
+    TITLE += edgeIdInFace;
+    TITLE += ", ";
+    TITLE += asiAlgo_Utils::ShapeAddr(itEdges->second).c_str();
+    TITLE += ", ";
+    TITLE += asiAlgo_Utils::OrientationToString(itEdges->second);
+    TITLE += " in face)\n";
+    //
+    double f, l;
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(itEdges->second, f, l);
+    //
+    if ( !c3d.IsNull() )
+    {
+      TITLE += "3D: ";
+      TITLE += c3d->DynamicType()->Name();
+      TITLE += " [";
+      TITLE += f;
+      TITLE += ", ";
+      TITLE += l;
+      TITLE += "]\n";
+    }
+
+    ShapeAnalysis_Edge sae;
+    Handle(Geom2d_Curve) c2d;
+    double f2, l2;
+    //
+    if ( sae.PCurve(itEdges->second, m_selectedFaceCache, c2d, f2, l2, true) )
+    {
+      TITLE += "2D: ";
+      TITLE += c2d->DynamicType()->Name();
+      TITLE += " [";
+      TITLE += f2;
+      TITLE += ", ";
+      TITLE += l2;
+      TITLE += "]";
+
+      gp_Pnt2d p2d1 = c2d->Value(f2);
+      gp_Pnt2d p2d2 = c2d->Value(l2);
+
+      TITLE += "\nCONS(";
+      TITLE += f2;
+      TITLE += ") = (";
+      TITLE += p2d1.X();
+      TITLE += ", ";
+      TITLE += p2d1.Y();
+      TITLE += ")";
+      //
+      TITLE += "\nCONS(";
+      TITLE += l2;
+      TITLE += ") = (";
+      TITLE += p2d2.X();
+      TITLE += ", ";
+      TITLE += p2d2.Y();
+      TITLE += ")";
+    }
+
+    TITLE += "\nLocation: ";
+    TITLE += asiAlgo_Utils::LocationToString(itEdges->second.Location());
+    TITLE += "\n";
+
+    m_progress.SendLogMessage(LogInfo(Normal) << "%1" << TITLE);
+  }
+
+  if ( m_pPartViewer )
+  {
+    // Highlight in the Part viewer.
+    asiEngine_Part( m_model,
+                    m_pPartViewer->PrsMgr() ).HighlightEdges(m_selectedEdgesCache);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for edges removal.
+void asiUI_ViewerDomain::onKillEdges()
+{
+  //Handle(asiData_PartNode) N = m_model->GetPartNode();
+  ////
+  //if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
+  //  return;
+
+  //TopoDS_Shape part = N->GetShape();
+
+  //// Get edges
+  //TopTools_IndexedMapOfShape selectedEdges;
+  //asiEngine_Domain::GetHighlightedEdges(N, this->PrsMgr(), selectedEdges);
+
+  //// Delete selected edges
+  //asiAlgo_DeleteEdges eraser(part);
+  //if ( !eraser.Perform(selectedEdges, true) )
+  //{
+  //  std::cout << "Error: cannot delete edges" << std::endl;
+  //  return;
+  //}
+
+  //const TopoDS_Shape& result = eraser.Result();
+
+  //// Save to model
+  //m_model->OpenCommand();
+  //{
+  //  asiEngine_Part(m_model).Update(result);
+  //}
+  //m_model->CommitCommand();
+
+  //m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+  //// Update viewer
+  //this->PrsMgr()->DeleteAllPresentations();
+  //this->PrsMgr()->Actualize( N.get() );
+
+  //// Notify
+  //emit partModified();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for edges joining.
+void asiUI_ViewerDomain::onJoinEdges()
+{
+  Handle(asiData_PartNode) N = m_model->GetPartNode();
+  //
+  if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
+    return;
+
+  if ( m_selectedEdgesCache.IsEmpty() || m_selectedFaceCache.IsNull() )
+    return;
+
+  TopoDS_Shape        part = N->GetShape();
+  Handle(asiAlgo_AAG) aag  = N->GetAAG();
+
+  m_progress.SendLogMessage(LogInfo(Normal) << "Trying to concatenate the selected edges...");
+
+  // Get edges
+  TopTools_IndexedMapOfShape selectedEdges;
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator eit(m_selectedEdgesCache);
+        eit.More(); eit.Next() )
+  {
+    const int eid = eit.Key();
+
+    const TopoDS_Shape& edge = aag->RequestMapOfEdges()(eid);
+    selectedEdges.Add(edge);
+  }
+
+  // Join selected edges
+  asiAlgo_JoinEdges joiner(part, m_progress, m_plotter);
+  //
+  if ( !joiner.Perform(selectedEdges, m_selectedFaceCache) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Edge concatenation failed.");
+    return;
+  }
+
+  const TopoDS_Shape& result = joiner.Result();
+
+  // Save to model
+  m_model->OpenCommand();
+  {
+    const int fid = N->GetAAG()->RequestMapOfSubShapes().FindIndex(m_selectedFaceCache);
+
+    asiEngine_Part(m_model).Update(result);
+    //
+    N->GetFaceRepresentation()     ->SetSelectedFace(fid);
+    N->GetNormsRepresentation()    ->SetSelectedFace(fid);
+    N->GetSurfaceRepresentation()  ->SetSelectedFace(fid);
+    N->GetContourRepresentation()  ->SetSelectedFace(fid);
+    N->GetHatchingRepresentation() ->SetSelectedFace(fid);
+  }
+  m_model->CommitCommand();
+
+  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
+
+  // Update viewer
+  Handle(asiUI_IV)
+    IV = Handle(asiUI_IV)::DownCast( m_plotter.Access() );
+  //
+  IV->GetPrsMgr3d()->Actualize( N );
+  IV->GetPrsMgr2d()->Actualize( N->GetFaceRepresentation() );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerDomain::onContextMenu(const QPoint& pos)
+{
+  asiVisu_QVTKWidget* pViewer   = m_prs_mgr->GetQVTKWidget();
+  QPoint              globalPos = pViewer->mapToGlobal(pos);
+
+  emit contextMenu(globalPos);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerDomain::getSelectedEdges(std::map<int, TopoDS_Edge>& edges)
+{
   Handle(asiData_PartNode) N = m_model->GetPartNode();
   //
   if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
@@ -248,6 +453,7 @@ void asiUI_ViewerDomain::onDomainPicked()
   //
   if ( F.IsNull() )
   {
+    m_selectedFaceCache.Nullify();
     m_selectedEdgesCache = TColStd_PackedMapOfInteger();
 
     if ( m_pPartViewer )
@@ -257,10 +463,8 @@ void asiUI_ViewerDomain::onDomainPicked()
 
     return;
   }
-
-  //---------------------------------------------------------------------------
-  // Retrieve current selection
-  //---------------------------------------------------------------------------
+  //
+  m_selectedFaceCache = F;
 
   // Access picking results.
   const asiVisu_ActualSelection&          sel     = m_prs_mgr->GetCurrentSelection();
@@ -325,8 +529,8 @@ void asiUI_ViewerDomain::onDomainPicked()
 
   // Get edges. We make an exploration loop here in order not to miss seams.
   int current_id = 0;
-  std::map<int, TopoDS_Edge> edges;
   TopTools_IndexedMapOfShape selected;
+  TColStd_PackedMapOfInteger eids;
   //
   for ( TopExp_Explorer eexp(F.Oriented(TopAbs_FORWARD), TopAbs_EDGE); eexp.More(); eexp.Next() )
   {
@@ -335,198 +539,11 @@ void asiUI_ViewerDomain::onDomainPicked()
     {
       edges[current_id] = ( TopoDS::Edge( eexp.Current() ) );
       selected.Add(edges[current_id]);
+
+      const int eid = N->GetAAG()->RequestMapOfEdges().FindIndex(edges[current_id]);
+      eids.Add(eid);
     }
   }
-  //
 
-  std::map<int, TopoDS_Edge>::const_iterator itEdges = edges.cbegin();
-  for ( ; itEdges != edges.cend(); ++itEdges )
-  {
-    const int edgeId = itEdges->first;
-
-    if ( m_selectedEdgesCache.Contains(edgeId) )
-    {
-      continue;
-    }
-
-    // Prepare label
-    TCollection_AsciiString TITLE = "(Edge #";
-    TITLE += edgeId;
-    TITLE += ", ";
-    TITLE += asiAlgo_Utils::ShapeAddr(itEdges->second).c_str();
-    TITLE += ", ";
-    TITLE += asiAlgo_Utils::OrientationToString(itEdges->second);
-    TITLE += " in face)\n";
-    //
-    double f, l;
-    Handle(Geom_Curve) c3d = BRep_Tool::Curve(itEdges->second, f, l);
-    //
-    if ( !c3d.IsNull() )
-    {
-      TITLE += "3D: ";
-      TITLE += c3d->DynamicType()->Name();
-      TITLE += " [";
-      TITLE += f;
-      TITLE += ", ";
-      TITLE += l;
-      TITLE += "]\n";
-    }
-
-    ShapeAnalysis_Edge sae;
-    Handle(Geom2d_Curve) c2d;
-    double f2, l2;
-    //
-    if ( sae.PCurve(itEdges->second, F, c2d, f2, l2, true) )
-    {
-      TITLE += "2D: ";
-      TITLE += c2d->DynamicType()->Name();
-      TITLE += " [";
-      TITLE += f2;
-      TITLE += ", ";
-      TITLE += l2;
-      TITLE += "]";
-
-      gp_Pnt2d p2d1 = c2d->Value(f2);
-      gp_Pnt2d p2d2 = c2d->Value(l2);
-
-      TITLE += "\nCONS(";
-      TITLE += f2;
-      TITLE += ") = (";
-      TITLE += p2d1.X();
-      TITLE += ", ";
-      TITLE += p2d1.Y();
-      TITLE += ")";
-      //
-      TITLE += "\nCONS(";
-      TITLE += l2;
-      TITLE += ") = (";
-      TITLE += p2d2.X();
-      TITLE += ", ";
-      TITLE += p2d2.Y();
-      TITLE += ")";
-    }
-
-    TITLE += "\nLocation: ";
-    TITLE += asiAlgo_Utils::LocationToString(itEdges->second.Location());
-    TITLE += "\n";
-
-    m_progress.SendLogMessage(LogInfo(Normal) << "%1" << TITLE);
-  }
-
-  m_selectedEdgesCache = cellGIDs;
-
-  if ( m_pPartViewer )
-  {
-    // Highlight in the Part viewer.
-    asiEngine_Part( m_model,
-                    m_pPartViewer->PrsMgr() ).HighlightSubShapes(selected);
-  }
-
-  // Take picked position from interactor
-  //double pickedX = 0.0, pickedY = 0.0;
-  //this->PrsMgr()->GetImageInteractorStyle()->GetPickedPos(pickedX, pickedY);
-
-  //// Pick world position
-  //vtkSmartPointer<vtkWorldPointPicker>
-  //  worldPicker = vtkSmartPointer<vtkWorldPointPicker>::New();
-  ////
-  //worldPicker->Pick( pickedX, pickedY, 0, this->PrsMgr()->GetRenderer() );
-  //double coord[3];
-  //worldPicker->GetPickPosition(coord);
-  //
-  //emit pointPicked(coord[0], coord[1]);
-}
-
-//-----------------------------------------------------------------------------
-
-//! Callback for edges removal.
-void asiUI_ViewerDomain::onKillEdges()
-{
-  Handle(asiData_PartNode) N = m_model->GetPartNode();
-  //
-  if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
-    return;
-
-  TopoDS_Shape part = N->GetShape();
-
-  // Get edges
-  TopTools_IndexedMapOfShape selectedEdges;
-  asiEngine_Domain::GetHighlightedEdges(N, this->PrsMgr(), selectedEdges);
-
-  // Delete selected edges
-  asiAlgo_DeleteEdges eraser(part);
-  if ( !eraser.Perform(selectedEdges, true) )
-  {
-    std::cout << "Error: cannot delete edges" << std::endl;
-    return;
-  }
-
-  const TopoDS_Shape& result = eraser.Result();
-
-  // Save to model
-  m_model->OpenCommand();
-  {
-    asiEngine_Part(m_model).Update(result);
-  }
-  m_model->CommitCommand();
-
-  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
-
-  // Update viewer
-  this->PrsMgr()->DeleteAllPresentations();
-  this->PrsMgr()->Actualize( N.get() );
-
-  // Notify
-  emit partModified();
-}
-
-//-----------------------------------------------------------------------------
-
-//! Callback for edges joining.
-void asiUI_ViewerDomain::onJoinEdges()
-{
-  Handle(asiData_PartNode) N = m_model->GetPartNode();
-  //
-  if ( N.IsNull() || !N->IsWellFormed() || N->GetShape().IsNull() )
-    return;
-
-  TopoDS_Shape part = N->GetShape();
-
-  // Get edges
-  TopoDS_Face face;
-  TopTools_IndexedMapOfShape selectedEdges;
-  asiEngine_Domain::GetHighlightedEdges(N, this->PrsMgr(), selectedEdges, face);
-
-  // Join selected edges
-  asiAlgo_JoinEdges joiner(part);
-  if ( !joiner.Perform(selectedEdges, face) )
-  {
-    std::cout << "Error: cannot join edges" << std::endl;
-    return;
-  }
-
-  const TopoDS_Shape& result = joiner.Result();
-
-  // Save to model
-  m_model->OpenCommand();
-  {
-    asiEngine_Part(m_model).Update(result);
-  }
-  m_model->CommitCommand();
-
-  m_selectedEdgesCache = TColStd_PackedMapOfInteger();
-
-  // Update viewer
-  this->PrsMgr()->DeleteAllPresentations();
-  this->PrsMgr()->Actualize( N.get() );
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_ViewerDomain::onContextMenu(const QPoint& pos)
-{
-  asiVisu_QVTKWidget* pViewer   = m_prs_mgr->GetQVTKWidget();
-  QPoint              globalPos = pViewer->mapToGlobal(pos);
-
-  emit contextMenu(globalPos);
+  m_selectedEdgesCache = eids;
 }

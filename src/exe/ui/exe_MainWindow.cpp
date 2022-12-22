@@ -265,6 +265,9 @@ void exe_MainWindow::createDockWindows()
   // Set plotter back to object browser.
   cf->ObjectBrowser->SetPlotter(cf->Plotter);
 
+  // Set plotter back to domain viewer.
+  cf->ViewerDomain->SetPlotter(cf->Plotter);
+
   // Set diagnostic tools for Data Model.
   cf->Model->FuncSetProgressNotifier( cf->Progress.Access() );
   cf->Model->FuncSetPlotter( cf->Plotter.Access() );

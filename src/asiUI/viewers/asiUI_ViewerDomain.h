@@ -78,6 +78,12 @@ public:
     m_pPartViewer = pPartViewer;
   }
 
+  //! Sets plotter.
+  void SetPlotter(ActAPI_PlotterEntry plotter)
+  {
+    m_plotter = plotter;
+  }
+
 public slots:
 
   void onResetView();
@@ -91,6 +97,10 @@ signals:
   void pointPicked(const double x, const double y);
   void partModified();
 
+protected:
+
+  void getSelectedEdges(std::map<int, TopoDS_Edge>& edges);
+
 private:
 
   Handle(asiEngine_Model)                m_model;          //!< Data Model instance.
@@ -101,7 +111,10 @@ private:
   //! Optional reference to the Part viewer.
   asiUI_Viewer* m_pPartViewer;
 
-  //! Selected edge cache.
+  //! Selected face cache.
+  TopoDS_Face m_selectedFaceCache;
+
+  //! Selected edges cache.
   TColStd_PackedMapOfInteger m_selectedEdgesCache;
 
 };
