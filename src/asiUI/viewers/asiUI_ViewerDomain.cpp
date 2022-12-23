@@ -393,13 +393,9 @@ void asiUI_ViewerDomain::onJoinEdges()
   {
     const int fid = N->GetAAG()->RequestMapOfSubShapes().FindIndex(m_selectedFaceCache);
 
-    asiEngine_Part(m_model).Update(result);
-    //
-    N->GetFaceRepresentation()     ->SetSelectedFace(fid);
-    N->GetNormsRepresentation()    ->SetSelectedFace(fid);
-    N->GetSurfaceRepresentation()  ->SetSelectedFace(fid);
-    N->GetContourRepresentation()  ->SetSelectedFace(fid);
-    N->GetHatchingRepresentation() ->SetSelectedFace(fid);
+    asiEngine_Part partApi(m_model);
+    partApi.Update(result);
+    partApi.SetSelectedFace(fid);
   }
   m_model->CommitCommand();
 

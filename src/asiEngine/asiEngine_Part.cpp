@@ -734,6 +734,23 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
 
 //-----------------------------------------------------------------------------
 
+void asiEngine_Part::SetSelectedFace(const int fid)
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) part_n = m_model->GetPartNode();
+  //
+  if ( part_n.IsNull() || !part_n->IsWellFormed() )
+    return;
+
+  part_n->GetFaceRepresentation()     ->SetSelectedFace(fid);
+  part_n->GetNormsRepresentation()    ->SetSelectedFace(fid);
+  part_n->GetSurfaceRepresentation()  ->SetSelectedFace(fid);
+  part_n->GetContourRepresentation()  ->SetSelectedFace(fid);
+  part_n->GetHatchingRepresentation() ->SetSelectedFace(fid);
+}
+
+//-----------------------------------------------------------------------------
+
 void asiEngine_Part::SetAAG(const Handle(asiAlgo_AAG)& aag)
 {
   // Store AAG in the corresponding Parameter.
