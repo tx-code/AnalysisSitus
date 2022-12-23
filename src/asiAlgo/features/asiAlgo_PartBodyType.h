@@ -52,7 +52,8 @@ enum asiAlgo_PartBodyType
   PartBodyType_OtherTube,        //!< Other type of tube.
   PartBodyType_Profile,          //!< Sheet metal profile.
   PartBodyType_CncMilling,       //!< CNC milled body.
-  PartBodyType_CncLatheMilling   //!< CNC lathed body, optionally combined with milling.
+  PartBodyType_CncLathe,         //!< CNC lathed body.
+  PartBodyType_CncLatheMilling   //!< CNC lathed body, (optionally) combined with milling.
 };
 
 //-----------------------------------------------------------------------------
@@ -76,6 +77,7 @@ namespace asiAlgo_PartBodyTypeUtils
         return true;
       case PartBodyType_Unrecognized:
       case PartBodyType_CncMilling:
+      case PartBodyType_CncLathe:
       case PartBodyType_CncLatheMilling:
         return false;
       default: break;
@@ -100,6 +102,7 @@ namespace asiAlgo_PartBodyTypeUtils
       case PartBodyType_Unrecognized:
         return false;
       case PartBodyType_CncMilling:
+      case PartBodyType_CncLathe:
       case PartBodyType_CncLatheMilling:
         return true;
       default: break;
@@ -124,6 +127,7 @@ namespace asiAlgo_PartBodyTypeUtils
       case PartBodyType_OtherTube:
       case PartBodyType_Profile:
       case PartBodyType_CncMilling:
+      case PartBodyType_CncLathe:
       case PartBodyType_CncLatheMilling:
         return false;
       default: break;
@@ -148,6 +152,7 @@ namespace asiAlgo_PartBodyTypeUtils
       case PartBodyType_OtherTube:
       case PartBodyType_Profile:
       case PartBodyType_CncMilling:
+      case PartBodyType_CncLathe:
       case PartBodyType_CncLatheMilling:
         return false;
       default: break;
@@ -171,6 +176,7 @@ namespace asiAlgo_PartBodyTypeUtils
       case PartBodyType_OtherTube:        return PropVal_Type_OtherTube;
       case PartBodyType_Profile:          return PropVal_Type_Profile;
       case PartBodyType_CncMilling:       return PropVal_Type_CncMilling;
+      case PartBodyType_CncLathe:         return PropVal_Type_CncLathe;
       case PartBodyType_CncLatheMilling:  return PropVal_Type_CncLatheMilling;
       default: break;
     }
@@ -199,6 +205,8 @@ namespace asiAlgo_PartBodyTypeUtils
       return PartBodyType_Profile;
     if ( name == PropVal_Type_CncMilling )
       return PartBodyType_CncMilling;
+    if ( name == PropVal_Type_CncLathe )
+      return PartBodyType_CncLathe;
     if ( name == PropVal_Type_CncLatheMilling )
       return PartBodyType_CncLatheMilling;
 
@@ -220,6 +228,7 @@ namespace asiAlgo_PartBodyTypeUtils
       case PartBodyType_OtherTube:        return ActAPI_Color(255./255, 190./255, 117./255, Quantity_TOC_RGB);
       case PartBodyType_Profile:          return ActAPI_Color(170./255, 190./255, 200./255, Quantity_TOC_RGB);
       case PartBodyType_CncMilling:       return ActAPI_Color(  0./255, 228./255,   0./255, Quantity_TOC_RGB);
+      case PartBodyType_CncLathe:         return ActAPI_Color(  0./255, 228./255, 100./255, Quantity_TOC_RGB);
       case PartBodyType_CncLatheMilling:  return ActAPI_Color(  0./255, 228./255, 228./255, Quantity_TOC_RGB);
       default: break;
     }
