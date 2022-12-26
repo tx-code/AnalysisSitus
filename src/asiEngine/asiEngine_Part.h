@@ -223,6 +223,10 @@ public:
            const Handle(asiAlgo_History)& history = nullptr,
            const bool                     doResetTessParams = false);
 
+  //! Sets the passed face ID to be stored persistently.
+  asiEngine_EXPORT void
+    SetSelectedFace(const int fid);
+
   //! Stores the passed AAG in the project tree.
   //! \param[in] aag AAG instance to store.
   asiEngine_EXPORT void
