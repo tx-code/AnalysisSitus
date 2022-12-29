@@ -1358,6 +1358,101 @@ void asiUI_ObjectBrowser::onFeatureComments()
 
 //-----------------------------------------------------------------------------
 
+void asiUI_ObjectBrowser::onFeatureCheckCommon()
+{
+  Handle(ActAPI_HNodeList) ns;
+  if ( !this->selectedNodes(ns) ) return;
+
+  int             iter = 0;
+  asiAlgo_Feature cmnFids;
+
+  for ( ActAPI_HNodeList::Iterator nit(*ns); nit.More(); nit.Next() )
+  {
+    const Handle(ActAPI_INode)& n = nit.Value();
+
+    if ( !n->IsKind( STANDARD_TYPE(asiData_FeatureNode) ) )
+      continue;
+
+    Handle(asiData_FeatureNode)
+      fn = Handle(asiData_FeatureNode)::DownCast(n);
+
+    if ( !iter )
+    {
+      fn->GetMask(cmnFids);
+    }
+    else
+    {
+      asiAlgo_Feature operand;
+      fn->GetMask(operand);
+
+      cmnFids.Intersect(operand);
+    }
+
+    iter++;
+  }
+
+  if ( !cmnFids.IsEmpty() )
+    m_progress.SendLogMessage(LogInfo(Normal) << "Common face IDs: %1." << cmnFids);
+  else
+    m_progress.SendLogMessage(LogInfo(Normal) << "No common face IDs found in the selected features.");
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ObjectBrowser::onFeatureCheckRepeated()
+{
+  Handle(ActAPI_HNodeList) ns;
+  if ( !this->selectedNodes(ns) ) return;
+
+  // Collect all features.
+  std::vector<asiAlgo_Feature> features;
+  //
+  for ( ActAPI_HNodeList::Iterator nit(*ns); nit.More(); nit.Next() )
+  {
+    const Handle(ActAPI_INode)& n = nit.Value();
+
+    if ( !n->IsKind( STANDARD_TYPE(asiData_FeatureNode) ) )
+      continue;
+
+    Handle(asiData_FeatureNode)
+      fn = Handle(asiData_FeatureNode)::DownCast(n);
+
+    asiAlgo_Feature feature;
+    fn->GetMask(feature);
+    //
+    features.push_back(feature);
+  }
+
+  // Check for repetitions.
+  bool anyRepetitions = false;
+  //
+  for ( size_t i = 0; i < features.size(); ++i )
+  {
+    for ( size_t j = i + 1; j < features.size(); ++j )
+    {
+      if ( features[i].HasIntersection(features[j]) )
+      {
+        asiAlgo_Feature cmnFids = features[i];
+        cmnFids.Intersect(features[j]);
+
+        Handle(asiData_FeatureNode) fn1 = Handle(asiData_FeatureNode)::DownCast(ns->Value(int(i + 1)));
+        Handle(asiData_FeatureNode) fn2 = Handle(asiData_FeatureNode)::DownCast(ns->Value(int(j + 1)));
+
+        if ( !anyRepetitions )
+          anyRepetitions = true;
+
+        m_progress.SendLogMessage(LogInfo(Normal) << "Repeated face IDs: %1 (features \"%2\" and \"%3\")."
+                                                  << cmnFids << fn1->GetName() << fn2->GetName());
+      }
+    }
+  }
+
+  if ( !anyRepetitions )
+    m_progress.SendLogMessage(LogInfo(Normal) << "No repeated face IDs found in the selected features.");
+}
+
+//-----------------------------------------------------------------------------
+
 //! Populates context menu with actions.
 //! \param[in]     activeNodes currently active Nodes.
 //! \param[in,out] pMenu       menu to populate.
@@ -1436,8 +1531,17 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
   //
   if ( node->IsKind( STANDARD_TYPE(asiData_FeatureNode) ) )
   {
-    pMenu->addSeparator();
-    pMenu->addAction( "Comments...", this, SLOT( onFeatureComments () ) );
+    if ( numSelected == 1 )
+    {
+      pMenu->addSeparator();
+      pMenu->addAction( "Comments...", this, SLOT( onFeatureComments () ) );
+    }
+    else
+    {
+      pMenu->addSeparator();
+      pMenu->addAction( "Check for common faces",   this, SLOT( onFeatureCheckCommon   () ) );
+      pMenu->addAction( "Check for repeated faces", this, SLOT( onFeatureCheckRepeated () ) );
+    }
   }
   //
   if ( isPresented )

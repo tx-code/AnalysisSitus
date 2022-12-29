@@ -187,6 +187,8 @@ protected slots:
   void onUnifyKnotsAndAlign    ();
   //
   void onFeatureComments       ();
+  void onFeatureCheckCommon    ();
+  void onFeatureCheckRepeated  ();
 
 protected:
 
