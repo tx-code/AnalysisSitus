@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 22 June 2018
+// Created on: 05 January 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018, Sergey Slyadnev
+// Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_ProgressNotifier_h
-#define asiAlgo_ProgressNotifier_h
+#ifndef asiAlgo_MobiusProgressNotifier_h
+#define asiAlgo_MobiusProgressNotifier_h
 
 // asiAlgo includes
 #include <asiAlgo.h>
@@ -37,23 +37,18 @@
 // Active Data includes
 #include <ActAPI_IProgressNotifier.h>
 
-#ifdef USE_TBB
-  // TBB includes
-  #include <atomic.h>
-#endif
+// Mobius includes
+#include <mobius/core_IProgressNotifier.h>
 
-//! Notification tool to take care of algorithmic messages.
-class asiAlgo_ProgressNotifier : public ActAPI_IProgressNotifier
+//! Notification tool to take care of algorithmic messages from Mobius.
+class asiAlgo_MobiusProgressNotifier : public mobius::core_IProgressNotifier
 {
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ProgressNotifier, ActAPI_IProgressNotifier)
-
 public:
 
   //! Constructor.
-  //! \param[in,out] os output stream.
+  //! \param[in] progress the native progress entry to channel all messages to.
   asiAlgo_EXPORT
-    asiAlgo_ProgressNotifier(Standard_OStream& os);
+    asiAlgo_MobiusProgressNotifier(ActAPI_ProgressEntry progress);
 
 // Thread-unsafe methods:
 public:
@@ -69,49 +64,49 @@ public:
   //!
   //! Please note, that by default the progress scale is declared with
   //! infinite capacity. Practically, it means that algorithm is not able
-  //! to foresee the number of steps it will need to complete. Be sure that
+  //! to foresee the number of steps it will need to complete. Make sure that
   //! in such a case your interface reacts adequately (e.g. no percentage is
   //! shown to the user).
   //!
-  //! \param[in] capacity capacity to set (infinite by default: INT_MAX).
+  //! \param[in] capacity capacity score to set (infinite by default).
   asiAlgo_EXPORT virtual void
     Init(const int capacity = INT_MAX);
 
   //! Returns the capacity value.
   //! \return requested capacity value.
   asiAlgo_EXPORT virtual int
-    Capacity() const;
+    GetCapacity() const;
 
   //! Returns true if the capacity value is infinite.
   //! \return true/false.
   asiAlgo_EXPORT virtual bool
     IsInfinite() const;
 
-  //! Sets message localization key.
-  //! \param[in] msgKey localization key to set.
+  //! Sets message (localization) key.
+  //! \param[in] msgKey message key to set.
   asiAlgo_EXPORT virtual void
-    SetMessageKey(const TCollection_AsciiString& msgKey);
+    SetMessageKey(const std::string& msgKey);
 
   //! Returns message localization key.
   //! \return localization key.
-  asiAlgo_EXPORT virtual TCollection_AsciiString
-    MessageKey() const;
+  asiAlgo_EXPORT virtual std::string
+    GetMessageKey() const;
 
-  //! Sets the ultimate progress status for the job.
+  //! Sets the job status.
   //! \param[in] status progress status to set.
   asiAlgo_EXPORT virtual void
-    SetProgressStatus(const ActAPI_ProgressStatus status);
+    SetProgressStatus(const mobius::core_ProgressStatus status);
 
   //! Returns current progress status.
-  //! \return ultimate progress status.
-  asiAlgo_EXPORT virtual ActAPI_ProgressStatus
-    ProgressStatus() const;
+  //! \return the ultimate progress status.
+  asiAlgo_EXPORT virtual mobius::core_ProgressStatus
+    GetProgressStatus() const;
 
   //! Requests job cancellation.
   asiAlgo_EXPORT virtual void
-    Cancel();
+    AskCancel();
 
-  //! Checks whether the job is being cancelled.
+  //! Checks whether the job is being canceled.
   //! \return true/false.
   asiAlgo_EXPORT virtual bool
     IsCancelling();
@@ -129,73 +124,40 @@ public:
   //! Returns the currently cumulated progress value.
   //! \return current cumulative progress.
   asiAlgo_EXPORT virtual int
-    CurrentProgress() const;
+    GetCurrentProgress() const;
 
-// Methods to be used by parallel algorithms (should be thread-safe):
+// Interface to be used by algorithms:
 public:
 
-  //! Thread-safe method used to increment the progress value by the passed step.
-  //! \param[in] progressStep progress value to increment by.
+  //! This method is used to increment the progress value by the passed step.
+  //! \param[in] incr progress value to increment by.
   asiAlgo_EXPORT virtual void
-    StepProgress(const int progressStep);
+    StepProgress(const int incr);
 
-  //! Thread-safe method used to set the progress value.
+  //! This method is used to set the progress value.
   //! \param[in] progress progress value to set.
   asiAlgo_EXPORT virtual void
     SetProgress(const int progress);
 
-  //! Thread-safe method used to send a logging message. Normally, this is
-  //! not GUI directly as Progress Notifier is designed for usage in
-  //! multi-threaded environment.
+  //! This method is used to send a logging message.
   //! \param[in] message   message string (normally it is i18n key).
-  //! \param[in] severity  message severity (info, warning, error).
+  //! \param[in] severity  message severity (info, notice, warning, error).
   //! \param[in] priority  message priority (normal, high).
   //! \param[in] arguments message arguments (if any).
   asiAlgo_EXPORT virtual void
-    SendLogMessage(const TCollection_AsciiString&  message,
-                   const ActAPI_LogMessageSeverity severity,
-                   const ActAPI_LogMessagePriority priority  = Priority_Normal,
-                   const ActAPI_LogArguments&      arguments = ActAPI_LogArguments());
+    SendLogMessage(const std::string&               message,
+                   const mobius::core_MsgSeverity   severity,
+                   const mobius::core_MsgPriority   priority  = mobius::MsgPriority_Normal,
+                   const mobius::core_MsgArguments& arguments = mobius::core_MsgArguments());
 
-  //! Thread-safe method used to send a logging message in a stream form.
-  //! Normally, this is not GUI directly as Progress Notifier is designed for
-  //! usage in multi-threaded environment.
+  //! This method is used to send a logging message in a stream form.
   //! \param[in] logStream logging stream.
   asiAlgo_EXPORT virtual void
-    SendLogMessage(const ActAPI_LogStream& logStream);
+    SendLogMessage(const mobius::core_MsgStream& logStream);
 
-// Concurrent collections:
-private:
+protected:
 
-  //! Output stream.
-  Standard_OStream& m_out;
-
-  //! Current progress.
-#ifdef USE_TBB
-  tbb::atomic<int> m_iProgress;
-#else
-  int m_iProgress;
-#endif
-
-// Single-threaded members:
-private:
-
-  //! Maximum allowed capacity.
-  int m_iCapacity;
-
-  //! Message key for short-description the working algorithm might want
-  //! to associate with the Progress Collector.
-  TCollection_AsciiString m_msgKey;
-
-  //! Progress status.
-  ActAPI_ProgressStatus m_status;
-
-  bool m_SendLogMessageCalled;
-
-private:
-
-  void operator=(const asiAlgo_ProgressNotifier&) = delete;
-  asiAlgo_ProgressNotifier(const asiAlgo_ProgressNotifier& pn) = delete;
+  ActAPI_ProgressEntry m_progress; //!< Native progress entry.
 
 };
 

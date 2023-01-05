@@ -48,8 +48,6 @@
 //! Logging tool connecting algorithmic logger with GUI.
 class asiUI_Logger : public ActAPI_ILogger
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiUI_Logger, ActAPI_ILogger)
 

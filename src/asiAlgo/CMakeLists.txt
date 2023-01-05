@@ -534,6 +534,11 @@ set (utils_CPP_FILES
   utils/MemTracker.cpp
 )
 
+if (USE_MOBIUS)
+  list(APPEND utils_H_FILES   utils/asiAlgo_MobiusProgressNotifier.h)
+  list(APPEND utils_CPP_FILES utils/asiAlgo_MobiusProgressNotifier.cpp)
+endif()
+
 #------------------------------------------------------------------------------
 # Discrete B-rep
 #------------------------------------------------------------------------------

@@ -50,8 +50,6 @@
 //! Logger for algorithmic messages.
 class asiAlgo_Logger : public ActAPI_ILogger
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_Logger, ActAPI_ILogger)
 

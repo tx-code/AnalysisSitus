@@ -51,6 +51,7 @@
 // asiAlgo includes
 #include <asiAlgo_FileFormat.h>
 #include <asiAlgo_MeshMerge.h>
+#include <asiAlgo_MobiusProgressNotifier.h>
 #include <asiAlgo_ReadSTEPWithMeta.h>
 #include <asiAlgo_STEP.h>
 #include <asiAlgo_STEPReduce.h>
@@ -95,6 +96,7 @@
 
 #if defined USE_MOBIUS
   #include <mobius/cascade.h>
+  #include <mobius/geom_ReadAstra.h>
   #include <mobius/poly_Mesh.h>
 
   using namespace mobius;
@@ -1266,6 +1268,45 @@ int ENGINE_SaveXYZ(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+#if defined USE_MOBIUS
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::string filename(argv[1]);
+
+  // Wrap progress notifier.
+  t_ptr<asiAlgo_MobiusProgressNotifier>
+    mbProgress = new asiAlgo_MobiusProgressNotifier( interp->GetProgress() );
+  //
+  core_ProgressEntry mbp(mbProgress);
+
+  // Read ASTRA file.
+  mobius::geom_ReadAstra readAstra(mbp);
+  //
+  if ( !readAstra.Perform(filename) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read ASTRA file.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -1453,4 +1494,12 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t given name.",
     //
     __FILE__, group, ENGINE_SaveXYZ);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("load-astra",
+    //
+    "load-astra <filename>\n"
+    "\t Loads ASTRA file with curves and surfaces.",
+    //
+    __FILE__, group, ENGINE_LoadAstra);
 }

@@ -73,8 +73,6 @@ enum ActAPI_ProgressStatus
 //!   are supported: Not Defined, Running, Succeeded, Failed, Canceled.
 class ActAPI_IProgressNotifier : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(ActAPI_IProgressNotifier, Standard_Transient)
 
