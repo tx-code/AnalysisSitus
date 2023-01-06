@@ -71,25 +71,25 @@ public:
 public:
 
   asiUI_EXPORT virtual void
-    Info(const TCollection_AsciiString&    message,
+    Info(const std::string&                message,
          const ActAPI_LogMessagePriority   priority  = Priority_Normal,
          const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& timeStamp = nullptr);
 
   asiUI_EXPORT virtual void
-    Notice(const TCollection_AsciiString&    message,
+    Notice(const std::string&                message,
            const ActAPI_LogMessagePriority   priority  = Priority_Normal,
            const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
            const Handle(Standard_Transient)& timeStamp = nullptr);
 
   asiUI_EXPORT virtual void
-    Warn(const TCollection_AsciiString&    message,
+    Warn(const std::string&                message,
          const ActAPI_LogMessagePriority   priority  = Priority_Normal,
          const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& timeStamp = nullptr);
 
   asiUI_EXPORT virtual void
-    Error(const TCollection_AsciiString&    message,
+    Error(const std::string&                message,
           const ActAPI_LogMessagePriority   priority  = Priority_Normal,
           const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
           const Handle(Standard_Transient)& timeStamp = nullptr);
@@ -131,7 +131,7 @@ private:
 
   QString toString(const Handle(ActAux_TimeStamp)& timeStamp) const;
 
-  void logMessage(const TCollection_AsciiString&    message,
+  void logMessage(const std::string&                message,
                   const ActAPI_LogMessageSeverity   severity,
                   const ActAPI_LogMessagePriority   priority,
                   const ActAPI_LogArguments&        arguments,

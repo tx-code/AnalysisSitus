@@ -79,7 +79,7 @@ QTextEdit* asiUI_Logger::GetLogWindow() const
 //! \param[in] priority  message priority.
 //! \param[in] arguments message arguments.
 //! \param[in] timeStamp application-specific timestamp.
-void asiUI_Logger::Info(const TCollection_AsciiString&    message,
+void asiUI_Logger::Info(const std::string&                message,
                         const ActAPI_LogMessagePriority   priority,
                         const ActAPI_LogArguments&        arguments,
                         const Handle(Standard_Transient)& timeStamp)
@@ -94,7 +94,7 @@ void asiUI_Logger::Info(const TCollection_AsciiString&    message,
 //! \param[in] priority  message priority.
 //! \param[in] arguments message arguments.
 //! \param[in] timeStamp application-specific timestamp.
-void asiUI_Logger::Notice(const TCollection_AsciiString&    message,
+void asiUI_Logger::Notice(const std::string&                message,
                           const ActAPI_LogMessagePriority   priority,
                           const ActAPI_LogArguments&        arguments,
                           const Handle(Standard_Transient)& timeStamp)
@@ -109,7 +109,7 @@ void asiUI_Logger::Notice(const TCollection_AsciiString&    message,
 //! \param[in] priority  message priority.
 //! \param[in] arguments message arguments.
 //! \param[in] timeStamp application-specific timestamp.
-void asiUI_Logger::Warn(const TCollection_AsciiString&    message,
+void asiUI_Logger::Warn(const std::string&                message,
                         const ActAPI_LogMessagePriority   priority,
                         const ActAPI_LogArguments&        arguments,
                         const Handle(Standard_Transient)& timeStamp)
@@ -124,10 +124,10 @@ void asiUI_Logger::Warn(const TCollection_AsciiString&    message,
 //! \param[in] priority  message priority.
 //! \param[in] arguments message arguments.
 //! \param[in] timeStamp application-specific timestamp.
-void asiUI_Logger::Error(const TCollection_AsciiString&     message,
-                          const ActAPI_LogMessagePriority   priority,
-                          const ActAPI_LogArguments&        arguments,
-                          const Handle(Standard_Transient)& timeStamp)
+void asiUI_Logger::Error(const std::string&                message,
+                         const ActAPI_LogMessagePriority   priority,
+                         const ActAPI_LogArguments&        arguments,
+                         const Handle(Standard_Transient)& timeStamp)
 {
   this->logMessage(message, Severity_Error, priority, arguments, timeStamp);
 }
@@ -210,10 +210,7 @@ QString asiUI_Logger::chooseString(const Handle(Standard_Transient)& val) const
 
   QString STR_String = this->toString<ActAPI_VariableString>(val);
   if ( !STR_String.isEmpty() )
-  {
-    STR_String = QObject::tr( STR_String.toLatin1() );
     return STR_String;
-  }
 
   return QString::null;
 }
@@ -238,7 +235,8 @@ QString asiUI_Logger::toString(const Handle(Standard_Transient)& val) const
   os << hVal->Value;
   std::string str = os.str();
 
-  return str.c_str();
+  // Convert from UTF-8 or current code page (Windows).
+  return QString::fromLocal8Bit( str.c_str() );
 }
 
 //-----------------------------------------------------------------------------
@@ -265,16 +263,16 @@ QString asiUI_Logger::toString(const Handle(ActAux_TimeStamp)& timeStamp) const
 //! \param[in] priority  message priority.
 //! \param[in] arguments message arguments.
 //! \param[in] timeStamp application-specific timestamp.
-void asiUI_Logger::logMessage(const TCollection_AsciiString&    message,
+void asiUI_Logger::logMessage(const std::string&                message,
                               const ActAPI_LogMessageSeverity   severity,
                               const ActAPI_LogMessagePriority   priority,
                               const ActAPI_LogArguments&        arguments,
                               const Handle(Standard_Transient)& timeStamp) const
 {
-  if ( message.IsEmpty() )
+  if ( message.empty() )
     return;
 
-  QString msg = QObject::tr( message.ToCString() );
+  QString msg = QString::fromStdString(message);
   this->logMessage(msg, severity, priority, arguments, timeStamp);
 }
 

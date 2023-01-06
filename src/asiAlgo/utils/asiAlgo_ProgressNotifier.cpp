@@ -31,6 +31,9 @@
 // Own include
 #include <asiAlgo_ProgressNotifier.h>
 
+// asiALgo includes
+#include <asiAlgo_Utils.h>
+
 // OCCT includes
 #include <Message_MsgFile.hxx>
 
@@ -217,30 +220,30 @@ void asiAlgo_ProgressNotifier::SetProgress(const int progress)
 //-----------------------------------------------------------------------------
 
 template<typename T>
-TCollection_AsciiString toString(const Handle(Standard_Transient)& theValue)
+std::string toString(const Handle(Standard_Transient)& theValue)
 {
   Handle(T) aValue = Handle(T)::DownCast(theValue);
   if (aValue.IsNull())
     return "";
 
-  TCollection_AsciiString anAsciiString(aValue->Value);
-  return anAsciiString;
+  std::string res = asiAlgo_Utils::Str::ToString(aValue->Value);
+  return res;
 }
 
 //-----------------------------------------------------------------------------
 
-TCollection_AsciiString getString(const Handle(Standard_Transient)& theValue)
+std::string getString(const Handle(Standard_Transient)& theValue)
 {
-  TCollection_AsciiString aStandInteger = toString<ActAPI_VariableInt>(theValue);
-  if (!aStandInteger.IsEmpty())
+  std::string aStandInteger = toString<ActAPI_VariableInt>(theValue);
+  if (!aStandInteger.empty())
     return aStandInteger;
 
-  TCollection_AsciiString aStandReal = toString<ActAPI_VariableReal>(theValue);
-  if (!aStandReal.IsEmpty())
+  std::string aStandReal = toString<ActAPI_VariableReal>(theValue);
+  if (!aStandReal.empty())
     return aStandReal;
 
-  TCollection_AsciiString aStandString = toString<ActAPI_VariableString>(theValue);
-  if (!aStandString.IsEmpty())
+  std::string aStandString = toString<ActAPI_VariableString>(theValue);
+  if (!aStandString.empty())
     return aStandString;
 
   return "<empty arg>";
@@ -248,10 +251,10 @@ TCollection_AsciiString getString(const Handle(Standard_Transient)& theValue)
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  message,
-                                             const ActAPI_LogMessageSeverity severity,
-                                             const ActAPI_LogMessagePriority /*priority*/,
-                                             const ActAPI_LogArguments&      arguments)
+void asiAlgo_ProgressNotifier::SendLogMessage(const std::string&              message,
+                                              const ActAPI_LogMessageSeverity severity,
+                                              const ActAPI_LogMessagePriority /*priority*/,
+                                              const ActAPI_LogArguments&      arguments)
 {
 #ifdef USE_TBB
   static tbb::spin_mutex MUTEX; // For console output only
@@ -259,23 +262,23 @@ void asiAlgo_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  me
 #endif
 
   // Try to treat the passed message as a key
-  TCollection_AsciiString formatted;
+  std::string formatted;
   //
-  if ( Message_MsgFile::HasMsg(message) )
-    formatted = Message_MsgFile::Msg(message);
+  if ( Message_MsgFile::HasMsg( message.c_str() ) )
+    formatted = TCollection_AsciiString( Message_MsgFile::Msg(message.c_str() ) ).ToCString();
   else
     formatted = message;
 
-  for (int i = 1; i <= arguments.Length(); ++i)
+  for ( int i = 1; i <= arguments.Length(); ++i )
   {
-    TCollection_AsciiString iarg = "%"; iarg += i;
-    const int parg = formatted.Search(iarg);
-    TCollection_AsciiString sarg = getString(arguments.Value(i));
+    std::string iarg = "%"; iarg += asiAlgo_Utils::Str::ToString<int>(i);
+    size_t parg = formatted.find(iarg);
+    std::string sarg = getString(arguments.Value(i));
 
-    if ( parg != -1 )
+    if ( parg != std::string::npos )
     {
-      formatted.Remove(parg, iarg.Length());
-      formatted.Insert(parg, sarg);
+      formatted.erase(parg, parg + iarg.size());
+      formatted.insert(parg, sarg);
     }
     else
     {
@@ -292,8 +295,8 @@ void asiAlgo_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  me
   // Since carriage is returned in progress reporting by StepProgress() method,
   // we try to reserve enough characters to erase visually the line occupied
   // by the progress indication.
-  if ( formatted.Length() < 100 )
-    for ( int k = formatted.Length(); k < 100; ++k )
+  if ( formatted.length() < 100 )
+    for ( size_t k = formatted.length(); k < 100; ++k )
       formatted += " ";
 
   switch ( severity )

@@ -1280,14 +1280,8 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
 
   std::string filename(argv[1]);
 
-  // Wrap progress notifier.
-  t_ptr<asiAlgo_MobiusProgressNotifier>
-    mbProgress = new asiAlgo_MobiusProgressNotifier( interp->GetProgress() );
-  //
-  core_ProgressEntry mbp(mbProgress);
-
   // Read ASTRA file.
-  mobius::geom_ReadAstra readAstra(mbp);
+  mobius::geom_ReadAstra readAstra( MobiusProgress( interp->GetProgress() ) );
   //
   if ( !readAstra.Perform(filename) )
   {

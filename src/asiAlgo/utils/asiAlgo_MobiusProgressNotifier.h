@@ -40,6 +40,8 @@
 // Mobius includes
 #include <mobius/core_IProgressNotifier.h>
 
+//-----------------------------------------------------------------------------
+
 //! Notification tool to take care of algorithmic messages from Mobius.
 class asiAlgo_MobiusProgressNotifier : public mobius::core_IProgressNotifier
 {
@@ -160,5 +162,10 @@ protected:
   ActAPI_ProgressEntry m_progress; //!< Native progress entry.
 
 };
+
+//-----------------------------------------------------------------------------
+
+#define MobiusProgress(progress) \
+  mobius::core_ProgressEntry( new asiAlgo_MobiusProgressNotifier(progress) )
 
 #endif

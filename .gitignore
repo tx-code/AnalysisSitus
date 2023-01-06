@@ -86,3 +86,7 @@ log.txt
 .idea/caches/build_file_checksums.ser
 
 .idea/vcs.xml
+
+build-oroox/
+
+install-oroox/

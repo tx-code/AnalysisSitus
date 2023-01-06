@@ -339,7 +339,7 @@ public:
   //! \return variable instance.
   ActData_EXPORT static Handle(ActAPI_VariableString)
     Instance(const TCollection_AsciiString& theName,
-             const TCollection_AsciiString& theValue)
+             const std::string&             theValue)
   {
     return new ActAPI_VariableString(theName, theValue);
   }
@@ -347,7 +347,7 @@ public:
 public:
 
   //! Variable value.
-  TCollection_AsciiString Value;
+  std::string Value;
 
 public:
 
@@ -358,7 +358,7 @@ public:
   //! Constructor accepting variable value as an argument. The variable will
   //! have no name (empty name member).
   //! \param theValue [in] variable value.
-  ActAPI_VariableString(const TCollection_AsciiString& theValue) : ActAPI_VariableBase()
+  ActAPI_VariableString(const std::string& theValue) : ActAPI_VariableBase()
   {
     Value = theValue;
   }
@@ -367,7 +367,7 @@ public:
   //! \param theName [in] variable name.
   //! \param theValue [in] variable value.
   ActAPI_VariableString(const TCollection_AsciiString& theName,
-                        const TCollection_AsciiString& theValue) : ActAPI_VariableBase()
+                        const std::string&             theValue) : ActAPI_VariableBase()
   {
     Name = theName;
     Value = theValue;

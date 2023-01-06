@@ -31,6 +31,9 @@
 // Own include
 #include <asiAlgo_Logger.h>
 
+// asiAlgo includes
+#include <asiAlgo_Utils.h>
+
 // Active Data includes
 #include <ActAux_TimeStamp.h>
 
@@ -45,49 +48,49 @@
 namespace
 {
   template<typename T>
-  TCollection_AsciiString toString(const Handle(Standard_Transient)& theValue)
+  std::string toString(const Handle(Standard_Transient)& theValue)
   {
     Handle(T) aValue = Handle(T)::DownCast(theValue);
     if (aValue.IsNull())
       return "";
 
-    TCollection_AsciiString anAsciiString(aValue->Value);
-    return anAsciiString;
+    std::string res = asiAlgo_Utils::Str::ToString(aValue->Value);
+    return res;
   }
 
-  TCollection_AsciiString getString(const Handle(Standard_Transient)& theValue)
+  std::string getString(const Handle(Standard_Transient)& theValue)
   {
-    TCollection_AsciiString aStandInteger = toString<ActAPI_VariableInt>(theValue);
-    if (!aStandInteger.IsEmpty())
+    std::string aStandInteger = toString<ActAPI_VariableInt>(theValue);
+    if (!aStandInteger.empty())
       return aStandInteger;
 
-    TCollection_AsciiString aStandReal = toString<ActAPI_VariableReal>(theValue);
-    if (!aStandReal.IsEmpty())
+    std::string aStandReal = toString<ActAPI_VariableReal>(theValue);
+    if (!aStandReal.empty())
       return aStandReal;
 
-    TCollection_AsciiString aStandString = toString<ActAPI_VariableString>(theValue);
-    if (!aStandString.IsEmpty())
+    std::string aStandString = toString<ActAPI_VariableString>(theValue);
+    if (!aStandString.empty())
       return aStandString;
 
     return "<empty arg>";
   }
 
-  TCollection_AsciiString getFormatted(const TCollection_AsciiString& message,
-                                       const ActAPI_LogArguments&     arguments)
+  std::string getFormatted(const std::string& message,
+                           const ActAPI_LogArguments&     arguments)
   {
     // Try to treat the passed message as a key
-    TCollection_AsciiString formatted = message;
+    std::string formatted = message;
 
     for ( int i = 1; i <= arguments.Length(); ++i )
     {
-      TCollection_AsciiString iarg = "%"; iarg += i;
-      const int parg = formatted.Search(iarg);
-      TCollection_AsciiString sarg = getString(arguments.Value(i));
+      std::string iarg = "%"; iarg += asiAlgo_Utils::Str::ToString(i);
+      size_t parg = formatted.find(iarg);
+      std::string sarg = getString(arguments.Value(i));
 
-      if ( parg != -1 )
+      if ( parg != std::string::npos )
       {
-        formatted.Remove(parg, iarg.Length());
-        formatted.Insert(parg, sarg);
+        formatted.erase(parg, parg + iarg.size());
+        formatted.insert(parg, sarg);
       }
       else
       {
@@ -99,21 +102,21 @@ namespace
     return formatted;
   }
 
-  TCollection_AsciiString
-    formatMessage(const TCollection_AsciiString&  message,
+  std::string
+    formatMessage(const std::string&              message,
                   const ActAPI_LogMessageSeverity severity,
                   const ActAPI_LogMessagePriority,
-                  const ActAPI_LogArguments& arguments,
+                  const ActAPI_LogArguments&      arguments,
                   const Handle(Standard_Transient)&)
   {
-    if ( message.IsEmpty() )
+    if ( message.empty() )
       return "";
 
     // Apply arguments.
-    TCollection_AsciiString msg = getFormatted(message, arguments);
+    std::string msg = getFormatted(message, arguments);
 
     // Generate severity-dependent prefix,
-    TCollection_AsciiString prefix;
+    std::string prefix;
     //
     if ( severity == Severity_Information )
     {
@@ -206,7 +209,7 @@ void asiAlgo_Logger::Clear()
 //! \param theArguments [in] message arguments.
 //! \param theTimeStamp [in] application-specific timestamp. Current timestamp
 //!                          is used in case of nullptr value passed.
-void asiAlgo_Logger::Info(const TCollection_AsciiString&    theMessage,
+void asiAlgo_Logger::Info(const std::string&                theMessage,
                           const ActAPI_LogMessagePriority   thePriority,
                           const ActAPI_LogArguments&        theArguments,
                           const Handle(Standard_Transient)& theTimeStamp)
@@ -224,7 +227,7 @@ void asiAlgo_Logger::Info(const TCollection_AsciiString&    theMessage,
 //! \param theArguments [in] message arguments.
 //! \param theTimeStamp [in] application-specific timestamp. Current timestamp
 //!                          is used in case of nullptr value passed.
-void asiAlgo_Logger::Notice(const TCollection_AsciiString&    theMessage,
+void asiAlgo_Logger::Notice(const std::string&                theMessage,
                             const ActAPI_LogMessagePriority   thePriority,
                             const ActAPI_LogArguments&        theArguments,
                             const Handle(Standard_Transient)& theTimeStamp)
@@ -242,7 +245,7 @@ void asiAlgo_Logger::Notice(const TCollection_AsciiString&    theMessage,
 //! \param theArguments [in] message arguments.
 //! \param theTimeStamp [in] application-specific timestamp. Current timestamp
 //!                          is used in case of nullptr value passed.
-void asiAlgo_Logger::Warn(const TCollection_AsciiString&    theMessage,
+void asiAlgo_Logger::Warn(const std::string&                theMessage,
                           const ActAPI_LogMessagePriority   thePriority,
                           const ActAPI_LogArguments&        theArguments,
                           const Handle(Standard_Transient)& theTimeStamp)
@@ -260,7 +263,7 @@ void asiAlgo_Logger::Warn(const TCollection_AsciiString&    theMessage,
 //! \param theArguments [in] message arguments.
 //! \param theTimeStamp [in] application-specific timestamp. Current timestamp
 //!                          is used in case of nullptr value passed.
-void asiAlgo_Logger::Error(const TCollection_AsciiString&    theMessage,
+void asiAlgo_Logger::Error(const std::string&                theMessage,
                            const ActAPI_LogMessagePriority   thePriority,
                            const ActAPI_LogArguments&        theArguments,
                            const Handle(Standard_Transient)& theTimeStamp)
@@ -278,7 +281,7 @@ void asiAlgo_Logger::Error(const TCollection_AsciiString&    theMessage,
 //! \param thePriority  [in] priority of the message.
 //! \param theArguments [in] message arguments.
 //! \param theTimeStamp [in] application-specific timestamp.
-void asiAlgo_Logger::appendMessage(const TCollection_AsciiString&    theMessage,
+void asiAlgo_Logger::appendMessage(const std::string&                theMessage,
                                    const ActAPI_LogMessageSeverity   theSeverity,
                                    const ActAPI_LogMessagePriority   thePriority,
                                    const ActAPI_LogArguments&        theArguments,
@@ -296,15 +299,15 @@ void asiAlgo_Logger::appendMessage(const TCollection_AsciiString&    theMessage,
 
   if ( !m_appenders.IsEmpty() )
   {
-    TCollection_AsciiString msg = formatMessage(theMessage,
-                                                theSeverity,
-                                                thePriority,
-                                                theArguments,
-                                                theTimeStamp);
+    std::string msg = formatMessage(theMessage,
+                                    theSeverity,
+                                    thePriority,
+                                    theArguments,
+                                    theTimeStamp);
     // Put in all appender streams.
     for ( int k = 0; k < m_appenders.Length(); ++k )
     {
-      *m_appenders[k] << msg.ToCString() << "\n";
+      *m_appenders[k] << msg << "\n";
       *m_appenders[k] << std::flush;
     }
   }

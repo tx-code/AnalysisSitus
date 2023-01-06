@@ -216,6 +216,7 @@ void asiAlgo_MobiusProgressNotifier::SendLogMessage(const std::string&       mes
       _severity = ActAPI_LogMessageSeverity::Severity_Warning;
       break;
     default:
+      _severity = ActAPI_LogMessageSeverity::Severity_Information;
       break;
   };
 

@@ -150,7 +150,7 @@ public:
   //! \param[in] priority  message priority (normal, high).
   //! \param[in] arguments message arguments (if any).
   virtual void
-    SendLogMessage(const TCollection_AsciiString&  message,
+    SendLogMessage(const std::string&              message,
                    const ActAPI_LogMessageSeverity severity,
                    const ActAPI_LogMessagePriority priority  = Priority_Normal,
                    const ActAPI_LogArguments&      arguments = ActAPI_LogArguments());

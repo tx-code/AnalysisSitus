@@ -191,10 +191,10 @@ void asiUI_BatchNotifier::SetProgress(const int progress)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_BatchNotifier::SendLogMessage(const TCollection_AsciiString&  message,
-                                          const ActAPI_LogMessageSeverity severity,
-                                          const ActAPI_LogMessagePriority priority,
-                                          const ActAPI_LogArguments&      arguments)
+void asiUI_BatchNotifier::SendLogMessage(const std::string&              message,
+                                         const ActAPI_LogMessageSeverity severity,
+                                         const ActAPI_LogMessagePriority priority,
+                                         const ActAPI_LogArguments&      arguments)
 {
   if ( severity == Severity_Information )
     m_logger->Info(message, priority, arguments);

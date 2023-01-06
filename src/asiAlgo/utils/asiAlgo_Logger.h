@@ -72,25 +72,25 @@ public:
 public:
 
   asiAlgo_EXPORT virtual void
-    Info(const TCollection_AsciiString&    theMessage,
+    Info(const std::string&                theMessage,
          const ActAPI_LogMessagePriority   thePriority  = Priority_Normal,
          const ActAPI_LogArguments&        theArguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& theTimeStamp = nullptr);
 
   asiAlgo_EXPORT virtual void
-    Notice(const TCollection_AsciiString&    theMessage,
+    Notice(const std::string&                theMessage,
            const ActAPI_LogMessagePriority   thePriority  = Priority_Normal,
            const ActAPI_LogArguments&        theArguments = ActAPI_LogArguments(),
            const Handle(Standard_Transient)& theTimeStamp = nullptr);
 
   asiAlgo_EXPORT virtual void
-    Warn(const TCollection_AsciiString&    theMessage,
+    Warn(const std::string&                theMessage,
          const ActAPI_LogMessagePriority   thePriority  = Priority_Normal,
          const ActAPI_LogArguments&        theArguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& theTimeStamp = nullptr);
 
   asiAlgo_EXPORT virtual void
-    Error(const TCollection_AsciiString&    theMessage,
+    Error(const std::string&                theMessage,
           const ActAPI_LogMessagePriority   thePriority  = Priority_Normal,
           const ActAPI_LogArguments&        theArguments = ActAPI_LogArguments(),
           const Handle(Standard_Transient)& theTimeStamp = nullptr);
@@ -98,7 +98,7 @@ public:
 // Internal methods:
 protected:
 
-  virtual void appendMessage(const TCollection_AsciiString&    theMessage,
+  virtual void appendMessage(const std::string&                theMessage,
                              const ActAPI_LogMessageSeverity   theSeverity,
                              const ActAPI_LogMessagePriority   thePriority,
                              const ActAPI_LogArguments&        theArguments,

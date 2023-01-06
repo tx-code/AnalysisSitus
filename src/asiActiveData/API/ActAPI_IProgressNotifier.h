@@ -178,10 +178,10 @@ public:
   //! \param thePriority [in] message priority (normal, high).
   //! \param theArguments [in] message arguments (if any).
   virtual void
-    SendLogMessage(const TCollection_AsciiString& theMessage,
+    SendLogMessage(const std::string&              theMessage,
                    const ActAPI_LogMessageSeverity theSeverity,
                    const ActAPI_LogMessagePriority thePriority = Priority_Normal,
-                   const ActAPI_LogArguments& theArguments = ActAPI_LogArguments()) = 0;
+                   const ActAPI_LogArguments&      theArguments = ActAPI_LogArguments()) = 0;
 
   //! Thread-safe method used to send a logging message in a stream form.
   //! Normally, this is not GUI directly as Progress Notifier is designed for
@@ -372,10 +372,10 @@ public:
   }
 
   //! Null-safe SendLogMessage method for Progress Notifier.
-  void SendLogMessage(const TCollection_AsciiString& theMessage,
+  void SendLogMessage(const std::string&              theMessage,
                       const ActAPI_LogMessageSeverity theSeverity,
                       const ActAPI_LogMessagePriority thePriority = Priority_Normal,
-                      const ActAPI_LogArguments& theArguments = ActAPI_LogArguments()) const
+                      const ActAPI_LogArguments&      theArguments = ActAPI_LogArguments()) const
   {
     if ( !m_PNotifier.IsNull() )
       m_PNotifier->SendLogMessage(theMessage, theSeverity, thePriority, theArguments);

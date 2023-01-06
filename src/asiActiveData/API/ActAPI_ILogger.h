@@ -115,9 +115,8 @@ struct ActAPI_LogMessage
   //! Severity tag.
   ActAPI_LogMessageSeverity Severity;
 
-  //! Message text. It is ASCII string as we consider it to be the
-  //! localization key.
-  TCollection_AsciiString MsgKey;
+  //! Message text.
+  std::string MsgKey;
 
   //! Arguments for logging message.
   ActAPI_LogArguments Arguments;
@@ -127,6 +126,8 @@ struct ActAPI_LogMessage
 
   //! Default constructor.
   ActAPI_LogMessage()
+  : Priority(Priority_Normal),
+    Severity(Severity_Information)
   {}
 
   //! Complete constructor.
@@ -137,7 +138,7 @@ struct ActAPI_LogMessage
   //! \param timeStamp [in] application-specific timestamp.
   ActAPI_LogMessage(const ActAPI_LogMessagePriority   priority,
                     const ActAPI_LogMessageSeverity   severity,
-                    const TCollection_AsciiString&    msgKey,
+                    const std::string&                msgKey,
                     const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
                     const Handle(Standard_Transient)& timeStamp = nullptr)
   : Priority  (priority),
@@ -182,25 +183,25 @@ public:
 public:
 
   virtual void
-    Info(const TCollection_AsciiString&    message,
+    Info(const std::string&                message,
          const ActAPI_LogMessagePriority   priority  = Priority_Normal,
          const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& timeStamp = nullptr) = 0;
 
   virtual void
-    Notice(const TCollection_AsciiString&    message,
+    Notice(const std::string&                message,
            const ActAPI_LogMessagePriority   priority  = Priority_Normal,
            const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
            const Handle(Standard_Transient)& timeStamp = nullptr) = 0;
 
   virtual void
-    Warn(const TCollection_AsciiString&    message,
+    Warn(const std::string&                message,
          const ActAPI_LogMessagePriority   priority  = Priority_Normal,
          const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
          const Handle(Standard_Transient)& timeStamp = nullptr) = 0;
 
   virtual void
-    Error(const TCollection_AsciiString&    message,
+    Error(const std::string&                message,
           const ActAPI_LogMessagePriority   priority  = Priority_Normal,
           const ActAPI_LogArguments&        arguments = ActAPI_LogArguments(),
           const Handle(Standard_Transient)& timeStamp = nullptr) = 0;
@@ -273,21 +274,21 @@ public:
   //! \return this instance for further streaming.
   ActAPI_LogStream& operator<<(Standard_CString str)
   {
-    return this->operator<<( TCollection_AsciiString(str) );
-  }
-
-  //! Pushes the passed value to the logging stream.
-  //! \param str [in] value to stream.
-  //! \return this instance for further streaming.
-  ActAPI_LogStream& operator<<(const std::string& str)
-  {
-    return this->operator<<( TCollection_AsciiString( str.c_str() ) );
+    return this->operator<<( std::string(str) );
   }
 
   //! Pushes the passed value to the logging stream.
   //! \param str [in] value to stream.
   //! \return this instance for further streaming.
   ActAPI_LogStream& operator<<(const TCollection_AsciiString& str)
+  {
+    return this->operator<<( str.ToCString() );
+  }
+
+  //! Pushes the passed value to the logging stream.
+  //! \param str [in] value to stream.
+  //! \return this instance for further streaming.
+  ActAPI_LogStream& operator<<(const std::string& str)
   {
     if ( m_bIsDummy )
       return *this;
@@ -421,7 +422,7 @@ public:
 
   //! Accessor for text.
   //! \return message text.
-  const TCollection_AsciiString& Text() const
+  const std::string& Text() const
   {
     return m_msg;
   }
@@ -442,7 +443,7 @@ private:
   ActAPI_LogMessageSeverity m_severity;
 
   //! Logging message.
-  TCollection_AsciiString m_msg;
+  std::string m_msg;
 
   //! Logging arguments.
   ActAPI_LogArguments m_args;

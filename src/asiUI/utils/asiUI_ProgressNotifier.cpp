@@ -198,7 +198,7 @@ void asiUI_ProgressNotifier::SetProgress(const int progress)
 //! \param severity  [in] message severity (info, warning, error).
 //! \param priority  [in] message priority (normal, high).
 //! \param arguments [in] message arguments (if any).
-void asiUI_ProgressNotifier::SendLogMessage(const TCollection_AsciiString&  message,
+void asiUI_ProgressNotifier::SendLogMessage(const std::string&              message,
                                             const ActAPI_LogMessageSeverity severity,
                                             const ActAPI_LogMessagePriority priority,
                                             const ActAPI_LogArguments&      arguments)
