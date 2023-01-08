@@ -75,8 +75,8 @@ namespace
     return "<empty arg>";
   }
 
-  std::string getFormatted(const std::string& message,
-                           const ActAPI_LogArguments&     arguments)
+  std::string getFormatted(const std::string&         message,
+                           const ActAPI_LogArguments& arguments)
   {
     // Try to treat the passed message as a key
     std::string formatted = message;

@@ -1268,6 +1268,25 @@ int ENGINE_SaveXYZ(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+static void SimplifyCurve(Handle(Geom_BSplineCurve)& BS,
+                          const double               Tol,
+                          const int                  MultMin)
+
+{
+  double    tol = Tol;
+  int       Mult, ii;
+  const int NbK = BS->NbKnots();
+
+  for ( Mult = BS->Degree(); Mult > MultMin; Mult-- )
+  {
+    for ( ii = NbK; ii > 1; ii-- )
+    {
+      if ( BS->Multiplicity(ii) == Mult )
+        BS->RemoveKnot(ii, Mult - 1, tol);
+    }
+  }
+}
+
 int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
@@ -1281,12 +1300,24 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
   std::string filename(argv[1]);
 
   // Read ASTRA file.
-  mobius::geom_ReadAstra readAstra( MobiusProgress( interp->GetProgress() ) );
+  geom_ReadAstra readAstra( MobiusProgress( interp->GetProgress() ) );
   //
   if ( !readAstra.Perform(filename) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read ASTRA file.");
     return TCL_ERROR;
+  }
+
+  // Get all curves.
+  const std::vector< t_ptr<t_bcurve> >& bcurves = readAstra.GetResultCurves();
+  //
+  for ( const auto& bcurve : bcurves )
+  {
+    Handle(Geom_BSplineCurve) c3d = cascade::GetOpenCascadeBCurve(bcurve);
+
+    SimplifyCurve(c3d, Precision::Confusion(), 1);
+
+    interp->GetPlotter().DRAW_CURVE( c3d, Color_Red, true, "astraCurve" );
   }
 
   return TCL_OK;
