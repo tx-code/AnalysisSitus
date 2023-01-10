@@ -51,7 +51,6 @@
 // asiAlgo includes
 #include <asiAlgo_FileFormat.h>
 #include <asiAlgo_MeshMerge.h>
-#include <asiAlgo_MobiusProgressNotifier.h>
 #include <asiAlgo_ReadSTEPWithMeta.h>
 #include <asiAlgo_STEP.h>
 #include <asiAlgo_STEPReduce.h>
@@ -60,6 +59,10 @@
 #include <asiAlgo_WriteDXF.h>
 #include <asiAlgo_WriteSTEPWithMeta.h>
 #include <asiAlgo_WriteSVG.h>
+//
+#if defined USE_MOBIUS
+  #include <asiAlgo_MobiusProgressNotifier.h>
+#endif
 
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
