@@ -1323,6 +1323,17 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
     interp->GetPlotter().DRAW_CURVE( c3d, Color_Red, true, "astraCurve" );
   }
 
+  // Get all surfaces.
+  const std::vector< t_ptr<t_bsurf> >& bsurfs = readAstra.GetResultSurfaces();
+  //
+  for ( const auto& bsurf : bsurfs )
+  {
+    /*bsurf->ExchangeUV();*/
+    Handle(Geom_BSplineSurface) s3d = cascade::GetOpenCascadeBSurface(bsurf);
+
+    interp->GetPlotter().DRAW_SURFACE( s3d, Color_DarkGray, "astraSurface" );
+  }
+
   return TCL_OK;
 #else
   (void) argc;

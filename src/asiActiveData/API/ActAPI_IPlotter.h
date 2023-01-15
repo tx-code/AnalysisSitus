@@ -105,6 +105,7 @@ protected:
 #define Color_Magenta   ActAPI_Color(Quantity_NOC_MAGENTA1)
 #define Color_Maroon    ActAPI_Color(Quantity_NOC_MAROON)
 #define Color_LightGray ActAPI_Color(Quantity_NOC_LIGHTGRAY)
+#define Color_DarkGray  ActAPI_Color(0.2, 0.2, 0.2, Quantity_TOC_RGB)
 
 //-----------------------------------------------------------------------------
 

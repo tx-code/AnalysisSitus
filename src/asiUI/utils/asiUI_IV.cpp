@@ -1690,6 +1690,10 @@ void asiUI_IV::draw_surface(const Handle(Geom_Surface)&    surface,
     m_lastObj = surface_n;
   }
 
+  // Update persistent color.
+  surface_n->SetHasColor(true);
+  surface_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+
   // Commit transaction
   if ( isTx )
     m_model->CommitCommand();
