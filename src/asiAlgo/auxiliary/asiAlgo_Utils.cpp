@@ -64,6 +64,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <asiAlgo_ConvertCanonical.h>
 #include <asiAlgo_IGES.h>
 #include <asiAlgo_FeatureAttrArea.h>
+#include <asiAlgo_FeatureAttrUVBounds.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
 #include <asiAlgo_RecognizeCanonical.h>
@@ -2245,6 +2246,35 @@ double asiAlgo_Utils::ComputeArea(const TopoDS_Shape& shape)
   BRepGProp::SurfaceProperties(shape, props, 1.0e-2);
   //
   return props.Mass();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::CacheFaceUVBounds(const int                  fid,
+                                      const Handle(asiAlgo_AAG)& aag,
+                                      double&                    umin,
+                                      double&                    umax,
+                                      double&                    vmin,
+                                      double&                    vmax)
+{
+  // Access the AAG attribute.
+  Handle(asiAlgo_FeatureAttrUVBounds)
+    uvAttr = aag->ATTR_NODE<asiAlgo_FeatureAttrUVBounds>(fid);
+
+  // Compute or use the cached value.
+  if ( uvAttr.IsNull() )
+  {
+    BRepTools::UVBounds(aag->GetFace(fid), umin, umax, vmin, vmax);
+
+    aag->SetNodeAttribute( fid, new asiAlgo_FeatureAttrUVBounds(umin, umax, vmin, vmax) );
+  }
+  else
+  {
+    umin = uvAttr->uMin;
+    umax = uvAttr->uMax;
+    vmin = uvAttr->vMin;
+    vmax = uvAttr->vMax;
+  }
 }
 
 //-----------------------------------------------------------------------------

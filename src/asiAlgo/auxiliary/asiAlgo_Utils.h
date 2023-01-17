@@ -1070,6 +1070,21 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT double
     ComputeArea(const TopoDS_Shape& shape);
 
+  //! Handles getting UV bounds of faces using the AAG as a cache.
+  //! \param[in]  fid  the AAG node id of the face.
+  //! \param[in]  aag  the AAG instance.
+  //! \param[out] umin the U min value.
+  //! \param[out] umax the U max value.
+  //! \param[out] vmin the V min value.
+  //! \param[out] vmax the V max value.
+  asiAlgo_EXPORT void
+    CacheFaceUVBounds(const int                  fid,
+                      const Handle(asiAlgo_AAG)& aag,
+                      double&                    umin,
+                      double&                    umax,
+                      double&                    vmin,
+                      double&                    vmax);
+
   //! Finds trasformation to move the reference frame `B` so that it is
   //! superimposed with the reference frame `A`.
   //! \param[in] A target reference frame.
