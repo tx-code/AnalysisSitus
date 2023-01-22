@@ -858,22 +858,57 @@ int ENGINE_LoadIGES(const Handle(asiTcl_Interp)& interp,
                     int                          argc,
                     const char**                 argv)
 {
-  if ( argc != 2 )
+  if ( argc < 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
   TCollection_AsciiString filename(argv[1]);
 
-  // Read BREP
-  TopoDS_Shape shape;
-  if ( !asiAlgo_Utils::ReadIGES(filename, shape) )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read IGES file.");
-    return TCL_ERROR;
-  }
+  const bool withNames = interp->HasKeyword(argc, argv, "names");
 
-  onModelLoaded(shape);
+  if ( withNames )
+  {
+    Handle(asiAsm::xde::Doc)
+      doc = new asiAsm::xde::Doc( interp->GetProgress(),
+                                  interp->GetPlotter() );
+
+    // Read IGES file into a document.
+    if ( !doc->LoadIGES(filename) )
+    {
+      doc->Release();
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "IGES file '%1' cannot be loaded."
+                                                          << filename);
+      return TCL_ERROR;
+    }
+
+    // Get all unique parts.
+    asiAsm::xde::PartIds partIds;
+    doc->GetParts(partIds);
+
+    // Add all parts.
+    for ( asiAsm::xde::PartIds::Iterator pit(partIds); pit.More(); pit.Next() )
+    {
+      const asiAsm::xde::PartId& pid = pit.Value();
+
+      TCollection_ExtendedString name  = doc->GetPartName(pid);
+      TopoDS_Shape               shape = doc->GetShape(pid);
+      //
+      interp->GetPlotter().REDRAW_SHAPE(name, shape, Color_Default);
+    }
+  }
+  else
+  {
+    // Read B-rep from IGES.
+    TopoDS_Shape shape;
+    if ( !asiAlgo_Utils::ReadIGES(filename, shape) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read IGES file.");
+      return TCL_ERROR;
+    }
+
+    onModelLoaded(shape);
+  }
 
   return TCL_OK;
 }
@@ -1290,6 +1325,42 @@ static void SimplifyCurve(Handle(Geom_BSplineCurve)& BS,
   }
 }
 
+//-----------------------------------------------------------------------------
+
+static void SimplifySurface(Handle(Geom_BSplineSurface)& BS,
+                            const double                 Tol,
+                            const int                    MultMin)
+
+{
+  int  multU, multV, ii;
+  bool Ok;
+
+  const TColStd_Array1OfReal&    U  = BS->UKnots();
+  const TColStd_Array1OfReal&    V  = BS->VKnots();
+  const TColStd_Array1OfInteger& UM = BS->UMultiplicities();
+  const TColStd_Array1OfInteger& VM = BS->VMultiplicities();
+
+  for ( ii = U.Length() - 1; ii > 1; ii-- )
+  {
+    Ok    = true;
+    multU = UM.Value(ii) - 1;
+    for  ( ; Ok && multU > MultMin; multU-- )
+    {
+      Ok = BS->RemoveUKnot(ii, multU, Tol);
+    }
+  }
+
+  for ( ii = V.Length() - 1; ii > 1; ii-- )
+  {
+    Ok    = true;
+    multV = VM.Value(ii) - 1;
+    for  ( ; Ok && multV > MultMin; multV-- )
+    {
+      Ok = BS->RemoveVKnot(ii, multV, Tol);
+    }
+  }
+}
+
 int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
@@ -1330,6 +1401,8 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
   {
     /*bsurf->ExchangeUV();*/
     Handle(Geom_BSplineSurface) s3d = cascade::GetOpenCascadeBSurface(bsurf);
+
+    SimplifySurface(s3d, Precision::Confusion(), 1);
 
     interp->GetPlotter().DRAW_SURFACE( s3d, Color_DarkGray, "astraSurface" );
   }
@@ -1441,8 +1514,11 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("load-iges",
     //
-    "load-iges <filename>\n"
-    "\t Loads IGES file to the active part.",
+    "load-iges <filename> [-names]\n"
+    "\t Loads IGES file to the active part or to the imperative plotter's\n"
+    "\t section if the '-names' keyword is passed. In the latter cases, all\n"
+    "\t IGES entities are imported with their original names instead of putting\n"
+    "\t all geometries into a single compound.",
     //
     __FILE__, group, ENGINE_LoadIGES);
 
