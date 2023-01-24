@@ -43,6 +43,7 @@
 // asiAlgo includes
 #include <asiAlgo_BuildHLR.h>
 #include <asiAlgo_MeshOBB.h>
+#include <asiAlgo_BuildOBB.h>
 #include <asiAlgo_MeshOffset.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -1678,10 +1679,9 @@ int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
 
   // Get part.
   Handle(asiData_PartNode) partNode = M->GetPartNode();
-  TopoDS_Shape             partSh   = partNode->GetShape();
 
   // Build OBB.
-  asiAlgo_MeshOBB mkOBB(partSh);
+  asiAlgo_BuildOBB mkOBB(partNode->GetAAG());
   //
   if ( !mkOBB.Perform() )
   {
@@ -1694,14 +1694,17 @@ int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
 
   TopoDS_Shape obbShape;
 
-  // Check if an equivalent cylinder is requested.
+  // Check if an equivalent cylinder or sphere is requested.
   const bool isCyl = interp->HasKeyword(argc, argv, "cyl");
+  const bool isSphere = interp->HasKeyword(argc, argv, "sphere");
   //
   if ( isCyl )
   {
-    gp_Trsf T;
-    gp_Ax2 ax;
-    obbShape = obb.BuildEquiCylinder(T, ax);
+    obbShape = obb.BuildCircumscribedCylinder();
+  }
+  else if (isSphere)
+  {
+    obbShape = obb.BuildCircumscribedSphere();
   }
   else
   {
@@ -2175,10 +2178,10 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-obb",
     //
-    "build-obb <res> [-cyl]\n"
+    "build-obb <res> [-cyl] [-sphere]\n"
     "\t Builds the oriented bounding box (OBB) for the active part.\n"
-    "\t If the '-cyl' flag is passed, the constructed OBB is turned\n"
-    "\t into an equivalent cylindrical bar.",
+    "\t If the '-cyl' or '-sphere' flag is passed, the constructed OBB is turned\n"
+    "\t into an circumscribed cylinder or sphere.",
     //
     __FILE__, group, ENGINE_BuildOBB);
 

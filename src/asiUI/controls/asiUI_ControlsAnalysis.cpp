@@ -1237,16 +1237,15 @@ void asiUI_ControlsAnalysis::onAABB()
   }
 
   // Protect from degenerated bbox.
-  if ( ( xMin - xMax ) < Precision::Confusion() ||
-       ( yMin - yMax ) < Precision::Confusion() ||
-       ( zMin - zMax ) < Precision::Confusion() )
+  const double precision = Precision::Confusion();
+  if ( dx < precision || dy < precision || dz < precision )
   {
-    xMin -= Precision::Confusion();
-    yMin -= Precision::Confusion();
-    zMin -= Precision::Confusion();
-    xMax += Precision::Confusion();
-    yMax += Precision::Confusion();
-    zMax += Precision::Confusion();
+    xMin -= precision;
+    yMin -= precision;
+    zMin -= precision;
+    xMax += precision;
+    yMax += precision;
+    zMax += precision;
   }
 
   // Create bounding box to draw it.

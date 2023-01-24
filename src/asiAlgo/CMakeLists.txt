@@ -24,6 +24,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_AttrFaceUniformGrid.h
   auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
+  auxiliary/asiAlgo_BuildOBB.h
   auxiliary/asiAlgo_BullardRNG.h
   auxiliary/asiAlgo_BVHAlgo.h
   auxiliary/asiAlgo_BVHFacets.h
@@ -58,6 +59,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_IntersectSS.h
   auxiliary/asiAlgo_Membership.h
   auxiliary/asiAlgo_ModelRefine.h
+  auxiliary/asiAlgo_OBB.h
   auxiliary/asiAlgo_Optional.h
   auxiliary/asiAlgo_OrientCnc.h
   auxiliary/asiAlgo_PointInPoly.h
@@ -79,6 +81,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_AnalyzeWire.cpp
   auxiliary/asiAlgo_BuildConvexHull.cpp
   auxiliary/asiAlgo_BuildHLR.cpp
+  auxiliary/asiAlgo_BuildOBB.cpp
   auxiliary/asiAlgo_BVHAlgo.cpp
   auxiliary/asiAlgo_BVHFacets.cpp
   auxiliary/asiAlgo_BVHIterator.cpp
@@ -102,6 +105,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_IntersectCS.cpp
   auxiliary/asiAlgo_IntersectSS.cpp
   auxiliary/asiAlgo_ModelRefine.cpp
+  auxiliary/asiAlgo_OBB.cpp
   auxiliary/asiAlgo_OrientCnc.cpp
   auxiliary/asiAlgo_PointInPoly.cpp
   auxiliary/asiAlgo_ProjectPointOnMesh.cpp

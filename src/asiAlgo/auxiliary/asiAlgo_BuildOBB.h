@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 16 February 2019
+// Created on: 25 January 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2019-present, Sergey Slyadnev
+// Copyright (c) 2022-present, Elizaveta Krylova
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_MeshOBB_h
-#define asiAlgo_MeshOBB_h
+#ifndef asiAlgo_BuildOBB_h
+#define asiAlgo_BuildOBB_h
 
 // asiAlgo includes
 #include <asiAlgo_OBB.h>
+#include <asiAlgo_AAG.h>
+#include <asiAlgo_OrientCnc.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -43,32 +45,22 @@
 
 //-----------------------------------------------------------------------------
 
-//! Utility to build Oriented Bounding Box on mesh by finding eigen vectors
-//! of a covariance matrix.
-class asiAlgo_MeshOBB : public ActAPI_IAlgorithm
+//! Utility to build Oriented Bounding Box on part.
+class asiAlgo_BuildOBB : public ActAPI_IAlgorithm
 {
   // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshOBB, ActAPI_IAlgorithm)
+  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildOBB, ActAPI_IAlgorithm)
 
 public:
 
   //! Constructor.
-  //! \param[in] mesh     the triangulation to build an OBB for.
-  //! \param[in] progress the progress notifier.
-  //! \param[in] plotter  the imperative plotter.
-  asiAlgo_EXPORT
-    asiAlgo_MeshOBB(const Handle(Poly_Triangulation)& mesh,
-                    ActAPI_ProgressEntry              progress = nullptr,
-                    ActAPI_PlotterEntry               plotter = nullptr);
-
-  //! Constructor.
-  //! \param[in] part     the input part.
+  //! \param[in] aag      the AAG of the input part.
   //! \param[in] progress the progress entry.
   //! \param[in] plotter  the imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_MeshOBB(const TopoDS_Shape&  part,
-                    ActAPI_ProgressEntry progress = nullptr,
-                    ActAPI_PlotterEntry  plotter  = nullptr);
+    asiAlgo_BuildOBB(const Handle(asiAlgo_AAG)& aag,
+                     ActAPI_ProgressEntry       progress = nullptr,
+                     ActAPI_PlotterEntry        plotter  = nullptr);
 
 public:
 
@@ -94,20 +86,8 @@ public:
 
 protected:
 
-  //! Calculates local axes by covariance analysis on mesh.
-  //! \param[out] xAxis      X axis.
-  //! \param[out] yAxis      Y axis.
-  //! \param[out] zAxis      Z axis.
-  //! \param[out] meanVertex central vertex.
-  void calculateByCovariance(gp_Ax1& xAxis,
-                             gp_Ax1& yAxis,
-                             gp_Ax1& zAxis,
-                             gp_XYZ& meanVertex) const;
-
-protected:
-
-  Handle(Poly_Triangulation) m_input; //!< Input triangulation.
-  asiAlgo_OBB                m_obb;   //!< Constructed OBB.
+  Handle(asiAlgo_AAG) m_aag; //!< AAG of the input part.
+  asiAlgo_OBB         m_obb; //!< Constructed OBB.
 
 };
 
