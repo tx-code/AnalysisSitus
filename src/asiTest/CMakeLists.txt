@@ -164,6 +164,7 @@ set (cases_inspection_H_FILES
   cases/inspection/asiTest_RecognizeBlends.h
   cases/inspection/asiTest_RecognizeCavities.h
   cases/inspection/asiTest_RecognizeConvexHull.h
+  cases/inspection/asiTest_VertexVexity.h
 )
 set (cases_inspection_CPP_FILES
   cases/inspection/asiTest_AAG.cpp
@@ -175,6 +176,7 @@ set (cases_inspection_CPP_FILES
   cases/inspection/asiTest_RecognizeBlends.cpp
   cases/inspection/asiTest_RecognizeCavities.cpp
   cases/inspection/asiTest_RecognizeConvexHull.cpp
+  cases/inspection/asiTest_VertexVexity.cpp
 )
 
 #------------------------------------------------------------------------------

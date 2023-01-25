@@ -67,6 +67,7 @@ enum test_CaseID
   CaseID_ComputeNegativeVolume,
   CaseID_IsContourClosed,
   CaseID_EdgeVexity,
+  CaseID_VertexVexity,
   CaseID_FaceGrid,
   CaseID_RecognizeCavities,
   CaseID_RecognizeConvexHull,

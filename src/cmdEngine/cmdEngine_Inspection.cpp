@@ -4212,12 +4212,12 @@ int ENGINE_CheckFacets(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
-                             int                          /*argc*/,
-                             const char**                 /*argv*/)
+                             int                          argc,
+                             const char**                 argv)
 {
   // Get part's AAG.
   Handle(asiData_PartNode)
-    partNode = cmdEngine::cf->Model->GetPartNode();
+    partNode = Handle(asiEngine_Model)::DownCast( interp->GetModel() )->GetPartNode();
   //
   if ( partNode.IsNull() || !partNode->IsWellFormed() )
   {
@@ -4228,11 +4228,12 @@ int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
   Handle(asiAlgo_AAG) G = partNode->GetAAG();
 
   int fid = 0;
+  const bool isFidPassed = interp->GetKeyValue(argc, argv, "fid", fid);
 
   // Access selected faces (if any).
   asiAlgo_Feature selected;
   //
-  if ( !cmdEngine::cf.IsNull() )
+  if ( !fid && !cmdEngine::cf.IsNull() )
   {
     asiEngine_Part partApi( cmdEngine::cf->Model,
                             cmdEngine::cf->ViewerPart->PrsMgr() );
@@ -4273,6 +4274,8 @@ int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
   bbuilder.MakeCompound(compConcave);
   bbuilder.MakeCompound(compConvex);
   //
+  int numConvex = 0, numConcave = 0, numSmooth = 0;
+  //
   for ( asiAlgo_CheckVertexVexity::t_vexityMap::Iterator vit(vexity);
         vit.More(); vit.Next() )
   {
@@ -4280,16 +4283,35 @@ int ENGINE_CheckVertexVexity(const Handle(asiTcl_Interp)& interp,
     const asiAlgo_FeatureAngleType X = vit.Value();
 
     if ( X == FeatureAngleType_Smooth )
+    {
       bbuilder.Add(compSmooth, V);
+      numSmooth++;
+    }
     else if ( X == FeatureAngleType_Concave )
+    {
       bbuilder.Add(compConcave, V);
+      numConcave++;
+    }
     else if ( X == FeatureAngleType_Convex )
+    {
       bbuilder.Add(compConvex, V);
+      numConvex++;
+    }
   }
 
   interp->GetPlotter().REDRAW_SHAPE("smooth",  compSmooth,  Color_LightGray, 1., true);
   interp->GetPlotter().REDRAW_SHAPE("concave", compConcave, Color_Red,       1., true);
   interp->GetPlotter().REDRAW_SHAPE("convex",  compConvex,  Color_Green,     1., true);
+
+  if ( !isFidPassed && (argc == 4) || isFidPassed && (argc == 6) )
+  {
+    // Set Tcl variables.
+    int varIdx = isFidPassed ? 2 : 0;
+    //
+    interp->SetVarFundamental<int>(argv[++varIdx], numConvex);
+    interp->SetVarFundamental<int>(argv[++varIdx], numConcave);
+    interp->SetVarFundamental<int>(argv[++varIdx], numSmooth);
+  }
 
   return TCL_OK;
 }
@@ -5075,8 +5097,11 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-vertex-vexity",
     //
-    "check-vertex-vexity\n"
-    "\t Checks convexity of all vertices in the given face.",
+    "check-vertex-vexity [-fid <fid>] [<numConvex> <numConcave> <numSmooth>]\n"
+    "\t Checks convexity of all vertices in the given face. You can pass the\n"
+    "\t optional variable names <numConvex>, <numConcave> and <numSmooth> to get\n"
+    "\t the corresponding quantities of convex, concave and smooth vertices in the\n"
+    "\t face of interest.",
     //
     __FILE__, group, ENGINE_CheckVertexVexity);
 

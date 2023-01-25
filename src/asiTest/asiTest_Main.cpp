@@ -50,6 +50,7 @@
 #include <asiTest_RecognizeConvexHull.h>
 #include <asiTest_SuppressBlends.h>
 #include <asiTest_Utils.h>
+#include <asiTest_VertexVexity.h>
 #include <asiTest_XdeDoc.h>
 
 // Active Data unit tests
@@ -145,6 +146,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_SuppressBlends>        );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AAG>                   );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_EdgeVexity>            );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_VertexVexity>          );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_FaceGrid>              );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_IsContourClosed>       );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>                 );
