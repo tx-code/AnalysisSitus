@@ -33,6 +33,7 @@
 
 // Analysis Situs includes
 #include <asiAlgo_AAG.h>
+#include <asiAlgo_AttrFaceUniformGrid.h>
 #include <asiAlgo_BuildConvexHull.h>
 #include <asiAlgo_BVHFacets.h>
 #include <asiAlgo_FeatureAttrConvexHull.h>
@@ -58,7 +59,8 @@ asiAlgo_RecognizeConvexHull::asiAlgo_RecognizeConvexHull(const TopoDS_Shape&  sh
 : asiAlgo_Recognizer ( shape, nullptr, progress, plotter ),
   m_iGridPts         ( 20 ),
   m_fToler           ( 0.1 ), // mm
-  m_bHaines          ( true )
+  m_bHaines          ( true ),
+  m_bCacheSampl      ( false )
 {}
 
 //-----------------------------------------------------------------------------
@@ -70,7 +72,8 @@ asiAlgo_RecognizeConvexHull::asiAlgo_RecognizeConvexHull(const Handle(asiAlgo_AA
 : asiAlgo_Recognizer ( aag, progress, plotter ),
   m_iGridPts         ( 20 ),
   m_fToler           ( 0.1 ), // mm
-  m_bHaines          ( true )
+  m_bHaines          ( true ),
+  m_bCacheSampl      ( false )
 {}
 
 //-----------------------------------------------------------------------------
@@ -113,6 +116,20 @@ void asiAlgo_RecognizeConvexHull::SetUseHaines(const bool on)
 bool asiAlgo_RecognizeConvexHull::GetUseHaines() const
 {
   return m_bHaines;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeConvexHull::SetCacheSampling(const bool on)
+{
+  m_bCacheSampl = on;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeConvexHull::GetCacheSampling() const
+{
+  return m_bCacheSampl;
 }
 
 //-----------------------------------------------------------------------------
@@ -249,6 +266,14 @@ bool asiAlgo_RecognizeConvexHull::Perform()
 
     if ( numOk == numProbes )
       convexHullFaces.Add(f);
+
+    if (m_bCacheSampl)
+    {
+      Handle(asiAlgo_AttrFaceUniformGrid) 
+        ug = new asiAlgo_AttrFaceUniformGrid(sampleFace.GetResult());
+      //
+      m_aag->SetNodeAttribute(f, ug);
+    }
   }
 
 #if defined COUT_DEBUG

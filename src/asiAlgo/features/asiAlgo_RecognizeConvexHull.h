@@ -28,8 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiAlgo_RecognizeConvexHull_h
-#define asiAlgo_RecognizeConvexHull_h
+#pragma once
 
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
@@ -98,6 +97,16 @@ public:
   asiAlgo_EXPORT bool
     GetUseHaines() const;
 
+  //! Sets the Boolean flag indicating whether to store the result of face sampling
+  //! in the dedicated attribute of AAG.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetCacheSampling(const bool on);
+
+  //! \return whether the result of sampling should be cached.
+  asiAlgo_EXPORT bool
+    GetCacheSampling() const;
+
 public:
 
   //! Performs recognition.
@@ -121,6 +130,7 @@ protected:
   //! Alternative classification approach.
   bool m_bHaines;
 
+  //! Flag whether to keep the result of sampling.
+  bool m_bCacheSampl;
 };
 
-#endif
