@@ -1395,14 +1395,31 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get all surfaces.
-  const std::vector< t_ptr<t_bsurf> >& bsurfs = readAstra.GetResultSurfaces();
+  const std::vector< t_ptr<t_surf> >& surfs = readAstra.GetResultSurfaces();
   //
-  for ( const auto& bsurf : bsurfs )
+  for ( const auto& surf : surfs )
   {
-    /*bsurf->ExchangeUV();*/
-    Handle(Geom_BSplineSurface) s3d = cascade::GetOpenCascadeBSurface(bsurf);
+    Handle(Geom_Surface) s3d;
 
-    SimplifySurface(s3d, Precision::Confusion(), 1);
+    // Spline surface.
+    t_ptr<t_bsurf> bsurf = t_ptr<t_bsurf>::DownCast(surf);
+    //
+    if ( !bsurf.IsNull() )
+    {
+      Handle(Geom_BSplineSurface) occBSurf = cascade::GetOpenCascadeBSurface(bsurf);
+
+      SimplifySurface(occBSurf, Precision::Confusion(), 1);
+
+      s3d = occBSurf;
+    }
+
+    // Surface of revolution.
+    t_ptr<t_surfRevol> revolSurf = t_ptr<t_surfRevol>::DownCast(surf);
+    //
+    if ( !revolSurf.IsNull() )
+    {
+      s3d = cascade::GetOpenCascadeRevolSurf(revolSurf);
+    }
 
     interp->GetPlotter().DRAW_SURFACE( s3d, Color_DarkGray, "astraSurface" );
   }
