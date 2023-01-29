@@ -59,6 +59,8 @@
 #include <asiAlgo_WriteREK.h>
 
 // OpenCascade includes
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 #include <TDF_Tool.hxx>
 
 // Qt includes
@@ -767,17 +769,45 @@ void asiUI_ObjectBrowser::onSetAsPart()
   Handle(ActAPI_INode) selected_n;
   if ( !this->selectedNode(selected_n) ) return;
 
-  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
-    return;
-
-  // Convert to the only supported type.
+  // Convert to the supported type.
   Handle(asiData_IVTopoItemNode)
     topoNode = Handle(asiData_IVTopoItemNode)::DownCast(selected_n);
 
-  // Get shape to convert.
-  TopoDS_Shape shapeToSet = topoNode->GetShape();
-  const double linDefl    = topoNode->GetLinearDeflection();
-  const double angDefl    = topoNode->GetAngularDeflection();
+  TopoDS_Shape shapeToSet;
+  double       linDefl = 0., angDefl = 0.;
+
+  if ( !topoNode.IsNull() )
+  {
+    // Get shape to convert.
+    shapeToSet = topoNode->GetShape();
+    linDefl    = topoNode->GetLinearDeflection();
+    angDefl    = topoNode->GetAngularDeflection();
+  }
+  else
+  {
+    Handle(asiData_IVCurveNode)
+      curveNode = Handle(asiData_IVCurveNode)::DownCast(selected_n);
+    //
+    if ( !curveNode.IsNull() )
+    {
+      double f, l;
+      Handle(Geom_Curve) C = curveNode->GetCurve(f, l);
+
+      shapeToSet = BRepBuilderAPI_MakeEdge(C, f, l);
+    }
+    else
+    {
+      Handle(asiData_IVSurfaceNode)
+        surfNode = Handle(asiData_IVSurfaceNode)::DownCast(selected_n);
+      //
+      if ( !surfNode.IsNull() )
+      {
+        Handle(Geom_Surface) S = surfNode->GetSurface();
+
+        shapeToSet = BRepBuilderAPI_MakeFace(S, Precision::Confusion());
+      }
+    }
+  }
 
   // Modify Data Model.
   Handle(asiData_PartNode) part_n;
@@ -803,20 +833,20 @@ void asiUI_ObjectBrowser::onSetAsPart()
 
   // Uncheck the topo item.
   QTreeWidgetItem*
-    pTopoItem = ::GetItem( this, topoNode->GetId() );
+    pTargetItem = ::GetItem( this, selected_n->GetId() );
   //
-  if ( pTopoItem )
+  if ( pTargetItem )
   {
-    if ( pTopoItem->flags() & Qt::ItemIsUserCheckable )
-      pTopoItem->setCheckState(1, Qt::Unchecked);
+    if ( pTargetItem->flags() & Qt::ItemIsUserCheckable )
+      pTargetItem->setCheckState(1, Qt::Unchecked);
   }
 
   // Update UI.
   for ( size_t k = 0; k < m_viewers.size(); ++k )
   {
     // Clear topological item.
-    if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(topoNode) )
-      m_viewers[k]->PrsMgr()->DeRenderPresentation(topoNode);
+    if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(selected_n) )
+      m_viewers[k]->PrsMgr()->DeRenderPresentation(selected_n);
 
     // Actualize part.
     if ( dynamic_cast<asiUI_ViewerPart*>(m_viewers[k]) )
@@ -1569,6 +1599,7 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
       {
         pMenu->addSeparator();
         pMenu->addAction( "Copy as JSON", this, SLOT( onCopyAsJSON () ) );
+        pMenu->addAction( "Set as part",  this, SLOT( onSetAsPart  () ) );
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
