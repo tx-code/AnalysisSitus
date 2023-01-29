@@ -1391,7 +1391,10 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
 
     SimplifyCurve(c3d, Precision::Confusion(), 1);
 
-    interp->GetPlotter().DRAW_CURVE( c3d, Color_Red, true, "astraCurve" );
+    QString qstr = QString::fromLocal8Bit( bcurve->GetName().c_str() );
+
+    interp->GetPlotter().REDRAW_CURVE( bcurve->HasName() ? QStr2ExtStr(qstr) : "astraCurve",
+                                       c3d, Color_Red, true );
   }
 
   // Get all surfaces.
@@ -1421,7 +1424,10 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
       s3d = cascade::GetOpenCascadeRevolSurf(revolSurf);
     }
 
-    interp->GetPlotter().DRAW_SURFACE( s3d, Color_DarkGray, "astraSurface" );
+    QString qstr = QString::fromLocal8Bit( surf->GetName().c_str() );
+
+    interp->GetPlotter().REDRAW_SURFACE( surf->HasName() ? QStr2ExtStr(qstr) : "astraSurface",
+                                         s3d, Color_DarkGray );
   }
 
   return TCL_OK;

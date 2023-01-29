@@ -662,9 +662,9 @@ int RE_ApproxCurve(const Handle(asiTcl_Interp)& interp,
 
     // Set result.
     if ( ptsRegions.size() == 1 )
-      interp->GetPlotter().REDRAW_CURVE(TCollection_AsciiString(argv[1]), resCurve, Color_Red, true);
+      interp->GetPlotter().REDRAW_CURVE(argv[1], resCurve, Color_Red, true);
     else
-      interp->GetPlotter().DRAW_CURVE(resCurve, Color_Red, true, TCollection_AsciiString(argv[1]));
+      interp->GetPlotter().DRAW_CURVE(resCurve, Color_Red, true, argv[1]);
   }
 
   return TCL_OK;

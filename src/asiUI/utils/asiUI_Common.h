@@ -284,6 +284,9 @@ public:
 #define AsciiStr2QStr(AsciiStr) \
   QObject::tr( AsciiStr.ToCString() )
 
+#define AsciiStr2StdStr(AsciiStr) \
+  AsciiStr.ToCString()
+
 #define QStr2AsciiStr(QStr) \
   asiUI_Common::ToAsciiString(QStr)
 
@@ -292,5 +295,8 @@ public:
 
 #define QStr2ExtStr(QStr) \
   asiUI_Common::ToExtString(QStr)
+
+#define StdStr2ExtStr(str) \
+  TCollection_ExtendedString( str.c_str() )
 
 #endif

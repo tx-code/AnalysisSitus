@@ -32,6 +32,7 @@
 #include <asiUI_IV.h>
 
 // asiUI includes
+#include <asiUI_Common.h>
 #include <asiUI_ObjectBrowser.h>
 
 // asiVisu includes
@@ -225,7 +226,7 @@ void asiUI_IV::ERASE_ALL()
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::ERASE(const TCollection_AsciiString& name)
+void asiUI_IV::ERASE(const t_extString& name)
 {
   // Loop over the imperative plotter's objects
   for ( Handle(ActAPI_IChildIterator) cit = m_model->GetIVNode()->GetChildIterator(true);
@@ -265,7 +266,7 @@ void asiUI_IV::ERASE(const TCollection_AsciiString& name)
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DONLY(const TCollection_AsciiString& name)
+void asiUI_IV::DONLY(const t_extString& name)
 {
   /* ============================
    *  Gather the Nodes to affect.
@@ -343,27 +344,27 @@ void asiUI_IV::ACTUALIZE_PART_PRS()
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINT(const gp_XY&                   coord,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINT(const gp_XY&        coord,
+                          const ActAPI_Color& color,
+                          const t_extString&  name)
 {
   this->draw_point(coord, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINT(const gp_Pnt2d&                point,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINT(const gp_Pnt2d&     point,
+                          const ActAPI_Color& color,
+                          const t_extString&  name)
 {
   this->DRAW_POINT(point.XY(), color, name);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINT(const gp_XYZ&                  coord,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINT(const gp_XYZ&       coord,
+                          const ActAPI_Color& color,
+                          const t_extString&  name)
 {
   Handle(HRealArray) coords = new HRealArray(0, 2);
   //
@@ -376,36 +377,36 @@ void asiUI_IV::DRAW_POINT(const gp_XYZ&                  coord,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINT(const gp_Pnt&                  point,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINT(const gp_Pnt&       point,
+                          const ActAPI_Color& color,
+                          const t_extString&  name)
 {
   this->DRAW_POINT(point.XYZ(), color, name);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINT(const TCollection_AsciiString& name,
-                            const gp_XY&                   coord,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINT(const t_extString&  name,
+                            const gp_XY&        coord,
+                            const ActAPI_Color& color)
 {
   this->draw_point(coord, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINT(const TCollection_AsciiString& name,
-                            const gp_Pnt2d&                coord,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINT(const t_extString&  name,
+                            const gp_Pnt2d&     coord,
+                            const ActAPI_Color& color)
 {
   this->draw_point(coord.XY(), color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINT(const TCollection_AsciiString& name,
-                            const gp_XYZ&                  coord,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINT(const t_extString&  name,
+                            const gp_XYZ&       coord,
+                            const ActAPI_Color& color)
 {
   Handle(HRealArray) coords = new HRealArray(0, 2);
   //
@@ -418,75 +419,75 @@ void asiUI_IV::REDRAW_POINT(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINT(const TCollection_AsciiString& name,
-                            const gp_Pnt&                  coords,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINT(const t_extString&  name,
+                            const gp_Pnt&       coords,
+                            const ActAPI_Color& color)
 {
   this->REDRAW_POINT(name, coords.XYZ(), color);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINTS(const Handle(HRealArray)&      coords,
-                           const ActAPI_Color&            color,
-                           const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINTS(const Handle(HRealArray)& coords,
+                           const ActAPI_Color&       color,
+                           const t_extString&        name)
 {
   this->draw_points(coords, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POINTS(const std::vector<gp_XYZ>&     pts,
-                           const ActAPI_Color&            color,
-                           const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POINTS(const std::vector<gp_XYZ>& pts,
+                           const ActAPI_Color&        color,
+                           const t_extString&         name)
 {
   this->draw_points(pts, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINTS(const TCollection_AsciiString& name,
-                             const Handle(HRealArray)&      coords,
-                             const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINTS(const t_extString&        name,
+                             const Handle(HRealArray)& coords,
+                             const ActAPI_Color&       color)
 {
   this->draw_points(coords, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POINTS(const TCollection_AsciiString& name,
-                             const std::vector<gp_XYZ>&     pts,
-                             const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POINTS(const t_extString&         name,
+                             const std::vector<gp_XYZ>& pts,
+                             const ActAPI_Color&        color)
 {
   this->draw_points(pts, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_VECTORS(const Handle(HRealArray)&      points,
-                            const Handle(HRealArray)&      vectors,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_VECTORS(const Handle(HRealArray)& points,
+                            const Handle(HRealArray)& vectors,
+                            const ActAPI_Color&       color,
+                            const t_extString&        name)
 {
   this->draw_vectors(points, vectors, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_VECTORS(const TCollection_AsciiString& name,
-                              const Handle(HRealArray)&      points,
-                              const Handle(HRealArray)&      vectors,
-                              const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_VECTORS(const t_extString&        name,
+                              const Handle(HRealArray)& points,
+                              const Handle(HRealArray)& vectors,
+                              const ActAPI_Color&       color)
 {
   this->draw_vectors(points, vectors, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_VECTOR_AT(const gp_Pnt&                  P,
-                              const gp_Vec&                  V,
-                              const ActAPI_Color&            color,
-                              const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_VECTOR_AT(const gp_Pnt&       P,
+                              const gp_Vec&       V,
+                              const ActAPI_Color& color,
+                              const t_extString&  name)
 {
   Handle(HRealArray) points  = new HRealArray(0, 2);
   Handle(HRealArray) vectors = new HRealArray(0, 2);
@@ -504,10 +505,10 @@ void asiUI_IV::DRAW_VECTOR_AT(const gp_Pnt&                  P,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_VECTOR_AT(const TCollection_AsciiString& name,
-                                const gp_Pnt&                  P,
-                                const gp_Vec&                  V,
-                                const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_VECTOR_AT(const t_extString&  name,
+                                const gp_Pnt&       P,
+                                const gp_Vec&       V,
+                                const ActAPI_Color& color)
 {
   Handle(HRealArray) points  = new HRealArray(0, 2);
   Handle(HRealArray) vectors = new HRealArray(0, 2);
@@ -525,10 +526,10 @@ void asiUI_IV::REDRAW_VECTOR_AT(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_VECTORS_AT(const gp_Pnt&                  origin,
-                               const std::vector<gp_Vec>&     vectors,
-                               const ActAPI_Color&            color,
-                               const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_VECTORS_AT(const gp_Pnt&              origin,
+                               const std::vector<gp_Vec>& vectors,
+                               const ActAPI_Color&        color,
+                               const t_extString&         name)
 {
   Handle(asiAlgo_BaseCloud<double>) posCloud = new asiAlgo_BaseCloud<double>;
   Handle(asiAlgo_BaseCloud<double>) vecCloud = new asiAlgo_BaseCloud<double>;
@@ -546,10 +547,10 @@ void asiUI_IV::DRAW_VECTORS_AT(const gp_Pnt&                  origin,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_VECTORS_AT(const TCollection_AsciiString& name,
-                                 const gp_Pnt&                  origin,
-                                 const std::vector<gp_Vec>&     vectors,
-                                 const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_VECTORS_AT(const t_extString&         name,
+                                 const gp_Pnt&              origin,
+                                 const std::vector<gp_Vec>& vectors,
+                                 const ActAPI_Color&        color)
 {
   Handle(asiAlgo_BaseCloud<double>) posCloud = new asiAlgo_BaseCloud<double>;
   Handle(asiAlgo_BaseCloud<double>) vecCloud = new asiAlgo_BaseCloud<double>;
@@ -567,89 +568,89 @@ void asiUI_IV::REDRAW_VECTORS_AT(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_AXES(const gp_Pnt&                  origin,
-                         const gp_Dir&                  dx,
-                         const gp_Dir&                  dy,
-                         const gp_Dir&                  dz,
-                         const double                   scale,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_AXES(const gp_Pnt&      origin,
+                         const gp_Dir&      dx,
+                         const gp_Dir&      dy,
+                         const gp_Dir&      dz,
+                         const double       scale,
+                         const t_extString& name)
 {
   this->draw_axes(origin, dx, dy, dz, scale, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_AXES(const TCollection_AsciiString& name,
-                           const gp_Pnt&                  origin,
-                           const gp_Dir&                  dx,
-                           const gp_Dir&                  dy,
-                           const gp_Dir&                  dz,
-                           const double                   scale)
+void asiUI_IV::REDRAW_AXES(const t_extString& name,
+                           const gp_Pnt&      origin,
+                           const gp_Dir&      dx,
+                           const gp_Dir&      dy,
+                           const gp_Dir&      dz,
+                           const double       scale)
 {
   this->draw_axes(origin, dx, dy, dz, scale, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)&      curve,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)& curve,
+                          const ActAPI_Color&       color,
+                          const TCollection_ExtendedString&        name)
 {
   this->draw_curve(curve, color, name, true, false, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)&      curve,
-                          const ActAPI_Color&            color,
-                          const bool                     drawOri,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)& curve,
+                          const ActAPI_Color&       color,
+                          const bool                drawOri,
+                          const TCollection_ExtendedString&        name)
 {
   this->draw_curve(curve, color, name, drawOri, false, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_CURVE(const TCollection_AsciiString& name,
-                            const Handle(Geom_Curve)&      curve,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_CURVE(const TCollection_ExtendedString&        name,
+                            const Handle(Geom_Curve)& curve,
+                            const ActAPI_Color&       color)
 {
   this->draw_curve(curve, color, name, true, false, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_CURVE(const TCollection_AsciiString& name,
-                            const Handle(Geom_Curve)&      curve,
-                            const ActAPI_Color&            color,
-                            const bool                     drawOri)
+void asiUI_IV::REDRAW_CURVE(const TCollection_ExtendedString&        name,
+                            const Handle(Geom_Curve)& curve,
+                            const ActAPI_Color&       color,
+                            const bool                drawOri)
 {
   this->draw_curve(curve, color, name, drawOri, false, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_CURVE2D(const Handle(Geom2d_Curve)&    curve,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_CURVE2D(const Handle(Geom2d_Curve)& curve,
+                            const ActAPI_Color&         color,
+                            const t_extString&          name)
 {
   this->draw_curve2d(curve, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_CURVE2D(const TCollection_AsciiString& name,
-                              const Handle(Geom2d_Curve)&    curve,
-                              const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_CURVE2D(const t_extString&          name,
+                              const Handle(Geom2d_Curve)& curve,
+                              const ActAPI_Color&         color)
 {
   this->draw_curve2d(curve, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)& surface,
+                            const ActAPI_Color&         color,
+                            const t_extString&          name)
 {
   if ( surface.IsNull() )
     return;
@@ -667,10 +668,10 @@ void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
-                            const ActAPI_Color&            color,
-                            const double                   opacity,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)& surface,
+                            const ActAPI_Color&         color,
+                            const double                opacity,
+                            const t_extString&          name)
 {
   if ( surface.IsNull() )
     return;
@@ -688,36 +689,36 @@ void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
-                            const double                   uMin,
-                            const double                   uMax,
-                            const double                   vMin,
-                            const double                   vMax,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)& surface,
+                            const double                uMin,
+                            const double                uMax,
+                            const double                vMin,
+                            const double                vMax,
+                            const ActAPI_Color&         color,
+                            const t_extString&          name)
 {
   this->DRAW_SURFACE(surface, uMin, uMax, vMin, vMax, color, 1.0, name);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)&    surface,
-                            const double                   uMin,
-                            const double                   uMax,
-                            const double                   vMin,
-                            const double                   vMax,
-                            const ActAPI_Color&            color,
-                            const double                   opacity,
-                            const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SURFACE(const Handle(Geom_Surface)& surface,
+                            const double                uMin,
+                            const double                uMax,
+                            const double                vMin,
+                            const double                vMax,
+                            const ActAPI_Color&         color,
+                            const double                opacity,
+                            const t_extString&          name)
 {
   this->draw_surface(surface, uMin, uMax, vMin, vMax, color, opacity, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
-                              const Handle(Geom_Surface)&    surface,
-                              const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_SURFACE(const t_extString&          name,
+                              const Handle(Geom_Surface)& surface,
+                              const ActAPI_Color&         color)
 {
   if ( surface.IsNull() )
     return;
@@ -735,10 +736,10 @@ void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
-                              const Handle(Geom_Surface)&    surface,
-                              const ActAPI_Color&            color,
-                              const double                   opacity)
+void asiUI_IV::REDRAW_SURFACE(const t_extString&          name,
+                              const Handle(Geom_Surface)& surface,
+                              const ActAPI_Color&         color,
+                              const double                opacity)
 {
   if ( surface.IsNull() )
     return;
@@ -756,325 +757,325 @@ void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
-                              const Handle(Geom_Surface)&    surface,
-                              const double                   uMin,
-                              const double                   uMax,
-                              const double                   vMin,
-                              const double                   vMax,
-                              const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_SURFACE(const t_extString&          name,
+                              const Handle(Geom_Surface)& surface,
+                              const double                uMin,
+                              const double                uMax,
+                              const double                vMin,
+                              const double                vMax,
+                              const ActAPI_Color&         color)
 {
   this->REDRAW_SURFACE(name, surface, uMin, uMax, vMin, vMax, color, 1.0);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SURFACE(const TCollection_AsciiString& name,
-                              const Handle(Geom_Surface)&    surface,
-                              const double                   uMin,
-                              const double                   uMax,
-                              const double                   vMin,
-                              const double                   vMax,
-                              const ActAPI_Color&            color,
-                              const double                   opacity)
+void asiUI_IV::REDRAW_SURFACE(const t_extString&          name,
+                              const Handle(Geom_Surface)& surface,
+                              const double                uMin,
+                              const double                uMax,
+                              const double                vMin,
+                              const double                vMax,
+                              const ActAPI_Color&         color,
+                              const double                opacity)
 {
   this->draw_surface(surface, uMin, uMax, vMin, vMax, color, opacity, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape& shape,
+                          const t_extString&  name)
 {
   this->DRAW_SHAPE(shape, 1.0, name);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape& shape,
+                          const ActAPI_Color& color,
+                          const t_extString&  name)
 {
   this->DRAW_SHAPE(shape, color, 1.0, name);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
-                          const double                   opacity,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape& shape,
+                          const double        opacity,
+                          const t_extString&  name)
 {
   this->draw_shape(shape, true, Color_Default, opacity, false, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
-                          const ActAPI_Color&            color,
-                          const double                   opacity,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape& shape,
+                          const ActAPI_Color& color,
+                          const double        opacity,
+                          const t_extString&  name)
 {
   this->draw_shape(shape, true, color, opacity, false, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape&            shape,
-                          const ActAPI_Color&            color,
-                          const double                   opacity,
-                          const bool                     isWireframe,
-                          const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_SHAPE(const TopoDS_Shape& shape,
+                          const ActAPI_Color& color,
+                          const double        opacity,
+                          const bool          isWireframe,
+                          const t_extString&  name)
 {
   this->draw_shape(shape, true, color, opacity, isWireframe, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
-                            const TopoDS_Shape&            shape)
+void asiUI_IV::REDRAW_SHAPE(const t_extString&  name,
+                            const TopoDS_Shape& shape)
 {
   this->REDRAW_SHAPE(name, shape, 1.0);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
-                            const TopoDS_Shape&            shape,
-                            const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_SHAPE(const t_extString&  name,
+                            const TopoDS_Shape& shape,
+                            const ActAPI_Color& color)
 {
   this->REDRAW_SHAPE(name, shape, color, 1.0);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
-                            const TopoDS_Shape&            shape,
-                            const double                   opacity)
+void asiUI_IV::REDRAW_SHAPE(const t_extString&  name,
+                            const TopoDS_Shape& shape,
+                            const double        opacity)
 {
   this->draw_shape(shape, true, Color_Default, opacity, false, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
-                            const TopoDS_Shape&            shape,
-                            const ActAPI_Color&            color,
-                            const double                   opacity)
+void asiUI_IV::REDRAW_SHAPE(const t_extString&  name,
+                            const TopoDS_Shape& shape,
+                            const ActAPI_Color& color,
+                            const double        opacity)
 {
   this->draw_shape(shape, true, color, opacity, false, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_SHAPE(const TCollection_AsciiString& name,
-                            const TopoDS_Shape&            shape,
-                            const ActAPI_Color&            color,
-                            const double                   opacity,
-                            const bool                     isWireframe)
+void asiUI_IV::REDRAW_SHAPE(const t_extString&  name,
+                            const TopoDS_Shape& shape,
+                            const ActAPI_Color& color,
+                            const double        opacity,
+                            const bool          isWireframe)
 {
   this->draw_shape(shape, true, color, opacity, isWireframe, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_LINK(const gp_Pnt&                  p1,
-                         const gp_Pnt&                  p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_LINK(const gp_Pnt&       p1,
+                         const gp_Pnt&       p2,
+                         const ActAPI_Color& color,
+                         const t_extString&  name)
 {
   this->draw_link(p1.XYZ(), p2.XYZ(), color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_LINK(const gp_XYZ&                  p1,
-                         const gp_XYZ&                  p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_LINK(const gp_XYZ&       p1,
+                         const gp_XYZ&       p2,
+                         const ActAPI_Color& color,
+                         const t_extString&  name)
 {
   this->draw_link(p1, p2, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_LINK(const gp_Pnt2d&                p1,
-                         const gp_Pnt2d&                p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_LINK(const gp_Pnt2d&     p1,
+                         const gp_Pnt2d&     p2,
+                         const ActAPI_Color& color,
+                         const t_extString&  name)
 {
   this->draw_link(p1.XY(), p2.XY(), color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_LINK(const gp_XY&                   p1,
-                         const gp_XY&                   p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_LINK(const gp_XY&        p1,
+                         const gp_XY&        p2,
+                         const ActAPI_Color& color,
+                         const t_extString&  name)
 {
   this->draw_link(p1, p2, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_LINK(const TCollection_AsciiString& name,
-                           const gp_Pnt&                  p1,
-                           const gp_Pnt&                  p2,
-                           const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_LINK(const t_extString&  name,
+                           const gp_Pnt&       p1,
+                           const gp_Pnt&       p2,
+                           const ActAPI_Color& color)
 {
   this->draw_link(p1.XYZ(), p2.XYZ(), color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_LINK(const TCollection_AsciiString& name,
-                           const gp_XYZ&                  p1,
-                           const gp_XYZ&                  p2,
-                           const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_LINK(const t_extString&  name,
+                           const gp_XYZ&       p1,
+                           const gp_XYZ&       p2,
+                           const ActAPI_Color& color)
 {
   this->draw_link(p1, p2, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_LINK(const TCollection_AsciiString& name,
-                           const gp_Pnt2d&                p1,
-                           const gp_Pnt2d&                p2,
-                           const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_LINK(const t_extString&  name,
+                           const gp_Pnt2d&     p1,
+                           const gp_Pnt2d&     p2,
+                           const ActAPI_Color& color)
 {
   this->draw_link(p1.XY(), p2.XY(), color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_LINK(const TCollection_AsciiString& name,
-                           const gp_XY&                   p1,
-                           const gp_XY&                   p2,
-                           const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_LINK(const t_extString&  name,
+                           const gp_XY&        p1,
+                           const gp_XY&        p2,
+                           const ActAPI_Color& color)
 {
   this->draw_link(p1, p2, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POLYLINE(const std::vector<gp_XYZ>&     poles,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POLYLINE(const std::vector<gp_XYZ>& poles,
+                             const ActAPI_Color&        color,
+                             const t_extString&         name)
 {
   this->draw_polyline(poles, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_POLYLINE(const std::vector<gp_XY>&      poles,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_POLYLINE(const std::vector<gp_XY>& poles,
+                             const ActAPI_Color&       color,
+                             const t_extString&        name)
 {
   this->draw_polyline(poles, color, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POLYLINE(const TCollection_AsciiString& name,
-                               const std::vector<gp_XY>&      poles,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POLYLINE(const t_extString&        name,
+                               const std::vector<gp_XY>& poles,
+                               const ActAPI_Color&       color)
 {
   this->draw_polyline(poles, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_POLYLINE(const TCollection_AsciiString& name,
-                               const std::vector<gp_XYZ>&     poles,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_POLYLINE(const t_extString&         name,
+                               const std::vector<gp_XYZ>& poles,
+                               const ActAPI_Color&        color)
 {
   this->draw_polyline(poles, color, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_TRIANGLE(const gp_Pnt&                  p1,
-                             const gp_Pnt&                  p2,
-                             const gp_Pnt&                  p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_TRIANGLE(const gp_Pnt&       p1,
+                             const gp_Pnt&       p2,
+                             const gp_Pnt&       p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name)
 {
   this->draw_triangle(p1.XYZ(), p2.XYZ(), p3.XYZ(), color, name, true, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_TRIANGLE(const gp_XYZ&                  p1,
-                             const gp_XYZ&                  p2,
-                             const gp_XYZ&                  p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_TRIANGLE(const gp_XYZ&       p1,
+                             const gp_XYZ&       p2,
+                             const gp_XYZ&       p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name)
 {
   this->draw_triangle(p1, p2, p3, color, name, true, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_TRIANGLE(const gp_Pnt2d&                p1,
-                             const gp_Pnt2d&                p2,
-                             const gp_Pnt2d&                p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_TRIANGLE(const gp_Pnt2d&     p1,
+                             const gp_Pnt2d&     p2,
+                             const gp_Pnt2d&     p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name)
 {
   this->draw_triangle(p1.XY(), p2.XY(), p3.XY(), color, name, true, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_TRIANGLE(const gp_XY&                   p1,
-                             const gp_XY&                   p2,
-                             const gp_XY&                   p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_TRIANGLE(const gp_XY&        p1,
+                             const gp_XY&        p2,
+                             const gp_XY&        p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name)
 {
   this->draw_triangle(p1, p2, p3, color, name, true, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TRIANGLE(const TCollection_AsciiString& name,
-                               const gp_Pnt&                  p1,
-                               const gp_Pnt&                  p2,
-                               const gp_Pnt&                  p3,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_TRIANGLE(const t_extString&  name,
+                               const gp_Pnt&       p1,
+                               const gp_Pnt&       p2,
+                               const gp_Pnt&       p3,
+                               const ActAPI_Color& color)
 {
   this->draw_triangle(p1.XYZ(), p2.XYZ(), p3.XYZ(), color, name, false, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TRIANGLE(const TCollection_AsciiString& name,
-                               const gp_XYZ&                  p1,
-                               const gp_XYZ&                  p2,
-                               const gp_XYZ&                  p3,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_TRIANGLE(const t_extString&  name,
+                               const gp_XYZ&       p1,
+                               const gp_XYZ&       p2,
+                               const gp_XYZ&       p3,
+                               const ActAPI_Color& color)
 {
   this->draw_triangle(p1, p2, p3, color, name, false, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TRIANGLE(const TCollection_AsciiString& name,
-                               const gp_Pnt2d&                p1,
-                               const gp_Pnt2d&                p2,
-                               const gp_Pnt2d&                p3,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_TRIANGLE(const t_extString&  name,
+                               const gp_Pnt2d&     p1,
+                               const gp_Pnt2d&     p2,
+                               const gp_Pnt2d&     p3,
+                               const ActAPI_Color& color)
 {
   this->draw_triangle(p1.XY(), p2.XY(), p3.XY(), color, name, false, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TRIANGLE(const TCollection_AsciiString& name,
-                               const gp_XY&                   p1,
-                               const gp_XY&                   p2,
-                               const gp_XY&                   p3,
-                               const ActAPI_Color&            color)
+void asiUI_IV::REDRAW_TRIANGLE(const t_extString&  name,
+                               const gp_XY&        p1,
+                               const gp_XY&        p2,
+                               const gp_XY&        p3,
+                               const ActAPI_Color& color)
 {
   this->draw_triangle(p1, p2, p3, color, name, false, false);
 }
@@ -1084,14 +1085,14 @@ void asiUI_IV::REDRAW_TRIANGLE(const TCollection_AsciiString& name,
 void asiUI_IV::DRAW_TRIANGULATION(const Handle(Poly_Triangulation)& tris,
                                   const ActAPI_Color&               color,
                                   const double                      opacity,
-                                  const TCollection_AsciiString&    name)
+                                  const t_extString&                name)
 {
   this->draw_triangulation(tris, color, opacity, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TRIANGULATION(const TCollection_AsciiString&    name,
+void asiUI_IV::REDRAW_TRIANGULATION(const t_extString&                name,
                                     const Handle(Poly_Triangulation)& tris,
                                     const ActAPI_Color&               color,
                                     const double                      opacity)
@@ -1101,38 +1102,38 @@ void asiUI_IV::REDRAW_TRIANGULATION(const TCollection_AsciiString&    name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_MESH(const Handle(ActData_Mesh)&    mesh,
-                         const ActAPI_Color&            color,
-                         const double                   opacity,
-                         const double                   edgeWidth,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_MESH(const Handle(ActData_Mesh)& mesh,
+                         const ActAPI_Color&         color,
+                         const double                opacity,
+                         const double                edgeWidth,
+                         const t_extString&          name)
 {
   this->draw_mesh(mesh, color, opacity, edgeWidth, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_MESH(const TCollection_AsciiString& name,
-                           const Handle(ActData_Mesh)&    mesh,
-                           const ActAPI_Color&            color,
-                           const double                   opacity,
-                           const double                   edgeWidth)
+void asiUI_IV::REDRAW_MESH(const t_extString&          name,
+                           const Handle(ActData_Mesh)& mesh,
+                           const ActAPI_Color&         color,
+                           const double                opacity,
+                           const double                edgeWidth)
 {
   this->draw_mesh(mesh, color, opacity, edgeWidth, name, false);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_TEXT(const TCollection_AsciiString& text,
-                         const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_TEXT(const t_extString& text,
+                         const t_extString& name)
 {
   this->draw_text(text, name, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_TEXT(const TCollection_AsciiString& name,
-                           const TCollection_AsciiString& text)
+void asiUI_IV::REDRAW_TEXT(const t_extString& name,
+                           const t_extString& text)
 {
   this->draw_text(text, name, false);
 }
@@ -1141,7 +1142,7 @@ void asiUI_IV::REDRAW_TEXT(const TCollection_AsciiString& name,
 
 void asiUI_IV::DRAW_ASI_POINTSF(const Handle(asiAlgo_BaseCloud<float>)& points,
                                 const ActAPI_Color&                     color,
-                                const TCollection_AsciiString&          name)
+                                const t_extString&                      name)
 {
   // Create a new Node for the given point set
   bool isTx = false;
@@ -1163,9 +1164,9 @@ void asiUI_IV::DRAW_ASI_POINTSF(const Handle(asiAlgo_BaseCloud<float>)& points,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::DRAW_ASI_POINTS(const std::vector<gp_Pnt2d>&   points,
-                               const ActAPI_Color&            color,
-                               const TCollection_AsciiString& name)
+void asiUI_IV::DRAW_ASI_POINTS(const std::vector<gp_Pnt2d>& points,
+                               const ActAPI_Color&          color,
+                               const t_extString&           name)
 {
   // Create a new Node for the given point set
   bool isTx = false;
@@ -1349,10 +1350,10 @@ const vtkSmartPointer<asiVisu_PrsManager>& asiUI_IV::prsManager(const bool is2d)
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_point(const gp_XY&                   coord,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name,
-                          const bool                     newPrimitive)
+void asiUI_IV::draw_point(const gp_XY&        coord,
+                          const ActAPI_Color& color,
+                          const t_extString&  name,
+                          const bool          newPrimitive)
 {
   Handle(HRealArray) coords = new HRealArray(0, 1);
   //
@@ -1400,10 +1401,10 @@ void asiUI_IV::draw_point(const gp_XY&                   coord,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
-                           const ActAPI_Color&            color,
-                           const TCollection_AsciiString& name,
-                           const bool                     newPrimitive)
+void asiUI_IV::draw_points(const Handle(HRealArray)& coords,
+                           const ActAPI_Color&       color,
+                           const t_extString&        name,
+                           const bool                newPrimitive)
 {
   if ( coords.IsNull() )
     return;
@@ -1453,10 +1454,10 @@ void asiUI_IV::draw_points(const Handle(HRealArray)&      coords,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_points(const std::vector<gp_XYZ>&     pts,
-                           const ActAPI_Color&            color,
-                           const TCollection_AsciiString& name,
-                           const bool                     newPrimitive)
+void asiUI_IV::draw_points(const std::vector<gp_XYZ>& pts,
+                           const ActAPI_Color&        color,
+                           const t_extString&         name,
+                           const bool                 newPrimitive)
 {
   if ( pts.empty() )
     return;
@@ -1471,11 +1472,11 @@ void asiUI_IV::draw_points(const std::vector<gp_XYZ>&     pts,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_vectors(const Handle(HRealArray)&      points,
-                            const Handle(HRealArray)&      vectors,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name,
-                            const bool                     newPrimitive)
+void asiUI_IV::draw_vectors(const Handle(HRealArray)& points,
+                            const Handle(HRealArray)& vectors,
+                            const ActAPI_Color&       color,
+                            const t_extString&        name,
+                            const bool                newPrimitive)
 {
   if ( points.IsNull() || vectors.IsNull() )
     return;
@@ -1533,12 +1534,12 @@ void asiUI_IV::draw_vectors(const Handle(HRealArray)&      points,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_curve(const Handle(Geom_Curve)&      curve,
-                          const ActAPI_Color&            color,
-                          const TCollection_AsciiString& name,
-                          const bool                     drawOri,
-                          const bool                     is2dViewer,
-                          const bool                     newPrimitive)
+void asiUI_IV::draw_curve(const Handle(Geom_Curve)& curve,
+                          const ActAPI_Color&       color,
+                          const TCollection_ExtendedString&        name,
+                          const bool                drawOri,
+                          const bool                is2dViewer,
+                          const bool                newPrimitive)
 {
   if ( curve.IsNull() )
     return;
@@ -1588,10 +1589,10 @@ void asiUI_IV::draw_curve(const Handle(Geom_Curve)&      curve,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)&    curve,
-                            const ActAPI_Color&            color,
-                            const TCollection_AsciiString& name,
-                            const bool                     newPrimitive)
+void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)& curve,
+                            const ActAPI_Color&         color,
+                            const t_extString&          name,
+                            const bool                  newPrimitive)
 {
   if ( curve.IsNull() )
     return;
@@ -1642,15 +1643,15 @@ void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)&    curve,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_surface(const Handle(Geom_Surface)&    surface,
-                            const double                   uMin,
-                            const double                   uMax,
-                            const double                   vMin,
-                            const double                   vMax,
-                            const ActAPI_Color&            color,
-                            const double                   opacity,
-                            const TCollection_AsciiString& name,
-                            const bool                     newPrimitive)
+void asiUI_IV::draw_surface(const Handle(Geom_Surface)& surface,
+                            const double                uMin,
+                            const double                uMax,
+                            const double                vMin,
+                            const double                vMax,
+                            const ActAPI_Color&         color,
+                            const double                opacity,
+                            const t_extString&          name,
+                            const bool                  newPrimitive)
 {
   if ( surface.IsNull() )
     return;
@@ -1704,13 +1705,13 @@ void asiUI_IV::draw_surface(const Handle(Geom_Surface)&    surface,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_shape(const TopoDS_Shape&            shape,
-                          const bool                     hasColor,
-                          const ActAPI_Color&            color,
-                          const double                   opacity,
-                          const bool                     isWireframe,
-                          const TCollection_AsciiString& name,
-                          const bool                     newPrimitive)
+void asiUI_IV::draw_shape(const TopoDS_Shape& shape,
+                          const bool          hasColor,
+                          const ActAPI_Color& color,
+                          const double        opacity,
+                          const bool          isWireframe,
+                          const t_extString&  name,
+                          const bool          newPrimitive)
 {
   if ( shape.IsNull() )
     return;
@@ -1771,12 +1772,12 @@ void asiUI_IV::draw_shape(const TopoDS_Shape&            shape,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_link(const gp_XYZ&                  p1,
-                         const gp_XYZ&                  p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name,
-                         const bool                     is2dViewer,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_link(const gp_XYZ&       p1,
+                         const gp_XYZ&       p2,
+                         const ActAPI_Color& color,
+                         const TCollection_ExtendedString&  name,
+                         const bool          is2dViewer,
+                         const bool          newPrimitive)
 {
   if ( (p1 - p2).Modulus() < 1.0e-5 )
     return;
@@ -1825,22 +1826,22 @@ void asiUI_IV::draw_link(const gp_XYZ&                  p1,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_link(const gp_XYZ&                  p1,
-                         const gp_XYZ&                  p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_link(const gp_XYZ&       p1,
+                         const gp_XYZ&       p2,
+                         const ActAPI_Color& color,
+                         const TCollection_ExtendedString&  name,
+                         const bool          newPrimitive)
 {
   this->draw_link(p1, p2, color, name, false, newPrimitive);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_link(const gp_XY&                   p1,
-                         const gp_XY&                   p2,
-                         const ActAPI_Color&            color,
-                         const TCollection_AsciiString& name,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_link(const gp_XY&        p1,
+                         const gp_XY&        p2,
+                         const ActAPI_Color& color,
+                         const TCollection_ExtendedString&  name,
+                         const bool          newPrimitive)
 {
   gp_XYZ p1_3d(p1.X(), p1.Y(), 0.0), p2_3d(p2.X(), p2.Y(), 0.0);
 
@@ -1849,11 +1850,11 @@ void asiUI_IV::draw_link(const gp_XY&                   p1,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>&     poles,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name,
-                             const bool                     is2dViewer,
-                             const bool                     newPrimitive)
+void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
+                             const ActAPI_Color&        color,
+                             const TCollection_ExtendedString&         name,
+                             const bool                 is2dViewer,
+                             const bool                 newPrimitive)
 {
   Handle(Geom_BSplineCurve) curve = asiAlgo_Utils::PolylineAsSpline(poles);
 
@@ -1862,10 +1863,10 @@ void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>&     poles,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>&     poles,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name,
-                             const bool                     newPrimitive)
+void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
+                             const ActAPI_Color&        color,
+                             const TCollection_ExtendedString&         name,
+                             const bool                 newPrimitive)
 {
   Handle(Geom_BSplineCurve) curve = asiAlgo_Utils::PolylineAsSpline(poles);
 
@@ -1874,10 +1875,10 @@ void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>&     poles,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_polyline(const std::vector<gp_XY>&      poles,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name,
-                             const bool                     newPrimitive)
+void asiUI_IV::draw_polyline(const std::vector<gp_XY>& poles,
+                             const ActAPI_Color&       color,
+                             const TCollection_ExtendedString&        name,
+                             const bool                newPrimitive)
 {
   // Convert 2-dimensional poles to 3-dimensional poles for unification
   std::vector<gp_XYZ> poles3d;
@@ -1892,13 +1893,13 @@ void asiUI_IV::draw_polyline(const std::vector<gp_XY>&      poles,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_triangle(const gp_XYZ&                  p1,
-                             const gp_XYZ&                  p2,
-                             const gp_XYZ&                  p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name,
-                             const bool                     newPrimitive,
-                             const bool                     isWireframe)
+void asiUI_IV::draw_triangle(const gp_XYZ&       p1,
+                             const gp_XYZ&       p2,
+                             const gp_XYZ&       p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name,
+                             const bool          newPrimitive,
+                             const bool          isWireframe)
 {
   if ( isWireframe )
   {
@@ -1923,13 +1924,13 @@ void asiUI_IV::draw_triangle(const gp_XYZ&                  p1,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_triangle(const gp_XY&                   p1,
-                             const gp_XY&                   p2,
-                             const gp_XY&                   p3,
-                             const ActAPI_Color&            color,
-                             const TCollection_AsciiString& name,
-                             const bool                     newPrimitive,
-                             const bool                     isWireframe)
+void asiUI_IV::draw_triangle(const gp_XY&        p1,
+                             const gp_XY&        p2,
+                             const gp_XY&        p3,
+                             const ActAPI_Color& color,
+                             const t_extString&  name,
+                             const bool          newPrimitive,
+                             const bool          isWireframe)
 {
   if ( isWireframe )
   {
@@ -1957,7 +1958,7 @@ void asiUI_IV::draw_triangle(const gp_XY&                   p1,
 void asiUI_IV::draw_triangulation(const Handle(Poly_Triangulation)& tris,
                                   const ActAPI_Color&               color,
                                   const double                      opacity,
-                                  const TCollection_AsciiString&    name,
+                                  const t_extString&                name,
                                   const bool                        newPrimitive)
 {
   // Open transaction
@@ -2006,12 +2007,12 @@ void asiUI_IV::draw_triangulation(const Handle(Poly_Triangulation)& tris,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_mesh(const Handle(ActData_Mesh)&    mesh,
-                         const ActAPI_Color&            color,
-                         const double                   opacity,
-                         const double                   edgeWidth,
-                         const TCollection_AsciiString& name,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_mesh(const Handle(ActData_Mesh)& mesh,
+                         const ActAPI_Color&         color,
+                         const double                opacity,
+                         const double                edgeWidth,
+                         const t_extString&          name,
+                         const bool                  newPrimitive)
 {
   // Open transaction
   bool isTx = false;
@@ -2056,9 +2057,9 @@ void asiUI_IV::draw_mesh(const Handle(ActData_Mesh)&    mesh,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_text(const TCollection_AsciiString& text,
-                         const TCollection_AsciiString& name,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_text(const t_extString& text,
+                         const t_extString& name,
+                         const bool         newPrimitive)
 {
   // Open transaction
   bool isTx = false;
@@ -2101,13 +2102,13 @@ void asiUI_IV::draw_text(const TCollection_AsciiString& text,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::draw_axes(const gp_Pnt&                  origin,
-                         const gp_Dir&                  dx,
-                         const gp_Dir&                  dy,
-                         const gp_Dir&                  dz,
-                         const double                   scale,
-                         const TCollection_AsciiString& name,
-                         const bool                     newPrimitive)
+void asiUI_IV::draw_axes(const gp_Pnt&      origin,
+                         const gp_Dir&      dx,
+                         const gp_Dir&      dy,
+                         const gp_Dir&      dz,
+                         const double       scale,
+                         const t_extString& name,
+                         const bool         newPrimitive)
 {
   // Open transaction
   bool isTx = false;
