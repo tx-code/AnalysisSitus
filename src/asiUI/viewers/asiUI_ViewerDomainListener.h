@@ -60,6 +60,12 @@ public:
   asiUI_EXPORT virtual void
     Connect();
 
+protected slots:
+
+  //! Populates context menu.
+  virtual void
+    onContextMenu(const QPoint&);
+
 protected:
 
   asiUI_ViewerPart* m_wViewerPart; //!< Part viewer.

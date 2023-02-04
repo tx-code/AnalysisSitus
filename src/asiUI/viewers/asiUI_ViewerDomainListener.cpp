@@ -64,3 +64,10 @@ void asiUI_ViewerDomainListener::Connect()
 {
   asiUI_Viewer3dListener::Connect(); // Connect basic reactions.
 }
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerDomainListener::onContextMenu(const QPoint& pt)
+{
+  asiUI_Viewer3dListener::onContextMenu(pt);
+}
