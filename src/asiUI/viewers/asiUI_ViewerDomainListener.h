@@ -60,16 +60,22 @@ public:
   asiUI_EXPORT virtual void
     Connect();
 
-protected slots:
+protected:
 
   //! Populates context menu.
   virtual void
-    onContextMenu(const QPoint&);
+    populateMenu(QMenu&);
+
+  //! Executes the passed action.
+  virtual void
+    executeAction(QAction* action);
 
 protected:
 
   asiUI_ViewerPart* m_wViewerPart; //!< Part viewer.
   asiUI_ViewerHost* m_wViewerHost; //!< Host viewer.
+
+  QAction* m_pJoinEdges; //!< Context-menu action to join edges.
 
 };
 

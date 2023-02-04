@@ -225,7 +225,7 @@ void asiUI_ViewerDomain::onResetView()
 void asiUI_ViewerDomain::onDomainPicked()
 {
   std::map<int, TopoDS_Edge> edges;
-  this->getSelectedEdges(edges);
+  this->GetSelectedEdges(edges);
 
   auto itEdges = edges.cbegin();
   for ( ; itEdges != edges.cend(); ++itEdges )
@@ -399,6 +399,7 @@ void asiUI_ViewerDomain::onJoinEdges()
   }
   m_model->CommitCommand();
 
+  // Reset selection.
   m_selectedEdgesCache = TColStd_PackedMapOfInteger();
 
   // Update viewer
@@ -421,7 +422,7 @@ void asiUI_ViewerDomain::onContextMenu(const QPoint& pos)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ViewerDomain::getSelectedEdges(std::map<int, TopoDS_Edge>& edges)
+void asiUI_ViewerDomain::GetSelectedEdges(std::map<int, TopoDS_Edge>& edges)
 {
   Handle(asiData_PartNode) N = m_model->GetPartNode();
   //

@@ -60,6 +60,8 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
+//-----------------------------------------------------------------------------
+
 namespace
 {
   template<class HPoint>
@@ -67,26 +69,29 @@ namespace
                              const HPoint& p12,
                              const HPoint& p21,
                              const HPoint& p22,
-                             Standard_Boolean& isRev1,
-                             Standard_Boolean& isRev2)
+                             bool&         isRev1,
+                             bool&         isRev2)
   {
-    isRev1 = Standard_False;
-    isRev2 = Standard_False;
-     //gka protection against crossing seem on second face 
-  
-    Standard_Real d11 = p11.Distance(p21);
-    Standard_Real d21 =p12.Distance(p21);
-  
-    Standard_Real d12 = p11.Distance(p22);
-    Standard_Real d22 = p22.Distance(p12);
-    Standard_Real Dmin1 = Min(d11,d21);
-    Standard_Real Dmin2 = Min(d12,d22);
-    if(fabs(Dmin1 - Dmin2) <= Precision::Confusion() || Dmin2 > Dmin1) {
-      isRev1 = (d11 < d21 ? Standard_True : Standard_False);
+    isRev1 = false;
+    isRev2 = false;
+
+    // gka protection against crossing seem on second face 
+
+    double d11   = p11.Distance(p21);
+    double d21   = p12.Distance(p21);
+    double d12   = p11.Distance(p22);
+    double d22   = p22.Distance(p12);
+    double Dmin1 = Min(d11,d21);
+    double Dmin2 = Min(d12,d22);
+    //
+    if ( fabs(Dmin1 - Dmin2) <= Precision::Confusion() || Dmin2 > Dmin1 )
+    {
+      isRev1 = (d11 < d21 ? true : false);
     }
-    else if(Dmin2 < Dmin1) {
-      isRev1 = (d12 < d22 ? Standard_True  : Standard_False);
-      isRev2 = Standard_True;
+    else if ( Dmin2 < Dmin1 )
+    {
+      isRev1 = (d12 < d22 ? true : false);
+      isRev2 = true;
     }
   }
 
@@ -100,17 +105,25 @@ namespace
     return aWireFixer.Wire();
   }
 
-  template<class HCurve> 
-  static inline void SegmentCurve (HCurve& curve,
-                                   const Standard_Real first,
-                                   const Standard_Real last)
+  template<class HCurve>
+  static inline void SegmentCurve(HCurve&      curve,
+                                  const double first,
+                                  const double last)
   {
-    if(curve->FirstParameter() < first - Precision::PConfusion() || 
-       curve->LastParameter() > last + Precision::PConfusion()) {
-      if(curve->IsPeriodic())
-        curve->Segment(first,last);
-      else curve->Segment(Max(curve->FirstParameter(),first),
-                          Min(curve->LastParameter(),last));
+    const double pconfusion = Precision::PConfusion();
+
+    if ( curve->FirstParameter() < first - pconfusion ||
+         curve->LastParameter() > last + pconfusion)
+    {
+      if ( curve->IsPeriodic() )
+      {
+        curve->Segment(first, last);
+      }
+      else
+      {
+        curve->Segment( Max(curve->FirstParameter(), first),
+                        Min(curve->LastParameter(), last) );
+      }
   } 
 }
 
@@ -133,87 +146,103 @@ namespace
   // Joins the passed 2D curves.
   bool JoinCurves(const Handle(Geom2d_Curve)& aC2d1,
                   const Handle(Geom2d_Curve)& aC2d2,
-                  const TopAbs_Orientation Orient1,
-                  const TopAbs_Orientation Orient2,
-                  Standard_Real& first1,
-                  Standard_Real& last1,
-                  Standard_Real& first2,
-                  Standard_Real& last2,
-                  Handle(Geom2d_Curve)& C2dOut,
-                  Standard_Boolean& isRev1,
-                  Standard_Boolean& isRev2,
-                  const Standard_Boolean isError)
+                  const TopAbs_Orientation    Orient1,
+                  const TopAbs_Orientation    Orient2,
+                  double&                     first1,
+                  double&                     last1,
+                  double&                     first2,
+                  double&                     last2,
+                  Handle(Geom2d_Curve)&       C2dOut,
+                  bool&                       isRev1,
+                  bool&                       isRev2,
+                  ActAPI_ProgressEntry        progress)
   {
     Handle(Geom2d_Curve) c2d1_copy, c2d2_copy;
     c2d1_copy = GetCurveCopy(aC2d1, first1, last1, Orient1);
     c2d2_copy = GetCurveCopy(aC2d2, first2, last2, Orient2);
+    bool After =  true;
+
     ShapeConstruct_Curve scc;
-    Standard_Boolean After =  Standard_True;
 
     // Convert to splines.
     Handle(Geom2d_BSplineCurve)
-      bsplc12d = scc.ConvertToBSpline(c2d1_copy,first1,last1,Precision::Confusion());
+      bsplc12d = scc.ConvertToBSpline( c2d1_copy, first1, last1, Precision::Confusion() );
     //
     Handle(Geom2d_BSplineCurve)
-      bsplc22d = scc.ConvertToBSpline(c2d2_copy,first2,last2,Precision::Confusion());
+      bsplc22d = scc.ConvertToBSpline( c2d2_copy, first2, last2, Precision::Confusion() );
+    //
+    if ( bsplc12d.IsNull() || bsplc22d.IsNull() )
+    {
+      progress.SendLogMessage(LogErr(Normal) << "Failed to convert p-curves to splines.");
+      return false;
+    }
 
-    if(bsplc12d.IsNull() || bsplc22d.IsNull()) return Standard_False;
-  
-    SegmentCurve(bsplc12d,first1,last1);
-    SegmentCurve(bsplc22d,first2,last2);
-    //gka protection against crossing seem on second face 
-    gp_Pnt2d pp112d =  bsplc12d->Pole(1).XY();
-    gp_Pnt2d pp122d =  bsplc12d->Pole(bsplc12d->NbPoles()).XY();
-  
-    gp_Pnt2d pp212d =  bsplc22d->Pole(1).XY();
-    gp_Pnt2d pp222d =  bsplc22d->Pole(bsplc22d->NbPoles()).XY();
-  
-    GetReversedParameters(pp112d,pp122d,pp212d,pp222d,isRev1,isRev2);
-  
-    //regression on file 866026_M-f276-f311.brep bug OCC482
-    //if(isRev1 || isRev2)
-    //  return newedge1;
-    if(isRev1) {
+    // Make sure that curves are properly trimmed.
+    SegmentCurve(bsplc12d, first1, last1);
+    SegmentCurve(bsplc22d, first2, last2);
+
+    // gka protection against crossing seem on second face
+    gp_Pnt2d pp112d = bsplc12d->Pole(1).XY();
+    gp_Pnt2d pp122d = bsplc12d->Pole(bsplc12d->NbPoles()).XY();
+    //
+    gp_Pnt2d pp212d = bsplc22d->Pole(1).XY();
+    gp_Pnt2d pp222d = bsplc22d->Pole(bsplc22d->NbPoles()).XY();
+
+    GetReversedParameters(pp112d, pp122d, pp212d, pp222d, isRev1, isRev2);
+
+    // If the corresponding edges are reversed, we forcibly reverse the
+    // corresponding curves.
+    if ( isRev1 )
+    {
       bsplc12d->Reverse();
     }
-    if(isRev2)
-      bsplc22d->Reverse(); 
-  
-  
-    //---------------------------------------------------------
-    //protection against invalid topology Housing(sam1296.brep(face 707) - bugmergeedges4.brep)
-    if(isError) {
-      gp_Pnt2d pp1 = bsplc12d->Value(bsplc12d->FirstParameter());
-      gp_Pnt2d pp2 = bsplc12d->Value(bsplc12d->LastParameter());
-      gp_Pnt2d pp3 = bsplc12d->Value((bsplc12d->FirstParameter() + bsplc12d->LastParameter())*0.5);
-    
-      Standard_Real leng = pp1.Distance(pp2);
-      Standard_Boolean isCircle = (leng < pp1.Distance(pp3) + Precision::PConfusion());
-      if((pp1.Distance(bsplc22d->Pole(1)) < leng) && !isCircle) return Standard_False;
+    if ( isRev2 )
+    {
+      bsplc22d->Reverse();
     }
-    //-------------------------------------------------------
-    gp_Pnt2d pmid1 = 0.5 * ( bsplc12d->Pole(bsplc12d->NbPoles()).XY() + bsplc22d->Pole(1).XY() );
-        bsplc12d->SetPole(bsplc12d->NbPoles(), pmid1);
+
+    gp_XY ptFirst = bsplc12d->Pole( bsplc12d->NbPoles() ).XY();
+    gp_XY ptNext  = bsplc22d->Pole(1).XY();
+
+    if ( (ptFirst - ptNext).Modulus() > 10*Precision::PConfusion() )
+    {
+      progress.SendLogMessage(LogErr(Normal) << "Edges do not touch each other.");
+      return false;
+    }
+
+    // Average the connection point to have mean coordinates on stitching.
+    gp_Pnt2d pmid1 = 0.5 * (ptFirst + ptNext);
+    //
+    bsplc12d->SetPole(bsplc12d->NbPoles(), pmid1);
     bsplc22d->SetPole(1, pmid1);
-  
+
     // abv 01 Sep 99: Geom2dConvert ALWAYS performs reparametrisation of the
     // second curve before merging; this is quite not suitable
     // Use 3d tool instead
-  //      Geom2dConvert_CompCurveToBSplineCurve connect2d(bsplc12d);
-    gp_Pnt vPnt(0,0,0);
-    gp_Vec vDir(0,0,1);
-    gp_Pln vPln ( vPnt, vDir );
-    Handle(Geom_BSplineCurve) bspl1 = 
-      Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d ( bsplc12d, vPln ) );
-    Handle(Geom_BSplineCurve) bspl2 = 
-      Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d ( bsplc22d, vPln ) );
+
+    // Convert curves to 3D in order to call the "right" tool.
+    gp_Pln uvPln( gp::Origin(), gp::DZ() );
+    //
+    Handle(Geom_BSplineCurve)
+      bspl1 = Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d(bsplc12d, uvPln) );
+    //
+    Handle(Geom_BSplineCurve)
+      bspl2 = Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d(bsplc22d, uvPln) );
+
+    // Concatenate curves.
     GeomConvert_CompCurveToBSplineCurve connect2d(bspl1);
-    if(!connect2d.Add(bspl2,Precision::PConfusion(), After, Standard_False)) return Standard_False;
-     C2dOut = GeomAPI::To2d ( connect2d.BSplineCurve(), vPln );
+    //
+    if ( !connect2d.Add(bspl2,Precision::PConfusion(), After, false) )
+      return false;
+
+    // Get back to UV.
+    C2dOut = GeomAPI::To2d(connect2d.BSplineCurve(), uvPln);
   
-    return Standard_True;
+    return true;
   }
 }
+
+//-----------------------------------------------------------------------------
 
 //! Ctor.
 asiAlgo_JoinEdges::asiAlgo_JoinEdges(const TopoDS_Shape&  masterCAD,
@@ -225,6 +254,8 @@ asiAlgo_JoinEdges::asiAlgo_JoinEdges(const TopoDS_Shape&  masterCAD,
   m_plotter  = plotter;
 }
 
+//-----------------------------------------------------------------------------
+
 //! Joins the given edges in the master model.
 //! \param edges [in] edges to join.
 //! \param face  [in] base face.
@@ -234,7 +265,7 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
 {
   if ( edges.Extent() != 2 )
   {
-    std::cout << "Error: only pair of edges is accepted" << std::endl;
+    m_progress.SendLogMessage(LogErr(Normal) << "Only a pair of edges is accepted.");
     return false;
   }
 
@@ -244,7 +275,6 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
   //
   if ( !this->joinEdges(E1, E2, face, newE) )
   {
-    std::cout << "Error: cannot join edges" << std::endl;
     return false;
   }
 
@@ -275,8 +305,12 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
   ReShape->Replace(face, newFace);
   m_result = ReShape->Apply(m_master);
 
+  m_progress.SendLogMessage(LogInfo(Normal) << "Edges have been concatenated successfully.");
+
   return true; // Success
 }
+
+//-----------------------------------------------------------------------------
 
 //! Finds a correct geometric order in which the edges should follow one
 //! after another in order to be joined properly.
@@ -309,6 +343,8 @@ void asiAlgo_JoinEdges::chooseOrder(const TopTools_IndexedMapOfShape& edges,
   }
 }
 
+//-----------------------------------------------------------------------------
+
 //! Joins a couple of edges into a single edge.
 //! \param edge_A  [in]  first edge to join.
 //! \param edge_B  [in]  second edge to join.
@@ -327,7 +363,7 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
 
   // Get orientation of the edges on their host faces. We want to have
   // orientation irrelevant of face orientation, as we are going to
-  // work in the parametric domain
+  // work in the parametric domain.
   TopAbs_Orientation eFirstOri = TopAbs_EXTERNAL, eSecondOri = TopAbs_EXTERNAL;
   //
   for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
@@ -338,7 +374,7 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
       eSecondOri = exp.Current().Orientation();
   }
 
-  // Choose orientation of the bridge edge being built
+  // Choose orientation of the bridge edge being built.
   TopoDS_Edge eForward;
   if ( eFirstOri == TopAbs_FORWARD )
     eForward = eFirst;
@@ -355,8 +391,22 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
 
   Handle(Geom2d_Curve) c2dRes;
   bool isRev12, isRev22;
-  if( !::JoinCurves(c2d1, c2d2, eFirstOri, eSecondOri, first1, last1, first2, last2, c2dRes, isRev12, isRev22, false) )
+  //
+  if( !::JoinCurves(c2d1,
+                    c2d2,
+                    eFirstOri,
+                    eSecondOri,
+                    first1,
+                    last1,
+                    first2,
+                    last2,
+                    c2dRes,
+                    isRev12,
+                    isRev22,
+                    m_progress) )
+  {
     return false;
+  }
 
   //m_plotter.REDRAW_CURVE2D("c2d1", c2d1, Color_White);
   //m_plotter.REDRAW_CURVE2D("c2d2", c2d2, Color_White);

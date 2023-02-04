@@ -67,7 +67,34 @@ void asiUI_ViewerDomainListener::Connect()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ViewerDomainListener::onContextMenu(const QPoint& pt)
+void asiUI_ViewerDomainListener::populateMenu(QMenu& menu)
 {
-  asiUI_Viewer3dListener::onContextMenu(pt);
+  asiUI_ViewerDomain*
+    pDomainViewer = ::qobject_cast<asiUI_ViewerDomain*>(m_pViewer);
+
+  std::map<int, TopoDS_Edge> edges;
+  pDomainViewer->GetSelectedEdges(edges);
+
+  if ( edges.size() == 2 )
+  {
+    menu.addSeparator();
+    m_pJoinEdges = menu.addAction("Join p-curves (&J)");
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerDomainListener::executeAction(QAction* action)
+{
+  asiUI_ViewerDomain*
+    pDomainViewer = ::qobject_cast<asiUI_ViewerDomain*>(m_pViewer);
+
+  /* ==========================
+   *  Join (concatenate) edges.
+   * ========================== */
+
+  if ( action == m_pJoinEdges )
+  {
+    pDomainViewer->onJoinEdges();
+  }
 }

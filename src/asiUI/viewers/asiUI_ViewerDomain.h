@@ -97,9 +97,9 @@ signals:
   void pointPicked(const double x, const double y);
   void partModified();
 
-protected:
+public:
 
-  void getSelectedEdges(std::map<int, TopoDS_Edge>& edges);
+  void GetSelectedEdges(std::map<int, TopoDS_Edge>& edges);
 
 private:
 
