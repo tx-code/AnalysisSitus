@@ -1361,6 +1361,8 @@ static void SimplifySurface(Handle(Geom_BSplineSurface)& BS,
   }
 }
 
+//-----------------------------------------------------------------------------
+
 int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
@@ -1382,6 +1384,8 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  int nbLoaded = 0;
+
   // Get all curves.
   const std::vector< t_ptr<t_bcurve> >& bcurves = readAstra.GetResultCurves();
   //
@@ -1395,6 +1399,8 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
 
     interp->GetPlotter().REDRAW_CURVE( bcurve->HasName() ? QStr2ExtStr(qstr) : "astraCurve",
                                        c3d, Color_Red, true );
+
+    nbLoaded++;
   }
 
   // Get all surfaces.
@@ -1428,7 +1434,12 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
 
     interp->GetPlotter().REDRAW_SURFACE( surf->HasName() ? QStr2ExtStr(qstr) : "astraSurface",
                                          s3d, Color_DarkGray );
+
+    nbLoaded++;
   }
+
+  // Return the number of loaded entities.
+  *interp << nbLoaded;
 
   return TCL_OK;
 #else
@@ -1637,7 +1648,8 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("load-astra",
     //
     "load-astra <filename>\n"
-    "\t Loads ASTRA file with curves and surfaces.",
+    "\t Loads ASTRA file with curves and surfaces. Returns the number of loaded\n"
+    "\t curves and surfaces to the interpreter.",
     //
     __FILE__, group, ENGINE_LoadAstra);
 }

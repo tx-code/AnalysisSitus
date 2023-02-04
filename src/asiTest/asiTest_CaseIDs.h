@@ -57,6 +57,7 @@ enum test_CaseID
 /* ------------------------------------------------------------------------ */
 
   CaseID_Exchange,
+  CaseID_ExchangeAstra,
   CaseID_ExchangeMesh,
   CaseID_ExchangeShape,
 

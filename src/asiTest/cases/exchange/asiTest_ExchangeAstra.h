@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 28 June 2022
+// Created on: 04 February 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2022-present, Andrey Voevodin
+// Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,16 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiTest_ExchangeShape_HeaderFile
-#define asiTest_ExchangeShape_HeaderFile
+#ifndef asiTest_ExchangeAstra_HeaderFile
+#define asiTest_ExchangeAstra_HeaderFile
 
 // asiTest includes
 #include <asiTest_CaseIDs.h>
 #include <asiTest_TclTestCase.h>
 
-//! Test functions for B-rep exchange.
-class asiTest_ExchangeShape : public asiTest_TclTestCase
+//! Test functions for ASTRA interoperability functions.
+//! Read more at http://quaoar.su/blog/page/read-astra-curves-and-surfaces
+class asiTest_ExchangeAstra : public asiTest_TclTestCase
 {
 public:
 
@@ -44,14 +45,14 @@ public:
   //! \return ID of the Test Case.
   static int ID()
   {
-    return CaseID_ExchangeShape;
+    return CaseID_ExchangeAstra;
   }
 
   //! Returns filename for the description.
   //! \return filename for the description of the Test Case.
   static std::string DescriptionFn()
   {
-    return "asiTest_ExchangeShape";
+    return "asiTest_ExchangeAstra";
   }
 
   //! Returns Test Case description directory.
@@ -65,13 +66,8 @@ public:
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
   {
-    functions << &test_load_step_1
-              << &test_write_step_2
-              << &test_write_step_3
-              << &test_load_iges_1
-              << &test_load_brep_1
-              << &test_write_brep_2
-              << &test_write_brep_3
+    functions << &test_load_001
+              << &test_load_002
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -80,13 +76,9 @@ private:
   static outcome runTestScript(const int   funcID,
                                const char* filename);
 
-  static outcome test_load_step_1(const int funcID);
-  static outcome test_write_step_2(const int funcID);
-  static outcome test_write_step_3(const int funcID);
-  static outcome test_load_iges_1(const int funcID);
-  static outcome test_load_brep_1(const int funcID);
-  static outcome test_write_brep_2(const int funcID);
-  static outcome test_write_brep_3(const int funcID);
+  // Runnable tests.
+  static outcome test_load_001(const int funcID);
+  static outcome test_load_002(const int funcID);
 
 };
 

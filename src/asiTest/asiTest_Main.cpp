@@ -37,6 +37,7 @@
 #include <asiTest_ConvertCanonical.h>
 #include <asiTest_EdgeVexity.h>
 #include <asiTest_Exchange.h>
+#include <asiTest_ExchangeAstra.h>
 #include <asiTest_ExchangeMesh.h>
 #include <asiTest_ExchangeShape.h>
 #include <asiTest_FaceGrid.h>
@@ -159,6 +160,7 @@ int main(int argc, char* argv[])
 
   // Data exchange tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ExchangeAstra> );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ExchangeMesh>  );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ExchangeShape> );
 

@@ -132,11 +132,13 @@ set (cases_editing_CPP_FILES
 
 set (cases_exchange_H_FILES
   cases/exchange/asiTest_Exchange.h
+  cases/exchange/asiTest_ExchangeAstra.h
   cases/exchange/asiTest_ExchangeMesh.h
   cases/exchange/asiTest_ExchangeShape.h
 )
 set (cases_exchange_CPP_FILES
   cases/exchange/asiTest_Exchange.cpp
+  cases/exchange/asiTest_ExchangeAstra.cpp
   cases/exchange/asiTest_ExchangeMesh.cpp
   cases/exchange/asiTest_ExchangeShape.cpp
 )
