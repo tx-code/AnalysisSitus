@@ -308,9 +308,9 @@ bool asiAlgo_MeshConvert::FromVTK(vtkPolyData*                source,
   // Construct resulting mesh and copy data.
   result = new Poly_Triangulation((int) nodes.size(), (int) faces.size(), false);
   for ( int i = 0; i < (int)nodes.size(); ++i )
-    result->ChangeNode(i + 1) = nodes[i];
+    result->SetNode(i + 1, nodes[i]);
   for ( int i = 0; i < (int)faces.size(); ++i )
-    result->ChangeTriangle(i + 1).Set(faces[i][0], faces[i][1], faces[i][2]);
+    result->SetTriangle(i + 1, Poly_Triangle(faces[i][0], faces[i][1], faces[i][2]));
 
   return true;
 }
@@ -330,9 +330,9 @@ bool asiAlgo_MeshConvert::ToVTK(const Handle(Poly_Triangulation)& source,
   NCollection_DataMap<int, vtkIdType> nodeRepo;
 
   // Pass mesh elements to VTK data source
-  const Poly_Array1OfTriangle& aTriangles = source->ChangeTriangles();
-  for ( int i = aTriangles.Lower(); i <= aTriangles.Upper(); ++i)
-    __translateElement(source, aTriangles(i), result, nodeRepo);
+  const Handle(Poly_HArray1OfTriangle)& aTriangles = source->MapTriangleArray();
+  for ( int i = aTriangles->Lower(); i <= aTriangles->Upper(); ++i)
+    __translateElement(source, aTriangles->Value(i), result, nodeRepo);
 
   return true;
 }
@@ -357,19 +357,19 @@ bool asiAlgo_MeshConvert::ToBRep(const Handle(Poly_Triangulation)& source,
   BRep_Builder bbuilder;
   bbuilder.MakeShell(shell);
   //
-  const TColgp_Array1OfPnt&    nodes     = source->Nodes();
-  const Poly_Array1OfTriangle& triangles = source->Triangles();
+  Handle(TColgp_HArray1OfPnt)    nodes     = source->MapNodeArray();
+  Handle(Poly_HArray1OfTriangle) triangles = source->MapTriangleArray();
   //
-  for ( int triIdx  = triangles.Lower();
-            triIdx <= triangles.Upper();
+  for ( int triIdx  = triangles->Lower();
+            triIdx <= triangles->Upper();
           ++triIdx )
   {
-    const Poly_Triangle& triangle = triangles(triIdx);
+    const Poly_Triangle& triangle = triangles->Value(triIdx);
     //
     int id[3];
     triangle.Get(id[0], id[1], id[2]);
     //
-    const gp_Pnt pnt[] = { nodes(id[0]), nodes(id[1]), nodes(id[2]) };
+    const gp_Pnt pnt[] = { nodes->Value(id[0]), nodes->Value(id[1]), nodes->Value(id[2]) };
     //
     if ( ( !( pnt[0].IsEqual(pnt[1], 0.0) ) ) &&
          ( !( pnt[0].IsEqual(pnt[2], 0.0) ) ) )
@@ -543,7 +543,7 @@ vtkIdType
   if ( resPidPtr == nullptr )
   {
     // Access mesh node
-    const gp_Pnt& aPnt = source->Nodes().Value(nodeID);
+    gp_Pnt aPnt = source->Node(nodeID);
 
     // Push the point into VTK data set
     resPidPtr = nodeRepo.Bound(nodeID, points->InsertNextPoint( aPnt.X(), aPnt.Y(), aPnt.Z() ));

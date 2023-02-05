@@ -189,21 +189,21 @@ bool asiAlgo_Cloudify::Sample_Facets(const TopoDS_Shape&                model,
       continue;
 
     // Take data arrays
-    const TColgp_Array1OfPnt&   nodes = T->Nodes();
-    const Poly_Array1OfTriangle& tris = T->Triangles();
+    Handle(TColgp_HArray1OfPnt) nodes   = T->MapNodeArray();
+    Handle(Poly_HArray1OfTriangle) tris = T->MapTriangleArray();
 
     // Loop over the array of triangles, so that we can work with each
     // individual facet independently
-    for ( int t = 1; t <= tris.Length(); ++t )
+    for ( int t = 1; t <= tris->Length(); ++t )
     {
-      const Poly_Triangle& tri = tris(t);
+      const Poly_Triangle& tri = tris->Value(t);
 
       // Take triangle's nodes
       int n[3];
       tri.Get(n[0], n[1], n[2]);
 
       // Check out the nodes
-      gp_XYZ r[3] = { nodes(n[0]).XYZ(), nodes(n[1]).XYZ(), nodes(n[2]).XYZ() };
+      gp_XYZ r[3] = { nodes->Value(n[0]).XYZ(), nodes->Value(n[1]).XYZ(), nodes->Value(n[2]).XYZ() };
 
       // There are two parameters for sampling. One runs from r[1] to r[2],
       // while the second runs from r[0] to the intermediate point between

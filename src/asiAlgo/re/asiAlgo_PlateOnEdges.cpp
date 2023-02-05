@@ -35,11 +35,9 @@
 #include <asiAlgo_Timer.h>
 
 // OCCT includes
-#include <Adaptor3d_HCurveOnSurface.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
@@ -48,7 +46,6 @@
 #include <BRepLib.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 #include <Geom_BSplineSurface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomPlate_BuildPlateSurface.hxx>
 #include <GeomPlate_HArray1OfHCurve.hxx>
 #include <GeomPlate_MakeApprox.hxx>

@@ -161,7 +161,7 @@ void asiUI_ControlsMesh::onLoadFromStl()
 
   // Dump the number of loaded triangles.
   m_notifier.SendLogMessage( LogInfo(Normal) << "Loaded %1 triangles."
-                                             << triangulation->Triangles().Length() );
+                                             << triangulation->MapTriangleArray()->Length() );
 
   //---------------------------------------------------------------------------
   // Initialize Triangulation Node

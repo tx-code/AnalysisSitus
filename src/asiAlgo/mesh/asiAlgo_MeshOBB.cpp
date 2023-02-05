@@ -130,11 +130,11 @@ bool asiAlgo_MeshOBB::Perform()
          ax_Y_param_min =  RealLast(),
          ax_Z_param_min =  RealLast();
   //
-  const TColgp_Array1OfPnt& nodes = m_input->Nodes();
+  Handle(TColgp_HArray1OfPnt) nodes = m_input->MapNodeArray();
   //
-  for ( int i = nodes.Lower(); i <= nodes.Upper(); ++i )
+  for ( int i = nodes->Lower(); i <= nodes->Upper(); ++i )
   {
-    const gp_Pnt& P = nodes(i);
+    const gp_Pnt& P = nodes->Value(i);
     //
     const double node_X = P.X();
     const double node_Y = P.Y();
@@ -242,11 +242,11 @@ void asiAlgo_MeshOBB::calculateByCovariance(gp_Ax1& xAxis,
    * ======================= */
 
   gp_XYZ mu;
-  const TColgp_Array1OfPnt& nodes = m_input->Nodes();
+  Handle(TColgp_HArray1OfPnt) nodes = m_input->MapNodeArray();
   //
-  for ( int i = nodes.Lower(); i <= nodes.Upper(); ++i )
+  for ( int i = nodes->Lower(); i <= nodes->Upper(); ++i )
   {
-    const gp_Pnt& P = nodes(i);
+    const gp_Pnt& P = nodes->Value(i);
 
     const double node_X = P.X();
     const double node_Y = P.Y();
@@ -272,9 +272,9 @@ void asiAlgo_MeshOBB::calculateByCovariance(gp_Ax1& xAxis,
     }
   }
 
-  for ( int i = nodes.Lower(); i <= nodes.Upper(); ++i )
+  for ( int i = nodes->Lower(); i <= nodes->Upper(); ++i )
   {
-    const gp_Pnt& P = nodes(i);
+    const gp_Pnt& P = nodes->Value(i);
     //
     const double node_X = P.X();
     const double node_Y = P.Y();

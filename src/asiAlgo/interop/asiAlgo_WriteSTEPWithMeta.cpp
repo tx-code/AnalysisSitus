@@ -338,6 +338,9 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
     {
       bool isEdge = (S.ShapeType() == TopAbs_EDGE || S.ShapeType() == TopAbs_WIRE);
 
+      Handle(StepVisual_Colour) surfColor = !isEdge ? color : nullptr;
+      Handle(StepVisual_Colour) curvColor =  isEdge ? color : nullptr;
+
       TopLoc_Location L;
       TColStd_SequenceOfTransient seqRI;
       int nb = FindEntities(Styles.FinderProcess(), S, L, seqRI);
@@ -354,15 +357,15 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
         Handle(StepVisual_PresentationStyleAssignment) PSA;
 
         if ( !color.IsNull() )
-          //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
-          PSA = Styles.MakeColorPSA(item, !isEdge ? color: nullptr, isEdge ? color : nullptr, false);
+        {
+          PSA = Styles.MakeColorPSA( item, surfColor, curvColor, surfColor, 0.0, false );
+        }
         else
         {
           // Default color is white.
-          color = Styles.EncodeColor(Quantity_Color(1, 1, 1, Quantity_TOC_RGB), DPDCs, ColRGBs);
+          color = Styles.EncodeColor( Quantity_Color(1, 1, 1, Quantity_TOC_RGB), DPDCs, ColRGBs );
           //
-          //PSA = Styles.MakeColorPSA(item, surfColor, nullptr, nullptr, 0., false);
-          PSA = Styles.MakeColorPSA(item, !isEdge ? color : nullptr, isEdge ? color : nullptr, false);
+          PSA = Styles.MakeColorPSA( item, surfColor, curvColor, surfColor, 0.0, false );
         }
 
         STEPstyle = Styles.AddStyle(item, PSA, override);

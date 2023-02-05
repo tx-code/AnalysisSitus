@@ -44,7 +44,7 @@
 #include <ActAux_TimeStamp.h>
 
 // OCCT includes
-#include <Message_ProgressSentry.hxx>
+#include <Message_ProgressScope.hxx>
 #include <OSD_Directory.hxx>
 #include <OSD_File.hxx>
 #include <OSD_Path.hxx>
@@ -114,10 +114,10 @@ Standard_Boolean ActData_CAFConversionCtx::Delete(const ActAPI_ParameterGID& the
 //! \return true in case of success, false -- otherwise.
 Standard_Boolean
   ActData_CAFConversionCtx::Apply(const Handle(ActAPI_IModel)& theModel,
-                                  const Handle(Message_ProgressIndicator)& theProgress)
+                                  const Message_ProgressRange& theProgress)
 {
-  Message_ProgressSentry PEntry(theProgress, "CAF_CONVERSION_CTX_APPLYING", 0, 2, 1);
-  PEntry.Show();
+  Message_ProgressScope PEntry(theProgress, "CAF_CONVERSION_CTX_APPLYING", 2);
+  Message_ProgressRange r1 = PEntry.Next();
 
   /* =================================
    *  Save & retrieve Model into copy
@@ -151,10 +151,10 @@ Standard_Boolean
   }
 
   // Step progress
-  PEntry.Next();
-  PEntry.Show();
+  r1.Close();
+  Message_ProgressRange r2 = PEntry.Next();
 
-  if ( !this->applyNormalization(theProgress) )
+  if ( !this->applyNormalization(r2) )
   {
 #if defined CTX_DEBUG
     this->dumpModel(m_resModel);
@@ -218,7 +218,7 @@ const Handle(ActAPI_IModel)& ActData_CAFConversionCtx::Result() const
 //! \param theProgress [in] Progress Indicator.
 //! \return true in case of success, false -- otherwise.
 Standard_Boolean
-  ActData_CAFConversionCtx::applyNormalization(const Handle(Message_ProgressIndicator)& ActData_NotUsed(theProgress))
+  ActData_CAFConversionCtx::applyNormalization(const Message_ProgressRange& ActData_NotUsed(theProgress))
 {
   // Construct relocation map
   m_sampler->BuildRelocationMap();
@@ -282,7 +282,7 @@ Standard_Boolean
 //! \param theProgress [in] Progress Indicator.
 //! \return true in case of success, false -- otherwise.
 Standard_Boolean
-  ActData_CAFConversionCtx::applyModifications(const Handle(Message_ProgressIndicator)& ActData_NotUsed(theProgress))
+  ActData_CAFConversionCtx::applyModifications(const Message_ProgressRange& ActData_NotUsed(theProgress))
 {
   // Get modification lists
   NCollection_Sequence<Handle(HRecord)>& aListInsert = m_modif.ListInsert();

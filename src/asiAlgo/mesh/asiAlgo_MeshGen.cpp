@@ -281,7 +281,7 @@ bool asiAlgo_MeshGen::DoNetGen(const TopoDS_Shape&                              
   for ( int i = 1; i <= nbTriangles; ++i )
   {
     const netgen::Element2d& elem = ngMesh.SurfaceElement(netgen::ElementIndex(i));
-    mesh->ChangeTriangle(i).Set(elem[0], elem[1], elem[2]);
+    mesh->SetTriangle(i,Poly_Triangle(elem[0], elem[1], elem[2]));
   }
 
   std::cout << "Mesh was generated." << std::endl;

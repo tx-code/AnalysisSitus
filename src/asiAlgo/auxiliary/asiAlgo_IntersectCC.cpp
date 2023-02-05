@@ -41,7 +41,6 @@
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <GeomConvert.hxx>
 #include <Precision.hxx>
-#include <Quantity_Parameter.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
 //-----------------------------------------------------------------------------

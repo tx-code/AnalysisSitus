@@ -37,7 +37,6 @@
 #include <asiVisu_Utils.h>
 
 // OpenCascade includes
-#include <Adaptor3d_HCurve.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_WireExplorer.hxx>

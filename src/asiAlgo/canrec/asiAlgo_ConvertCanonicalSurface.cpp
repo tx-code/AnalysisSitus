@@ -38,7 +38,7 @@
 // OpenCascade includes
 #include <ElSLib.hxx>
 #include <Geom_Line.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 
 #define MagicTwist 1000
 
@@ -303,8 +303,8 @@ Handle(Geom_Surface)
 
   m_fGap = 0.;
 
-  Handle(GeomAdaptor_HSurface)
-    SurfAdapt = new GeomAdaptor_HSurface(newSurf);
+  Handle(GeomAdaptor_Surface)
+    SurfAdapt = new GeomAdaptor_Surface(newSurf);
 
   const int          NP = 21;
   double             S = 0., T = 0.;

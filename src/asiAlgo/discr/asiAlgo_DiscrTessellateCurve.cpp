@@ -46,8 +46,6 @@
 #include <ShapeAnalysis_Curve.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
 #include <ElCLib.hxx>
-#include <BRepAdaptor_HSurface.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
 
 #ifdef DEBUG_ApproximateCurveByPolyline_Shape
   #include <DBRep.hxx>
@@ -755,19 +753,19 @@ bool TessellateCurve::PntToCurve2d(
   gp_Pnt2d&                                   theUVPoint,
   double&                              theCoSParam)
 {
-  if (!theCoS.Surface()->IsKind(STANDARD_TYPE(BRepAdaptor_HSurface)))
+  if (!theCoS.Surface()->IsKind(STANDARD_TYPE(BRepAdaptor_Surface)))
     throw Standard_ProgramError("Unexpected type of surface");
 
-  if (!theCoS.Curve2d()->IsKind(STANDARD_TYPE(BRepAdaptor_HCurve2d)))
+  if (!theCoS.Curve2d()->IsKind(STANDARD_TYPE(BRepAdaptor_Curve2d)))
     throw Standard_ProgramError("Unexpected type of curve 2D");
 
   // Get surface from Geom
-  Handle(BRepAdaptor_HSurface) aGeomSurfHAdt =
-    Handle(BRepAdaptor_HSurface)::DownCast(theCoS.Surface());
+  Handle(BRepAdaptor_Surface) aGeomSurfHAdt =
+    Handle(BRepAdaptor_Surface)::DownCast(theCoS.Surface());
 
   // Get curve from Geom
-  Handle(BRepAdaptor_HCurve2d) aGeomCurveHAdt =
-    Handle(BRepAdaptor_HCurve2d)::DownCast(theCoS.Curve2d());
+  Handle(BRepAdaptor_Curve2d) aGeomCurveHAdt =
+    Handle(BRepAdaptor_Curve2d)::DownCast(theCoS.Curve2d());
 
   Adaptor3d_CurveOnSurface aCOnS = Adaptor3d_CurveOnSurface(aGeomCurveHAdt, aGeomSurfHAdt);
 
@@ -789,10 +787,15 @@ bool TessellateCurve::PntToCurve2d(
   theUVPoint = aGeomCurveHAdt->Value(theCoSParam);
   if (aDist > theProjToler)
   {
-    Handle(Geom_Surface) aSurface = aGeomSurfHAdt->ChangeSurface().Surface().Surface();
+    Handle(Geom_Surface) aSurface = aGeomSurfHAdt->ChangeSurface().Surface();
     gp_Pnt aPoint = thePoint;
-    if (aGeomSurfHAdt->ChangeSurface().Trsf().Form() != gp_Identity)
-      aPoint.Transform(aGeomSurfHAdt->ChangeSurface().Trsf().Inverted());
+
+    // 7.4.0:
+    // if (aGeomSurfHAdt->ChangeSurface().Trsf().Form() != gp_Identity)
+    //   aPoint.Transform(aGeomSurfHAdt->ChangeSurface().Trsf().Inverted());
+    if ( aGeomSurfHAdt->Trsf().Form() != gp_Identity )
+      aPoint.Transform( aGeomSurfHAdt->Trsf().Inverted() );
+
     ShapeAnalysis_Surface aSurfTools(aSurface);
     gp_Pnt2d aUVPoint = aSurfTools.NextValueOfUV(theUVPoint, aPoint, Precision::Confusion());
 

@@ -94,7 +94,6 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <BRep_TEdge.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
-#include <BRepAlgo_Common.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Defeaturing.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -131,7 +130,6 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
 #include <GeomAPI_PointsToBSpline.hxx>
 #include <GeomConvert.hxx>
 #include <GeomFill_ConstrainedFilling.hxx>
@@ -175,7 +173,6 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <Image_AlienPixMap.hxx>
 #include <V3d_View.hxx>
 #include <OpenGl_GraphicDriver.hxx>
-
 #include <BRepBuilderAPI_Transform.hxx>
 
 // Eigen includes
@@ -3200,10 +3197,10 @@ bool asiAlgo_Utils::Fill4Contour(const std::vector<Handle(Geom_BSplineCurve)>& c
   if ( curves.size() != 4 )
     return false;
 
-  Handle(GeomFill_SimpleBound) b1 = new GeomFill_SimpleBound(new GeomAdaptor_HCurve(curves[0]), 1e-3, 1e-2);
-  Handle(GeomFill_SimpleBound) b2 = new GeomFill_SimpleBound(new GeomAdaptor_HCurve(curves[1]), 1e-3, 1e-2);
-  Handle(GeomFill_SimpleBound) b3 = new GeomFill_SimpleBound(new GeomAdaptor_HCurve(curves[2]), 1e-3, 1e-2);
-  Handle(GeomFill_SimpleBound) b4 = new GeomFill_SimpleBound(new GeomAdaptor_HCurve(curves[3]), 1e-3, 1e-2);
+  Handle(GeomFill_SimpleBound) b1 = new GeomFill_SimpleBound(new GeomAdaptor_Curve(curves[0]), 1e-3, 1e-2);
+  Handle(GeomFill_SimpleBound) b2 = new GeomFill_SimpleBound(new GeomAdaptor_Curve(curves[1]), 1e-3, 1e-2);
+  Handle(GeomFill_SimpleBound) b3 = new GeomFill_SimpleBound(new GeomAdaptor_Curve(curves[2]), 1e-3, 1e-2);
+  Handle(GeomFill_SimpleBound) b4 = new GeomFill_SimpleBound(new GeomAdaptor_Curve(curves[3]), 1e-3, 1e-2);
 
   GeomFill_ConstrainedFilling filling(3, 100);
   filling.Init(b1, b2, b3, b4);
@@ -3261,8 +3258,8 @@ bool asiAlgo_Utils::FillContourPlate(const std::vector<Handle(Geom_BSplineCurve)
     tang->SetValue(i, GeomAbs_C0);
     nbPtsCur->SetValue(i, 50); // Number of discretization points
 
-    Handle(GeomAdaptor_HCurve)
-      curveAdt = new GeomAdaptor_HCurve(curves[cidx]);
+    Handle(GeomAdaptor_Curve)
+      curveAdt = new GeomAdaptor_Curve(curves[cidx]);
 
     fronts->SetValue(i, curveAdt);
   }

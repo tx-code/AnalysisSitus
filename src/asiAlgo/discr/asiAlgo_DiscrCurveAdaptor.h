@@ -35,8 +35,8 @@
 #include <asiAlgo.h>
 
 // OpenCascade includes
-#include <Adaptor2d_HCurve2d.hxx>
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <NCollection_List.hxx>
 #include <LProp3d_SLProps.hxx>
 #include <Precision.hxx>
@@ -60,8 +60,8 @@ public:
   public:
     CurveOnSurface () : myAdaptor (2, Precision::Confusion()) {}
 
-    void Init (const Handle(Adaptor2d_HCurve2d)& theCurve2d,
-               const Handle(Adaptor3d_HSurface)& theSurf)
+    void Init (const Handle(Adaptor2d_Curve2d)& theCurve2d,
+               const Handle(Adaptor3d_Surface)& theSurf)
     {
       myCurve2d = theCurve2d;
       mySurface = theSurf;
@@ -81,20 +81,20 @@ public:
 
   public:
 
-    Handle(Adaptor2d_HCurve2d) Curve2d() const
+    Handle(Adaptor2d_Curve2d) Curve2d() const
     {
       return myCurve2d;
     }
 
-    Handle(Adaptor3d_HSurface) Surface() const
+    Handle(Adaptor3d_Surface) Surface() const
     {
       return mySurface;
     }
 
   private:
-    Handle(Adaptor2d_HCurve2d) myCurve2d;
-    Handle(Adaptor3d_HSurface) mySurface;
-    mutable LProp3d_SLProps    myAdaptor;
+    Handle(Adaptor2d_Curve2d) myCurve2d;
+    Handle(Adaptor3d_Surface) mySurface;
+    mutable LProp3d_SLProps   myAdaptor;
   };
   typedef NCollection_List<CurveOnSurface> ListOfCurveOnSurface;
 
@@ -106,8 +106,8 @@ public:
     myMeshParams (theMeshParams)
   {}
 
-  void AddCurveOnSurface(const Handle(Adaptor2d_HCurve2d)& theCurve2d,
-                         const Handle(Adaptor3d_HSurface)& theSurf)
+  void AddCurveOnSurface(const Handle(Adaptor2d_Curve2d)& theCurve2d,
+                         const Handle(Adaptor3d_Surface)& theSurf)
   {
     myCOnSList.Append(CurveOnSurface()).Init (theCurve2d, theSurf);
   }

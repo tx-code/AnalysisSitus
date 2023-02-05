@@ -94,8 +94,8 @@ public:
   //! \param[out] hull the resulting convex hull.
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform(const TColgp_Array1OfPnt&   data,
-            Handle(Poly_Triangulation)& hull);
+    Perform(const Handle(TColgp_HArray1OfPnt)& data,
+            Handle(Poly_Triangulation)&        hull);
 
 };
 

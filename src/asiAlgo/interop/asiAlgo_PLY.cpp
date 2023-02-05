@@ -359,7 +359,7 @@ void asiAlgo_PLY::writeNodes(const Handle(Poly_Triangulation)& tris,
 {
   for ( int node_idx = 1; node_idx <= tris->NbNodes(); ++node_idx )
   {
-    const gp_Pnt& P = tris->Nodes()(node_idx);
+    const gp_Pnt& P = tris->Node(node_idx);
     FILE.FILE() << P.X() << " " << P.Y() << " " << P.Z();
     FILE.FILE() << "\n";
   }
@@ -413,11 +413,9 @@ void asiAlgo_PLY::writeElements(const Handle(Poly_Triangulation)& tris,
                                 const int                         shift,
                                 asiAlgp_OutPLYFile&               FILE)
 {
-  const Poly_Array1OfTriangle& trisArr = tris->Triangles();
-  //
-  for ( int i = 1; i <= trisArr.Length(); ++i )
+  for ( int i = 1; i <= tris->NbTriangles(); ++i )
   {
-    const Poly_Triangle& tri = trisArr(i);
+    const Poly_Triangle& tri = tris->Triangle(i);
 
     // Get node IDs.
     int node_idx[4] = {0, 0, 0, 0};

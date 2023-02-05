@@ -34,9 +34,6 @@ glTFFacePropertyExtractor::glTFFacePropertyExtractor(const TopoDS_Face& face)
 //
 : m_face        (face),
   m_SLTool      (1, 1e-12),
-  m_pNodes      (nullptr),
-  m_pNormals    (nullptr),
-  m_pNodeUVs    (nullptr),
   m_bHasNormals (false),
   m_bMirrored   (false)
 {
@@ -72,14 +69,14 @@ int glTFFacePropertyExtractor::NbTriangles() const
 
 int glTFFacePropertyExtractor::ElemLower() const
 {
-  return m_polyTriang->Triangles().Lower();
+  return m_polyTriang->MapTriangleArray()->Lower();
 }
 
 //-----------------------------------------------------------------------------
 
 int glTFFacePropertyExtractor::ElemUpper() const
 {
-  return m_polyTriang->Triangles().Upper();
+  return m_polyTriang->MapTriangleArray()->Upper();
 }
 
 //-----------------------------------------------------------------------------
@@ -106,7 +103,7 @@ bool glTFFacePropertyExtractor::HasNormals() const
 
 bool glTFFacePropertyExtractor::HasTexCoords() const
 {
-  return m_pNodeUVs != nullptr;
+  return !m_polyTriang->MapUVNodeArray().IsNull();
 }
 
 //-----------------------------------------------------------------------------
@@ -131,7 +128,7 @@ gp_Dir glTFFacePropertyExtractor::NormalTransformed(const int N)
 int glTFFacePropertyExtractor::NbNodes() const
 {
   return !m_polyTriang.IsNull()
-        ? m_polyTriang->Nodes().Length()
+        ? m_polyTriang->NbNodes()
         : 0;
 }
 
@@ -139,14 +136,14 @@ int glTFFacePropertyExtractor::NbNodes() const
 
 int glTFFacePropertyExtractor::NodeLower() const
 {
-  return m_polyTriang->Nodes().Lower();
+  return m_polyTriang->MapNodeArray()->Lower();
 }
 
 //-----------------------------------------------------------------------------
 
 int glTFFacePropertyExtractor::NodeUpper() const
 {
-  return m_polyTriang->Nodes().Upper();
+  return m_polyTriang->MapNodeArray()->Upper();
 }
 
 //-----------------------------------------------------------------------------
@@ -162,14 +159,15 @@ gp_Pnt glTFFacePropertyExtractor::NodeTransformed(const int N) const
 
 gp_Pnt2d glTFFacePropertyExtractor::NodeTexCoord(const int N) const
 {
-  return m_pNodeUVs != nullptr ? m_pNodeUVs->Value(N) : gp_Pnt2d();
+  Handle(TColgp_HArray1OfPnt2d) nodeUVs = m_polyTriang->MapUVNodeArray();
+  return nodeUVs.IsNull() ? gp_Pnt2d() : nodeUVs->Value(N);
 }
 
 //-----------------------------------------------------------------------------
 
 gp_Pnt glTFFacePropertyExtractor::node(const int N) const
 {
-  return m_polyTriang->Nodes().Value(N);
+  return m_polyTriang->Node(N);
 }
 
 //-----------------------------------------------------------------------------
@@ -178,20 +176,22 @@ gp_Dir glTFFacePropertyExtractor::normal(const int N)
 {
   gp_Dir norm( gp::DZ() );
 
-  if ( m_pNormals != nullptr )
+  if ( m_polyTriang->HasNormals() )
   {
-    const int nodeIdx = N - m_pNodes->Lower();
-    const Graphic3d_Vec3 normVec3( m_pNormals->Value(m_pNormals->Lower() + nodeIdx * 3),
-                                   m_pNormals->Value(m_pNormals->Lower() + nodeIdx * 3 + 1),
-                                   m_pNormals->Value(m_pNormals->Lower() + nodeIdx * 3 + 2) );
+    Handle(TShort_HArray1OfShortReal) norms = m_polyTriang->MapNormalArray();
+
+    const int nodeIdx = N - m_polyTriang->MapNodeArray()->Lower();
+    const Graphic3d_Vec3 normVec3( norms->Value(norms->Lower() + nodeIdx * 3),
+                                   norms->Value(norms->Lower() + nodeIdx * 3 + 1),
+                                   norms->Value(norms->Lower() + nodeIdx * 3 + 2) );
     if ( normVec3.Modulus() != 0.0f )
     {
       norm.SetCoord( normVec3.x(), normVec3.y(), normVec3.z() );
     }
   }
-  else if ( m_bHasNormals && m_pNodeUVs != nullptr )
+  else if ( m_bHasNormals && m_polyTriang->HasUVNodes() )
   {
-    const gp_XY& anUV = m_pNodeUVs->Value(N).XY();
+    const gp_XY& anUV = m_polyTriang->MapUVNodeArray()->Value(N).XY();
     m_SLTool.SetParameters( anUV.X(), anUV.Y() );
     //
     if ( m_SLTool.IsNormalDefined() )
@@ -207,7 +207,7 @@ gp_Dir glTFFacePropertyExtractor::normal(const int N)
 const Poly_Triangle&
   glTFFacePropertyExtractor::triangle(const int elemIndex) const
 {
-  return m_polyTriang->Triangles().Value(elemIndex);
+  return m_polyTriang->Triangle(elemIndex);
 }
 
 //-----------------------------------------------------------------------------
@@ -216,20 +216,12 @@ void glTFFacePropertyExtractor::initFace()
 {
   m_bHasNormals = false;
   m_bMirrored   = m_trsf.VectorialPart().Determinant() < 0.0;
-  m_pNormals    = nullptr;
-  m_pNodeUVs    = nullptr;
 
-  m_pNodes = &m_polyTriang->Nodes();
+  if ( !m_polyTriang.IsNull() )
   //
-  if ( !m_polyTriang.IsNull() && m_polyTriang->HasNormals() )
   {
-    m_pNormals    = &m_polyTriang->Normals();
-    m_bHasNormals = true;
-  }
-  if ( !m_polyTriang.IsNull() && m_polyTriang->HasUVNodes() )
-  {
-    m_pNodeUVs = &m_polyTriang->UVNodes();
-    if ( !m_bHasNormals )
+    m_bHasNormals = m_polyTriang->HasNormals();
+    if ( m_polyTriang->HasUVNodes() && !m_bHasNormals )
     {
       TopoDS_Face faceFwd = TopoDS::Face( m_face.Oriented(TopAbs_FORWARD) );
       faceFwd.Location( TopLoc_Location() );

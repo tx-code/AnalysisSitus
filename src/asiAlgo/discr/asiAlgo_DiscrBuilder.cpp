@@ -41,16 +41,14 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_ReShape.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
 #include <Geom_OffsetSurface.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <Precision.hxx>
 #include <ShapeAnalysis_Wire.hxx>
@@ -585,9 +583,9 @@ bool Builder::DiscretiseEdge(const TopoDS_Edge& aEdge, Edge& aDEdge)
       if (!BRep_Tool::CurveOnSurface(aEdge, aFace, fpar, lpar).IsNull())
       {
         BRepAdaptor_Curve2d aCurve2d(aEdge, aFace);
-        Handle(BRepAdaptor_HCurve2d) hCurve2d = new BRepAdaptor_HCurve2d(aCurve2d);
+        Handle(BRepAdaptor_Curve2d) hCurve2d = new BRepAdaptor_Curve2d(aCurve2d);
         BRepAdaptor_Surface aSurf(aFace, false);
-        Handle(BRepAdaptor_HSurface) hSurf = new BRepAdaptor_HSurface(aSurf);
+        Handle(BRepAdaptor_Surface) hSurf = new BRepAdaptor_Surface(aSurf);
         aCurveAdaptor.AddCurveOnSurface(hCurve2d, hSurf);
       }
     }
@@ -704,8 +702,8 @@ bool Builder::DiscretiseEdge
     int nbpt = aDEdge.GetCurve().NbPoints();
 
     CurveAdaptor::CurveOnSurface aCOS;
-    aCOS.Init(new BRepAdaptor_HCurve2d(BRepAdaptor_Curve2d(aEdge, aFace)),
-              new BRepAdaptor_HSurface(BRepAdaptor_Surface(aFace, false)));
+    aCOS.Init(new BRepAdaptor_Curve2d(BRepAdaptor_Curve2d(aEdge, aFace)),
+              new BRepAdaptor_Surface(BRepAdaptor_Surface(aFace, false)));
 
     // Projection stuff
     const double aProjToler = Max(m_meshParams.IsDeflection() ?
@@ -786,7 +784,7 @@ bool
     const TopoDS_Face& aCurrentFace = TopoDS::Face(anIt.Value());
 
     Handle(Geom_Surface) aSurf = BRep_Tool::Surface(aCurrentFace);
-    Handle(GeomAdaptor_HSurface) aSurfAdt = new GeomAdaptor_HSurface(aSurf);
+    Handle(GeomAdaptor_Surface) aSurfAdt = new GeomAdaptor_Surface(aSurf);
 
     // Get curve 2D
     double aFirstPar2d, aLastPar2d;
@@ -803,8 +801,8 @@ bool
         Abs(aLastPar3d - aLastPar2d) > Precision::Confusion())
       return false;
 
-    Handle(Geom2dAdaptor_HCurve) aCurve2dAdt =
-      new Geom2dAdaptor_HCurve(aCurve2d, aFirstPar2d, aLastPar2d);
+    Handle(Geom2dAdaptor_Curve) aCurve2dAdt =
+      new Geom2dAdaptor_Curve(aCurve2d, aFirstPar2d, aLastPar2d);
     Adaptor3d_CurveOnSurface aCurveOnSurfAdt(aCurve2dAdt, aSurfAdt);
 
     // Check parameterization against the passed working set of parameters

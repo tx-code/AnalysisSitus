@@ -206,7 +206,7 @@ Standard_Boolean
                              const Standard_Integer theAppVerActual,
                              const TCollection_AsciiString& theFnBefore,
                              const TCollection_AsciiString& theFnAfter,
-                             const Handle(Message_ProgressIndicator)& theProgress)
+                             const Message_ProgressRange&   theProgress)
 {
   Handle(ActData_BaseModel)
     aModelBase = Handle(ActData_BaseModel)::DownCast(theModel);
@@ -217,8 +217,8 @@ Standard_Boolean
   aModelBase->DisableTransactions();
 
   // Prepare progress
-  Message_ProgressSentry PEntry(theProgress, "CAF_CONVERSION_FW_APP", 0, 2, 1);
-  PEntry.Show();
+  Message_ProgressScope PEntry(theProgress, "CAF_CONVERSION_FW_APP", 2);
+  Message_ProgressRange r1 = PEntry.Next();
 
   // Dump BEFORE
   if ( !theFnBefore.IsEmpty() )
@@ -229,7 +229,7 @@ Standard_Boolean
   // FRAMEWORK conversion
   if ( theFwVerStored < theFwVerActual )
   {
-    if ( !aModelBase->converterFw()->Perform(theModel, theFwVerStored, theFwVerActual, theProgress) )
+    if ( !aModelBase->converterFw()->Perform(theModel, theFwVerStored, theFwVerActual, r1) )
     {
       aModelBase->Release(ActData_BaseModel::Version_LessFail);
       return Standard_False;
@@ -399,7 +399,7 @@ Standard_Boolean ActData_CAFLoader::NeedsConversion() const
 //! \return true in case of success, false -- otherwise.
 Standard_Boolean ActData_CAFLoader::Convert(const TCollection_AsciiString& theFnBefore,
                                             const TCollection_AsciiString& theFnAfter,
-                                            const Handle(Message_ProgressIndicator)& theProgress)
+                                            const Message_ProgressRange&   theProgress)
 {
   return Convert(m_model,
                  m_fwVerStored, m_appVerStored,

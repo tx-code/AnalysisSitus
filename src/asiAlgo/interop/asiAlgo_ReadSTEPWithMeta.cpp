@@ -350,8 +350,9 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
 
     Handle(StepVisual_Colour) SurfCol, BoundCol, CurveCol, RenderCol;
     bool IsComponent = false;
+    double RenderTransp = 0.0;
 
-    if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, IsComponent) && IsVisible )
+    if ( !Styles.GetColors(style, SurfCol, BoundCol, CurveCol, RenderCol, RenderTransp, IsComponent) && IsVisible )
       continue;
 
     // find shape

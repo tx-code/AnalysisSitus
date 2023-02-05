@@ -2670,15 +2670,15 @@ int ENGINE_MoveTriangulation(const Handle(asiTcl_Interp)& interp,
   T.SetTranslationPart(Translation);
 
   // Create transformed vertices.
-  const TColgp_Array1OfPnt& oldNodes = poly->Nodes();
-  TColgp_Array1OfPnt newNodes( oldNodes.Lower(), oldNodes.Upper() );
+  Handle(TColgp_HArray1OfPnt) oldNodes = poly->MapNodeArray();
+  TColgp_Array1OfPnt newNodes( oldNodes->Lower(), oldNodes->Upper() );
   //
-  for ( int nidx = oldNodes.Lower(); nidx <= oldNodes.Upper(); ++nidx )
-    newNodes(nidx) = oldNodes(nidx).Transformed(T);
+  for ( int nidx = oldNodes->Lower(); nidx <= oldNodes->Upper(); ++nidx )
+    newNodes.SetValue( nidx, oldNodes->Value(nidx).Transformed(T) );
 
   // Create new triangulation.
   Handle(Poly_Triangulation)
-    newPoly = new Poly_Triangulation( newNodes, poly->Triangles() );
+    newPoly = new Poly_Triangulation( newNodes, poly->MapTriangleArray()->Array1() );
 
   // Update Data Model.
   cmdEngine::model->OpenCommand();

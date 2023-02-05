@@ -30,7 +30,6 @@
 // OpenCascade includes
 #include <Approx_Curve3d.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_HCurve.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAPI_PointsToBSpline.hxx>
@@ -489,7 +488,7 @@ void asiAlgo_WriteDXF::exportBSpline(const BRepAdaptor_Curve& c)
 
   double tol3D = 0.001;
   int maxDegree = 3, maxSegment = 200;
-  Handle(BRepAdaptor_HCurve) hCurve = new BRepAdaptor_HCurve(c);
+  Handle(BRepAdaptor_Curve) hCurve = new BRepAdaptor_Curve(c);
 
   // Approximate.
   Approx_Curve3d approx(hCurve, tol3D, GeomAbs_C0, maxSegment, maxDegree);

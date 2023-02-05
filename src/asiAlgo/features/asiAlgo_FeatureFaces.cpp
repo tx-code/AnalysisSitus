@@ -31,6 +31,11 @@
 // asiAlgo includes
 #include <asiAlgo_FeatureFaces.h>
 
+// Win includes
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 //-----------------------------------------------------------------------------
 
 void asiAlgo::Dump(const asiAlgo_Feature& feature)

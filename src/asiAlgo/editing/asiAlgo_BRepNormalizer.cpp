@@ -32,7 +32,7 @@
 #include <asiAlgo_BRepNormalizer.h>
 
 // OCCT includes
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_NullObject.hxx>
 #include <TColStd_ListIteratorOfListOfTransient.hxx>

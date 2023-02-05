@@ -180,8 +180,8 @@ bool asiAlgo_OBJ::Write(const TopoDS_Shape&            theShape,
     if ( T.IsNull() )
       continue;
     //
-    aNbNodesAll += T->Nodes().Length();
-    aNbElemsAll += T->Triangles().Length();
+    aNbNodesAll += T->NbNodes();
+    aNbElemsAll += T->NbTriangles();
   }
 
   if ( aNbNodesAll == 0 || aNbElemsAll == 0 )
@@ -215,7 +215,7 @@ bool asiAlgo_OBJ::Write(const TopoDS_Shape&            theShape,
     if ( T.IsNull() )
       continue;
     //
-    const int  aLower     = T->Triangles().Lower();
+    const int  aLower     = T->MapTriangleArray()->Lower();
     const bool isMirrored = L.Transformation().VectorialPart().Determinant() < 0.0;
 
     TCollection_AsciiString aRefName("unnamed");
@@ -226,12 +226,11 @@ bool asiAlgo_OBJ::Write(const TopoDS_Shape&            theShape,
     }
 
     // Write nodes
-    const TColgp_Array1OfPnt& aNodes = T->Nodes();
+    Handle(TColgp_HArray1OfPnt) aNodes = T->MapNodeArray();
     const gp_Trsf&            aTrsf  = L.Transformation();
-    for ( int aNodeIter = aNodes.Lower(); aNodeIter <= aNodes.Upper(); ++aNodeIter )
+    for ( int aNodeIter = aNodes->Lower(); aNodeIter <= aNodes->Upper(); ++aNodeIter )
     {
-      gp_Pnt aNode = aNodes(aNodeIter);
-      aNode.Transform(aTrsf);
+      gp_Pnt aNode = aNodes->Value(aNodeIter).Transformed(aTrsf);
       //
       if ( !anObjFile.WriteVertex( objXyzToVec( aNode.XYZ() ) ) )
       {
@@ -241,15 +240,16 @@ bool asiAlgo_OBJ::Write(const TopoDS_Shape&            theShape,
     }
 
     // Write indices
-    for ( Poly_Array1OfTriangle::Iterator tIter( T->Triangles() ); tIter.More(); tIter.Next() )
+    Handle(Poly_HArray1OfTriangle) tris = T->MapTriangleArray();
+    for ( int tIter = tris->Lower(); tIter <= tris->Upper(); ++tIter )
     {
       if ( (F.Orientation() == TopAbs_REVERSED) ^ isMirrored )
       {
-        tIter.Value().Get(aTriNodes[0], aTriNodes[2], aTriNodes[1]);
+        tris->Value(tIter).Get(aTriNodes[0], aTriNodes[2], aTriNodes[1]);
       }
       else
       {
-        tIter.Value().Get(aTriNodes[0], aTriNodes[1], aTriNodes[2]);
+        tris->Value(tIter).Get(aTriNodes[0], aTriNodes[1], aTriNodes[2]);
       }
 
       aTriNodes[0] = aFirstNode + aTriNodes[0] - aLower;

@@ -81,7 +81,7 @@ bool asiAlgo_BuildConvexHull::Perform(const TopoDS_Shape&         shape,
     return false;
   }
 
-  return this->Perform(inputTris->Nodes(), hull);
+  return this->Perform(inputTris->MapNodeArray(), hull);
 }
 
 //-----------------------------------------------------------------------------
@@ -106,19 +106,19 @@ bool asiAlgo_BuildConvexHull::Perform(const std::vector<gp_Pnt>&  data,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildConvexHull::Perform(const TColgp_Array1OfPnt&   data,
-                                      Handle(Poly_Triangulation)& hull)
+bool asiAlgo_BuildConvexHull::Perform(const Handle(TColgp_HArray1OfPnt)& data,
+                                      Handle(Poly_Triangulation)&        hull)
 {
-  if ( data.Size() < 4 )
+  if ( data->Size() < 4 )
     return false; // Early exit.
 
   // Prepare data.
   std::vector<double> convertedData;
-  for( int i = 1; i <= data.Size(); ++i )
+  for( int i = 1; i <= data->Size(); ++i )
   {
-    convertedData.push_back(data[i].Coord(1));
-    convertedData.push_back(data[i].Coord(2));
-    convertedData.push_back(data[i].Coord(3));
+    convertedData.push_back(data->Value(i).Coord(1));
+    convertedData.push_back(data->Value(i).Coord(2));
+    convertedData.push_back(data->Value(i).Coord(3));
   }
 
   return this->Perform(convertedData, hull);
@@ -199,7 +199,7 @@ bool asiAlgo_BuildConvexHull::Perform(const std::vector<double>&  data,
   // Nodes.
   hull = new Poly_Triangulation((int) vertices.size(), (int) faces.size(), false);
   for( int i = 0; i < hull->NbNodes(); ++i )
-    hull->ChangeNode(i + 1).SetCoord(vertices[i].x, vertices[i].y, vertices[i].z);
+    hull->SetNode(i + 1, gp_Pnt(vertices[i].x, vertices[i].y, vertices[i].z));
 
   // Triangles.
   for( int i = 1; i <= hull->NbTriangles(); ++i )
@@ -210,7 +210,7 @@ bool asiAlgo_BuildConvexHull::Perform(const std::vector<double>&  data,
     HalfEdgeMesh::HalfEdge he3 = heMesh.m_halfEdges[he2.m_next];
 
     // Half-edge mesh uses zero-based indexation.
-    hull->ChangeTriangle(i).Set((int) he1.m_endVertex + 1, (int) he2.m_endVertex + 1, (int) he3.m_endVertex + 1);
+    hull->SetTriangle(i, Poly_Triangle((int) he1.m_endVertex + 1, (int) he2.m_endVertex + 1, (int) he3.m_endVertex + 1));
   }
 
   return true;

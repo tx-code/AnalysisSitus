@@ -45,6 +45,7 @@
 #include <NCollection_Vector.hxx>
 
 class ActData_Mesh;
+class gp_Vec;
 
 DEFINE_STANDARD_HANDLE(ActData_Mesh_Element, ActData_Mesh_Object)
 

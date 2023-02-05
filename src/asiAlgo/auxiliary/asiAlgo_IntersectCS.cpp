@@ -32,8 +32,8 @@
 #include <asiAlgo_IntersectCS.h>
 
 // OCCT includes
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <IntCurveSurface_HInter.hxx>
 #include <Precision.hxx>
 
@@ -52,8 +52,8 @@ bool asiAlgo_IntersectCS::operator()(const Handle(Geom_Surface)&   S,
                                      asiAlgo_IntersectionPointsCS& result,
                                      bool&                         hasTangentialPoints)
 {
-  Handle(GeomAdaptor_HCurve)   HC = new GeomAdaptor_HCurve(C);
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface(S);
+  Handle(GeomAdaptor_Curve)   HC = new GeomAdaptor_Curve(C);
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface(S);
 
   hasTangentialPoints = false;
 

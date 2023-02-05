@@ -137,9 +137,6 @@ private:
   TopLoc_Location                 m_faceLocation; //!< current face location
   BRepLProp_SLProps               m_SLTool;       //!< auxiliary tool for fetching normals from surface
   BRepAdaptor_Surface             m_faceAdaptor;  //!< surface adaptor for fetching normals from surface
-  const TColgp_Array1OfPnt*       m_pNodes;       //!< node positions of current face
-  const TShort_Array1OfShortReal* m_pNormals;     //!< node normals of current face
-  const TColgp_Array1OfPnt2d*     m_pNodeUVs;     //!< node UV coordinates of current face
   bool                            m_bHasNormals;  //!< flag indicating that current face has normals
   gp_Trsf                         m_trsf;         //!< current face transformation
   bool                            m_bMirrored;    //!< flag indicating that face triangles should be mirrored

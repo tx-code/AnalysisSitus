@@ -53,15 +53,16 @@ ActData_Mesh::ActData_Mesh(const Handle(Poly_Triangulation)& tri)
   : myNodeIDFactory     (new ActData_Mesh_IDFactory),
     myElementIDFactory  (new ActData_Mesh_IDFactory)
 {
-  for ( int node_idx = 1; node_idx <= tri->Nodes().Length(); ++node_idx )
+  for ( int node_idx = 1; node_idx <= tri->NbNodes(); ++node_idx )
   {
-    this->AddNode( tri->Nodes()(node_idx).X(), tri->Nodes()(node_idx).Y(), tri->Nodes()(node_idx).Z() );
+    gp_Pnt n = tri->Node(node_idx);
+    this->AddNode( n.X(), n.Y(), n.Z() );
   }
 
-  for ( int tri_idx = 1; tri_idx <= tri->Triangles().Length(); ++tri_idx )
+  for ( int tri_idx = 1; tri_idx <= tri->NbTriangles(); ++tri_idx )
   {
     int nodes[3] = {0, 0, 0};
-    tri->Triangles()(tri_idx).Get(nodes[0], nodes[1], nodes[2]);
+    tri->Triangle(tri_idx).Get(nodes[0], nodes[1], nodes[2]);
 
     this->AddFace(nodes, 3);
   }

@@ -38,7 +38,7 @@
 #include <ActAPI_IAlgorithm.h>
 
 // OCCT includes
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 //! Utility to suppress hard features.
 class asiAlgo_SuppressHard : public ActAPI_IAlgorithm

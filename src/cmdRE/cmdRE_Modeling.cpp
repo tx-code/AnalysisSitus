@@ -1874,8 +1874,10 @@ int RE_GetTriangulationNodes(const Handle(asiTcl_Interp)& interp,
   // Prepare a point cloud.
   Handle(asiAlgo_BaseCloud<double>) cloud = new asiAlgo_BaseCloud<double>;
   //
-  for ( int i = tris->Nodes().Lower(); i <= tris->Nodes().Upper(); ++i )
-    cloud->AddElement( tris->Nodes()(i).XYZ() );
+  Handle(TColgp_HArray1OfPnt) nodes = tris->MapNodeArray();
+
+  for ( int i = nodes->Lower(); i <= nodes->Upper(); ++i )
+    cloud->AddElement( nodes->Value(i).XYZ() );
 
   // Set result.
   interp->GetPlotter().REDRAW_POINTS(argv[1], cloud->GetCoordsArray(), Color_Default);

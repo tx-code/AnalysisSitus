@@ -61,10 +61,10 @@ ActData_CAFConverter::ActData_CAFConverter(const ActData_ConversionStream& theCS
 //! \param theProgress [in] Progress Indicator.
 //! \return true/false.
 Standard_Boolean
-  ActData_CAFConverter::Perform(Handle(ActAPI_IModel)& theModel,
-                                const Standard_Integer theOldVer,
-                                const Standard_Integer theNewVer,
-                                const Handle(Message_ProgressIndicator)& theProgress)
+  ActData_CAFConverter::Perform(Handle(ActAPI_IModel)&       theModel,
+                                const Standard_Integer       theOldVer,
+                                const Standard_Integer       theNewVer,
+                                const Message_ProgressRange& theProgress)
 {
   Handle(ActData_BaseModel) aModelBase = Handle(ActData_BaseModel)::DownCast(theModel);
 
@@ -91,21 +91,19 @@ Standard_Boolean
     return Standard_False;
 
   // Prepare progress entry
-  Message_ProgressSentry PEntry(theProgress, "CAF_CONVERSION_TRAVERSING", 0, aCSeq.Length(), 1);
-  PEntry.Show();
+  Message_ProgressScope PEntry(theProgress, "CAF_CONVERSION_TRAVERSING", aCSeq.Length());
 
   // Apply the conversion sequence
   for ( ActData_ConversionSequence::Iterator it(aCSeq); it.More(); it.Next() )
   {
+    Message_ProgressRange r = PEntry.Next();
     const ActData_ConversionRoutine& aRoutine = it.Value();
     theModel->DisableTransactions();
-    Standard_Boolean aConvRes = (*aRoutine)(theModel, theProgress);
+    Standard_Boolean aConvRes = (*aRoutine)(theModel, r);
     if ( !aConvRes )
     {
       return Standard_False;
     }
-    PEntry.Next();
-    PEntry.Show();
   }
 
   return Standard_True;

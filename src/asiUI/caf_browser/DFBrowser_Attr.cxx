@@ -640,9 +640,9 @@ void DFBrowser_Attr::Description (const Handle(TDF_Attribute) &theAttr,
       AddToName(aString);
       sprintf(aString,"Deviation angle: %f\n",(float)(aContext->DeviationAngle()));
       AddToName(aString);
-      sprintf(aString,"Hidden line remove deviation cefficient: %f\n",(float)(aContext->HLRDeviationCoefficient()));
+      sprintf(aString,"Hidden line remove deviation cefficient: %f\n",(float)(aContext->DeviationCoefficient()));
       AddToName(aString);
-      sprintf(aString,"Hidden line remove angle: %f\n",(float)(aContext->HLRAngle()));
+      sprintf(aString,"Hidden line remove angle: %f\n",(float)(aContext->DeviationAngle()));
       AddToName(aString);
       sprintf(aString,"Iso number: (U:%d,V:%d)\n",aContext->IsoNumber(AIS_TOI_IsoU),aContext->IsoNumber(AIS_TOI_IsoV));
       AddToName(aString);

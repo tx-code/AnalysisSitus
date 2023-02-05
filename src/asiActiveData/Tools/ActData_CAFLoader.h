@@ -37,7 +37,7 @@
 #include <ActData_BaseModel.h>
 
 // OCCT includes
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 DEFINE_STANDARD_HANDLE(ActData_CAFLoader, Standard_Transient)
 
@@ -74,7 +74,7 @@ public:
             const Standard_Integer theAppVerActual,
             const TCollection_AsciiString& theFnBefore = TCollection_AsciiString(),
             const TCollection_AsciiString& theFnAfter = TCollection_AsciiString(),
-            const Handle(Message_ProgressIndicator)& theProgress = nullptr);
+            const Message_ProgressRange& theProgress = Message_ProgressRange());
 
   ActData_EXPORT static Standard_Boolean
     CheckWellFormed(const Handle(ActAPI_IModel)& theModel);
@@ -98,7 +98,7 @@ public:
   ActData_EXPORT Standard_Boolean
     Convert(const TCollection_AsciiString& theFnBefore = TCollection_AsciiString(),
             const TCollection_AsciiString& theFnAfter = TCollection_AsciiString(),
-            const Handle(Message_ProgressIndicator)& theProgress = nullptr);
+            const Message_ProgressRange&   theProgress = Message_ProgressRange());
 
   ActData_EXPORT Standard_Boolean
     CheckWellFormed() const;

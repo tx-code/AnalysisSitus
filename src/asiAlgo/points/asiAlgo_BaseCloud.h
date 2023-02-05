@@ -35,6 +35,7 @@
 #include <asiAlgo_CloudRegion.h>
 
 // OCCT includes
+#include <gp_Ax3.hxx>
 #include <gp_XYZ.hxx>
 #include <Standard_Type.hxx>
 #include <TColStd_HArray1OfReal.hxx>

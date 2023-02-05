@@ -58,10 +58,10 @@ public:
     ActData_CAFConverter(const ActData_ConversionStream& theCStream);
 
   ActData_EXPORT Standard_Boolean
-    Perform(Handle(ActAPI_IModel)& theModel,
-            const Standard_Integer theOldVer,
-            const Standard_Integer theNewVer,
-            const Handle(Message_ProgressIndicator)& theProgress);
+    Perform(Handle(ActAPI_IModel)&       theModel,
+            const Standard_Integer       theOldVer,
+            const Standard_Integer       theNewVer,
+            const Message_ProgressRange& theProgress);
 
 private:
 

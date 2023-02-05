@@ -224,18 +224,18 @@ namespace
     {
       gp_XYZ xyz;
       if ( Loc.IsIdentity() )
-        xyz = LocalTri->Nodes()(localNodeId).XYZ();
+        xyz = LocalTri->Node(localNodeId).XYZ();
       else
-        xyz = LocalTri->Nodes()(localNodeId).Transformed( Loc.Transformation() ).XYZ();
+        xyz = LocalTri->Node(localNodeId).Transformed( Loc.Transformation() ).XYZ();
 
-      result->ChangeNode(localNodeId) = xyz;
+      result->SetNode(localNodeId, xyz);
     }
 
     // Add triangles taking into account face orientation.
     for ( int i = 1; i <= nTriangles; ++i )
     {
       int n1, n2, n3;
-      LocalTri->Triangles()(i).Get(n1, n2, n3);
+      LocalTri->Triangle(i).Get(n1, n2, n3);
       int m[3] = {n1, n2, n3};
 
       if ( F.Orientation() == TopAbs_REVERSED )
@@ -244,7 +244,7 @@ namespace
         m[2] = n2;
       }
 
-      result->ChangeTriangle(i) = Poly_Triangle(m[0], m[1], m[2]);
+      result->SetTriangle(i, Poly_Triangle(m[0], m[1], m[2]));
     }
 
     // Build normals.
@@ -276,7 +276,7 @@ Handle(Poly_Triangulation)
   Handle(Poly_Triangulation)
     result = new Poly_Triangulation(nodeCount, triCount, false);
   //
-  result->SetNormals( new TShort_HArray1OfShortReal(1, 3*nodeCount) );
+  result->AddNormals();
 
   // The second pass is to compose the united triangulation.
   int globalNodeIdx = 1;
@@ -287,11 +287,11 @@ Handle(Poly_Triangulation)
     NCollection_DataMap<int, int> nodeMapping;
 
     // Pass nodes.
-    const TColgp_Array1OfPnt& nodes = T->Nodes();
+    Handle(TColgp_HArray1OfPnt) nodes = T->MapNodeArray();
     //
-    for ( int pidx = nodes.Lower(); pidx <= nodes.Upper(); ++pidx )
+    for ( int pidx = nodes->Lower(); pidx <= nodes->Upper(); ++pidx )
     {
-      result->ChangeNode(globalNodeIdx) = nodes(pidx);
+      result->SetNode(globalNodeIdx, nodes->Value(pidx));
 
       if ( T->HasNormals() )
         result->SetNormal( globalNodeIdx, T->Normal(pidx) );
@@ -300,15 +300,15 @@ Handle(Poly_Triangulation)
     }
 
     // Pass triangles.
-    const Poly_Array1OfTriangle& TT = T->Triangles();
+    Handle(Poly_HArray1OfTriangle) TT = T->MapTriangleArray();
     //
-    for ( int tidx = TT.Lower(); tidx <= TT.Upper(); ++tidx )
+    for ( int tidx = TT->Lower(); tidx <= TT->Upper(); ++tidx )
     {
       int nids[3];
-      TT(tidx).Get(nids[0], nids[1], nids[2]);
+      TT->Value(tidx).Get(nids[0], nids[1], nids[2]);
       int nnids[3] = {nodeMapping(nids[0]), nodeMapping(nids[1]), nodeMapping(nids[2])};
 
-      result->ChangeTriangle(globalTriangleIdx++) = Poly_Triangle(nnids[0], nnids[1], nnids[2]);
+      result->SetTriangle(globalTriangleIdx++, Poly_Triangle(nnids[0], nnids[1], nnids[2]));
     }
   }
 
@@ -409,9 +409,9 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
       {
         gp_XYZ xyz;
         if ( Loc.IsIdentity() )
-          xyz = LocalTri->Nodes()(localNodeId).XYZ();
+          xyz = LocalTri->Node(localNodeId).XYZ();
         else
-          xyz = LocalTri->Nodes()(localNodeId).Transformed( Loc.Transformation() ).XYZ();
+          xyz = LocalTri->Node(localNodeId).Transformed( Loc.Transformation() ).XYZ();
 
         // Add node to the conglomerate after coincidence test
         ::appendNodeInGlobalTri(localNodeId,                  // [in]     local node ID in a face
@@ -426,7 +426,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
       for ( int i = 1; i <= nLocalTriangles; ++i )
       {
         int n1, n2, n3;
-        LocalTri->Triangles()(i).Get(n1, n2, n3);
+        LocalTri->Triangle(i).Get(n1, n2, n3);
         int m[3] = {n1, n2, n3};
 
         if ( F.Orientation() == TopAbs_REVERSED )
@@ -480,9 +480,9 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
       {
         gp_XYZ xyz;
         if ( Loc.IsIdentity() )
-          xyz = LocalTri->Nodes()(localNodeId).XYZ();
+          xyz = LocalTri->Node(localNodeId).XYZ();
         else
-          xyz = LocalTri->Nodes()(localNodeId).Transformed( Loc.Transformation() ).XYZ();
+          xyz = LocalTri->Node(localNodeId).Transformed( Loc.Transformation() ).XYZ();
 
         // Add node to the conglomerate after coincidence test
         ::appendNodeInGlobalTri(localNodeId,                  // [in]     local node ID in a face
@@ -497,7 +497,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
       for ( int i = 1; i <= nLocalTriangles; ++i )
       {
         int n1, n2, n3;
-        LocalTri->Triangles()(i).Get(n1, n2, n3);
+        LocalTri->Triangle(i).Get(n1, n2, n3);
         int m[3] = {n1, n2, n3};
 
         if ( F.Orientation() == TopAbs_REVERSED )
@@ -561,7 +561,7 @@ void asiAlgo_MeshMerge::build(const std::vector<Handle(Poly_Triangulation)>& tri
     // Add nodes with coincidence test
     for ( int localNodeId = 1; localNodeId <= nLocalNodes; ++localNodeId )
     {
-      gp_XYZ xyz = LocalTri->Nodes()(localNodeId).XYZ();
+      gp_XYZ xyz = LocalTri->Node(localNodeId).XYZ();
 
       // Add node to the conglomerate after coincidence test
       ::appendNodeInGlobalTri(localNodeId,                  // [in]     local node ID in a face
@@ -576,7 +576,7 @@ void asiAlgo_MeshMerge::build(const std::vector<Handle(Poly_Triangulation)>& tri
     for ( int i = 1; i <= nLocalTriangles; ++i )
     {
       int n1, n2, n3;
-      LocalTri->Triangles()(i).Get(n1, n2, n3);
+      LocalTri->Triangle(i).Get(n1, n2, n3);
       int m[3] = {n1, n2, n3};
 
       m[0] = FaceNodeIds_ToGlobalNodeIds.Find(m[0]);

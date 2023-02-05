@@ -627,7 +627,7 @@ void asiVisu_ShapeRobustTessellator::addEdge(const TopoDS_Edge&           edge,
     for ( int k = polygonOnTriNodes.Lower(); k <= polygonOnTriNodes.Upper(); ++k )
     {
       const int pidx = polygonOnTriNodes(k);
-      gp_Pnt P = poly->Nodes()(pidx);
+      gp_Pnt P = poly->Node(pidx);
       //
       if ( !loc.IsIdentity() )
         P.Transform(loc);
@@ -925,11 +925,11 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
 
     // Populate node
     NCollection_DataMap<int, vtkIdType> pointIds;
-    const TColgp_Array1OfPnt& nodes = triangulation->Nodes();
+    Handle(TColgp_HArray1OfPnt) nodes = triangulation->MapNodeArray();
     //
-    for ( int pidx = nodes.Lower(); pidx <= nodes.Upper(); ++pidx )
+    for ( int pidx = nodes->Lower(); pidx <= nodes->Upper(); ++pidx )
     {
-      gp_Pnt P = nodes(pidx);
+      gp_Pnt P = nodes->Value(pidx);
       //
       if ( !loc.IsIdentity() )
         P.Transform(loc);
@@ -941,11 +941,11 @@ void asiVisu_ShapeRobustTessellator::addFace(const TopoDS_Face& face,
     }
 
     // Create triangle cells
-    const Poly_Array1OfTriangle& triangles = triangulation->Triangles();
+    Handle(Poly_HArray1OfTriangle) triangles = triangulation->MapTriangleArray();
     //
-    for ( int t = triangles.Lower(); t <= triangles.Upper(); ++t )
+    for ( int t = triangles->Lower(); t <= triangles->Upper(); ++t )
     {
-      const Poly_Triangle& triangle = triangles(t);
+      const Poly_Triangle& triangle = triangles->Value(t);
 
       int n1, n2, n3;
       triangle.Get(n1, n2, n3);

@@ -48,13 +48,12 @@
 #include <GCPnts_AbscissaPoint.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <gp_Pnt2d.hxx>
 #include <GProp_GProps.hxx>
 #include <IntRes2d_Domain.hxx>
@@ -949,9 +948,9 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckDegenerated (const Standard_Integer n
   //added by rln 18/12/97 CSR# CTS18544 entity 13638
   //the situation when degenerated edge already exists but flag is not set
   //(i.e. the parametric space is closed)
-  GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
-  Standard_Real max = Max ( Ads.UResolution(myPrecision),
-			    Ads.VResolution(myPrecision) );
+  // GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+  Standard_Real max = Max ( mySurf->Adaptor3d()->/*Ads.*/UResolution(myPrecision),
+                            mySurf->Adaptor3d()->/*Ads.*/VResolution(myPrecision) );
   if ( p2d1.Distance (p2d2) /*Abs (par1 - par2)*/ <= max + gp::Resolution() ) return Standard_False;
 
   //#84 rln p2d1 = aP2d.XY() + par1 * theDir2d.XY();
@@ -1030,8 +1029,9 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckDegenerated (const Standard_Integer n
   gp_Pnt2d p1 = C1->Value (ul1);
   gp_Pnt2d p2 = C2->Value (uf2);
   myMin2d = myMax2d = p1.Distance (p2);
-  GeomAdaptor_Surface& SA = mySurf->Adaptor3d()->ChangeSurface();
-  if (myMin2d > (Max (SA.UResolution (myPrecision), SA.VResolution (myPrecision)) + Precision::PConfusion()))
+  // GeomAdaptor_Surface& SA = mySurf->Adaptor3d()->ChangeSurface();
+  if (myMin2d > (Max (mySurf->Adaptor3d()->/*SA.*/UResolution (myPrecision),
+                      mySurf->Adaptor3d()->/*SA.*/VResolution (myPrecision)) + Precision::PConfusion()))
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE1);
   return LastCheckStatus (ShapeExtend_DONE);
 }
@@ -1059,8 +1059,8 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckDegenerated (const Standard_Integer n
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_FAIL1);
     return Standard_False;
   }
-  Handle(Geom2dAdaptor_HCurve) AC = new Geom2dAdaptor_HCurve(pc,pcuf,pcul);
-  Handle(GeomAdaptor_HSurface) AS = new GeomAdaptor_HSurface(mySurf->Surface());
+  Handle(Geom2dAdaptor_Curve) AC = new Geom2dAdaptor_Curve(pc,pcuf,pcul);
+  Handle(GeomAdaptor_Surface) AS = new GeomAdaptor_Surface(mySurf->Surface());
   Adaptor3d_CurveOnSurface ACS(AC,AS);
   gp_Pnt cpnt, pcpnt;
   Standard_Integer nbp = 45;
@@ -1315,8 +1315,9 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckIntersectingEdges (const Standard_Int
       gp_Pnt2d end2 = Crv2->Value ( isForward2 ? a2 : b2 );
 //:l0      Standard_Real distab2 = mySurf->Value ( end1 ).SquareDistance ( mySurf->Value ( end2 ) );
       //:l0: test like in BRepCheck
-      GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
-      Standard_Real tol2d = 2 * Max ( Ads.UResolution(tol), Ads.VResolution(tol) );
+      // GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+      Standard_Real tol2d = 2 * Max ( mySurf->Adaptor3d()->/*Ads.*/UResolution(tol),
+                                      mySurf->Adaptor3d()->/*Ads.*/VResolution(tol) );
       isLacking = ( end1.SquareDistance(end2) >= tol2d * tol2d );
     }
 
@@ -1530,8 +1531,9 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckLacking (const Standard_Integer num,
   // test like in BRepCheck
   Standard_Real tol = Max ( BRep_Tool::Tolerance ( V1 ), BRep_Tool::Tolerance ( V2 ) );
   tol = ( Tolerance > gp::Resolution() && Tolerance < tol ? Tolerance : tol );
-  GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
-  Standard_Real tol2d = 2 * Max ( Ads.UResolution(tol), Ads.VResolution(tol) );
+  // GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+  Standard_Real tol2d = 2 * Max ( mySurf->Adaptor3d()->/*Ads.*/UResolution(tol),
+                                  mySurf->Adaptor3d()->/*Ads.*/VResolution(tol) );
   if ( // tol2d < gp::Resolution() || //#2 smh 26.03.99 S4163 Zero divide
        myMax2d < tol2d * tol2d ) return Standard_False;
 
@@ -1674,12 +1676,12 @@ Standard_Boolean asiAlgo_AnalyzeWire::CheckNotchedEdges(const Standard_Integer n
   if ( Abs ( v2.Angle ( v1 ) ) > 0.1 || p2d1.Distance(p2d2) > Tolerance)
     return Standard_False;
 
-  Handle(Geom2dAdaptor_HCurve) AC2d1  = new Geom2dAdaptor_HCurve(c2d1,a1,b1);
-  Handle(GeomAdaptor_HSurface) AdS1 = new GeomAdaptor_HSurface(new Geom_Plane(gp_Pln()));
+  Handle(Geom2dAdaptor_Curve) AC2d1  = new Geom2dAdaptor_Curve(c2d1,a1,b1);
+  Handle(GeomAdaptor_Surface) AdS1 = new GeomAdaptor_Surface(new Geom_Plane(gp_Pln()));
   Adaptor3d_CurveOnSurface Ad1(AC2d1,AdS1);
 
-  Handle(Geom2dAdaptor_HCurve) AC2d2  = new Geom2dAdaptor_HCurve(c2d2,a2,b2);
-  Handle(GeomAdaptor_HSurface) AdS2 = new GeomAdaptor_HSurface(new Geom_Plane(gp_Pln()));
+  Handle(Geom2dAdaptor_Curve) AC2d2  = new Geom2dAdaptor_Curve(c2d2,a2,b2);
+  Handle(GeomAdaptor_Surface) AdS2 = new GeomAdaptor_Surface(new Geom_Plane(gp_Pln()));
   Adaptor3d_CurveOnSurface Ad2(AC2d2,AdS2);
 
   Adaptor3d_CurveOnSurface longAD, shortAD;

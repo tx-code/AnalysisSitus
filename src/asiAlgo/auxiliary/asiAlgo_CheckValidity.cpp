@@ -696,11 +696,11 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
 
       m_progress.SendLogMessage(LogNotice(Normal) << "Free links of the face %1:" << iF);
 
-      TopLoc_Location            loc;
-      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(iF) );
-      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
-      const gp_Trsf&             trsf   = loc.Transformation();
-      const TColgp_Array1OfPnt&  points = tris->Nodes();
+      TopLoc_Location             loc;
+      const TopoDS_Face&          face   = TopoDS::Face( allFaces.FindKey(iF) );
+      Handle(Poly_Triangulation)  tris   = BRep_Tool::Triangulation(face, loc);
+      const gp_Trsf&              trsf   = loc.Transformation();
+      Handle(TColgp_HArray1OfPnt) points = tris->MapNodeArray();
 
       TColgp_Array1OfPnt   pnts   (1, 2);
       TColgp_Array1OfPnt2d pnts2d (1, 2);
@@ -712,8 +712,8 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
 
         m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}" << n1 << n2);
 
-        pnts(1) = points(n1).Transformed(trsf);
-        pnts(2) = points(n2).Transformed(trsf);
+        pnts(1) = points->Value(n1).Transformed(trsf);
+        pnts(2) = points->Value(n2).Transformed(trsf);
 
         m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts),
                              Color_Red, "free-link");
@@ -722,10 +722,10 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
 
         if ( tris->HasUVNodes() )
         {
-          const TColgp_Array1OfPnt2d& points2d = tris->UVNodes();
+          Handle(TColgp_HArray1OfPnt2d) points2d = tris->MapUVNodeArray();
           //
-          pnts2d(1) = points2d(n1);
-          pnts2d(2) = points2d(n2);
+          pnts2d(1) = points2d->Value(n1);
+          pnts2d(2) = points2d->Value(n2);
 
           m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d),
                                  Color_Red, "free-link");
@@ -791,17 +791,17 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       int iface, inode;
       checker.GetFreeNodeNum(i, iface, inode);
 
-      TopLoc_Location            loc;
-      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(iface) );
-      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
-      const TColgp_Array1OfPnt&  points = tris->Nodes();
-      const gp_Trsf&             trsf   = loc.Transformation();
+      TopLoc_Location             loc;
+      const TopoDS_Face&          face   = TopoDS::Face( allFaces.FindKey(iface) );
+      Handle(Poly_Triangulation)  tris   = BRep_Tool::Triangulation(face, loc);
+      Handle(TColgp_HArray1OfPnt) points = tris->MapNodeArray();
+      const gp_Trsf&              trsf   = loc.Transformation();
 
-      m_plotter.DRAW_POINT(points(inode).Transformed(trsf), Color_Red, "free-node");
+      m_plotter.DRAW_POINT(points->Value(inode).Transformed(trsf), Color_Red, "free-node");
 
       if ( tris->HasUVNodes() )
       {
-        m_plotter.DRAW_POINT(tris->UVNodes()(inode), Color_Red, "free-node");
+        m_plotter.DRAW_POINT(tris->UVNode(inode), Color_Red, "free-node");
       }
 
       m_progress.SendLogMessage(LogNotice(Normal) << "{%1 %2}"
@@ -825,29 +825,29 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       int faceId = 0, triId = 0;
       checker.GetSmallTriangle(i, faceId, triId);
 
-      TopLoc_Location            loc;
-      const TopoDS_Face&         face   = TopoDS::Face( allFaces.FindKey(faceId) );
-      Handle(Poly_Triangulation) tris   = BRep_Tool::Triangulation(face, loc);
-      const gp_Trsf&             trsf   = loc.Transformation();
-      const Poly_Triangle&       tri    = tris->Triangle(triId);
-      const TColgp_Array1OfPnt&  points = tris->Nodes();
+      TopLoc_Location             loc;
+      const TopoDS_Face&          face   = TopoDS::Face( allFaces.FindKey(faceId) );
+      Handle(Poly_Triangulation)  tris   = BRep_Tool::Triangulation(face, loc);
+      const gp_Trsf&              trsf   = loc.Transformation();
+      const Poly_Triangle&        tri    = tris->Triangle(triId);
+      Handle(TColgp_HArray1OfPnt) points = tris->MapNodeArray();
 
       int N1, N2, N3;
       tri.Get(N1, N2, N3);
 
       TColgp_Array1OfPnt poles(1, 4);
-      poles(1) = poles(4) = points(N1).Transformed(trsf);
-      poles(2) = points(N2).Transformed(trsf);
-      poles(3) = points(N3).Transformed(trsf);
+      poles(1) = poles(4) = points->Value(N1).Transformed(trsf);
+      poles(2) = points->Value(N2).Transformed(trsf);
+      poles(3) = points->Value(N3).Transformed(trsf);
 
       m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(poles), Color_Red, "small-tri");
 
       if ( tris->HasUVNodes() )
       {
         TColgp_Array1OfPnt2d poles2d(1, 4);
-        poles2d(1) = poles2d(4) = tris->UVNodes()(N1);
-        poles2d(2) = tris->UVNodes()(N2);
-        poles2d(3) = tris->UVNodes()(N3);
+        poles2d(1) = poles2d(4) = tris->UVNode(N1);
+        poles2d(2) = tris->UVNode(N2);
+        poles2d(3) = tris->UVNode(N3);
 
         m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(poles2d), Color_Red, "small-tri");
       }
@@ -903,13 +903,13 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       break;
 
     // Find free links.
-    const Poly_Array1OfTriangle&   triangles = tris->Triangles();
-    const int                      triNum    = triangles.Length();
+    Handle(Poly_HArray1OfTriangle) triangles = tris->MapTriangleArray();
+    const int                      triNum    = triangles->Length();
     NCollection_Map<BRepMesh_Edge> freeEdgeMap;
     //
     for ( int tidx = 1; tidx <= triNum; ++tidx )
     {
-      const Poly_Triangle& tri = triangles(tidx);
+      const Poly_Triangle& tri = triangles->Value(tidx);
       int triNodes[3] = { tri.Value(1), tri.Value(2), tri.Value(3)};
 
       for ( int j = 1; j <= 3; ++j )
@@ -935,10 +935,10 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
       m_progress.SendLogMessage(LogNotice(Normal) << "Not connected mesh inside face %1."
                                                   << fidx);
 
-      const TColgp_Array1OfPnt& points = tris->Nodes();
-      const gp_Trsf&            trsf   = loc.Transformation();
-      TColgp_Array1OfPnt        pnts   (1, 2);
-      TColgp_Array1OfPnt2d      pnts2d (1, 2);
+      Handle(TColgp_HArray1OfPnt) points = tris->MapNodeArray();
+      const gp_Trsf&              trsf   = loc.Transformation();
+      TColgp_Array1OfPnt          pnts   (1, 2);
+      TColgp_Array1OfPnt2d        pnts2d (1, 2);
       //
       for ( NCollection_Map<BRepMesh_Edge>::Iterator mapIt(freeEdgeMap);
             mapIt.More(); mapIt.Next())
@@ -949,8 +949,8 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
                                                     << link.FirstNode()
                                                     << link.LastNode());
 
-        pnts(1) = points( link.FirstNode() ) .Transformed(trsf);
-        pnts(2) = points( link.LastNode() )  .Transformed(trsf);
+        pnts(1) = points->Value( link.FirstNode() ) .Transformed(trsf);
+        pnts(2) = points->Value( link.LastNode() )  .Transformed(trsf);
 
         m_plotter.DRAW_CURVE(asiAlgo_Utils::PolylineAsSpline(pnts), Color_Red, false, "free-edge");
         m_plotter.DRAW_POINT(pnts(1), Color_Red, "free-edge");
@@ -958,9 +958,9 @@ bool asiAlgo_CheckValidity::CheckTriangulation(const TopoDS_Shape& shape,
         //
         if ( tris->HasUVNodes() )
         {
-          const TColgp_Array1OfPnt2d& points2d = tris->UVNodes();
-          pnts2d(1) = points2d( link.FirstNode() );
-          pnts2d(2) = points2d( link.LastNode() );
+          Handle(TColgp_HArray1OfPnt2d) points2d = tris->MapUVNodeArray();
+          pnts2d(1) = points2d->Value( link.FirstNode() );
+          pnts2d(2) = points2d->Value( link.LastNode() );
 
           m_plotter.DRAW_CURVE2D(asiAlgo_Utils::PolylineAsSpline(pnts2d), Color_Red, "free-edge");
           m_plotter.DRAW_POINT(pnts2d(1), Color_Red, "free-edge");

@@ -64,11 +64,11 @@ outcome ActTest_TriangulationParameter::accessValue(const int funcID)
    * =========================== */
 
   static Handle(Poly_Triangulation) TRIS = new Poly_Triangulation(3, 1, 0);
-  TRIS->ChangeNode(1) = gp_Pnt(0.0, 0.0, 0.0);
-  TRIS->ChangeNode(2) = gp_Pnt(1.0, 0.0, 0.0);
-  TRIS->ChangeNode(3) = gp_Pnt(1.0, 1.0, 0.0);
+  TRIS->SetNode(1, gp_Pnt(0.0, 0.0, 0.0));
+  TRIS->SetNode(2, gp_Pnt(1.0, 0.0, 0.0));
+  TRIS->SetNode(3, gp_Pnt(1.0, 1.0, 0.0));
   //
-  TRIS->ChangeTriangle(1) = Poly_Triangle(1, 2, 3);
+  TRIS->SetTriangle(1, Poly_Triangle(1, 2, 3));
 
   doc->OpenCommand();
   param->SetTriangulation(TRIS);

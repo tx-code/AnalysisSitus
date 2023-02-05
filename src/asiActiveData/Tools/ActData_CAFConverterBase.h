@@ -37,14 +37,14 @@
 #include <ActData_Common.h>
 
 // OCCT includes
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 // Active Data (API) forward declarations
 class ActAPI_IModel;
 
 //! Type definition for conversion routine.
-typedef Standard_Boolean (*ActData_ConversionRoutine)(Handle(ActAPI_IModel)& theModel,
-                                                      const Handle(Message_ProgressIndicator)& theProgress);
+typedef Standard_Boolean (*ActData_ConversionRoutine)(Handle(ActAPI_IModel)&       theModel,
+                                                      const Message_ProgressRange& theProgress);
 
 //! Type definition for conversion sequence.
 typedef NCollection_Sequence<ActData_ConversionRoutine> ActData_ConversionSequence;

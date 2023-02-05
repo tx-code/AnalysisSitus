@@ -644,11 +644,11 @@ bool asiAlgo_InterpolateSurfMesh::collectInteriorNodes(const Handle(Poly_Triangu
 
   asiAlgo_ClassifyPointFace classifier(F, 1e-4, 1e-4, false);
 
-  const TColgp_Array1OfPnt& triNodes = tris->Nodes();
+  Handle(TColgp_HArray1OfPnt) triNodes = tris->MapNodeArray();
 
-  for ( int k = triNodes.Lower(); k <= triNodes.Upper(); ++k )
+  for ( int k = triNodes->Lower(); k <= triNodes->Upper(); ++k )
   {
-    const gp_Pnt& triNode = triNodes(k);
+    const gp_Pnt& triNode = triNodes->Value(k);
     //
     if ( boxClipping && contourAABB.IsOut(triNode) )
       continue;

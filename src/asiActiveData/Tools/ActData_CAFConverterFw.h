@@ -55,20 +55,20 @@ enum ActData_VersionLog
 //! Namespace for all available conversion routines.
 namespace ActData_ConversionLibrary
 {
-  Standard_Boolean v040_to_v050(Handle(ActAPI_IModel)& theModel,
-                                const Handle(Message_ProgressIndicator)& theProgress);
+  Standard_Boolean v040_to_v050(Handle(ActAPI_IModel)&       theModel,
+                                const Message_ProgressRange& theProgress);
 
-  Standard_Boolean v050_to_v060(Handle(ActAPI_IModel)& theModel,
-                                const Handle(Message_ProgressIndicator)& theProgress);
+  Standard_Boolean v050_to_v060(Handle(ActAPI_IModel)&       theModel,
+                                const Message_ProgressRange& theProgress);
 
-  Standard_Boolean v060_to_v070(Handle(ActAPI_IModel)& theModel,
-                                const Handle(Message_ProgressIndicator)& theProgress);
+  Standard_Boolean v060_to_v070(Handle(ActAPI_IModel)&       theModel,
+                                const Message_ProgressRange& theProgress);
 
-  Standard_Boolean v070_to_v080(Handle(ActAPI_IModel)& theModel,
-                                const Handle(Message_ProgressIndicator)& theProgress);
+  Standard_Boolean v070_to_v080(Handle(ActAPI_IModel)&       theModel,
+                                const Message_ProgressRange& theProgress);
 
-  Standard_Boolean v080_to_v100(Handle(ActAPI_IModel)& theModel,
-                                const Handle(Message_ProgressIndicator)& theProgress);
+  Standard_Boolean v080_to_v100(Handle(ActAPI_IModel)&       theModel,
+                                const Message_ProgressRange& theProgress);
 }
 
 #endif

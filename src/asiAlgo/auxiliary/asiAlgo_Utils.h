@@ -72,6 +72,7 @@
 #include <Geom_ToroidalSurface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <gp_Lin2d.hxx>
 #include <gp_Trsf.hxx>
 #include <math_BullardGenerator.hxx>
 #include <math_Function.hxx>

@@ -41,7 +41,7 @@
 #include <ActData_ParameterFactory.h>
 
 // OCCT includes
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 //! \ingroup AD_DF
 //!
@@ -199,7 +199,7 @@ public:
 
   ActData_EXPORT Standard_Boolean
     Apply(const Handle(ActAPI_IModel)& theModel,
-          const Handle(Message_ProgressIndicator)& theProgress = nullptr);
+          const Message_ProgressRange& theProgress = Message_ProgressRange());
 
   ActData_EXPORT const Handle(ActAPI_IModel)&
     Result() const;
@@ -208,10 +208,10 @@ public:
 private:
 
   Standard_Boolean
-    applyNormalization(const Handle(Message_ProgressIndicator)& theProgress);
+    applyNormalization(const Message_ProgressRange& theProgress);
 
   Standard_Boolean
-    applyModifications(const Handle(Message_ProgressIndicator)& theProgress);
+    applyModifications(const Message_ProgressRange& theProgress);
 
   Standard_Boolean
     applyInsert(const Handle(HRecord)& theRec);
