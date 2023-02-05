@@ -81,7 +81,12 @@ void cmdEngine::Commands_Naming(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("init-naming",
     //
     "init-naming\n"
-    "\t Initializes topological naming service for the active part.",
+    "\t Initializes topological naming service for the active part.\n"
+    "\t As a result, all boundary elements (faces, edges, vertices) get\n"
+    "\t unique names like 'edge_1', 'face_1', 'vertex_1', 'edge_2, 'face_2',\n"
+    "\t 'vertex_2', etc. These names are persistent in the sense that they would\n"
+    "\t survive local operations (e.g., Euler ops) even if their memory addresses\n"
+    "\t become different.",
     //
     __FILE__, group, ENGINE_InitNaming);
 }

@@ -46,6 +46,7 @@ enum test_CaseID
   CaseID_RecognizeBlends,
   CaseID_SuppressBlends,
   CaseID_ConvertCanonical,
+  CaseID_ConcatPCurves,
 
 /* ------------------------------------------------------------------------ */
 

@@ -60,29 +60,29 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
+#define MaxAllowedGap 1.e-4
+
 //-----------------------------------------------------------------------------
 
 namespace
 {
-  template<class HPoint>
-  void GetReversedParameters(const HPoint& p11,
-                             const HPoint& p12,
-                             const HPoint& p21,
-                             const HPoint& p22,
-                             bool&         isRev1,
-                             bool&         isRev2)
+  template<class Pt>
+  void GetReversedParameters(const Pt& p11,
+                             const Pt& p12,
+                             const Pt& p21,
+                             const Pt& p22,
+                             bool&     isRev1,
+                             bool&     isRev2)
   {
     isRev1 = false;
     isRev2 = false;
-
-    // gka protection against crossing seem on second face 
 
     double d11   = p11.Distance(p21);
     double d21   = p12.Distance(p21);
     double d12   = p11.Distance(p22);
     double d22   = p22.Distance(p12);
-    double Dmin1 = Min(d11,d21);
-    double Dmin2 = Min(d12,d22);
+    double Dmin1 = Min(d11, d21);
+    double Dmin2 = Min(d12, d22);
     //
     if ( fabs(Dmin1 - Dmin2) <= Precision::Confusion() || Dmin2 > Dmin1 )
     {
@@ -97,12 +97,12 @@ namespace
 
   TopoDS_Wire FixWire(const TopoDS_Wire& theWire)
   {
-    ShapeFix_Wire aWireFixer;
-    aWireFixer.Load(theWire);
-    aWireFixer.FixClosed();
-    aWireFixer.FixGaps2d();
-    aWireFixer.FixConnected();
-    return aWireFixer.Wire();
+    ShapeFix_Wire wireFixer;
+    wireFixer.Load(theWire);
+    wireFixer.FixClosed();
+    wireFixer.FixGaps2d();
+    wireFixer.FixConnected();
+    return wireFixer.Wire();
   }
 
   template<class HCurve>
@@ -128,24 +128,24 @@ namespace
 }
 
   template<class HCurve>
-  HCurve GetCurveCopy(const HCurve&             curve,
-                      double&                   first,
-                      double&                   last,
-                      const TopAbs_Orientation& orient)
+  HCurve GetCurveCopy(const HCurve&            curve,
+                      double&                  first,
+                      double&                  last,
+                      const TopAbs_Orientation orient)
   {
     if ( orient == TopAbs_REVERSED )
     {
       double cf = first;
-      first = curve->ReversedParameter ( last );
-      last  = curve->ReversedParameter ( cf );
+      first = curve->ReversedParameter(last);
+      last  = curve->ReversedParameter(cf);
       return curve->Reversed();
     }
-    return HCurve::DownCast(curve->Copy());
+    return HCurve::DownCast( curve->Copy() );
   }
 
   // Joins the passed 2D curves.
-  bool JoinCurves(const Handle(Geom2d_Curve)& aC2d1,
-                  const Handle(Geom2d_Curve)& aC2d2,
+  bool JoinCurves(const Handle(Geom2d_Curve)& c2d1,
+                  const Handle(Geom2d_Curve)& c2d2,
                   const TopAbs_Orientation    Orient1,
                   const TopAbs_Orientation    Orient2,
                   double&                     first1,
@@ -153,14 +153,19 @@ namespace
                   double&                     first2,
                   double&                     last2,
                   Handle(Geom2d_Curve)&       C2dOut,
-                  bool&                       isRev1,
-                  bool&                       isRev2,
-                  ActAPI_ProgressEntry        progress)
+                  ActAPI_ProgressEntry        progress,
+                  ActAPI_PlotterEntry         plotter)
   {
+    //plotter.REDRAW_CURVE2D("c2d1", c2d1, Color_White);
+    //plotter.REDRAW_CURVE2D("c2d2", c2d2, Color_White);
+
+    // Make working copies of the curves.
     Handle(Geom2d_Curve) c2d1_copy, c2d2_copy;
-    c2d1_copy = GetCurveCopy(aC2d1, first1, last1, Orient1);
-    c2d2_copy = GetCurveCopy(aC2d2, first2, last2, Orient2);
-    bool After =  true;
+    c2d1_copy = GetCurveCopy(c2d1, first1, last1, Orient1);
+    c2d2_copy = GetCurveCopy(c2d2, first2, last2, Orient2);
+
+    //plotter.REDRAW_CURVE2D("c2d1_copy", c2d1_copy, Color_White);
+    //plotter.REDRAW_CURVE2D("c2d2_copy", c2d2_copy, Color_White);
 
     ShapeConstruct_Curve scc;
 
@@ -177,44 +182,52 @@ namespace
       return false;
     }
 
+    //plotter.REDRAW_CURVE2D("c2d1_copy_conv", c2d1_copy, Color_White);
+    //plotter.REDRAW_CURVE2D("c2d2_copy_conv", c2d2_copy, Color_White);
+
     // Make sure that curves are properly trimmed.
     SegmentCurve(bsplc12d, first1, last1);
     SegmentCurve(bsplc22d, first2, last2);
 
-    // gka protection against crossing seem on second face
     gp_Pnt2d pp112d = bsplc12d->Pole(1).XY();
     gp_Pnt2d pp122d = bsplc12d->Pole(bsplc12d->NbPoles()).XY();
     //
     gp_Pnt2d pp212d = bsplc22d->Pole(1).XY();
     gp_Pnt2d pp222d = bsplc22d->Pole(bsplc22d->NbPoles()).XY();
 
+    // Check the geometric order of curves after they have been reapproximated
+    // taking into account the orientations of their edges.
+    bool isRev1, isRev2;
     GetReversedParameters(pp112d, pp122d, pp212d, pp222d, isRev1, isRev2);
 
-    // If the corresponding edges are reversed, we forcibly reverse the
-    // corresponding curves.
-    if ( isRev1 )
-    {
-      bsplc12d->Reverse();
-    }
-    if ( isRev2 )
-    {
-      bsplc22d->Reverse();
-    }
+    int iLastOnC1  = isRev1 ? 1                   : bsplc12d->NbPoles();
+    int iFirstOnC2 = isRev2 ? bsplc22d->NbPoles() : 1;
 
-    gp_XY ptFirst = bsplc12d->Pole( bsplc12d->NbPoles() ).XY();
-    gp_XY ptNext  = bsplc22d->Pole(1).XY();
+    //plotter.REDRAW_CURVE2D("c2d1_copy_segmented", c2d1_copy, Color_White);
+    //plotter.REDRAW_CURVE2D("c2d2_copy_segmented", c2d2_copy, Color_White);
 
-    if ( (ptFirst - ptNext).Modulus() > 10*Precision::PConfusion() )
+    // Check for a gap.
+    gp_XY ptFirst = bsplc12d->Pole(iLastOnC1).XY();
+    gp_XY ptNext  = bsplc22d->Pole(iFirstOnC2).XY();
+    //
+    if ( (ptFirst - ptNext).Modulus() > MaxAllowedGap )
     {
-      progress.SendLogMessage(LogErr(Normal) << "Edges do not touch each other.");
+      plotter.REDRAW_POINT("ptFirst", ptFirst, Color_Red);
+      plotter.REDRAW_POINT("ptNext",  ptNext,  Color_Red);
+
+      progress.SendLogMessage( LogErr(Normal) << "Edges do not touch each other. "
+                                                 "The detected gap is %1 mm while "
+                                                 "the max allowed gap is %2 mm."
+                                              << (ptFirst - ptNext).Modulus()
+                                              << MaxAllowedGap );
       return false;
     }
 
     // Average the connection point to have mean coordinates on stitching.
     gp_Pnt2d pmid1 = 0.5 * (ptFirst + ptNext);
     //
-    bsplc12d->SetPole(bsplc12d->NbPoles(), pmid1);
-    bsplc22d->SetPole(1, pmid1);
+    bsplc12d->SetPole(iLastOnC1,  pmid1);
+    bsplc22d->SetPole(iFirstOnC2, pmid1);
 
     // abv 01 Sep 99: Geom2dConvert ALWAYS performs reparametrisation of the
     // second curve before merging; this is quite not suitable
@@ -224,15 +237,17 @@ namespace
     gp_Pln uvPln( gp::Origin(), gp::DZ() );
     //
     Handle(Geom_BSplineCurve)
-      bspl1 = Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d(bsplc12d, uvPln) );
+      bspl1 = Handle(Geom_BSplineCurve)::DownCast( GeomAPI::To3d(bsplc12d, uvPln) );
     //
     Handle(Geom_BSplineCurve)
-      bspl2 = Handle(Geom_BSplineCurve)::DownCast ( GeomAPI::To3d(bsplc22d, uvPln) );
+      bspl2 = Handle(Geom_BSplineCurve)::DownCast( GeomAPI::To3d(bsplc22d, uvPln) );
 
     // Concatenate curves.
     GeomConvert_CompCurveToBSplineCurve connect2d(bspl1);
     //
-    if ( !connect2d.Add(bspl2,Precision::PConfusion(), After, false) )
+    const bool after = true;
+    //
+    if ( !connect2d.Add(bspl2, Precision::PConfusion(), after, false) )
       return false;
 
     // Get back to UV.
@@ -380,8 +395,6 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
     eForward = eFirst;
   else if ( eSecondOri == TopAbs_FORWARD )
     eForward = eSecond;
-  //
-  TopAbs_Orientation bridgeOri = eFirst.Orientation();
 
   if ( !sae.PCurve(eFirst, face, c2d1, first1, last1, false) )
     return false;
@@ -390,7 +403,6 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
     return false;
 
   Handle(Geom2d_Curve) c2dRes;
-  bool isRev12, isRev22;
   //
   if( !::JoinCurves(c2d1,
                     c2d2,
@@ -401,16 +413,15 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
                     first2,
                     last2,
                     c2dRes,
-                    isRev12,
-                    isRev22,
-                    m_progress) )
+                    m_progress,
+                    m_plotter) )
   {
     return false;
   }
 
-  //m_plotter.REDRAW_CURVE2D("c2d1", c2d1, Color_White);
-  //m_plotter.REDRAW_CURVE2D("c2d2", c2d2, Color_White);
-  //m_plotter.REDRAW_CURVE2D("c2dRes", c2dRes, Color_Green);
+  /*m_plotter.REDRAW_CURVE2D("c2d1", c2d1, Color_White);
+  m_plotter.REDRAW_CURVE2D("c2d2", c2d2, Color_White);
+  m_plotter.REDRAW_CURVE2D("c2dRes", c2dRes, Color_Green);*/
 
   // Get host surface.
   Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
@@ -422,11 +433,6 @@ bool asiAlgo_JoinEdges::joinEdges(const TopoDS_Edge& eFirst,
   // Recover missing geometry
   ShapeFix_Edge SFE;
   SFE.FixAddCurve3d(eResult);
-
-  // Set orientation.
-  eResult.Orientation(bridgeOri);
-
-  //m_plotter.REDRAW_SHAPE("eResult", eResult, Color_Blue);
 
   return true;
 }

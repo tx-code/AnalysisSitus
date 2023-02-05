@@ -84,77 +84,77 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          cmdMisc_NotUsed(argc),
               const char**                 argv)
 {
-  /*t_ptr<poly_Mesh> mobMesh = new poly_Mesh;
-  mobMesh->AddVertex(0,0,0);*/
+  t_ptr<poly_Mesh> mobMesh = new poly_Mesh;
+  mobMesh->AddVertex(0,0,0);
 
-  Handle(Geom_Plane) drawingPlane = new Geom_Plane( gp::Origin(), gp::DZ() );
+  //Handle(Geom_Plane) drawingPlane = new Geom_Plane( gp::Origin(), gp::DZ() );
 
-  std::vector<gp_XY> pts = {
-    gp_XY(1108.8858916194, 355),
-    gp_XY(1258.8858916194, 355),
-    gp_XY(1183.8858916194, 382.5),
-    gp_XY(1258.8858916194, 382.5),
-    gp_XY(1258.9377598936, 115.5),
-    gp_XY(1058.8858916194, 231),
-    gp_XY(1108.8858916194, 382.5),
-    gp_XY(1258.8858916194, 350),
-    gp_XY(1108.8858916194, 350),
-    gp_XY(858.8340233452, 115.5),
-    gp_XY(836.3858916194, 615),
-    gp_XY(858.8340233452, 0),
-    gp_XY(836.3858916194, 130),
-    gp_XY(836.3858916194, 392.5),
-    gp_XY(831.3858916194, 50),
-    gp_XY(808.8858916194, 0),
-    gp_XY(808.8858916194, 650),
-    gp_XY(1008.8858916194, 630),
-    gp_XY(1108.8858916194, 630),
-    gp_XY(1308.8858916194, 650),
-    gp_XY(1308.8858916194, 0),
-    gp_XY(1258.9377598936, 0) };
+  //std::vector<gp_XY> pts = {
+  //  gp_XY(1108.8858916194, 355),
+  //  gp_XY(1258.8858916194, 355),
+  //  gp_XY(1183.8858916194, 382.5),
+  //  gp_XY(1258.8858916194, 382.5),
+  //  gp_XY(1258.9377598936, 115.5),
+  //  gp_XY(1058.8858916194, 231),
+  //  gp_XY(1108.8858916194, 382.5),
+  //  gp_XY(1258.8858916194, 350),
+  //  gp_XY(1108.8858916194, 350),
+  //  gp_XY(858.8340233452, 115.5),
+  //  gp_XY(836.3858916194, 615),
+  //  gp_XY(858.8340233452, 0),
+  //  gp_XY(836.3858916194, 130),
+  //  gp_XY(836.3858916194, 392.5),
+  //  gp_XY(831.3858916194, 50),
+  //  gp_XY(808.8858916194, 0),
+  //  gp_XY(808.8858916194, 650),
+  //  gp_XY(1008.8858916194, 630),
+  //  gp_XY(1108.8858916194, 630),
+  //  gp_XY(1308.8858916194, 650),
+  //  gp_XY(1308.8858916194, 0),
+  //  gp_XY(1258.9377598936, 0) };
 
-  Handle(asiAlgo_BaseCloud<double>) pcloud = new asiAlgo_BaseCloud<double>;
-  //
-  Handle(asiAlgo_PointWithAttrCloud<gp_XY>)
-    cloud = new asiAlgo_PointWithAttrCloud<gp_XY>;
-  //
-  for ( const auto& pt : pts )
-  {
-    cloud ->AddElement( pt );
-    pcloud->AddElement( drawingPlane->Value( pt.X(), pt.Y() ) );
-  }
+  //Handle(asiAlgo_BaseCloud<double>) pcloud = new asiAlgo_BaseCloud<double>;
+  ////
+  //Handle(asiAlgo_PointWithAttrCloud<gp_XY>)
+  //  cloud = new asiAlgo_PointWithAttrCloud<gp_XY>;
+  ////
+  //for ( const auto& pt : pts )
+  //{
+  //  cloud ->AddElement( pt );
+  //  pcloud->AddElement( drawingPlane->Value( pt.X(), pt.Y() ) );
+  //}
 
-  interp->GetPlotter().REDRAW_POINTS("pcloud", pcloud->GetCoordsArray(), Color_White);
+  //interp->GetPlotter().REDRAW_POINTS("pcloud", pcloud->GetCoordsArray(), Color_White);
 
-  asiAlgo_QuickHull2d<gp_XY> qHull( cloud,
-                                    interp->GetProgress(),
-                                    interp->GetPlotter() );
+  //asiAlgo_QuickHull2d<gp_XY> qHull( cloud,
+  //                                  interp->GetProgress(),
+  //                                  interp->GetPlotter() );
 
-  if ( !qHull.Perform() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build convex hull.");
-    return TCL_ERROR;
-  }
+  //if ( !qHull.Perform() )
+  //{
+  //  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build convex hull.");
+  //  return TCL_ERROR;
+  //}
 
-  const Handle(TColStd_HSequenceOfInteger)& hull = qHull.GetHull();
+  //const Handle(TColStd_HSequenceOfInteger)& hull = qHull.GetHull();
 
-  // Make polygon.
-  BRepBuilderAPI_MakePolygon mkPolygon;
-  //
-  for ( int hidx = hull->Lower(); hidx <= hull->Upper(); ++hidx )
-  {
-    const int index = hull->Value(hidx);
-    gp_XY     xy    = cloud->GetElement(index).Coord;
+  //// Make polygon.
+  //BRepBuilderAPI_MakePolygon mkPolygon;
+  ////
+  //for ( int hidx = hull->Lower(); hidx <= hull->Upper(); ++hidx )
+  //{
+  //  const int index = hull->Value(hidx);
+  //  gp_XY     xy    = cloud->GetElement(index).Coord;
 
-    mkPolygon.Add( drawingPlane->Value( xy.X(), xy.Y() ) );
-  }
-  //
-  mkPolygon.Close(); // Polygon should be closed
-  mkPolygon.Build();
-  //
-  const TopoDS_Wire& W = mkPolygon.Wire();
+  //  mkPolygon.Add( drawingPlane->Value( xy.X(), xy.Y() ) );
+  //}
+  ////
+  //mkPolygon.Close(); // Polygon should be closed
+  //mkPolygon.Build();
+  ////
+  //const TopoDS_Wire& W = mkPolygon.Wire();
 
-  interp->GetPlotter().REDRAW_SHAPE("convexHull", W, Color_Green, 1., true);
+  //interp->GetPlotter().REDRAW_SHAPE("convexHull", W, Color_Green, 1., true);
 
   return TCL_OK;
 }

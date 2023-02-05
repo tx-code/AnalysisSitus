@@ -32,6 +32,7 @@
 #include <asiTest_AAG.h>
 #include <asiTest_BuildQuickHull.h>
 #include <asiTest_ChangeColor.h>
+#include <asiTest_ConcatPCurves.h>
 #include <asiTest_CommonFacilities.h>
 #include <asiTest_ComputeNegativeVolume.h>
 #include <asiTest_ConvertCanonical.h>
@@ -138,6 +139,7 @@ int main(int argc, char* argv[])
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
   // Main tests.
+  /*CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );*/
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>          );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                   );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>           );

@@ -45,6 +45,7 @@
 #include <asiAlgo_EulerKFMV.h>
 #include <asiAlgo_InterpolateSurfMesh.h>
 #include <asiAlgo_InvertShells.h>
+#include <asiAlgo_JoinEdges.h>
 #include <asiAlgo_MeshConvert.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_OrientCnc.h>
@@ -3500,6 +3501,114 @@ int ENGINE_OrientPart(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConcatPCurves(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_ERROR;
+  }
+
+  // Get AAG and the active part.
+  Handle(asiAlgo_AAG) aag  = partNode->GetAAG();
+  TopoDS_Shape        part = partNode->GetShape();
+
+  /* =============
+   *  Read inputs.
+   * ============= */
+
+  // Read face ID.
+  int fid = 0;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "face", fid) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, specify the face of interest "
+                                                           "using the '-face' keyword.");
+    return TCL_ERROR;
+  }
+
+  // Get the number of edges in the face.
+  TopTools_IndexedMapOfShape faceEdges, selectedEdges;
+  TopExp::MapShapes(aag->GetFace(fid), TopAbs_EDGE, faceEdges);
+  //
+  const int numEdges = faceEdges.Extent();
+
+  // Read local indices of edges.
+  std::vector<int> eids;
+  int eIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "edges", eIdx) )
+  {
+    int k = eIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+
+      if ( eid < 1 || eid > numEdges )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "The passed edge ID %1 is out of range [1, %2]."
+                                                            << eid << numEdges);
+        return TCL_ERROR;
+      }
+
+      eids.push_back(eid);
+    }
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, specify the edges to concatenate "
+                                                           "using the '-edges' keyword.");
+    return TCL_ERROR;
+  }
+
+  // Get edges.
+  for ( const auto eid : eids )
+  {
+    selectedEdges.Add( faceEdges(eid) );
+  }
+
+  /* ===================
+   *  Concatenate edges.
+   * =================== */
+
+  asiAlgo_JoinEdges joiner( part, interp->GetProgress(), interp->GetPlotter() );
+  //
+  if ( !joiner.Perform( selectedEdges, aag->GetFace(fid) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Edge concatenation failed.");
+    return TCL_ERROR;
+  }
+
+  const TopoDS_Shape& result = joiner.Result();
+
+  /* =============
+   *  Update part.
+   * ============= */
+
+  // Modify Data Model.
+  cmdEngine::model->OpenCommand();
+  {
+    asiEngine_Part partApi(cmdEngine::model);
+    //
+    partApi.Update(result);
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update UI.
+  if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -3986,4 +4095,15 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t Otherwise, only local axes are detected but the shape is not changed.",
     //
     __FILE__, group, ENGINE_OrientPart);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("concat-pcurves",
+    //
+    "concat-pcurves -face <fid> -edges <e1> <e2>\n"
+    "\t Concatenates edges <e1> and <e2> belonging to the face <fid> into\n"
+    "\t a single edge. The indices <e1> and <e2> are defined locally and thereby\n"
+    "\t range from 1 to the number of edges in the face. The concatenation process\n"
+    "\t is done at the level of pcurves.",
+    //
+    __FILE__, group, ENGINE_ConcatPCurves);
 }
