@@ -524,6 +524,7 @@ set (utils_H_FILES
   utils/asiAlgo_JSON.h
   utils/asiAlgo_Logger.h
   utils/asiAlgo_MemChecker.h
+  utils/asiAlgo_Message.h
   utils/asiAlgo_Timer.h
   utils/asiAlgo_ProgressNotifier.h
   utils/asiAlgo_TimeStamp.h

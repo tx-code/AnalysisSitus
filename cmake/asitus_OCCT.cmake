@@ -76,6 +76,23 @@ set (LIBS
   TKService
 )
 
+if (USE_OCCT_INSPECTOR)
+  set (LIBS
+    ${LIBS}
+    TKVCAF
+    TKXmlXCAF
+    TKTInspector
+    TKTInspectorAPI
+    TKDFBrowser
+    TKShapeView
+    TKTreeModel
+    TKMessageModel
+    TKMessageView
+    TKVInspector
+    TKView
+  )
+endif()
+
 if (NOT BUILD_ALGO_ONLY)
   ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION_MAJOR}")
   ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION_MAJOR}.${OCCT_VERSION_MINOR}")

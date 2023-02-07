@@ -71,6 +71,14 @@ include (${CMAKE_SOURCE_DIR}/cmake/asitus_Rapidjson.cmake)
 # OCCT
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_OCCT.cmake)
 
+# OCCT inspector
+set (USE_OCCT_INSPECTOR OFF CACHE BOOL "OCCT Inspector is optional.")
+
+if (USE_OCCT_INSPECTOR)
+  add_definitions (-DUSE_OCCT_INSPECTOR)
+endif()
+#
+
 # TBB is optional
 set (USE_THREADING OFF CACHE BOOL "TBB is optional 3-rd party. Building with TBB will allow to run algorithms in multi-threaded mode.")
 

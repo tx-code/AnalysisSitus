@@ -336,6 +336,7 @@ set (utils_H_FILES
   utils/asiUI_Common.h
   utils/asiUI_CommonFacilities.h
   utils/asiUI_DataAdaptor.h
+  utils/asiUI_Inspector.h
   utils/asiUI_IV.h
   utils/asiUI_Logger.h
   utils/asiUI_OverrideCursor.h
@@ -354,6 +355,7 @@ set (utils_CPP_FILES
   utils/asiUI_Common.cpp
   utils/asiUI_CommonFacilities.cpp
   utils/asiUI_DataAdaptor.cpp
+  utils/asiUI_Inspector.cpp
   utils/asiUI_IV.cpp
   utils/asiUI_Logger.cpp
   utils/asiUI_OverrideCursor.cpp
@@ -473,6 +475,19 @@ set (OCCT_LIB_FILES
   TKV3d
   TKVCAF
 )
+
+if (USE_OCCT_INSPECTOR)
+  set (OCCT_LIB_FILES
+    TKVCAF
+    TKTInspector
+    TKTInspectorAPI
+    TKDFBrowser
+    TKShapeView
+    TKTreeModel
+    TKVInspector
+  )
+endif()
+
 #------------------------------------------------------------------------------
 set (VTK_LIB_FILES
   vtkChartsCore-8.2

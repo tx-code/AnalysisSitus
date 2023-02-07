@@ -55,6 +55,7 @@
 // asiUI includes
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
+#include <utils/asiUI_Inspector.h>
 
 // DF Browser includes
 #include <DFBrowser.hxx>
@@ -156,6 +157,50 @@ int ASMXDE_DFBrowse(const Handle(asiTcl_Interp)& interp,
 
   return TCL_OK;
 }
+
+#ifdef USE_OCCT_INSPECTOR
+#include <cmdAsm_XdeModel.h>
+#include <CDM_Application.hxx>
+//-----------------------------------------------------------------------------
+int ASMXDE_OCCTInspector(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  (void) argc;
+  (void) argv;
+
+  NCollection_List<Handle(Standard_Transient)> parameters;
+  // Get model name.
+  std::string name;
+  //
+  if ( interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    // Get the XDE document.
+    Handle(asiTcl_Variable) var = interp->GetVar(name);
+    //
+    if ( !var.IsNull() && var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+    {
+      Handle(cmdAsm_XdeModel) xdeModel = Handle(cmdAsm_XdeModel)::DownCast(var);
+      Handle(Doc)             doc      = xdeModel->GetDocument();
+      //DFBrowser::DFBrowserCall( doc->GetDocument() );
+      parameters.Append(doc->GetDocument()->Application());
+    }
+  }
+
+  //
+  if ( interp->GetKeyValue(argc, argv, "update", name) )
+  {
+    asiUI_Inspector::updateInspector();
+  }
+  else
+  {
+    asiUI_Inspector::showInspector(parameters);
+  }
+
+  return TCL_OK;
+}
+
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -1621,6 +1666,17 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t for the model <M>.",
     //
     __FILE__, group, ASMXDE_DFBrowse);
+
+  #ifdef USE_OCCT_INSPECTOR
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("inspector",
+    //
+    "inspector [-model <M>] [-update]\n"
+    "\t Opens OpenCascade inspector to inspect the internals of the OCAF document\n"
+    "\t for the model <M>.",
+    //
+    __FILE__, group, ASMXDE_OCCTInspector);
+  #endif
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-new",

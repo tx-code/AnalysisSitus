@@ -105,6 +105,33 @@ if (USE_MOBIUS)
 endif()
 
 #------------------------------------------------------------------------------
+if (USE_OCCT_INSPECTOR)
+  set (OCCT_LIB_FILES
+    TKTInspector
+    TKTInspectorAPI
+    TKDFBrowser
+    TKShapeView
+    TKTreeModel
+    TKVInspector
+  )
+endif()
+foreach (LIB_FILE ${OCCT_LIB_FILES})
+  if (WIN32)
+    set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  else()
+    set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  endif()
+
+  if (3RDPARTY_OCCT_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+    target_link_libraries (cmdEngine debug ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+    target_link_libraries (cmdEngine optimized ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
+  else()
+    target_link_libraries (cmdEngine ${3RDPARTY_OCCT_LIBRARY_DIR}/${LIB_FILENAME})
+  endif()
+endforeach()
+
+
+#------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software
 #------------------------------------------------------------------------------
 

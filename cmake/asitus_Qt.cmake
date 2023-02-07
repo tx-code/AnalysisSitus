@@ -54,17 +54,29 @@ if (NOT BUILD_ALGO_ONLY)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Svg.dll     CONFIGURATIONS Release DESTINATION bin)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Network.dll CONFIGURATIONS Release DESTINATION bin)
 
+    if (USE_OCCT_INSPECTOR)
+      install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Xml.dll   CONFIGURATIONS Release DESTINATION bin)
+    endif()
+
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Core.dll     CONFIGURATIONS RelWithDebInfo DESTINATION bini)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Gui.dll      CONFIGURATIONS RelWithDebInfo DESTINATION bini)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Widgets.dll  CONFIGURATIONS RelWithDebInfo DESTINATION bini)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Svg.dll      CONFIGURATIONS RelWithDebInfo DESTINATION bini)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Network.dll  CONFIGURATIONS RelWithDebInfo DESTINATION bini)
 
+    if (USE_OCCT_INSPECTOR)
+      install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Xmld.dll   CONFIGURATIONS RelWithDebInfo DESTINATION bini)
+    endif()
+
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Cored.dll    CONFIGURATIONS Debug DESTINATION bind)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Guid.dll     CONFIGURATIONS Debug DESTINATION bind)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Widgetsd.dll CONFIGURATIONS Debug DESTINATION bind)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Svgd.dll     CONFIGURATIONS Debug DESTINATION bind)
     install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Networkd.dll CONFIGURATIONS Debug DESTINATION bind)
+
+    if (USE_OCCT_INSPECTOR)
+      install (FILES ${3RDPARTY_QT_DIR}/bin/Qt5Xmld.dll   CONFIGURATIONS Debug DESTINATION bind)
+    endif()
 
     install (DIRECTORY ${3RDPARTY_QT_DIR}/plugins/imageformats/   CONFIGURATIONS Release DESTINATION bin/imageformats/)
     install (DIRECTORY ${3RDPARTY_QT_DIR}/plugins/platforms/      CONFIGURATIONS Release DESTINATION bin/platforms/)
