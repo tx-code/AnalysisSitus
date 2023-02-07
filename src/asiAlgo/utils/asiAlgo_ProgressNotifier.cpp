@@ -277,7 +277,7 @@ void asiAlgo_ProgressNotifier::SendLogMessage(const std::string&              me
 
     if ( parg != std::string::npos )
     {
-      formatted.erase(parg, parg + iarg.size());
+      formatted.erase(parg, iarg.size());
       formatted.insert(parg, sarg);
     }
     else
