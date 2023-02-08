@@ -35,6 +35,7 @@
 #include <asiAlgo_ArmijoRule.h>
 
 // STD includes
+#include <iostream>
 #include <vector>
 
 #undef COUT_DEBUG
