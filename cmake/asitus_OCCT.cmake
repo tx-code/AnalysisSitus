@@ -29,7 +29,9 @@ endif()
 message (STATUS "... OCCT Debug Library dirs: ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}")
 message (STATUS "... OCCT Debug Binary  dirs: ${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
 
-set (OCCT_VERSION "7.4.0")
+set (OCCT_VERSION_MAJOR "7")
+set (OCCT_VERSION_MINOR "6")
+set (OCCT_VERSION_PATCH "0")
 
 #--------------------------------------------------------------------------
 # Installation
@@ -75,5 +77,7 @@ set (LIBS
 )
 
 if (NOT BUILD_ALGO_ONLY)
-  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION}")
+  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION_MAJOR}")
+  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION_MAJOR}.${OCCT_VERSION_MINOR}")
+  ASITUS_INSTALL_3RDPARTY (LIBS "OCCT" "" ".${OCCT_VERSION_MAJOR}.${OCCT_VERSION_MINOR}.${OCCT_VERSION_PATCH}")
 endif()
