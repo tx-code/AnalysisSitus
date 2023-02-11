@@ -424,6 +424,7 @@ int main(int argc, char** argv)
     EXE_LOAD_MODULE(cf, "cmdRE")
     EXE_LOAD_MODULE(cf, "cmdDDF")
     EXE_LOAD_MODULE(cf, "cmdAsm")
+    EXE_LOAD_MODULE(cf, "cmdTest")
     //
 #ifdef USE_MOBIUS
     EXE_LOAD_MODULE(cf, "cmdMobius")

@@ -31,6 +31,9 @@
 // Own include
 #include <asiAlgo_JoinEdges.h>
 
+// asiAlgo includes
+#include <asiAlgo_CheckValidity.h>
+
 // OCCT includes
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
@@ -55,6 +58,8 @@
 #include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Face.hxx>
+#include <ShapeFix_ShapeTolerance.hxx>
+#include <ShapeFix_ShapeTolerance.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
@@ -95,11 +100,14 @@ namespace
     }
   }
 
-  TopoDS_Wire FixWire(const TopoDS_Wire& theWire)
+  //! Restores the validity of the passed wire.
+  TopoDS_Wire FixWire(const TopoDS_Wire& W,
+                      const double       tol)
   {
     ShapeFix_Wire wireFixer;
-    wireFixer.Load(theWire);
-    wireFixer.FixClosed();
+    wireFixer.Load(W);
+    wireFixer.FixReorder();
+    wireFixer.FixClosed(tol);
     wireFixer.FixGaps2d();
     wireFixer.FixConnected();
     return wireFixer.Wire();
@@ -284,6 +292,12 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
     return false;
   }
 
+  // Get max face tolerance.
+  const double maxTol = asiAlgo_CheckValidity::MaxTolerance(face);
+  //
+  m_progress.SendLogMessage(LogNotice(Normal) << "Max face tolerance is %1."
+                                              << maxTol);
+
   // Join edges
   TopoDS_Edge E1, E2, newE;
   this->chooseOrder(edges, E1, E2);
@@ -293,7 +307,10 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
     return false;
   }
 
-  // Build a new wire. It will be re-ordered properly by healing at the end
+  asiAlgo_CheckValidity checker(m_progress, m_plotter);
+
+  // Build a new wire. It will be re-ordered properly by healing at
+  // in the FixWire() function.
   Handle(ShapeExtend_WireData) WD = new ShapeExtend_WireData;
   for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
   {
@@ -306,14 +323,33 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
   }
   WD->Add( newE );
   //
-  TopoDS_Wire W = FixWire( WD->Wire() );
+  TopoDS_Wire W0 = WD->Wire();
+
+  // Update tolerance and fix the wire.
+  TopoDS_Wire W = FixWire(W0, maxTol);
+
+  // Contract check of validity.
+  if ( !checker.CheckBasic(W) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "The constructed wire is not valid.");
+    return false;
+  }
+
+  //m_plotter.REDRAW_SHAPE("W", W, Color_Red, 1., true);
 
   // Build another face
-  BRepBuilderAPI_MakeFace mkFace( BRep_Tool::Surface(face), W, Precision::Confusion() );
+  BRepBuilderAPI_MakeFace mkFace( BRep_Tool::Surface(face), W, maxTol );
   TopoDS_Face newFace = mkFace.Face();
   //
   if ( face.Orientation() == TopAbs_REVERSED )
     newFace.Reverse();
+
+  // Contract check of validity.
+  if ( !checker.CheckBasic(newFace) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "The constructed face is not valid.");
+    return false;
+  }
 
   // Change old face with the reconstructed one
   Handle(BRepTools_ReShape) ReShape = new BRepTools_ReShape;

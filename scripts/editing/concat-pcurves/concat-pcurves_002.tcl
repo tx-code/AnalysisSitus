@@ -2,8 +2,8 @@
 set datafile cad/turbines/blade.igs
 
 # Expected cardinal numbers.
-set nbVertices 38
-set nbEdges 38
+set nbVertices 36
+set nbEdges 36
 set nbWires 9
 set nbFaces 9
 set nbShells 0
@@ -25,8 +25,10 @@ print-summary
 set initialToler [get-tolerance]
 
 # Apply geometric operators.
-concat-pcurves -face 1 -edges 3 4
-concat-pcurves -face 1 -edges 3 4
+concat-pcurves -face 5 -edges 1 2
+concat-pcurves -face 5 -edges 1 2
+concat-pcurves -face 5 -edges 3 4
+concat-pcurves -face 5 -edges 3 4
 
 # Check contents.
 test-check-number-shape-entities -vertex $nbVertices -edge $nbEdges -wire $nbWires -face $nbFaces -shell $nbShells -solid $nbsolids -compsolid $nbCompsolids -compound $nbCompound

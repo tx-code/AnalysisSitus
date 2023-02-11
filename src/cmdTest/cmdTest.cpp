@@ -47,14 +47,6 @@ Handle(asiEngine_Model) cmdTest::model = nullptr;
 void cmdTest::Factory(const Handle(asiTcl_Interp)&      interp,
                       const Handle(Standard_Transient)& data)
 {
-  //static const char* group = "cmdTest";
-
-  /* ==========================
-   *  Initialize UI facilities
-   * ========================== */
-
-  interp->GetProgress().SendLogMessage(LogWarn(Normal) << "[cmdTest] UI facilities are not available. GUI may not be updated.");
-
   /* ================================
    *  Initialize Data Model instance
    * ================================ */
@@ -72,9 +64,9 @@ void cmdTest::Factory(const Handle(asiTcl_Interp)&      interp,
    * ===================== */
 
   // Load sub-modules.
-  Commands_Mesh(interp, data);
-  Commands_Points(interp, data);
-  Commands_Shape(interp, data);
+  Commands_Mesh   (interp, data);
+  Commands_Points (interp, data);
+  Commands_Shape  (interp, data);
 }
 
 // Declare entry point PLUGINFACTORY

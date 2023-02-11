@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
   // Main tests.
-  /*CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );*/
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>          );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                   );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_RebuildEdge>           );
