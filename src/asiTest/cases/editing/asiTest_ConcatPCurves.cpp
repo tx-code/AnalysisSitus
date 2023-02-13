@@ -79,3 +79,13 @@ outcome asiTest_ConcatPCurves::test003(const int funcID)
 {
   return runTestScript(funcID, "editing/concat-pcurves/concat-pcurves_003.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+//! Test scenario 004.
+//! \param[in] funcID ID of the Test Function.
+//! \return true in case of success, false -- otherwise.
+outcome asiTest_ConcatPCurves::test004(const int funcID)
+{
+  return runTestScript(funcID, "editing/concat-pcurves/concat-pcurves_004.tcl");
+}

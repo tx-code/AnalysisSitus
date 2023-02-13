@@ -247,6 +247,7 @@ set (editing_H_FILES
   editing/asiAlgo_ModConstructEdge.h
   editing/asiAlgo_ModEdgeInfo.h
   editing/asiAlgo_Naming.h
+  editing/asiAlgo_NurbsConvertModification.h
   editing/asiAlgo_RebuildEdge.h
   editing/asiAlgo_RehostFaces.h
   editing/asiAlgo_RepatchFaces.h
@@ -277,6 +278,7 @@ set (editing_CPP_FILES
   editing/asiAlgo_ModBase.cpp
   editing/asiAlgo_ModConstructEdge.cpp
   editing/asiAlgo_Naming.cpp
+  editing/asiAlgo_NurbsConvertModification.cpp
   editing/asiAlgo_RebuildEdge.cpp
   editing/asiAlgo_RepatchFaces.cpp
   editing/asiAlgo_RehostFaces.cpp

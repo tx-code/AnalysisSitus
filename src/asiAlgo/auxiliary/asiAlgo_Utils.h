@@ -693,13 +693,31 @@ namespace asiAlgo_Utils
   }
 
   //! Checks surface type.
-  //! \param[in] surface surface to check.
+  //! \param[in] surf surface to check.
   //! \return true/false.
   template<typename TSurf>
-  static bool IsTypeOf(const Handle(Geom_Surface)& surface)
+  static bool IsTypeOf(const Handle(Geom_Surface)& surf)
   {
-    if ( surface->IsInstance( STANDARD_TYPE(TSurf) ) )
+    Handle(TSurf) basesurf;
+
+    // Check host surface directly.
+    if ( surf->IsInstance( STANDARD_TYPE(TSurf) ) )
+    {
       return true;
+    }
+
+    // Check trimmed surface which may encapsulate the surface type we're looking for.
+    if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
+    {
+      Handle(Geom_RectangularTrimmedSurface)
+        RT = Handle(Geom_RectangularTrimmedSurface)::DownCast(surf);
+
+      // Check basis surface.
+      basesurf = Handle(TSurf)::DownCast( RT->BasisSurface() );
+      //
+      if ( !basesurf.IsNull() )
+        return true;
+    }
 
     return false;
   }

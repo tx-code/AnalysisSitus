@@ -374,7 +374,7 @@ void asiUI_ViewerDomain::onJoinEdges()
     const int eid = eit.Key();
 
     const TopoDS_Shape& edge = aag->RequestMapOfEdges()(eid);
-    selectedEdges.Add(edge);
+    selectedEdges.Add( edge.Located( TopLoc_Location() ) );
   }
 
   // Join selected edges

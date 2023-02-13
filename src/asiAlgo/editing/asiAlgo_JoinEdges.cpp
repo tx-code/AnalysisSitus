@@ -292,8 +292,10 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
     return false;
   }
 
+  TopoDS_Face nolocFace = TopoDS::Face( face.Located( TopLoc_Location() ) );
+
   // Get max face tolerance.
-  const double maxTol = asiAlgo_CheckValidity::MaxTolerance(face);
+  const double maxTol = asiAlgo_CheckValidity::MaxTolerance(nolocFace);
   //
   m_progress.SendLogMessage(LogNotice(Normal) << "Max face tolerance is %1."
                                               << maxTol);
@@ -302,7 +304,7 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
   TopoDS_Edge E1, E2, newE;
   this->chooseOrder(edges, E1, E2);
   //
-  if ( !this->joinEdges(E1, E2, face, newE) )
+  if ( !this->joinEdges(E1, E2, nolocFace, newE) )
   {
     return false;
   }
@@ -311,22 +313,35 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
 
   // Build a new wire. It will be re-ordered properly by healing at
   // in the FixWire() function.
+  bool isNewAdded = false;
   Handle(ShapeExtend_WireData) WD = new ShapeExtend_WireData;
-  for ( TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next() )
+  //
+  for ( TopExp_Explorer exp(nolocFace, TopAbs_EDGE); exp.More(); exp.Next() )
   {
     const TopoDS_Shape& E = exp.Current();
 
     if ( E.IsPartner(E1) || E.IsPartner(E2) )
-      continue;
-
-    WD->Add( exp.Current() );
+    {
+      if ( !isNewAdded )
+      {
+        isNewAdded = true;
+        WD->Add(newE);
+      }
+    }
+    else
+    {
+      WD->Add( exp.Current() );
+    }
   }
-  WD->Add( newE );
   //
-  TopoDS_Wire W0 = WD->Wire();
+  TopoDS_Wire W0 = WD->WireAPIMake();
+
+  //m_plotter.REDRAW_SHAPE("W0", W0, Color_Red, 1., true);
 
   // Update tolerance and fix the wire.
   TopoDS_Wire W = FixWire(W0, maxTol);
+
+  //m_plotter.REDRAW_SHAPE("W", W, Color_Red, 1., true);
 
   // Contract check of validity.
   if ( !checker.CheckBasic(W) )
@@ -335,10 +350,8 @@ bool asiAlgo_JoinEdges::Perform(const TopTools_IndexedMapOfShape& edges,
     return false;
   }
 
-  //m_plotter.REDRAW_SHAPE("W", W, Color_Red, 1., true);
-
   // Build another face
-  BRepBuilderAPI_MakeFace mkFace( BRep_Tool::Surface(face), W, maxTol );
+  BRepBuilderAPI_MakeFace mkFace( BRep_Tool::Surface(nolocFace), W, maxTol );
   TopoDS_Face newFace = mkFace.Face();
   //
   if ( face.Orientation() == TopAbs_REVERSED )

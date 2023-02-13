@@ -3570,16 +3570,18 @@ int ENGINE_ConcatPCurves(const Handle(asiTcl_Interp)& interp,
   // Get edges.
   for ( const auto eid : eids )
   {
-    selectedEdges.Add( faceEdges(eid) );
+    selectedEdges.Add( faceEdges(eid).Located( TopLoc_Location() ) );
   }
 
   /* ===================
    *  Concatenate edges.
    * =================== */
 
+  TopoDS_Face face = aag->GetFace(fid);
+
   asiAlgo_JoinEdges joiner( part, interp->GetProgress(), interp->GetPlotter() );
   //
-  if ( !joiner.Perform( selectedEdges, aag->GetFace(fid) ) )
+  if ( !joiner.Perform(selectedEdges, face) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Edge concatenation failed.");
     return TCL_ERROR;

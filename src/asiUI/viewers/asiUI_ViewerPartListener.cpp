@@ -42,6 +42,7 @@
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
 #include <asiAlgo_MeshMerge.h>
+#include <asiAlgo_NurbsConvertModification.h>
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -60,6 +61,8 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepTools.hxx>
+#include <BRepTools_Modifier.hxx>
+#include <BRepTools_ReShape.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -200,6 +203,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pSaveSTLAction        (nullptr),
   m_pShowNormsAction      (nullptr),
   m_pInvertFacesAction    (nullptr),
+  m_pSplConvertAction     (nullptr),
   m_pShowOriContourAction (nullptr),
   m_pShowHatchingAction   (nullptr),
   m_pCopyAsStringAction   (nullptr),
@@ -607,6 +611,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       }
       //
       m_pInvertFacesAction = menu.addAction("Invert faces");
+      m_pSplConvertAction  = menu.addAction("Convert to spline");
       m_pFindIsolated      = menu.addAction("Find isolated");
       if ( faceIndices.Extent() > 1 )
       {
@@ -869,6 +874,78 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Actualize
     m_pViewer->PrsMgr()->Actualize(part_n);
     m_pViewer->PrsMgr()->Actualize( m_model->GetPartNode()->GetNormsRepresentation() );
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: convert to spline
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pSplConvertAction )
+  {
+    // Get highlighted sub-shapes
+    TopTools_IndexedMapOfShape selected;
+    asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
+
+    // Get Part Node
+    Handle(asiData_PartNode) part_n = m_model->GetPartNode();
+    //
+    if ( part_n.IsNull() || !part_n->IsWellFormed() )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Part Node is null or bad-formed" );
+      return;
+    }
+    //
+    TopoDS_Shape partSh = part_n->GetShape();
+
+    // Shape of interest
+    TopoDS_Shape shape = ::FacesAsOneShape(selected);
+    //
+    if ( shape.ShapeType() != TopAbs_FACE )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Please, select one face." );
+      return;
+    }
+
+    TIMER_NEW
+    TIMER_GO
+
+    /* ===================
+     *  Convert to spline.
+     * =================== */
+
+    Handle(asiAlgo_NurbsConvertModification)
+      M = new asiAlgo_NurbsConvertModification;
+    //
+    BRepTools_Modifier modifier(shape, M);
+    //
+    if ( !modifier.IsDone() )
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Failed to convert." );
+      return;
+    }
+
+    TopoDS_Shape convShape = modifier.ModifiedShape(shape);
+
+    /* ==============
+     *  Update shape.
+     * ============== */
+
+    Handle(BRepTools_ReShape) ReShape = new BRepTools_ReShape;
+    ReShape->Replace(shape, convShape);
+
+    TopoDS_Shape updatedPartSh = ReShape->Apply(partSh);
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_MSG("Convert to spline")
+
+    // Update Data Model
+    m_model->OpenCommand();
+    {
+      asiEngine_Part(m_model).Update(updatedPartSh);
+    }
+    m_model->CommitCommand();
+
+    // Actualize
+    m_pViewer->PrsMgr()->Actualize(part_n);
   }
 
   //---------------------------------------------------------------------------
