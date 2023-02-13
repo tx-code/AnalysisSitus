@@ -33,6 +33,7 @@
 
 // Active Data includes
 #include <ActData_Application.h>
+#include <ActData_Utils.h>
 
 // asiTestEngine includes
 #include <asiTestEngine_Launcher.h>
@@ -48,6 +49,13 @@
 
 #pragma warning(disable: 4127) // "Conditional expression is constant" by TEST_VERIFY
 #pragma warning(disable: 4800) // "Standard_Boolean: forcing value to bool" by TEST_VERIFY
+
+//-----------------------------------------------------------------------------
+
+#define SET_MODIFIED_BY_TIMESTAMP( L ) \
+  Handle(ActAux_TimeStamp) aTS = ActAux_TimeStampTool::Generate(); \
+  Handle(HIntArray) aTSChunked = ActAux_TimeStampTool::AsChunked(aTS); \
+  ActData_Utils::InitIntegerArray(L, -1, aTSChunked);
 
 //-----------------------------------------------------------------------------
 // ActTest_MeshAttrBase: construction & static initializers
@@ -208,6 +216,8 @@ outcome ActTest_MeshAttrBase::populateMeshNodes(TDF_Label&         meshLab,
   Handle(ActData_MeshAttr) aMeshAttr;
   TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
 
+  SET_MODIFIED_BY_TIMESTAMP( meshLab )
+
   // Populate Mesh DS with nodes
   for ( Standard_Integer i = 0; i < NB_NODES; i++ )
     NODE_IDS.Append( aMeshAttr->AddNode(NODES[i][0], NODES[i][1], NODES[i][2]) );
@@ -227,6 +237,8 @@ outcome ActTest_MeshAttrBase::populateMeshTriangles(TDF_Label&         meshLab,
   Handle(ActData_MeshAttr) aMeshAttr;
   TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
 
+  SET_MODIFIED_BY_TIMESTAMP( meshLab )
+
   // Populate Mesh DS with triangles
   for ( Standard_Integer i = 0; i < NB_TRIANGLES; i++ )
     TRIANGLE_IDS.Append( aMeshAttr->AddElement(TRIANGLES[i], 3) );
@@ -245,6 +257,8 @@ outcome ActTest_MeshAttrBase::populateMeshQuadrangles(TDF_Label&         meshLab
 {
   Handle(ActData_MeshAttr) aMeshAttr;
   TEST_VERIFY( meshLab.FindAttribute(ActData_MeshAttr::GUID(), aMeshAttr), nameFunc, funcID )
+
+  SET_MODIFIED_BY_TIMESTAMP( meshLab )
 
   // Populate Mesh DS with quadrangles
   for ( Standard_Integer i = 0; i < NB_QUADRANGLES; i++ )

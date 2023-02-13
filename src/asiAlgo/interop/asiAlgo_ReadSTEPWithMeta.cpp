@@ -421,19 +421,19 @@ bool asiAlgo_ReadSTEPWithMeta::readColors(const Handle(XSControl_WorkSession)& W
         {
           Styles.DecodeColor(SurfCol, aSCol);
           //
-          m_output->SetColor(S, aSCol, asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_SURFACE);
+          m_output->SetColor(S, Quantity_Color( Quantity_Color::Convert_LinearRGB_To_sRGB( aSCol.Rgb() ) ), asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_SURFACE);
         }
         if ( !BoundCol.IsNull() )
         {
           Styles.DecodeColor(BoundCol, aBCol);
           //
-          m_output->SetColor(S, aBCol, asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_CURVE);
+          m_output->SetColor(S, Quantity_Color( Quantity_Color::Convert_LinearRGB_To_sRGB( aBCol.Rgb() ) ), asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_CURVE);
         }
         if ( !CurveCol.IsNull() )
         {
           Styles.DecodeColor(CurveCol, aCCol);
           //
-          m_output->SetColor(S, aBCol, asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_POINT);
+          m_output->SetColor(S, Quantity_Color( Quantity_Color::Convert_LinearRGB_To_sRGB( aCCol.Rgb() ) ), asiAlgo_ReadSTEPWithMetaOutput::ColorAttachment_POINT);
         }
       }
     }

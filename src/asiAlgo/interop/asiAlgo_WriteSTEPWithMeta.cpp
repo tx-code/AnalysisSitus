@@ -358,6 +358,22 @@ void asiAlgo_WriteSTEPWithMeta::makeSTEPStyles(STEPConstruct_Styles&            
 
         if ( !color.IsNull() )
         {
+          if ( !surfColor.IsNull() )
+          {
+            Quantity_Color qColor;
+            Styles.DecodeColor( surfColor, qColor );
+
+            surfColor = Styles.EncodeColor( Quantity_Color( Quantity_Color::Convert_sRGB_To_LinearRGB( qColor.Rgb() ) ) );
+          }
+
+          if ( !curvColor.IsNull() )
+          {
+            Quantity_Color qColor;
+            Styles.DecodeColor( curvColor, qColor );
+
+            curvColor = Styles.EncodeColor( Quantity_Color( Quantity_Color::Convert_sRGB_To_LinearRGB( qColor.Rgb() ) ) );
+          }
+
           PSA = Styles.MakeColorPSA( item, surfColor, curvColor, surfColor, 0.0, false );
         }
         else
