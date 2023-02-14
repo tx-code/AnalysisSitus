@@ -42,7 +42,6 @@
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
 #include <asiAlgo_MeshMerge.h>
-#include <asiAlgo_NurbsConvertModification.h>
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -62,6 +61,7 @@
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_Modifier.hxx>
+#include <BRepTools_NurbsConvertModification.hxx>
 #include <BRepTools_ReShape.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <ShapeAnalysis_Surface.hxx>
@@ -912,8 +912,8 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
      *  Convert to spline.
      * =================== */
 
-    Handle(asiAlgo_NurbsConvertModification)
-      M = new asiAlgo_NurbsConvertModification;
+    Handle(BRepTools_NurbsConvertModification)
+      M = new BRepTools_NurbsConvertModification;
     //
     BRepTools_Modifier modifier(shape, M);
     //
