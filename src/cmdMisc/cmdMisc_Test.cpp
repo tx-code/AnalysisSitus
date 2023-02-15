@@ -84,8 +84,10 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          cmdMisc_NotUsed(argc),
               const char**                 argv)
 {
+#if defined USE_MOBIUS
   t_ptr<poly_Mesh> mobMesh = new poly_Mesh;
   mobMesh->AddVertex(0,0,0);
+#endif
 
   //Handle(Geom_Plane) drawingPlane = new Geom_Plane( gp::Origin(), gp::DZ() );
 
