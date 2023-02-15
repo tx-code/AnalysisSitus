@@ -78,6 +78,7 @@ public slots:
   void onSuppressFaces  (); //!< On face suppression (useful for isolated features).
   void onDefeatureFaces (); //!< On "smart" face removal.
   void onDetachFaces    (); //!< On face detaching (breaking sharing).
+  void onDetachAll      (); //!< On detaching all faces.
   //
   void onSew            (); //!< On sewing.
   void onAutoRepair     (); //!< On automatic repair.
@@ -97,13 +98,15 @@ private:
       t_edit() : pDeleteFaces    (nullptr),
                  pSuppressFaces  (nullptr),
                  pDefeatureFaces (nullptr),
-                 pDetachFaces    (nullptr)
+                 pDetachFaces    (nullptr),
+                 pDetachAll      (nullptr)
       {}
 
       QPushButton* pDeleteFaces;    //!< Deletes selected faces (only).
       QPushButton* pSuppressFaces;  //!< Deletes selected faces with all contours.
       QPushButton* pDefeatureFaces; //!< Deletes selected faces and stitches neighbors.
       QPushButton* pDetachFaces;    //!< Detaches selected faces from B-Rep.
+      QPushButton* pDetachAll;      //!< Detaches all faces.
     } Edit;
 
     struct t_healing

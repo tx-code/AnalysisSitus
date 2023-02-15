@@ -74,6 +74,7 @@ asiUI_ControlsModeling::asiUI_ControlsModeling(const Handle(asiEngine_Model)& mo
   m_widgets.Edit.pSuppressFaces  = new QPushButton("Suppress faces");
   m_widgets.Edit.pDefeatureFaces = new QPushButton("Defeature faces");
   m_widgets.Edit.pDetachFaces    = new QPushButton("Detach faces");
+  m_widgets.Edit.pDetachAll      = new QPushButton("Detach all");
   //
   m_widgets.Healing.pSew            = new QPushButton("Sew");
   m_widgets.Healing.pAutoRepair     = new QPushButton("Auto-repair");
@@ -89,6 +90,7 @@ asiUI_ControlsModeling::asiUI_ControlsModeling(const Handle(asiEngine_Model)& mo
   pEditLay->addWidget(m_widgets.Edit.pSuppressFaces);
   pEditLay->addWidget(m_widgets.Edit.pDefeatureFaces);
   pEditLay->addWidget(m_widgets.Edit.pDetachFaces);
+  pEditLay->addWidget(m_widgets.Edit.pDetachAll);
 
   // Group for healing operators.
   QGroupBox*   pHealingGroup = new QGroupBox("Healing");
@@ -118,6 +120,7 @@ asiUI_ControlsModeling::asiUI_ControlsModeling(const Handle(asiEngine_Model)& mo
   connect( m_widgets.Edit.pSuppressFaces,  SIGNAL( clicked() ), SLOT( onSuppressFaces  () ) );
   connect( m_widgets.Edit.pDefeatureFaces, SIGNAL( clicked() ), SLOT( onDefeatureFaces () ) );
   connect( m_widgets.Edit.pDetachFaces,    SIGNAL( clicked() ), SLOT( onDetachFaces    () ) );
+  connect( m_widgets.Edit.pDetachAll,      SIGNAL( clicked() ), SLOT( onDetachAll      () ) );
   //
   connect( m_widgets.Healing.pSew,            SIGNAL( clicked() ), SLOT( onSew            () ) );
   connect( m_widgets.Healing.pAutoRepair,     SIGNAL( clicked() ), SLOT( onAutoRepair     () ) );
@@ -281,6 +284,43 @@ void asiUI_ControlsModeling::onDetachFaces()
 
   TIMER_FINISH
   TIMER_COUT_RESULT_MSG("Detach faces")
+
+  const TopoDS_Shape& result = detacher.Result();
+
+  // Update part.
+  m_model->OpenCommand(); // tx start
+  {
+    asiEngine_Part( m_model, m_partViewer->PrsMgr() ).Update(result);
+  }
+  m_model->CommitCommand(); // tx commit
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ControlsModeling::onDetachAll()
+{
+  Handle(asiData_PartNode) part_n;
+  TopoDS_Shape             part;
+  //
+  if ( !asiUI_Common::PartShape(m_model, part_n, part) ) return;
+
+  TIMER_NEW
+  TIMER_GO
+
+  TopTools_IndexedMapOfShape allFaces;
+  TopExp::MapShapes(part, TopAbs_FACE, allFaces);
+
+  // Deatch selected faces.
+  asiAlgo_DetachFaces detacher(part);
+  //
+  if ( !detacher.Perform(allFaces) )
+  {
+    m_notifier.SendLogMessage(LogErr(Normal) << "Cannot detach faces.");
+    return;
+  }
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_MSG("Detach all faces")
 
   const TopoDS_Shape& result = detacher.Result();
 

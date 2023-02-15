@@ -38,6 +38,7 @@
 #include <asiVisu_PrsManager.h>
 
 // asiAlgo includes
+#include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_Utils.h>
 
 // Qt includes
@@ -78,8 +79,15 @@ asiUI_DialogSewing::asiUI_DialogSewing(const Handle(asiEngine_Model)& model,
   // Sizing
   m_widgets.pTolerance->setMinimumWidth(CONTROL_EDIT_WIDTH);
 
+  // Define the default tolerance
+  TopoDS_Shape partSh = model->GetPartNode()->GetShape();
+  double defaultTolerance = 0.00001;
+  //
+  if ( !partSh.IsNull() )
+    defaultTolerance = asiAlgo_CheckValidity::MaxTolerance(partSh);
+
   // Default values
-  m_widgets.pTolerance->setText("0.00001");
+  m_widgets.pTolerance->setText( QString::number(defaultTolerance) );
 
   //---------------------------------------------------------------------------
   // Buttons
@@ -103,7 +111,7 @@ asiUI_DialogSewing::asiUI_DialogSewing(const Handle(asiEngine_Model)& model,
   //
   pGrid->addWidget(new QLabel("Tolerance:"), 0, 0);
   //
-  pGrid->addWidget(m_widgets.pTolerance,  0, 1);
+  pGrid->addWidget(m_widgets.pTolerance, 0, 1);
   //
   pGrid->setColumnStretch(0, 0);
   pGrid->setColumnStretch(1, 1);
