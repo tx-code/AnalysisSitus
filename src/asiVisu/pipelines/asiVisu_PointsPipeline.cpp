@@ -95,6 +95,9 @@ void asiVisu_PointsPipeline::SetInput(const Handle(asiVisu_DataProvider)& DP)
       src = vtkSmartPointer< asiVisu_PointsSource<double> >::New();
     //
     src->SetInputPoints(points);
+    src->Rescale( provider->GetScaleCoeffX(),
+                  provider->GetScaleCoeffY(),
+                  provider->GetScaleCoeffZ() );
 
     // Set active reper IDs if any.
     if ( m_bAllowSelection )

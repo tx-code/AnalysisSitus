@@ -94,6 +94,8 @@
 #define EVENT_SELECT_ALL          (vtkCommand::UserEvent + 1012)
 #define EVENT_FIND_VERTEX         (vtkCommand::UserEvent + 1013)
 #define EVENT_DEFEATURE           (vtkCommand::UserEvent + 1014)
+#define EVENT_SCALE_U             (vtkCommand::UserEvent + 1015)
+#define EVENT_SCALE_V             (vtkCommand::UserEvent + 1016)
 
 // For interactive picking:
 #define EVENT_DETECT_WORLD_POINT  (vtkCommand::UserEvent + 2010) // World picker.

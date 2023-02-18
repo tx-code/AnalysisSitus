@@ -54,6 +54,12 @@ public:
   asiData_EXPORT static Handle(ActAPI_INode)
     Instance();
 
+  //! Initializes all props with default values.
+  void Init()
+  {
+    asiData_FaceNodeBase::init();
+  }
+
 protected:
 
   //! Allocation is allowed only via Instance() method.

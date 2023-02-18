@@ -43,8 +43,6 @@
 //! Data provider for a single point cloud.
 class asiVisu_PointsDataProvider : public asiVisu_DataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_PointsDataProvider, asiVisu_DataProvider)
 
@@ -65,6 +63,23 @@ public:
 
   virtual Handle(TColStd_HPackedMapOfInteger)
     GetIndices() const = 0;
+
+public:
+
+  virtual double GetScaleCoeffX() const
+  {
+    return 1.;
+  }
+
+  virtual double GetScaleCoeffY() const
+  {
+    return 1.;
+  }
+
+  virtual double GetScaleCoeffZ() const
+  {
+    return 1.;
+  }
 
 protected:
 

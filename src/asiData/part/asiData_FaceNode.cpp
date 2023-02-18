@@ -39,6 +39,8 @@
 asiData_FaceNode::asiData_FaceNode() : asiData_FaceNodeBase()
 {
   REGISTER_PARAMETER(Bool, PID_ShowOriTips);
+  REGISTER_PARAMETER(Real, PID_UScaleCoeff);
+  REGISTER_PARAMETER(Real, PID_VScaleCoeff);
 }
 
 //-----------------------------------------------------------------------------
@@ -50,11 +52,18 @@ Handle(ActAPI_INode) asiData_FaceNode::Instance()
 
 //-----------------------------------------------------------------------------
 
-void asiData_FaceNode::Init()
+void asiData_FaceNode::Init(const bool resetScaling)
 {
-  asiData_FaceNodeBase::Init();
+  asiData_FaceNodeBase::init();
 
   this->SetShowOriTips(true);
+
+  if ( resetScaling )
+  {
+    this->SetUScaleCoeff(1.);
+    this->SetVScaleCoeff(1.);
+  }
+
   this->InitParameter(PID_ShowOriTips, "Show tips", "", ParameterFlag_IsVisible, true);
 }
 
@@ -70,4 +79,32 @@ void asiData_FaceNode::SetShowOriTips(const bool on)
 bool asiData_FaceNode::GetShowOriTips() const
 {
   return ActParamTool::AsBool( this->Parameter(PID_ShowOriTips) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_FaceNode::SetUScaleCoeff(const double coeff)
+{
+  ActParamTool::AsReal( this->Parameter(PID_UScaleCoeff) )->SetValue(coeff);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiData_FaceNode::GetUScaleCoeff() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_UScaleCoeff) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_FaceNode::SetVScaleCoeff(const double coeff)
+{
+  ActParamTool::AsReal( this->Parameter(PID_VScaleCoeff) )->SetValue(coeff);
+}
+
+//-----------------------------------------------------------------------------
+
+double asiData_FaceNode::GetVScaleCoeff() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_VScaleCoeff) )->GetValue();
 }

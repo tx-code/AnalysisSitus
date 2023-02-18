@@ -41,8 +41,6 @@
 //! Data provider for vertices in a parametric domain.
 class asiVisu_DomainPointsDataProvider : public asiVisu_PointsDataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_DomainPointsDataProvider, asiVisu_PointsDataProvider)
 
@@ -66,6 +64,15 @@ public:
 
   asiVisu_EXPORT virtual Handle(asiAlgo_BaseCloud<double>)
     GetPoints() const;
+
+  asiVisu_EXPORT virtual double
+    GetScaleCoeffX() const;
+
+  asiVisu_EXPORT virtual double
+    GetScaleCoeffY() const;
+
+  asiVisu_EXPORT virtual double
+    GetScaleCoeffZ() const;
 
 public:
 

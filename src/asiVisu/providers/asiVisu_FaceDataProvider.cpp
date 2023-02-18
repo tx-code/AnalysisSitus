@@ -150,6 +150,26 @@ bool asiVisu_FaceDataProvider::GetShowOriTips() const
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_FaceDataProvider::GetUScaleCoeff() const
+{
+  if ( m_node->IsInstance( STANDARD_TYPE(asiData_FaceNode) ) )
+    return Handle(asiData_FaceNode)::DownCast(m_node)->GetUScaleCoeff();
+
+  return 1.;
+}
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_FaceDataProvider::GetVScaleCoeff() const
+{
+  if ( m_node->IsInstance( STANDARD_TYPE(asiData_FaceNode) ) )
+    return Handle(asiData_FaceNode)::DownCast(m_node)->GetVScaleCoeff();
+
+  return 1.;
+}
+
+//-----------------------------------------------------------------------------
+
 //! \return surface type.
 Handle(Standard_Type) asiVisu_FaceDataProvider::GetSurfaceType() const
 {
@@ -241,7 +261,9 @@ Handle(ActAPI_HParameterList) asiVisu_FaceDataProvider::translationSources() con
   if ( m_node->IsInstance( STANDARD_TYPE(asiData_FaceNode) ) )
   {
     return ActParamStream() << m_node->Parameter(asiData_FaceNode::PID_SelectedFaces)
-                            << m_node->Parameter(asiData_FaceNode::PID_ShowOriTips);
+                            << m_node->Parameter(asiData_FaceNode::PID_ShowOriTips)
+                            << m_node->Parameter(asiData_FaceNode::PID_UScaleCoeff)
+                            << m_node->Parameter(asiData_FaceNode::PID_VScaleCoeff);
   }
   else if ( m_node->IsInstance( STANDARD_TYPE(asiData_SurfNode) ) )
   {

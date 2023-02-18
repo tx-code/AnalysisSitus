@@ -78,6 +78,12 @@ public:
   asiVisu_EXPORT void
     SetOnePointFilter(const int pidx);
 
+  //! Scales the coordinates of all points.
+  asiVisu_EXPORT void
+    Rescale(const double scaleX,
+            const double scaleY,
+            const double scaleZ);
+
 protected:
 
   //! This method (called by superclass) performs conversion of OCCT
@@ -122,8 +128,11 @@ private:
 
 private:
 
-  Handle(asiAlgo_BaseCloud<REAL_TYPE>) m_points;  //!< Points to visualize.
-  Handle(TColStd_HPackedMapOfInteger)  m_indices; //!< Point indices to keep (if filter is set).
+  Handle(asiAlgo_BaseCloud<REAL_TYPE>) m_points;       //!< Points to visualize.
+  Handle(TColStd_HPackedMapOfInteger)  m_indices;      //!< Point indices to keep (if filter is set).
+  double                               m_fScaleCoeffX; //!< Scaling coefficient for X coordinates.
+  double                               m_fScaleCoeffY; //!< Scaling coefficient for Y coordinates.
+  double                               m_fScaleCoeffZ; //!< Scaling coefficient for Z coordinates.
 
 };
 

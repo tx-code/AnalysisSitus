@@ -221,11 +221,13 @@ public:
   asiEngine_EXPORT Handle(asiData_PartNode)
     Update(const TopoDS_Shape&            model,
            const Handle(asiAlgo_History)& history = nullptr,
-           const bool                     doResetTessParams = false);
+           const bool                     doResetTessParams = false,
+           const bool                     doResetUVScaling = true);
 
   //! Sets the passed face ID to be stored persistently.
   asiEngine_EXPORT void
-    SetSelectedFace(const int fid);
+    SetSelectedFace(const int  fid,
+                    const bool updateScaleUV = true);
 
   //! Stores the passed AAG in the project tree.
   //! \param[in] aag AAG instance to store.
@@ -252,7 +254,8 @@ public:
 
   //! Cleans up Data Model structure related to the Part Node.
   asiEngine_EXPORT void
-    Clean(const bool cleanMeta = true);
+    Clean(const bool cleanMeta = true,
+          const bool resetUVScaling = true);
 
   //! Accessor for a transient pointer to a B-Rep face by its one-based index.
   //! \param[in] oneBasedId one-based index of a face to access.

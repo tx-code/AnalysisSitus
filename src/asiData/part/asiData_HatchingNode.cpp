@@ -76,7 +76,7 @@ void asiData_HatchingNode::SetName(const TCollection_ExtendedString& name)
 //! Performs initial actions required to make Node WELL-FORMED.
 void asiData_HatchingNode::Init()
 {
-  asiData_FaceNodeBase::Init();
+  asiData_FaceNodeBase::init();
 
   // Set default values.
   this->SetNumIsosU (10);

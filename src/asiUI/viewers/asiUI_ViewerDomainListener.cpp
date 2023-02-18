@@ -31,6 +31,9 @@
 // Own include
 #include <asiUI_ViewerDomainListener.h>
 
+// asiUI includes
+#include <asiUI_IV.h>
+
 //-----------------------------------------------------------------------------
 
 //! Constructor accepting all necessary facilities.
@@ -48,7 +51,10 @@ asiUI_ViewerDomainListener::asiUI_ViewerDomainListener(asiUI_ViewerPart*        
                                                        ActAPI_PlotterEntry            plotter)
 : asiUI_Viewer3dListener (wViewerDomain, model, progress, plotter),
   m_wViewerPart          (wViewerPart),
-  m_wViewerHost          (wViewerHost)
+  m_wViewerHost          (wViewerHost),
+  m_pScaleU              (nullptr),
+  m_pScaleV              (nullptr),
+  m_pJoinEdges           (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -72,6 +78,9 @@ void asiUI_ViewerDomainListener::populateMenu(QMenu& menu)
   asiUI_ViewerDomain*
     pDomainViewer = ::qobject_cast<asiUI_ViewerDomain*>(m_pViewer);
 
+  m_pScaleU = menu.addAction("Scale up in U");
+  m_pScaleV = menu.addAction("Scale up in V");
+
   std::map<int, TopoDS_Edge> edges;
   pDomainViewer->GetSelectedEdges(edges);
 
@@ -89,11 +98,29 @@ void asiUI_ViewerDomainListener::executeAction(QAction* action)
   asiUI_ViewerDomain*
     pDomainViewer = ::qobject_cast<asiUI_ViewerDomain*>(m_pViewer);
 
+  /* ============
+   *  Scale up U.
+   * ============ */
+
+  if ( action == m_pScaleU )
+  {
+    pDomainViewer->onScaleU();
+  }
+
+  /* ============
+   *  Scale up V.
+   * ============ */
+
+  else if ( action == m_pScaleV )
+  {
+    pDomainViewer->onScaleV();
+  }
+
   /* ==========================
    *  Join (concatenate) edges.
    * ========================== */
 
-  if ( action == m_pJoinEdges )
+  else if ( action == m_pJoinEdges )
   {
     pDomainViewer->onJoinEdges();
   }

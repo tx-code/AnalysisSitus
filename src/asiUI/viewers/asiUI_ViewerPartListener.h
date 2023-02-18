@@ -130,15 +130,15 @@ protected:
   Handle(asiUI_IStatusBar) m_statusBar;     //!< Status bar string.
 
   //! Custom actions.
-  QAction* m_pSaveBREPAction;
-  QAction* m_pSaveSTLAction;
-  QAction* m_pShowNormsAction;
-  QAction* m_pInvertFacesAction;
-  QAction* m_pSplConvertAction;
-  QAction* m_pShowOriContourAction;
-  QAction* m_pShowHatchingAction;
-  QAction* m_pCopyAsStringAction;
-  QAction* m_pSetAsVariableAction;
+  QAction* m_pSaveBREP;
+  QAction* m_pSaveSTL;
+  QAction* m_pShowNorms;
+  QAction* m_pInvertFaces;
+  QAction* m_pSplConvert;
+  QAction* m_pShowOriContour;
+  QAction* m_pShowHatching;
+  QAction* m_pCopyAsString;
+  QAction* m_pSetAsVariable;
   QAction* m_pFindIsolated;
   QAction* m_pCheckDihAngle;
   QAction* m_pAddAsFeature;

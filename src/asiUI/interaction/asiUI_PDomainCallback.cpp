@@ -76,4 +76,8 @@ void asiUI_PDomainCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
     emit killEdges();
   else if ( eventId == EVENT_JOIN )
     emit joinEdges();
+  else if ( eventId == EVENT_SCALE_U )
+    emit scaleU();
+  else if ( eventId == EVENT_SCALE_V )
+    emit scaleV();
 }

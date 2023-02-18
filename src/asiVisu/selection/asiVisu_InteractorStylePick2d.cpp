@@ -133,6 +133,10 @@ void asiVisu_InteractorStylePick2d::OnKeyPress()
   std::string key = this->Interactor->GetKeySym();
   if ( key == "Delete" )
     this->InvokeEvent(EVENT_DELETE);
-  if ( key == "j" )
+  if ( key == "j" || key == "J" )
     this->InvokeEvent(EVENT_JOIN);
+  if ( key == "u" || key == "U" )
+    this->InvokeEvent(EVENT_SCALE_U);
+  if ( key == "v" || key == "V" )
+    this->InvokeEvent(EVENT_SCALE_V);
 }

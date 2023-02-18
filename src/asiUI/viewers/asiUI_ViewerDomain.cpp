@@ -138,6 +138,14 @@ asiUI_ViewerDomain::asiUI_ViewerDomain(const Handle(asiEngine_Model)& model,
   if ( !m_prs_mgr->GetImageInteractorStyle()->HasObserver(EVENT_JOIN) )
     m_prs_mgr->GetImageInteractorStyle()->AddObserver(EVENT_JOIN, m_domainCallback);
 
+  // Set observer for U scaling
+  if ( !m_prs_mgr->GetImageInteractorStyle()->HasObserver(EVENT_SCALE_U) )
+    m_prs_mgr->GetImageInteractorStyle()->AddObserver(EVENT_SCALE_U, m_domainCallback);
+
+  // Set observer for V scaling
+  if ( !m_prs_mgr->GetImageInteractorStyle()->HasObserver(EVENT_SCALE_V) )
+    m_prs_mgr->GetImageInteractorStyle()->AddObserver(EVENT_SCALE_V, m_domainCallback);
+
   // Get notified once any sensitive is picked on a section
   connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onDomainPicked() ) );
 
@@ -146,6 +154,12 @@ asiUI_ViewerDomain::asiUI_ViewerDomain(const Handle(asiEngine_Model)& model,
 
   // Get notified of edge joining
   connect( m_domainCallback, SIGNAL( joinEdges() ), this, SLOT( onJoinEdges() ) );
+
+  // Get notified on U scaling
+  connect( m_domainCallback, SIGNAL( scaleU() ), this, SLOT( onScaleU() ) );
+
+  // Get notified on V scaling
+  connect( m_domainCallback, SIGNAL( scaleV() ), this, SLOT( onScaleV() ) );
 
   /* =====================================
    *  Finalize initial state of the scene
@@ -394,7 +408,7 @@ void asiUI_ViewerDomain::onJoinEdges()
     const int fid = N->GetAAG()->RequestMapOfSubShapes().FindIndex(m_selectedFaceCache);
 
     asiEngine_Part partApi(m_model);
-    partApi.Update(result);
+    partApi.Update(result, nullptr, false, false);
     partApi.SetSelectedFace(fid);
   }
   m_model->CommitCommand();
@@ -408,6 +422,46 @@ void asiUI_ViewerDomain::onJoinEdges()
   //
   IV->GetPrsMgr3d()->Actualize( N );
   IV->GetPrsMgr2d()->Actualize( N->GetFaceRepresentation() );
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for U scaling.
+void asiUI_ViewerDomain::onScaleU()
+{
+  Handle(asiData_FaceNode)
+    faceNode = m_model->GetPartNode()->GetFaceRepresentation();
+
+  const double coeff = faceNode->GetUScaleCoeff();
+
+  m_model->DisableTransactions();
+  {
+    faceNode->SetUScaleCoeff(coeff + 1);
+  }
+  m_model->EnableTransactions();
+
+  // Update viewer.
+  m_prs_mgr->Actualize(faceNode);
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for V scaling.
+void asiUI_ViewerDomain::onScaleV()
+{
+  Handle(asiData_FaceNode)
+    faceNode = m_model->GetPartNode()->GetFaceRepresentation();
+
+  const double coeff = faceNode->GetVScaleCoeff();
+
+  m_model->DisableTransactions();
+  {
+    faceNode->SetVScaleCoeff(coeff + 1);
+  }
+  m_model->EnableTransactions();
+
+  // Update viewer.
+  m_prs_mgr->Actualize(faceNode);
 }
 
 //-----------------------------------------------------------------------------

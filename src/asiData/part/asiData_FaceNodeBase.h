@@ -94,10 +94,10 @@ public:
     GetSelectedFaces() const;
 
 // Initialization:
-public:
+protected:
 
-  asiData_EXPORT virtual void
-    Init();
+  asiData_EXPORT void
+    init();
 
 protected:
 

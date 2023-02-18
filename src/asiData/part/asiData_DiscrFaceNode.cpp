@@ -56,7 +56,7 @@ Handle(ActAPI_INode) asiData_DiscrFaceNode::Instance()
 
 void asiData_DiscrFaceNode::Init()
 {
-  asiData_FaceNodeBase::Init();
+  asiData_FaceNodeBase::init();
 }
 
 //-----------------------------------------------------------------------------

@@ -677,7 +677,8 @@ Handle(asiData_DiscrFaceNode)
 
 Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            model,
                                                 const Handle(asiAlgo_History)& history,
-                                                const bool                     doResetTessParams)
+                                                const bool                     doResetTessParams,
+                                                const bool                     doResetUVScaling)
 {
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();
@@ -689,7 +690,7 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
   this->UpdateMetadata(history);
 
   // Reset data without cleaning up metadata.
-  this->Clean(false);
+  this->Clean(false, doResetUVScaling);
 
   // Set working structures
   Handle(ActData_ShapeParameter)
@@ -734,7 +735,8 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
 
 //-----------------------------------------------------------------------------
 
-void asiEngine_Part::SetSelectedFace(const int fid)
+void asiEngine_Part::SetSelectedFace(const int  fid,
+                                     const bool updateScaleUV)
 {
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();
@@ -851,7 +853,8 @@ Handle(asiAlgo_BVHFacets) asiEngine_Part::BuildBVH(const bool store)
 
 //-----------------------------------------------------------------------------
 
-void asiEngine_Part::Clean(const bool cleanMeta)
+void asiEngine_Part::Clean(const bool cleanMeta,
+                           const bool resetUVScaling)
 {
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();
@@ -860,7 +863,7 @@ void asiEngine_Part::Clean(const bool cleanMeta)
     return;
 
   // Reset data.
-  part_n->GetFaceRepresentation()          ->Init();
+  part_n->GetFaceRepresentation()          ->Init(resetUVScaling);
   part_n->GetSurfaceRepresentation()       ->Init();
   part_n->GetEdgeRepresentation()          ->Init();
   part_n->GetCurveRepresentation()         ->Init();

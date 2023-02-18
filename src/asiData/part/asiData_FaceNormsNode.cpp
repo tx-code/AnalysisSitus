@@ -53,7 +53,7 @@ Handle(ActAPI_INode) asiData_FaceNormsNode::Instance()
 //! Performs initial actions required to make Node WELL-FORMED.
 void asiData_FaceNormsNode::Init()
 {
-  asiData_FaceNodeBase::Init();
+  asiData_FaceNodeBase::init();
 
   this->SetSampleRate(0.05);
   this->InitParameter(PID_SampleRate,  "Sampling rate", "", ParameterFlag_IsVisible, true);

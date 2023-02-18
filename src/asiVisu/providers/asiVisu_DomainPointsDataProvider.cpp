@@ -153,6 +153,27 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_DomainPointsDataProvider::GetPoints() 
 
 //-----------------------------------------------------------------------------
 
+double asiVisu_DomainPointsDataProvider::GetScaleCoeffX() const
+{
+  return Handle(asiData_FaceNode)::DownCast(m_node)->GetUScaleCoeff();
+}
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_DomainPointsDataProvider::GetScaleCoeffY() const
+{
+  return Handle(asiData_FaceNode)::DownCast(m_node)->GetVScaleCoeff();
+}
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_DomainPointsDataProvider::GetScaleCoeffZ() const
+{
+  return 1.;
+}
+
+//-----------------------------------------------------------------------------
+
 //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
 //! translation process.
 //! \return source Parameters.
@@ -162,7 +183,9 @@ Handle(ActAPI_HParameterList) asiVisu_DomainPointsDataProvider::translationSourc
   ActParamStream out;
 
   // Register Parameter as sensitive.
-  out << m_node->Parameter(asiData_FaceNode::PID_SelectedFaces);
+  out << m_node->Parameter(asiData_FaceNode::PID_SelectedFaces)
+      << m_node->Parameter(asiData_FaceNode::PID_UScaleCoeff)
+      << m_node->Parameter(asiData_FaceNode::PID_VScaleCoeff);
 
   return out;
 }

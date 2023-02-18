@@ -405,6 +405,8 @@ void asiUI_ViewerPart::onSubShapesPicked()
       if ( picked_face_IDs.size() )
       {
         geom_n->GetFaceRepresentation()     ->SetSelectedFaces(picked_face_IDs);
+        geom_n->GetFaceRepresentation()     ->SetUScaleCoeff  (1.);
+        geom_n->GetFaceRepresentation()     ->SetVScaleCoeff  (1.);
         geom_n->GetNormsRepresentation()    ->SetSelectedFaces(picked_face_IDs);
         geom_n->GetSurfaceRepresentation()  ->SetSelectedFaces(picked_face_IDs);
         geom_n->GetContourRepresentation()  ->SetSelectedFaces(picked_face_IDs);
@@ -413,6 +415,8 @@ void asiUI_ViewerPart::onSubShapesPicked()
       else // Reset stored indices
       {
         geom_n->GetFaceRepresentation()     ->SetSelectedFace(0);
+        geom_n->GetFaceRepresentation()     ->SetUScaleCoeff (1.);
+        geom_n->GetFaceRepresentation()     ->SetVScaleCoeff (1.);
         geom_n->GetNormsRepresentation()    ->SetSelectedFace(0);
         geom_n->GetSurfaceRepresentation()  ->SetSelectedFace(0);
         geom_n->GetContourRepresentation()  ->SetSelectedFace(0);

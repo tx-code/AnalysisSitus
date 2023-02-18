@@ -199,23 +199,23 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_wViewerDomain         (wViewerDomain),
   m_wViewerHost           (wViewerHost),
   m_wBrowser              (wBrowser),
-  m_pSaveBREPAction       (nullptr),
-  m_pSaveSTLAction        (nullptr),
-  m_pShowNormsAction      (nullptr),
-  m_pInvertFacesAction    (nullptr),
-  m_pSplConvertAction     (nullptr),
-  m_pShowOriContourAction (nullptr),
-  m_pShowHatchingAction   (nullptr),
-  m_pCopyAsStringAction   (nullptr),
-  m_pSetAsVariableAction  (nullptr),
+  m_statusBar             (statusBar),
+  m_pSaveBREP             (nullptr),
+  m_pSaveSTL              (nullptr),
+  m_pShowNorms            (nullptr),
+  m_pInvertFaces          (nullptr),
+  m_pSplConvert           (nullptr),
+  m_pShowOriContour       (nullptr),
+  m_pShowHatching         (nullptr),
+  m_pCopyAsString         (nullptr),
+  m_pSetAsVariable        (nullptr),
   m_pFindIsolated         (nullptr),
   m_pCheckDihAngle        (nullptr),
   m_pAddAsFeature         (nullptr),
   m_pGetAsBLOB            (nullptr),
   m_pMeasureLength        (nullptr),
   m_pGetSpannedAngle      (nullptr),
-  m_pCheckThickness       (nullptr),
-  m_statusBar             (statusBar)
+  m_pCheckThickness       (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -586,7 +586,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   if ( facetIndices.Extent() )
   {
     menu.addSeparator();
-    m_pSaveSTLAction = menu.addAction("Save to STL...");
+    m_pSaveSTL = menu.addAction("Save to STL...");
   }
 
   // Prepare the context menu items.
@@ -599,26 +599,28 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       //
       if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_FaceNormsNode) ) )
       {
-        m_pShowNormsAction = menu.addAction("Show face normals");
+        m_pShowNorms = menu.addAction("Show face normals");
       }
       if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_FaceContourNode) ) )
       {
-        m_pShowOriContourAction = menu.addAction("Show face oriented contour");
+        m_pShowOriContour = menu.addAction("Show face oriented contour");
       }
       if ( m_pViewer->PrsMgr()->IsPresentable( STANDARD_TYPE(asiData_HatchingNode) ) )
       {
-        m_pShowHatchingAction = menu.addAction("Show hatching");
+        m_pShowHatching = menu.addAction("Show hatching");
       }
       //
-      m_pInvertFacesAction = menu.addAction("Invert faces");
-      m_pSplConvertAction  = menu.addAction("Convert to spline");
-      m_pFindIsolated      = menu.addAction("Find isolated");
+      m_pInvertFaces  = menu.addAction("Invert face(s)");
+      m_pSplConvert   = menu.addAction("Convert to spline");
+      m_pFindIsolated = menu.addAction("Find isolated");
+      //
       if ( faceIndices.Extent() > 1 )
       {
         m_pCheckDihAngle = menu.addAction("Check dihedral angle");
       }
-      m_pAddAsFeature      = menu.addAction("Add as feature");
-      m_pGetAsBLOB         = menu.addAction("Get as BLOB");
+      //
+      m_pAddAsFeature = menu.addAction("Add as feature");
+      m_pGetAsBLOB    = menu.addAction("Get as BLOB");
 
       if ( faceIndices.Extent() == 1 )
       {
@@ -639,16 +641,16 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
 
     menu.addSeparator();
     //
-    m_pSaveBREPAction      = menu.addAction("Save to BREP...");
-    m_pSetAsVariableAction = menu.addAction("Set as variable");
+    m_pSaveBREP      = menu.addAction("Save to BREP...");
+    m_pSetAsVariable = menu.addAction("Set as variable");
 
     if ( faceIndices.Extent() )
-      m_pSaveSTLAction = menu.addAction("Save to STL...");
+      m_pSaveSTL = menu.addAction("Save to STL...");
 
     // Add items which work for single-element selection.
     if ( faceIndices.Extent() == 1 || edgeIndices.Extent() == 1 )
     {
-      m_pCopyAsStringAction = menu.addAction("Copy as JSON");
+      m_pCopyAsString = menu.addAction("Copy as JSON");
     }
 
     // Selected items are vertices.
@@ -671,7 +673,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: save BREP
   //---------------------------------------------------------------------------
-  if ( pAction == m_pSaveBREPAction )
+  if ( pAction == m_pSaveBREP )
   {
     // Get highlighted sub-shapes
     TopTools_IndexedMapOfShape selected;
@@ -697,7 +699,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: save STL
   //---------------------------------------------------------------------------
-  if ( pAction == m_pSaveSTLAction )
+  else if ( pAction == m_pSaveSTL )
   {
     asiEngine_Part          partApi( m_model, m_pViewer->PrsMgr() );
     asiEngine_Triangulation trisApi( m_model, m_pViewer->PrsMgr() );
@@ -741,7 +743,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: copy as string
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pCopyAsStringAction )
+  else if ( pAction == m_pCopyAsString )
   {
     // Get highlighted sub-shapes.
     TopTools_IndexedMapOfShape selected;
@@ -793,7 +795,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: show normal field
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pShowNormsAction )
+  else if ( pAction == m_pShowNorms )
   {
     TIMER_NEW
     TIMER_GO
@@ -807,7 +809,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: show oriented contour
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pShowOriContourAction )
+  else if ( pAction == m_pShowOriContour )
   {
     TIMER_NEW
     TIMER_GO
@@ -821,7 +823,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: show face hatching
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pShowHatchingAction )
+  else if ( pAction == m_pShowHatching )
   {
     TIMER_NEW
     TIMER_GO
@@ -835,7 +837,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: invert faces
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pInvertFacesAction )
+  else if ( pAction == m_pInvertFaces )
   {
     // Get highlighted faces
     TColStd_PackedMapOfInteger faceIndices;
@@ -879,7 +881,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: convert to spline
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pSplConvertAction )
+  else if ( pAction == m_pSplConvert )
   {
     // Get highlighted sub-shapes
     TopTools_IndexedMapOfShape selected;
@@ -951,7 +953,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: set as variable
   //---------------------------------------------------------------------------
-  if ( pAction == m_pSetAsVariableAction )
+  if ( pAction == m_pSetAsVariable )
   {
     // Get highlighted sub-shapes
     TopTools_IndexedMapOfShape selected;

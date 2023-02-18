@@ -54,6 +54,10 @@ public:
     SetEdgeOnFace(const TopoDS_Edge& edge,
                   const TopoDS_Face& face);
 
+  void
+    Rescale(const double scaleX,
+            const double scaleY);
+
 protected:
 
   asiVisu_PCurveSource();

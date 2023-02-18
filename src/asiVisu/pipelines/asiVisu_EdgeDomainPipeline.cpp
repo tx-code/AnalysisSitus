@@ -44,7 +44,7 @@
 asiVisu_EdgeDomainPipeline::asiVisu_EdgeDomainPipeline()
 //
 : asiVisu_Pipeline( vtkSmartPointer<vtkPolyDataMapper>::New(),
-                 vtkSmartPointer<vtkActor>::New() )
+                    vtkSmartPointer<vtkActor>::New() )
 {}
 
 //-----------------------------------------------------------------------------

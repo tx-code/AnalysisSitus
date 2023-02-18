@@ -43,8 +43,6 @@
 //! Data provider for face geometry.
 class asiVisu_FaceDataProvider : public asiVisu_SurfaceDataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_FaceDataProvider, asiVisu_SurfaceDataProvider)
 
@@ -72,6 +70,12 @@ public:
 
   asiVisu_EXPORT bool
     GetShowOriTips() const;
+
+  asiVisu_EXPORT double
+    GetUScaleCoeff() const;
+
+  asiVisu_EXPORT double
+    GetVScaleCoeff() const;
 
 public:
 

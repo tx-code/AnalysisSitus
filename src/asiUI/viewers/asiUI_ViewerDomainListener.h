@@ -75,6 +75,8 @@ protected:
   asiUI_ViewerPart* m_wViewerPart; //!< Part viewer.
   asiUI_ViewerHost* m_wViewerHost; //!< Host viewer.
 
+  QAction* m_pScaleU;    //!< Scale up in U direction.
+  QAction* m_pScaleV;    //!< Scale up in V direction.
   QAction* m_pJoinEdges; //!< Context-menu action to join edges.
 
 };

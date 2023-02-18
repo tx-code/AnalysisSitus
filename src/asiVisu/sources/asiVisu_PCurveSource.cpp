@@ -65,6 +65,23 @@ asiVisu_PCurveSource::~asiVisu_PCurveSource()
 // Kernel methods
 //-----------------------------------------------------------------------------
 
+void asiVisu_PCurveSource::Rescale(const double scaleX,
+                                   const double scaleY)
+{
+  if ( m_XCoords.IsNull() || m_YCoords.IsNull() )
+    return;
+
+  const int numCoords = m_XCoords->Length();
+
+  for ( int k = 0; k < numCoords; ++k )
+  {
+    m_XCoords->ChangeValue(k) *= scaleX;
+    m_YCoords->ChangeValue(k) *= scaleY;
+  }
+
+  this->Modified();
+}
+
 //! Sets input geometry.
 //! \param edge [in] edge to retrieve the p-curve from.
 //! \param face [in] host face.

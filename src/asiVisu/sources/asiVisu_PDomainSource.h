@@ -56,6 +56,8 @@ public:
   void Set3DCurveModeOn ();
   void SetTipMode       (const bool on);
   void SetTipNorm       (const gp_Vec& tipNorm);
+  void SetUScaleCoeff   (const double coeff);
+  void SetVScaleCoeff   (const double coeff);
 
 protected:
 
@@ -79,10 +81,12 @@ private:
 
 private:
 
-  TopoDS_Face m_face;        //!< Face to convert.
-  bool        m_bPCurveMode; //!< Indicates whether p-curve mode is activated.
-  bool        m_bTipMode;    //!< Indicates whether to visualize orientation tips.
-  gp_Vec      m_tipNorm;     //!< Optional normal vector for tips.
+  TopoDS_Face m_face;         //!< Face to convert.
+  bool        m_bPCurveMode;  //!< Indicates whether p-curve mode is activated.
+  bool        m_bTipMode;     //!< Indicates whether to visualize orientation tips.
+  gp_Vec      m_tipNorm;      //!< Optional normal vector for tips.
+  double      m_fScaleCoeffU; //!< Scaling coefficient in U axis.
+  double      m_fScaleCoeffV; //!< Scaling coefficient in V axis.
 
 };
 

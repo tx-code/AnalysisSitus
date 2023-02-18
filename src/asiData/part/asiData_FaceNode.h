@@ -52,8 +52,9 @@ public:
   //! IDs for the underlying Parameters.
   enum ParamId
   {
-    //! Whether to show orientation tips for the edges.
-    PID_ShowOriTips = asiData_FaceNodeBase::PID_Last,
+    PID_ShowOriTips = asiData_FaceNodeBase::PID_Last, //!< Whether to show orientation tips for the edges.
+    PID_UScaleCoeff,                                  //!< Scaling in U curvilinear direction.
+    PID_VScaleCoeff,                                  //!< Scaling in V curvilinear direction.
     PID_Last        = PID_ShowOriTips + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -69,7 +70,7 @@ public:
 
   //! Performs initial actions required to make Node WELL-FORMED.
   asiData_EXPORT void
-    Init();
+    Init(const bool resetScaling = true);
 
 public:
 
@@ -83,6 +84,24 @@ public:
   //!         edges are supposed to be visualized or not.
   asiData_EXPORT bool
     GetShowOriTips() const;
+
+  //! Sets a double coefficient for scaling U curvilinear direction.
+  //! \param[in] coeff the scaling coefficient to set.
+  asiData_EXPORT void
+    SetUScaleCoeff(const double coeff);
+
+  //! \return the coefficient for scaling U curvilinear direction.
+  asiData_EXPORT double
+    GetUScaleCoeff() const;
+
+  //! Sets a double coefficient for scaling V curvilinear direction.
+  //! \param[in] coeff the scaling coefficient to set.
+  asiData_EXPORT void
+    SetVScaleCoeff(const double coeff);
+
+  //! \return the coefficient for scaling V curvilinear direction.
+  asiData_EXPORT double
+    GetVScaleCoeff() const;
 
 protected:
 

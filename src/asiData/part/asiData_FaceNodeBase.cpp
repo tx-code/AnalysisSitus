@@ -44,7 +44,7 @@ asiData_FaceNodeBase::asiData_FaceNodeBase() : ActData_BaseNode()
 }
 
 //! Performs initial actions required to make Face Node WELL-FORMED.
-void asiData_FaceNodeBase::Init()
+void asiData_FaceNodeBase::init()
 {
   // Initialize name Parameter
   this->InitParameter(PID_Name, "Name", "", ParameterFlag_IsVisible, true);

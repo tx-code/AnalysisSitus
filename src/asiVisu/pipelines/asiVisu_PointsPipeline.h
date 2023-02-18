@@ -43,8 +43,6 @@
 //! Visualization pipeline for point cloud.
 class asiVisu_PointsPipeline : public asiVisu_Pipeline
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_PointsPipeline, asiVisu_Pipeline)
 

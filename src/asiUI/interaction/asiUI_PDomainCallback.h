@@ -72,6 +72,8 @@ signals:
 
   void killEdges();
   void joinEdges();
+  void scaleU();
+  void scaleV();
 
 protected:
 

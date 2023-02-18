@@ -68,6 +68,8 @@ asiVisu_PointsSource<float>* asiVisu_PointsSource<float>::New()
 template <typename REAL_TYPE>
 asiVisu_PointsSource<REAL_TYPE>::asiVisu_PointsSource() : vtkPolyDataAlgorithm ()
 {
+  m_fScaleCoeffX = m_fScaleCoeffY = m_fScaleCoeffZ = 1.;
+
   this->SetNumberOfInputPorts(0); // Connected directly to our own Data Provider
                                   // which has nothing to do with VTK pipeline.
 }
@@ -136,6 +138,21 @@ void asiVisu_PointsSource<REAL_TYPE>::SetOnePointFilter(const int pidx)
 //-----------------------------------------------------------------------------
 
 template <typename REAL_TYPE>
+void asiVisu_PointsSource<REAL_TYPE>::Rescale(const double scaleX,
+                                              const double scaleY,
+                                              const double scaleZ)
+{
+  m_fScaleCoeffX = scaleX;
+  m_fScaleCoeffY = scaleY;
+  m_fScaleCoeffZ = scaleZ;
+
+  // Set source modified.
+  this->Modified();
+}
+
+//-----------------------------------------------------------------------------
+
+template <typename REAL_TYPE>
 int asiVisu_PointsSource<REAL_TYPE>::RequestData(vtkInformation*        request,
                                                  vtkInformationVector** inputVector,
                                                  vtkInformationVector*  outputVector)
@@ -166,7 +183,9 @@ int asiVisu_PointsSource<REAL_TYPE>::RequestData(vtkInformation*        request,
 
   for ( int i = coords->Lower(); i <= coords->Upper() - 2; i += 3 )
   {
-    gp_Pnt P( coords->Value(i), coords->Value(i + 1), coords->Value(i + 2) );
+    gp_Pnt P( coords->Value(i)     * m_fScaleCoeffX,
+              coords->Value(i + 1) * m_fScaleCoeffY,
+              coords->Value(i + 2) * m_fScaleCoeffZ );
 
     vtkIdType pointIndex = this->registerGridPoint(P, polyOutput);
 

@@ -54,7 +54,8 @@ vtkStandardNewMacro(asiVisu_PDomainSource)
 
 //! Default constructor.
 asiVisu_PDomainSource::asiVisu_PDomainSource()
-: vtkPolyDataAlgorithm()
+: vtkPolyDataAlgorithm (),
+  m_fScaleCoeffU       (1.)
 {
   this->SetNumberOfInputPorts(0); // Connected directly to our own Data Provider
                                   // which has nothing to do with VTK pipeline
@@ -106,6 +107,22 @@ void asiVisu_PDomainSource::SetTipMode(const bool on)
 void asiVisu_PDomainSource::SetTipNorm(const gp_Vec& tipNorm)
 {
   m_tipNorm = tipNorm;
+  this->Modified();
+}
+
+//! Sets scaling coefficient along U axis for pcurves.
+//! \param[in] tipNorm normal vector to set.
+void asiVisu_PDomainSource::SetUScaleCoeff(const double scale)
+{
+  m_fScaleCoeffU = scale;
+  this->Modified();
+}
+
+//! Sets scaling coefficient along V axis for pcurves.
+//! \param[in] tipNorm normal vector to set.
+void asiVisu_PDomainSource::SetVScaleCoeff(const double scale)
+{
+  m_fScaleCoeffV = scale;
   this->Modified();
 }
 
@@ -175,6 +192,7 @@ int asiVisu_PDomainSource::RequestData(vtkInformation*        request,
 
       // Initialize data source
       pcurveSource->SetEdgeOnFace(E, face2Iterate);
+      pcurveSource->Rescale(m_fScaleCoeffU, m_fScaleCoeffV);
     }
     else
     {

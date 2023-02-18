@@ -86,11 +86,13 @@ public:
 
 public slots:
 
-  void onResetView();
-  void onDomainPicked();
-  void onKillEdges();
-  void onJoinEdges();
-  void onContextMenu(const QPoint&);
+  void onResetView    ();
+  void onDomainPicked ();
+  void onKillEdges    ();
+  void onJoinEdges    ();
+  void onScaleU       ();
+  void onScaleV       ();
+  void onContextMenu  (const QPoint&);
 
 signals:
 
