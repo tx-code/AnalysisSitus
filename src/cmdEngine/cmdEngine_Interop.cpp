@@ -303,7 +303,8 @@ int ENGINE_SaveBrep(const Handle(asiTcl_Interp)& interp,
   }
 
   // Save BREP.
-  if ( !BRepTools::Write( shape, filename.ToCString() ) )
+  if ( !BRepTools::Write(shape, filename.ToCString(), false, false,
+                         TopTools_FormatVersion_VERSION_2) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save BREP file.");
     return TCL_ERROR;

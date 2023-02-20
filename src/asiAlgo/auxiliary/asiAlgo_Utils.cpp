@@ -2346,37 +2346,11 @@ bool asiAlgo_Utils::ReadIGES(const TCollection_AsciiString& filename,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::WriteBRep(const TopoDS_Shape&            theShape,
-                              const TCollection_AsciiString& theFilename)
+bool asiAlgo_Utils::WriteBRep(const TopoDS_Shape&            shape,
+                              const TCollection_AsciiString& filename)
 {
-  std::ofstream os;
-  OSD_OpenStream(os, theFilename, std::ios::out);
-  //
-  if ( !os.is_open() || !os.good() )
-    return false;
-
-  bool isGood = (os.good() && !os.eof());
-  if ( !isGood )
-    return isGood;
-
-  // We disable triangulation right in ShapeSet.
-  BRepTools_ShapeSet SS(false);
-  SS.Add(theShape);
-
-  os << "DBRep_DrawableShape\n";  // for easy Draw read
-  SS.Write(os);
-  isGood = os.good();
-  if( isGood )
-    SS.Write(theShape, os);
-  //
-  os.flush();
-  isGood = os.good();
-
-  errno = 0;
-  os.close();
-  isGood = os.good() && isGood && !errno;
-
-  return isGood;
+  return BRepTools::Write(shape, filename.ToCString(), false, false,
+                          TopTools_FormatVersion_VERSION_2);
 }
 
 //-----------------------------------------------------------------------------
