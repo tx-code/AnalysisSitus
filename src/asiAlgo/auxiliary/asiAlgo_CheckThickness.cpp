@@ -71,6 +71,8 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
 
   // Build BVH.
   m_bvh = new asiAlgo_BVHFacets(m_resField.triangulation);
+#else
+  (void) shape;
 #endif
 }
 

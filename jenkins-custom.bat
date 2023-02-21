@@ -8,7 +8,7 @@ REM ===========================================================================
 REM  Configuration of Network Resources
 REM ===========================================================================
 
-set "JENKINS_3RDPARTIES_ARCHIVE_DIR=D:\Work\AnalysisSitus-libpacks\win\msvc2019_x64"
+set "JENKINS_3RDPARTIES_ARCHIVE_DIR=D:\Work\AnalysisSitus-libpacks\win\msvc2019_x64_occt760"
 set "JENKINS_3RDPARTIES_ARCHIVE=analysissitus-libpack-msvc2019.zip"
 set "JENKINS_3RDPARTIES_MOBIUS_DIR=%~dp0..\Mobius\cmake-install-dir"
 set "JENKINS_LAST_BUILD_DIR=D:\Work\!situ"

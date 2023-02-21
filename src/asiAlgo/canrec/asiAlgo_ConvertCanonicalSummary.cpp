@@ -118,7 +118,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
         ccSummary.isValid = mit->value.GetBool();
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfBezier )
+    else if ( prop == asiPropName_ExtrasCanRecSurfBezier )
     {
       if ( !mit->value.IsNull() )
       {
@@ -127,7 +127,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfSpl )
+    else if ( prop == asiPropName_ExtrasCanRecSurfSpl )
     {
       if ( !mit->value.IsNull() )
       {
@@ -136,7 +136,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfConical )
+    else if ( prop == asiPropName_ExtrasCanRecSurfConical )
     {
       if ( !mit->value.IsNull() )
       {
@@ -145,7 +145,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfCyl )
+    else if ( prop == asiPropName_ExtrasCanRecSurfCyl )
     {
       if ( !mit->value.IsNull() )
       {
@@ -154,7 +154,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfOffset )
+    else if ( prop == asiPropName_ExtrasCanRecSurfOffset )
     {
       if ( !mit->value.IsNull() )
       {
@@ -163,7 +163,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfSph )
+    else if ( prop == asiPropName_ExtrasCanRecSurfSph )
     {
       if ( !mit->value.IsNull() )
       {
@@ -172,7 +172,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfLinExtr )
+    else if ( prop == asiPropName_ExtrasCanRecSurfLinExtr )
     {
       if ( !mit->value.IsNull() )
       {
@@ -181,7 +181,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfOfRevol )
+    else if ( prop == asiPropName_ExtrasCanRecSurfOfRevol )
     {
       if ( !mit->value.IsNull() )
       {
@@ -190,7 +190,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfToroidal )
+    else if ( prop == asiPropName_ExtrasCanRecSurfToroidal )
     {
       if ( !mit->value.IsNull() )
       {
@@ -199,7 +199,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecSurfPlane )
+    else if ( prop == asiPropName_ExtrasCanRecSurfPlane )
     {
       if ( !mit->value.IsNull() )
       {
@@ -208,7 +208,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveBezier )
+    else if ( prop == asiPropName_ExtrasCanRecCurveBezier )
     {
       if ( !mit->value.IsNull() )
       {
@@ -217,7 +217,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveSpline )
+    else if ( prop == asiPropName_ExtrasCanRecCurveSpline )
     {
       if ( !mit->value.IsNull() )
       {
@@ -226,7 +226,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveCircle )
+    else if ( prop == asiPropName_ExtrasCanRecCurveCircle )
     {
       if ( !mit->value.IsNull() )
       {
@@ -235,7 +235,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveEllipse )
+    else if ( prop == asiPropName_ExtrasCanRecCurveEllipse )
     {
       if ( !mit->value.IsNull() )
       {
@@ -244,7 +244,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveHyperbola )
+    else if ( prop == asiPropName_ExtrasCanRecCurveHyperbola )
     {
       if ( !mit->value.IsNull() )
       {
@@ -253,7 +253,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveLine )
+    else if ( prop == asiPropName_ExtrasCanRecCurveLine )
     {
       if ( !mit->value.IsNull() )
       {
@@ -262,7 +262,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveOffset )
+    else if ( prop == asiPropName_ExtrasCanRecCurveOffset )
     {
       if ( !mit->value.IsNull() )
       {
@@ -271,7 +271,7 @@ void asiAlgo_ConvertCanonicalSummary::FromJSON(void*                            
       }
     }
 
-    if ( prop == asiPropName_ExtrasCanRecCurveParabola )
+    else if ( prop == asiPropName_ExtrasCanRecCurveParabola )
     {
       if ( !mit->value.IsNull() )
       {
