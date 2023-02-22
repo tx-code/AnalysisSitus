@@ -68,12 +68,18 @@ public:
   static void Functions(asiTestFunctions& functions)
   {
     functions << &testMapShapes1
+              << &testRanges1
+              << &testRanges2
+              << &testRanges3
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
 private:
 
-  static outcome testMapShapes1(const int funcID);
+  static outcome testMapShapes1 (const int funcID);
+  static outcome testRanges1    (const int funcID);
+  static outcome testRanges2    (const int funcID);
+  static outcome testRanges3    (const int funcID);
 
 };
 

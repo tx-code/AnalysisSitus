@@ -208,6 +208,8 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #define fopen_s(pFile, filename, mode) ((*(pFile))=fopen((filename), (mode)))
 #endif
 
+#define asiAlgo_RangeLinPrec 0.01
+
 //-----------------------------------------------------------------------------
 
 void appendSurfaceDetails(const Handle(Geom_Surface)& surf,
@@ -5786,9 +5788,10 @@ bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
 
 //-----------------------------------------------------------------------------
 
-Handle(Image_AlienPixMap) asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape& shape,
-                                                                  const int           width,
-                                                                  const int           height)
+Handle(Image_AlienPixMap)
+  asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape& shape,
+                                          const int           width,
+                                          const int           height)
 {
   Handle(Aspect_DisplayConnection)
     _displayConnection = new Aspect_DisplayConnection();
@@ -5881,6 +5884,222 @@ bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
     return false;
 
   return pixmap->Save(filename.c_str());
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Range::Contains(const t_range& range1,
+                                    const t_range& range2)
+{
+  if ( (range1.second > range2.second) && (range1.first < range2.first) )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Range::Coincide(const t_range& range1,
+                                    const t_range& range2)
+{
+  if ( (Abs(range1.first - range2.first) < asiAlgo_RangeLinPrec) &&
+       (Abs(range1.second - range2.second) < asiAlgo_RangeLinPrec) )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Range::Overlap(const t_range& range1,
+                                   const t_range& range2)
+{
+  // Partial overlapping.
+  if ( ( (range1.second > range2.first)  || ( Abs(range1.second - range2.first)  < asiAlgo_RangeLinPrec ) ) &&
+       ( (range1.first  < range2.first)  || ( Abs(range1.first  - range2.first)  < asiAlgo_RangeLinPrec ) ) &&
+       ( (range1.second < range2.second) || ( Abs(range1.second - range2.second) < asiAlgo_RangeLinPrec ) ) )
+  {
+    return true;
+  }
+
+  // Inclusion/coincidence.
+  if ( ( (range1.second < range2.second) || ( Abs(range1.second - range2.second) < asiAlgo_RangeLinPrec ) ) &&
+       ( (range1.first  > range2.first)  || ( Abs(range1.first  - range2.first)  < asiAlgo_RangeLinPrec ) ) )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+asiAlgo_Utils::Range::t_range
+  asiAlgo_Utils::Range::Merge(const t_range& range1,
+                              const t_range& range2)
+{
+  return t_range( Min(range1.first,  range2.first),
+                  Max(range1.second, range2.second) );
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Range::Intersect(const t_range& range,
+                                     const double   hmin,
+                                     const double   hmax,
+                                     t_range&       res)
+{
+  const double rmin = range.first;
+  const double rmax = range.second;
+
+  // Self degenerated.
+  if ( Abs(range.first - range.second) < asiAlgo_RangeLinPrec )
+    return false;
+
+  // Entirely on the left.
+  if ( (rmin < hmin) && ( (rmax < hmin) || Abs(rmax - hmin) < asiAlgo_RangeLinPrec) )
+    return false;
+
+  // Entirely on the right.
+  if ( (rmax > hmax) && ( (rmin > hmax) || Abs(rmin - hmax) < asiAlgo_RangeLinPrec) )
+    return false;
+
+  // Left corner is inside the range and right corner is outside the range.
+  if ( ( (rmin < hmax) && ( (rmin > hmin) || Abs(rmin - hmin) < asiAlgo_RangeLinPrec) ) &&
+       ( (rmax > hmax) || Abs(rmax - hmax) < asiAlgo_RangeLinPrec ) )
+  {
+    res.first  = rmin;
+    res.second = hmax;
+    return true;
+  }
+
+  // Left corner is outside the range and right corner is inside the range.
+  if ( ( (rmin < hmin) || Abs(rmin - hmin) < asiAlgo_RangeLinPrec ) &&
+       ( (rmax > hmin) && ( (rmax < hmax) || Abs(rmax - hmax) < asiAlgo_RangeLinPrec) ) )
+  {
+    res.first  = hmin;
+    res.second = rmax;
+    return true;
+  }
+
+  // Both corners are in the range.
+  if ( ( (rmin > hmin) || Abs(rmin - hmin) < asiAlgo_RangeLinPrec ) &&
+       ( (rmax < hmax) || Abs(rmax - hmax) < asiAlgo_RangeLinPrec ) )
+  {
+    res.first  = rmin;
+    res.second = rmax;
+    return true;
+  }
+
+  // Both corners are outside the range.
+  if ( ( (rmin < hmin) || Abs(rmin - hmin) < asiAlgo_RangeLinPrec ) &&
+       ( (rmax > hmax) || Abs(rmax - hmax) < asiAlgo_RangeLinPrec ) )
+  {
+    res.first  = hmin;
+    res.second = hmax;
+    return true;
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::Range::MergeRanges(const t_rangesByFaces& inputRanges,
+                                       t_rangesByFaces&       merged)
+{
+  // Contract check.
+  if ( inputRanges.empty() )
+  {
+    return;
+  }
+
+  t_rangesByFaces ranges = inputRanges;
+
+  std::sort(ranges.begin(), ranges.end(), [&](const t_rangeByFace& a,
+                                              const t_rangeByFace& b) {
+    return a.second.first < b.second.first;
+  });
+
+  t_rangesByFaces result;
+
+  int  i    = 0;
+  bool stop = false;
+  do
+  {
+    // Get the next range.
+    t_range currRange = ranges[i].second;
+
+    int  j   = i + 1;
+    bool gap = false;
+
+    if ( j == ranges.size() )
+    {
+      stop = true;
+      result.push_back({0, currRange});
+    }
+    else
+    {
+      do
+      {
+        // Get the next range.
+        const t_range& nextRange = ranges[j].second;
+
+        if ( Overlap(currRange, nextRange) || Overlap(nextRange, currRange) )
+        {
+          currRange = Merge(currRange, nextRange);
+          j++;
+
+          if ( j == ranges.size() )
+            stop = true;
+        }
+        else
+        {
+          gap = true;
+          i   = j; // Proceed with the next range.
+        }
+
+        if ( gap || stop )
+        {
+          result.push_back({0, currRange});
+        }
+      }
+      while ( !gap && !stop );
+
+      if ( i == ranges.size() )
+        stop = true;
+    }
+  }
+  while ( !stop );
+
+  merged = result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Range::AreEqual(const t_rangesByFaces& ranges1,
+                                    const t_rangesByFaces& ranges2)
+{
+  if ( ranges1.size() != ranges2.size() )
+    return false;
+
+  for ( size_t i = 0; i < ranges1.size(); ++i )
+  {
+    if ( ranges1[i].first != ranges2[i].first )
+      return false;
+
+    if ( Abs(ranges1[i].second.first - ranges2[i].second.first) > asiAlgo_RangeLinPrec )
+      return false;
+
+    if ( Abs(ranges1[i].second.second - ranges2[i].second.second) > asiAlgo_RangeLinPrec )
+      return false;
+  }
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------

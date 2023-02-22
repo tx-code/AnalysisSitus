@@ -488,6 +488,83 @@ namespace asiAlgo_Utils
                       const std::string&  filename);
   } // Graphics namespace.
 
+  //! Functions for working with 1-dimensional ranges.
+  namespace Range
+  {
+    //! Range.
+    typedef std::pair<double, double> t_range;
+
+    //! Range associated with a face.
+    typedef std::pair<int, t_range> t_rangeByFace;
+
+    //! Ranges by faces.
+    typedef std::vector<t_rangeByFace> t_rangesByFaces;
+
+    //! Checks if the first range contains the second one.
+    //! \param[in] range1 the first range to check.
+    //! \param[in] range2 the second range to check.
+    //! \return true/false.
+    asiAlgo_EXPORT bool
+      Contains(const t_range& range1,
+               const t_range& range2);
+
+    //! Checks if the passed ranges are geometrically coincident.
+    //! \param[in] range1 the first range to check.
+    //! \param[in] range2 the second range to check.
+    //! \return true/false.
+    asiAlgo_EXPORT bool
+      Coincide(const t_range& range1,
+                const t_range& range2);
+
+    //! Checks if the passed `range1` left-overlaps or included into `range2`.
+    //! Run this function twice with the swapped arguments to perform full test.
+    //! \param[in] range1 the first range to check.
+    //! \param[in] range2 the second range to check.
+    //! \return true in the case of overlapping, false otherwise.
+    asiAlgo_EXPORT bool
+      Overlap(const t_range& range1,
+              const t_range& range2);
+
+    //! Merges the passed two ranges and returns the merged one.
+    //! \param[in] range1 the first range.
+    //! \param[in] range2 the second range.
+    //! \return the merged range.
+    asiAlgo_EXPORT t_range
+      Merge(const t_range& range1,
+            const t_range& range2);
+
+    //! Intersects the passed range with the domain range.
+    //! \param[in]  range the range in question.
+    //! \param[in]  hmin  the min domain bound.
+    //! \param[in]  hmax  the max domain bound.
+    //! \param[out] res   the intersection result.
+    //! \return true if the intersecting range is non-degenrated,
+    //!         false -- otherwise.
+    asiAlgo_EXPORT bool
+      Intersect(const t_range& range,
+                const double   hmin,
+                const double   hmax,
+                t_range&       res);
+
+    //! Merges all ranges in the passed `inputRanges` collection, so that
+    //! we end up with non-overlapping maximal ranges in the output `merged`
+    //! collection.
+    //! \param[in]  inputRanges the input ranges to process.
+    //! \param[out] merged      the merged ranges.
+    asiAlgo_EXPORT void
+      MergeRanges(const t_rangesByFaces& inputRanges,
+                  t_rangesByFaces&       merged);
+
+    //! Checks if the passed ranges are identical.
+    //! \param[in] ranges1 the first collection of ranges.
+    //! \param[in] ranges2 the second collection of ranges.
+    //! \return true/false.
+    asiAlgo_EXPORT bool
+      AreEqual(const t_rangesByFaces& ranges1,
+               const t_rangesByFaces& ranges2);
+
+  } // Range namespace.
+
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.
   //! \return label.
