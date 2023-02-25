@@ -42,6 +42,7 @@
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
 #include <asiAlgo_MeshMerge.h>
+#include <asiAlgo_PlateOnEdges.h>
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -195,27 +196,28 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
                                                    ActAPI_ProgressEntry            progress,
                                                    ActAPI_PlotterEntry             plotter)
 //
-: asiUI_Viewer3dListener  (wViewerPart, model, progress, plotter),
-  m_wViewerDomain         (wViewerDomain),
-  m_wViewerHost           (wViewerHost),
-  m_wBrowser              (wBrowser),
-  m_statusBar             (statusBar),
-  m_pSaveBREP             (nullptr),
-  m_pSaveSTL              (nullptr),
-  m_pShowNorms            (nullptr),
-  m_pInvertFaces          (nullptr),
-  m_pSplConvert           (nullptr),
-  m_pShowOriContour       (nullptr),
-  m_pShowHatching         (nullptr),
-  m_pCopyAsString         (nullptr),
-  m_pSetAsVariable        (nullptr),
-  m_pFindIsolated         (nullptr),
-  m_pCheckDihAngle        (nullptr),
-  m_pAddAsFeature         (nullptr),
-  m_pGetAsBLOB            (nullptr),
-  m_pMeasureLength        (nullptr),
-  m_pGetSpannedAngle      (nullptr),
-  m_pCheckThickness       (nullptr)
+: asiUI_Viewer3dListener (wViewerPart, model, progress, plotter),
+  m_wViewerDomain        (wViewerDomain),
+  m_wViewerHost          (wViewerHost),
+  m_wBrowser             (wBrowser),
+  m_statusBar            (statusBar),
+  m_pSaveBREP            (nullptr),
+  m_pSaveSTL             (nullptr),
+  m_pShowNorms           (nullptr),
+  m_pInvertFaces         (nullptr),
+  m_pSplConvert          (nullptr),
+  m_pFillEdges           (nullptr),
+  m_pShowOriContour      (nullptr),
+  m_pShowHatching        (nullptr),
+  m_pCopyAsString        (nullptr),
+  m_pSetAsVariable       (nullptr),
+  m_pFindIsolated        (nullptr),
+  m_pCheckDihAngle       (nullptr),
+  m_pAddAsFeature        (nullptr),
+  m_pGetAsBLOB           (nullptr),
+  m_pMeasureLength       (nullptr),
+  m_pGetSpannedAngle     (nullptr),
+  m_pCheckThickness      (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -592,6 +594,12 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   // Prepare the context menu items.
   if ( faceIndices.Extent() || edgeIndices.Extent() || vertIndices.Extent() )
   {
+    if ( edgeIndices.Extent() )
+    {
+      menu.addSeparator();
+      m_pFillEdges = menu.addAction("Fit surface");
+    }
+
     // Add items specific to faces.
     if ( faceIndices.Extent() )
     {
@@ -953,7 +961,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   // ACTION: set as variable
   //---------------------------------------------------------------------------
-  if ( pAction == m_pSetAsVariable )
+  else if ( pAction == m_pSetAsVariable )
   {
     // Get highlighted sub-shapes
     TopTools_IndexedMapOfShape selected;
@@ -1243,7 +1251,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     // Get face.
     const TopoDS_Face& face = aag->GetFace( faceIndices.GetMinimalMapped() );
     Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
-    if (surf.IsNull())
+    if ( surf.IsNull() )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "Surface is NULL.");
       return;
@@ -1310,5 +1318,47 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
 
     m_progress.SendLogMessage( LogInfo(Normal) << "Thickness is %1."
                                                << minDist);
+  }
+
+  //---------------------------------------------------------------------------
+  // ACTION: fill surface
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pFillEdges )
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+    // Get selected edges.
+    TColStd_PackedMapOfInteger eids;
+    partApi.GetHighlightedEdges(eids);
+
+    // Collect edges.
+    Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
+    //
+    for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
+    {
+      const int edgeId = eit.Key();
+
+      // Get edge.
+      const TopoDS_Shape&
+        edge = partApi.GetAAG()->RequestMapOfEdges()(edgeId);
+
+      hedges->Append(edge);
+    }
+
+    // Prepare interpolation tool.
+    asiAlgo_PlateOnEdges interpAlgo(partApi.GetShape(), m_progress, m_plotter);
+    //
+    interpAlgo.SetFairingCoeff(1e-3);
+
+    // Interpolate.
+    Handle(Geom_BSplineSurface) surf;
+    //
+    if ( !interpAlgo.BuildSurf(hedges, GeomAbs_C0, surf) )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Interpolation failed.");
+      return;
+    }
+
+    m_plotter.DRAW_SURFACE(surf, Color_Default, "filling");
   }
 }

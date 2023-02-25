@@ -135,6 +135,7 @@ protected:
   QAction* m_pShowNorms;
   QAction* m_pInvertFaces;
   QAction* m_pSplConvert;
+  QAction* m_pFillEdges;
   QAction* m_pShowOriContour;
   QAction* m_pShowHatching;
   QAction* m_pCopyAsString;
