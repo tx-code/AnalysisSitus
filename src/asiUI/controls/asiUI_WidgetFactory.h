@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_WidgetFactoy_HeaderFile
-#define asiUI_WidgetFactoy_HeaderFile
+#ifndef asiUI_WidgetFactory_HeaderFile
+#define asiUI_WidgetFactory_HeaderFile
 
 // asiUI includes
 #include <asiUI_Datum.h>
@@ -44,6 +44,7 @@
 class QWidget;
 class QString;
 class asiUI_CommonFacilities;
+class asiUI_DatumTable;
 
 //-----------------------------------------------------------------------------
 
@@ -82,10 +83,10 @@ public:
                               QWidget*       theParent = 0,
                               int            theDatumFlags = asiUI_Datum::Control);
 
-  //asiUI_EXPORT
-  //  asiUI_DatumTable* CreateDatumTable(const int theRowNumber = 0,
-  //                                     const int theColumnNumber = 0,
-  //                                     QWidget*  theParent = 0);
+  asiUI_EXPORT
+    asiUI_DatumTable* CreateDatumTable(const int theRowNumber = 0,
+                                       const int theColumnNumber = 0,
+                                       QWidget*  theParent = 0);
 
   //asiUI_EXPORT
   //  asiUI_DatumTree* CreateDatumTree(QWidget* theParent = 0);

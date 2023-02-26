@@ -32,11 +32,12 @@
 #define asiUI_ViewerPartListener_h
 
 // asiUI includes
+#include <asiUI_IStatusBar.h>
 #include <asiUI_Viewer3dListener.h>
 #include <asiUI_ViewerDomain.h>
 #include <asiUI_ViewerHost.h>
-#include <asiUI_IStatusBar.h>
 #include <asiUI_ViewerPart.h>
+#include <asiUI_WidgetFactory.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>
@@ -51,6 +52,7 @@ class asiUI_EXPORT asiUI_ViewerPartListener : public asiUI_Viewer3dListener
 public:
 
   //! Constructor accepting all necessary facilities.
+  //! \param[in] wf            widget factory.
   //! \param[in] wViewerPart   part viewer.
   //! \param[in] wViewerDomain domain viewer.
   //! \param[in] wViewerHost   host viewer.
@@ -59,14 +61,15 @@ public:
   //! \param[in] model         Data Model instance.
   //! \param[in] progress      progress notifier.
   //! \param[in] plotter       imperative plotter.
-  asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
-                           asiUI_ViewerDomain*             wViewerDomain,
-                           asiUI_ViewerHost*               wViewerHost,
-                           asiUI_ObjectBrowser*            wBrowser,
-                           const Handle(asiUI_IStatusBar)& statusBar,
-                           const Handle(asiEngine_Model)&  model,
-                           ActAPI_ProgressEntry            progress,
-                           ActAPI_PlotterEntry             plotter);
+  asiUI_ViewerPartListener(const Handle(asiUI_WidgetFactory)& wf,
+                           asiUI_ViewerPart*                  wViewerPart,
+                           asiUI_ViewerDomain*                wViewerDomain,
+                           asiUI_ViewerHost*                  wViewerHost,
+                           asiUI_ObjectBrowser*               wBrowser,
+                           const Handle(asiUI_IStatusBar)&    statusBar,
+                           const Handle(asiEngine_Model)&     model,
+                           ActAPI_ProgressEntry               progress,
+                           ActAPI_PlotterEntry                plotter);
 
   //! Dtor.
   virtual
@@ -124,10 +127,11 @@ protected:
 
 protected:
 
-  asiUI_ViewerDomain*      m_wViewerDomain; //!< Domain viewer.
-  asiUI_ViewerHost*        m_wViewerHost;   //!< Host viewer.
-  asiUI_ObjectBrowser*     m_wBrowser;      //!< Object browser.
-  Handle(asiUI_IStatusBar) m_statusBar;     //!< Status bar string.
+  Handle(asiUI_WidgetFactory) m_widgetFactory; //!< Widget factory.
+  asiUI_ViewerDomain*         m_wViewerDomain; //!< Domain viewer.
+  asiUI_ViewerHost*           m_wViewerHost;   //!< Host viewer.
+  asiUI_ObjectBrowser*        m_wBrowser;      //!< Object browser.
+  Handle(asiUI_IStatusBar)    m_statusBar;     //!< Status bar string.
 
   //! Custom actions.
   QAction* m_pSaveBREP;

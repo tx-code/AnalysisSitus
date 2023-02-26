@@ -414,7 +414,8 @@ void exe_MainWindow::createDockWindows()
                                                            cf);
 
   // Listener for part viewer.
-  Listeners.pViewerPart = new asiUI_ViewerPartListener(Widgets.wViewerPart,
+  Listeners.pViewerPart = new asiUI_ViewerPartListener(cf->WidgetFactory,
+                                                       Widgets.wViewerPart,
                                                        Widgets.wViewerDomain,
                                                        Widgets.wViewerSurface,
                                                        Widgets.wBrowser,

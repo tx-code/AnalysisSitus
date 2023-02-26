@@ -226,8 +226,7 @@ public:
 
   //! Sets the passed face ID to be stored persistently.
   asiEngine_EXPORT void
-    SetSelectedFace(const int  fid,
-                    const bool updateScaleUV = true);
+    SetSelectedFace(const int fid);
 
   //! Stores the passed AAG in the project tree.
   //! \param[in] aag AAG instance to store.
