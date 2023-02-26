@@ -5,6 +5,33 @@
   <!-- Common semantic IDs                                                  -->
   <!-- ==================================================================== -->
 
+  <datum id="POI_X" format="%5.2x3" label="x">
+    <dimensions>
+      <dimension name="extra" value="mm" />
+    </dimensions>
+    <domain type="Float" min="-1e99" max="1e99" />
+    <ui widget="SpinBox" widgetParams="step=0.01" />
+    <description>X</description>
+  </datum>
+
+  <datum id="POI_Y" format="%0.3x" label="y">
+    <dimensions>
+      <dimension name="extra" value="mm" />
+    </dimensions>
+    <domain type="Float" min="-1e99" max="1e99" />
+    <ui widget="SpinBox" widgetParams="step=0.01" />
+    <description>Y</description>
+  </datum>
+
+  <datum id="POI_Z" format="%0.3x" label="z">
+    <dimensions>
+      <dimension name="extra" value="mm" />
+    </dimensions>
+    <domain type="Float" min="-1e99" max="1e99" />
+    <ui widget="SpinBox" widgetParams="step=0.01" />
+    <description>Z</description>
+  </datum>
+
   <valueList id="List-YesNo" name="Yes/No">
     <value id="1">Yes</value>
     <value id="2">No</value>

@@ -15,6 +15,15 @@ set (CPP_FILES
 )
 
 #------------------------------------------------------------------------------
+# Surface approximation
+#------------------------------------------------------------------------------
+
+set (appsurf_H_FILES
+)
+set (appsurf_CPP_FILES
+)
+
+#------------------------------------------------------------------------------
 # Auxiliary
 #------------------------------------------------------------------------------
 
@@ -689,6 +698,14 @@ foreach (FILE ${CPP_FILES})
   source_group ("Source Files" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${appsurf_H_FILES})
+  source_group ("Header Files\\AppSurf" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${appsurf_CPP_FILES})
+  source_group ("Source Files\\AppSurf" FILES "${FILE}")
+endforeach (FILE)
+
 foreach (FILE ${aux_H_FILES})
   source_group ("Header Files\\Auxiliary" FILES "${FILE}")
 endforeach (FILE)
@@ -807,6 +824,7 @@ endforeach (FILE)
 
 # Create include variable
 set (asiAlgo_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
+  ${CMAKE_CURRENT_SOURCE_DIR}/appsurf;\
   ${CMAKE_CURRENT_SOURCE_DIR}/auxiliary;\
   ${CMAKE_CURRENT_SOURCE_DIR}/blends;\
   ${CMAKE_CURRENT_SOURCE_DIR}/canrec;\
@@ -868,6 +886,7 @@ endif()
 # Add target
 add_library (asiAlgo SHARED
   ${H_FILES}             ${CPP_FILES}
+  ${appsurf_H_FILES}     ${appsurf_CPP_FILES}
   ${aux_H_FILES}         ${aux_CPP_FILES}
   ${blends_H_FILES}      ${blends_CPP_FILES}
   ${canrec_H_FILES}      ${canrec_CPP_FILES}
@@ -993,6 +1012,7 @@ if (MSVC)
 endif()
 
 install (FILES ${H_FILES}             DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${appsurf_H_FILES}     DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${aux_H_FILES}         DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${blends_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
 install (FILES ${canrec_H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)

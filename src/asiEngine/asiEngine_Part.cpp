@@ -735,8 +735,7 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
 
 //-----------------------------------------------------------------------------
 
-void asiEngine_Part::SetSelectedFace(const int  fid,
-                                     const bool updateScaleUV)
+void asiEngine_Part::SetSelectedFace(const int fid)
 {
   // Get Part Node.
   Handle(asiData_PartNode) part_n = m_model->GetPartNode();

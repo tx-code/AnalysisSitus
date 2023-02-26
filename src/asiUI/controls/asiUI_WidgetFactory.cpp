@@ -47,6 +47,7 @@
 #include <asiUI_DatumSelector.h>
 #include <asiUI_DatumLabel.h>
 #include <asiUI_DatumCustomSelector.h>
+#include <asiUI_DatumTable.h>
 #include <asiUI_DatumTextEdit.h>
 #include <asiUI_Logger.h>
 
@@ -94,33 +95,24 @@ asiUI_Datum* asiUI_WidgetFactory::CreateEditor(const QString& theDataDicID,
 
   return aDatum;
 }
-//
-////! Create datum table.
-////! \param theRowNumber [in] number of rows in the table.
-////! \param theColumnNumber [in] number of columns in the table.
-////! \param theParent [in] the parent widget.
-////! \return new instance of datum table.
-//asiUI_DatumTable* asiUI_WidgetFactory::CreateDatumTable(const int theRowNumber,
-//                                                          const int theColumnNumber,
-//                                                          QWidget*  theParent)
-//{
-//  asiUI_DatumTable* aTable = new asiUI_DatumTable(this, theParent);
-//
-//  aTable->SetRowCount(theRowNumber);
-//  aTable->SetColumnCount(theColumnNumber);
-//
-//  if ( m_pApp.isNull() )
-//    return aTable; // no connect possible
-//
-//  if ( asiUI_UnitManager* aMgr = m_pApp->GetUnitManager() )
-//  {
-//    QObject::connect(aMgr, SIGNAL( UnitSystemChanged() ),
-//      aTable->GetEventHandler(), SLOT( onUnitsChanged() ) );
-//  }
-//
-//  return aTable;
-//}
-//
+
+//! Create datum table.
+//! \param theRowNumber [in] number of rows in the table.
+//! \param theColumnNumber [in] number of columns in the table.
+//! \param theParent [in] the parent widget.
+//! \return new instance of datum table.
+asiUI_DatumTable* asiUI_WidgetFactory::CreateDatumTable(const int theRowNumber,
+                                                          const int theColumnNumber,
+                                                          QWidget*  theParent)
+{
+  asiUI_DatumTable* aTable = new asiUI_DatumTable(this, theParent);
+
+  aTable->SetRowCount(theRowNumber);
+  aTable->SetColumnCount(theColumnNumber);
+
+  return aTable;
+}
+
 ////! Create instance of datum tree widget.
 ////! \param theParent [in] the parent widget that takes ownership of the datum tree.
 ////! \return new instance of datum tree.

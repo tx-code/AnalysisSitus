@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_BgColorDialog.h>
 #include <asiUI_Common.h>
+#include <asiUI_DialogAppSurf.h>
 #include <asiUI_DialogDump.h>
 #include <asiUI_IStatusBar.h>
 
@@ -42,7 +43,6 @@
 #include <asiAlgo_InvertFaces.h>
 #include <asiAlgo_JSON.h>
 #include <asiAlgo_MeshMerge.h>
-#include <asiAlgo_PlateOnEdges.h>
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -187,16 +187,18 @@ namespace
 
 //-----------------------------------------------------------------------------
 
-asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
-                                                   asiUI_ViewerDomain*             wViewerDomain,
-                                                   asiUI_ViewerHost*               wViewerHost,
-                                                   asiUI_ObjectBrowser*            wBrowser,
-                                                   const Handle(asiUI_IStatusBar)& statusBar,
-                                                   const Handle(asiEngine_Model)&  model,
-                                                   ActAPI_ProgressEntry            progress,
-                                                   ActAPI_PlotterEntry             plotter)
+asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFactory)& wf,
+                                                   asiUI_ViewerPart*                  wViewerPart,
+                                                   asiUI_ViewerDomain*                wViewerDomain,
+                                                   asiUI_ViewerHost*                  wViewerHost,
+                                                   asiUI_ObjectBrowser*               wBrowser,
+                                                   const Handle(asiUI_IStatusBar)&    statusBar,
+                                                   const Handle(asiEngine_Model)&     model,
+                                                   ActAPI_ProgressEntry               progress,
+                                                   ActAPI_PlotterEntry                plotter)
 //
 : asiUI_Viewer3dListener (wViewerPart, model, progress, plotter),
+  m_widgetFactory        (wf),
   m_wViewerDomain        (wViewerDomain),
   m_wViewerHost          (wViewerHost),
   m_wBrowser             (wBrowser),
@@ -597,7 +599,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     if ( edgeIndices.Extent() )
     {
       menu.addSeparator();
-      m_pFillEdges = menu.addAction("Fit surface");
+      m_pFillEdges = menu.addAction("Fit surface...");
     }
 
     // Add items specific to faces.
@@ -1325,40 +1327,9 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   //---------------------------------------------------------------------------
   else if ( pAction == m_pFillEdges )
   {
-    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+    asiUI_ViewerPart* pViewer = dynamic_cast<asiUI_ViewerPart*>(m_pViewer);
 
-    // Get selected edges.
-    TColStd_PackedMapOfInteger eids;
-    partApi.GetHighlightedEdges(eids);
-
-    // Collect edges.
-    Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
-    //
-    for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
-    {
-      const int edgeId = eit.Key();
-
-      // Get edge.
-      const TopoDS_Shape&
-        edge = partApi.GetAAG()->RequestMapOfEdges()(edgeId);
-
-      hedges->Append(edge);
-    }
-
-    // Prepare interpolation tool.
-    asiAlgo_PlateOnEdges interpAlgo(partApi.GetShape(), m_progress, m_plotter);
-    //
-    interpAlgo.SetFairingCoeff(1e-3);
-
-    // Interpolate.
-    Handle(Geom_BSplineSurface) surf;
-    //
-    if ( !interpAlgo.BuildSurf(hedges, GeomAbs_C0, surf) )
-    {
-      m_progress.SendLogMessage(LogErr(Normal) << "Interpolation failed.");
-      return;
-    }
-
-    m_plotter.DRAW_SURFACE(surf, Color_Default, "filling");
+    asiUI_DialogAppSurf dlgAppSurf(m_widgetFactory, m_model, pViewer, m_progress, m_plotter);
+    dlgAppSurf.exec();
   }
 }

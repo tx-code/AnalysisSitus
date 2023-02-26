@@ -18,6 +18,7 @@ set (controls_H_FILES
   controls/asiUI_ItemRoles.h
   controls/asiUI_JsonBlock.h
   controls/asiUI_HeaderViewAPI.h
+  controls/asiUI_HeaderViewStyling.h
   controls/asiUI_ParamEditorImpl.h
   controls/asiUI_ParameterEditorItem.h
   controls/asiUI_StatusBarImpl.h
@@ -38,6 +39,7 @@ set (controls_H_UI_FILES
   controls/asiUI_ControlsPart.h
   controls/asiUI_ControlsPartListener.h
   controls/asiUI_EvalButton.h
+  controls/asiUI_HeaderView.h
   controls/asiUI_JsonEditor.h
   controls/asiUI_JsonHighlighter.h
   controls/asiUI_JsonSearchThread.h
@@ -68,6 +70,8 @@ set (controls_CPP_FILES
   controls/asiUI_ControlsPart.cpp
   controls/asiUI_ControlsPartListener.cpp
   controls/asiUI_EvalButton.cpp
+  controls/asiUI_HeaderView.cpp
+  controls/asiUI_HeaderViewStyling.cpp
   controls/asiUI_JsonEditor.cpp
   controls/asiUI_JsonHighlighter.cpp
   controls/asiUI_JsonSearchThread.cpp
@@ -164,6 +168,7 @@ set (datum_H_UI_FILES
   datum/asiUI_DatumSpinBox.h
   datum/asiUI_DatumSpinBoxDbl.h
   datum/asiUI_DatumTextEdit.h
+  datum/asiUI_DatumTable.h
   datum/asiUI_DatumViewBase.h
   datum/asiUI_DatumViewDelegate.h
   datum/asiUI_DatumViewModel.h
@@ -187,6 +192,8 @@ set (datum_CPP_FILES
   datum/asiUI_DatumSelector.cpp
   datum/asiUI_DatumSpinBox.cpp
   datum/asiUI_DatumSpinBoxDbl.cpp
+  datum/asiUI_DatumTable.cpp
+  datum/asiUI_DatumTableInternals.cpp
   datum/asiUI_DatumTextEdit.cpp
   datum/asiUI_DatumViewBase.cpp
   datum/asiUI_DatumViewItem.cpp
@@ -206,6 +213,7 @@ set (dialogs_H_FILES
   dialogs/asiUI_TclPluginToCommands.h
 )
 set (dialogs_H_UI_FILES
+  dialogs/asiUI_DialogAppSurf.h
   dialogs/asiUI_DialogCommands.h
   dialogs/asiUI_DialogCommandsDelegate.h
   dialogs/asiUI_DialogDump.h
@@ -226,7 +234,8 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogTopoGraphDepth.h
   dialogs/asiUI_DialogXdeSummary.h
 )
-set (dialogs_CPP_FILES 
+set (dialogs_CPP_FILES
+  dialogs/asiUI_DialogAppSurf.cpp
   dialogs/asiUI_DialogCommands.cpp
   dialogs/asiUI_DialogCommandsCommandItem.cpp
   dialogs/asiUI_DialogCommandsDelegate.cpp

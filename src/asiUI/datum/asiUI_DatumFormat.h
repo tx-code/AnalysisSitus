@@ -40,7 +40,7 @@
 #include <QSharedPointer>
 #pragma warning(pop)
 
-#define ASI_DATUM_DOUBLE_PRECISION 14
+#define ASI_DATUM_DOUBLE_PRECISION 3
 
 class asiUI_DatumFormat;
 
