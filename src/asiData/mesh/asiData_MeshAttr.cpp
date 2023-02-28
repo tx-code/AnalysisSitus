@@ -107,7 +107,7 @@ void asiData_MeshAttr::Restore(const Handle(TDF_Attribute)& mainAttr)
 
   if ( !fromCasted->m_mesh.IsNull() )
   {
-    t_ptr<poly_Mesh> mesh = fromCasted->m_mesh->DeepCopy();
+    t_ptr<t_mesh> mesh = fromCasted->m_mesh->DeepCopy();
     m_mesh = mesh;
   }
 #else
@@ -129,7 +129,7 @@ void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
 
   if ( !m_mesh.IsNull() )
   {
-    t_ptr<poly_Mesh> mesh = m_mesh->DeepCopy();
+    t_ptr<t_mesh> mesh = m_mesh->DeepCopy();
     intoCasted->m_mesh = mesh;
   }
 #else
@@ -145,7 +145,7 @@ void asiData_MeshAttr::Paste(const Handle(TDF_Attribute)&       into,
 
 //! Sets mesh to store.
 //! \param[in] mesh mesh to store.
-void asiData_MeshAttr::SetMesh(const t_ptr<poly_Mesh>& mesh)
+void asiData_MeshAttr::SetMesh(const t_ptr<t_mesh>& mesh)
 {
   this->Backup();
 
@@ -154,7 +154,7 @@ void asiData_MeshAttr::SetMesh(const t_ptr<poly_Mesh>& mesh)
 
 //! Returns the stored mesh.
 //! \return stored mesh.
-const t_ptr<poly_Mesh>& asiData_MeshAttr::GetMesh() const
+const t_ptr<t_mesh>& asiData_MeshAttr::GetMesh() const
 {
   return m_mesh;
 }

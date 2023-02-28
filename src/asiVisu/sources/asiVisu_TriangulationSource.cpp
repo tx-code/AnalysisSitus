@@ -78,7 +78,7 @@ asiVisu_TriangulationSource::~asiVisu_TriangulationSource()
 
 #if defined USE_MOBIUS
 
-void asiVisu_TriangulationSource::SetInputTriangulation(const t_ptr<poly_Mesh>& triangulation)
+void asiVisu_TriangulationSource::SetInputTriangulation(const t_ptr<t_mesh>& triangulation)
 {
   m_mesh = triangulation;
   //
@@ -87,7 +87,7 @@ void asiVisu_TriangulationSource::SetInputTriangulation(const t_ptr<poly_Mesh>& 
 
 //-----------------------------------------------------------------------------
 
-const t_ptr<poly_Mesh>&
+const t_ptr<t_mesh>&
   asiVisu_TriangulationSource::GetInputTriangulation() const
 {
   return m_mesh;
@@ -146,10 +146,10 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
   // Collect all used nodes.
   NCollection_Map<int> usedNodeIDs;
   //
-  for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
-    poly_Triangle             tri;
+    poly_Triangle<>           tri;
 
     if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
       continue;
@@ -165,7 +165,7 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
   // Collect free nodes (ones which are not used).
   TColStd_PackedMapOfInteger freeNodeIDs;
   //
-  for ( poly_Mesh::VertexIterator vit(m_mesh); vit.More(); vit.Next() )
+  for ( t_mesh::VertexIterator vit(m_mesh); vit.More(); vit.Next() )
   {
     const poly_VertexHandle vh = vit.Current();
 
@@ -203,10 +203,10 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
     // > 2 -- non-manifold link.
     NCollection_DataMap<asiAlgo_MeshLink, int, asiAlgo_MeshLink> linkOccurenceMap;
 
-    for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
+    for ( t_mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
     {
       const poly_TriangleHandle th = tit.Current();
-      poly_Triangle             tri;
+      poly_Triangle<>           tri;
 
       if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
         continue;
@@ -281,10 +281,10 @@ int asiVisu_TriangulationSource::RequestData(vtkInformation*        request,
    *  Add facets.
    * ============ */
 
-  for ( poly_Mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(m_mesh); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
-    poly_Triangle             tri;
+    poly_Triangle<>           tri;
 
     if ( !m_mesh->GetTriangle(th, tri) || tri.IsDeleted() )
       continue;

@@ -80,9 +80,9 @@ asiAlgo_CheckThickness::asiAlgo_CheckThickness(const TopoDS_Shape&  shape,
 
 #if defined USE_MOBIUS
 
-asiAlgo_CheckThickness::asiAlgo_CheckThickness(const t_ptr<poly_Mesh>& tris,
-                                               ActAPI_ProgressEntry    progress,
-                                               ActAPI_PlotterEntry     plotter)
+asiAlgo_CheckThickness::asiAlgo_CheckThickness(const t_ptr<t_mesh>& tris,
+                                               ActAPI_ProgressEntry progress,
+                                               ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_bIsCustomDir    ( false ),
   m_fMinThick       ( 0. ),
@@ -125,11 +125,11 @@ bool asiAlgo_CheckThickness::Perform_RayMethod()
   // Cast a ray from each facet.
   double minScalar = DBL_MAX, maxScalar = -DBL_MAX;
   //
-  for ( poly_Mesh::TriangleIterator tit(m_resField.triangulation); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(m_resField.triangulation); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
 
-    poly_Triangle t;
+    poly_Triangle<> t;
     if ( !m_resField.triangulation->GetTriangle(th, t) || t.IsDeleted() )
       continue;
 

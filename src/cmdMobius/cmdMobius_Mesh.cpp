@@ -38,7 +38,7 @@ using namespace mobius;
 
 //-----------------------------------------------------------------------------
 
-cmdMobius_Mesh::cmdMobius_Mesh(const t_ptr<poly_Mesh>& mesh)
+cmdMobius_Mesh::cmdMobius_Mesh(const t_ptr<t_mesh>& mesh)
 : asiTcl_Variable()
 {
   this->SetMesh(mesh);
@@ -56,14 +56,14 @@ cmdMobius_Mesh::~cmdMobius_Mesh()
 
 //-----------------------------------------------------------------------------
 
-void cmdMobius_Mesh::SetMesh(const t_ptr<poly_Mesh>& mesh)
+void cmdMobius_Mesh::SetMesh(const t_ptr<t_mesh>& mesh)
 {
   m_mesh = mesh;
 }
 
 //-----------------------------------------------------------------------------
 
-const t_ptr<poly_Mesh>& cmdMobius_Mesh::GetMesh() const
+const t_ptr<t_mesh>& cmdMobius_Mesh::GetMesh() const
 {
   return m_mesh;
 }

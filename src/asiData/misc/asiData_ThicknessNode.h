@@ -115,7 +115,7 @@ public:
   //! Sets mesh without a scalar field.
   //! \param[in] mesh mesh to store.
   asiData_EXPORT void
-    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh);
+    SetMesh(const mobius::t_ptr<mobius::t_mesh>& mesh);
 #endif
 
   //! Stores mesh with associated thickness field scalars.

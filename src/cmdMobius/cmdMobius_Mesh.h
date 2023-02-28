@@ -59,7 +59,7 @@ public:
   //! Ctor.
   //! \param[in] mesh the mesh to set.
   cmdMobius_EXPORT
-    cmdMobius_Mesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh = nullptr);
+    cmdMobius_Mesh(const mobius::t_ptr<mobius::t_mesh>& mesh = nullptr);
 
 #endif
 
@@ -74,10 +74,10 @@ public:
   //! Sets the mesh to store.
   //! \param[in] mesh the mesh to set.
   cmdMobius_EXPORT void
-    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh);
+    SetMesh(const mobius::t_ptr<mobius::t_mesh>& mesh);
 
   //! \return the owned mesh.
-  cmdMobius_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
+  cmdMobius_EXPORT const mobius::t_ptr<mobius::t_mesh>&
     GetMesh() const;
 
 #endif
@@ -97,7 +97,7 @@ public:
 
 protected:
 
-  mobius::t_ptr<mobius::poly_Mesh> m_mesh; //!< Owned mesh.
+  mobius::t_ptr<mobius::t_mesh> m_mesh; //!< Owned mesh.
 
 #endif
 

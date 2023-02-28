@@ -105,7 +105,7 @@ void asiData_ThicknessNode::SetName(const TCollection_ExtendedString& N)
 //-----------------------------------------------------------------------------
 
 #if defined USE_MOBIUS
-void asiData_ThicknessNode::SetMesh(const t_ptr<poly_Mesh>& mesh)
+void asiData_ThicknessNode::SetMesh(const t_ptr<t_mesh>& mesh)
 {
   Handle(asiData_MeshParameter)::DownCast( this->Parameter(PID_Mesh) )->SetMesh(mesh);
 }

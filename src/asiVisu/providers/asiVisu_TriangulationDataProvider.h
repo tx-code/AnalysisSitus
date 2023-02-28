@@ -85,7 +85,7 @@ public:
 #if defined USE_MOBIUS
   //! Returns the OCCT triangulation to be visualized.
   //! \return OCCT facet model.
-  asiVisu_EXPORT virtual mobius::t_ptr<mobius::poly_Mesh>
+  asiVisu_EXPORT virtual mobius::t_ptr<mobius::t_mesh>
     GetTriangulation() const;
 #endif
 

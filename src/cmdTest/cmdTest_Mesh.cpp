@@ -94,7 +94,7 @@ int TEST_CheckNumberOfMeshEntities(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  t_ptr<poly_Mesh> mesh = triNode->GetTriangulation();
+  t_ptr<t_mesh> mesh = triNode->GetTriangulation();
   if ( mesh.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "No triangulation was found.");
@@ -186,7 +186,7 @@ int TEST_CheckAABBOfMesh(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  t_ptr<poly_Mesh> mesh = triNode->GetTriangulation();
+  t_ptr<t_mesh> mesh = triNode->GetTriangulation();
   if ( mesh.IsNull() )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "No triangulation was found.");

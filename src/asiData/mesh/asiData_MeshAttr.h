@@ -87,15 +87,15 @@ public:
 public:
 
   asiData_EXPORT void
-    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh);
+    SetMesh(const mobius::t_ptr<mobius::t_mesh>& mesh);
 
-  asiData_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
+  asiData_EXPORT const mobius::t_ptr<mobius::t_mesh>&
     GetMesh() const;
 
 // Members:
 private:
 
-  mobius::t_ptr<mobius::poly_Mesh> m_mesh; //!< Pointer to mesh.
+  mobius::t_ptr<mobius::t_mesh> m_mesh; //!< Pointer to mesh.
 
 #endif
 

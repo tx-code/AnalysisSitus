@@ -82,7 +82,7 @@ void asiVisu_TriangulationPipeline::SetInput(const Handle(asiVisu_DataProvider)&
    *  Validate input Parameters.
    * =========================== */
 
-  t_ptr<poly_Mesh> triangulation = DP->GetTriangulation();
+  t_ptr<t_mesh> triangulation = DP->GetTriangulation();
   //
   if ( triangulation.IsNull() )
   {

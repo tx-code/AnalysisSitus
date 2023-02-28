@@ -69,7 +69,7 @@ Handle(asiData_TriangulationNode) asiEngine_Triangulation::CreateTriangulation()
 
 //-----------------------------------------------------------------------------
 
-t_ptr<poly_Mesh> asiEngine_Triangulation::GetTriangulation()
+t_ptr<t_mesh> asiEngine_Triangulation::GetTriangulation()
 {
   return m_model->GetTriangulationNode()->GetTriangulation();
 }

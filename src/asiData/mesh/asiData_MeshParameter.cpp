@@ -62,7 +62,7 @@ Handle(asiData_MeshParameter) asiData_MeshParameter::Instance()
 //! \param[in] doResetValidity indicates whether to reset validity flag.
 //! \param[in] doResetPending  indicates whether this Parameter must lose its
 //!                            PENDING (or out-dated) property.
-void asiData_MeshParameter::SetMesh(const t_ptr<poly_Mesh>&       mesh,
+void asiData_MeshParameter::SetMesh(const t_ptr<t_mesh>&          mesh,
                                     const ActAPI_ModificationType MType,
                                     const bool                    doResetValidity,
                                     const bool                    doResetPending)
@@ -86,7 +86,7 @@ void asiData_MeshParameter::SetMesh(const t_ptr<poly_Mesh>&       mesh,
 
 //! Accessor for the stored mesh.
 //! \return stored mesh.
-t_ptr<poly_Mesh> asiData_MeshParameter::GetMesh()
+t_ptr<t_mesh> asiData_MeshParameter::GetMesh()
 {
   if ( !this->IsWellFormed() )
     Standard_ProgramError::Raise("Data inconsistent");

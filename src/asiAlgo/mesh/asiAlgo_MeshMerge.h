@@ -142,7 +142,7 @@ public:
 
 #if defined USE_MOBIUS
   //! \return the resulting mesh data structure of Mobius kernel.
-  const mobius::t_ptr<mobius::poly_Mesh>& GetMobiusMesh() const
+  const mobius::t_ptr<mobius::t_mesh>& GetMobiusMesh() const
   {
     return m_resultMobMesh;
   }
@@ -174,7 +174,7 @@ protected:
 
 #if defined USE_MOBIUS
   //! Result Mobius mesh.
-  mobius::t_ptr<mobius::poly_Mesh> m_resultMobMesh;
+  mobius::t_ptr<mobius::t_mesh> m_resultMobMesh;
 #endif
 
 };

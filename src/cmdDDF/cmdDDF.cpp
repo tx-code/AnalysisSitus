@@ -491,7 +491,7 @@ int DDF_Polygonize(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get the reconstruction result.
-  const t_ptr<poly_Mesh>& mesh = mcAlgo.GetResult();
+  const t_ptr<t_mesh>& mesh = mcAlgo.GetResult();
 
   // Convert to OpenCascade's mesh.
   cascade_Triangulation converter(mesh);
@@ -577,7 +577,7 @@ int DDF_PolygonizeCell(const Handle(asiTcl_Interp)& interp,
   t_ptr<poly_BaseDistanceField> df = new poly_AdaptiveDistanceField(pNode, 0., false);
 
   // Run marching cubes reconstruction at a single voxel.
-  t_ptr<poly_Mesh>
+  t_ptr<t_mesh>
     mesh = poly_MarchingCubes::PolygonizeVoxel( pNode->GetP0(), pNode->GetP7(),
                                                 df, 0. );
 
@@ -674,13 +674,13 @@ int DDF_PolygonizeSVO(const Handle(asiTcl_Interp)& interp,
   //
   getLeaves(pSVO, leaves);
 
-  t_ptr<poly_Mesh> resMesh = new poly_Mesh;
+  t_ptr<t_mesh> resMesh = new t_mesh;
 
   // Run marching cubes in each leaf.
   for ( size_t k = 0; k < leaves.size(); ++k )
   {
     // Run marching cubes reconstruction at a single voxel.
-    t_ptr<poly_Mesh>
+    t_ptr<t_mesh>
       localMesh = poly_MarchingCubes::PolygonizeVoxel( leaves[k]->GetP0(), leaves[k]->GetP7(),
                                                        df, 0. );
 
@@ -690,13 +690,13 @@ int DDF_PolygonizeSVO(const Handle(asiTcl_Interp)& interp,
     }
     else
     {
-      for ( poly_Mesh::TriangleIterator tit(localMesh); tit.More(); tit.Next() )
+      for ( t_mesh::TriangleIterator tit(localMesh); tit.More(); tit.Next() )
       {
         poly_TriangleHandle ht = tit.Current();
         poly_VertexHandle   hv[3], res_hv[3];
 
         // Get vertices.
-        poly_Triangle t;
+        poly_Triangle<> t;
         if ( !localMesh->GetTriangle(ht, t) )
           continue;
         //

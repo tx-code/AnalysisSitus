@@ -153,7 +153,7 @@ bool asiAlgo_CheckDeviations::internalPerform()
     const int triangleId = facet.FaceIndex;
 
     // Get indices of nodes.
-    poly_Triangle triangle;
+    poly_Triangle<> triangle;
     if ( !m_result.triangulation->GetTriangle(poly_TriangleHandle(triangleId), triangle) || triangle.IsDeleted() )
       continue;
     //

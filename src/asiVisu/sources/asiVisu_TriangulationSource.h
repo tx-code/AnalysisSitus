@@ -70,10 +70,10 @@ public:
   //! Sets triangulation to visualize.
   //! \param[in] triangulation the triangulation to visualize.
   asiVisu_EXPORT void
-    SetInputTriangulation(const mobius::t_ptr<mobius::poly_Mesh>& triangulation);
+    SetInputTriangulation(const mobius::t_ptr<mobius::t_mesh>& triangulation);
 
   //! \return initial triangulation.
-  asiVisu_EXPORT const mobius::t_ptr<mobius::poly_Mesh>&
+  asiVisu_EXPORT const mobius::t_ptr<mobius::t_mesh>&
     GetInputTriangulation() const;
 
 #endif
@@ -221,7 +221,7 @@ private:
 #if defined USE_MOBIUS
 
   //! Triangulation to convert to VTK polygonal data.
-  mobius::t_ptr<mobius::poly_Mesh> m_mesh;
+  mobius::t_ptr<mobius::t_mesh> m_mesh;
 
 #endif
 

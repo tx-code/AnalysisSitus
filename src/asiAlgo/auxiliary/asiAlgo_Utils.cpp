@@ -2372,7 +2372,7 @@ bool asiAlgo_Utils::ReadStl(const TCollection_AsciiString& filename,
     return false;
 
   // Get the constructed mesh.
-  const t_ptr<poly_Mesh>& mesh = reader.GetResult();
+  const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
   cascade_Triangulation converter(mesh);
@@ -2408,7 +2408,7 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
     return false;
 
   // Get the constructed mesh.
-  const t_ptr<poly_Mesh>& mobMesh = reader.GetResult();
+  const t_ptr<t_mesh>& mobMesh = reader.GetResult();
 
   // ...
   // Convert to Active Data mesh.
@@ -2417,7 +2417,7 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
   mesh = new ActData_Mesh;
 
   // Add mesh nodes.
-  for ( poly_Mesh::VertexIterator vit(mobMesh); vit.More(); vit.Next() )
+  for ( t_mesh::VertexIterator vit(mobMesh); vit.More(); vit.Next() )
   {
     const poly_VertexHandle vh = vit.Current();
 
@@ -2431,12 +2431,12 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
   }
 
   // Add triangles.
-  for ( poly_Mesh::TriangleIterator tit(mobMesh); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(mobMesh); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
 
     // Get triangle.
-    poly_Triangle mobTriangle;
+    poly_Triangle<> mobTriangle;
     if ( !mobMesh->GetTriangle(th, mobTriangle) )
       continue;
 
@@ -2449,7 +2449,7 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
   }
 
   // Add quads.
-  for ( poly_Mesh::QuadIterator qit(mobMesh); qit.More(); qit.Next() )
+  for ( t_mesh::QuadIterator qit(mobMesh); qit.More(); qit.Next() )
   {
     const poly_QuadHandle qh = qit.Current();
 
@@ -2495,7 +2495,7 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
     return false;
 
   // Get the constructed mesh.
-  const t_ptr<poly_Mesh>& mesh = reader.GetResult();
+  const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
   cascade_Triangulation converter(mesh);
@@ -2535,7 +2535,7 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
     return false;
 
   // Get the constructed mesh.
-  const t_ptr<poly_Mesh>& mobMesh = reader.GetResult();
+  const t_ptr<t_mesh>& mobMesh = reader.GetResult();
 
   // ...
   // Convert to Active Data mesh.
@@ -2544,7 +2544,7 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
   mesh = new ActData_Mesh;
 
   // Add mesh nodes.
-  for ( poly_Mesh::VertexIterator vit(mobMesh); vit.More(); vit.Next() )
+  for ( t_mesh::VertexIterator vit(mobMesh); vit.More(); vit.Next() )
   {
     const poly_VertexHandle vh = vit.Current();
 
@@ -2558,12 +2558,12 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
   }
 
   // Add triangles.
-  for ( poly_Mesh::TriangleIterator tit(mobMesh); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(mobMesh); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
 
     // Get triangle.
-    poly_Triangle mobTriangle;
+    poly_Triangle<> mobTriangle;
     if ( !mobMesh->GetTriangle(th, mobTriangle) )
       continue;
 
@@ -2576,7 +2576,7 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
   }
 
   // Add quads.
-  for ( poly_Mesh::QuadIterator qit(mobMesh); qit.More(); qit.Next() )
+  for ( t_mesh::QuadIterator qit(mobMesh); qit.More(); qit.Next() )
   {
     const poly_QuadHandle qh = qit.Current();
 
@@ -2621,7 +2621,7 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
     return false;
 
   // Get the constructed mesh.
-  const t_ptr<poly_Mesh>& mesh = reader.GetResult();
+  const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
   cascade_Triangulation converter(mesh);

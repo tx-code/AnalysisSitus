@@ -121,11 +121,11 @@ public:
   //! \param[in] progress    progress notifier.
   //! \param[in] plotter     imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_BVHFacets(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
-                      const BuilderType                       builderType = Builder_Binned,
-                      const bool                              useFaceRefs = true,
-                      ActAPI_ProgressEntry                    progress    = nullptr,
-                      ActAPI_PlotterEntry                     plotter     = nullptr);
+    asiAlgo_BVHFacets(const mobius::t_ptr<mobius::t_mesh>& mesh,
+                      const BuilderType                    builderType = Builder_Binned,
+                      const bool                           useFaceRefs = true,
+                      ActAPI_ProgressEntry                 progress    = nullptr,
+                      ActAPI_PlotterEntry                  plotter     = nullptr);
 #endif
 
 public:
@@ -236,9 +236,9 @@ protected:
   //! \param[in] useFaceRefs indicates whether to use face IDs as back-refs from BVH-stored facets.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    init(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
-         const BuilderType                       builderType,
-         const bool                              useFaceRefs);
+    init(const mobius::t_ptr<mobius::t_mesh>& mesh,
+         const BuilderType                    builderType,
+         const bool                           useFaceRefs);
 #endif
 
   //! Adds face to the accelerating structure.

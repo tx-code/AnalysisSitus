@@ -142,9 +142,9 @@ namespace
   //! \param[in] argc   the number of arguments.
   //! \param[in] argv   the argument string.
   //! \return the mesh to work with.
-  t_ptr<poly_Mesh> GetActiveMesh(const Handle(asiTcl_Interp)& /*interp*/,
-                                 int                          /*argc*/,
-                                 const char**                 /*argv*/)
+  t_ptr<t_mesh> GetActiveMesh(const Handle(asiTcl_Interp)& /*interp*/,
+                              int                          /*argc*/,
+                              const char**                 /*argv*/)
   {
     // Make a copy to assure that we do not modify the persistent data
     // directly as otherwise undo/redo will be buggy.
@@ -352,7 +352,7 @@ int MOBIUS_POLY_Init(const Handle(asiTcl_Interp)& interp,
   }
 
   asiAlgo_MeshMerge meshMerge(shape, asiAlgo_MeshMerge::Mode_MobiusMesh);
-  const t_ptr<poly_Mesh>& mesh = meshMerge.GetMobiusMesh();
+  const t_ptr<t_mesh>& mesh = meshMerge.GetMobiusMesh();
 
   // Compose the domain of interest.
   t_domain domain = ::ComposePlanarDomain();
@@ -774,10 +774,10 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     std::vector<int>                 tIds;
     std::vector<int>                 tNums;
     //
-    for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+    for ( t_mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
     {
       poly_TriangleHandle th( tit.Current() );
-      poly_Triangle       t;
+      poly_Triangle<>     t;
       //
       if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
         continue;
@@ -799,7 +799,7 @@ int MOBIUS_POLY_RefineMidpoints(const Handle(asiTcl_Interp)& interp,
     for ( int idx : tNums )
     {
       poly_TriangleHandle th(tIds[idx]);
-      poly_Triangle       t;
+      poly_Triangle<>     t;
 
       // Get the next triangle to process.
       mesh->GetTriangle(th, t);
@@ -918,10 +918,10 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
       std::vector<int>                 tIds;
       std::vector<int>                 tNums;
       //
-      for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+      for ( t_mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
       {
         poly_TriangleHandle th( tit.Current() );
-        poly_Triangle       t;
+        poly_Triangle<>     t;
         //
         if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
           continue;
@@ -943,7 +943,7 @@ int MOBIUS_POLY_RefineByMidedges(const Handle(asiTcl_Interp)& interp,
       for ( int idx : tNums )
       {
         poly_TriangleHandle th(tIds[idx]);
-        poly_Triangle       t;
+        poly_Triangle<>     t;
 
         // Get the next triangle to process.
         mesh->GetTriangle(th, t);
@@ -1163,7 +1163,7 @@ int MOBIUS_POLY_CollapseEdges(const Handle(asiTcl_Interp)& interp,
   {
     bool anyRefined = false;
     //
-    for ( poly_Mesh::EdgeIterator eit(mesh); eit.More(); eit.Next() )
+    for ( t_mesh::EdgeIterator eit(mesh); eit.More(); eit.Next() )
     {
       const poly_EdgeHandle eh = eit.Current();
       poly_Edge             e;
@@ -1346,10 +1346,10 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     std::vector<int>                 tIds;
     std::vector<int>                 tNums;
     //
-    for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+    for ( t_mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
     {
       poly_TriangleHandle th( tit.Current() );
-      poly_Triangle       t;
+      poly_Triangle<>     t;
       //
       if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
         continue;
@@ -1371,7 +1371,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     for ( int idx : tNums )
     {
       poly_TriangleHandle th(tIds[idx]);
-      poly_Triangle       t;
+      poly_Triangle<>     t;
 
       // Get the next triangle to process.
       mesh->GetTriangle(th, t);
@@ -1418,10 +1418,10 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     std::vector<int>                 tIds;
     std::vector<int>                 tNums;
     //
-    for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+    for ( t_mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
     {
       poly_TriangleHandle th( tit.Current() );
-      poly_Triangle       t;
+      poly_Triangle<>     t;
       //
       if ( !mesh->GetTriangle(th, t) || t.IsDeleted() )
         continue;
@@ -1443,7 +1443,7 @@ int MOBIUS_POLY_RefineInc(const Handle(asiTcl_Interp)& interp,
     for ( int idx : tNums )
     {
       poly_TriangleHandle th(tIds[idx]);
-      poly_Triangle       t;
+      poly_Triangle<>     t;
 
       // Get the next triangle to process.
       mesh->GetTriangle(th, t);
@@ -2091,7 +2091,7 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), msg)
 
-  const t_ptr<poly_Mesh>& mesh = cascade::GetMobiusMesh(occMesh);
+  const t_ptr<t_mesh>& mesh = cascade::GetMobiusMesh(occMesh);
 
   if ( mesh.IsNull() )
   {

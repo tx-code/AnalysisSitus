@@ -155,21 +155,21 @@ Handle(asiAlgo_BaseCloud<double>) asiVisu_TessNormalsDataProvider::GetPointsd()
 #if defined USE_MOBIUS
   else if ( PN->IsKind( STANDARD_TYPE(asiData_TriangulationNode) ) )
   {
-    t_ptr<poly_Mesh>
+    t_ptr<t_mesh>
       tris = Handle(asiData_TriangulationNode)::DownCast(PN)->GetTriangulation();
 
     // Get positions of the vectors.
     if ( normsNode->IsElemental() )
     {
       // Compute COGs of mesh elements.
-      for ( poly_Mesh::TriangleIterator tit(tris); tit.More(); tit.Next() )
+      for ( t_mesh::TriangleIterator tit(tris); tit.More(); tit.Next() )
       {
         const poly_TriangleHandle th = tit.Current();
 
         if ( !idsMap.Contains( th.GetIdx() ) )
           continue;
 
-        poly_Triangle tri;
+        poly_Triangle<> tri;
         if ( !tris->GetTriangle(th, tri) || tri.IsDeleted() )
           continue;
 

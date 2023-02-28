@@ -170,7 +170,7 @@ namespace
   void appendNodeInGlobalTri(const int                            localNodeId,
                              int&                                 globalNodeId,
                              const gp_XYZ&                        xyz,
-                             t_ptr<poly_Mesh>&                    GlobalTri,
+                             t_ptr<t_mesh>&                       GlobalTri,
                              NCollection_CellFilter<InspectNode>& NodeFilter,
                              NCollection_DataMap<int, int>&       LocGlobMap)
   {
@@ -383,7 +383,7 @@ void asiAlgo_MeshMerge::build(const TopoDS_Shape& body,
   if ( mode == Mode_MobiusMesh )
   {
 #if defined USE_MOBIUS
-    m_resultMobMesh = new poly_Mesh;
+    m_resultMobMesh = new t_mesh;
 
     // [BEGIN] Iterate over the faces
     int faceId = 0;

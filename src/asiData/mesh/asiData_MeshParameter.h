@@ -69,7 +69,7 @@ public:
 
 public:
 
-  mobius::t_ptr<mobius::poly_Mesh> pMesh; //!< Mesh.
+  mobius::t_ptr<mobius::t_mesh> pMesh; //!< Mesh.
 
 };
 
@@ -100,12 +100,12 @@ public:
 public:
 
   asiData_EXPORT void
-    SetMesh(const mobius::t_ptr<mobius::poly_Mesh>& mesh,
-            const ActAPI_ModificationType           MType           = MT_Touched,
-            const bool                              doResetValidity = true,
-            const bool                              doResetPending  = true);
+    SetMesh(const mobius::t_ptr<mobius::t_mesh>& mesh,
+            const ActAPI_ModificationType        MType           = MT_Touched,
+            const bool                           doResetValidity = true,
+            const bool                           doResetPending  = true);
 
-  asiData_EXPORT mobius::t_ptr<mobius::poly_Mesh>
+  asiData_EXPORT mobius::t_ptr<mobius::t_mesh>
     GetMesh();
 
 #endif

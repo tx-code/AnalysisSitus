@@ -71,7 +71,7 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   Handle(asiData_MeshParameter)
     trisParam = Handle(asiData_MeshParameter)::DownCast( ownerNode->Parameter( trisExtParam->GetParamId() ) );
 
-  t_ptr<poly_Mesh> tris = trisParam->GetMesh();
+  t_ptr<t_mesh> tris = trisParam->GetMesh();
 
   // Get Thickness Node.
   Handle(asiData_ThicknessNode)

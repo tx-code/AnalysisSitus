@@ -67,9 +67,9 @@ public:
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_CheckThickness(const mobius::t_ptr<mobius::poly_Mesh>& tris,
-                           ActAPI_ProgressEntry                    progress = nullptr,
-                           ActAPI_PlotterEntry                     plotter  = nullptr);
+    asiAlgo_CheckThickness(const mobius::t_ptr<mobius::t_mesh>& tris,
+                           ActAPI_ProgressEntry                 progress = nullptr,
+                           ActAPI_PlotterEntry                  plotter  = nullptr);
 #endif
 
 public:

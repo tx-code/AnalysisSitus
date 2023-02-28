@@ -73,10 +73,10 @@ ActAPI_DataObjectId
 
 #if defined USE_MOBIUS
 
-t_ptr<poly_Mesh>
+t_ptr<t_mesh>
   asiVisu_TriangulationDataProvider::GetTriangulation() const
 {
-  return static_cast<poly_Mesh*>( m_triangulationParam->GetMesh() );
+  return static_cast<t_mesh*>( m_triangulationParam->GetMesh() );
 }
 
 #endif

@@ -85,7 +85,12 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
               const char**                 argv)
 {
 #if defined USE_MOBIUS
-  t_ptr<poly_Mesh> mobMesh = new poly_Mesh;
+  struct Traits : public poly_Traits
+  {
+    int testIdx;
+  };
+
+  t_ptr<poly_Mesh<Traits>> mobMesh = new poly_Mesh<Traits>;
   mobMesh->AddVertex(0,0,0);
 #endif
 

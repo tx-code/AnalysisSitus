@@ -46,14 +46,14 @@
 //! Default constructor. Registers all involved Parameters.
 asiData_TriangulationNode::asiData_TriangulationNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name,          PID_Name);
-  REGISTER_PARAMETER(RealArray,     PID_Options);
-  REGISTER_PARAMETER(Group,         PID_GroupPrs);
-  REGISTER_PARAMETER(Int,           PID_DisplayMode);
-  REGISTER_PARAMETER(Bool,          PID_UseScalars);
-  REGISTER_PARAMETER(Int,           PID_Color);
-  REGISTER_PARAMETER(Int,           PID_EdgesColor);
-  REGISTER_PARAMETER(Bool,          PID_HasVertices);
+  REGISTER_PARAMETER(Name,      PID_Name);
+  REGISTER_PARAMETER(RealArray, PID_Options);
+  REGISTER_PARAMETER(Group,     PID_GroupPrs);
+  REGISTER_PARAMETER(Int,       PID_DisplayMode);
+  REGISTER_PARAMETER(Bool,      PID_UseScalars);
+  REGISTER_PARAMETER(Int,       PID_Color);
+  REGISTER_PARAMETER(Int,       PID_EdgesColor);
+  REGISTER_PARAMETER(Bool,      PID_HasVertices);
 
   // Non-standard Parameters.
   this->registerParameter(PID_BVH,           asiData_BVHParameter::Instance(), false);
@@ -130,19 +130,19 @@ Handle(asiData_MeshParameter)
 #if defined USE_MOBIUS
 
 //! \return stored tessellation.
-t_ptr<poly_Mesh> asiData_TriangulationNode::GetTriangulation() const
+t_ptr<t_mesh> asiData_TriangulationNode::GetTriangulation() const
 {
   Handle(asiData_MeshParameter) param = this->GetTriangulationParam();
   //
   if ( param.IsNull() )
     return nullptr;
 
-  return static_cast<poly_Mesh*>( param->GetMesh() );
+  return static_cast<t_mesh*>( param->GetMesh() );
 }
 
 //! Sets tessellation to store.
 //! \param[in] triangulation the tessellation to store.
-void asiData_TriangulationNode::SetTriangulation(const t_ptr<poly_Mesh>& triangulation)
+void asiData_TriangulationNode::SetTriangulation(const t_ptr<t_mesh>& triangulation)
 {
   Handle(asiData_MeshParameter) param = this->GetTriangulationParam();
   //

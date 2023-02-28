@@ -50,7 +50,7 @@ class asiAlgo_MeshField;
 struct asiAlgo_MeshWithFields
 {
 #if defined USE_MOBIUS
-  mobius::t_ptr<mobius::poly_Mesh>       triangulation;
+  mobius::t_ptr<mobius::t_mesh>          triangulation;
   std::vector<Handle(asiAlgo_MeshField)> fields;
 #endif
 };

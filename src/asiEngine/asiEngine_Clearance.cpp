@@ -50,7 +50,7 @@ Handle(asiData_ClearanceNode)
   asiEngine_Clearance::CreateClearance(const Handle(ActAPI_INode)& owner)
 {
 #if defined USE_MOBIUS
-  t_ptr<poly_Mesh> mesh;
+  t_ptr<t_mesh> mesh;
 
   // Resolve the owner.
   if ( owner->IsKind( STANDARD_TYPE(asiData_PartNode) ) )

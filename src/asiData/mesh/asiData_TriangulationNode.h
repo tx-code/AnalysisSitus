@@ -111,11 +111,11 @@ public:
 
 #if defined USE_MOBIUS
 
-  asiData_EXPORT mobius::t_ptr<mobius::poly_Mesh>
+  asiData_EXPORT mobius::t_ptr<mobius::t_mesh>
     GetTriangulation() const;
 
   asiData_EXPORT void
-    SetTriangulation(const mobius::t_ptr<mobius::poly_Mesh>& triangulation);
+    SetTriangulation(const mobius::t_ptr<mobius::t_mesh>& triangulation);
 
 #endif
 

@@ -72,9 +72,9 @@ asiAlgo_CheckClearance::asiAlgo_CheckClearance(const TopoDS_Shape&  shape,
 
 #if defined USE_MOBIUS
 
-asiAlgo_CheckClearance::asiAlgo_CheckClearance(const t_ptr<poly_Mesh>& tris,
-                                               ActAPI_ProgressEntry    progress,
-                                               ActAPI_PlotterEntry     plotter)
+asiAlgo_CheckClearance::asiAlgo_CheckClearance(const t_ptr<t_mesh>& tris,
+                                               ActAPI_ProgressEntry progress,
+                                               ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_fMinClr         ( 0. ),
   m_fMaxClr         ( 0. )
@@ -109,11 +109,11 @@ bool asiAlgo_CheckClearance::Perform()
   // Cast a ray from each facet.
   double minScalar = Precision::Infinite(), maxScalar = -Precision::Infinite();
   //
-  for ( poly_Mesh::TriangleIterator tit(m_resField.triangulation); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(m_resField.triangulation); tit.More(); tit.Next() )
   {
     const poly_TriangleHandle th = tit.Current();
 
-    poly_Triangle t;
+    poly_Triangle<> t;
     if ( !m_resField.triangulation->GetTriangle(th, t) || t.IsDeleted() )
       continue;
 

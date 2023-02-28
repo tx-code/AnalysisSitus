@@ -85,7 +85,7 @@ public:
 #if defined USE_MOBIUS
 
   //! \return the existing triangulation.
-  asiEngine_EXPORT mobius::t_ptr<mobius::poly_Mesh>
+  asiEngine_EXPORT mobius::t_ptr<mobius::t_mesh>
     GetTriangulation();
 
 #endif

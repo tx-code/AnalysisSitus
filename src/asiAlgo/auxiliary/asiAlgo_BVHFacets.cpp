@@ -90,11 +90,11 @@ asiAlgo_BVHFacets::asiAlgo_BVHFacets(const Handle(Poly_Triangulation)& mesh,
 //-----------------------------------------------------------------------------
 
 #if defined USE_MOBIUS
-asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<poly_Mesh>& mesh,
-                                     const BuilderType       builderType,
-                                     const bool              useFaceRefs,
-                                     ActAPI_ProgressEntry    progress,
-                                     ActAPI_PlotterEntry     plotter)
+asiAlgo_BVHFacets::asiAlgo_BVHFacets(const t_ptr<t_mesh>& mesh,
+                                     const BuilderType    builderType,
+                                     const bool           useFaceRefs,
+                                     ActAPI_ProgressEntry progress,
+                                     ActAPI_PlotterEntry  plotter)
 {
   this->init(mesh, builderType, useFaceRefs);
   this->MarkDirty();
@@ -368,9 +368,9 @@ bool asiAlgo_BVHFacets::init(const Handle(Poly_Triangulation)& mesh,
 //-----------------------------------------------------------------------------
 
 #if defined USE_MOBIUS
-bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
-                             const BuilderType       builderType,
-                             const bool              useFaceRefs)
+bool asiAlgo_BVHFacets::init(const t_ptr<t_mesh>& mesh,
+                             const BuilderType    builderType,
+                             const bool           useFaceRefs)
 {
   if ( mesh.IsNull() )
     return false;
@@ -384,10 +384,10 @@ bool asiAlgo_BVHFacets::init(const t_ptr<poly_Mesh>& mesh,
   Bnd_Box aabb;
 
   // Iterate the mesh.
-  for ( poly_Mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
+  for ( t_mesh::TriangleIterator tit(mesh); tit.More(); tit.Next() )
   {
     poly_TriangleHandle th = tit.Current();
-    poly_Triangle       t;
+    poly_Triangle<>     t;
     poly_VertexHandle   vh[3];
 
     // Get triangle and skip it if it's marked as "deleted".

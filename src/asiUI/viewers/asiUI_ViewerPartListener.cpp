@@ -91,10 +91,10 @@ namespace
 #if defined USE_MOBIUS
 
   Handle(Poly_Triangulation)
-    ExtractRegion(const t_ptr<poly_Mesh>&           tris,
+    ExtractRegion(const t_ptr<t_mesh>&              tris,
                   const TColStd_PackedMapOfInteger& ids)
   {
-    t_ptr<poly_Mesh> region = new poly_Mesh;
+    t_ptr<t_mesh> region = new t_mesh;
 
     // Add new nodes.
     std::unordered_map<poly_VertexHandle, poly_VertexHandle> nodeMap;
@@ -103,7 +103,7 @@ namespace
     {
       const int tid = fit.Key();
 
-      poly_Triangle t;
+      poly_Triangle<> t;
       tris->GetTriangle(poly_TriangleHandle(tid), t);
 
       poly_VertexHandle globalNodeHandles[3];
@@ -124,13 +124,13 @@ namespace
     }
 
     // Add new triangles.
-    std::vector<poly_Triangle> newTriangles;
+    std::vector<poly_Triangle<>> newTriangles;
     //
     for ( TColStd_PackedMapOfInteger::Iterator fit(ids); fit.More(); fit.Next() )
     {
       const int tid = fit.Key();
 
-      poly_Triangle t;
+      poly_Triangle<> t;
       tris->GetTriangle(poly_TriangleHandle(tid), t);
 
       poly_VertexHandle globalNodeHandles[3];
