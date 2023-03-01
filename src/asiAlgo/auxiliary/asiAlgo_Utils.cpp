@@ -2375,7 +2375,7 @@ bool asiAlgo_Utils::ReadStl(const TCollection_AsciiString& filename,
   const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
-  cascade_Triangulation converter(mesh);
+  cascade_Triangulation<> converter(mesh);
   converter.DirectConvert();
   //
   triangulation = converter.GetOpenCascadeTriangulation();
@@ -2498,7 +2498,7 @@ bool asiAlgo_Utils::ReadPly(const TCollection_AsciiString& filename,
   const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
-  cascade_Triangulation converter(mesh);
+  cascade_Triangulation<> converter(mesh);
   converter.DirectConvert();
   //
   triangulation = converter.GetOpenCascadeTriangulation();
@@ -2624,7 +2624,7 @@ bool asiAlgo_Utils::ReadObj(const TCollection_AsciiString& filename,
   const t_ptr<t_mesh>& mesh = reader.GetResult();
 
   // Convert to OpenCascade's mesh.
-  cascade_Triangulation converter(mesh);
+  cascade_Triangulation<> converter(mesh);
   converter.DirectConvert();
   //
   triangulation = converter.GetOpenCascadeTriangulation();

@@ -494,7 +494,7 @@ int DDF_Polygonize(const Handle(asiTcl_Interp)& interp,
   const t_ptr<t_mesh>& mesh = mcAlgo.GetResult();
 
   // Convert to OpenCascade's mesh.
-  cascade_Triangulation converter(mesh);
+  cascade_Triangulation<> converter(mesh);
   converter.DirectConvert();
   //
   const Handle(Poly_Triangulation)&
@@ -588,7 +588,7 @@ int DDF_PolygonizeCell(const Handle(asiTcl_Interp)& interp,
   else
   {
     // Convert to OpenCascade's mesh.
-    cascade_Triangulation converter(mesh);
+    cascade_Triangulation<> converter(mesh);
     converter.DirectConvert();
     //
     const Handle(Poly_Triangulation)&
@@ -719,7 +719,7 @@ int DDF_PolygonizeSVO(const Handle(asiTcl_Interp)& interp,
   }
 
   // Convert to OpenCascade's mesh.
-  cascade_Triangulation converter(resMesh);
+  cascade_Triangulation<> converter(resMesh);
   converter.DirectConvert();
   //
   const Handle(Poly_Triangulation)&
