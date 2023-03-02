@@ -152,6 +152,8 @@ set (datum_H_FILES
 set (datum_H_UI_FILES
   datum/asiUI_Datum.h
   datum/asiUI_DatumCheckBox.h
+  datum/asiUI_DatumClipboardTableData.h
+  datum/asiUI_DatumClipboardTool.h
   datum/asiUI_DatumColorEdit.h
   datum/asiUI_DatumColorItem.h
   datum/asiUI_DatumComboBox.h
@@ -176,6 +178,8 @@ set (datum_H_UI_FILES
 set (datum_CPP_FILES 
   datum/asiUI_Datum.cpp
   datum/asiUI_DatumCheckBox.cpp
+  datum/asiUI_DatumClipboardTableData.cpp
+  datum/asiUI_DatumClipboardTool.cpp
   datum/asiUI_DatumColorEdit.cpp
   datum/asiUI_DatumColorItem.cpp
   datum/asiUI_DatumComboBox.cpp

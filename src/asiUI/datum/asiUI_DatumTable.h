@@ -381,6 +381,12 @@ protected slots:
 
   void onRowsRemoved(QModelIndex theParent, int theStart, int theEnd);
 
+  void ContextMenu(QPoint pos);
+
+  void CopyClipboardData();
+
+  void PasteClipboardData();
+
 protected:
 
   virtual QString 
@@ -392,6 +398,9 @@ protected:
 
   virtual void
     refreshUnitsInLabels();
+
+  virtual void
+    keyPressEvent(QKeyEvent *theEvent);
 
   virtual void
     emitValueChanged(const QModelIndex& theIndex,

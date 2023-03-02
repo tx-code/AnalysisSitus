@@ -90,6 +90,7 @@
 
 // asiUI includes
 #include <dialogs/asiUI_DialogDump.h>
+#include <dialogs/asiUI_DialogAppSurf.h>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -162,6 +163,29 @@ int runJsonView(int argc,
   return 0;
 }
 
+int runDialogAppSurf(int argc,
+                     char** argv,
+                     const std::string& scriptArg)
+{
+  if (scriptArg.empty())
+    return 1;
+
+  QApplication app(argc, argv);
+  exe_MainWindow::setApplicationStyle(":qdarkstyle/style.qss");
+
+  asiUI_CommonFacilities commonFacilities;
+
+  ActAPI_ProgressEntry progress;
+  ActAPI_PlotterEntry  plotter;
+  Handle(asiEngine_Model) model;
+  asiUI_DialogAppSurf* dlg = new asiUI_DialogAppSurf(commonFacilities.WidgetFactory,
+                                                     model, nullptr, progress, plotter);
+  dlg->show();
+
+  app.exec();
+  return 0;
+}
+
 //-----------------------------------------------------------------------------
 // Entry point
 //-----------------------------------------------------------------------------
@@ -177,6 +201,8 @@ int main(int argc, char** argv)
     isRunCommand = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runcommand, scriptArg);
   const bool
     isRunJsonView = asiExe::GetKeyValue(argc, argv, ASITUS_KW_runjsonview, scriptArg);
+  const bool
+    isRunDialogAppSurf = asiExe::GetKeyValue(argc, argv, ASITUS_KW_rundialogappsurf, scriptArg);
   const bool
     isGenDoc = asiExe::HasKeyword(argc, argv, ASITUS_KW_gendoc);
   const bool
@@ -278,6 +304,11 @@ int main(int argc, char** argv)
       std::cout << "Cannot load data dictionary from "
                 << QStr2AsciiStr(dictFilenameStr).ToCString() << std::endl;
     }
+  }
+
+  if (isRunDialogAppSurf)
+  {
+    return runDialogAppSurf(argc, argv, scriptArg);
   }
 
   //---------------------------------------------------------------------------

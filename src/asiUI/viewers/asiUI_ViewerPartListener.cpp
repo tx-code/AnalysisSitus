@@ -1330,6 +1330,9 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     asiUI_ViewerPart* pViewer = dynamic_cast<asiUI_ViewerPart*>(m_pViewer);
 
     asiUI_DialogAppSurf dlgAppSurf(m_widgetFactory, m_model, pViewer, m_progress, m_plotter);
+
+    dlgAppSurf.onEdgePicked();
+
     dlgAppSurf.exec();
   }
 }

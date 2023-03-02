@@ -30,13 +30,18 @@
 
 // Own include
 #include <asiUI_DatumTable.h>
+#include <asiUI_DatumClipboardTableData.h>
+#include <asiUI_DatumClipboardTool.h>
 
-// SBM Gui Framework includes
+// asiUI includes
 #include <asiUI_HeaderView.h>
 
 // Qt includes
 #pragma warning(push, 0)
 #include <QHeaderView>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QMessageBox>
 #pragma warning(pop)
 
 //! Constructor for empty datum table.
@@ -62,6 +67,10 @@ asiUI_DatumTable::asiUI_DatumTable(const Handle(asiUI_WidgetFactory)& theFactory
   aRowHeader->setSectionResizeMode(QHeaderView::ResizeToContents);
   this->setVerticalHeader(aRowHeader);
   this->setHorizontalHeader(aColHeader);
+
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect( this, SIGNAL( customContextMenuRequested(QPoint) ),
+           this, SLOT  ( ContextMenu(QPoint) ) );
 }
 
 //! Default destructor.
@@ -562,6 +571,141 @@ void asiUI_DatumTable::onRowsRemoved(QModelIndex /*theParent*/, int theStart, in
   }
 }
 
+//-----------------------------------------------------------------------------
+
+void asiUI_DatumTable::ContextMenu(QPoint pos)
+{
+  if (selectionModel()->selectedIndexes().isEmpty())
+    return;
+
+  // Create and populate the menu.
+  QMenu* pMenu = new QMenu(this);
+
+  QAction* pCopyAction  = new QAction("Copy", this);
+  QAction* pPasteAction = new QAction("Paste", this);
+
+  pMenu->addAction(pCopyAction);
+  pMenu->addAction(pPasteAction);
+
+  connect( pCopyAction,  SIGNAL( triggered() ), this, SLOT( CopyClipboardData  () ) );
+  connect( pPasteAction, SIGNAL( triggered() ), this, SLOT( PasteClipboardData () ) );
+
+  if ( !pMenu->isEmpty() )
+    pMenu->popup( this->viewport()->mapToGlobal(pos) );
+}
+
+//! Copy values from the table into clipboard if possible.
+void asiUI_DatumTable::CopyClipboardData()
+{
+  //std::cout << "Copy key pressed" << std::endl;
+
+  // Perform copying to intermediate buffer
+  asiUI_DatumClipboardTool::CopyToClipboard(this);
+}
+
+//! Copy values from the clipboard into the table if possible.
+void asiUI_DatumTable::PasteClipboardData()
+{
+  //std::cout << "Paste key pressed" << std::endl;
+
+  QItemSelectionModel* aSelModel = this->selectionModel();
+
+  // table-layout like selection rectangle
+  QModelIndexList anArrangedIndexes;
+  QRect aSelectionRect = asiUI_DatumClipboardTool::GetContiguous(
+    this, aSelModel->selection(), anArrangedIndexes);
+
+  if ( !aSelectionRect.isValid() )
+    return;
+
+  QModelIndex aTopLeft  = anArrangedIndexes.first();
+  QModelIndex aBotRight = anArrangedIndexes.last();
+
+  // get paste rectangle in accordance
+  // with selection made and Excel rules
+  QRect aRuledRect = asiUI_DatumClipboardTool::GetPasteRuleRegion(aSelectionRect);
+
+  // warn if selected region is bigger than paste data
+  if ( aSelectionRect.height() > aRuledRect.height() ||
+       aSelectionRect.width()  > aRuledRect.width() )
+  {
+    if ( QMessageBox::warning(NULL,
+           "Selected region is too large.",
+           "Selected region is larger than the clipboard data.\nDo you want to paste the data anyway?",
+           QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )
+      return;
+  }
+
+  // get model indexes under selection and number of
+  // rows and columns missing to fit the whole insertion rect
+  int aMissingRows = 0;
+  int aMissingCols = 0;
+
+  QModelIndexList aRuledIndexes = 
+    asiUI_DatumClipboardTool::GetIndexesFromRect(this, aRuledRect, aMissingRows, aMissingCols);
+
+  // Let operation to decide whether the tables can be re-sized
+  int aCanExpandRows = 0;
+  int aCanExpandCols = 0;
+  if ( QTableView* aTableView = qobject_cast<QTableView*>( this ) )
+  {
+    //canExpandOnPaste(aTableView, aMissingRows, aMissingCols,
+    //  aCanExpandRows, aCanExpandCols);
+
+    // only row expansion is allowed
+    aCanExpandRows = aMissingRows;
+    aCanExpandCols = aMissingCols;//0;
+  }
+
+  // get final rectangle for insertion
+  QRect aFinalRect = aRuledRect.adjusted(0, 0,
+    aCanExpandCols - aMissingCols, aCanExpandRows - aMissingRows);
+
+  if ( aRuledRect.right()  > aFinalRect.right() 
+    || aRuledRect.bottom() > aFinalRect.bottom() )
+  {
+    if ( QMessageBox::warning(NULL,
+           QObject::tr("CLIPBOARD_PASTE_TITLE_DOES_NOT_FIT"),
+           QObject::tr("CLIPBOARD_PASTE_MSG_DOESN_NOT_FIT"),
+           QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )
+      return;
+  }
+
+  // expand table and appropriately modify selection
+  if ( QTableView* aTableView = qobject_cast<QTableView*>( this ) )
+  {
+    // Expand table
+    if ( aCanExpandRows > 0 || aCanExpandCols > 0 )
+    {
+      //expandTableOnPaste(aTableView, aCanExpandRows, aCanExpandCols);
+      QAbstractItemModel* aModel = aTableView->model();
+      aModel->insertRows( aModel->rowCount(), aCanExpandRows );
+      aModel->insertColumns( aModel->columnCount(), aCanExpandCols );
+    }
+
+    // change selection in accordance with the pasted region
+    QAbstractItemModel* aModel = aTableView->model();
+    QModelIndex aTopLeft2 = aModel->index( aFinalRect.top(), aFinalRect.left() );
+    QModelIndex aBotRight2 = aModel->index( aFinalRect.bottom(), aFinalRect.right() );
+
+    aTableView->selectionModel()->select(
+      QItemSelection(aTopLeft2, aBotRight2), QItemSelectionModel::ClearAndSelect);
+  }
+  else
+  {
+    // no expansion possible here, provide coherent selection
+    QItemSelectionModel* aSelectionModel = this->selectionModel();
+    aSelectionModel->clearSelection();
+
+    QModelIndexList::ConstIterator aIndexIt = aRuledIndexes.constBegin();
+    for ( ; aIndexIt != aRuledIndexes.constEnd(); aIndexIt++ )
+      aSelectionModel->select( (*aIndexIt), QItemSelectionModel::Select );
+  }
+
+  // Paste data into destination Table View
+  asiUI_DatumClipboardTool::PasteFromClipboard(this);
+}
+
 //! Refresh items layout.
 void asiUI_DatumTable::doItemsLayout()
 {
@@ -1001,6 +1145,36 @@ void asiUI_DatumTable::refreshUnitsInLabels()
   if ( GetRowCount() > 0 )
   {
     updateHeaders( Qt::Vertical, 0, GetRowCount() -1 );
+  }
+}
+
+//! Processes Copy/Paste keys combinations.
+void asiUI_DatumTable::keyPressEvent(QKeyEvent *theEvent)
+{
+  switch ( theEvent->key() )
+  {
+    case Qt::Key_Copy :
+    case Qt::Key_C :
+    {
+      if (theEvent->modifiers().testFlag(Qt::ControlModifier))
+      {
+        CopyClipboardData();
+      }
+      break;
+    }
+
+    case Qt::Key_Paste :
+    case Qt::Key_V :
+    {
+      if (theEvent->modifiers().testFlag(Qt::ControlModifier))
+      {
+        PasteClipboardData();
+      }
+      break;
+    }
+
+    default:
+      asiUI_DatumViewBase<QTableView>::keyPressEvent(theEvent);
   }
 }
 

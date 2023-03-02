@@ -75,17 +75,26 @@ public:
   //! \param[in] progress the progress notifier.
   //! \param[in] plotter  the imperative plotter.
   //! \param[in] parent   the parent widget.
-  asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
-                      const Handle(asiEngine_Model)&     model,
-                      asiUI_ViewerPart*                  pViewer,
-                      ActAPI_ProgressEntry               progress,
-                      ActAPI_PlotterEntry                plotter,
-                      QWidget*                           parent = nullptr);
+  asiUI_EXPORT
+    asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
+                        const Handle(asiEngine_Model)&     model,
+                        asiUI_ViewerPart*                  pViewer,
+                        ActAPI_ProgressEntry               progress,
+                        ActAPI_PlotterEntry                plotter,
+                        QWidget*                           parent = nullptr);
 
   //! Dtor.
-  virtual ~asiUI_DialogAppSurf();
+  asiUI_EXPORT
+    virtual ~asiUI_DialogAppSurf();
 
 public slots:
+
+  //! Reaction on edge selection in the viewer.
+  void onEdgePicked();
+
+  //! Reaction on face selection in the viewer.
+  //! \param[in] pickRes pick result.
+  void onFacePicked(asiVisu_PickerResult* pickRes);
 
   //! Reaction on changing "method" combobox.
   //! \param[in] methodIdx new 0-based type index.
@@ -103,6 +112,15 @@ protected:
     QComboBox*        pMethodSel; //!< Selector for the surface fitting method.
     asiUI_LineEdit*   pEdges;     //!< Indices of edges.
     asiUI_DatumTable* pPoints;    //!< Point coordinates.
+
+    QLabel*           pInitialSurfaceLabel;
+    asiUI_LineEdit*   pInitialSurface;
+
+    QLabel*           pFairingCoeffLabel;
+    asiUI_LineEdit*   pFairingCoeff;
+
+    QLabel*           pNumItersLabel;
+    asiUI_LineEdit*   pNumIters;
 
     t_widgets() : pApply     (nullptr),
                   pMethodSel (nullptr),

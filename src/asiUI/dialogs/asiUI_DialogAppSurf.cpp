@@ -134,6 +134,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   QFrame*    pMethodPanel        = new QFrame;
   QGroupBox* pGroupEConstraints  = new QGroupBox("Edge constraints");
   QGroupBox* pGroupPPConstraints = new QGroupBox("Pin-point constraints");
+  QGroupBox* pGroupAdvanced      = new QGroupBox("Advanced");
 
   // Method.
   m_widgets.pMethodSel = new QComboBox();
@@ -157,6 +158,15 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_widgets.pPoints->SetColumnEditor(1, "POI_Y");
   m_widgets.pPoints->SetColumnEditor(2, "POI_Z");
   m_widgets.pPoints->SetEditByClick(false);
+
+  m_widgets.pInitialSurfaceLabel = new QLabel("Initial surface", this);
+  m_widgets.pInitialSurface = new asiUI_LineEdit(this);
+
+  m_widgets.pFairingCoeffLabel = new QLabel("Fairing coeff.", this);
+  m_widgets.pFairingCoeff = new asiUI_LineEdit(this);
+
+  m_widgets.pNumItersLabel = new QLabel("Num. iters", this);
+  m_widgets.pNumIters = new asiUI_LineEdit(this);
 
   //---------------------------------------------------------------------------
   // Buttons
@@ -208,6 +218,23 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   }
 
+  // Advanced.
+  {
+    QGridLayout* pLayout = new QGridLayout(pGroupAdvanced);
+    pLayout->setSpacing(10);
+    //
+    pLayout->addWidget(m_widgets.pInitialSurfaceLabel, 0, 0);
+    pLayout->addWidget(m_widgets.pInitialSurface,      0, 1);
+
+    pLayout->addWidget(m_widgets.pFairingCoeffLabel,   1, 0);
+    pLayout->addWidget(m_widgets.pFairingCoeff,        1, 1);
+
+    pLayout->addWidget(m_widgets.pNumItersLabel,       2, 0);
+    pLayout->addWidget(m_widgets.pNumIters,            2, 1);
+    //
+    pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  }
+
   //---------------------------------------------------------------------------
   // Main layout
   //---------------------------------------------------------------------------
@@ -216,6 +243,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_pMainLayout->addWidget(pMethodPanel);
   m_pMainLayout->addWidget(pGroupEConstraints);
   m_pMainLayout->addWidget(pGroupPPConstraints);
+  m_pMainLayout->addWidget(pGroupAdvanced);
   m_pMainLayout->addWidget(m_widgets.pApply);
   //
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -231,12 +259,76 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   // Adjust initial state.
   this->onChangeMethod(0);
+
+  connect( m_pViewer, SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onEdgePicked() ) );
+
+  connect( m_pViewer, SIGNAL ( facePicked(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onFacePicked(asiVisu_PickerResult*) ) );
 }
 
 //-----------------------------------------------------------------------------
 
 asiUI_DialogAppSurf::~asiUI_DialogAppSurf()
 {}
+
+//-----------------------------------------------------------------------------
+void asiUI_DialogAppSurf::onEdgePicked()
+{
+  if (!m_model || !m_pViewer)
+    return;
+
+  asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+
+  // Get selected edges.
+  TColStd_PackedMapOfInteger eids;
+  partApi.GetHighlightedEdges(eids);
+
+  // Collect edges.
+  Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
+  //
+
+  QStringList edgeIds;
+  for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
+  {
+    const int edgeId = eit.Key();
+
+    edgeIds.append(QString::number(edgeId));
+    //// Get edge.
+    //const TopoDS_Shape&
+    //  edge = partApi.GetAAG()->RequestMapOfEdges()(edgeId);
+
+    //hedges->Append(edge);
+  }
+
+  m_widgets.pEdges->setText(edgeIds.join(" "));
+}
+
+//-----------------------------------------------------------------------------
+
+#include <asiVisu_PartNodeInfo.h>
+void asiUI_DialogAppSurf::onFacePicked(asiVisu_PickerResult* pickRes)
+{
+  if (!m_model || !m_pViewer)
+    return;
+
+    // Check if part is picked
+  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve( pickRes->GetPickedActor() );
+  //
+  if ( pickRes->GetPickedActor() && !nodeInfo )
+    return;
+
+  Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+
+  // Get index of the active sub-shape.
+  const int
+    globalId = geom_n->GetFaceRepresentation()->GetAnySelectedFace();
+  //
+  if ( globalId == 0 )
+    return;
+
+  m_widgets.pInitialSurface->setText(QString::number(globalId));
+}
 
 //-----------------------------------------------------------------------------
 
@@ -249,6 +341,9 @@ void asiUI_DialogAppSurf::onChangeMethod(const int methodIdx)
 
 void asiUI_DialogAppSurf::onApply()
 {
+  if (!m_model || !m_pViewer)
+    return;
+
   asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
   // Get selected edges.
