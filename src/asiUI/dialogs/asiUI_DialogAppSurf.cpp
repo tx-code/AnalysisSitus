@@ -32,6 +32,7 @@
 #include "asiUI_DialogAppSurf.h"
 
 // asiAlgo includes
+#include <asiAlgo_AppSurf2.h>
 #include <asiAlgo_PlateOnEdges.h>
 
 // asiEngine includes
@@ -391,6 +392,21 @@ void asiUI_DialogAppSurf::onApply()
     if ( !interpAlgo.BuildSurf(hedges, GeomAbs_C0, surf) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "Interpolation failed.");
+      return;
+    }
+  }
+
+  else if ( m_method == Method_APPSURF2 )
+  {
+    // Prepare approximation tool.
+    asiAlgo_AppSurf2 approxAlgo(m_progress, m_plotter);
+    //
+    approxAlgo.SetFairingCoeff(1e-3);
+
+    // Interpolate.
+    if ( !approxAlgo.BuildSurf(hedges, surf) )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "APPSURF2 failed.");
       return;
     }
   }

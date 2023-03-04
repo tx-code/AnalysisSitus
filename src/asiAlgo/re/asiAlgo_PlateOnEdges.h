@@ -140,7 +140,7 @@ public:
               Handle(Geom_BSplineSurface)&       support);
 
   //! Builds host b-surface.
-  //! \param[out] edges      collection of edges.
+  //! \param[in]  edges      collection of edges.
   //! \param[in]  continuity desired order of cross-boundary continuity.
   //! \param[out] support    reconstructed support b-surface.
   //! \return true in case of success, false -- otherwise.
