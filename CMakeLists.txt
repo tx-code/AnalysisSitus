@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0.0 FATAL_ERROR)
 
 # Project name
-project (AnalysisSitus CXX)
+project (AnalysisSitus-OX CXX)
 
 # Install dir of the built project
 set (INSTALL_DIR "" CACHE PATH "Path where to install Analysis Situs.")
