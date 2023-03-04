@@ -145,6 +145,8 @@ set (salome_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (datum_H_FILES
+  datum/asiUI_DatumClipboardTableData.h
+  datum/asiUI_DatumClipboardTool.h
   datum/asiUI_DatumFormat.h
   datum/asiUI_DatumViewApi.h
   datum/asiUI_DatumViewItem.h
@@ -152,8 +154,6 @@ set (datum_H_FILES
 set (datum_H_UI_FILES
   datum/asiUI_Datum.h
   datum/asiUI_DatumCheckBox.h
-  datum/asiUI_DatumClipboardTableData.h
-  datum/asiUI_DatumClipboardTool.h
   datum/asiUI_DatumColorEdit.h
   datum/asiUI_DatumColorItem.h
   datum/asiUI_DatumComboBox.h

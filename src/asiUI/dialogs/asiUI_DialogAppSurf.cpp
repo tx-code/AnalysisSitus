@@ -344,25 +344,39 @@ void asiUI_DialogAppSurf::onApply()
   if (!m_model || !m_pViewer)
     return;
 
+  /* ==================
+   *  Read constraints.
+   * ================== */
+
   asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
-  // Get selected edges.
-  TColStd_PackedMapOfInteger eids;
-  partApi.GetHighlightedEdges(eids);
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
 
-  // Collect edges.
-  Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
+  Handle(TopTools_HSequenceOfShape) hedges   = new TopTools_HSequenceOfShape;
+
+  // Read edge indices.
+  QStringList eidList = m_widgets.pEdges->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
   //
-  for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
+  for ( const auto& eidStr : eidList )
   {
-    const int edgeId = eit.Key();
+    const int eid = eidStr.toInt();
 
-    // Get edge.
-    const TopoDS_Shape&
-      edge = partApi.GetAAG()->RequestMapOfEdges()(edgeId);
-
-    hedges->Append(edge);
+    if ( (eid > 0) && ( eid <= allEdges.Extent() ) )
+    {
+      const TopoDS_Shape& edge = allEdges.FindKey(eid);
+      hedges->Append(edge);
+    }
+    else
+    {
+      m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
+                                                << eid << allEdges.Extent() );
+    }
   }
+
+  /* =====================
+   *  Approximate surface.
+   * ===================== */
 
   Handle(Geom_BSplineSurface) surf;
 
