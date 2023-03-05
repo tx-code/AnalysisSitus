@@ -1615,6 +1615,8 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
         pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP   () ) );
         pMenu->addAction( "Set as part",     this, SLOT( onSetAsPart    () ) );
         pMenu->addAction( "Explore...",      this, SLOT( onExploreShape () ) );
+        pMenu->addSeparator();
+        pMenu->addAction( "Make partition",  this, SLOT( onPartition    () ) );
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVPointSetNode) ) )
@@ -1884,15 +1886,26 @@ void asiUI_ObjectBrowser::onPartition()
   Handle(ActAPI_INode) sel;
   if ( !this->selectedNode(sel) ) return;
 
+  TopoDS_Shape cutter;
+
+  // Check type.
   Handle(asiData_IVSurfaceNode)
     surfNode = Handle(asiData_IVSurfaceNode)::DownCast(sel);
   //
   if ( surfNode.IsNull() )
-    return;
+  {
+    Handle(asiData_IVTopoItemNode)
+      shapeNode = Handle(asiData_IVTopoItemNode)::DownCast(sel);
+    //
+    if ( shapeNode.IsNull() )
+      return;
 
-  // Turn into shape.
-  TopoDS_Shape
-    toolSh = BRepBuilderAPI_MakeFace( surfNode->GetSurface(), Precision::Confusion() );
+    cutter = shapeNode->GetShape();
+  }
+  else
+  {
+    cutter = BRepBuilderAPI_MakeFace( surfNode->GetSurface(), Precision::Confusion() );
+  }
 
   // Get Part Node.
   Handle(asiData_PartNode) partNode = m_model->GetPartNode();
@@ -1901,7 +1914,7 @@ void asiUI_ObjectBrowser::onPartition()
   BOPAlgo_Builder bopBuilder;
   //
   bopBuilder.AddArgument(partSh);
-  bopBuilder.AddArgument(toolSh);
+  bopBuilder.AddArgument(cutter);
   bopBuilder.Perform();
 
   const TopoDS_Shape& res = bopBuilder.Shape();

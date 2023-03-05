@@ -38,6 +38,9 @@
 // asiEngine includes
 #include <asiEngine_Part.h>
 
+// asiVisu includes
+#include <asiVisu_PartNodeInfo.h>
+
 // Qt includes
 #include <Standard_WarningsDisable.hxx>
 //
@@ -165,6 +168,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   m_widgets.pFairingCoeffLabel = new QLabel("Fairing coeff.", this);
   m_widgets.pFairingCoeff = new asiUI_LineEdit(this);
+  m_widgets.pFairingCoeff->setText("0.001");
 
   m_widgets.pNumItersLabel = new QLabel("Num. iters", this);
   m_widgets.pNumIters = new asiUI_LineEdit(this);
@@ -274,6 +278,7 @@ asiUI_DialogAppSurf::~asiUI_DialogAppSurf()
 {}
 
 //-----------------------------------------------------------------------------
+
 void asiUI_DialogAppSurf::onEdgePicked()
 {
   if (!m_model || !m_pViewer)
@@ -307,7 +312,6 @@ void asiUI_DialogAppSurf::onEdgePicked()
 
 //-----------------------------------------------------------------------------
 
-#include <asiVisu_PartNodeInfo.h>
 void asiUI_DialogAppSurf::onFacePicked(asiVisu_PickerResult* pickRes)
 {
   if (!m_model || !m_pViewer)
@@ -345,6 +349,9 @@ void asiUI_DialogAppSurf::onApply()
   if (!m_model || !m_pViewer)
     return;
 
+  // Fairing coefficient.
+  const double lambda = QVariant( m_widgets.pFairingCoeff->text() ).toDouble();
+
   /* ==================
    *  Read constraints.
    * ================== */
@@ -379,14 +386,16 @@ void asiUI_DialogAppSurf::onApply()
    *  Approximate surface.
    * ===================== */
 
-  Handle(Geom_BSplineSurface) surf;
+  Handle(asiAlgo_BaseCloud<double>) pinPts;
+  Handle(Geom_BSplineSurface)       surf;
+  TopoDS_Face                       face;
 
   if ( m_method == Method_PLATE )
   {
     // Prepare interpolation tool.
     asiAlgo_PlateOnEdges interpAlgo(partApi.GetShape(), m_progress, m_plotter);
     //
-    interpAlgo.SetFairingCoeff(1e-3);
+    interpAlgo.SetFairingCoeff(lambda);
 
     // Interpolate.
     if ( !interpAlgo.BuildSurf(hedges, GeomAbs_C0, surf) )
@@ -401,14 +410,16 @@ void asiUI_DialogAppSurf::onApply()
     // Prepare approximation tool.
     asiAlgo_AppSurf2 approxAlgo(m_progress, m_plotter);
     //
-    approxAlgo.SetFairingCoeff(1e-3);
+    approxAlgo.SetFairingCoeff(lambda);
 
     // Interpolate.
-    if ( !approxAlgo.BuildSurf(hedges, surf) )
+    if ( !approxAlgo.BuildSurf(hedges, surf, face) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "APPSURF2 failed.");
       return;
     }
+
+    pinPts = approxAlgo.GetConstraints();
   }
   else
   {
@@ -417,5 +428,11 @@ void asiUI_DialogAppSurf::onApply()
   }
 
   if ( !surf.IsNull() )
-    m_plotter.DRAW_SURFACE(surf, Color_Default, "filling");
+    m_plotter.DRAW_SURFACE(surf, Color_Default, "fillingSurf");
+
+  if ( !face.IsNull() )
+    m_plotter.DRAW_SHAPE(face, Color_Default, "fillingFace");
+
+  if ( !pinPts.IsNull() )
+    m_plotter.REDRAW_POINTS("constaints", pinPts->GetCoordsArray(), Color_Red);
 }

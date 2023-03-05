@@ -39,6 +39,7 @@
 
 // OCCT includes
 #include <Geom_BSplineSurface.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
 //-----------------------------------------------------------------------------
@@ -68,10 +69,12 @@ public:
   //! Builds B-surface.
   //! \param[in]  edges   the collection of constraint edges.
   //! \param[out] support the constructed B-surface.
+  //! \param[out] face    the constructed face.
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     BuildSurf(const Handle(TopTools_HSequenceOfShape)& edges,
-              Handle(Geom_BSplineSurface)&             support);
+              Handle(Geom_BSplineSurface)&             support,
+              TopoDS_Face&                             face);
 
 public:
 
@@ -102,11 +105,18 @@ public:
     return m_fFairCoeff;
   }
 
+  //! \return all used pinpoint constraints.
+  const Handle(asiAlgo_BaseCloud<double>)& GetConstraints() const
+  {
+    return m_pinPts;
+  }
+
 protected:
 
   int                               m_iNumDiscrPts; //!< Number of discretization points.
   double                            m_fFairCoeff;   //!< Optional fairing coefficient.
   Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
+  Handle(asiAlgo_BaseCloud<double>) m_pinPts;       //!< All pinpoint constraints.
 
 };
 
