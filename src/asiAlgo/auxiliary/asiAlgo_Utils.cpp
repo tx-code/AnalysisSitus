@@ -63,6 +63,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <asiAlgo_ClassifyPointFace.h>
 #include <asiAlgo_ConvertCanonical.h>
 #include <asiAlgo_IGES.h>
+#include <asiAlgo_FeatureAttrAngle.h>
 #include <asiAlgo_FeatureAttrArea.h>
 #include <asiAlgo_FeatureAttrUVBounds.h>
 #include <asiAlgo_FeatureFaces.h>
@@ -115,6 +116,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_ShapeSet.hxx>
+#include <BRepTools_WireExplorer.hxx>
 #include <GC_MakeCircle.hxx>
 #include <GCPnts_QuasiUniformAbscissa.hxx>
 #include <Geom_BezierCurve.hxx>
@@ -6123,4 +6125,121 @@ bool asiAlgo_Utils::ProjectPointOnPlane(const Handle(Geom_Plane)& plane,
   proj.SetXYZ(point.XYZ() + alpha * dir.XYZ());
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::HasEccentricVexity(const int                                 fid,
+                                       const asiAlgo_Feature&                    nids,
+                                       const gp_Ax1&                             axis,
+                                       const Handle(asiAlgo_AAG)&                aag,
+                                       const double                              linPrec,
+                                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                                       ActAPI_PlotterEntry                       plotter)
+{
+  bool hasSoughtEdges = false;
+  TColStd_PackedMapOfInteger soughtEdges;
+
+  // Check angle types.
+  for ( asiAlgo_Feature::Iterator nit(nids); nit.More(); nit.Next() )
+  {
+    const int nid = nit.Key();
+
+    asiAlgo_AAG::t_arc arc(fid, nid);
+
+    // Get the dihedral angle.
+    Handle(asiAlgo_FeatureAttrAngle)
+      DA = aag->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
+    //
+    if ( DA.IsNull() )
+      continue;
+
+    const asiAlgo_FeatureAngleType vexity = DA->GetAngleType();
+
+    if ( toCheck.find(vexity) != toCheck.end() )
+    {
+      if ( !hasSoughtEdges ) hasSoughtEdges = true;
+
+      // Collect found edges.
+      Handle(asiAlgo_FeatureAttrAdjacency)
+        AA = aag->ATTR_ARC<asiAlgo_FeatureAttrAdjacency>(arc);
+      //
+      if ( !AA.IsNull() )
+      {
+        soughtEdges.Unite( AA->GetEdgeIndices() );
+      }
+    }
+  }
+
+  if ( !hasSoughtEdges )
+    return false;
+
+  // Check eccentricity.
+  bool hasImpossibleContour = false;
+  gp_Lin axLin(axis);
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator eit(soughtEdges);
+        eit.More(); eit.Next() )
+  {
+    const int          eid  = eit.Key();
+    const TopoDS_Edge& edge = TopoDS::Edge( aag->RequestMapOfEdges()(eid) );
+
+    double f, l;
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, f, l);
+    //
+    if ( c3d.IsNull() )
+      continue;
+
+    gp_Circ circ;
+    if ( IsCircular(c3d, circ) )
+    {
+      const gp_Pnt& circCenter = circ.Location();
+      const double  d          = axLin.Distance(circCenter);
+
+      if ( d > linPrec )
+      {
+        hasImpossibleContour = true;
+
+#if defined DRAW_DEBUG
+        plotter.DRAW_SHAPE(edge, Color_Red, 1., true, "eccentricEdge");
+        plotter.DRAW_POINT(circCenter, Color_Red, "circCenter");
+#endif
+      }
+    }
+    else
+    {
+#if defined DRAW_DEBUG
+      plotter.DRAW_SHAPE(edge, Color_Red, 1., true, "soughtEdge");
+#endif
+
+      // Any non-circular edge from the found subset is assumed to be impossible.
+      hasImpossibleContour = true;
+    }
+  }
+
+  return hasImpossibleContour;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::HasEccentricVexity(const int                                 fid,
+                                       const TopoDS_Wire&                        wire,
+                                       const gp_Ax1&                             axis,
+                                       const Handle(asiAlgo_AAG)&                aag,
+                                       const double                              linPrec,
+                                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                                       ActAPI_PlotterEntry                       plotter)
+{
+  // Get neighbor faces.
+  asiAlgo_Feature nids;
+  //
+  for ( BRepTools_WireExplorer wexp(wire); wexp.More(); wexp.Next() )
+  {
+    const TopoDS_Edge& edge  = wexp.Current(); // Outer edge.
+    asiAlgo_Feature    enids = aag->GetNeighborsThru(fid, edge);
+    //
+    nids.Unite(enids);
+  }
+
+  return HasEccentricVexity(fid, nids, axis, aag, linPrec, toCheck, plotter);
 }

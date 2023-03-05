@@ -189,6 +189,8 @@ protected slots:
   void onFeatureComments       ();
   void onFeatureCheckCommon    ();
   void onFeatureCheckRepeated  ();
+  //
+  void onPartition             ();
 
 protected:
 

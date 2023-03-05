@@ -38,6 +38,7 @@
 // OCCT includes
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
+#include <BRepTools_WireExplorer.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <gp_Ax1.hxx>
@@ -45,12 +46,15 @@
 #include <gp_Lin2d.hxx>
 #include <Precision.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
 #undef DRAW_DEBUG
 #if defined DRAW_DEBUG
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
+
+#define DefaultLinPrec 0.1
 
 namespace {
 
@@ -98,12 +102,60 @@ namespace {
     return eids;
   }
 
+  //! Looks for concave inner wires to invalidate non-machinable
+  //! bottom faces of holes.
+  bool HasConcaveInnerWire(const int                  fid,
+                           const Handle(asiAlgo_AAG)& aag)
+  {
+    const TopoDS_Face& F = aag->GetFace(fid);
+
+    TopoDS_Wire owire = asiAlgo_Utils::OuterWire(F);
+
+    // Iterate over the internal contours.
+    for ( TopExp_Explorer fexp(F, TopAbs_WIRE); fexp.More(); fexp.Next() )
+    {
+      const TopoDS_Wire& wire = TopoDS::Wire( fexp.Current() );
+
+      // Skip outer wire.
+      if ( wire.IsPartner(owire) )
+        continue;
+
+      // Find neighbors over the inner edges.
+      for ( BRepTools_WireExplorer wexp(wire); wexp.More(); wexp.Next() )
+      {
+        const TopoDS_Edge& edge  = wexp.Current(); // Outer edge.
+        asiAlgo_Feature    enids = aag->GetNeighborsThru(fid, edge);
+
+        for ( asiAlgo_Feature::Iterator nit(enids); nit.More(); nit.Next() )
+        {
+          const int nid = nit.Key();
+
+          asiAlgo_AAG::t_arc arc(fid, nid);
+
+          // Get the dihedral angle.
+          Handle(asiAlgo_FeatureAttrAngle)
+            DA = aag->ATTR_ARC<asiAlgo_FeatureAttrAngle>(arc);
+          //
+          if ( DA.IsNull() )
+            continue;
+
+          if ( asiAlgo_FeatureAngle::IsConcave( DA->GetAngleType() ) )
+          {
+            return true;
+          }
+        }
+      }
+    } // by inner contours.
+
+    return false;
+  }
+
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& featureFaces,
-                                               TColStd_PackedMapOfInteger& featureIndices)
+                                                TColStd_PackedMapOfInteger& featureIndices)
 {
   // Extract suspected face and check if it is a cylinder. Even if a hole
   // is composed of other types of surfaces (e.g. conical), we assume that
@@ -219,6 +271,39 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
       //
       if ( asiAlgo_Utils::IsConical(neighbor_face) || asiAlgo_Utils::IsPlanar(neighbor_face) )
         suspected_endings.Add(neighbor_id);
+    }
+  }
+
+  // Validate bottom faces: they should not contain any concave inner wires. Also here
+  // we need to be sure that the checked "suspected ending" is actually a bottom face,
+  // so we add additional test for the outer wire.
+  for ( asiAlgo_Feature::Iterator sit(suspected_endings); sit.More(); sit.Next() )
+  {
+    const int          sid   = sit.Key();
+    const TopoDS_Face& sface = m_it->GetGraph()->GetFace(sid);
+
+    TopoDS_Wire owire = asiAlgo_Utils::OuterWire(sface);
+
+    std::set<asiAlgo_FeatureAngleType>
+      outerVexities = {FeatureAngleType_Concave,
+                       FeatureAngleType_SmoothConcave};
+
+    // Check if that's a bottom face and not a base face where a hole is inserted.
+    if ( asiAlgo_Utils::HasEccentricVexity(sid,
+                                           owire,
+                                           ref_ax,
+                                           m_it->GetGraph(),
+                                           DefaultLinPrec,
+                                           outerVexities,
+                                           nullptr) )
+    {
+      continue; // Does not seem to be a bottom.
+    }
+
+    // Check for obstructions.
+    if ( ::HasConcaveInnerWire( sid, m_it->GetGraph() ) )
+    {
+      return false;
     }
   }
 

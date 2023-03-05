@@ -73,6 +73,7 @@ enum test_CaseID
   CaseID_FaceGrid,
   CaseID_RecognizeCavities,
   CaseID_RecognizeConvexHull,
+  CaseID_RecognizeHoles,
 
 /* ------------------------------------------------------------------------ */
 

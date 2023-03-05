@@ -59,6 +59,7 @@
 #include <asiAlgo_WriteREK.h>
 
 // OpenCascade includes
+#include <BOPAlgo_Builder.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <TDF_Tool.hxx>
@@ -1600,6 +1601,12 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
         pMenu->addSeparator();
         pMenu->addAction( "Copy as JSON", this, SLOT( onCopyAsJSON () ) );
         pMenu->addAction( "Set as part",  this, SLOT( onSetAsPart  () ) );
+
+        if ( node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+        {
+          pMenu->addSeparator();
+          pMenu->addAction( "Make partition", this, SLOT( onPartition () ) );
+        }
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
@@ -1868,4 +1875,50 @@ void asiUI_ObjectBrowser::hideNodes(const Handle(ActAPI_HNodeList)& nodes)
     }
   }
   m_model->CommitCommand();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ObjectBrowser::onPartition()
+{
+  Handle(ActAPI_INode) sel;
+  if ( !this->selectedNode(sel) ) return;
+
+  Handle(asiData_IVSurfaceNode)
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast(sel);
+  //
+  if ( surfNode.IsNull() )
+    return;
+
+  // Turn into shape.
+  TopoDS_Shape
+    toolSh = BRepBuilderAPI_MakeFace( surfNode->GetSurface(), Precision::Confusion() );
+
+  // Get Part Node.
+  Handle(asiData_PartNode) partNode = m_model->GetPartNode();
+  TopoDS_Shape             partSh   = partNode->GetShape();
+
+  BOPAlgo_Builder bopBuilder;
+  //
+  bopBuilder.AddArgument(partSh);
+  bopBuilder.AddArgument(toolSh);
+  bopBuilder.Perform();
+
+  const TopoDS_Shape& res = bopBuilder.Shape();
+
+  // Update part.
+  m_model->OpenCommand();
+  {
+    asiEngine_Part partApi(m_model);
+    partApi.Update(res);
+  }
+  m_model->CommitCommand();
+
+  // Actualize.
+  for ( size_t k = 0; k < m_viewers.size(); ++k )
+    if ( m_viewers[k] && m_viewers[k]->PrsMgr()->IsPresented(partNode) )
+    {
+      m_viewers[k]->PrsMgr()->DeletePresentation(partNode);
+      m_viewers[k]->PrsMgr()->Actualize(partNode, false, true);
+    }
 }

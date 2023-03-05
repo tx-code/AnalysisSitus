@@ -90,6 +90,7 @@
 // Standard includes
 #include <limits>
 #include <unordered_set>
+#include <set>
 
 //-----------------------------------------------------------------------------
 
@@ -2226,6 +2227,28 @@ namespace asiAlgo_Utils
                         const gp_Dir&             dir,
                         const gp_Pnt&             point,
                         gp_Pnt&                   proj);
+
+  //! Checks if the passed neighbors contain any eccentric circular edge
+  //! with one of the checked vexities.
+  asiAlgo_EXPORT bool
+    HasEccentricVexity(const int                                 fid,
+                       const asiAlgo_Feature&                    nids,
+                       const gp_Ax1&                             axis,
+                       const Handle(asiAlgo_AAG)&                aag,
+                       const double                              linPrec,
+                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                       ActAPI_PlotterEntry                       plotter = nullptr);
+
+  //! Checks if the passed wire contains any eccentric circular edge
+  //! with one of the checked vexities.
+  asiAlgo_EXPORT bool
+    HasEccentricVexity(const int                                 fid,
+                       const TopoDS_Wire&                        wire,
+                       const gp_Ax1&                             axis,
+                       const Handle(asiAlgo_AAG)&                aag,
+                       const double                              linPrec,
+                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                       ActAPI_PlotterEntry                       plotter = nullptr);
 
 } // asiAlgo_Utils namespace.
 
