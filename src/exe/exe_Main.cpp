@@ -193,6 +193,8 @@ int runDialogAppSurf(int argc,
 //! main().
 int main(int argc, char** argv)
 {
+  QLocale::setDefault(QLocale::c());
+
   // Check whether batch mode is requested.
   std::string scriptArg;
   const bool

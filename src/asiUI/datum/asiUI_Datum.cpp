@@ -614,9 +614,9 @@ QString asiUI_Datum::DatumImpl<base_t>::GetFormatted(const bool theLongFmt)
       }
       case DDS_DicItem::Float:
       {
-        QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
-        if ( !re.exactMatch(aValue) )
-          return "";
+        //QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+        //if ( !re.exactMatch(aValue) )
+        //  return "";
 
         return m_Fmt->Format(aValue.toDouble(), theLongFmt);
       }
@@ -817,9 +817,9 @@ asiUI_Datum::DoubleValidator::DoubleValidator(const QString& theFilter,
 //! \return status or validation result.
 QValidator::State asiUI_Datum::DoubleValidator::validate(QString& theInput, int& thePos) const
 {
-  QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
-  if ( !re.exactMatch(theInput) )
-    return Invalid;
+  //QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+  //if ( !re.exactMatch(theInput) )
+  //  return Invalid;
 
   State aFormatState = Acceptable;
   State aValueState = QDS_DoubleValidator::validate(theInput, thePos);
@@ -888,9 +888,9 @@ void asiUI_Datum::DoubleValidator::fixup(QString& theInput) const
     return;
   }
 
-  QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
-  if ( !re.exactMatch(theInput) )
-    return;
+  //QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+  //if ( !re.exactMatch(theInput) )
+  //  return;
 
   bool isConverted = false;
   double aDoubleValue = theInput.toDouble(&isConverted);
