@@ -2231,24 +2231,24 @@ namespace asiAlgo_Utils
   //! Checks if the passed neighbors contain any eccentric circular edge
   //! with one of the checked vexities.
   asiAlgo_EXPORT bool
-    HasEccentricVexity(const int                                 fid,
-                       const asiAlgo_Feature&                    nids,
-                       const gp_Ax1&                             axis,
-                       const Handle(asiAlgo_AAG)&                aag,
-                       const double                              linPrec,
-                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
-                       ActAPI_PlotterEntry                       plotter = nullptr);
+    HasConcentricVexity(const int                                 fid,
+                        const asiAlgo_Feature&                    nids,
+                        const gp_Ax1&                             axis,
+                        const Handle(asiAlgo_AAG)&                aag,
+                        const double                              linPrec,
+                        const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                        ActAPI_PlotterEntry                       plotter = nullptr);
 
   //! Checks if the passed wire contains any eccentric circular edge
   //! with one of the checked vexities.
   asiAlgo_EXPORT bool
-    HasEccentricVexity(const int                                 fid,
-                       const TopoDS_Wire&                        wire,
-                       const gp_Ax1&                             axis,
-                       const Handle(asiAlgo_AAG)&                aag,
-                       const double                              linPrec,
-                       const std::set<asiAlgo_FeatureAngleType>& toCheck,
-                       ActAPI_PlotterEntry                       plotter = nullptr);
+    HasConcentricVexity(const int                                 fid,
+                        const TopoDS_Wire&                        wire,
+                        const gp_Ax1&                             axis,
+                        const Handle(asiAlgo_AAG)&                aag,
+                        const double                              linPrec,
+                        const std::set<asiAlgo_FeatureAngleType>& toCheck,
+                        ActAPI_PlotterEntry                       plotter = nullptr);
 
 } // asiAlgo_Utils namespace.
 
