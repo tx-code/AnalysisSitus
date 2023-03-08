@@ -75,7 +75,7 @@ typedef NCollection_List<PersistentId> PersistentIdList;
 //! [A. Rappoport, A scheme for single instance representation in hierarchical
 //!  assembly graphs, in: B. Falcidieno, T. L. Kunii (Eds.), Modeling in
 //!  Computer Graphics, Springer Berlin Heidelberg, Berlin, Heidelberg,
-//!  1993, pp. 213–223]
+//!  1993, pp. 213-223]
 //!
 //! for the overview together with discussion of instancing issues. An
 //! assembly item is an element of a scene tree which is a dual representation
