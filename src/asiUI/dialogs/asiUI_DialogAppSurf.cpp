@@ -30,6 +30,7 @@
 
 // Own include
 #include "asiUI_DialogAppSurf.h"
+#include "asiUI_SelectFile.h"
 
 // asiAlgo includes
 #include <asiAlgo_AppSurf2.h>
@@ -44,6 +45,7 @@
 // Qt includes
 #include <Standard_WarningsDisable.hxx>
 //
+#include <QFile>
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -125,11 +127,12 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
                                          ActAPI_ProgressEntry               progress,
                                          ActAPI_PlotterEntry                plotter,
                                          QWidget*                           parent)
-: QDialog    (parent),
-  m_pViewer  (pViewer),
-  m_model    (model),
-  m_progress (progress),
-  m_plotter  (plotter)
+: QDialog             (parent),
+  m_pViewer           (pViewer),
+  m_model             (model),
+  m_blockPointsChange (false),
+  m_progress          (progress),
+  m_plotter           (plotter)
 {
   // Main layout.
   m_pMainLayout = new QVBoxLayout();
@@ -139,6 +142,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   QGroupBox* pGroupEConstraints  = new QGroupBox("Edge constraints");
   QGroupBox* pGroupPPConstraints = new QGroupBox("Pin-point constraints");
   QGroupBox* pGroupAdvanced      = new QGroupBox("Advanced");
+  QFrame*    bButtonsFrame  = new QFrame;
 
   // Method.
   m_widgets.pMethodSel = new QComboBox();
@@ -150,6 +154,15 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   // Selected edges.
   m_widgets.pEdges = new asiUI_LineEdit();
 
+  // Filename for xyz data.
+  m_widgets.pSelectXYZLabel = new QLabel("Filename (xyz)", this);
+  m_widgets.pSelectXYZ = new asiUI_SelectFile("XYZ point cloud (*.xyz)",
+                                              "Filename (xyz)",
+                                              QString(),
+                                              QImage(":icons/asitus/select_xyz.svg"),
+                                              asiUI_Common::OpenSaveAction::OpenSaveAction_Open,
+                                              this);
+
   // Table with point coordinates.
   m_widgets.pPoints = wf->CreateDatumTable(0, 0);
   //
@@ -157,34 +170,51 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_widgets.pPoints->setMinimumWidth(CONTROL_TBL_WIDTH);
 
   m_widgets.pPoints->SetColumnCount(3);
+  m_widgets.pPoints->SetCanExpandOnPaste(Qt::Horizontal, false);
   m_widgets.pPoints->SetRowCount(1);
   m_widgets.pPoints->SetColumnEditor(0, "POI_X");
   m_widgets.pPoints->SetColumnEditor(1, "POI_Y");
   m_widgets.pPoints->SetColumnEditor(2, "POI_Z");
   m_widgets.pPoints->SetEditByClick(false);
 
+  // Buttons to manage the table
+  m_widgets.pInsertRow = new QPushButton(QIcon(":icons/asitus/table_add.png"),    QString());
+  m_widgets.pInsertRow->setToolTip("Add Row");
+  m_widgets.pRemoveRow = new QPushButton(QIcon(":icons/asitus/table_remove.png"), QString());
+  m_widgets.pRemoveRow->setToolTip("Delete Row" );
+
   m_widgets.pInitialSurfaceLabel = new QLabel("Initial surface", this);
   m_widgets.pInitialSurface = new asiUI_LineEdit(this);
 
-  m_widgets.pFairingCoeffLabel = new QLabel("Fairing coeff.", this);
-  m_widgets.pFairingCoeff = new asiUI_LineEdit(this);
-  m_widgets.pFairingCoeff->setText("0.001");
-
-  m_widgets.pNumItersLabel = new QLabel("Num. iters", this);
-  m_widgets.pNumIters = new asiUI_LineEdit(this);
+  m_widgets.pFairingCoeff = wf->CreateEditor("Fairing_coeff", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumIters     = wf->CreateEditor("Num_iters",     this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
 
   //---------------------------------------------------------------------------
   // Buttons
   //---------------------------------------------------------------------------
 
   m_widgets.pApply = new QPushButton("Apply");
+  m_widgets.pClose = new QPushButton("Close");
 
   // Sizing.
   m_widgets.pApply->setMaximumWidth(CONTROL_BTN_WIDTH);
+  m_widgets.pClose->setMaximumWidth(CONTROL_BTN_WIDTH);
 
   // Reaction.
-  connect( m_widgets.pMethodSel, SIGNAL( currentIndexChanged (const int) ), this, SLOT( onChangeMethod (const int) ) );
-  connect( m_widgets.pApply,     SIGNAL( clicked             ()          ), this, SLOT( onApply        ()          ) );
+  connect( m_widgets.pMethodSel, SIGNAL( currentIndexChanged (const int)                               ),
+           this,                 SLOT  ( onChangeMethod      (const int)                               ) );
+  connect( m_widgets.pSelectXYZ, SIGNAL( textChanged         (const QString&)                          ),
+           this,                 SLOT  ( onXYZSelected       ()                                        ) );
+  connect( m_widgets.pPoints,    SIGNAL( ValueChanged        ( const int, const int, const QVariant& ) ),
+           this,                 SLOT  ( onPointsChanged     ()                                        ) );
+  connect( m_widgets.pInsertRow, SIGNAL( clicked             ()                                        ),
+           m_widgets.pPoints,    SLOT  ( InsertRow           ()                                        ) );
+  connect( m_widgets.pRemoveRow, SIGNAL( clicked             ()                                        ),
+           m_widgets.pPoints,    SLOT  ( RemoveRows          ()                                        ) );
+  connect( m_widgets.pApply,     SIGNAL( clicked             ()                                        ),
+           this,                 SLOT  ( onApply             ()                                        ) );
+  connect( m_widgets.pClose,     SIGNAL( clicked             ()                                        ),
+           this,                 SLOT  ( close               ()                                        ) );
 
   //---------------------------------------------------------------------------
   // Layout
@@ -217,8 +247,31 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   {
     QVBoxLayout* pLayout = new QVBoxLayout(pGroupPPConstraints);
     pLayout->setSpacing(10);
+
+    // xyz filename
+    QFrame* selectFileFrame = new QFrame(pGroupPPConstraints);
+    QHBoxLayout* selectFileFrameLayout = new QHBoxLayout(selectFileFrame);
+    selectFileFrameLayout->addWidget(m_widgets.pSelectXYZLabel);
+    selectFileFrameLayout->addWidget(m_widgets.pSelectXYZ);
+
+    selectFileFrameLayout->setSpacing(10);
+    selectFileFrameLayout->setMargin(0);
+
+    pLayout->addWidget(selectFileFrame);
     //
     pLayout->addWidget(m_widgets.pPoints);
+
+   // buttons
+    QFrame* addRemFrame = new QFrame(pGroupPPConstraints);
+    QHBoxLayout* addRemLayout = new QHBoxLayout(addRemFrame);
+
+    addRemLayout->addStretch();
+    addRemLayout->addWidget(m_widgets.pInsertRow);
+    addRemLayout->addWidget(m_widgets.pRemoveRow);
+    addRemLayout->setSpacing(10);
+    addRemLayout->setMargin(0);
+
+    pLayout->addWidget(addRemFrame);
     //
     pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   }
@@ -231,13 +284,19 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     pLayout->addWidget(m_widgets.pInitialSurfaceLabel, 0, 0);
     pLayout->addWidget(m_widgets.pInitialSurface,      0, 1);
 
-    pLayout->addWidget(m_widgets.pFairingCoeffLabel,   1, 0);
-    pLayout->addWidget(m_widgets.pFairingCoeff,        1, 1);
-
-    pLayout->addWidget(m_widgets.pNumItersLabel,       2, 0);
-    pLayout->addWidget(m_widgets.pNumIters,            2, 1);
+    m_widgets.pFairingCoeff->AddTo(pLayout,            1, 0);
+    m_widgets.pNumIters->AddTo    (pLayout,            2, 0);
     //
     pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  }
+
+  // Layout for buttons.
+  {
+    QHBoxLayout* pButtonsLayout = new QHBoxLayout(bButtonsFrame);
+    pButtonsLayout->setSpacing(10);
+    //
+    pButtonsLayout->addWidget(m_widgets.pApply);
+    pButtonsLayout->addWidget(m_widgets.pClose);
   }
 
   //---------------------------------------------------------------------------
@@ -249,7 +308,8 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_pMainLayout->addWidget(pGroupEConstraints);
   m_pMainLayout->addWidget(pGroupPPConstraints);
   m_pMainLayout->addWidget(pGroupAdvanced);
-  m_pMainLayout->addWidget(m_widgets.pApply);
+  m_pMainLayout->addWidget(bButtonsFrame);
+
   //
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
@@ -265,11 +325,14 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   // Adjust initial state.
   this->onChangeMethod(0);
 
-  connect( m_pViewer, SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
-           this,      SLOT   ( onEdgePicked() ) );
+  if (m_pViewer)
+  {
+    connect( m_pViewer, SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
+             this,      SLOT   ( onEdgePicked() ) );
 
-  connect( m_pViewer, SIGNAL ( facePicked(asiVisu_PickerResult*) ),
-           this,      SLOT   ( onFacePicked(asiVisu_PickerResult*) ) );
+    connect( m_pViewer, SIGNAL ( facePicked(asiVisu_PickerResult*) ),
+             this,      SLOT   ( onFacePicked(asiVisu_PickerResult*) ) );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -343,6 +406,36 @@ void asiUI_DialogAppSurf::onChangeMethod(const int methodIdx)
 }
 
 //-----------------------------------------------------------------------------
+void asiUI_DialogAppSurf::onXYZSelected()
+{
+  QString fileName = m_widgets.pSelectXYZ->text();
+
+  QFile file(fileName);
+  if (!file.exists())
+    return;
+
+  m_blockPointsChange = true;
+  // TODO: reading XYZ file.
+  // filling table with test values
+  m_widgets.pPoints->SetRowCount(5);
+  for (int i = 0; i < 5; i++)
+  {
+    for (int j = 0; j < 3; j++)
+      m_widgets.pPoints->SetValue(i, j, QString::number(i + 0.1 * j));
+  }
+  m_blockPointsChange = false;
+}
+
+//-----------------------------------------------------------------------------
+void asiUI_DialogAppSurf::onPointsChanged()
+{
+  if (m_blockPointsChange)
+    return;
+
+  m_widgets.pSelectXYZ->reset();
+}
+
+//-----------------------------------------------------------------------------
 
 void asiUI_DialogAppSurf::onApply()
 {
@@ -350,7 +443,7 @@ void asiUI_DialogAppSurf::onApply()
     return;
 
   // Fairing coefficient.
-  const double lambda = QVariant( m_widgets.pFairingCoeff->text() ).toDouble();
+  const double lambda = QVariant( m_widgets.pFairingCoeff->GetString() ).toDouble();
 
   /* ==================
    *  Read constraints.

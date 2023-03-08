@@ -129,6 +129,22 @@ asiUI_DatumSpinBox::Editor::Editor(const QString& theDicID,
   }
 
   QtxIntSpinBox* aSpinBox = spinBox();
+  if ( theFlags & UseMinMaxRange )
+  {
+    bool isOk;
+    double aLimit = minValue().toDouble(&isOk);
+    if (isOk)
+      aSpinBox->setMinimum(aLimit);
+
+    aLimit = maxValue().toDouble(&isOk);
+    if (isOk)
+      aSpinBox->setMaximum(aLimit);
+  }
+  else
+  {
+    aSpinBox->setMinimum( INT_MIN );
+    aSpinBox->setMaximum( INT_MAX );
+  }
   connect( aSpinBox, SIGNAL( editingFinished() ),
            this, SIGNAL( EditingFinished() ) );
 }
@@ -150,7 +166,4 @@ void asiUI_DatumSpinBox::Editor::unitSystemChanged(const QString& theSystem)
     aSpinBox->setSuffix( suffix() );
     aSpinBox->setPrefix( prefix() );
   }
-
-  aSpinBox->setMinimum( INT_MIN );
-  aSpinBox->setMaximum( INT_MAX );
 }

@@ -49,6 +49,8 @@
 //
 #include <Standard_WarningsRestore.hxx>
 
+class asiUI_SelectFile;
+
 //-----------------------------------------------------------------------------
 
 //! Dialog for surface fitting.
@@ -100,6 +102,12 @@ public slots:
   //! \param[in] methodIdx new 0-based type index.
   void onChangeMethod(const int methodIdx);
 
+  //! XYZ file is selected.
+  void onXYZSelected();
+
+  //! Change in points table resets XYZ text entered.
+  void onPointsChanged();
+
   //! Reaction on clicking "Apply" button.
   void onApply();
 
@@ -108,19 +116,19 @@ protected:
   //! Widgets.
   struct t_widgets
   {
-    QPushButton*      pApply;     //!< Apply surface fitting method.
-    QComboBox*        pMethodSel; //!< Selector for the surface fitting method.
-    asiUI_LineEdit*   pEdges;     //!< Indices of edges.
-    asiUI_DatumTable* pPoints;    //!< Point coordinates.
-
-    QLabel*           pInitialSurfaceLabel;
-    asiUI_LineEdit*   pInitialSurface;
-
-    QLabel*           pFairingCoeffLabel;
-    asiUI_LineEdit*   pFairingCoeff;
-
-    QLabel*           pNumItersLabel;
-    asiUI_LineEdit*   pNumIters;
+    QPushButton*      pApply;               //!< Apply surface fitting method.
+    QPushButton*      pClose;               //!< Closes the dialog.
+    QComboBox*        pMethodSel;           //!< Selector for the surface fitting method.
+    asiUI_LineEdit*   pEdges;               //!< Indices of edges.
+    QLabel*           pSelectXYZLabel;      //!< XYZ file selector label.
+    asiUI_SelectFile* pSelectXYZ;           //!< XYZ file selector.
+    asiUI_DatumTable* pPoints;              //!< Point coordinates.
+    QPushButton*      pInsertRow;           //!< Appends a new row after the selected row or to the end.
+    QPushButton*      pRemoveRow;           //!< Removes the currently selected row.
+    QLabel*           pInitialSurfaceLabel; //!< String name of the optional initial surface description.
+    asiUI_LineEdit*   pInitialSurface;      //!< String name of the optional initial surface.
+    asiUI_Datum*      pFairingCoeff;        //!< Fairing coefficient ranging.
+    asiUI_Datum*      pNumIters;            //!< Number of iterations.
 
     t_widgets() : pApply     (nullptr),
                   pMethodSel (nullptr),
@@ -137,10 +145,11 @@ protected:
     }
   };
 
-  t_widgets               m_widgets;     //!< UI controls.
-  QVBoxLayout*            m_pMainLayout; //!< Layout of the widget.
-  asiUI_ViewerPart*       m_pViewer;     //!< External reference to viewer.
-  Handle(asiEngine_Model) m_model;       //!< Data Model instance.
+  t_widgets               m_widgets;           //!< UI controls.
+  QVBoxLayout*            m_pMainLayout;       //!< Layout of the widget.
+  asiUI_ViewerPart*       m_pViewer;           //!< External reference to viewer.
+  Handle(asiEngine_Model) m_model;             //!< Data Model instance.
+  bool                    m_blockPointsChange; //!< block for points table change.
 
   //! Selected surface fitting method.
   Method m_method;

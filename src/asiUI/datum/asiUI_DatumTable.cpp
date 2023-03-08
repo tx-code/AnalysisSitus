@@ -68,6 +68,9 @@ asiUI_DatumTable::asiUI_DatumTable(const Handle(asiUI_WidgetFactory)& theFactory
   this->setVerticalHeader(aRowHeader);
   this->setHorizontalHeader(aColHeader);
 
+  m_CanExpandOnPaste[Qt::Horizontal] = true;
+  m_CanExpandOnPaste[Qt::Vertical]   = true;
+
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect( this, SIGNAL( customContextMenuRequested(QPoint) ),
            this, SLOT  ( ContextMenu(QPoint) ) );
@@ -179,6 +182,16 @@ void asiUI_DatumTable::SetRowTitles(const QStringList& theTitles)
   {
     updateHeaders( Qt::Vertical, 0, aModel->rowCount() - 1 );
   }
+}
+
+//! Sets state whether the table can be expanded in rows/columns by pasting values
+//! from the clipboard. If not, the values out of the table size will be ignored.
+//! \param theOrientation [in] horizontal means columns, vertial - rows.
+//! \param theValue[in]
+void asiUI_DatumTable::SetCanExpandOnPaste(const Qt::Orientation theOrientation,
+                                           const bool            theValue)
+{
+  m_CanExpandOnPaste[theOrientation] = theValue;
 }
 
 //! Get user-defined title string for the column.
@@ -649,12 +662,9 @@ void asiUI_DatumTable::PasteClipboardData()
   int aCanExpandCols = 0;
   if ( QTableView* aTableView = qobject_cast<QTableView*>( this ) )
   {
-    //canExpandOnPaste(aTableView, aMissingRows, aMissingCols,
-    //  aCanExpandRows, aCanExpandCols);
-
     // only row expansion is allowed
-    aCanExpandRows = aMissingRows;
-    aCanExpandCols = aMissingCols;//0;
+    aCanExpandRows = m_CanExpandOnPaste[Qt::Vertical]   ? aMissingRows : 0;
+    aCanExpandCols = m_CanExpandOnPaste[Qt::Horizontal] ? aMissingCols : 0;
   }
 
   // get final rectangle for insertion
@@ -665,8 +675,9 @@ void asiUI_DatumTable::PasteClipboardData()
     || aRuledRect.bottom() > aFinalRect.bottom() )
   {
     if ( QMessageBox::warning(NULL,
-           QObject::tr("CLIPBOARD_PASTE_TITLE_DOES_NOT_FIT"),
-           QObject::tr("CLIPBOARD_PASTE_MSG_DOESN_NOT_FIT"),
+           "Clipboard data does not fit into table.",
+           "Clipboard data does not fit into the table. Only part of it will be copied.\
+Do you want to paste the data anyway?",
            QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )
       return;
   }
@@ -704,37 +715,6 @@ void asiUI_DatumTable::PasteClipboardData()
 
   // Paste data into destination Table View
   asiUI_DatumClipboardTool::PasteFromClipboard(this);
-}
-
-//! Refresh items layout.
-void asiUI_DatumTable::doItemsLayout()
-{
-  QHeaderView* aVerHeader = verticalHeader();
-  QHeaderView* aHorHeader = horizontalHeader();
-  QAbstractItemModel* aModel = model();
-
-  // note: this check is introduced to
-  // force qt issue with sending sectionCountChanged
-  // signal on doItemsLayout if actually the header
-  // has no rows and columns. This leads to cpu loading
-  // when table has no sections at all!
-  // The role of doItemsLayout is to update contents and
-  // layout of existing items - since that this call is useless
-  // for empty vertical and horizontal headers if the
-  // number of them is not going to change...
-  if ( aModel && ( aModel->columnCount() != aHorHeader->count() || aHorHeader->count() != 0 ) )
-  {
-    aHorHeader->headerDataChanged(Qt::Horizontal, 0, aModel->columnCount() - 1);
-    aHorHeader->doItemsLayout();
-  }
-
-  if ( aModel && ( aModel->rowCount() != aVerHeader->count() || aVerHeader->count() != 0 ) )
-  {
-    aVerHeader->headerDataChanged(Qt::Vertical, 0, aModel->rowCount() - 1);
-    aVerHeader->doItemsLayout();
-  }
-
-  QAbstractItemView::doItemsLayout();
 }
 
 //! Synchronize internal data structures with the new model.
@@ -1221,6 +1201,26 @@ void asiUI_DatumTable::emitCustomSelectorTriggered(const QModelIndex& theIndex)
   emit CustomSelectorTriggered( theIndex.row(), theIndex.column() );
 }
 
+//! Appends a new row after the selected row or to the end if no row is selected (or multiple rows are selected).
+void asiUI_DatumTable::InsertRow()
+{
+  int posAt = -1;
+  QModelIndexList aSelection = selectionModel()->selectedIndexes();
+  QModelIndexList::Iterator anIt = aSelection.begin();
+  for ( ; anIt != aSelection.end(); anIt++ )
+  {
+    QModelIndex& anIndex = *anIt;
+    posAt = std::max(posAt, anIndex.row());
+  }
+  int newRowId = posAt < 0 ? GetRowCount() : posAt + 1;
+  InsertRows( newRowId, 1 );
+
+  if ( GetColumnCount() > 0 )
+  {
+    updateItems( newRowId, newRowId, 0, GetColumnCount() - 1 );
+  }
+}
+
 //! Insert rows into the table at the specified index.
 //! \param theAt [in] insertion row index.
 //! \param theRows [in] number of inserted rows.
@@ -1252,6 +1252,38 @@ void asiUI_DatumTable::InsertColumns(const int theAt, const int theCols)
   if ( aModel->signalsBlocked() )
   {
     onColumnsInserted( QModelIndex(), theAt, theCols - theAt - 1 );
+  }
+}
+
+//! Removes the currently selected row.
+//! If a single cell is selected, the corresponding row is said to be selected;
+//! If multiple rows are selected (or multiple cells in different rows), then all rows are removed.
+//! If nothing is selected, it removes the latest row.
+void asiUI_DatumTable::RemoveRows()
+{
+  std::set<int>  rowsToRemoveUnique;
+  std::list<int> rowsToRemove;
+
+  QModelIndexList aSelection = selectionModel()->selectedIndexes();
+  QModelIndexList::Iterator anIt = aSelection.begin();
+  for ( ; anIt != aSelection.end(); anIt++ )
+  {
+    QModelIndex& anIndex = *anIt;
+    if (rowsToRemoveUnique.find(anIndex.row()) != rowsToRemoveUnique.end())
+      continue;
+    rowsToRemoveUnique.insert(anIndex.row());
+    rowsToRemove.push_back(anIndex.row());
+  }
+  rowsToRemove.sort();
+  rowsToRemove.reverse();
+
+  // remove the latest row
+  if (rowsToRemove.empty() && GetRowCount() > 0)
+    rowsToRemove.push_back(GetRowCount() - 1);
+
+  for (int row : rowsToRemove)
+  {
+    RemoveRows(row, 1);
   }
 }
 

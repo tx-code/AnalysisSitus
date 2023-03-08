@@ -193,6 +193,9 @@ public:
 
 public slots:
 
+  void
+    InsertRow();
+
   virtual void
     InsertRows(const int theAt,
                const int theRows = 1);
@@ -200,6 +203,9 @@ public slots:
   virtual void
     InsertColumns(const int theAt,
                   const int theCols = 1);
+
+  void
+    RemoveRows();
 
   virtual void
     RemoveRows(const int theAt,
@@ -235,6 +241,10 @@ public:
   QString GetRowTitle(const int theRow) const;
 
   void SetRowTitle(const int theRow, const QString& theTitle);
+
+  void SetCanExpandOnPaste(const Qt::Orientation theOrientation,
+                           const bool            theValue);
+
 
 // header extensions
 public:
@@ -324,9 +334,6 @@ public:
 
   virtual void
     updateGeometries();
-
-  virtual void
-    doItemsLayout();
 
 signals:
 
@@ -454,6 +461,7 @@ private:
   CursorPropagation                      m_CursorProp;
   QMap<Qt::Orientation, EditorSet>       m_BandEditors;
   QMap<Qt::Orientation, VectorOfStrings> m_Titles;
+  QMap<Qt::Orientation, bool>            m_CanExpandOnPaste;
   QWidget*                               m_CornerWidget;
   bool                                   m_bGeomUpdateBlock;
 };

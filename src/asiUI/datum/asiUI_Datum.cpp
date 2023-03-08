@@ -467,6 +467,8 @@ int asiUI_Datum::convertFlags(const int datumFlags) const
     flags |= QDS::NotConvert;
   if ( datumFlags & UnitsWithLabel )
     flags |= QDS::UnitsWithLabel;
+  if ( datumFlags & UseMinMaxRange )
+    flags |= QDS::UseMinMaxRange;
 
   return flags;
 }

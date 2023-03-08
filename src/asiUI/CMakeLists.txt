@@ -52,6 +52,7 @@ set (controls_H_UI_FILES
   controls/asiUI_ParameterEditorListenerDefault.h
   controls/asiUI_ParameterEditorView.h
   controls/asiUI_SearchLine.h
+  controls/asiUI_SelectFile.h
   controls/asiUI_ShapeBrowser.h
   controls/asiUI_StatusBar.h
   controls/asiUI_StyledTextEdit.h
@@ -86,6 +87,7 @@ set (controls_CPP_FILES
   controls/asiUI_ParameterEditorItem.cpp
   controls/asiUI_ParameterEditorView.cpp
   controls/asiUI_SearchLine.cpp
+  controls/asiUI_SelectFile.cpp
   controls/asiUI_ShapeBrowser.cpp
   controls/asiUI_StatusBar.cpp
   controls/asiUI_StatusBarImpl.cpp

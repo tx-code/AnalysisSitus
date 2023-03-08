@@ -57,6 +57,7 @@ public:
     NotAccel       = 0x10,         //!< Not support accelerators in datum label
     NotConvert     = 0x20,         //!< Don't convert numeric value
     UnitsWithLabel = 0x40,         //!< Display units of measure in label like "<label_text> (<units_text>) instead separate text"
+    UseMinMaxRange = 0x80,         //! Using 'min', 'max' values as minimum/maximum of spin boxes, not as validator check.
     All = Label | Control | Units  //!< Create all subwidgets
   } DatumFlags;
 

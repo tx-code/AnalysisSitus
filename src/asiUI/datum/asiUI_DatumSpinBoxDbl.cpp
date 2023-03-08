@@ -117,10 +117,23 @@ asiUI_DatumSpinBoxDbl::SpinBoxImpl::SpinBoxImpl(const QString& theDictId,
   if ( !aSpinBox )
     return;
 
-  aSpinBox->setMinimum(-1.0e14);
-  aSpinBox->setMaximum(1.0e14);
+  if ( theFlags & UseMinMaxRange )
+  {
+    bool isOk;
+    double aLimit = minValue().toDouble(&isOk);
+    if (isOk)
+      aSpinBox->setMinimum(aLimit);
 
-  aSpinBox->SetValidator( validator() );
+    aLimit = maxValue().toDouble(&isOk);
+    if (isOk)
+      aSpinBox->setMaximum(aLimit);
+  }
+  else
+  {
+    aSpinBox->setMinimum(-1.0e14);
+    aSpinBox->setMaximum(1.0e14);
+  }
+  aSpinBox->SetValidator( validator(true) );
 
   connect( aSpinBox, SIGNAL( editingFinished() ), this, SIGNAL( EditingFinished() ) );
 
@@ -182,8 +195,6 @@ void asiUI_DatumSpinBoxDbl::SpinBoxImpl::unitSystemChanged(const QString& theSys
   aSpinBox->SetValidator( new asiUI_Datum::DoubleValidator( filter(), true, (QObject*)this ) );
   aSpinBox->setPrecision(-ASI_DATUM_DOUBLE_PRECISION);
   aSpinBox->setDecimals(DBL_MAX_10_EXP);
-  aSpinBox->setMinimum(-1.0e14);
-  aSpinBox->setMaximum( 1.0e14);
 }
 
 //! Callback invoked when edit text changes.
