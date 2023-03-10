@@ -52,6 +52,9 @@
 // Common props
 #define PropName_Sdk                              "sdk"
 #define PropName_SdkVersion                       "sdkVersion"
+#define PropName_ProcessingTime                   "processingTime"
+#define PropName_UnitScaleFactor                  "unitScaleFactor"
+#define PropName_OriginalUnitString               "originalUnitString"
 #define PropName_Bad                              "bad"
 #define PropName_Ignore                           "ignore"
 #define PropName_File                             "file"
