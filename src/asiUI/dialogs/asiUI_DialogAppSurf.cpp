@@ -285,7 +285,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     pLayout->addWidget(m_widgets.pInitialSurface,      0, 1);
 
     m_widgets.pFairingCoeff->AddTo(pLayout,            1, 0);
-    m_widgets.pNumIters->AddTo    (pLayout,            2, 0);
+    //m_widgets.pNumIters->AddTo    (pLayout,            2, 0);
     //
     pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   }
@@ -356,18 +356,12 @@ void asiUI_DialogAppSurf::onEdgePicked()
   // Collect edges.
   Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
   //
-
   QStringList edgeIds;
   for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
   {
     const int edgeId = eit.Key();
 
-    edgeIds.append(QString::number(edgeId));
-    //// Get edge.
-    //const TopoDS_Shape&
-    //  edge = partApi.GetAAG()->RequestMapOfEdges()(edgeId);
-
-    //hedges->Append(edge);
+    edgeIds.append( QString::number(edgeId) );
   }
 
   m_widgets.pEdges->setText(edgeIds.join(" "));
@@ -375,27 +369,27 @@ void asiUI_DialogAppSurf::onEdgePicked()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogAppSurf::onFacePicked(asiVisu_PickerResult* pickRes)
+void asiUI_DialogAppSurf::onFacePicked(asiVisu_PickerResult* /*pickRes*/)
 {
-  if (!m_model || !m_pViewer)
-    return;
+  //if ( !m_model || !m_pViewer )
+  //  return;
 
-    // Check if part is picked
-  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve( pickRes->GetPickedActor() );
-  //
-  if ( pickRes->GetPickedActor() && !nodeInfo )
-    return;
+  //// Check if part is picked
+  //asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve( pickRes->GetPickedActor() );
+  ////
+  //if ( pickRes->GetPickedActor() && !nodeInfo )
+  //  return;
 
-  Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  //Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
 
-  // Get index of the active sub-shape.
-  const int
-    globalId = geom_n->GetFaceRepresentation()->GetAnySelectedFace();
-  //
-  if ( globalId == 0 )
-    return;
+  //// Get index of the active sub-shape.
+  //const int
+  //  globalId = geom_n->GetFaceRepresentation()->GetAnySelectedFace();
+  ////
+  //if ( globalId == 0 )
+  //  return;
 
-  m_widgets.pInitialSurface->setText(QString::number(globalId));
+  //m_widgets.pInitialSurface->setText(QString::number(globalId));
 }
 
 //-----------------------------------------------------------------------------
@@ -440,6 +434,9 @@ void asiUI_DialogAppSurf::onXYZSelected()
     const int numPts = cloud->GetNumberOfElements();
 
     m_widgets.pPoints->SetRowCount(numPts);
+    m_widgets.pPoints->setAutoScroll(false);
+    m_widgets.pPoints->blockSignals(true);
+
     for ( int i = 0; i < numPts; ++i )
     {
       gp_XYZ xyz = cloud->GetElement(i);
@@ -451,6 +448,8 @@ void asiUI_DialogAppSurf::onXYZSelected()
         m_widgets.pPoints->SetValue( i, j + 2, QString::number( xyz.Z() ) );
       }
     }
+
+    m_widgets.pPoints->blockSignals(false);
   }
   m_blockPointsChange = false;
 }
@@ -515,6 +514,27 @@ void asiUI_DialogAppSurf::onApply()
   if ( !extraPts->IsEmpty() )
     m_plotter.REDRAW_POINTS("extraPts", extraPts->GetCoordsArray(), Color_Violet);
 
+  // Initial surface.
+  Handle(Geom_Surface) initSurf;
+  t_extString          initSurfName = QStr2ExtStr( m_widgets.pInitialSurface->text() );
+  //
+  Handle(ActAPI_INode) ivSurfBase = m_model->FindNodeByName(initSurfName);
+  //
+  if ( !ivSurfBase.IsNull() )
+  {
+    Handle(asiData_IVSurfaceNode)
+      ivSurf = Handle(asiData_IVSurfaceNode)::DownCast(ivSurfBase);
+    //
+    if ( !ivSurf.IsNull() )
+      initSurf = ivSurf->GetSurface();
+  }
+
+  if ( !initSurfName.IsEmpty() && initSurf.IsNull() )
+  {
+    m_progress.SendLogMessage(LogWarn(Normal) << "Initial surface '%1' does not exist."
+                                              << initSurfName);
+  }
+
   /* =====================
    *  Approximate surface.
    * ===================== */
@@ -530,6 +550,7 @@ void asiUI_DialogAppSurf::onApply()
     //
     interpAlgo.SetFairingCoeff (lambda);
     interpAlgo.SetExtraPoints  (extraPts);
+    interpAlgo.SetInitSurf     (initSurf);
 
     // Interpolate.
     if ( !interpAlgo.Build(hedges, GeomAbs_C0, surf, face) )

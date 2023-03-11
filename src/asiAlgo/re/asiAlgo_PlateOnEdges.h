@@ -161,6 +161,13 @@ public:
 
 public:
 
+  //! Sets initial surface.
+  //! \param[in] initSurf the initial surface to set.
+  void SetInitSurf(const Handle(Geom_Surface)& initSurf)
+  {
+    m_initSurf = initSurf;
+  }
+
   //! Sets the number of discretization points used to convert the curve
   //! constraints to the plate-native pinpoint constraints.
   //! \param[in] numPts number of points to set.
@@ -210,6 +217,7 @@ protected:
   double                            m_fFairCoeff;   //!< Optional fairing coefficient.
   Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
   Handle(asiAlgo_BaseCloud<double>) m_pinPts;       //!< All pinpoint constraints.
+  Handle(Geom_Surface)              m_initSurf;     //!< Initial surface.
 
 };
 

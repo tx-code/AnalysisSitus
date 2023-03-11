@@ -44,6 +44,7 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <Geom_Plane.hxx>
+#include <GeomConvert.hxx>
 #include <NCollection_CellFilter.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeFix_Shape.hxx>
@@ -245,8 +246,25 @@ bool asiAlgo_AppSurf2::Build(const Handle(TopTools_HSequenceOfShape)& edges,
   // Prepare approximation tool.
   geom_ApproxBSurf approx(pts, 3, 3);
 
+  // Optional initial surface.
+  if ( !m_initSurf.IsNull() )
+  {
+    Handle(Geom_BSplineSurface)
+      bsurf = GeomConvert::SurfaceToBSplineSurface(m_initSurf);
+
+    approx.SetInitSurface( cascade::GetMobiusBSurface(bsurf) );
+  }
+
   // Approximate.
-  if ( !approx.Perform(m_fFairCoeff) )
+  try
+  {
+    if ( !approx.Perform(m_fFairCoeff) )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Approximation with APPSURF2 failed.");
+      return false;
+    }
+  }
+  catch ( ... )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Approximation with APPSURF2 failed.");
     return false;

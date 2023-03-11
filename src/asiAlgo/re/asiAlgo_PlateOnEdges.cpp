@@ -32,6 +32,7 @@
 #include <asiAlgo_PlateOnEdges.h>
 
 // asiAlgo includes
+#include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_Timer.h>
 
 // OCCT includes
@@ -100,11 +101,11 @@ namespace
     { return m_isFind; }
 
     //! Set current point to search for coincidence.
-    void SetCurrent (const gp_XYZ& pnt)
+    void SetCurrent(const gp_XYZ& pnt)
     { m_current = pnt; }
 
     //! Implementation of inspection method.
-    NCollection_CellFilter_Action Inspect (const Target& obj)
+    NCollection_CellFilter_Action Inspect(const Target& obj)
     {
       const gp_XYZ pt = m_current.Subtracted(obj);
       const double sqDist = pt.SquareModulus();
@@ -172,8 +173,7 @@ bool asiAlgo_PlateOnEdges::Build(Handle(TopTools_HSequenceOfShape)& edges,
     return false;
 
   // Build face.
-  if ( !this->BuildFace(edges, support, result) )
-    return false;
+  this->BuildFace(edges, support, result);
 
   return true;
 }
@@ -247,6 +247,10 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
   GeomPlate_BuildPlateSurface builder;
   this->fillConstraints(edges, continuity, builder);
 
+  // Set optional initial surface.
+  if ( !m_initSurf.IsNull() )
+    builder.LoadInitSurface(m_initSurf);
+
   /* ======================
    *  STAGE 2: build plate
    * ====================== */
@@ -266,7 +270,14 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
     m_progress.SendLogMessage(LogErr(Normal) << "Plating failed.");
     return false;
   }
+
   Handle(GeomPlate_Surface) plate = builder.Surface();
+
+  if ( plate.IsNull() )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Plating resulted in null surface.");
+    return false;
+  }
 
   /* =======================================
    *  STAGE 3: approximate plate with NURBS
@@ -333,6 +344,9 @@ bool asiAlgo_PlateOnEdges::BuildFace(Handle(TopTools_HSequenceOfShape)& edges,
                                      const Handle(Geom_BSplineSurface)& support,
                                      TopoDS_Face&                       result)
 {
+  if ( edges->IsEmpty() )
+    return false;
+
   // Compose a new wire.
   Handle(TopTools_HSequenceOfShape) freeWires;
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, 1e-3, 0, freeWires);
@@ -362,7 +376,16 @@ bool asiAlgo_PlateOnEdges::BuildFace(Handle(TopTools_HSequenceOfShape)& edges,
     newF = TopoDS::Face(S);
   }
 
-  result = newF;
+  // Check if the face is valid.
+  asiAlgo_CheckValidity checker;
+  const double tol               = checker.GetMaxTolerance(newF)*5.0;
+  const bool   hasAllClosedWires = checker.HasAllClosedWires(newF, tol);
+  //
+  if ( hasAllClosedWires )
+    result = newF;
+  else
+    return false;
+
   return true;
 }
 
