@@ -596,12 +596,6 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   // Prepare the context menu items.
   if ( faceIndices.Extent() || edgeIndices.Extent() || vertIndices.Extent() )
   {
-    if ( edgeIndices.Extent() )
-    {
-      menu.addSeparator();
-      m_pFillEdges = menu.addAction("Fit surface...");
-    }
-
     // Add items specific to faces.
     if ( faceIndices.Extent() )
     {
@@ -671,6 +665,10 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
       m_pMeasureLength = menu.addAction("Measure distance");
     }
   }
+
+  // Uncoditional actions.
+  menu.addSeparator();
+  m_pFillEdges = menu.addAction("Fit surface...");
 }
 
 //-----------------------------------------------------------------------------

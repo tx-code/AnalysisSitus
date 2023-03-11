@@ -134,11 +134,11 @@ asiUI_DatumSpinBox::Editor::Editor(const QString& theDicID,
     bool isOk;
     double aLimit = minValue().toDouble(&isOk);
     if (isOk)
-      aSpinBox->setMinimum(aLimit);
+      aSpinBox->setMinimum((int)(aLimit));
 
     aLimit = maxValue().toDouble(&isOk);
     if (isOk)
-      aSpinBox->setMaximum(aLimit);
+      aSpinBox->setMaximum((int)(aLimit));
   }
   else
   {

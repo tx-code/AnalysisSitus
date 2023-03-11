@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_DatumTable.h>
 #include <asiUI_LineEdit.h>
+#include <asiUI_SelectFile.h>
 #include <asiUI_ViewerPart.h>
 
 // asiEngine include
@@ -48,8 +49,6 @@
 #include <QVBoxLayout>
 //
 #include <Standard_WarningsRestore.hxx>
-
-class asiUI_SelectFile;
 
 //-----------------------------------------------------------------------------
 
@@ -111,6 +110,12 @@ public slots:
   //! Reaction on clicking "Apply" button.
   void onApply();
 
+private:
+
+  //! Collects all points from the table in the returned point cloud.
+  Handle(asiAlgo_BaseCloud<double>)
+    getTablePoints() const;
+
 protected:
 
   //! Widgets.
@@ -130,18 +135,37 @@ protected:
     asiUI_Datum*      pFairingCoeff;        //!< Fairing coefficient ranging.
     asiUI_Datum*      pNumIters;            //!< Number of iterations.
 
-    t_widgets() : pApply     (nullptr),
-                  pMethodSel (nullptr),
-                  pEdges     (nullptr),
-                  pPoints    (nullptr)
+    //! Default ctor.
+    t_widgets() : pApply               (nullptr),
+                  pClose               (nullptr),
+                  pMethodSel           (nullptr),
+                  pEdges               (nullptr),
+                  pSelectXYZLabel      (nullptr),
+                  pSelectXYZ           (nullptr),
+                  pPoints              (nullptr),
+                  pInsertRow           (nullptr),
+                  pRemoveRow           (nullptr),
+                  pInitialSurfaceLabel (nullptr),
+                  pInitialSurface      (nullptr),
+                  pFairingCoeff        (nullptr),
+                  pNumIters            (nullptr)
     {}
 
     void Release()
     {
-      delete pApply;     pApply     = nullptr;
-      delete pMethodSel; pMethodSel = nullptr;
-      delete pEdges;     pEdges     = nullptr;
-      delete pPoints;    pPoints    = nullptr;
+      delete pApply;               pApply               = nullptr;
+      delete pClose;               pClose               = nullptr;
+      delete pMethodSel;           pMethodSel           = nullptr;
+      delete pEdges;               pEdges               = nullptr;
+      delete pSelectXYZLabel;      pSelectXYZLabel      = nullptr;
+      delete pSelectXYZ;           pSelectXYZ           = nullptr;
+      delete pPoints;              pPoints              = nullptr;
+      delete pInsertRow;           pInsertRow           = nullptr;
+      delete pRemoveRow;           pRemoveRow           = nullptr;
+      delete pInitialSurfaceLabel; pInitialSurfaceLabel = nullptr;
+      delete pInitialSurface;      pInitialSurface      = nullptr;
+      delete pFairingCoeff;        pFairingCoeff        = nullptr;
+      delete pNumIters;            pNumIters            = nullptr;
     }
   };
 

@@ -72,9 +72,9 @@ public:
   //! \param[out] face    the constructed face.
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    BuildSurf(const Handle(TopTools_HSequenceOfShape)& edges,
-              Handle(Geom_BSplineSurface)&             support,
-              TopoDS_Face&                             face);
+    Build(const Handle(TopTools_HSequenceOfShape)& edges,
+          Handle(Geom_BSplineSurface)&             support,
+          TopoDS_Face&                             face);
 
 public:
 

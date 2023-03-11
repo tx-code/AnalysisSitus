@@ -188,6 +188,12 @@ public:
     return m_fFairCoeff;
   }
 
+  //! \return all used pinpoint constraints.
+  const Handle(asiAlgo_BaseCloud<double>)& GetConstraints() const
+  {
+    return m_pinPts;
+  }
+
 protected:
 
   //! Adds pinpoint constraints to the given plate builder.
@@ -203,6 +209,7 @@ protected:
   int                               m_iNumDiscrPts; //!< Number of discretization points.
   double                            m_fFairCoeff;   //!< Optional fairing coefficient.
   Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
+  Handle(asiAlgo_BaseCloud<double>) m_pinPts;       //!< All pinpoint constraints.
 
 };
 

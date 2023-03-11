@@ -32,6 +32,7 @@
 #include "asiAlgo_AppSurf2.h"
 
 // asiAlgo includes
+#include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_PlaneOnPoints.h>
 #include <asiAlgo_Timer.h>
 
@@ -216,9 +217,9 @@ void asiAlgo_AppSurf2::SetExtraPoints(const Handle(asiAlgo_BaseCloud<double>)& p
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_AppSurf2::BuildSurf(const Handle(TopTools_HSequenceOfShape)& edges,
-                                 Handle(Geom_BSplineSurface)&             support,
-                                 TopoDS_Face&                             face)
+bool asiAlgo_AppSurf2::Build(const Handle(TopTools_HSequenceOfShape)& edges,
+                             Handle(Geom_BSplineSurface)&             support,
+                             TopoDS_Face&                             face)
 {
   /* ==============================
    *  STAGE 1: prepare constraints.
@@ -264,28 +265,37 @@ bool asiAlgo_AppSurf2::BuildSurf(const Handle(TopTools_HSequenceOfShape)& edges,
    *  STAGE 3: make face.
    * ==================== */
 
-  // To get rid of `const`.
-  Handle(TopTools_HSequenceOfShape)
-    unsortedEdges = new TopTools_HSequenceOfShape;
-  //
-  for ( TopTools_SequenceOfShape::Iterator eit(*edges); eit.More(); eit.Next() )
-    unsortedEdges->Append( eit.Value() );
+  if ( !edges->IsEmpty() )
+  {
+    // To get rid of `const`.
+    Handle(TopTools_HSequenceOfShape)
+      unsortedEdges = new TopTools_HSequenceOfShape;
+    //
+    for ( TopTools_SequenceOfShape::Iterator eit(*edges); eit.More(); eit.Next() )
+      unsortedEdges->Append( eit.Value() );
 
-  // Compose a new wire.
-  Handle(TopTools_HSequenceOfShape) freeWires;
-  ShapeAnalysis_FreeBounds::ConnectEdgesToWires(unsortedEdges, 1e-3, 0, freeWires);
-  //
-  const TopoDS_Wire& repatchW = TopoDS::Wire( freeWires->First() );
+    // Compose a new wire.
+    Handle(TopTools_HSequenceOfShape) freeWires;
+    ShapeAnalysis_FreeBounds::ConnectEdgesToWires(unsortedEdges, 1e-3, 0, freeWires);
+    //
+    const TopoDS_Wire& repatchW = TopoDS::Wire( freeWires->First() );
 
-  // Build new face.
-  TopoDS_Face newF = BRepBuilderAPI_MakeFace(support, repatchW, false);
+    // Build new face.
+    TopoDS_Face newF = BRepBuilderAPI_MakeFace(support, repatchW, false);
 
-  // Heal defects.
-  ShapeFix_Shape shapeHealer(newF);
-  shapeHealer.Perform();
-  newF = TopoDS::Face( shapeHealer.Shape() );
+    // Heal defects.
+    ShapeFix_Shape shapeHealer(newF);
+    shapeHealer.Perform();
+    newF = TopoDS::Face( shapeHealer.Shape() );
 
-  face = newF;
+    // Check if the face is valid.
+    asiAlgo_CheckValidity checker;
+    const double tol               = checker.GetMaxTolerance(face)*5.0;
+    const bool   hasAllClosedWires = checker.HasAllClosedWires(face, tol);
+    //
+    if ( hasAllClosedWires )
+      face = newF;
+  }
 
   return true;
 }

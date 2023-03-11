@@ -240,6 +240,9 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
    *  STAGE 1: prepare constraints
    * ============================== */
 
+  // Fill constraints for giving them back.
+  m_pinPts = new asiAlgo_BaseCloud<double>;
+
   // Create builder instance.
   GeomPlate_BuildPlateSurface builder;
   this->fillConstraints(edges, continuity, builder);
@@ -407,6 +410,9 @@ void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShap
           pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
 
         builder.Add(pntCon);
+
+        // Store constraint for reference.
+        m_pinPts->AddElement(pnt);
       }
     }
   }
@@ -425,6 +431,9 @@ void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShap
         pntCon = new GeomPlate_PointConstraint(Pi, continuity, 1.0e-4);
 
       builder.Add(pntCon);
+
+      // Store constraint for reference.
+      m_pinPts->AddElement(Pi);
     }
   }
 }

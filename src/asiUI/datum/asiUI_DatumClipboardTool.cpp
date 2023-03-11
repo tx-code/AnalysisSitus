@@ -333,7 +333,7 @@ QModelIndexList asiUI_DatumClipboardTool::GetIndexesFromRect(
 //! \param theIndexes [in] the indexes to check.
 //! \return boolean flag indicating whether the copy is possible or not.
 bool asiUI_DatumClipboardTool::IsCopyPossible(
-                                  QAbstractItemView* theView,
+                                  QAbstractItemView* /*theView*/,
                                   const QModelIndexList& theIndexes)
 {
   // check restriction rules

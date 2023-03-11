@@ -171,7 +171,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   m_widgets.pPoints->SetColumnCount(3);
   m_widgets.pPoints->SetCanExpandOnPaste(Qt::Horizontal, false);
-  m_widgets.pPoints->SetRowCount(1);
+  m_widgets.pPoints->SetRowCount(0);
   m_widgets.pPoints->SetColumnEditor(0, "POI_X");
   m_widgets.pPoints->SetColumnEditor(1, "POI_Y");
   m_widgets.pPoints->SetColumnEditor(2, "POI_Z");
@@ -406,30 +406,60 @@ void asiUI_DialogAppSurf::onChangeMethod(const int methodIdx)
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_DialogAppSurf::onXYZSelected()
 {
   QString fileName = m_widgets.pSelectXYZ->text();
 
-  QFile file(fileName);
-  if (!file.exists())
+  if ( fileName.isEmpty() )
     return;
 
-  m_blockPointsChange = true;
-  // TODO: reading XYZ file.
-  // filling table with test values
-  m_widgets.pPoints->SetRowCount(5);
-  for (int i = 0; i < 5; i++)
+  QFile file(fileName);
+  //
+  if ( !file.exists() )
   {
-    for (int j = 0; j < 3; j++)
-      m_widgets.pPoints->SetValue(i, j, QString::number(i + 0.1 * j));
+    m_progress.SendLogMessage(LogErr(Normal) << "File '%1' does not exist."
+                                             << QStr2AsciiStr(fileName) );
+    return;
+  }
+
+  // Load point cloud
+  Handle(asiAlgo_BaseCloud<double>) cloud = new asiAlgo_BaseCloud<double>;
+  //
+  if ( !cloud->Load( fileName.toLatin1() ) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot load point cloud from '%1'."
+                                             << QStr2AsciiStr(fileName) );
+    return;
+  }
+  m_progress.SendLogMessage(LogInfo(Normal) << "Point cloud was loaded successfully.");
+
+  // filling table with test values
+  m_blockPointsChange = true;
+  {
+    const int numPts = cloud->GetNumberOfElements();
+
+    m_widgets.pPoints->SetRowCount(numPts);
+    for ( int i = 0; i < numPts; ++i )
+    {
+      gp_XYZ xyz = cloud->GetElement(i);
+      //
+      for ( int j = 0; j < 3; j += 3 )
+      {
+        m_widgets.pPoints->SetValue( i, j,     QString::number( xyz.X() ) );
+        m_widgets.pPoints->SetValue( i, j + 1, QString::number( xyz.Y() ) );
+        m_widgets.pPoints->SetValue( i, j + 2, QString::number( xyz.Z() ) );
+      }
+    }
   }
   m_blockPointsChange = false;
 }
 
 //-----------------------------------------------------------------------------
+
 void asiUI_DialogAppSurf::onPointsChanged()
 {
-  if (m_blockPointsChange)
+  if ( m_blockPointsChange )
     return;
 
   m_widgets.pSelectXYZ->reset();
@@ -439,7 +469,7 @@ void asiUI_DialogAppSurf::onPointsChanged()
 
 void asiUI_DialogAppSurf::onApply()
 {
-  if (!m_model || !m_pViewer)
+  if ( !m_model || !m_pViewer )
     return;
 
   // Fairing coefficient.
@@ -453,33 +483,43 @@ void asiUI_DialogAppSurf::onApply()
 
   Handle(asiAlgo_AAG) aag = partApi.GetAAG();
 
-  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
-  Handle(TopTools_HSequenceOfShape) hedges   = new TopTools_HSequenceOfShape;
+  Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
 
-  // Read edge indices.
-  QStringList eidList = m_widgets.pEdges->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
-  //
-  for ( const auto& eidStr : eidList )
+  if ( !aag.IsNull() )
   {
-    const int eid = eidStr.toInt();
+    const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
 
-    if ( (eid > 0) && ( eid <= allEdges.Extent() ) )
+    // Read edge indices.
+    QStringList eidList = m_widgets.pEdges->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
+    //
+    for ( const auto& eidStr : eidList )
     {
-      const TopoDS_Shape& edge = allEdges.FindKey(eid);
-      hedges->Append(edge);
-    }
-    else
-    {
-      m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
-                                                << eid << allEdges.Extent() );
+      const int eid = eidStr.toInt();
+
+      if ( (eid > 0) && ( eid <= allEdges.Extent() ) )
+      {
+        const TopoDS_Shape& edge = allEdges.FindKey(eid);
+        hedges->Append(edge);
+      }
+      else
+      {
+        m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
+                                                  << eid << allEdges.Extent() );
+      }
     }
   }
+
+  // Point constraints from the table.
+  Handle(asiAlgo_BaseCloud<double>) extraPts = this->getTablePoints();
+  //
+  if ( !extraPts->IsEmpty() )
+    m_plotter.REDRAW_POINTS("extraPts", extraPts->GetCoordsArray(), Color_Violet);
 
   /* =====================
    *  Approximate surface.
    * ===================== */
 
-  Handle(asiAlgo_BaseCloud<double>) pinPts;
+  Handle(asiAlgo_BaseCloud<double>) finalConstraints;
   Handle(Geom_BSplineSurface)       surf;
   TopoDS_Face                       face;
 
@@ -488,14 +528,17 @@ void asiUI_DialogAppSurf::onApply()
     // Prepare interpolation tool.
     asiAlgo_PlateOnEdges interpAlgo(partApi.GetShape(), m_progress, m_plotter);
     //
-    interpAlgo.SetFairingCoeff(lambda);
+    interpAlgo.SetFairingCoeff (lambda);
+    interpAlgo.SetExtraPoints  (extraPts);
 
     // Interpolate.
-    if ( !interpAlgo.BuildSurf(hedges, GeomAbs_C0, surf) )
+    if ( !interpAlgo.Build(hedges, GeomAbs_C0, surf, face) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "Interpolation failed.");
       return;
     }
+
+    finalConstraints = interpAlgo.GetConstraints();
   }
 
   else if ( m_method == Method_APPSURF2 )
@@ -503,16 +546,17 @@ void asiUI_DialogAppSurf::onApply()
     // Prepare approximation tool.
     asiAlgo_AppSurf2 approxAlgo(m_progress, m_plotter);
     //
-    approxAlgo.SetFairingCoeff(lambda);
+    approxAlgo.SetFairingCoeff (lambda);
+    approxAlgo.SetExtraPoints  (extraPts);
 
     // Interpolate.
-    if ( !approxAlgo.BuildSurf(hedges, surf, face) )
+    if ( !approxAlgo.Build(hedges, surf, face) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "APPSURF2 failed.");
       return;
     }
 
-    pinPts = approxAlgo.GetConstraints();
+    finalConstraints = approxAlgo.GetConstraints();
   }
   else
   {
@@ -526,6 +570,30 @@ void asiUI_DialogAppSurf::onApply()
   if ( !face.IsNull() )
     m_plotter.DRAW_SHAPE(face, Color_Default, "fillingFace");
 
-  if ( !pinPts.IsNull() )
-    m_plotter.REDRAW_POINTS("constaints", pinPts->GetCoordsArray(), Color_Red);
+  if ( !finalConstraints.IsNull() )
+    m_plotter.REDRAW_POINTS("finalConstraints", finalConstraints->GetCoordsArray(), Color_Red);
+}
+
+//-----------------------------------------------------------------------------
+
+Handle(asiAlgo_BaseCloud<double>) asiUI_DialogAppSurf::getTablePoints() const
+{
+  Handle(asiAlgo_BaseCloud<double>) res = new asiAlgo_BaseCloud<double>;
+
+  const int numRows = m_widgets.pPoints->GetRowCount();
+  const int numCols = m_widgets.pPoints->GetColumnCount();
+
+  for ( int i = 0; i < numRows; ++i )
+  {
+    for ( int j = 0; j < numCols; j += 3 )
+    {
+      const double x = m_widgets.pPoints->GetValue(i, j)    .toDouble();
+      const double y = m_widgets.pPoints->GetValue(i, j + 1).toDouble();
+      const double z = m_widgets.pPoints->GetValue(i, j + 2).toDouble();
+
+      res->AddElement(x, y, z);
+    }
+  }
+
+  return res;
 }
