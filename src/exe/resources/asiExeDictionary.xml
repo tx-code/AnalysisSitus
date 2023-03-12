@@ -32,10 +32,11 @@
     <description>Z</description>
   </datum>
 
-  <datum id="Fairing_coeff" format="%5.4x" label="Fairing coeff.">
-    <domain type="Float" min="0" max="1e99" default="0.01"/>
+  <datum id="Fairing_coeff" format="%5.5x5" label="Fairing coeff.">
+    <domain type="Float" min="0" max="1e99" default="0.001"/>
     <ui widget="SpinBox" widgetParams="step=0.1"/>
-    <description>Fairing coeff.</description>
+    <description>Coefficient of fairness. Greater values correspond to smoother surfaces.
+Make sure to pass non-zero values to surface approximation methods in order to avoid singular matrices.</description>
   </datum>
 
   <datum id="Num_iters" format="" label="Num. iters">
