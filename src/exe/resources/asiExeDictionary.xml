@@ -5,7 +5,7 @@
   <!-- Common semantic IDs                                                  -->
   <!-- ==================================================================== -->
 
-  <datum id="POI_X" format="%5.4x" label="x">
+  <datum id="POI_X" format="%5.3x" label="x">
     <dimensions>
       <dimension name="extra" value="mm" />
     </dimensions>
@@ -14,7 +14,7 @@
     <description>X</description>
   </datum>
 
-  <datum id="POI_Y" format="%5.4x" label="y">
+  <datum id="POI_Y" format="%5.3x" label="y">
     <dimensions>
       <dimension name="extra" value="mm" />
     </dimensions>
@@ -23,7 +23,7 @@
     <description>Y</description>
   </datum>
 
-  <datum id="POI_Z" format="%5.4x" label="z">
+  <datum id="POI_Z" format="%5.3x" label="z">
     <dimensions>
       <dimension name="extra" value="mm" />
     </dimensions>
@@ -32,7 +32,7 @@
     <description>Z</description>
   </datum>
 
-  <datum id="Fairing_coeff" format="%5.5x5" label="Fairing coeff.">
+  <datum id="Fairing_coeff" format="%5.5x" label="Fairing coeff.">
     <domain type="Float" min="0" max="1e99" default="0.001"/>
     <ui widget="SpinBox" widgetParams="step=0.1"/>
     <description>Coefficient of fairness. Greater values correspond to smoother surfaces.

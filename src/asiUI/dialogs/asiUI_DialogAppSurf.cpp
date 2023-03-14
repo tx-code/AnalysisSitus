@@ -180,8 +180,13 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   // Buttons to manage the table
   m_widgets.pInsertRow = new QPushButton(QIcon(":icons/asitus/table_add.png"),    QString());
   m_widgets.pInsertRow->setToolTip("Add Row");
+  m_widgets.pInsertRow->setFocusPolicy(Qt::NoFocus);
   m_widgets.pRemoveRow = new QPushButton(QIcon(":icons/asitus/table_remove.png"), QString());
-  m_widgets.pRemoveRow->setToolTip("Delete Row" );
+  m_widgets.pRemoveRow->setToolTip("Delete Row");
+  m_widgets.pRemoveRow->setFocusPolicy(Qt::NoFocus);
+  m_widgets.pClearTable = new QPushButton(QIcon(":icons/asitus/table_clear.svg"),    QString());
+  m_widgets.pClearTable->setToolTip("Clear table");
+  m_widgets.pClearTable->setFocusPolicy(Qt::NoFocus);
 
   m_widgets.pInitialSurfaceLabel = new QLabel("Initial surface", this);
   m_widgets.pInitialSurface = new asiUI_LineEdit(this);
@@ -194,7 +199,10 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   //---------------------------------------------------------------------------
 
   m_widgets.pApply = new QPushButton("Apply");
+  m_widgets.pApply->setFocusPolicy( Qt::NoFocus );
+
   m_widgets.pClose = new QPushButton("Close");
+  m_widgets.pClose->setFocusPolicy( Qt::NoFocus );
 
   // Sizing.
   m_widgets.pApply->setMaximumWidth(CONTROL_BTN_WIDTH);
@@ -211,6 +219,8 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
            m_widgets.pPoints,    SLOT  ( InsertRow           ()                                        ) );
   connect( m_widgets.pRemoveRow, SIGNAL( clicked             ()                                        ),
            m_widgets.pPoints,    SLOT  ( RemoveRows          ()                                        ) );
+  connect( m_widgets.pClearTable,SIGNAL( clicked             ()                                        ),
+           this,                 SLOT  ( onClearTable        ()                                        ) );
   connect( m_widgets.pApply,     SIGNAL( clicked             ()                                        ),
            this,                 SLOT  ( onApply             ()                                        ) );
   connect( m_widgets.pClose,     SIGNAL( clicked             ()                                        ),
@@ -268,6 +278,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     addRemLayout->addStretch();
     addRemLayout->addWidget(m_widgets.pInsertRow);
     addRemLayout->addWidget(m_widgets.pRemoveRow);
+    addRemLayout->addWidget(m_widgets.pClearTable);
     addRemLayout->setSpacing(10);
     addRemLayout->setMargin(0);
 
@@ -462,6 +473,13 @@ void asiUI_DialogAppSurf::onPointsChanged()
     return;
 
   m_widgets.pSelectXYZ->reset();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogAppSurf::onClearTable()
+{
+  m_widgets.pPoints->SetRowCount(0);
 }
 
 //-----------------------------------------------------------------------------

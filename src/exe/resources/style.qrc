@@ -27,6 +27,7 @@
     <file>asitus/search.svg</file>
     <file>asitus/select_xyz.svg</file>
     <file>asitus/table_add.png</file>
+    <file>asitus/table_clear.svg</file>
     <file>asitus/table_remove.png</file>
   </qresource>
   <qresource prefix="qss_icons">

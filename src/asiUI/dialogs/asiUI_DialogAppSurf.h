@@ -107,6 +107,9 @@ public slots:
   //! Change in points table resets XYZ text entered.
   void onPointsChanged();
 
+  //! Remove all rows in the table of point constraints.
+  void onClearTable();
+
   //! Reaction on clicking "Apply" button.
   void onApply();
 
@@ -130,6 +133,7 @@ protected:
     asiUI_DatumTable* pPoints;              //!< Point coordinates.
     QPushButton*      pInsertRow;           //!< Appends a new row after the selected row or to the end.
     QPushButton*      pRemoveRow;           //!< Removes the currently selected row.
+    QPushButton*      pClearTable;          //!< Clears table values.
     QLabel*           pInitialSurfaceLabel; //!< String name of the optional initial surface description.
     asiUI_LineEdit*   pInitialSurface;      //!< String name of the optional initial surface.
     asiUI_Datum*      pFairingCoeff;        //!< Fairing coefficient ranging.
@@ -145,6 +149,7 @@ protected:
                   pPoints              (nullptr),
                   pInsertRow           (nullptr),
                   pRemoveRow           (nullptr),
+                  pClearTable          (nullptr),
                   pInitialSurfaceLabel (nullptr),
                   pInitialSurface      (nullptr),
                   pFairingCoeff        (nullptr),
@@ -162,6 +167,7 @@ protected:
       delete pPoints;              pPoints              = nullptr;
       delete pInsertRow;           pInsertRow           = nullptr;
       delete pRemoveRow;           pRemoveRow           = nullptr;
+      delete pClearTable;          pClearTable          = nullptr;
       delete pInitialSurfaceLabel; pInitialSurfaceLabel = nullptr;
       delete pInitialSurface;      pInitialSurface      = nullptr;
       delete pFairingCoeff;        pFairingCoeff        = nullptr;
