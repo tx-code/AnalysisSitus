@@ -37,6 +37,7 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <DBRep.hxx>
@@ -58,6 +59,7 @@
 #include <gp_Lin.hxx>
 #include <ShapeAnalysis.hxx>
 #include <ShapeAnalysis_Curve.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeBuild_ReShape.hxx>
 #include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Wire.hxx>
@@ -66,6 +68,10 @@
 
 // Standard includes
 #include <vector>
+
+//-----------------------------------------------------------------------------
+
+#define sewTol 0.1
 
 //-----------------------------------------------------------------------------
 
@@ -109,6 +115,18 @@ namespace
     void MarkAsLine()
     {
       m_c.SetRadius( 0.0 );
+    }
+
+    void SwapPoints()
+    {
+      gp_Pnt tempP = m_p0;
+      double tempT = m_t0;
+
+      m_p0 = m_p1;
+      m_t0 = m_t1;
+
+      m_p1 = tempP;
+      m_t1 = tempT;
     }
   };
 
@@ -844,172 +862,288 @@ namespace
 
     return true;
   }
-}
 
-//-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
 
-bool asiAlgo_ConvertCurve::Convert2ArcLines(const Handle(Geom_Curve)& c,
-                                            const double              f,
-                                            const double              l,
-                                            TopoDS_Wire&              w,
-                                            double                    t)
-{
-  // Skip invalid curves.
-  if ( c.IsNull() )
+  enum convert2ArcLinesStatus
   {
-    return false;
-  }
+    convert2ArcLinesStatus_Done,
+    convert2ArcLinesStatus_IsLineOrArc,
+    convert2ArcLinesStatus_Failed
+  };
 
-  // Skip already 'good' types of curves.
-  if ( asiAlgo_Utils::IsTypeOf<Geom_Line>(c) ||
-       asiAlgo_Utils::IsTypeOf<Geom_Circle>(c) )
+  //-----------------------------------------------------------------------------
+
+  convert2ArcLinesStatus convert2ArcLines(const Handle(Geom_Curve)&          c,
+                                          const double                       f,
+                                          const double                       l,
+                                          const double                       t,
+                                          Handle(TopTools_HSequenceOfShape)& newEdges,
+                                          ActAPI_ProgressEntry               /*progress*/,
+                                          ActAPI_PlotterEntry                /*plotter*/)
   {
-    return true;
-  }
-
-  Handle(Geom_TrimmedCurve) trim;
-  if ( c->DynamicType() != STANDARD_TYPE( Geom_TrimmedCurve ) )
-  {
-    trim = new Geom_TrimmedCurve( c, f, l );
-  }
-  else
-  {
-    trim = Handle(Geom_TrimmedCurve)::DownCast( c );
-  }
-
-  // Get a BSpline curve from the input curve.
-  Handle(Geom_BSplineCurve) bspline =
-    GeomConvert::CurveToBSplineCurve( trim );
-
-  const int nbKnots = bspline->NbKnots();
-  TColStd_Array1OfReal knots( 1, nbKnots );
-  bspline->Knots( knots );
-
-  GeomAdaptor_Curve adaptorCurve;
-  adaptorCurve.Load( bspline,
-                     bspline->FirstParameter(),
-                     bspline->LastParameter() );
-
-  GCPnts_UniformAbscissa splitter( adaptorCurve, 3 );
-
-  bool isOk = false;
-  double u0 = 0.0, u1 = 0.0;
-  double finalL = 0.0;
-
-  std::vector< arcInfo > arcs;
-
-  for ( int i = 2; i <= splitter.NbPoints(); ++i )
-  {
-    u0 = splitter.Parameter( i - 1 );
-    u1 = splitter.Parameter( i );
-
-    finalL = u1;
-
-    while ( u0 < finalL )
+    // Skip invalid curves.
+    if ( c.IsNull() )
     {
-      try
-      {
-        isOk = HandleArc( adaptorCurve, u0, u1, t, arcs, knots );
-      }
-      catch (...)
-      {
-        return false;
-      }
-
-      if ( !isOk )
-      {
-        u1 = ( u0 + u1 ) / 2.;
-      }
-      else
-      {
-        u0 = u1;
-        u1 = finalL;
-      }
+      return convert2ArcLinesStatus_Failed;
     }
-  }
 
-  if ( arcs.empty() )
-  {
-    return false;
-  }
+    // Skip already 'good' types of curves.
+    Handle(Geom_Line) baseLine;
+    Handle(Geom_Circle) baseCirc;
 
-  // Close path if necessary.
-  gp_Pnt p;
-  adaptorCurve.D0( adaptorCurve.LastParameter(), p );
-
-  arcInfo& last = arcs.back();
-
-  const double d = last.m_p1.Distance( p );
-
-  if ( d > Precision::Confusion() )
-  {
-    if ( d > t )
+    if ( asiAlgo_Utils::IsTypeOf<Geom_Line>( c, baseLine ) ||
+         asiAlgo_Utils::IsTypeOf<Geom_Circle>( c, baseCirc ) )
     {
-      arcs.push_back( arcInfo( last.m_p1, p, last.m_t1, adaptorCurve.LastParameter() ) );
+      return convert2ArcLinesStatus_IsLineOrArc;
+    }
+
+    Handle(Geom_TrimmedCurve) trim;
+    if ( c->DynamicType() != STANDARD_TYPE( Geom_TrimmedCurve ) )
+    {
+      trim = new Geom_TrimmedCurve( c, f, l );
     }
     else
     {
-      if ( !last.IsLine() )
+      trim = Handle(Geom_TrimmedCurve)::DownCast( c );
+    }
+
+    // Get a BSpline curve from the input curve.
+    Handle(Geom_BSplineCurve) bspline =
+      GeomConvert::CurveToBSplineCurve( trim );
+
+    const int nbKnots = bspline->NbKnots();
+    TColStd_Array1OfReal knots( 1, nbKnots );
+    bspline->Knots( knots );
+
+    GeomAdaptor_Curve adaptorCurve;
+    adaptorCurve.Load( bspline,
+                       bspline->FirstParameter(),
+                       bspline->LastParameter() );
+
+    GCPnts_UniformAbscissa splitter( adaptorCurve, 3 );
+
+    bool isOk = false;
+    double u0 = 0.0, u1 = 0.0;
+    double finalL = 0.0;
+
+    std::vector< arcInfo > arcs;
+
+    for ( int i = 2; i <= splitter.NbPoints(); ++i )
+    {
+      u0 = splitter.Parameter( i - 1 );
+      u1 = splitter.Parameter( i );
+
+      finalL = u1;
+
+      while ( u0 < finalL )
       {
-        CalcNewCirc( last.m_p0, last.m_p1, p, last.m_c );
+        try
+        {
+          isOk = HandleArc( adaptorCurve, u0, u1, t, arcs, knots );
+        }
+        catch (...)
+        {
+          return convert2ArcLinesStatus_Failed;
+        }
+
+        if ( !isOk )
+        {
+          u1 = ( u0 + u1 ) / 2.;
+        }
+        else
+        {
+          u0 = u1;
+          u1 = finalL;
+        }
+      }
+    }
+
+    if ( arcs.empty() )
+    {
+      return convert2ArcLinesStatus_Failed;
+    }
+
+    // Close path if necessary.
+    gp_Pnt p;
+    adaptorCurve.D0( adaptorCurve.LastParameter(), p );
+
+    arcInfo& last = arcs.back();
+
+    const double diffLast = last.m_p1.Distance( p );
+
+    if ( diffLast > Precision::Confusion() )
+    {
+      if ( diffLast > t )
+      {
+        arcs.push_back( arcInfo( last.m_p1, p, last.m_t1, adaptorCurve.LastParameter() ) );
+      }
+      else
+      {
+        if ( !last.IsLine() )
+        {
+          CalcNewCirc( last.m_p0, last.m_p1, p, last.m_c );
+        }
+
+        last.m_p1 = p;
+      }
+    }
+
+    adaptorCurve.D0( adaptorCurve.FirstParameter(), p );
+
+    arcInfo& first = arcs.front();
+
+    const double diffFirst = first.m_p0.Distance( p );
+
+    if ( diffFirst > Precision::Confusion() )
+    {
+      if ( diffFirst > t )
+      {
+        arcs.insert( arcs.begin(), arcInfo( p, first.m_p0, adaptorCurve.FirstParameter(), first.m_t0 ) );
+      }
+      else
+      {
+        if ( !first.IsLine() )
+        {
+          CalcNewCirc( first.m_p1, first.m_p0, p, first.m_c );
+        }
+
+        first.m_p0 = p;
+      }
+    }
+
+    // Add new edges to the wire.
+    std::vector< std::pair< TopoDS_Vertex, tl::optional<gp_Circ> > > verticesToCircles;
+
+    const int arcsSize = (int) arcs.size();
+
+    for ( int i = 0; i < arcsSize; ++i )
+    {
+      const arcInfo& arc = arcs[i];
+
+      const TopoDS_Vertex v = BRepBuilderAPI_MakeVertex( arc.m_p0 );
+
+      tl::optional<gp_Circ> cOpt;
+
+      if ( !arc.IsLine() )
+      {
+        cOpt = arc.m_c;
       }
 
-      last.m_p1 = p;
+      verticesToCircles.push_back( std::pair< TopoDS_Vertex, tl::optional<gp_Circ> >( v, cOpt ) );
+
+      if ( i == arcsSize - 1 )
+      {
+        const TopoDS_Vertex vLast = BRepBuilderAPI_MakeVertex( arc.m_p1 );
+
+        verticesToCircles.push_back( std::pair< TopoDS_Vertex, tl::optional<gp_Circ> >( vLast, tl::nullopt ) );
+      }
     }
-  }
-
-  // Build edges and the final wire.
-  ShapeExtend_WireData wdata;
-
-  for ( const arcInfo& arc : arcs )
-  {
-    TopoDS_Shape edge;
-
-    try
+//
+    for ( int i = 1; i < (int) verticesToCircles.size(); ++i )
     {
-      edge = arc.IsLine() ? BRepBuilderAPI_MakeEdge( arc.m_p0, arc.m_p1 )
-                          : BRepBuilderAPI_MakeEdge( arc.m_c,  arc.m_p0, arc.m_p1 );
-    }
-    catch ( ... )
-    {
-      return false;
+      try
+      {
+        const TopoDS_Vertex& v0 = verticesToCircles[i-1].first;
+        const TopoDS_Vertex& v1 = verticesToCircles[i].first;
+
+        const tl::optional<gp_Circ>& cOpt = verticesToCircles[i-1].second;
+
+        const gp_Pnt& Pfnew = BRep_Tool::Pnt( v0 );
+        const gp_Pnt& Plnew = BRep_Tool::Pnt( v1 );
+
+        if ( !Pfnew.IsEqual( Plnew, Precision::Confusion() ) )
+        {
+          newEdges->Append( TopoDS::Edge( cOpt.has_value() ? BRepBuilderAPI_MakeEdge( cOpt.value(), v0, v1 )
+                                                           : BRepBuilderAPI_MakeEdge( v0, v1 ) ) );
+        }
+      }
+      catch ( ... )
+      {
+        return convert2ArcLinesStatus_Failed;
+      }
     }
 
-    wdata.Add( TopoDS::Edge( edge ) );
+    return convert2ArcLinesStatus_Done;
   }
-
-  w = wdata.WireAPIMake();
-
-  return true;
 }
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_ConvertCurve::Convert2ArcLines(TopoDS_Shape& shape,
-                                            double        tolerance)
+void asiAlgo_ConvertCurve::Convert2ArcLines(TopoDS_Shape&        shape,
+                                            double               tolerance,
+                                            ActAPI_ProgressEntry progress,
+                                            ActAPI_PlotterEntry  plotter)
 {
   Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
 
-  for ( TopExp_Explorer exp(shape, TopAbs_EDGE); exp.More(); exp.Next() )
+  for ( TopExp_Explorer expW( shape, TopAbs_WIRE ); expW.More(); expW.Next() )
   {
-    const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
+    const TopoDS_Wire& wire = TopoDS::Wire( expW.Current() );
 
-    double f, l;
-    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+    Handle(TopTools_HSequenceOfShape) inputEdges = new TopTools_HSequenceOfShape;
 
-    TopoDS_Wire W;
+    bool isSomethingDone = false;
 
-    if ( !Convert2ArcLines(curve, f, l, W, tolerance) )
+    for ( TopExp_Explorer expE( wire, TopAbs_EDGE ); expE.More(); expE.Next() )
     {
-      continue;
+      const TopoDS_Edge& edge = TopoDS::Edge( expE.Current() );
+
+      Handle(TopTools_HSequenceOfShape) localInputEdges = new TopTools_HSequenceOfShape;
+
+      double f, l;
+      Handle(Geom_Curve) curve = BRep_Tool::Curve( edge, f, l );
+
+      convert2ArcLinesStatus status =
+        convert2ArcLines( curve, f, l, tolerance, localInputEdges, progress, plotter );
+
+      if ( status == convert2ArcLinesStatus_Failed )
+      {
+        continue;
+      }
+      else if ( status == convert2ArcLinesStatus_IsLineOrArc )
+      {
+        inputEdges->Append( edge );
+
+        continue;
+      }
+
+      isSomethingDone = true;
+
+      TopTools_SequenceOfShape::Iterator newEdgesIter( *localInputEdges );
+      for ( ; newEdgesIter.More(); newEdgesIter.Next() )
+      {
+        if ( edge.Orientation() == TopAbs_REVERSED )
+        {
+          newEdgesIter.ChangeValue().Reverse();
+        }
+
+        inputEdges->Append( newEdgesIter.Value() );
+      }
     }
+
     //
-    if ( !W.IsNull() )
-      ctx->Replace(edge, W);
+    if ( isSomethingDone )
+    {
+      Handle(TopTools_HSequenceOfShape) wires = new TopTools_HSequenceOfShape();
+
+      ShapeAnalysis_FreeBounds::ConnectEdgesToWires( inputEdges, sewTol, false, wires );
+
+      if ( wires->Length() == 1 && !wires->First().IsNull() )
+      {
+        ctx->Replace( wire, wires->First() );
+      }
+      else
+      {
+        progress.SendLogMessage( LogWarn(Normal) << "Failed to convert bsplines to lines and arcs." );
+      }
+    }
   }
 
-  TopoDS_Shape newShape = ctx->Apply(shape);
-  shape = newShape;
+  shape = ctx->Apply( shape );
+
+  // Fix edges sharing problems if any.
+  asiAlgo_Utils::Sew( shape, sewTol, shape );
 }
 
 //-----------------------------------------------------------------------------

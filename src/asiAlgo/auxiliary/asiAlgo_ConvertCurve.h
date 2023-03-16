@@ -44,16 +44,11 @@
 //! Function to perform conversion of spline and ellipse curves to arcs and lines.
 namespace asiAlgo_ConvertCurve
 {
-  asiAlgo_EXPORT bool
-    Convert2ArcLines(const Handle(Geom_Curve)& curve,
-                     double                    first,
-                     double                    last,
-                     TopoDS_Wire&              wire,
-                     double                    tolerance = 0.001);
-
   asiAlgo_EXPORT void
-    Convert2ArcLines(TopoDS_Shape& shape,
-                     double        tolerance = 0.001);
+    Convert2ArcLines(TopoDS_Shape&        shape,
+                     double               tolerance = 0.001,
+                     ActAPI_ProgressEntry progress  = nullptr,
+                     ActAPI_PlotterEntry  plotter   = nullptr);
 
   asiAlgo_EXPORT void
     Convert2Polyline(const TopoDS_Wire&   wire,

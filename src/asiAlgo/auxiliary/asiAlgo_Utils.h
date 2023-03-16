@@ -651,13 +651,19 @@ namespace asiAlgo_Utils
     ShapeAddr(const TopoDS_Shape& shape);
 
   //! Checks curve type.
-  //! \param[in] curve curve to check.
+  //! \param[in]  curve     the curve to check.
+  //! \param[out] basecurve the extracted basis curve if the originally
+  //!                       passed one is trimmed.
   //! \return true/false.
   template<typename TCurve>
-  bool IsTypeOf(const Handle(Geom_Curve)& curve)
+  bool IsTypeOf(const Handle(Geom_Curve)& curve,
+                Handle(TCurve)&           basecurve)
   {
     if ( curve->IsInstance( STANDARD_TYPE(TCurve) ) )
+    {
+      basecurve = Handle(TCurve)::DownCast(curve);
       return true;
+    }
 
     if ( curve->IsInstance( STANDARD_TYPE(Geom_TrimmedCurve) ) )
     {
@@ -666,13 +672,23 @@ namespace asiAlgo_Utils
 
       Handle(Geom_Curve) basis = trimmed->BasisCurve();
 
-      if ( IsTypeOf<TCurve>(basis) )
+      if ( IsTypeOf<TCurve>(basis, basecurve) )
       {
         return true;
       }
     }
 
     return false;
+  }
+
+  //! Checks curve type.
+  //! \param[in] curve the curve to check.
+  //! \return true/false.
+  template<typename TCurve>
+  bool IsTypeOf(const Handle(Geom_Curve)& curve)
+  {
+    Handle(TCurve) basecurve;
+    return IsTypeOf<TCurve>(curve, basecurve);
   }
 
   //! Checks edge type.
