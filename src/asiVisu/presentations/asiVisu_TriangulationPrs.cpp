@@ -47,6 +47,8 @@
 #include <vtkMapper.h>
 #include <vtkProperty.h>
 
+#define MAX_TRIS2DUMP 5
+
 //-----------------------------------------------------------------------------
 
 //! Creates a Presentation object for the passed Triangulation Node.
@@ -359,9 +361,12 @@ void asiVisu_TriangulationPrs::highlight(vtkRenderer*                        asi
     mainPl->SetPickedElements( elemIds, selNature );
 
     // Diagnostic dump.
-    if ( selNature == SelectionNature_Persistent )
-      for ( TColStd_MapIteratorOfPackedMapOfInteger eit(elemIds); eit.More(); eit.Next() )
-        m_progress.SendLogMessage( LogNotice(Normal) << "Picked face with ID %1." << eit.Key() );
+    if ( elemIds.Extent() <= MAX_TRIS2DUMP )
+    {
+      if ( selNature == SelectionNature_Persistent )
+        for ( TColStd_MapIteratorOfPackedMapOfInteger eit(elemIds); eit.More(); eit.Next() )
+          m_progress.SendLogMessage( LogNotice(Normal) << "Picked face with ID %1." << eit.Key() );
+    }
   }
   // #################################################
   // LINK selection

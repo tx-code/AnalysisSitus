@@ -592,14 +592,14 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  // Compute links.
-  mesh->ComputeEdges();
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute links")
-
-  TIMER_RESET
-  TIMER_GO
+  // Whether to find adjacent elements by vertices.
+  const bool byVertices = interp->HasKeyword(argc, argv, "v");
+  //
+  if ( !byVertices )
+  {
+    // Compute links.
+    mesh->ComputeEdges();
+  }
 
   // Find triangles.
   TColStd_PackedMapOfInteger foundIds;
