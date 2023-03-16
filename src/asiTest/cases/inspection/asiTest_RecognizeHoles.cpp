@@ -38,7 +38,7 @@ outcome asiTest_RecognizeHoles::testAll(const int /*funcID*/)
   // Get filename of script to execute.
   TCollection_AsciiString fullFilename = GetPath("inspection/recognize-holes");
 
-  // Execute test script.
+  // Execute all scripts as a single test.
   outcome res = evaluateAll(fullFilename, DescriptionFn());
 
   // Return status.

@@ -36,6 +36,7 @@
 
 // OCCT includes
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
 #undef COUT_DEBUG
@@ -46,14 +47,15 @@
 //-----------------------------------------------------------------------------
 
 asiAlgo_RecognizeDrillHoles::asiAlgo_RecognizeDrillHoles(const TopoDS_Shape&  shape,
-                                                     const bool           doHard,
-                                                     ActAPI_ProgressEntry progress,
-                                                     ActAPI_PlotterEntry  plotter)
+                                                         const bool           doHard,
+                                                         ActAPI_ProgressEntry progress,
+                                                         ActAPI_PlotterEntry  plotter)
 //
 : asiAlgo_Recognizer (shape, nullptr, progress, plotter),
   m_fLinToler        (0.),
   m_fCanRecPrec      (1.e-3),
-  m_bHardMode        (doHard)
+  m_bHardMode        (doHard),
+  m_bPureConicalOn   (true)
 {}
 
 //-----------------------------------------------------------------------------
@@ -66,7 +68,8 @@ asiAlgo_RecognizeDrillHoles::asiAlgo_RecognizeDrillHoles(const Handle(asiAlgo_AA
 : asiAlgo_Recognizer (aag, progress, plotter),
   m_fLinToler        (0.),
   m_fCanRecPrec      (1.e-3),
-  m_bHardMode        (doHard)
+  m_bHardMode        (doHard),
+  m_bPureConicalOn   (true)
 {}
 
 //-----------------------------------------------------------------------------
@@ -106,10 +109,19 @@ void asiAlgo_RecognizeDrillHoles::SetHardFeatureModeOff()
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_RecognizeDrillHoles::SetPureConicalAllowed(const bool isOn)
+{
+  m_bPureConicalOn = isOn;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_RecognizeDrillHoles::SetSeedFaceIds(const TColStd_PackedMapOfInteger& fids)
 {
   m_seeds = fids;
 }
+
+//-----------------------------------------------------------------------------
 
 void asiAlgo_RecognizeDrillHoles::SetFaceIdsToExclude(const TColStd_PackedMapOfInteger& fids)
 {
@@ -198,9 +210,10 @@ bool asiAlgo_RecognizeDrillHoles::performInternal(const double radius)
                                                m_progress,
                                                m_plotter);
   //
-  rule->SetLinearTolerance (linToler);
-  rule->SetCanRecPrecision (m_fCanRecPrec);
-  rule->SetHardFeatureMode (m_bHardMode); // Turn on/off hard feature detection.
+  rule->SetLinearTolerance    (linToler);
+  rule->SetCanRecPrecision    (m_fCanRecPrec);
+  rule->SetHardFeatureMode    (m_bHardMode); // Turn on/off hard feature detection.
+  rule->SetPureConicalAllowed (m_bPureConicalOn);
 
   // Run the main recognition loop. Any face is a seed, we let the rule decide.
   for ( ; seed_it->More(); seed_it->Next() )
@@ -243,10 +256,12 @@ bool asiAlgo_RecognizeDrillHoles::performInternal(const double radius)
   // Complete recognition.
   for ( ; seed_it->More(); seed_it->Next() )
   {
-    const int current_id = seed_it->GetFaceId();
+    const int currentFid = seed_it->GetFaceId();
     //
-    if ( m_result.ids.Contains(current_id) )
+    if ( m_result.ids.Contains(currentFid) )
       continue;
+
+    const TopoDS_Face& currentFace = m_aag->GetFace(currentFid);
 
     // Get neighbors and check if all them have been detected as feature
     // faces. If so, then current face is in "floating isolation", so we
@@ -269,8 +284,36 @@ bool asiAlgo_RecognizeDrillHoles::performInternal(const double radius)
 
     if ( isFloatingIsolation )
     {
-      m_result.faces.Add( seed_it->GetGraph()->GetFace(current_id) );
-      m_result.ids.Add(current_id);
+      bool isPlateauEnding = false;
+      //
+      if ( asiAlgo_Utils::IsPlanar(currentFace) && current_neighbors.Extent() )
+      {
+        // For a planar face, its outer wire should have hole feature faces attached.
+        // If that's not the case, there's something strange with such a planar ending
+        // and we do not want to have it in the recognition result.
+
+        TColStd_PackedMapOfInteger eids;
+        TopoDS_Wire                W = asiAlgo_Utils::OuterWire(currentFace);
+        //
+        for ( TopExp_Explorer eexp(W, TopAbs_EDGE); eexp.More(); eexp.Next() )
+        {
+          const int eid = m_aag->RequestMapOfEdges().FindIndex( eexp.Current() );
+          eids.Add(eid);
+        }
+
+        asiAlgo_Feature currentNids = m_aag->GetNeighborsThru(currentFid, eids);
+        //
+        if ( currentNids.IsEmpty() )
+        {
+          isPlateauEnding = true;
+        }
+      }
+
+      if ( !isPlateauEnding )
+      {
+        m_result.faces.Add( seed_it->GetGraph()->GetFace(currentFid) );
+        m_result.ids.Add(currentFid);
+      }
     }
 
     // Progress.
@@ -291,5 +334,5 @@ bool asiAlgo_RecognizeDrillHoles::performInternal(const double radius)
 void asiAlgo_RecognizeDrillHoles::matchConnectedComponent(const Handle(asiAlgo_AAG)& asiAlgo_NotUsed(cc),
                                                           asiAlgo_Feature&           asiAlgo_NotUsed(feature))
 {
-  // TODO: NYI
+  // Left for customization in app-specific code.
 }

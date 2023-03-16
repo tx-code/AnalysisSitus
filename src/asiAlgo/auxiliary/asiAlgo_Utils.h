@@ -955,6 +955,34 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     IsToroidal(const TopoDS_Face& face);
 
+  //! Checks whether the passed face is a torus.
+  //! \param[in]  face face to check.
+  //! \param[out] rmax major radius of the host torus.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsToroidal(const TopoDS_Face& face,
+               double&            rmax);
+
+  //! Checks whether the passed face is a torus.
+  //! \param[in]  face face to check.
+  //! \param[out] ax   axis of the torus.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsToroidal(const TopoDS_Face& face,
+               gp_Ax1&            ax);
+
+  //! Checks whether the passed face is a torus.
+  //! \param[in]  face face to check.
+  //! \param[out] rmin outer minor radius of the host torus.
+  //! \param[out] rmax major radius of the host torus.
+  //! \param[out] ax   axis of the torus.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsToroidal(const TopoDS_Face& face,
+               double&            rmin,
+               double&            rmax,
+               gp_Ax1&            ax);
+
   //! Checks if the passed edge is circular.
   //! \param[in] edge edge to check.
   //! \return true/false.

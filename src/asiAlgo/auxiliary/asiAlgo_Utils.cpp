@@ -1749,6 +1749,73 @@ bool asiAlgo_Utils::IsToroidal(const TopoDS_Face& face)
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsToroidal(const TopoDS_Face& face,
+                               double&            rmax)
+{
+  double rmin = 0.;
+  gp_Ax1 ax;
+  //
+  return IsToroidal(face, rmin, rmax, ax);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsToroidal(const TopoDS_Face& face,
+                               gp_Ax1&            ax)
+{
+  double rmin = 0.;
+  double rmax = 0.;
+  //
+  return IsToroidal(face, rmin, rmax, ax);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::IsToroidal(const TopoDS_Face& face,
+                               double&            rmin,
+                               double&            rmax,
+                               gp_Ax1&            ax)
+{
+  if ( !asiAlgo_Utils::IsToroidal(face) )
+    return false;
+
+  bool isToroidal = false;
+  Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
+  Handle(Geom_ToroidalSurface) torsurf;
+
+  if ( surf->IsInstance( STANDARD_TYPE(Geom_ToroidalSurface) ) )
+  {
+    isToroidal = true;
+
+    // Get host surface.
+    torsurf = Handle(Geom_ToroidalSurface)::DownCast(surf);
+  }
+  else if ( surf->IsInstance( STANDARD_TYPE(Geom_RectangularTrimmedSurface) ) )
+  {
+    Handle(Geom_RectangularTrimmedSurface)
+      RT = Handle(Geom_RectangularTrimmedSurface)::DownCast(surf);
+
+    if ( RT->BasisSurface()->IsInstance( STANDARD_TYPE(Geom_ToroidalSurface) ) )
+    {
+      isToroidal = true;
+
+      // Get host surface.
+      torsurf = Handle(Geom_ToroidalSurface)::DownCast( RT->BasisSurface() );
+    }
+  }
+
+  if ( isToroidal && !torsurf.IsNull() )
+  {
+    ax   = torsurf->Axis();
+    rmin = torsurf->MinorRadius();
+    rmax = torsurf->MajorRadius();
+  }
+
+  return isToroidal;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsCircular(const TopoDS_Edge& edge)
 {
   double f, l;

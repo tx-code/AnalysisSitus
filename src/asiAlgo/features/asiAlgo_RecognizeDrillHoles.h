@@ -41,8 +41,6 @@
 //! Utility to recognize drilled holes.
 class asiAlgo_RecognizeDrillHoles : public asiAlgo_Recognizer
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeDrillHoles, asiAlgo_Recognizer)
 
@@ -96,6 +94,11 @@ public:
   asiAlgo_EXPORT void
     SetHardFeatureMode(const bool isOn);
 
+  //! Turns on/off pure conical holes detection mode.
+  //! \param[in] isOn value to set.
+  asiAlgo_EXPORT void
+    SetPureConicalAllowed(const bool isOn);
+
   //! Sets a set of seed faces to start the recognition from. If seed faces are
   //! not specified, the algorithm will traverse the entire AAG trying each
   //! face as a seed one.
@@ -136,11 +139,12 @@ protected:
 
 protected:
 
-  double                     m_fLinToler;   //!< Linear tolerance to use.
-  double                     m_fCanRecPrec; //!< Precision of canonical recognition.
-  bool                       m_bHardMode;   //!< Hard feature mode (on/off).
-  TColStd_PackedMapOfInteger m_seeds;       //!< IDs of the user-defined seed faces.
-  TColStd_PackedMapOfInteger m_xSeeds;      //!< IDs of the excluded faces.
+  double                     m_fLinToler;      //!< Linear tolerance to use.
+  double                     m_fCanRecPrec;    //!< Precision of canonical recognition.
+  bool                       m_bHardMode;      //!< Hard feature mode (on/off).
+  bool                       m_bPureConicalOn; //!< Pure conical holes will be detected in this mode.
+  TColStd_PackedMapOfInteger m_seeds;          //!< IDs of the user-defined seed faces.
+  TColStd_PackedMapOfInteger m_xSeeds;         //!< IDs of the excluded faces.
 
 };
 

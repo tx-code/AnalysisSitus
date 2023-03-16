@@ -37,13 +37,14 @@
 
 // OCCT includes
 #include <BRep_Tool.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepLProp_SLProps.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Cylinder.hxx>
-#include <gp_Lin2d.hxx>
 #include <Precision.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TopExp_Explorer.hxx>
@@ -299,20 +300,40 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
   // interaction in that local zone. This situation is, however, absolutely,
   // normal for hard features.
 
-  if ( !m_bHardMode && !this->isCylindrical(suspected_face,
-                                            true,
+  bool isBoreFace = true;
+
+  if ( !m_bHardMode && !this->isCylindrical(suspected_face_id,
+                                            true, true,
                                             suspected_radius,
                                             suspected_ang_min,
                                             suspected_ang_max,
                                             ref_ax) )
-    return false;
+  {
+    isBoreFace = false;
+  }
 
-  if ( m_bHardMode && !this->isCylindrical(suspected_face,
-                                           false,
+  if ( m_bHardMode && !this->isCylindrical(suspected_face_id,
+                                           false, true,
                                            suspected_radius,
                                            suspected_ang_min,
                                            suspected_ang_max,
                                            ref_ax) )
+  {
+    isBoreFace = false;
+  }
+
+  // Last chance for this face is to be a sink-only hole.
+  if ( !isBoreFace && m_bPureConicalOn )
+  {
+    isBoreFace = this->isConical(suspected_face_id,
+                                 false,
+                                 suspected_radius,
+                                 suspected_ang_min,
+                                 suspected_ang_max,
+                                 ref_ax);
+  }
+
+  if ( !isBoreFace )
     return false;
 
   // Check if this face is attributed. Attribution is normally done for
@@ -360,6 +381,23 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
   if ( (sum_angle < 2*M_PI) && (Abs(sum_angle - 2*M_PI) > m_fAngToler) )
     return false;
 
+  // Traverse toroidal surfaces.
+  // Such surfaces are not drillable feature, but the external calling 
+  // feature solving algorithm relies on both drilling and hole milling operations
+  // to find the most optimal solution.
+  asiAlgo_Feature radii;
+  //
+  this->visitNeighborToruses(suspected_face_id,
+                             suspected_face_id,
+                             suspected_radius,
+                             ref_ax,
+                             radii);
+  //
+  this->AddTraversed(radii);
+  neighbors.Subtract(radii);
+
+  nbSuspectedSupports = neighbors.Extent();
+
   // From all feature face neighbors keep only those satisfying the hard-coded
   // rules below. Notice that graph pattern matching is a more general
   // approach, comparing to what we are doing here. But here we can
@@ -378,7 +416,9 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
       const int          neighbor_id   = nit.Key();
       const TopoDS_Face& neighbor_face = m_it->GetGraph()->GetFace(neighbor_id);
       //
-      if ( asiAlgo_Utils::IsConical(neighbor_face) || asiAlgo_Utils::IsPlanar(neighbor_face) )
+      if ( asiAlgo_Utils::IsConical(neighbor_face) ||
+           asiAlgo_Utils::IsPlanar(neighbor_face)  ||
+           asiAlgo_Utils::IsToroidal(neighbor_face) )
         suspected_endings.Add(neighbor_id);
     }
   }
@@ -419,6 +459,7 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
   for ( asiAlgo_Feature::Iterator eit(suspected_endings); eit.More(); eit.Next() )
   {
     const int              ending_id        = eit.Key();
+    const TopoDS_Face&     ending_face      = m_it->GetGraph()->GetFace(ending_id);
     const asiAlgo_Feature& ending_neighbors = m_it->GetGraph()->GetNeighbors(ending_id);
 
     bool isRealEnding = true;
@@ -440,24 +481,23 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
     }
     else
     {
-      const TopoDS_Face& ending_face = m_it->GetGraph()->GetFace(ending_id);
-      //
-      gp_Ax1 cone_ax;
-      if ( asiAlgo_Utils::IsConical(ending_face, cone_ax) )
+      gp_Ax1 end_ax;
+      if ( asiAlgo_Utils::IsConical(ending_face, end_ax) ||
+           asiAlgo_Utils::IsToroidal(ending_face, end_ax))
       {
-        if ( cone_ax.IsCoaxial(ref_ax, m_fAngToler, m_fLinToler) ||
-             cone_ax.IsOpposite(ref_ax, m_fAngToler) )
+        if (end_ax.IsCoaxial(ref_ax, m_fAngToler, m_fLinToler) ||
+            end_ax.IsOpposite(ref_ax, m_fAngToler) )
         {
           // Co-axial but position of the axis can be different.
-          const gp_Pnt& cone_ax_P = cone_ax.Location();
+          const gp_Pnt& end_ax_P = end_ax.Location();
           const gp_Pnt& ref_ax_P  = ref_ax.Location();
 
 #if defined DRAW_DEBUG
-          this->GetPlotter().DRAW_POINT(cone_ax_P, Color_Green);
+          this->GetPlotter().DRAW_POINT(end_ax_P, Color_Green);
           this->GetPlotter().DRAW_POINT(ref_ax_P,  Color_Red);
 #endif
 
-          const double axes_dist = cone_ax_P.Distance(ref_ax_P);
+          const double axes_dist = end_ax_P.Distance(ref_ax_P);
           if ( axes_dist < m_fLinToler )
           {
             //-----------------------------------------------------------------
@@ -466,7 +506,7 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
           }
           else
           {
-            gp_Ax1 sample_ax( ref_ax_P, gp_Vec( cone_ax_P.XYZ() - ref_ax_P.XYZ() ) );
+            gp_Ax1 sample_ax( ref_ax_P, gp_Vec( end_ax_P.XYZ() - ref_ax_P.XYZ() ) );
             //
             if ( sample_ax.IsParallel(ref_ax, m_fAngToler) )
             {
@@ -493,25 +533,28 @@ bool asiAlgo_RecognizeDrillHolesRule::recognize(TopTools_IndexedMapOfShape& feat
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const TopoDS_Face& face) const
+bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const int fid) const
 {
   double radius;
   double angle_min;
   double angle_max;
   gp_Ax1 ax;
 
-  return this->isCylindrical(face, false, radius, angle_min, angle_max, ax);
+  return this->isCylindrical(fid, false, true, radius, angle_min, angle_max, ax);
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const TopoDS_Face& face,
-                                                   const bool         checkNoHints,
-                                                   double&            radius,
-                                                   double&            angle_min,
-                                                   double&            angle_max,
-                                                   gp_Ax1&            ax) const
+bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const int  fid,
+                                                    const bool checkNoHints,
+                                                    const bool checkBore,
+                                                    double&    radius,
+                                                    double&    angle_min,
+                                                    double&    angle_max,
+                                                    gp_Ax1&    ax) const
 {
+  const TopoDS_Face& face = m_it->GetGraph()->GetFace(fid);
+
   bool isCyl = asiAlgo_Utils::IsCylindrical(face, radius, ax, angle_min, angle_max);
   //
   if ( !isCyl )
@@ -553,14 +596,16 @@ bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const TopoDS_Face& face,
       // non-freeform types, such as planes, conical surfaces, etc. For splines,
       // it will attempt to recognize a cylinder with some extra geometric checks.
       gp_Cylinder cyl;
-      if ( !asiAlgo_RecognizeCanonical::CheckIsCylindrical(BRep_Tool::Surface(face),
+      if ( !asiAlgo_RecognizeCanonical::CheckIsCylindrical(surface,
                                                            uMin, uMax, vMin, vMax,
                                                            m_fCanRecPrec,
                                                            true, // Extract parametric ranges.
                                                            cyl,
                                                            uMinRec, uMaxRec, vMinRec, vMaxRec,
                                                            m_progress, m_plotter) )
+      {
         return false;
+      }
 
       // Get the props.
       radius    = cyl.Radius();
@@ -573,6 +618,45 @@ bool asiAlgo_RecognizeDrillHolesRule::isCylindrical(const TopoDS_Face& face,
       return false;
     }
   }
+
+  if ( checkNoHints )
+  {
+    asiAlgo_FindFeatureHints hint(face, nullptr, nullptr);
+    //
+    if ( hint.IsPuzzled() )
+      return false;
+  }
+
+  if ( checkBore )
+  {
+    if ( !asiAlgo_Utils::IsInternal(face, 2*radius, ax) )
+      return false;
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeDrillHolesRule::isConical(const int  fid,
+                                                const bool checkNoHints,
+                                                double&    radius,
+                                                double&    angle_min,
+                                                double&    angle_max,
+                                                gp_Ax1&    ax) const
+{
+  const TopoDS_Face& face = m_it->GetGraph()->GetFace(fid);
+
+  double hMin, hMax, rMin, rMax;
+  bool isCone = asiAlgo_Utils::IsConical(face, ax, true,
+                                         angle_min, angle_max,
+                                         hMin, hMax,
+                                         rMin, rMax);
+
+  radius = rMin;
+
+  if ( !isCone )
+    return false;
 
   if ( checkNoHints )
   {
@@ -621,8 +705,6 @@ void asiAlgo_RecognizeDrillHolesRule::visitNeighborCylinders(const int        si
     if ( collected.Contains(nid) || (nid == sid) )
       continue;
 
-    const TopoDS_Face& nface = m_it->GetGraph()->GetFace(nid);
-
     // Props.
     gp_Ax1 ax;
     double angMin = 0.0;
@@ -630,8 +712,8 @@ void asiAlgo_RecognizeDrillHolesRule::visitNeighborCylinders(const int        si
     double nr     = 0.0;
 
     // Check cylindricity.
-    if ( ( !m_bHardMode && this->isCylindrical(nface, true,  nr, angMin, angMax, ax) ) ||
-         (  m_bHardMode && this->isCylindrical(nface, false, nr, angMin, angMax, ax) ) )
+    if ( ( !m_bHardMode && this->isCylindrical(nid, true,  true, nr, angMin, angMax, ax) ) ||
+         (  m_bHardMode && this->isCylindrical(nid, false, true, nr, angMin, angMax, ax) ) )
     {
       if ( Abs(nr - refRadius) > m_fLinToler )
       {
@@ -666,4 +748,124 @@ void asiAlgo_RecognizeDrillHolesRule::visitNeighborCylinders(const int        si
       }
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeDrillHolesRule::visitNeighborToruses(const int        sid,
+                                                           const int        fid,
+                                                           const double     refRadius,
+                                                           const gp_Ax1&    refAxis,
+                                                           asiAlgo_Feature& collected)
+{
+  asiAlgo_Feature nids = m_it->GetGraph()->GetNeighbors(fid);
+
+  // Iterate over neighbors.
+  for (asiAlgo_Feature::Iterator nit(nids); nit.More(); nit.Next())
+  {
+    const int nid = nit.Key();
+    //
+    if (collected.Contains(nid) || (nid == sid))
+      continue;
+
+    // Props.
+    gp_Ax1 ax;
+    double rmin = 0.0;
+    double rmax = 0.0;
+
+    // Check whether face is toridal and extract its props.
+    const TopoDS_Face& face = m_it->GetGraph()->GetFace(nid);
+    if (!asiAlgo_Utils::IsToroidal(face, rmin, rmax, ax))
+    {
+      continue;
+    }
+
+    if (Abs((rmax + rmin) - refRadius) > m_fLinToler)
+    {
+      continue; // If this neighbor torus is a patch of the primary hole's
+                // geometry, then we expect it to have the same radius.
+    }
+
+    if (ax.Direction().IsParallel(refAxis.Direction(), m_fAngToler))
+    {
+      // Check whether torus location belongs the direction of cylinder.
+      const gp_Pnt& ax_P = ax.Location();
+
+#if defined DRAW_DEBUG
+      const gp_Pnt& ref_ax_P = refAxis.Location();
+      this->GetPlotter().DRAW_POINT(ax_P, Color_Green);
+      this->GetPlotter().DRAW_POINT(ref_ax_P, Color_Red);
+#endif
+
+      //
+      gp_Lin pln(refAxis);
+      if (pln.Distance(ax_P) < m_fLinToler)
+      {
+        collected.Add(nid);
+        this->visitNeighborToruses(sid,
+                                   nid,
+                                   refRadius,
+                                   refAxis,
+                                   collected);
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeDrillHolesRule::isInternal(const int     fid,
+                                                 const double  diameter,
+                                                 const gp_Ax1& ax) const
+{
+  const TopoDS_Face& face = m_it->GetGraph()->GetFace(fid);
+
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+
+  return this->isInternal(fid, diameter, (uMin + uMax)*0.5, (vMin + vMax)*0.5, ax);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_RecognizeDrillHolesRule::isInternal(const int     fid,
+                                                 const double  diameter,
+                                                 const double  u,
+                                                 const double  v,
+                                                 const gp_Ax1& ax) const
+{
+  const TopoDS_Face& face = m_it->GetGraph()->GetFace(fid);
+
+  BRepAdaptor_Surface bas(face);
+  BRepLProp_SLProps lprops( bas, u, v, 1, Precision::Confusion() );
+  //
+  if ( !lprops.IsNormalDefined() )
+    return false;
+
+  const gp_Pnt& cylPt   = lprops.Value();
+  gp_Dir        cylNorm = lprops.Normal();
+  //
+  if ( face.Orientation() == TopAbs_REVERSED )
+    cylNorm.Reverse();
+
+  // Take a probe point along the normal.
+  gp_Pnt normProbe = cylPt.XYZ() + cylNorm.XYZ()*diameter*0.05;
+
+#if defined DRAW_DEBUG
+  m_plotter.DRAW_POINT(cylPt, Color_Red, "cylPt");
+  m_plotter.DRAW_POINT(normProbe, Color_Green, "normProbe");
+#endif
+
+  // Compute the distance to the axis.
+  gp_Lin axisLin(ax);
+  //
+  const double probeDist = axisLin.Distance(normProbe);
+  const double cylDist   = axisLin.Distance(cylPt);
+  //
+  if ( probeDist < cylDist )
+  {
+    return true;
+  }
+
+  return false;
 }
