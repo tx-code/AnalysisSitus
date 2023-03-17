@@ -173,6 +173,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <AIS_InteractiveContext.hxx>
 #include <AIS_Shape.hxx>
 #include <Image_AlienPixMap.hxx>
+#include <V3d_DirectionalLight.hxx>
 #include <V3d_View.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
@@ -5863,78 +5864,88 @@ Handle(Image_AlienPixMap)
                                           const int           height)
 {
   Handle(Aspect_DisplayConnection)
-    _displayConnection = new Aspect_DisplayConnection();
+    displayConnection = new Aspect_DisplayConnection();
 
   // don't waste the time waiting for VSync when window is not displayed on the screen
-  OpenGl_Caps _caps;
-  _caps.buffersNoSwap = true;
+  OpenGl_Caps caps;
+  caps.buffersNoSwap = true;
 
   Handle(OpenGl_GraphicDriver)
-    _graphicDriver = new OpenGl_GraphicDriver(_displayConnection, false);
+    graphicDriver = new OpenGl_GraphicDriver(displayConnection, false);
   //
-  _graphicDriver->ChangeOptions() = _caps;
-  _graphicDriver->InitContext();
+  graphicDriver->ChangeOptions() = caps;
+  graphicDriver->InitContext();
 
   //* Viewer setup
-  Handle(V3d_Viewer) _viewer = new V3d_Viewer(_graphicDriver);
+  Handle(V3d_Viewer) viewer = new V3d_Viewer(graphicDriver);
   Quantity_Color bgColor(255. / 255, 255. / 255, 255. / 255, Quantity_TOC_RGB);
-  _viewer->SetDefaultBackgroundColor(bgColor);
-  _viewer->SetDefaultLights();
-  _viewer->SetLightOn();
+  viewer->SetDefaultBackgroundColor(bgColor);
+
+  // Lightning
+  Handle(V3d_DirectionalLight) lightDir =
+    new V3d_DirectionalLight(gp_Dir(0., 0., -1.),
+                             Quantity_NOC_WHITE,
+                             true);
+  //
+  viewer->AddLight(lightDir);
+  viewer->SetLightOn(lightDir);
 
   Handle(V3d_View)
-    _view = new V3d_View(_viewer, _viewer->DefaultTypeOfView());
+    view = new V3d_View(viewer, viewer->DefaultTypeOfView());
 
 #ifdef _WIN32
   /* Window - create a so called "virtual" WNT window that is a pure WNT window
      redefined to be never shown. */
-  Handle(WNT_WClass) _wClass = new WNT_WClass("GW3D_Class", (void*)DefWindowProcW,
-                                              CS_VREDRAW | CS_HREDRAW, 0, 0,
-                                              ::LoadCursor(NULL, IDC_ARROW));
+  Handle(WNT_WClass) wClass = new WNT_WClass("GW3D_Class", (void*)DefWindowProcW,
+                                             CS_VREDRAW | CS_HREDRAW, 0, 0,
+                                             ::LoadCursor(NULL, IDC_ARROW));
 
-  Handle(WNT_Window) _win = new WNT_Window("",
-    _wClass,
-    WS_POPUP,
-    0, 0,
-    width, height,
-    Quantity_NOC_BLACK);
+  Handle(WNT_Window) win = new WNT_Window("",
+                                          wClass,
+                                          WS_POPUP,
+                                          0, 0,
+                                          width, height,
+                                          Quantity_NOC_BLACK);
 
-  _win->SetVirtual(true);
-  _view->SetWindow(_win);
+  win->SetVirtual(true);
+  view->SetWindow(win);
 
 #else // Linux
-  Handle(Xw_Window) _win = new Xw_Window(_graphicDriver->GetDisplayConnection(),
-                                         "",
-                                         0, 0,
-                                         width, height);
-                                         _win->SetVirtual(true);
-                                         _view->SetWindow(_win);
+  Handle(Xw_Window) win = new Xw_Window(graphicDriver->GetDisplayConnection(),
+                                        "",
+                                        0, 0,
+                                        width, height);
+                                        win->SetVirtual(true);
+                                        view->SetWindow(win);
 #endif
 
   //* View setup
-  _view->SetWindow(_win);
-  _view->SetComputedMode(false);
-  _view->SetProj(V3d_XposYnegZpos);
-  _view->AutoZFit();
+  view->SetWindow(win);
+  view->SetComputedMode(false);
+  view->SetProj(V3d_XposYnegZpos);
+  view->AutoZFit();
 
   //* AIS context
-  Handle(AIS_InteractiveContext) _context = new AIS_InteractiveContext(_viewer);
-  _context->SetDisplayMode(AIS_Shaded, false);
-  _context->DefaultDrawer()->SetFaceBoundaryDraw(true);
+  Handle(AIS_InteractiveContext) context = new AIS_InteractiveContext(viewer);
+  context->SetDisplayMode(AIS_Shaded, false);
+  context->DefaultDrawer()->SetFaceBoundaryDraw(true);
 
   // Render immediate structures into back buffer rather than front.
-  _view->View()->SetImmediateModeDrawToFront(false);
+  view->View()->SetImmediateModeDrawToFront(false);
 
   //* Dump
   Handle(Image_AlienPixMap) pixmap = new Image_AlienPixMap;
-  Quantity_Color _shapeColor(200. / 255, 200. / 255, 200. / 255, Quantity_TOC_RGB);
 
-  Handle(AIS_Shape) _shapePrs = new AIS_Shape(shape);
-  _shapePrs->SetColor(_shapeColor);
-  _context->Display(_shapePrs, false);
-  _view->FitAll(0.1, true);
+  Quantity_Color shapeColor(180. / 255, 180. / 255, 180. / 255,
+                            Quantity_TOC_RGB);
 
-  bool isOk = _view->ToPixMap(*pixmap, width, height);
+  Handle(AIS_Shape) shapePrs = new AIS_Shape(shape);
+  shapePrs->SetColor(shapeColor);
+
+  context->Display(shapePrs, false);
+  view->FitAll(0.1, true);
+
+  bool isOk = view->ToPixMap(*pixmap, width, height);
 
   return isOk ? pixmap : nullptr;
 }

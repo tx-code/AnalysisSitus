@@ -510,7 +510,6 @@ set (points_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (re_H_FILES
-  re/asiAlgo_AppSurf2.h
   re/asiAlgo_BuildCoonsSurf.h
   re/asiAlgo_CheckDeviations.h
   re/asiAlgo_InterpolateSurfMesh.h
@@ -518,7 +517,6 @@ set (re_H_FILES
   re/asiAlgo_PlateOnEdges.h
 )
 set (re_CPP_FILES
-  re/asiAlgo_AppSurf2.cpp
   re/asiAlgo_BuildCoonsSurf.cpp
   re/asiAlgo_CheckDeviations.cpp
   re/asiAlgo_InterpolateSurfMesh.cpp
@@ -552,7 +550,9 @@ set (utils_CPP_FILES
 
 if (USE_MOBIUS)
   list(APPEND utils_H_FILES   utils/asiAlgo_MobiusProgressNotifier.h)
-  list(APPEND utils_CPP_FILES utils/asiAlgo_MobiusProgressNotifier.cpp)
+  list(APPEND utils_CPP_FILES utils/asiAlgo_MobiusProgressNotifier.cpp)   
+  list(APPEND re_H_FILES      re/asiAlgo_AppSurf2.h)
+  list(APPEND re_CPP_FILES    re/asiAlgo_AppSurf2.cpp)
 endif()
 
 #------------------------------------------------------------------------------
