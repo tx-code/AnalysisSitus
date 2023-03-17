@@ -657,6 +657,74 @@ int MOBIUS_POLY_FindAdjacent(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_GrowRegion(const Handle(asiTcl_Interp)& interp,
+                           int                          argc,
+                           const char**                 argv)
+{
+#if defined USE_MOBIUS
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( !facetIds.Extent() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No facets are selected.");
+    return TCL_ERROR;
+  }
+  //
+  if ( facetIds.Extent() != 1 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select one facet.");
+    return TCL_ERROR;
+  }
+
+  poly_TriangleHandle hseed( facetIds.GetMinimalMapped() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  std::unordered_set<poly_TriangleHandle> region;
+  mesh->GrowRegion(hseed, region);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Grow region")
+
+  // Find triangles.
+  TColStd_PackedMapOfInteger foundIds;
+  //
+  for ( const auto h : region )
+  {
+    foundIds.Add(h.iIdx);
+  }
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of triangles in the collected region: %1."
+                                                        << foundIds.Extent() );
+
+  trisApi.HighlightFacets(foundIds);
+
+  *interp << foundIds;
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 int MOBIUS_POLY_FindBoundary(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
@@ -2218,6 +2286,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Finds adjacent triangles for the given one.",
     //
     __FILE__, group, MOBIUS_POLY_FindAdjacent);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-grow-region",
+    //
+    "poly-grow-region\n"
+    "\n"
+    "\t Grows region starting from the selected seed facet.",
+    //
+    __FILE__, group, MOBIUS_POLY_GrowRegion);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-find-boundary",
