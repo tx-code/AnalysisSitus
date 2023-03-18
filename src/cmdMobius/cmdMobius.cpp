@@ -725,6 +725,41 @@ int MOBIUS_POLY_GrowRegion(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_CountCComps(const Handle(asiTcl_Interp)& interp,
+                            int                          argc,
+                            const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  TIMER_NEW
+  TIMER_GO
+
+  std::vector< std::unordered_set<poly_TriangleHandle> > ccomps;
+  mesh->ComputeCComponents(ccomps);
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Compute connected components")
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Num. of connected components: %1."
+                                                        << (int) ( ccomps.size() ) );
+
+  *interp << (int) ( ccomps.size() );
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 int MOBIUS_POLY_FindBoundary(const Handle(asiTcl_Interp)& interp,
                              int                          argc,
                              const char**                 argv)
@@ -2295,6 +2330,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t Grows region starting from the selected seed facet.",
     //
     __FILE__, group, MOBIUS_POLY_GrowRegion);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-count-ccomps",
+    //
+    "poly-count-ccomps\n"
+    "\n"
+    "\t Counts connected components in the active mesh.",
+    //
+    __FILE__, group, MOBIUS_POLY_CountCComps);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("poly-find-boundary",
