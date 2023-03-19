@@ -387,7 +387,7 @@ void asiAlgo_BaseCloud<TCoordType>::Clear()
 //-----------------------------------------------------------------------------
 
 template <typename TCoordType>
-bool asiAlgo_BaseCloud<TCoordType>::Load(const char* filename)
+bool asiAlgo_BaseCloud<TCoordType>::Load(const wchar_t* filename)
 {
   std::ifstream FILE(filename);
   if ( !FILE.is_open() )
@@ -421,7 +421,7 @@ bool asiAlgo_BaseCloud<TCoordType>::Load(const char* filename)
 //-----------------------------------------------------------------------------
 
 template <typename TCoordType>
-bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const char* filename) const
+bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const wchar_t* filename) const
 {
   std::ofstream FILE(filename);
   if ( !FILE.is_open() )

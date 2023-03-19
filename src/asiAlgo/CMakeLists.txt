@@ -19,8 +19,10 @@ set (CPP_FILES
 #------------------------------------------------------------------------------
 
 set (appsurf_H_FILES
+  appsurf/asiAlgo_AppSurfUtils.h
 )
 set (appsurf_CPP_FILES
+  appsurf/asiAlgo_AppSurfUtils.cpp
 )
 
 #------------------------------------------------------------------------------

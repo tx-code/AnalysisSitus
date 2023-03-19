@@ -185,6 +185,13 @@ set (cases_inspection_CPP_FILES
   cases/inspection/asiTest_VertexVexity.cpp
 )
 
+set (cases_modeling_H_FILES
+  cases/modeling/asiTest_AppSurf.h
+)
+set (cases_modeling_CPP_FILES
+  cases/modeling/asiTest_AppSurf.cpp
+)
+
 #------------------------------------------------------------------------------
 # Add sources
 #------------------------------------------------------------------------------
@@ -269,6 +276,16 @@ foreach (FILE ${cases_inspection_CPP_FILES})
   source_group ("Source Files\\Cases\\Inspection" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${cases_modeling_H_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Header Files\\Cases\\Modeling" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${cases_modeling_CPP_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Source Files\\Cases\\Modeling" FILES "${FILE}")
+endforeach (FILE)
+
 #------------------------------------------------------------------------------
 # Resources
 #------------------------------------------------------------------------------
@@ -288,6 +305,7 @@ set (asiTest_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/editing;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/exchange;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/framework;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/cases/modeling;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/inspection;")
 #
 set (asiTest_include_dir ${asiTest_include_dir_loc} PARENT_SCOPE)

@@ -135,16 +135,22 @@ public:
   //! \return converted string
   static TCollection_AsciiString ToAsciiString(const QString& qstr)
   {
+    // OpenCasade's ASCII string can hold UTF-8, e.g., for STEP import.
     return ( !qstr.isEmpty() ) ?
       TCollection_AsciiString( qstr.toUtf8().data() ) : TCollection_AsciiString();
   }
 
   //! Converts QString to std::string
   //! \return converted string
-  static std::string ToStandardString(const QString& theStr)
+  static std::string ToStandardString(const QString& qs)
   {
-    std::string utf8_text = theStr.toUtf8().constData();
-    return utf8_text;
+    // Either this if you use UTF-8 anywhere
+    // std::string utf8_text = qs.toUtf8().constData();
+
+    // or this if you're on Windows :-)
+    std::string current_locale_text = qs.toLocal8Bit().constData();
+
+    return current_locale_text;
   }
 
   //! Converts TCollection_ExtendedString to std::string

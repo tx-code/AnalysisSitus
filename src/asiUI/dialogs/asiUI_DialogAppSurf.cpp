@@ -33,7 +33,9 @@
 #include "asiUI_SelectFile.h"
 
 // asiAlgo includes
+//#include <asiAlgo_AppSurf1.h>
 #include <asiAlgo_AppSurf2.h>
+#include <asiAlgo_AppSurfUtils.h>
 #include <asiAlgo_PlateOnEdges.h>
 
 // asiEngine includes
@@ -51,6 +53,9 @@
 #include <QLabel>
 //
 #include <Standard_WarningsRestore.hxx>
+
+// OpenCascade includes
+#include <BRep_Builder.hxx>
 
 //-----------------------------------------------------------------------------
 
@@ -119,6 +124,24 @@ static const char* const image0_data[] = {
 "................................................",
 "................................................"};
 
+namespace
+{
+  //! Computes the default edge discretization precision for the passed shape.
+  double ComputeDefaultPrec(const TopoDS_Shape& shape)
+  {
+    double xMin, yMin, zMin, xMax, yMax, zMax;
+    if ( asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax, false) )
+    {
+      double d = gp_Pnt(xMin, yMin, zMin).Distance( gp_Pnt(xMax, yMax, zMax) );
+      d *= 0.05; // some percentage of AABB diagonal
+      //
+      return d;
+    }
+
+    return 0;
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
@@ -154,6 +177,9 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   // Selected edges.
   m_widgets.pEdges = new asiUI_LineEdit();
 
+  // Edge discretization precision.
+  m_widgets.pDiscrPrec = wf->CreateEditor("EdgeDiscrPrec", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+
   // Filename for xyz data.
   m_widgets.pSelectXYZLabel = new QLabel("Filename (xyz)", this);
   m_widgets.pSelectXYZ = new asiUI_SelectFile("XYZ point cloud (*.xyz)",
@@ -184,7 +210,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_widgets.pRemoveRow = new QPushButton(QIcon(":icons/asitus/table_remove.png"), QString());
   m_widgets.pRemoveRow->setToolTip("Delete Row");
   m_widgets.pRemoveRow->setFocusPolicy(Qt::NoFocus);
-  m_widgets.pClearTable = new QPushButton(QIcon(":icons/asitus/table_clear.svg"),    QString());
+  m_widgets.pClearTable = new QPushButton(QIcon(":icons/asitus/table_clear.png"), QString());
   m_widgets.pClearTable->setToolTip("Clear table");
   m_widgets.pClearTable->setFocusPolicy(Qt::NoFocus);
 
@@ -193,6 +219,10 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   m_widgets.pFairingCoeff = wf->CreateEditor("Fairing_coeff", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
   m_widgets.pNumIters     = wf->CreateEditor("Num_iters",     this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumUSpans    = wf->CreateEditor("Num_USpans",    this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumVSpans    = wf->CreateEditor("Num_VSpans",    this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pUDegree      = wf->CreateEditor("UDegree",       this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pVDegree      = wf->CreateEditor("VDegree",       this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
 
   //---------------------------------------------------------------------------
   // Buttons
@@ -245,10 +275,18 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   // Edge constraints.
   {
+    QFrame*      pDiscrPrecFrame  = new QFrame;
+    QHBoxLayout* pDiscrPrecLayout = new QHBoxLayout(pDiscrPrecFrame);
+    pDiscrPrecLayout->setSpacing(10);
+    pDiscrPrecLayout->setContentsMargins(5, 0, 200, 0);
+    //
+    m_widgets.pDiscrPrec->AddTo(pDiscrPrecLayout);
+
     QVBoxLayout* pLayout = new QVBoxLayout(pGroupEConstraints);
     pLayout->setSpacing(10);
     //
     pLayout->addWidget(m_widgets.pEdges);
+    pLayout->addWidget(pDiscrPrecFrame);
     //
     pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   }
@@ -271,7 +309,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     //
     pLayout->addWidget(m_widgets.pPoints);
 
-   // buttons
+    // buttons
     QFrame* addRemFrame = new QFrame(pGroupPPConstraints);
     QHBoxLayout* addRemLayout = new QHBoxLayout(addRemFrame);
 
@@ -289,16 +327,48 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   // Advanced.
   {
-    QGridLayout* pLayout = new QGridLayout(pGroupAdvanced);
-    pLayout->setSpacing(10);
-    //
-    pLayout->addWidget(m_widgets.pInitialSurfaceLabel, 0, 0);
-    pLayout->addWidget(m_widgets.pInitialSurface,      0, 1);
+    QVBoxLayout* pAdvLayout     = new QVBoxLayout(pGroupAdvanced);
+    QFrame*      pGridFrameTop  = new QFrame;
+    QFrame*      pGridFrameBot1 = new QFrame;
+    QFrame*      pGridFrameBot2 = new QFrame;
 
-    m_widgets.pFairingCoeff->AddTo(pLayout,            1, 0);
-    //m_widgets.pNumIters->AddTo    (pLayout,            2, 0);
+    pAdvLayout->setAlignment(Qt::AlignTop);
+
+    // Top grid.
+    QGridLayout* pGridLayoutTop = new QGridLayout(pGridFrameTop);
+    pGridLayoutTop->setSpacing(10);
+    pGridLayoutTop->setContentsMargins(10, 0, 10, 0);
     //
-    pLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    pGridLayoutTop->addWidget(m_widgets.pInitialSurfaceLabel, 0, 0);
+    pGridLayoutTop->addWidget(m_widgets.pInitialSurface,      0, 1);
+    //
+    m_widgets.pFairingCoeff->AddTo(pGridLayoutTop,            1, 0);
+    //
+    pGridLayoutTop->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+    // Bottom grid 1.
+    QHBoxLayout* pGridLayoutBot1 = new QHBoxLayout(pGridFrameBot1);
+    pGridLayoutBot1->setSpacing(10);
+    pGridLayoutBot1->setContentsMargins(10, 0, 10, 0);
+    //
+    m_widgets.pNumUSpans->AddTo(pGridLayoutBot1);
+    m_widgets.pNumVSpans->AddTo(pGridLayoutBot1);
+    //
+    pGridLayoutBot1->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+    // Bottom grid 2.
+    QHBoxLayout* pGridLayoutBot2 = new QHBoxLayout(pGridFrameBot2);
+    pGridLayoutBot2->setSpacing(10);
+    pGridLayoutBot2->setContentsMargins(10, 0, 10, 0);
+    //
+    m_widgets.pUDegree->AddTo(pGridLayoutBot2);
+    m_widgets.pVDegree->AddTo(pGridLayoutBot2);
+    //
+    pGridLayoutBot2->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+    pAdvLayout->addWidget(pGridFrameTop);
+    pAdvLayout->addWidget(pGridFrameBot1);
+    pAdvLayout->addWidget(pGridFrameBot2);
   }
 
   // Layout for buttons.
@@ -330,13 +400,14 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
 
   this->setLayout(m_pMainLayout);
   this->setWindowModality(Qt::WindowModal);
+  //this->setWindowFlag(Qt::WindowStaysOnTopHint);
   this->setWindowTitle("Fit surface");
   this->setWindowIcon( QIcon( QPixmap( (const char**) image0_data ) ) );
 
   // Adjust initial state.
   this->onChangeMethod(0);
 
-  if (m_pViewer)
+  if ( m_pViewer )
   {
     connect( m_pViewer, SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
              this,      SLOT   ( onEdgePicked() ) );
@@ -344,6 +415,17 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
     connect( m_pViewer, SIGNAL ( facePicked(asiVisu_PickerResult*) ),
              this,      SLOT   ( onFacePicked(asiVisu_PickerResult*) ) );
   }
+
+  // Compute initial value for the discretization precision.
+  asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+  //
+  TopoDS_Shape partSh = partApi.GetShape();
+  //
+  if ( !partSh.IsNull() )
+  {
+    m_widgets.pDiscrPrec->SetDouble( ::ComputeDefaultPrec(partSh) );
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -355,7 +437,7 @@ asiUI_DialogAppSurf::~asiUI_DialogAppSurf()
 
 void asiUI_DialogAppSurf::onEdgePicked()
 {
-  if (!m_model || !m_pViewer)
+  if ( !m_model || !m_pViewer )
     return;
 
   asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
@@ -363,19 +445,43 @@ void asiUI_DialogAppSurf::onEdgePicked()
   // Get selected edges.
   TColStd_PackedMapOfInteger eids;
   partApi.GetHighlightedEdges(eids);
+  //
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+  {
+    m_progress.SendLogMessage(LogWarn(Normal) << "Active part is null. Please, load a model before setting edge constraints.");
+    return;
+  }
+
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
 
   // Collect edges.
-  Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
+  BRep_Builder bbuilder;
+  TopoDS_Compound edgeComp;
+  bbuilder.MakeCompound(edgeComp);
   //
   QStringList edgeIds;
   for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
   {
     const int edgeId = eit.Key();
 
-    edgeIds.append( QString::number(edgeId) );
+    if ( edgeId >= 1 && edgeId <= allEdges.Extent() )
+    {
+      bbuilder.Add( edgeComp, allEdges(edgeId) );
+      edgeIds.append( QString::number(edgeId) );
+    }
+    else
+    {
+      m_progress.SendLogMessage(LogWarn(Normal) << "Edge with ID %1 does not exist in the model."
+                                                << edgeId);
+    }
   }
 
   m_widgets.pEdges->setText(edgeIds.join(" "));
+
+  if ( !eids.IsEmpty() )
+    m_widgets.pDiscrPrec->SetDouble( ::ComputeDefaultPrec(edgeComp) );
 }
 
 //-----------------------------------------------------------------------------
@@ -424,20 +530,21 @@ void asiUI_DialogAppSurf::onXYZSelected()
   if ( !file.exists() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "File '%1' does not exist."
-                                             << QStr2AsciiStr(fileName) );
+                                             << QStr2StdStr(fileName) );
     return;
   }
 
   // Load point cloud
   Handle(asiAlgo_BaseCloud<double>) cloud = new asiAlgo_BaseCloud<double>;
   //
-  if ( !cloud->Load( fileName.toLatin1() ) )
+  if ( !cloud->Load( QStr2ExtStr(fileName).ToWideString() ) )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Cannot load point cloud from '%1'."
-                                             << QStr2AsciiStr(fileName) );
+    m_progress.SendLogMessage( LogErr(Normal) << "Cannot load point cloud from '%1'."
+                                              << QStr2StdStr(fileName) );
     return;
   }
-  m_progress.SendLogMessage(LogInfo(Normal) << "Point cloud was loaded successfully.");
+  m_progress.SendLogMessage( LogInfo(Normal) << "Point cloud was successfully loaded from '%1'."
+                                             << QStr2StdStr(fileName) );
 
   // filling table with test values
   m_blockPointsChange = true;
@@ -491,6 +598,29 @@ void asiUI_DialogAppSurf::onApply()
 
   // Fairing coefficient.
   const double lambda = QVariant( m_widgets.pFairingCoeff->GetString() ).toDouble();
+
+  // Number of U/V spans.
+  const int numUSpans = QVariant( m_widgets.pNumUSpans->GetString() ).toInt();
+  const int numVSpans = QVariant( m_widgets.pNumVSpans->GetString() ).toInt();
+  //
+  if ( !numUSpans || !numVSpans )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Please, make sure to specify at least 1 span in U and V directions.");
+    return;
+  }
+
+  // U/V degrees.
+  const int UDegree = QVariant( m_widgets.pUDegree->GetString() ).toInt();
+  const int VDegree = QVariant( m_widgets.pVDegree->GetString() ).toInt();
+  //
+  if ( !UDegree || !VDegree )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Please, make sure to specify correct U and V surface degrees.");
+    return;
+  }
+
+  // Edge discretization precision.
+  const double edgeDiscrPrec = QVariant( m_widgets.pDiscrPrec->GetString() ).toDouble();
 
   /* ==================
    *  Read constraints.
@@ -561,14 +691,19 @@ void asiUI_DialogAppSurf::onApply()
   Handle(Geom_BSplineSurface)       surf;
   TopoDS_Face                       face;
 
+  /* =======
+   *  PLATE
+   * ======= */
+
   if ( m_method == Method_PLATE )
   {
     // Prepare interpolation tool.
     asiAlgo_PlateOnEdges interpAlgo(partApi.GetShape(), m_progress, m_plotter);
     //
-    interpAlgo.SetFairingCoeff (lambda);
-    interpAlgo.SetExtraPoints  (extraPts);
-    interpAlgo.SetInitSurf     (initSurf);
+    interpAlgo.SetFairingCoeff  (lambda);
+    interpAlgo.SetExtraPoints   (extraPts);
+    interpAlgo.SetInitSurf      (initSurf);
+    interpAlgo.SetEdgeDiscrPrec (edgeDiscrPrec);
 
     // Interpolate.
     if ( !interpAlgo.Build(hedges, GeomAbs_C0, surf, face) )
@@ -580,15 +715,48 @@ void asiUI_DialogAppSurf::onApply()
     finalConstraints = interpAlgo.GetConstraints();
   }
 
+  /* ==========
+   *  APPSURF1
+   * ========== */
+
+  //else if ( m_method == Method_APPSURF1 )
+  //{
+  //  // Prepare approximation tool.
+  //  asiAlgo_AppSurf1 approxAlgo(m_progress, m_plotter);
+  //  //
+  //  approxAlgo.ChangeAlpha(lambda);
+  //  approxAlgo.LoadPoints(extraPts);
+  //  approxAlgo.InitialPlane(UDegree, VDegree);
+
+  //  // Approximate.
+  //  if ( !approxAlgo.Build(surf) )
+  //  {
+  //    m_progress.SendLogMessage(LogErr(Normal) << "APPSURF1 failed.");
+  //    return;
+  //  }
+
+  //  //finalConstraints = approxAlgo.GetConstraints();
+  //}
+
+  /* ==========
+   *  APPSURF2
+   * ========== */
+
   else if ( m_method == Method_APPSURF2 )
   {
     // Prepare approximation tool.
     asiAlgo_AppSurf2 approxAlgo(m_progress, m_plotter);
     //
-    approxAlgo.SetFairingCoeff (lambda);
-    approxAlgo.SetExtraPoints  (extraPts);
+    approxAlgo.SetFairingCoeff  (lambda);
+    approxAlgo.SetExtraPoints   (extraPts);
+    approxAlgo.SetInitSurf      (initSurf);
+    approxAlgo.SetNumUKnots     (numUSpans + 1);
+    approxAlgo.SetNumVKnots     (numVSpans + 1);
+    approxAlgo.SetDegreeU       (UDegree);
+    approxAlgo.SetDegreeV       (VDegree);
+    approxAlgo.SetEdgeDiscrPrec (edgeDiscrPrec);
 
-    // Interpolate.
+    // Approximate.
     if ( !approxAlgo.Build(hedges, surf, face) )
     {
       m_progress.SendLogMessage(LogErr(Normal) << "APPSURF2 failed.");
@@ -597,9 +765,10 @@ void asiUI_DialogAppSurf::onApply()
 
     finalConstraints = approxAlgo.GetConstraints();
   }
+
   else
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "The selected method is not currently supported.");
+    m_progress.SendLogMessage(LogErr(Normal) << "The selected method is not yet supported.");
     return;
   }
 

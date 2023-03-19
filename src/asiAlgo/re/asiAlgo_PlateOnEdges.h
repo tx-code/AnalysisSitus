@@ -168,20 +168,6 @@ public:
     m_initSurf = initSurf;
   }
 
-  //! Sets the number of discretization points used to convert the curve
-  //! constraints to the plate-native pinpoint constraints.
-  //! \param[in] numPts number of points to set.
-  void SetNumDiscrPoints(const int numPts)
-  {
-    m_iNumDiscrPts = numPts;
-  }
-
-  //! \return used number of discretization points.
-  int GetNumDiscrPoints() const
-  {
-    return m_iNumDiscrPts;
-  }
-
   //! Sets fairing coefficient.
   //! \param[in] fairCoeff coefficient to set.
   void SetFairingCoeff(const double fairCoeff)
@@ -201,23 +187,30 @@ public:
     return m_pinPts;
   }
 
+  //! Sets the edge discretization precision in model units.
+  //! \param[in] prec the precision to set.
+  void SetEdgeDiscrPrec(const double prec)
+  {
+    m_fEdgeDiscrPrec = prec;
+  }
+
 protected:
 
   //! Adds pinpoint constraints to the given plate builder.
   asiAlgo_EXPORT void
     fillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
                     const unsigned int                       continuity,
-                    GeomPlate_BuildPlateSurface&             builder) const;
+                    GeomPlate_BuildPlateSurface&             builder);
 
 protected:
 
-  TopoDS_Shape                      m_shape;        //!< Working shape.
-  Handle(asiAlgo_AAG)               m_aag;          //!< AAG.
-  int                               m_iNumDiscrPts; //!< Number of discretization points.
-  double                            m_fFairCoeff;   //!< Optional fairing coefficient.
-  Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
-  Handle(asiAlgo_BaseCloud<double>) m_pinPts;       //!< All pinpoint constraints.
-  Handle(Geom_Surface)              m_initSurf;     //!< Initial surface.
+  TopoDS_Shape                      m_shape;          //!< Working shape.
+  Handle(asiAlgo_AAG)               m_aag;            //!< AAG.
+  double                            m_fEdgeDiscrPrec; //!< Number of discretization points.
+  double                            m_fFairCoeff;     //!< Optional fairing coefficient.
+  Handle(asiAlgo_BaseCloud<double>) m_extraPts;       //!< Extra pinpoint constraints.
+  Handle(asiAlgo_BaseCloud<double>) m_pinPts;         //!< All pinpoint constraints.
+  Handle(Geom_Surface)              m_initSurf;       //!< Initial surface.
 
 };
 

@@ -913,7 +913,7 @@ void asiUI_ObjectBrowser::onSaveToXYZ()
   Handle(asiAlgo_BaseCloud<double>) pts = ptsNode->GetPoints();
 
   // Save points.
-  if ( !pts->SaveAs( QStr2AsciiStr(filename).ToCString() ) )
+  if ( !pts->SaveAs( QStr2ExtStr(filename).ToWideString() ) )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot save point cloud.");
     return;

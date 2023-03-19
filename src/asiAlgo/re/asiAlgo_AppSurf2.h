@@ -85,20 +85,6 @@ public:
     m_initSurf = initSurf;
   }
 
-  //! Sets the number of discretization points used to convert the curve
-  //! constraints to the pinpoint constraints.
-  //! \param[in] numPts the number of points to set.
-  void SetNumDiscrPoints(const int numPts)
-  {
-    m_iNumDiscrPts = numPts;
-  }
-
-  //! \return the used number of discretization points.
-  int GetNumDiscrPoints() const
-  {
-    return m_iNumDiscrPts;
-  }
-
   //! Sets fairing coefficient.
   //! \param[in] fairCoeff the coefficient to set.
   void SetFairingCoeff(const double fairCoeff)
@@ -118,13 +104,52 @@ public:
     return m_pinPts;
   }
 
+  //! Sets the number of U knots for the initial plane.
+  //! \param[in] num the value to set.
+  void SetNumUKnots(const int num)
+  {
+    m_iNumUKnots = num;
+  }
+
+  //! Sets the number of V knots for the initial plane.
+  //! \param[in] num the value to set.
+  void SetNumVKnots(const int num)
+  {
+    m_iNumVKnots = num;
+  }
+
+  //! Sets the U degree for the initial plane.
+  //! \param[in] num the value to set.
+  void SetDegreeU(const int num)
+  {
+    m_iDegU = num;
+  }
+
+  //! Sets the V degree for the initial plane.
+  //! \param[in] num the value to set.
+  void SetDegreeV(const int num)
+  {
+    m_iDegV = num;
+  }
+
+  //! Sets the edge discretization precision in model units.
+  //! \param[in] prec the precision to set.
+  void SetEdgeDiscrPrec(const double prec)
+  {
+    m_fEdgeDiscrPrec = prec;
+  }
+
 protected:
 
-  int                               m_iNumDiscrPts; //!< Number of discretization points.
-  double                            m_fFairCoeff;   //!< Optional fairing coefficient.
-  Handle(asiAlgo_BaseCloud<double>) m_extraPts;     //!< Extra pinpoint constraints.
-  Handle(asiAlgo_BaseCloud<double>) m_pinPts;       //!< All pinpoint constraints.
-  Handle(Geom_Surface)              m_initSurf;     //!< Initial surface.
+  double                            m_fEdgeDiscrPrec; //!< Number of discretization points.
+  double                            m_fFairCoeff;     //!< Optional fairing coefficient.
+  Handle(asiAlgo_BaseCloud<double>) m_extraPts;       //!< Extra pinpoint constraints.
+  Handle(asiAlgo_BaseCloud<double>) m_pinPts;         //!< All pinpoint constraints.
+  Handle(Geom_Surface)              m_initSurf;       //!< Initial surface.
+  int                               m_iNumUKnots;     //!< Number of U knots.
+  int                               m_iNumVKnots;     //!< Number of V knots.
+  int                               m_iDegU;          //!< U degree.
+  int                               m_iDegV;          //!< V degree.
 
 };
 

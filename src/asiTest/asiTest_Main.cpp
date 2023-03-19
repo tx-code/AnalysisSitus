@@ -30,6 +30,7 @@
 
 // asiTest includes
 #include <asiTest_AAG.h>
+#include <asiTest_AppSurf.h>
 #include <asiTest_BuildQuickHull.h>
 #include <asiTest_ChangeColor.h>
 #include <asiTest_ConcatPCurves.h>
@@ -161,6 +162,9 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>           );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ComputeNegativeVolume> );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildQuickHull>        );
+
+  // Modeling.
+  //CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AppSurf> );
 
   // Data exchange tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );

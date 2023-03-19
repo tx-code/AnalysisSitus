@@ -32,6 +32,7 @@
 #include <asiAlgo_PlateOnEdges.h>
 
 // asiAlgo includes
+#include <asiAlgo_AppSurfUtils.h>
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_Timer.h>
 
@@ -82,52 +83,10 @@
 
 //-----------------------------------------------------------------------------
 
-namespace
-{
-
-  class PlateInspector : public NCollection_CellFilter_InspectorXYZ
-  {
-  public:
-    typedef gp_XYZ Target;
-
-    //! Constructor; remembers the tolerance.
-    PlateInspector(const double tol)
-    { m_tol = tol * tol; m_isFind = false; }
-
-    void ClearFind()
-    { m_isFind = false; }
-
-    const bool IsFind() const
-    { return m_isFind; }
-
-    //! Set current point to search for coincidence.
-    void SetCurrent(const gp_XYZ& pnt)
-    { m_current = pnt; }
-
-    //! Implementation of inspection method.
-    NCollection_CellFilter_Action Inspect(const Target& obj)
-    {
-      const gp_XYZ pt = m_current.Subtracted(obj);
-      const double sqDist = pt.SquareModulus();
-      if( sqDist < m_tol )
-        m_isFind = true;
-
-      return CellFilter_Keep;
-    }
-
-  private:
-    Standard_Real    m_tol;     //!< Squared comparison tolerance.
-    gp_XYZ           m_current; //!< Current point.
-    Standard_Boolean m_isFind;  //!< Detection state.
-  };
-}
-
-//-----------------------------------------------------------------------------
-
 asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(ActAPI_ProgressEntry progress,
                                            ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
-  m_iNumDiscrPts    ( 10 ),
+  m_fEdgeDiscrPrec  ( 1.0 ),
   m_fFairCoeff      ( 0.01 )
 {}
 
@@ -139,7 +98,7 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(const Handle(asiAlgo_AAG)& aag,
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_shape           ( aag->GetMasterShape() ),
   m_aag             ( aag),
-  m_iNumDiscrPts    ( 10 ),
+  m_fEdgeDiscrPrec  ( 1.0 ),
   m_fFairCoeff      ( 0.01 )
 {}
 
@@ -150,7 +109,7 @@ asiAlgo_PlateOnEdges::asiAlgo_PlateOnEdges(const TopoDS_Shape&  shape,
                                            ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_shape           ( shape ),
-  m_iNumDiscrPts    ( 10 ),
+  m_fEdgeDiscrPrec  ( 1.0 ),
   m_fFairCoeff      ( 0.01 )
 {}
 
@@ -239,9 +198,6 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
   /* ==============================
    *  STAGE 1: prepare constraints
    * ============================== */
-
-  // Fill constraints for giving them back.
-  m_pinPts = new asiAlgo_BaseCloud<double>;
 
   // Create builder instance.
   GeomPlate_BuildPlateSurface builder;
@@ -393,70 +349,25 @@ bool asiAlgo_PlateOnEdges::BuildFace(Handle(TopTools_HSequenceOfShape)& edges,
 
 void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShape)& edges,
                                            const unsigned int                       continuity,
-                                           GeomPlate_BuildPlateSurface&             builder) const
+                                           GeomPlate_BuildPlateSurface&             builder)
 {
-  const double tol =  0.5;
-  NCollection_CellFilter<PlateInspector> cellFilter(tol);
+  t_ptr<t_pcloud> pts = new t_pcloud;
 
-  /* ================================
-   *  Add constraints over the edges.
-   * ================================ */
+  asiAlgo_AppSurfUtils::PrepareConstraints(m_fEdgeDiscrPrec, edges, m_extraPts, pts);
 
-  // Iterate over edges to add point constraints.
-  for ( int i = 1; i <= edges->Size(); ++i )
+  // Fill constraints for giving them back.
+  m_pinPts = new asiAlgo_BaseCloud<double>;
+
+  for ( int k = 0; k < pts->GetNumberOfPoints(); ++k )
   {
-    const TopoDS_Edge& edge = TopoDS::Edge( edges->Value(i) );
-    BRepAdaptor_Curve curve(edge);
-    const double f = curve.FirstParameter();
-    const double l = curve.LastParameter();
+    gp_Pnt pnt = cascade::GetOpenCascadePnt( pts->GetPoint(k) );
 
-    // Get points from the current edge.
-    const int nbPnt = 23;
-    for ( int j = 0; j < nbPnt; ++j )
-    {
-      const double param = f + j * (l - f) / (nbPnt - 1);
-      const gp_Pnt pnt = curve.Value(param);
+    Handle(GeomPlate_PointConstraint)
+      pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
 
-      PlateInspector inspector(tol);
-      const gp_XYZ min = inspector.Shift(pnt.XYZ(), -tol);
-      const gp_XYZ max = inspector.Shift(pnt.XYZ(),  tol);
+    builder.Add(pntCon);
 
-      inspector.ClearFind();
-      inspector.SetCurrent( pnt.XYZ() );
-      cellFilter.Inspect(min, max, inspector);
-
-      if ( !inspector.IsFind() )
-      {
-        cellFilter.Add( pnt.XYZ(), pnt.XYZ() );
-
-        Handle(GeomPlate_PointConstraint)
-          pntCon = new GeomPlate_PointConstraint(pnt, continuity, 1.0e-4);
-
-        builder.Add(pntCon);
-
-        // Store constraint for reference.
-        m_pinPts->AddElement(pnt);
-      }
-    }
-  }
-
-  /* ================================
-   *  Add optional inner constraints.
-   * ================================ */
-
-  if ( !m_extraPts.IsNull() )
-  {
-    for ( int i = 0; i < m_extraPts->GetNumberOfElements(); ++i )
-    {
-      gp_Pnt Pi = m_extraPts->GetElement(i);
-
-      Handle(GeomPlate_PointConstraint)
-        pntCon = new GeomPlate_PointConstraint(Pi, continuity, 1.0e-4);
-
-      builder.Add(pntCon);
-
-      // Store constraint for reference.
-      m_pinPts->AddElement(Pi);
-    }
+    // Store constraint for reference.
+    m_pinPts->AddElement(pnt);
   }
 }

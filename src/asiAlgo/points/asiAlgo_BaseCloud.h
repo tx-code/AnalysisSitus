@@ -123,13 +123,13 @@ public:
   //! \param filename [in] file to read.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Load(const char* filename);
+    Load(const wchar_t* filename);
 
   //! Writes base cloud to file with given filename.
   //! \param filename [in] file to write into.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    SaveAs(const char* filename) const;
+    SaveAs(const wchar_t* filename) const;
 
 protected:
 

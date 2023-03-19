@@ -128,6 +128,7 @@ protected:
     QPushButton*      pClose;               //!< Closes the dialog.
     QComboBox*        pMethodSel;           //!< Selector for the surface fitting method.
     asiUI_LineEdit*   pEdges;               //!< Indices of edges.
+    asiUI_Datum*      pDiscrPrec;           //!< Discretization precision.
     QLabel*           pSelectXYZLabel;      //!< XYZ file selector label.
     asiUI_SelectFile* pSelectXYZ;           //!< XYZ file selector.
     asiUI_DatumTable* pPoints;              //!< Point coordinates.
@@ -138,12 +139,17 @@ protected:
     asiUI_LineEdit*   pInitialSurface;      //!< String name of the optional initial surface.
     asiUI_Datum*      pFairingCoeff;        //!< Fairing coefficient ranging.
     asiUI_Datum*      pNumIters;            //!< Number of iterations.
+    asiUI_Datum*      pNumUSpans;           //!< Number of U spans.
+    asiUI_Datum*      pNumVSpans;           //!< Number of V spans.
+    asiUI_Datum*      pUDegree;             //!< U degree.
+    asiUI_Datum*      pVDegree;             //!< V degree.
 
     //! Default ctor.
     t_widgets() : pApply               (nullptr),
                   pClose               (nullptr),
                   pMethodSel           (nullptr),
                   pEdges               (nullptr),
+                  pDiscrPrec           (nullptr),
                   pSelectXYZLabel      (nullptr),
                   pSelectXYZ           (nullptr),
                   pPoints              (nullptr),
@@ -153,7 +159,11 @@ protected:
                   pInitialSurfaceLabel (nullptr),
                   pInitialSurface      (nullptr),
                   pFairingCoeff        (nullptr),
-                  pNumIters            (nullptr)
+                  pNumIters            (nullptr),
+                  pNumUSpans           (nullptr),
+                  pNumVSpans           (nullptr),
+                  pUDegree             (nullptr),
+                  pVDegree             (nullptr)
     {}
 
     void Release()
@@ -162,6 +172,7 @@ protected:
       delete pClose;               pClose               = nullptr;
       delete pMethodSel;           pMethodSel           = nullptr;
       delete pEdges;               pEdges               = nullptr;
+      delete pDiscrPrec;           pDiscrPrec           = nullptr;
       delete pSelectXYZLabel;      pSelectXYZLabel      = nullptr;
       delete pSelectXYZ;           pSelectXYZ           = nullptr;
       delete pPoints;              pPoints              = nullptr;
@@ -172,6 +183,10 @@ protected:
       delete pInitialSurface;      pInitialSurface      = nullptr;
       delete pFairingCoeff;        pFairingCoeff        = nullptr;
       delete pNumIters;            pNumIters            = nullptr;
+      delete pNumUSpans;           pNumUSpans           = nullptr;
+      delete pNumVSpans;           pNumVSpans           = nullptr;
+      delete pUDegree;             pUDegree             = nullptr;
+      delete pVDegree;             pVDegree             = nullptr;
     }
   };
 
