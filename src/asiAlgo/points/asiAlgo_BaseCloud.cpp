@@ -39,6 +39,9 @@
 #include <gp_Ax3.hxx>
 #include <gp_Vec.hxx>
 
+// Standard includes
+#include <array>
+
 // Eigen includes
 #pragma warning(push, 0)
 #pragma warning(disable : 4702 4701)
@@ -59,6 +62,25 @@ namespace
   {
     return p1.first > p2.first;
   }
+
+#if !defined WIN32
+  std::string convert(const std::wstring& wstr)
+  {
+    const int BUFF_SIZE = 7;
+    if (MB_CUR_MAX >= BUFF_SIZE) throw std::invalid_argument("BUFF_SIZE too small");
+    std::string result;
+    bool shifts = std::wctomb(nullptr, 0);  // reset the conversion state
+    for (const wchar_t wc : wstr)
+    {
+        std::array<char, BUFF_SIZE> buffer;
+        const int ret = std::wctomb(buffer.data(), wc);
+        if (ret < 0) throw std::invalid_argument("inconvertible wide characters in the current locale");
+        buffer[ret] = '\0';  // make 'buffer' contain a C-style string
+        result = result + std::string(buffer.data());
+    }
+    return result;
+  }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -389,7 +411,12 @@ void asiAlgo_BaseCloud<TCoordType>::Clear()
 template <typename TCoordType>
 bool asiAlgo_BaseCloud<TCoordType>::Load(const wchar_t* filename)
 {
+#if defined WIN32
   std::ifstream FILE(filename);
+#else
+  std::ifstream FILE( ::convert( std::wstring(filename) ) );
+#endif
+
   if ( !FILE.is_open() )
     return false;
 
