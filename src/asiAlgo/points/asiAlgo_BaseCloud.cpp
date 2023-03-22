@@ -450,7 +450,12 @@ bool asiAlgo_BaseCloud<TCoordType>::Load(const wchar_t* filename)
 template <typename TCoordType>
 bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const wchar_t* filename) const
 {
+#if defined WIN32
   std::ofstream FILE(filename);
+#else
+  std::ofstream FILE( ::convert( std::wstring(filename) ) );
+#endif
+
   if ( !FILE.is_open() )
     return false;
 
