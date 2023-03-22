@@ -224,6 +224,41 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFact
 
 //-----------------------------------------------------------------------------
 
+asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
+                                                   asiUI_ViewerDomain*             wViewerDomain,
+                                                   asiUI_ViewerHost*               wViewerHost,
+                                                   asiUI_ObjectBrowser*            wBrowser,
+                                                   const Handle(asiUI_IStatusBar)& statusBar,
+                                                   const Handle(asiEngine_Model)&  model,
+                                                   ActAPI_ProgressEntry            progress,
+                                                   ActAPI_PlotterEntry             plotter)
+//
+: asiUI_Viewer3dListener (wViewerPart, model, progress, plotter),
+  m_wViewerDomain        (wViewerDomain),
+  m_wViewerHost          (wViewerHost),
+  m_wBrowser             (wBrowser),
+  m_statusBar            (statusBar),
+  m_pSaveBREP            (nullptr),
+  m_pSaveSTL             (nullptr),
+  m_pShowNorms           (nullptr),
+  m_pInvertFaces         (nullptr),
+  m_pSplConvert          (nullptr),
+  m_pFillEdges           (nullptr),
+  m_pShowOriContour      (nullptr),
+  m_pShowHatching        (nullptr),
+  m_pCopyAsString        (nullptr),
+  m_pSetAsVariable       (nullptr),
+  m_pFindIsolated        (nullptr),
+  m_pCheckDihAngle       (nullptr),
+  m_pAddAsFeature        (nullptr),
+  m_pGetAsBLOB           (nullptr),
+  m_pMeasureLength       (nullptr),
+  m_pGetSpannedAngle     (nullptr),
+  m_pCheckThickness      (nullptr)
+{}
+
+//-----------------------------------------------------------------------------
+
 asiUI_ViewerPartListener::~asiUI_ViewerPartListener()
 {}
 

@@ -71,6 +71,24 @@ public:
                            ActAPI_ProgressEntry               progress,
                            ActAPI_PlotterEntry                plotter);
 
+  //! Constructor accepting all necessary facilities.
+  //! \param[in] wViewerPart   part viewer.
+  //! \param[in] wViewerDomain domain viewer.
+  //! \param[in] wViewerHost   host viewer.
+  //! \param[in] wBrowser      object browser.
+  //! \param[in] statusBar     status bar interface.
+  //! \param[in] model         Data Model instance.
+  //! \param[in] progress      progress notifier.
+  //! \param[in] plotter       imperative plotter.
+  asiUI_ViewerPartListener(asiUI_ViewerPart*               wViewerPart,
+                           asiUI_ViewerDomain*             wViewerDomain,
+                           asiUI_ViewerHost*               wViewerHost,
+                           asiUI_ObjectBrowser*            wBrowser,
+                           const Handle(asiUI_IStatusBar)& statusBar,
+                           const Handle(asiEngine_Model)&  model,
+                           ActAPI_ProgressEntry            progress,
+                           ActAPI_PlotterEntry             plotter);
+
   //! Dtor.
   virtual
     ~asiUI_ViewerPartListener();
