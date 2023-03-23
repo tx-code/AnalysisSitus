@@ -40,7 +40,6 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 #include <BRepTools_WireExplorer.hxx>
-#include <DBRep.hxx>
 #include <ElCLib.hxx>
 #include <Extrema_ExtElC.hxx>
 #include <Extrema_POnCurv.hxx>
