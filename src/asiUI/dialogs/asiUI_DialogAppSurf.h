@@ -34,6 +34,7 @@
 // asiUI includes
 #include <asiUI_DatumTable.h>
 #include <asiUI_LineEdit.h>
+#include <asiUI_MobiusProgressNotifier.h>
 #include <asiUI_SelectFile.h>
 #include <asiUI_ViewerPart.h>
 
@@ -45,6 +46,7 @@
 //
 #include <QComboBox>
 #include <QDialog>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QVBoxLayout>
 //
@@ -63,7 +65,6 @@ public:
   enum Method
   {
     Method_PLATE = 0, //!< PLATE interpolation.
-    Method_APPSURF1,  //!< APPSURF1 algorithm.
     Method_APPSURF2   //!< APPSURF2 algorithm.
   };
 
@@ -113,6 +114,9 @@ public slots:
   //! Reaction on clicking "Apply" button.
   void onApply();
 
+  //! Cancel button clicked.
+  void onCancel();
+
 private:
 
   //! Collects all points from the table in the returned point cloud.
@@ -143,6 +147,8 @@ protected:
     asiUI_Datum*      pNumVSpans;           //!< Number of V spans.
     asiUI_Datum*      pUDegree;             //!< U degree.
     asiUI_Datum*      pVDegree;             //!< V degree.
+    QWidget*          pProgressFrame;       //!< Progress widget.
+    QProgressBar*     pProgressBar;         //!< Progress bar.
 
     //! Default ctor.
     t_widgets() : pApply               (nullptr),
@@ -163,7 +169,9 @@ protected:
                   pNumUSpans           (nullptr),
                   pNumVSpans           (nullptr),
                   pUDegree             (nullptr),
-                  pVDegree             (nullptr)
+                  pVDegree             (nullptr),
+                  pProgressFrame       (nullptr),
+                  pProgressBar         (nullptr)
     {}
 
     void Release()
@@ -187,6 +195,8 @@ protected:
       delete pNumVSpans;           pNumVSpans           = nullptr;
       delete pUDegree;             pUDegree             = nullptr;
       delete pVDegree;             pVDegree             = nullptr;
+      delete pProgressFrame;       pProgressFrame       = nullptr;
+      delete pProgressBar;         pProgressBar         = nullptr;
     }
   };
 
@@ -201,8 +211,9 @@ protected:
 
   /* Diagnostics */
 
-  ActAPI_ProgressEntry m_progress; //!< Progress notifier.
-  ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
+  ActAPI_ProgressEntry       m_progress;    //!< Progress notifier.
+  ActAPI_PlotterEntry        m_plotter;     //!< Imperative plotter.
+  mobius::core_ProgressEntry m_mobProgress; //!< Mobius progress controller.
 
 };
 

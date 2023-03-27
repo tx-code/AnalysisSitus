@@ -77,6 +77,7 @@
 #pragma warning(push, 0)
 #include <QApplication>
 #include <QClipboard>
+#include <QMainWindow>
 #pragma warning(pop)
 
 #if defined USE_MOBIUS
@@ -1362,10 +1363,15 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   {
     asiUI_ViewerPart* pViewer = dynamic_cast<asiUI_ViewerPart*>(m_pViewer);
 
-    asiUI_DialogAppSurf dlgAppSurf(m_widgetFactory, m_model, pViewer, m_progress, m_plotter);
+    asiUI_DialogAppSurf*
+      pDlgAppSurf = new asiUI_DialogAppSurf(m_widgetFactory,
+                                            m_model,
+                                            pViewer,
+                                            m_progress,
+                                            m_plotter,
+                                            m_widgetFactory->GetCommonFacilities()->MainWindow);
 
-    dlgAppSurf.onEdgePicked();
-
-    dlgAppSurf.exec();
+    pDlgAppSurf->onEdgePicked();
+    pDlgAppSurf->show();
   }
 }

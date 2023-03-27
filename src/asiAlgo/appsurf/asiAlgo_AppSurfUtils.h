@@ -61,4 +61,12 @@ namespace asiAlgo_AppSurfUtils
                        const Handle(TopTools_HSequenceOfShape)& edges,
                        const Handle(asiAlgo_BaseCloud<double>)& extras,
                        const mobius::t_ptr<mobius::t_pcloud>&   pts);
+
+  //! Measures the obtained deviation.
+  asiAlgo_EXPORT void
+    MeasureDeviation(const Handle(Geom_BSplineSurface)&       bsurf,
+                     const Handle(asiAlgo_BaseCloud<double>)& pts,
+                     double&                                  minDeviation,
+                     double&                                  maxDeviation,
+                     double&                                  avrDeviation);
 };

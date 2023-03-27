@@ -34,30 +34,27 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 
-// Active Data includes
-#include <ActAPI_IAlgorithm.h>
-
 // OCCT includes
 #include <Geom_BSplineSurface.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
+// Mobius includes
+#include <mobius/core_IAlgorithm.h>
+
 //-----------------------------------------------------------------------------
 
 //! Runs APPSURF2 surface fitting algorithm.
-class asiAlgo_AppSurf2 : public ActAPI_IAlgorithm
+class asiAlgo_AppSurf2 : public mobius::core_IAlgorithm
 {
-  // OCCT RTTI
-  DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AppSurf2, ActAPI_IAlgorithm)
-
 public:
 
   //! Default ctor.
   //! \param[in] progress the progress indicator.
   //! \param[in] plotter  the imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_AppSurf2(ActAPI_ProgressEntry progress = nullptr,
-                     ActAPI_PlotterEntry  plotter  = nullptr);
+    asiAlgo_AppSurf2(mobius::core_ProgressEntry progress = nullptr,
+                     mobius::core_PlotterEntry  plotter  = nullptr);
 
 public:
 

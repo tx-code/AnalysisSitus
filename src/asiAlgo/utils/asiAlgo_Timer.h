@@ -120,4 +120,16 @@
     Notifier.SendLogMessage(LogInfo(Normal) << "... Finished."); \
   }
 
+#define TIMER_COUT_RESULT_NOTIFIER_MOBIUS(Notifier, Msg) \
+  { \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "============================================="); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "%1" << Msg); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "---------------------------------------------"); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "\tElapsed time (seconds):  %1" << __aux_debug_Seconds); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "\tElapsed time (minutes):  %1" << __aux_debug_Minutes); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "\tElapsed time (hours):    %1" << __aux_debug_Hours); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "\tElapsed time (CPU time): %1" << __aux_debug_CPUTime); \
+    Notifier.SendLogMessage(MobiusInfo(Normal) << "... Finished."); \
+  }
+
 #endif

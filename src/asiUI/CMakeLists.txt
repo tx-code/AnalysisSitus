@@ -353,6 +353,7 @@ set (utils_H_FILES
   utils/asiUI_DataAdaptor.h
   utils/asiUI_IV.h
   utils/asiUI_Logger.h
+  utils/asiUI_MobiusProgressNotifier.h
   utils/asiUI_OverrideCursor.h
   utils/asiUI_PrimDataAdaptor.h
 )
@@ -371,6 +372,7 @@ set (utils_CPP_FILES
   utils/asiUI_DataAdaptor.cpp
   utils/asiUI_IV.cpp
   utils/asiUI_Logger.cpp
+  utils/asiUI_MobiusProgressNotifier.cpp
   utils/asiUI_OverrideCursor.cpp
   utils/asiUI_PrimDataAdaptor.cpp
   utils/asiUI_PrimDataView.cpp

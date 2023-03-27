@@ -36,9 +36,11 @@
 
 // OpenCascade includes
 #include <BRepAdaptor_Curve.hxx>
+#include <Extrema_ExtPS.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomConvert.hxx>
 #include <GeomLib.hxx>
 #include <NCollection_CellFilter.hxx>
@@ -208,7 +210,7 @@ void asiAlgo_AppSurfUtils::PrepareConstraints(const double                      
                                               const Handle(asiAlgo_BaseCloud<double>)& extras,
                                               const t_ptr<t_pcloud>&                   pts)
 {
-  const double tol = 0.5;
+  const double tol = 0.5*prec;
   NCollection_CellFilter<ApproxInspector> cellFilter(tol);
 
   /* ================================
@@ -271,4 +273,77 @@ void asiAlgo_AppSurfUtils::PrepareConstraints(const double                      
       pts->AddPoint( cascade::GetMobiusPnt(Pi) );
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineSurface)&       bsurf,
+                                            const Handle(asiAlgo_BaseCloud<double>)& pts,
+                                            double&                                  minDeviation,
+                                            double&                                  maxDeviation,
+                                            double&                                  avrDeviation)
+{
+  double U, V, UMin, UMax, VMin, VMax;
+  double curDev = 0, minDev = 0, maxDev = 0, summDev = 0;
+
+  bsurf->Bounds(UMin, UMax, VMin, VMax);
+
+  double Tolerance = Precision::PConfusion();
+  GeomAdaptor_Surface gas(bsurf);
+
+  Extrema_ExtPS extPS;
+  extPS.Initialize(gas, UMin, UMax, VMin, VMax, Tolerance, Tolerance);
+
+  const int nPts = pts->GetNumberOfElements();
+  //
+  for ( int i = 0; i < nPts; ++i )
+  {
+    gp_XYZ P = pts->GetElement(i);
+    extPS.Perform(P);
+
+    double curDist, dist;
+    int    index = 1;
+
+    if ( extPS.IsDone() && (extPS.NbExt() > 0) )
+    {
+      dist = extPS.SquareDistance(1);
+
+      for ( int j = 2; j <= extPS.NbExt(); ++j )
+      {
+        curDist = extPS.SquareDistance(j);
+
+        if ( curDist < dist )
+        {
+          dist = curDist;
+          index = j;
+        }
+      }
+    }
+
+    extPS.Point(index).Parameter(U, V);
+
+    gp_Pnt Pntproj;
+    bsurf->D0(U, V, Pntproj);
+    const gp_XYZ gap3d(P - Pntproj.XYZ());
+    const gp_XY con2d(U,V);
+
+    curDev = Pntproj.Distance(P);
+    summDev += curDev;
+    if ( i == 1 )
+    {
+      minDev = curDev;
+      maxDev = curDev;
+    }
+    else
+    {
+      if ( curDev < minDev )
+        minDev = curDev;
+      if ( curDev > maxDev )
+        maxDev = curDev;
+    }
+  }
+
+  minDeviation = minDev;
+  maxDeviation = maxDev;
+  avrDeviation = summDev / nPts;
 }

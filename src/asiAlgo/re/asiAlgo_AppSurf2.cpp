@@ -57,9 +57,9 @@ using namespace mobius;
 
 //-----------------------------------------------------------------------------
 
-asiAlgo_AppSurf2::asiAlgo_AppSurf2(ActAPI_ProgressEntry progress,
-                                   ActAPI_PlotterEntry  plotter)
-: ActAPI_IAlgorithm (progress, plotter),
+asiAlgo_AppSurf2::asiAlgo_AppSurf2(core_ProgressEntry progress,
+                                   core_PlotterEntry  plotter)
+: core_IAlgorithm   (progress, plotter),
   m_fEdgeDiscrPrec  ( 1.0 ),
   m_fFairCoeff      ( 0.01 ),
   m_iNumUKnots      ( 2 ),
@@ -103,7 +103,7 @@ bool asiAlgo_AppSurf2::Build(const Handle(TopTools_HSequenceOfShape)& edges,
   TIMER_GO
 
   // Prepare approximation tool.
-  geom_ApproxBSurf approx(pts, m_iDegU, m_iDegV, MobiusProgress(m_progress));
+  geom_ApproxBSurf approx(pts, m_iDegU, m_iDegV, m_progress);
 
   // Optional initial surface.
   Handle(Geom_BSplineSurface) initSurf;
@@ -121,25 +121,26 @@ bool asiAlgo_AppSurf2::Build(const Handle(TopTools_HSequenceOfShape)& edges,
                                                          m_iDegV);
   }
   //
-  approx.SetInitSurface( cascade::GetMobiusBSurface(initSurf) );
+  if ( !initSurf.IsNull() )
+    approx.SetInitSurface( cascade::GetMobiusBSurface(initSurf) );
 
   // Approximate.
   try
   {
     if ( !approx.Perform(m_fFairCoeff) )
     {
-      m_progress.SendLogMessage(LogErr(Normal) << "Approximation with APPSURF2 failed.");
+      m_progress.SendLogMessage(MobiusErr(Normal) << "Approximation with APPSURF2 failed.");
       return false;
     }
   }
   catch ( ... )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Approximation with APPSURF2 failed.");
+    m_progress.SendLogMessage(MobiusErr(Normal) << "Approximation with APPSURF2 failed.");
     return false;
   }
 
   TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(m_progress, "APPSURF2")
+  TIMER_COUT_RESULT_NOTIFIER_MOBIUS(m_progress, "APPSURF2")
 
   // Get result.
   t_ptr<t_bsurf> mobResSurf = approx.GetResult();

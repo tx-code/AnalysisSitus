@@ -78,90 +78,76 @@
   using namespace mobius;
 #endif
 
+#include <BRepTools.hxx>
+#include <Geom2d_Line.hxx>
+#include <Geom2dAPI_InterCurveCurve.hxx>
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
-              int                          cmdMisc_NotUsed(argc),
+              int                          argc,
               const char**                 argv)
 {
-#if defined USE_MOBIUS
-  struct Traits : public poly_Traits
+  asiEngine_Part partApi( cmdMisc::cf->Model,
+                          cmdMisc::cf->ViewerPart->PrsMgr() );
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdMisc::cf.IsNull() )
   {
-    int testIdx;
-  };
+    partApi.GetHighlightedFaces(selected);
+  }
 
-  t_ptr<poly_Mesh<Traits>> mobMesh = new poly_Mesh<Traits>;
-  mobMesh->AddVertex(0,0,0);
-#endif
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
 
-  //Handle(Geom_Plane) drawingPlane = new Geom_Plane( gp::Origin(), gp::DZ() );
+  if ( selected.Extent() != 1 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select exactly one face.");
+    return TCL_ERROR;
+  }
 
-  //std::vector<gp_XY> pts = {
-  //  gp_XY(1108.8858916194, 355),
-  //  gp_XY(1258.8858916194, 355),
-  //  gp_XY(1183.8858916194, 382.5),
-  //  gp_XY(1258.8858916194, 382.5),
-  //  gp_XY(1258.9377598936, 115.5),
-  //  gp_XY(1058.8858916194, 231),
-  //  gp_XY(1108.8858916194, 382.5),
-  //  gp_XY(1258.8858916194, 350),
-  //  gp_XY(1108.8858916194, 350),
-  //  gp_XY(858.8340233452, 115.5),
-  //  gp_XY(836.3858916194, 615),
-  //  gp_XY(858.8340233452, 0),
-  //  gp_XY(836.3858916194, 130),
-  //  gp_XY(836.3858916194, 392.5),
-  //  gp_XY(831.3858916194, 50),
-  //  gp_XY(808.8858916194, 0),
-  //  gp_XY(808.8858916194, 650),
-  //  gp_XY(1008.8858916194, 630),
-  //  gp_XY(1108.8858916194, 630),
-  //  gp_XY(1308.8858916194, 650),
-  //  gp_XY(1308.8858916194, 0),
-  //  gp_XY(1258.9377598936, 0) };
+  fid = selected.GetMinimalMapped();
 
-  //Handle(asiAlgo_BaseCloud<double>) pcloud = new asiAlgo_BaseCloud<double>;
-  ////
-  //Handle(asiAlgo_PointWithAttrCloud<gp_XY>)
-  //  cloud = new asiAlgo_PointWithAttrCloud<gp_XY>;
-  ////
-  //for ( const auto& pt : pts )
-  //{
-  //  cloud ->AddElement( pt );
-  //  pcloud->AddElement( drawingPlane->Value( pt.X(), pt.Y() ) );
-  //}
+  const TopoDS_Face& face = partApi.GetAAG()->GetFace(fid);
 
-  //interp->GetPlotter().REDRAW_POINTS("pcloud", pcloud->GetCoordsArray(), Color_White);
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
 
-  //asiAlgo_QuickHull2d<gp_XY> qHull( cloud,
-  //                                  interp->GetProgress(),
-  //                                  interp->GetPlotter() );
+  const double uMid = (uMin + uMax)*0.5;
+  const double vMid = (vMin + vMax)*0.5;
 
-  //if ( !qHull.Perform() )
-  //{
-  //  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build convex hull.");
-  //  return TCL_ERROR;
-  //}
+  Handle(Geom_Surface) surf    = BRep_Tool::Surface(face);
+  Handle(Geom2d_Line)  isoLine = new Geom2d_Line( gp_Lin2d( gp_Pnt2d(uMid, vMid), gp::DY2d() ) );
 
-  //const Handle(TColStd_HSequenceOfInteger)& hull = qHull.GetHull();
+  interp->GetPlotter().DRAW_CURVE( surf->UIso(uMid), Color_Green, false, "uIso" );
 
-  //// Make polygon.
-  //BRepBuilderAPI_MakePolygon mkPolygon;
-  ////
-  //for ( int hidx = hull->Lower(); hidx <= hull->Upper(); ++hidx )
-  //{
-  //  const int index = hull->Value(hidx);
-  //  gp_XY     xy    = cloud->GetElement(index).Coord;
+  for ( TopExp_Explorer eexp(face, TopAbs_EDGE); eexp.More(); eexp.Next() )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( eexp.Current() );
 
-  //  mkPolygon.Add( drawingPlane->Value( xy.X(), xy.Y() ) );
-  //}
-  ////
-  //mkPolygon.Close(); // Polygon should be closed
-  //mkPolygon.Build();
-  ////
-  //const TopoDS_Wire& W = mkPolygon.Wire();
+    // Get pcurve of an edge.
+    double f, l;
+    Handle(Geom2d_Curve) pcurve = BRep_Tool::CurveOnSurface(edge, face, f, l);
 
-  //interp->GetPlotter().REDRAW_SHAPE("convexHull", W, Color_Green, 1., true);
+    Geom2dAPI_InterCurveCurve intersector(isoLine, pcurve);
+
+    if ( intersector.NbPoints() )
+    {
+      const int nsol = intersector.NbPoints();
+      for ( int isol = 1; isol <= nsol; ++isol )
+      {
+        gp_Pnt2d pt2d = intersector.Point(isol);
+        gp_Pnt   pt   = surf->Value( pt2d.X(), pt2d.Y() );
+
+        interp->GetPlotter().DRAW_POINT(pt, Color_Red, "intersectionPoint");
+      }
+    }
+  }
 
   return TCL_OK;
 }

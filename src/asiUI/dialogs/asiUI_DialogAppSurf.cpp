@@ -33,7 +33,6 @@
 #include "asiUI_SelectFile.h"
 
 // asiAlgo includes
-//#include <asiAlgo_AppSurf1.h>
 #include <asiAlgo_AppSurf2.h>
 #include <asiAlgo_AppSurfUtils.h>
 #include <asiAlgo_PlateOnEdges.h>
@@ -51,6 +50,7 @@
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QToolButton>
 //
 #include <Standard_WarningsRestore.hxx>
 
@@ -165,14 +165,17 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   QGroupBox* pGroupEConstraints  = new QGroupBox("Edge constraints");
   QGroupBox* pGroupPPConstraints = new QGroupBox("Pin-point constraints");
   QGroupBox* pGroupAdvanced      = new QGroupBox("Advanced");
-  QFrame*    bButtonsFrame  = new QFrame;
+  QFrame*    bButtonsFrame       = new QFrame;
 
   // Method.
   m_widgets.pMethodSel = new QComboBox();
   //
   m_widgets.pMethodSel->addItem("PLATE",    Method_PLATE);
-  m_widgets.pMethodSel->addItem("APPSURF1", Method_APPSURF1);
+  //m_widgets.pMethodSel->addItem("APPSURF1", Method_APPSURF1);
   m_widgets.pMethodSel->addItem("APPSURF2", Method_APPSURF2);
+  //
+  m_widgets.pMethodSel->setCurrentIndex(Method_APPSURF2);
+  this->onChangeMethod(Method_APPSURF2); // Adjust initial state.
 
   // Selected edges.
   m_widgets.pEdges = new asiUI_LineEdit();
@@ -381,6 +384,44 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   }
 
   //---------------------------------------------------------------------------
+  // Progress indication
+  //---------------------------------------------------------------------------
+
+  m_widgets.pProgressFrame = new QWidget(this);
+
+  // Progress indicator.
+  m_widgets.pProgressBar = new QProgressBar;
+  m_widgets.pProgressBar->setRange(0, 0);
+  m_widgets.pProgressBar->setTextVisible(false);
+  m_widgets.pProgressBar->setAlignment(Qt::AlignHCenter);
+  m_widgets.pProgressBar->setMinimumWidth(200);
+  m_widgets.pProgressFrame->hide();
+
+  // Cancel button
+  QIcon cancelIcon(":icons/asitus/asitus_cancel_icon_16x16.png");
+  //
+  QToolButton* pCancelButton = new QToolButton(m_widgets.pProgressFrame);
+  pCancelButton->setIcon(cancelIcon);
+  pCancelButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  pCancelButton->setSizePolicy( QSizePolicy(QSizePolicy::Preferred,
+                                            QSizePolicy::Expanding) );
+  //
+  connect( pCancelButton, SIGNAL( clicked() ), this, SLOT( onCancel() ) );
+
+  // Configure layout.
+  QHBoxLayout* progressLayout = new QHBoxLayout();
+  progressLayout->setMargin(2);
+  progressLayout->setSpacing(3);
+  progressLayout->addWidget(m_widgets.pProgressBar, 10, Qt::AlignVCenter);
+  progressLayout->addWidget(pCancelButton, 0, Qt::AlignVCenter);
+  //
+  m_widgets.pProgressFrame->setLayout(progressLayout);
+
+  // Progress entry.
+  m_mobProgress = mobius::core_ProgressEntry( new asiUI_MobiusProgressNotifier(m_progress,
+                                                                               m_widgets.pProgressBar) );
+
+  //---------------------------------------------------------------------------
   // Main layout
   //---------------------------------------------------------------------------
 
@@ -389,8 +430,8 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_pMainLayout->addWidget(pGroupEConstraints);
   m_pMainLayout->addWidget(pGroupPPConstraints);
   m_pMainLayout->addWidget(pGroupAdvanced);
+  m_pMainLayout->addWidget(m_widgets.pProgressFrame);
   m_pMainLayout->addWidget(bButtonsFrame);
-
   //
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
@@ -399,13 +440,10 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   this->setMinimumSize( QSize(650, 600) );
 
   this->setLayout(m_pMainLayout);
-  this->setWindowModality(Qt::WindowModal);
+  this->setWindowModality(Qt::NonModal);
   //this->setWindowFlag(Qt::WindowStaysOnTopHint);
   this->setWindowTitle("Fit surface");
   this->setWindowIcon( QIcon( QPixmap( (const char**) image0_data ) ) );
-
-  // Adjust initial state.
-  this->onChangeMethod(0);
 
   if ( m_pViewer )
   {
@@ -724,9 +762,14 @@ void asiUI_DialogAppSurf::onApply()
   //  // Prepare approximation tool.
   //  asiAlgo_AppSurf1 approxAlgo(m_progress, m_plotter);
   //  //
-  //  approxAlgo.ChangeAlpha(lambda);
-  //  approxAlgo.LoadPoints(extraPts);
-  //  approxAlgo.InitialPlane(UDegree, VDegree);
+  //  approxAlgo.ChangeAlpha      (lambda);
+  //  approxAlgo.LoadPoints       (hedges, extraPts);
+  //  approxAlgo.InitialPlane     (numUSpans + 1, numVSpans + 1);
+  //  approxAlgo.ChangeDeg        (UDegree, VDegree);
+  //  approxAlgo.SetEdgeDiscrPrec (edgeDiscrPrec);
+
+  //  if ( !initSurf.IsNull() )
+  //    approxAlgo.SetSurface( Handle(Geom_BSplineSurface)::DownCast(initSurf) );
 
   //  // Approximate.
   //  if ( !approxAlgo.Build(surf) )
@@ -735,7 +778,7 @@ void asiUI_DialogAppSurf::onApply()
   //    return;
   //  }
 
-  //  //finalConstraints = approxAlgo.GetConstraints();
+  //  finalConstraints = approxAlgo.GetConstraints();
   //}
 
   /* ==========
@@ -744,8 +787,10 @@ void asiUI_DialogAppSurf::onApply()
 
   else if ( m_method == Method_APPSURF2 )
   {
+    m_widgets.pProgressFrame->show();
+
     // Prepare approximation tool.
-    asiAlgo_AppSurf2 approxAlgo(m_progress, m_plotter);
+    asiAlgo_AppSurf2 approxAlgo(m_mobProgress);
     //
     approxAlgo.SetFairingCoeff  (lambda);
     approxAlgo.SetExtraPoints   (extraPts);
@@ -759,11 +804,13 @@ void asiUI_DialogAppSurf::onApply()
     // Approximate.
     if ( !approxAlgo.Build(hedges, surf, face) )
     {
+      m_widgets.pProgressFrame->hide();
       m_progress.SendLogMessage(LogErr(Normal) << "APPSURF2 failed.");
       return;
     }
 
     finalConstraints = approxAlgo.GetConstraints();
+    m_widgets.pProgressFrame->hide();
   }
 
   else
@@ -780,6 +827,18 @@ void asiUI_DialogAppSurf::onApply()
 
   if ( !finalConstraints.IsNull() )
     m_plotter.REDRAW_POINTS("finalConstraints", finalConstraints->GetCoordsArray(), Color_Red);
+
+  /* ===================
+   *  Measure deviation.
+   * =================== */
+
+  double minDeviation = DBL_MAX, maxDeviation = DBL_MAX, avrDeviation = DBL_MAX;
+  asiAlgo_AppSurfUtils::MeasureDeviation(surf, finalConstraints, minDeviation, maxDeviation, avrDeviation);
+
+  m_progress.SendLogMessage(LogNotice(Normal) << "\n\tMax.     deviation: %1"
+                                                 "\n\tMin.     deviation: %2"
+                                                 "\n\tAverage. deviation: %3"
+                                              << maxDeviation << minDeviation << avrDeviation);
 }
 
 //-----------------------------------------------------------------------------
@@ -804,4 +863,11 @@ Handle(asiAlgo_BaseCloud<double>) asiUI_DialogAppSurf::getTablePoints() const
   }
 
   return res;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogAppSurf::onCancel()
+{
+  m_mobProgress.AskCancel();
 }

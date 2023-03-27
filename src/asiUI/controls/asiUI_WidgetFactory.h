@@ -65,8 +65,6 @@ class asiUI_DatumTable;
 //! inappropriate editor specified.
 class asiUI_WidgetFactory : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiUI_WidgetFactory,Standard_Transient)
 
@@ -78,15 +76,23 @@ public:
 // editor factory
 public:
 
-  asiUI_EXPORT
-    asiUI_Datum* CreateEditor(const QString& theDataDicID,
-                              QWidget*       theParent = 0,
-                              int            theDatumFlags = asiUI_Datum::Control);
+  asiUI_EXPORT asiUI_Datum*
+    CreateEditor(const QString& theDataDicID,
+                 QWidget*       theParent = 0,
+                 int            theDatumFlags = asiUI_Datum::Control);
 
-  asiUI_EXPORT
-    asiUI_DatumTable* CreateDatumTable(const int theRowNumber = 0,
-                                       const int theColumnNumber = 0,
-                                       QWidget*  theParent = 0);
+  asiUI_EXPORT asiUI_DatumTable*
+    CreateDatumTable(const int theRowNumber = 0,
+                     const int theColumnNumber = 0,
+                     QWidget*  theParent = 0);
+
+public:
+
+  //! \return common facilities.
+  asiUI_CommonFacilities* GetCommonFacilities()
+  {
+    return m_pCommonFacilities;
+  }
 
   //asiUI_EXPORT
   //  asiUI_DatumTree* CreateDatumTree(QWidget* theParent = 0);
@@ -94,8 +100,8 @@ public:
 private:
 
   asiUI_Datum* editor(const QString& theDataDicID,
-                       QWidget*       theParent,
-                       int            theDatumFlags);
+                      QWidget*       theParent,
+                      int            theDatumFlags);
 
 private:
 
