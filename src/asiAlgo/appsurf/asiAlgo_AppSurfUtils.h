@@ -33,8 +33,10 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 
-// Mobius includes
-#include <mobius/geom_PositionCloud.h>
+#if defined USE_MOBIUS
+  // Mobius includes
+  #include <mobius/geom_PositionCloud.h>
+#endif
 
 // OpenCascade includes
 #include <Geom_BSplineSurface.hxx>
@@ -55,12 +57,14 @@ namespace asiAlgo_AppSurfUtils
                         const int                                degU,
                         const int                                degV);
 
+#if defined USE_MOBIUS
   //! Prepares pinpoint constraints for approximation as a point cloud.
   asiAlgo_EXPORT void
     PrepareConstraints(const double                             prec,
                        const Handle(TopTools_HSequenceOfShape)& edges,
                        const Handle(asiAlgo_BaseCloud<double>)& extras,
                        const mobius::t_ptr<mobius::t_pcloud>&   pts);
+#endif
 
   //! Measures the obtained deviation.
   asiAlgo_EXPORT void

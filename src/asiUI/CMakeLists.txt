@@ -219,7 +219,6 @@ set (dialogs_H_FILES
   dialogs/asiUI_TclPluginToCommands.h
 )
 set (dialogs_H_UI_FILES
-  dialogs/asiUI_DialogAppSurf.h
   dialogs/asiUI_DialogCommands.h
   dialogs/asiUI_DialogCommandsDelegate.h
   dialogs/asiUI_DialogDump.h
@@ -241,7 +240,6 @@ set (dialogs_H_UI_FILES
   dialogs/asiUI_DialogXdeSummary.h
 )
 set (dialogs_CPP_FILES
-  dialogs/asiUI_DialogAppSurf.cpp
   dialogs/asiUI_DialogCommands.cpp
   dialogs/asiUI_DialogCommandsCommandItem.cpp
   dialogs/asiUI_DialogCommandsDelegate.cpp
@@ -265,6 +263,11 @@ set (dialogs_CPP_FILES
   dialogs/asiUI_DialogTopoGraphDepth.cpp
   dialogs/asiUI_DialogXdeSummary.cpp
 )
+
+if (USE_MOBIUS)
+  list(APPEND dialogs_H_UI_FILES dialogs/asiUI_DialogAppSurf.h)
+  list(APPEND dialogs_CPP_FILES  dialogs/asiUI_DialogAppSurf.cpp)
+endif()
 
 #------------------------------------------------------------------------------
 # Graphs
@@ -353,7 +356,6 @@ set (utils_H_FILES
   utils/asiUI_DataAdaptor.h
   utils/asiUI_IV.h
   utils/asiUI_Logger.h
-  utils/asiUI_MobiusProgressNotifier.h
   utils/asiUI_OverrideCursor.h
   utils/asiUI_PrimDataAdaptor.h
 )
@@ -372,7 +374,6 @@ set (utils_CPP_FILES
   utils/asiUI_DataAdaptor.cpp
   utils/asiUI_IV.cpp
   utils/asiUI_Logger.cpp
-  utils/asiUI_MobiusProgressNotifier.cpp
   utils/asiUI_OverrideCursor.cpp
   utils/asiUI_PrimDataAdaptor.cpp
   utils/asiUI_PrimDataView.cpp
@@ -380,6 +381,11 @@ set (utils_CPP_FILES
   utils/asiUI_ProgressNotifier.cpp
   utils/asiUI_UnitManager.cpp
 )
+
+if (USE_MOBIUS)
+  list(APPEND utils_H_FILES   utils/asiUI_MobiusProgressNotifier.h)
+  list(APPEND utils_CPP_FILES utils/asiUI_MobiusProgressNotifier.cpp)
+endif()
 
 #------------------------------------------------------------------------------
 # Viewers

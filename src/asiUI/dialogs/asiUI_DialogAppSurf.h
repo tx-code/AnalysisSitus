@@ -213,6 +213,7 @@ protected:
 
   ActAPI_ProgressEntry       m_progress;    //!< Progress notifier.
   ActAPI_PlotterEntry        m_plotter;     //!< Imperative plotter.
+
   mobius::core_ProgressEntry m_mobProgress; //!< Mobius progress controller.
 
 };

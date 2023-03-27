@@ -38,9 +38,11 @@
 #include <asiAlgo_PlaneOnPoints.h>
 #include <asiAlgo_Timer.h>
 
-// Mobius includes
-#include <mobius/cascade.h>
-#include <mobius/geom_ApproxBSurf.h>
+#if defined USE_MOBIUS
+  // Mobius includes
+  #include <mobius/cascade.h>
+  #include <mobius/geom_ApproxBSurf.h>
+#endif
 
 // OCCT includes
 #include <BRepAdaptor_Curve.hxx>

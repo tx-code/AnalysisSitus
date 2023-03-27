@@ -417,9 +417,11 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   //
   m_widgets.pProgressFrame->setLayout(progressLayout);
 
+#if defined USE_MOBIUS
   // Progress entry.
   m_mobProgress = mobius::core_ProgressEntry( new asiUI_MobiusProgressNotifier(m_progress,
                                                                                m_widgets.pProgressBar) );
+#endif
 
   //---------------------------------------------------------------------------
   // Main layout

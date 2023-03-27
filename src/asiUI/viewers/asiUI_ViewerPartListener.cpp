@@ -34,9 +34,12 @@
 // asiUI includes
 #include <asiUI_BgColorDialog.h>
 #include <asiUI_Common.h>
-#include <asiUI_DialogAppSurf.h>
 #include <asiUI_DialogDump.h>
 #include <asiUI_IStatusBar.h>
+//
+#if defined USE_MOBIUS
+  #include <asiUI_DialogAppSurf.h>
+#endif
 
 // asiAlgo includes
 #include <asiAlgo_CheckDihedralAngle.h>
@@ -702,9 +705,11 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     }
   }
 
+#if defined USE_MOBIUS
   // Uncoditional actions.
   menu.addSeparator();
   m_pFillEdges = menu.addAction("Fit surface...");
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1356,6 +1361,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
                                                << minDist);
   }
 
+#if defined USE_MOBIUS
   //---------------------------------------------------------------------------
   // ACTION: fill surface
   //---------------------------------------------------------------------------
@@ -1374,4 +1380,5 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     pDlgAppSurf->onEdgePicked();
     pDlgAppSurf->show();
   }
+#endif
 }

@@ -195,6 +195,15 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
                                      const unsigned int                       continuity,
                                      Handle(Geom_BSplineSurface)&             support)
 {
+#if !defined USE_MOBIUS
+  (void) edges;
+  (void) continuity;
+  (void) support;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "PLATE is not accessible without Mobius. Please, turn on USE_MOBIUS flag in cmake.");
+  return false;
+#else
+
   /* ==============================
    *  STAGE 1: prepare constraints
    * ============================== */
@@ -292,6 +301,7 @@ bool asiAlgo_PlateOnEdges::BuildSurf(const Handle(TopTools_HSequenceOfShape)& ed
    }
 
   return true;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -351,6 +361,7 @@ void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShap
                                            const unsigned int                       continuity,
                                            GeomPlate_BuildPlateSurface&             builder)
 {
+#if defined USE_MOBIUS
   t_ptr<t_pcloud> pts = new t_pcloud;
 
   asiAlgo_AppSurfUtils::PrepareConstraints(m_fEdgeDiscrPrec, edges, m_extraPts, pts);
@@ -370,4 +381,9 @@ void asiAlgo_PlateOnEdges::fillConstraints(const Handle(TopTools_HSequenceOfShap
     // Store constraint for reference.
     m_pinPts->AddElement(pnt);
   }
+#else
+  (void) edges;
+  (void) continuity;
+  (void) builder;
+#endif
 }

@@ -31,8 +31,10 @@
 // Own include
 #include "asiAlgo_AppSurfUtils.h"
 
-// Mobius includes
-#include <mobius/cascade.h>
+#if defined USE_MOBIUS
+  // Mobius includes
+  #include <mobius/cascade.h>
+#endif
 
 // OpenCascade includes
 #include <BRepAdaptor_Curve.hxx>
@@ -47,7 +49,9 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 
-using namespace mobius;
+#if defined USE_MOBIUS
+  using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -205,6 +209,8 @@ Handle(Geom_BSplineSurface)
 
 //-----------------------------------------------------------------------------
 
+#if defined USE_MOBIUS
+
 void asiAlgo_AppSurfUtils::PrepareConstraints(const double                             prec,
                                               const Handle(TopTools_HSequenceOfShape)& edges,
                                               const Handle(asiAlgo_BaseCloud<double>)& extras,
@@ -274,6 +280,8 @@ void asiAlgo_AppSurfUtils::PrepareConstraints(const double                      
     }
   }
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 
