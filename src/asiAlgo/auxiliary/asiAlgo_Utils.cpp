@@ -6117,7 +6117,7 @@ void asiAlgo_Utils::Range::MergeRanges(const t_rangesByFaces& inputRanges,
     int  j   = i + 1;
     bool gap = false;
 
-    if ( j == ranges.size() )
+    if ( j == (int) ( ranges.size() ) )
     {
       stop = true;
       result.push_back({0, currRange});
@@ -6134,7 +6134,7 @@ void asiAlgo_Utils::Range::MergeRanges(const t_rangesByFaces& inputRanges,
           currRange = Merge(currRange, nextRange);
           j++;
 
-          if ( j == ranges.size() )
+          if ( j == (int) ( ranges.size() ) )
             stop = true;
         }
         else
@@ -6150,7 +6150,7 @@ void asiAlgo_Utils::Range::MergeRanges(const t_rangesByFaces& inputRanges,
       }
       while ( !gap && !stop );
 
-      if ( i == ranges.size() )
+      if ( i == (int) ( ranges.size() ) )
         stop = true;
     }
   }

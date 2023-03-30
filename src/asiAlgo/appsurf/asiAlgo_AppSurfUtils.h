@@ -73,4 +73,4 @@ namespace asiAlgo_AppSurfUtils
                      double&                                  minDeviation,
                      double&                                  maxDeviation,
                      double&                                  avrDeviation);
-};
+}

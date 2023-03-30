@@ -62,25 +62,6 @@ namespace
   {
     return p1.first > p2.first;
   }
-
-#if !defined WIN32
-  std::string convert(const std::wstring& wstr)
-  {
-    const int BUFF_SIZE = 7;
-    if (MB_CUR_MAX >= BUFF_SIZE) throw std::invalid_argument("BUFF_SIZE too small");
-    std::string result;
-    bool shifts = std::wctomb(nullptr, 0);  // reset the conversion state
-    for (const wchar_t wc : wstr)
-    {
-        std::array<char, BUFF_SIZE> buffer;
-        const int ret = std::wctomb(buffer.data(), wc);
-        if (ret < 0) throw std::invalid_argument("inconvertible wide characters in the current locale");
-        buffer[ret] = '\0';  // make 'buffer' contain a C-style string
-        result = result + std::string(buffer.data());
-    }
-    return result;
-  }
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -352,7 +333,7 @@ bool asiAlgo_BaseCloud<TCoordType>::ComputeInertiaAxes(gp_Ax3& axes) const
                          EigenSolver.eigenvectors().col(1).real(),
                          EigenSolver.eigenvectors().col(2).real() };
 
-  // Make result stable. Eigen may return vector multiplied by -1.0 for 
+  // Make result stable. Eigen may return vector multiplied by -1.0 for
   // almost equivalent matrices with deviations (1e-14).
   for (int i = 0; i < 3; ++i)
   {
@@ -408,14 +389,15 @@ void asiAlgo_BaseCloud<TCoordType>::Clear()
 
 //-----------------------------------------------------------------------------
 
+#if defined WIN32
 template <typename TCoordType>
 bool asiAlgo_BaseCloud<TCoordType>::Load(const wchar_t* filename)
-{
-#if defined WIN32
-  std::ifstream FILE(filename);
 #else
-  std::ifstream FILE( ::convert( std::wstring(filename) ) );
+template <typename TCoordType>
+bool asiAlgo_BaseCloud<TCoordType>::Load(const char* filename)
 #endif
+{
+  std::ifstream FILE(filename);
 
   if ( !FILE.is_open() )
     return false;
@@ -447,14 +429,15 @@ bool asiAlgo_BaseCloud<TCoordType>::Load(const wchar_t* filename)
 
 //-----------------------------------------------------------------------------
 
+#if defined WIN32
 template <typename TCoordType>
 bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const wchar_t* filename) const
-{
-#if defined WIN32
-  std::ofstream FILE(filename);
 #else
-  std::ofstream FILE( ::convert( std::wstring(filename) ) );
+template <typename TCoordType>
+bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const char* filename) const
 #endif
+{
+  std::ofstream FILE(filename);
 
   if ( !FILE.is_open() )
     return false;

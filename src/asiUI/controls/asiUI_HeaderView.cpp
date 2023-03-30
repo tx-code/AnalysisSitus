@@ -338,7 +338,7 @@ void asiUI_HeaderView::mouseMoveEvent(QMouseEvent* theEvent)
       aSelectionAPI->select( orientation(), aSelection, QItemSelectionModel::ClearAndSelect );
     }
     break;
-    
+
     case Resize :
     {
       int aCurrPos = orientation() == Qt::Horizontal ? theEvent->pos().x() : theEvent->pos().y();
@@ -348,7 +348,7 @@ void asiUI_HeaderView::mouseMoveEvent(QMouseEvent* theEvent)
       resizeSection( m_mouseCache.handle, qMax( m_mouseCache.sectionSize + aDelta, minimumSectionSize() ) );
     }
     break;
-    
+
     default: break;
   }
 }
@@ -683,7 +683,7 @@ asiUI_HeaderStyleOption
   QVariant aCustomTextAngle = aValueByRole[HeaderViewRole_TextAngle];
 
   // Font property
-  QFont aFont = aFontHint.isValid() 
+  QFont aFont = aFontHint.isValid()
               && aFontHint.canConvert<QFont>()
                ? aFontHint.value<QFont>() : QFont( this->font() );
 
@@ -698,9 +698,9 @@ asiUI_HeaderStyleOption
                ? anIconHint.value<QIcon>() : QIcon();
 
   // Text alignment property
-  Qt::Alignment anAlignment = anAlignmentHint.isValid()
+  Qt::Alignment anAlignment = /* anAlignmentHint.isValid()
                            && anAlignmentHint.canConvert<int>()
-                            ? anAlignmentHint.value<int>() : Qt::AlignCenter;
+                            ? anAlignmentHint.value<int>() : */ Qt::AlignCenter;
 
   double aTextAngle = m_dTextAngle;
 
@@ -836,9 +836,9 @@ asiUI_HeaderStyleOption
       }
       else
       {
-        aStyleOption.selectedPosition = 
-          isNextSelected 
-            ? QStyleOptionHeader::NextIsSelected 
+        aStyleOption.selectedPosition =
+          isNextSelected
+            ? QStyleOptionHeader::NextIsSelected
             : QStyleOptionHeader::NotAdjacent;
       }
     }
@@ -873,7 +873,7 @@ asiUI_HeaderStyleOption
     else
     {
       isSelected = aSelectionAPI->HeaderSelection( orientation(), false ).indexOf(theIndex) != -1;
-      isIntersecting = 
+      isIntersecting =
         isSelected || aSelectionAPI->HeaderSelection( orientation(), true ).indexOf(theIndex) != -1;
     }
 
@@ -1063,7 +1063,7 @@ QSize asiUI_HeaderView::bounds(const QVariant& theSizeHint,
                                 const QStyleOption* theItemOptions,
                                 const QHeaderView* theView) const
 {
-  QSize aSizeHint = theSizeHint.isValid() 
+  QSize aSizeHint = theSizeHint.isValid()
                  && theSizeHint.canConvert<QSize>()
                   ? theSizeHint.value<QSize>() : QSize();
 
@@ -1126,17 +1126,17 @@ int asiUI_HeaderView::handleAt(const QPoint& theCursor) const
   {
     return -1;
   }
-  
+
   int aMargin = this->style()->pixelMetric(QStyle::PM_HeaderGripMargin, 0, this);
-  
+
   int aVisualAtLeft = visualIndexAt( aPos - aMargin );
   int aHandle = -1;
-  
+
   if ( aVisualAtLeft >= 0 && aVisualAtLeft != aVisualAt )
   {
     aHandle = isRightToLeft() ? logicalIndex(aVisualAt) : logicalIndex(aVisualAtLeft);
   }
-  
+
   if ( aHandle < 0 )
   {
     int aVisualAtRight = visualIndexAt( aPos + aMargin );
@@ -1149,19 +1149,19 @@ int asiUI_HeaderView::handleAt(const QPoint& theCursor) const
       aHandle = isRightToLeft() ? logicalIndex(aVisualAtRight) : logicalIndex(aVisualAt);
     }
   }
-  
+
   if ( aHandle < 0 )
   {
     return -1;
   }
-  
+
   asiUI_HeaderIndex aIndex = sectionAt(theCursor);
-  
+
   if ( aHandle >= aIndex.GetFirstSection() && aHandle < aIndex.GetLastSection() )
   {
     return -1;
   }
-  
+
   return aHandle;
 }
 

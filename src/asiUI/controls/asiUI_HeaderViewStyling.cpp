@@ -31,6 +31,8 @@
 // asiUI includes
 #include <asiUI_HeaderViewStyling.h>
 
+#include <cmath>
+
 // --------------------------------------------------------------------------------------
 // Style
 // --------------------------------------------------------------------------------------
@@ -258,7 +260,7 @@ QSize asiUI_HeaderStyle::sizeFromContents(ContentsType theContentType,
   {
     // from horizon angles above 45deg switch boundary location
     // horizontal to vertical boundaries and vice-versa
-    if ( qAbs( sin( anAngleRad ) ) > 0.707 )
+    if ( qAbs( std::sin( anAngleRad ) ) > 0.707 )
     {
       int aSwitchWidth  = aSectWidth;
       int aSwitchHeight = aSectHeight;

@@ -314,7 +314,7 @@ void asiUI_ObjectBrowser::addChildren(const Handle(ActAPI_INode)& root_n,
     // Configure child.
     child_ui->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     //
-    if ( child_n->GetUserFlags() & NodeFlag_IsPresentedInPartView ) 
+    if ( child_n->GetUserFlags() & NodeFlag_IsPresentedInPartView )
     {
       child_ui->setFlags(child_ui->flags() | Qt::ItemIsUserCheckable);
       child_ui->setCheckState(1, (child_n->GetUserFlags() & NodeFlag_IsPresentationVisible) ? Qt::Checked : Qt::Unchecked);
@@ -913,7 +913,11 @@ void asiUI_ObjectBrowser::onSaveToXYZ()
   Handle(asiAlgo_BaseCloud<double>) pts = ptsNode->GetPoints();
 
   // Save points.
+#if defined WIN32
   if ( !pts->SaveAs( QStr2ExtStr(filename).ToWideString() ) )
+#else
+  if ( !pts->SaveAs( QStr2StdStr(filename).c_str() ) )
+#endif
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot save point cloud.");
     return;
@@ -1729,7 +1733,7 @@ bool asiUI_ObjectBrowser::selectedNodes(Handle(ActAPI_HNodeList)& Nodes) const
 //! Returns the currently active Nodes with widgets.
 //! \param[out] nodesWithWidgets requested Nodes.
 //! \return true in case of success, false -- otherwise.
-//! 
+//!
 bool asiUI_ObjectBrowser::
   selectedNodes(std::vector<std::pair<Handle(ActAPI_INode),
                                       QTreeWidgetItem*>>& nodesWithWidgets) const

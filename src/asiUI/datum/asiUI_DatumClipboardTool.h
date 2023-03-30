@@ -35,7 +35,7 @@
 #include <asiUI.h>
 #include <asiUI_DatumClipboardTableData.h>
 #include <asiUI_HeaderView.h>
-#include <asiUI_HeaderViewApi.h>
+#include <asiUI_HeaderViewAPI.h>
 
 // Qt includes
 #pragma warning(push, 0)
@@ -85,7 +85,7 @@ public:
   static asiUI_DatumClipboardTableData
     CopyToData(QAbstractItemView* theView);
 
-  static bool 
+  static bool
     CopyToClipboard(QAbstractItemView* theView);
 
 // data paste methods
@@ -95,11 +95,11 @@ public:
     PasteFromData(QAbstractItemView* theView,
                   const asiUI_DatumClipboardTableData& theData);
 
-  static bool 
+  static bool
     PasteFromClipboard(QAbstractItemView* theView);
 
 // Paste Region Size.
-// These methods inclapsulate logic related to estimation (depending on current selection) 
+// These methods inclapsulate logic related to estimation (depending on current selection)
 // of the region of item view that will be (or could be) filled with data from specified
 // data buffer.
 // Data table-like layout is expected.
@@ -201,7 +201,7 @@ public:
   void SetIndexAt(const int theHorPos, const int theVerPos, const QModelIndex& theIndex);
 
   //! \return Rectangular area.
-  inline QRect GetRectangle() const 
+  inline QRect GetRectangle() const
   {
     return QRect(m_left, m_top, m_horLength, m_verLength);
   }
@@ -215,7 +215,7 @@ public:
 
   //! checks whether the rectangular area is empty.
   //! \return TRUE if the region is empty.
-  inline bool IsEmpty() const 
+  inline bool IsEmpty() const
   {
     return !IsValid() || ( m_horLength <= 0 || m_verLength <= 0 );
   }
@@ -261,7 +261,7 @@ public:
   void SetIndexAt(const int theHorPos, const int theVerPos, const asiUI_HeaderIndex& theIndex);
 
   //! \return Rectangular area.
-  inline QRect GetRectangle() const 
+  inline QRect GetRectangle() const
   {
     return QRect(m_left, m_top, m_horLength, m_verLength);
   }
@@ -275,7 +275,7 @@ public:
 
   //! checks whether the rectangular area is empty.
   //! \return TRUE if the region is empty.
-  inline bool IsEmpty() const 
+  inline bool IsEmpty() const
   {
     return !IsValid() || ( m_horLength <= 0 || m_verLength <= 0 );
   }

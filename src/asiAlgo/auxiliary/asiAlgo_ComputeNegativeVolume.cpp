@@ -190,57 +190,6 @@ void TakeModified(const TopoDS_Shape&   shape,
     }
   }
 }
-//=======================================================================
-// function: TakeModified
-// purpose: Stores the modified object into the map
-//=======================================================================
-void TakeModified(const TopoDS_Shape&  shape,
-                  BOPAlgo_Builder&     builder,
-                  TopTools_MapOfShape& mapOfShape)
-{
-  const TopTools_ListOfShape& modified = builder.Modified(shape);
-  if ( modified.IsEmpty() && !builder.IsDeleted(shape) )
-  {
-    mapOfShape.Add(shape);
-  }
-  else
-  {
-    TopTools_ListIteratorOfListOfShape itM(modified);
-    for ( ; itM.More(); itM.Next() )
-    {
-      mapOfShape.Add(itM.Value());
-    }
-  }
-}
-
-//=======================================================================
-// function: MakeRemoved
-// purpose: Makes the shapes in the list removed in the history.
-//          Keeps the shapes contained in the map.
-//=======================================================================
-void MakeRemoved(const TopTools_ListOfShape&       shapes,
-                 BRepTools_History&                history,
-                 const TopTools_IndexedMapOfShape& keepShapes)
-{
-  TopTools_IndexedMapOfShape shapesMap;
-  TopTools_ListIteratorOfListOfShape it(shapes);
-  for ( ; it.More(); it.Next() )
-  {
-    TopExp::MapShapes(it.Value(), shapesMap);
-  }
-
-  const Standard_Integer nbShapes = shapesMap.Extent();
-  for ( Standard_Integer i = 1; i <= nbShapes; ++i )
-  {
-    const TopoDS_Shape& shape = shapesMap(i);
-    if ( !keepShapes.Contains(shape) &&
-         BRepTools_History::IsSupportedType(shape) )
-    {
-      history.Remove(shape);
-    }
-  }
-}
-
 
 //=======================================================================
 // function: FindInternals
@@ -790,7 +739,7 @@ private: //! @name Private methods performing the operation
                 isFound = false;
                 break;
               }
-            
+
               if (newFeaturesFaces.Contains(expFaces.Value()))
               {
                 isFound = true;

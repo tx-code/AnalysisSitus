@@ -1120,12 +1120,15 @@ int ENGINE_LoadPoints(const Handle(asiTcl_Interp)& interp,
 
   // Assuming that `argv[2]` is UTF-8.
   TCollection_ExtendedString filenameW(argv[2], true);
-  const wchar_t* filenameWPtr = filenameW.ToWideString();
 
   // Load point cloud
   Handle(asiAlgo_BaseCloud<double>) cloud = new asiAlgo_BaseCloud<double>;
   //
-  if ( !cloud->Load(filenameWPtr) )
+#if defined WIN32
+  if ( !cloud->Load( filenameW.ToWideString() ) )
+#else
+  if ( !cloud->Load(ExtStr2StdStr(filenameW).c_str() ) )
+#endif
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot load point cloud.");
     return TCL_ERROR;
@@ -1279,7 +1282,6 @@ int ENGINE_SaveXYZ(const Handle(asiTcl_Interp)& interp,
 
   // Assuming that `argv[2]` is UTF-8.
   TCollection_ExtendedString filenameW(argv[2], true);
-  const wchar_t* filenameWPtr = filenameW.ToWideString();
 
   Handle(asiData_IVPointSetNode)
     ptsNode = Handle(asiData_IVPointSetNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
@@ -1300,7 +1302,11 @@ int ENGINE_SaveXYZ(const Handle(asiTcl_Interp)& interp,
   }
 
   // Save points.
-  if ( !pts->SaveAs(filenameWPtr) )
+#if defined WIN32
+  if ( !pts->SaveAs( filenameW.ToWideString() ) )
+#else
+  if ( !pts->SaveAs( ExtStr2StdStr(filenameW).c_str() ) )
+#endif
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save point cloud.");
     return TCL_ERROR;

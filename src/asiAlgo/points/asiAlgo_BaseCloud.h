@@ -122,14 +122,24 @@ public:
   //! structuring information.
   //! \param filename [in] file to read.
   //! \return true in case of success, false -- otherwise.
+#if defined _WIN32
   asiAlgo_EXPORT bool
     Load(const wchar_t* filename);
+#else
+  asiAlgo_EXPORT bool
+    Load(const char* filename);
+#endif
 
   //! Writes base cloud to file with given filename.
   //! \param filename [in] file to write into.
   //! \return true in case of success, false -- otherwise.
+#if defined _WIN32
   asiAlgo_EXPORT bool
     SaveAs(const wchar_t* filename) const;
+#else
+  asiAlgo_EXPORT bool
+    SaveAs(const char* filename) const;
+#endif
 
 protected:
 

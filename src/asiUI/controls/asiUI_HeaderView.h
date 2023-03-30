@@ -33,7 +33,7 @@
 
 // asiUI includes
 #include <asiUI_Common.h>
-#include <asiUI_HeaderViewApi.h>
+#include <asiUI_HeaderViewAPI.h>
 #include <asiUI_HeaderViewStyling.h>
 
 // Qt includes
