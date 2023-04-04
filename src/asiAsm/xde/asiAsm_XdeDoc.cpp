@@ -78,6 +78,9 @@
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
 
+// STL includes
+#include <map>
+
 //-----------------------------------------------------------------------------
 
 using namespace asiAsm::xde;
@@ -225,7 +228,102 @@ bool Doc::LoadNative(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
+inline static double fromSiName(const TCollection_AsciiString& unitStr)
+{
+  static const std::map<TCollection_AsciiString, double>
+    prefixMap =
+  {
+    { "yocto", 1.0e-24 },
+    { "zepto", 1.0e-21 },
+    { "atto",  1.0e-18 },
+    { "femto", 1.0e-15 },
+    { "pico",  1.0e-12 },
+    { "nano",  1.0e-9 },
+    { "micro", 1.0e-6 },
+    { "milli", 1.0e-3 },
+    { "centi", 1.0e-2 },
+    { "deci",  1.0e-1 },
+    { "deca",  1.0e1 },
+    { "hecto", 1.0e2 },
+    { "kilo",  1.0e3 },
+    { "mega",  1.0e6 },
+    { "giga",  1.0e9 },
+    { "tera",  1.0e12 },
+    { "pera",  1.0e15 },
+    { "exa",   1.0e18 },
+    { "zetta", 1.0e21 },
+    { "yotta", 1.0e24 }
+  };
+
+  static const std::map<TCollection_AsciiString, double>
+    baseMap =
+  {
+    { "angstrom",   1.0e-10 },
+    { "micron",     1.0e-6 },
+    { "twip",       0.0000176389 },
+    { "thou",       0.0000254 },
+    { "mil",        0.0000254 },
+    { "barleycorn", 0.0084667 },
+    { "inch",       0.0254 },
+    { "hand",       0.1016 },
+    { "foot",       0.3048 },
+    { "feet",       0.3048 },
+    { "yard",       0.9144 },
+    { "metre",      1.0 },
+    { "chain",      20.1168 },
+    { "furlong",    201.168 },
+    { "mile",       1609.344 },
+    { "league",     4828.032 }
+  };
+
+  // Prepare input value.
+  TCollection_AsciiString unitStrLower( unitStr );
+  unitStrLower.LowerCase();
+
+  // Final scaling factor.
+  double scaleFactor = 1.0;
+
+  // Find base unit name.
+  std::map<TCollection_AsciiString, double>::const_iterator itBM = baseMap.cbegin();
+  for ( ; itBM != baseMap.cend(); ++itBM )
+  {
+    if ( unitStrLower.EndsWith( itBM->first ) )
+    {
+      scaleFactor *= itBM->second;
+      break;
+    }
+  }
+
+  // Apply prefix modifier if any.
+  std::map<TCollection_AsciiString, double>::const_iterator itPM = prefixMap.cbegin();
+  for ( ; itPM != prefixMap.cend(); ++itPM )
+  {
+    if ( unitStrLower.StartsWith( itPM->first ) )
+    {
+      scaleFactor *= itPM->second;
+      break;
+    }
+  }
+
+  // Now we have a scale factor for conversation to metres.
+  // But we want to use millimetres.
+  return scaleFactor * 1000.0;
+}
+
+//-----------------------------------------------------------------------------
+
 bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
+{
+  std::string units;
+  double scaleFactor = 1.0;
+  return LoadSTEP(filename, units, scaleFactor);
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
+                   std::string&                   units,
+                   double&                        scaleFactor)
 {
   if ( m_doc.IsNull() )
   {
@@ -269,6 +367,13 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
     m_progress.SendLogMessage( LogErr(Normal) << "STEP reader failed (exception on reading STEP file)." );
     return false;
   }
+
+  // Get units used in CAD file.
+  TColStd_SequenceOfAsciiString lengthNames, angleNames, solidAngleNames;
+  xdeReader.ChangeReader().FileUnits(lengthNames, angleNames, solidAngleNames);
+  units       = lengthNames.IsEmpty() ? "" : lengthNames.First().ToCString();
+  scaleFactor = lengthNames.IsEmpty() ? 1.0
+                                      : fromSiName(lengthNames.First());
 
   return true;
 }

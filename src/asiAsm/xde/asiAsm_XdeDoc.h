@@ -116,6 +116,16 @@ public:
   asiAsm_EXPORT bool
     LoadSTEP(const TCollection_AsciiString& filename);
 
+  //! Loads STEP file to populate the internal XDE Document.
+  //! \param[in]  filename    name of the STEP file to load.
+  //! \param[out] units       units.
+  //! \param[out] scaleFactor scale factor of length units of the input file.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    LoadSTEP(const TCollection_AsciiString& filename,
+             std::string&                   units,
+             double&                        scaleFactor);
+
   //! Loads IGES file to populate the internal XDE Document.
   //! \param[in] filename name of the IGES file to load.
   //! \return true in case of success, false -- otherwise.
