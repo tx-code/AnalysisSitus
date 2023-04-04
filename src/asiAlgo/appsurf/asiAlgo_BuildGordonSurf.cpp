@@ -53,6 +53,7 @@
 #include <Geom_BSplineCurve.hxx>
 
 #include <CTiglInterpolateCurveNetwork.h>
+#include <CTiglBSplineAlgorithms.h>
 
 using namespace mobius;
 
@@ -472,6 +473,22 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   //
   this->reapproxCurves(uCurves, uCurves, uParams, uKnots);
   this->reapproxCurves(vCurves, vCurves, vParams, vKnots);
+
+  /* ====================================
+   *  Find curve intersection parameters.
+   * ==================================== */
+
+  math_Matrix intersection_params_u(0, numIsoU - 1,
+                                    0, numIsoV - 1);
+  math_Matrix intersection_params_v(0, numIsoU - 1,
+                                    0, numIsoV - 1);
+
+  this->computeCurveIntersections(uCurves, vCurves,
+                                  intersection_params_u,
+                                  intersection_params_v);
+
+  intersection_params_u.Dump(std::cout);
+  intersection_params_v.Dump(std::cout);
 
   /* =================
    *  Give TiGL a try.
@@ -935,4 +952,118 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
   }
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
+                                                        const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
+                                                        math_Matrix&                                  uParams,
+                                                        math_Matrix&                                  vParams) const
+{
+  /* =================================
+   *  Compute intersection parameters.
+   * ================================= */
+
+  const double spatialTol = 0.01;
+  bool fail = false;
+  for (int spline_u_idx = 0; spline_u_idx < static_cast<int>(uCurves.size()); ++spline_u_idx)
+  {
+    for (int spline_v_idx = 0; spline_v_idx < static_cast<int>(vCurves.size()); ++spline_v_idx)
+    {
+      std::vector<std::pair<double, double> >
+        currentIntersections = tigl::CTiglBSplineAlgorithms::intersections(uCurves[static_cast<size_t>(spline_u_idx)],
+                                                                           vCurves[static_cast<size_t>(spline_v_idx)],
+                                                                           spatialTol);
+
+      if ( currentIntersections.size() < 1 )
+      {
+        fail = true;
+      }
+      else if ( currentIntersections.size() == 1 )
+      {
+        uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
+        vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
+      }
+      else if ( currentIntersections.size() == 2 ) // for closed curves
+      {
+        // only the u-directional B-spline curves are closed
+        if (uCurves[0]->IsClosed()) {
+          if (spline_v_idx == 0) {
+            uParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].first, currentIntersections[1].first);
+          }
+          else if (spline_v_idx == static_cast<int>(vCurves.size() - 1)) {
+            uParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].first, currentIntersections[1].first);
+          }
+
+          // intersection_params_vector[0].second == intersection_params_vector[1].second
+          vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
+        }
+
+        // only the v-directional B-spline curves are closed
+        if (vCurves[0]->IsClosed()) {
+
+          if (spline_u_idx == 0) {
+            vParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].second, currentIntersections[1].second);
+          }
+          else if (spline_u_idx == static_cast<int>(uCurves.size() - 1)) {
+            vParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].second, currentIntersections[1].second);
+          }
+          // intersection_params_vector[0].first == intersection_params_vector[1].first
+          uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
+        }
+      }
+
+      else if (currentIntersections.size() > 2)
+      {
+        return false;
+      }
+    }
+  }
+
+  /* ===========================
+   *  Beautify parameter values.
+   * =========================== */
+
+   Standard_Integer nProfiles = static_cast<Standard_Integer>(uCurves.size());
+    Standard_Integer nGuides = static_cast<Standard_Integer>(vCurves.size());
+    // eliminate small inaccuracies of the intersection parameters:
+
+    // first intersection
+    for (Standard_Integer spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
+        if (std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1)) < 0.001) {
+            if (std::abs(uCurves[0]->Knot(1)) < 1e-10) {
+                uParams(spline_u_idx, 0) = 0;
+            }
+            else {
+                uParams(spline_u_idx, 0) = uCurves[0]->Knot(1);
+            }
+        }
+    }
+
+    for (Standard_Integer spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
+        if (std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001) {
+            if (std::abs(vCurves[0]->Knot(1)) < 1e-10) {
+                vParams(0, spline_v_idx) = 0;
+            }
+            else {
+                vParams(0, spline_v_idx) = vCurves[0]->Knot(1);
+            }
+        }
+    }
+
+    // last intersection
+    for (Standard_Integer spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
+        if (std::abs(uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot(uCurves[0]->NbKnots())) < 0.001) {
+            uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
+        }
+    }
+
+    for (Standard_Integer spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
+        if (std::abs(vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot(vCurves[0]->NbKnots())) < 0.001) {
+            vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot(vCurves[0]->NbKnots());
+        }
+    }
+
+  return !fail;
 }

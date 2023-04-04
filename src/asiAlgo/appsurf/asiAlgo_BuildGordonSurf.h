@@ -43,6 +43,7 @@
 // OCCT includes
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <math_Matrix.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 
@@ -110,6 +111,13 @@ protected:
                    std::vector<Handle(Geom_BSplineCurve)>&       result,
                    std::vector<double>&                          params,
                    std::vector<double>&                          knots) const;
+
+  //! Computes intersection parameters between curves.
+  asiAlgo_EXPORT bool
+    computeCurveIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
+                              const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
+                              math_Matrix&                                  uParams,
+                              math_Matrix&                                  vParams) const;
 
 };
 
