@@ -59,6 +59,30 @@ using namespace mobius;
 
 namespace
 {
+  template <class T>
+  T Clamp(T val, T min, T max)
+  {
+    if (min > max) {
+      throw Standard_ProgramError("Minimum may not be larger than maximum in clamp!");
+    }
+    return std::max(min, std::min(val, max));
+  }
+
+  double Clamp(double val, double min, double max)
+  {
+    return Clamp<>(val, min, max);
+  }
+
+  int Clamp(int val, int min, int max)
+  {
+    return Clamp<>(val, min, max);
+  }
+
+  size_t Clamp(size_t val, size_t min, size_t max)
+  {
+    return Clamp<>(val, min, max);
+  }
+
   //! Computes the default edge discretization precision for the passed shape.
   double ComputeDefaultPrec(const TopoDS_Shape& shape)
   {
@@ -490,40 +514,158 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   intersection_params_u.Dump(std::cout);
   intersection_params_v.Dump(std::cout);
 
+  std::vector<double> newParametersProfiles;
+  std::vector<double> newParametersGuides;
+
+  {
+    const int nGuides   = numIsoV;
+    const int nProfiles = numIsoU;
+
+    for (int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx) {
+        double sum = 0;
+        for (int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx) {
+            sum += intersection_params_u(spline_u_idx - 1, spline_v_idx - 1);
+        }
+        newParametersProfiles.push_back(sum / nProfiles);
+    }
+
+    for (int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx) {
+        double sum = 0;
+        for (int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx) {
+            sum += intersection_params_v(spline_u_idx - 1, spline_v_idx - 1);
+        }
+        newParametersGuides.push_back(sum / nGuides);
+    }
+
+    if (newParametersProfiles.front() > 1e-4 || newParametersGuides.front() > 1e-4) {
+        throw Standard_ProgramError("At least one B-splines has no intersection at the beginning.");
+    }
+
+    // Get maximum number of control points to figure out detail of spline
+    size_t max_cp_u = 0, max_cp_v = 0;
+    for( const auto& C : uCurves ) {
+        max_cp_u = std::max(max_cp_u, static_cast<size_t>(C->NbPoles()));
+    }
+    for( const auto& C : vCurves ) {
+        max_cp_v = std::max(max_cp_v, static_cast<size_t>(C->NbPoles()));
+    }
+
+    // we want to use at least 10 and max 80 control points to be able to reparametrize the geometry properly
+    size_t mincp = 10;
+    size_t maxcp = 80;
+
+    // since we interpolate the intersections, we cannot use fewer control points than curves
+    // We need to add two since we want c2 continuity, which adds two equations
+    size_t min_u = std::max(vCurves.size() + 2, mincp);
+    size_t min_v = std::max(uCurves.size() + 2, mincp);
+
+    size_t max_u = std::max(min_u, maxcp);
+    size_t max_v = std::max(min_v, maxcp);
+
+    max_cp_u = Clamp(max_cp_u + 10, min_u, max_u);
+    max_cp_v = Clamp(max_cp_v + 10, min_v, max_v);
+
+    // reparametrize u-directional B-splines
+    for (int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
+
+        std::vector<double> oldParametersProfile;
+        for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
+            oldParametersProfile.push_back(intersection_params_u(spline_u_idx, spline_v_idx));
+        }
+
+        // eliminate small inaccuracies at the first knot
+        if (std::abs(oldParametersProfile.front()) < 1e-4) {
+            oldParametersProfile.front() = 0;
+        }
+
+        if (std::abs(newParametersProfiles.front()) < 1e-4) {
+            newParametersProfiles.front() = 0;
+        }
+
+        // eliminate small inaccuracies at the last knot
+        if (std::abs(oldParametersProfile.back() - 1) < 1e-4) {
+            oldParametersProfile.back() = 1;
+        }
+
+        if (std::abs(newParametersProfiles.back() - 1) < 1e-4) {
+            newParametersProfiles.back() = 1;
+        }
+
+        Handle(Geom_BSplineCurve)& profile = uCurves[static_cast<size_t>(spline_u_idx)];
+        profile = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(profile, oldParametersProfile, newParametersProfiles, max_cp_u).curve;
+    }
+
+    // reparametrize v-directional B-splines
+    for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
+
+        std::vector<double> oldParameterGuide;
+        for (int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
+            oldParameterGuide.push_back(intersection_params_v(spline_u_idx, spline_v_idx));
+        }
+
+        // eliminate small inaccuracies at the first knot
+        if (std::abs(oldParameterGuide.front()) < 1e-5) {
+            oldParameterGuide.front() = 0;
+        }
+
+        if (std::abs(newParametersGuides.front()) < 1e-5) {
+            newParametersGuides.front() = 0;
+        }
+
+        // eliminate small inaccuracies at the last knot
+        if (std::abs(oldParameterGuide.back() - 1) < 1e-5) {
+            oldParameterGuide.back() = 1;
+        }
+
+        if (std::abs(newParametersGuides.back() - 1) < 1e-5) {
+            newParametersGuides.back() = 1;
+        }
+
+        Handle(Geom_BSplineCurve)& guide = vCurves[static_cast<size_t>(spline_v_idx)];
+        guide = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(guide, oldParameterGuide, newParametersGuides, max_cp_v).curve;
+    }
+  }
+
+  for ( const auto& C : uCurves )
+    m_plotter.DRAW_CURVE(C, Color_Pink, true, "profile");
+
+  for ( const auto& C : vCurves )
+    m_plotter.DRAW_CURVE(C, Color_Violet, true, "guide");
+
   /* =================
    *  Give TiGL a try.
    * ================= */
 
-  // TODO: remove me
-  {
-    std::vector<Handle(Geom_Curve)> uCurvesTigl, vCurvesTigl;
-    //
-    for ( const auto c : uCurves )
-      uCurvesTigl.push_back(c);
-    //
-    for ( const auto c : vCurves )
-      vCurvesTigl.push_back(c);
+  //// TODO: remove me
+  //{
+  //  std::vector<Handle(Geom_Curve)> uCurvesTigl, vCurvesTigl;
+  //  //
+  //  for ( const auto c : uCurves )
+  //    uCurvesTigl.push_back(c);
+  //  //
+  //  for ( const auto c : vCurves )
+  //    vCurvesTigl.push_back(c);
 
-    tigl::CTiglInterpolateCurveNetwork tiglGordon(uCurvesTigl, vCurvesTigl, 1e-3, m_progress, m_plotter);
+  //  tigl::CTiglInterpolateCurveNetwork tiglGordon(uCurvesTigl, vCurvesTigl, 1e-3, m_progress, m_plotter);
 
-    Handle(Geom_BSplineSurface) res = tiglGordon.Surface();
+  //  Handle(Geom_BSplineSurface) res = tiglGordon.Surface();
 
-    m_plotter.REDRAW_SURFACE("tiglGordon", res, Color_White);
+  //  m_plotter.REDRAW_SURFACE("tiglGordon", res, Color_White);
 
-    // Check surface deviation from the curve network.
-    double bndDev, innerDev, maxDev;
-    //
-    CheckDeviation( res,
-                    uEdges, vEdges, bndDev, innerDev, maxDev,
-                    m_plotter );
+  //  // Check surface deviation from the curve network.
+  //  double bndDev, innerDev, maxDev;
+  //  //
+  //  CheckDeviation( res,
+  //                  uEdges, vEdges, bndDev, innerDev, maxDev,
+  //                  m_plotter );
 
-    m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
-                                                   "\n\tInner deviation: %2."
-                                                   "\n\tMax deviation: %3."
-                                                << bndDev << innerDev << maxDev);
+  //  m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
+  //                                                 "\n\tInner deviation: %2."
+  //                                                 "\n\tMax deviation: %3."
+  //                                              << bndDev << innerDev << maxDev);
 
-    return true;
-  }
+  //  return true;
+  //}
 
   /* ===================
    *  Convert to Mobius.
@@ -604,8 +746,8 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
     geom_SkinSurface skinner(rails, 3, false);
     //
-   /* skinner.ForceParameters(uParams);
-    skinner.ForceKnots(uKnots);*/
+    skinner.ForceParameters(newParametersGuides);
+   /* skinner.ForceKnots(uKnots);*/
     //
     if ( !skinner.Perform() )
     {
@@ -640,6 +782,8 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
     std::vector< t_ptr<t_bcurve> > rails = vCurvesMb;
 
     geom_SkinSurface skinner(rails, 1, false);
+    //
+    skinner.ForceParameters(newParametersProfiles);
     //
     if ( !skinner.Perform() )
     {
@@ -947,8 +1091,6 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
       resCurve = cascade::GetOpenCascadeBCurve( interpTool.GetResult(k) );
 
     result.push_back(resCurve);
-
-    m_plotter.DRAW_CURVE(resCurve, Color_Pink, true, "reapproxedCurve");
   }
 
   return true;
