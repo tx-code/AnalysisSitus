@@ -387,7 +387,7 @@ asiAlgo_BuildGordonSurf::asiAlgo_BuildGordonSurf(ActAPI_ProgressEntry progress,
 bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
                                     const std::vector<TopoDS_Edge>& vEdges,
                                     Handle(Geom_BSplineSurface)&    support,
-                                    TopoDS_Face&                    face) const
+                                    TopoDS_Face&                    face)
 {
   /* =============
    *  Preparation.
@@ -461,6 +461,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   do
   {
     ++j;
+    s = j - 1;
 
     if ( j < numIsoU )
     {
@@ -470,7 +471,9 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
       uCurves[s]->D1( 0.5*( uCurves[s]->FirstParameter() + uCurves[s]->LastParameter() ), Ps, Vs );
       uCurves[j]->D1( 0.5*( uCurves[j]->FirstParameter() + uCurves[j]->LastParameter() ), Pj, Vj );
 
-      if ( Vj.Dot(Vs) < 0 )
+      const double dot = Vj.Dot(Vs);
+
+      if ( dot < 0 )
         uCurves[j]->Reverse();
     }
     else
@@ -537,8 +540,10 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
         newParametersGuides.push_back(sum / nGuides);
     }
 
-    if (newParametersProfiles.front() > 1e-4 || newParametersGuides.front() > 1e-4) {
-        throw Standard_ProgramError("At least one B-splines has no intersection at the beginning.");
+    if ( newParametersProfiles.front() > 1e-4 || newParametersGuides.front() > 1e-4 )
+    {
+      this->AddStatusFlag(Status_InconsistentOrientationOfCurves);
+      return false;
     }
 
     // Get maximum number of control points to figure out detail of spline
@@ -746,6 +751,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
     geom_SkinSurface skinner(rails, 3, false);
     //
+    skinner.SetUseChordLength(false);
     skinner.ForceParameters(newParametersGuides);
    /* skinner.ForceKnots(uKnots);*/
     //
@@ -783,6 +789,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
     geom_SkinSurface skinner(rails, 1, false);
     //
+    skinner.SetUseChordLength(false);
     skinner.ForceParameters(newParametersProfiles);
     //
     if ( !skinner.Perform() )
@@ -1091,6 +1098,8 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
       resCurve = cascade::GetOpenCascadeBCurve( interpTool.GetResult(k) );
 
     result.push_back(resCurve);
+
+    m_plotter.DRAW_CURVE(resCurve, Color_Khaki, true, "reapproxedCurve");
   }
 
   return true;

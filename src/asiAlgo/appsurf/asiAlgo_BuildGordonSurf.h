@@ -56,6 +56,14 @@ class asiAlgo_BuildGordonSurf : public ActAPI_IAlgorithm
 
 public:
 
+  enum Status
+  {
+    Status_Ok                              = 0x0000,
+    Status_InconsistentOrientationOfCurves = 0x0001
+  };
+
+public:
+
   //! Checks deviation between the constructed surfaces and the initial
   //! curve network.
   //! \param[in]  surf     the surface of interest.
@@ -95,7 +103,7 @@ public:
     Build(const std::vector<TopoDS_Edge>& uEdges,
           const std::vector<TopoDS_Edge>& vEdges,
           Handle(Geom_BSplineSurface)&    support,
-          TopoDS_Face&                    face) const;
+          TopoDS_Face&                    face);
 
 protected:
 
