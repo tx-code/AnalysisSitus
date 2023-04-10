@@ -68,16 +68,6 @@ namespace
     return std::max(min, std::min(val, max));
   }
 
-  double Clamp(double val, double min, double max)
-  {
-    return Clamp<>(val, min, max);
-  }
-
-  int Clamp(int val, int min, int max)
-  {
-    return Clamp<>(val, min, max);
-  }
-
   size_t Clamp(size_t val, size_t min, size_t max)
   {
     return Clamp<>(val, min, max);
