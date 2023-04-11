@@ -30,7 +30,7 @@ message (STATUS "... OCCT Debug Library dirs: ${3RDPARTY_OCCT_LIBRARY_DIR_DEBUG}
 message (STATUS "... OCCT Debug Binary  dirs: ${3RDPARTY_OCCT_DLL_DIR_DEBUG}")
 
 set (OCCT_VERSION_MAJOR "7")
-set (OCCT_VERSION_MINOR "6")
+set (OCCT_VERSION_MINOR "7")
 set (OCCT_VERSION_PATCH "0")
 
 #--------------------------------------------------------------------------
@@ -68,6 +68,7 @@ set (LIBS
   TKFillet
   TKSTL
   TKXCAF
+  TKXDE
   TKXDESTEP
   TKXDEIGES
   TKVCAF
