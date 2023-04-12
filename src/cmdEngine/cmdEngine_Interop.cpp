@@ -92,6 +92,7 @@
 // Qt includes
 #pragma warning(push, 0)
 #include <QDialog>
+#include <QDir>
 #include <QMainWindow>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -1235,7 +1236,6 @@ int ENGINE_DumpThicknessVTP(const Handle(asiTcl_Interp)& interp,
   return TCL_OK;
 }
 
-
 //-----------------------------------------------------------------------------
 
 int ENGINE_DumpAutoread(const Handle(asiTcl_Interp)& interp,
@@ -1246,23 +1246,35 @@ int ENGINE_DumpAutoread(const Handle(asiTcl_Interp)& interp,
   (void) argv;
 
   if ( cmdEngine::cf.IsNull() || !cmdEngine::cf->Console )
-    return TCL_OK;
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "cmdEngine::cf is null.");
+    return TCL_ERROR;
+  }
+
+  // Absolute filename.
+  QString filename = QDir::currentPath() + "/" + asiTcl_AutoLogFilename;
+
+  std::cout << "Target filename for autolog is " << QStr2StdStr(filename) << std::endl;
 
   // Get the contents of Active Script.
   QString txt = cmdEngine::cf->Console->toPlainText();
 
   // Save to file.
-  QFile qFile(asiTcl_AutoLogFilename);
+  QFile qFile(filename);
   //
   if ( qFile.open(QIODevice::WriteOnly) )
   {
     QTextStream out(&qFile);
     out << txt;
     qFile.close();
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Saved autoread file to '%1'."
+                                                         << QStr2ExtStr(filename));
   }
   else
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write autoread file.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write autoread file to '%1'."
+                                                        << QStr2ExtStr(filename));
     return TCL_ERROR;
   }
 

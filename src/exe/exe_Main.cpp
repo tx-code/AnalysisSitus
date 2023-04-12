@@ -353,15 +353,25 @@ int main(int argc, char** argv)
     // Check the autoread log
     //---------------------------------------------------------------------------
 
-    QFile qFile(asiTcl_AutoLogFilename);
+    // Absolute filename.
+    QString logFilename = QDir::currentPath() + "/" + asiTcl_AutoLogFilename;
+
+    std::cout << "Searching for autolog at " << QStr2StdStr(logFilename) << "...";
+
+    QFile qFile(logFilename);
     //
     if ( qFile.exists() )
     {
+      std::cout << " found." << std::endl;
       if ( qFile.open(QIODevice::ReadOnly | QFile::Text) )
       {
         QTextStream in(&qFile);
         pMainWindow->Widgets.wConsole->setText( in.readAll() );
       }
+    }
+    else
+    {
+      std::cout << " not found." << std::endl;
     }
 
     //---------------------------------------------------------------------------

@@ -63,7 +63,7 @@
 #define CONTROL_BTN_WIDTH 150
 #define CONTROL_TBL_WIDTH 350
 
-static const char* const image0_data[] = { 
+static const char* const image0_data[] = {
 "48 48 10 1",
 ". c None",
 "a c #000000",
@@ -577,7 +577,11 @@ void asiUI_DialogAppSurf::onXYZSelected()
   // Load point cloud
   Handle(asiAlgo_BaseCloud<double>) cloud = new asiAlgo_BaseCloud<double>;
   //
+#if defined WIN32
   if ( !cloud->Load( QStr2ExtStr(fileName).ToWideString() ) )
+#else
+  if ( !cloud->Load( QStr2StdStr(fileName).c_str() ) )
+#endif
   {
     m_progress.SendLogMessage( LogErr(Normal) << "Cannot load point cloud from '%1'."
                                               << QStr2StdStr(fileName) );
