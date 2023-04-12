@@ -92,7 +92,7 @@ namespace RTCD
 
     asiAlgo_EXPORT Point(const Vector& V);
 
-    double operator[](const int i)
+    double operator[](const int i) const
     {
       switch ( i )
       {

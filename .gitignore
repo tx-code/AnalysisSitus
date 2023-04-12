@@ -10,9 +10,8 @@ doc/reference/generated/
 test/results/*
 test/dumping/*
 include/
-build/
-build-sdk/
-install*
+build*/    
+install*/   
 .vscode
 *.exe
 *.psess
