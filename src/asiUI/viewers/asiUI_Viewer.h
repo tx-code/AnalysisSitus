@@ -53,9 +53,9 @@ class asiUI_EXPORT asiUI_Viewer : public QWidget
 
 public:
 
-  asiUI_Viewer(ActAPI_ProgressEntry progress,
-               ActAPI_PlotterEntry  plotter,
-               QWidget*             parent = nullptr);
+  asiUI_Viewer(ActAPI_ProgressEntry progress = nullptr,
+               ActAPI_PlotterEntry  plotter  = nullptr,
+               QWidget*             parent   = nullptr);
 
   virtual ~asiUI_Viewer();
 

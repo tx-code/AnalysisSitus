@@ -93,6 +93,7 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepTools.hxx>
 #include <GeomLProp_CLProps.hxx>
+#include <GeomLProp_SLProps.hxx>
 #include <GProp_GProps.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <TopExp.hxx>
@@ -1570,6 +1571,33 @@ int ENGINE_EvalSurf(const Handle(asiTcl_Interp)& interp,
       Message += ", ";
       Message += asiAlgo_Utils::Str::ToString<double>( eval_D2uv.Z() ).c_str();
       Message += ")";
+
+      // Evaluate curvature.
+      GeomLProp_SLProps slProps(occtSurface,
+                                u, v, 2,
+                                Precision::Confusion());
+      //
+      if ( slProps.IsCurvatureDefined() )
+      {
+        const double minK = slProps.MinCurvature();
+        const double maxK = slProps.MaxCurvature();
+        const double gK   = slProps.GaussianCurvature();
+        const double mK   = slProps.MeanCurvature();
+
+        Message += "\nMin curvature: ";
+        Message += asiAlgo_Utils::Str::ToString<double>(minK).c_str();
+        Message += "\nMax curvature: ";
+        Message += asiAlgo_Utils::Str::ToString<double>(maxK).c_str();
+        Message += "\nGaussian curvature: ";
+        Message += asiAlgo_Utils::Str::ToString<double>(gK).c_str();
+        Message += "\nMean curvature: ";
+        Message += asiAlgo_Utils::Str::ToString<double>(mK).c_str();
+
+        gp_Dir maxCurvatureDir, minCurvatureDir;
+        slProps.CurvatureDirections(maxCurvatureDir, minCurvatureDir);
+
+        interp->GetPlotter().REDRAW_AXES("principalCurvatures", eval_P, maxCurvatureDir, minCurvatureDir, eval_D1u^eval_D1v, 1);
+      }
     }
     else
     {

@@ -198,13 +198,11 @@ void asiUI_Plot2d::Render(const std::vector<double>&                x,
   m_contextView = vtkSmartPointer<vtkContextView>::New();
   //
   m_contextView->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
-  //
-  m_contextView->GetRenderWindow()->SetMultiSamples(8);
 
   // Create Qt window. NOTICE that interactor should be already given to
   // the render window at this stage.
   m_pViewer = new asiUI_VtkWindow();
-  m_pViewer->SetRenderWindow( m_contextView->GetRenderWindow() );
+  m_contextView->SetRenderWindow( m_pViewer->GetRenderWindow() );
 
   vtkSmartPointer<vtkChartXY> chart = vtkSmartPointer<vtkChartXY>::New();
   m_contextView->GetScene()->AddItem(chart);
