@@ -426,6 +426,7 @@ set (mesh_H_FILES
   mesh/asiAlgo_MeshOffset.h
   mesh/asiAlgo_MeshParams.h
   mesh/asiAlgo_MeshProjectLine.h
+  mesh/asiAlgo_MeshSlice.h
   mesh/asiAlgo_MeshSmooth.h
   mesh/asiAlgo_MeshWithFields.h
 )
@@ -443,6 +444,7 @@ set (mesh_CPP_FILES
   mesh/asiAlgo_MeshOffset.cpp
   mesh/asiAlgo_MeshParams.cpp
   mesh/asiAlgo_MeshProjectLine.cpp
+  mesh/asiAlgo_MeshSlice.cpp
   mesh/asiAlgo_MeshSmooth.cpp
 )
 
