@@ -81,6 +81,9 @@
 #include <BRepTools.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2dAPI_InterCurveCurve.hxx>
+#include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <GeomConvert.hxx>
+#include <ShapeFix_Wire.hxx>
 
 //-----------------------------------------------------------------------------
 
@@ -115,39 +118,37 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
 
   const TopoDS_Face& face = partApi.GetAAG()->GetFace(fid);
 
-  double uMin, uMax, vMin, vMax;
-  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+  //convert a face_shape to Geom_BSplineSurface
+    TopoDS_Face faceo = TopoDS::Face(face);
+    BRepBuilderAPI_NurbsConvert nurbs_convert;
+    nurbs_convert = BRepBuilderAPI_NurbsConvert(faceo);
+    nurbs_convert.Perform(faceo);
+    TopoDS_Shape face_shape = nurbs_convert.Shape();
+    Handle(Geom_Surface) h_geomface = BRep_Tool::Surface(TopoDS::Face(face_shape));
+    Handle(Geom_BSplineSurface)h_bsurface = GeomConvert::SurfaceToBSplineSurface(h_geomface);
+    
+    //Reparametrize u dir
+    Standard_Integer nbuk = h_bsurface->NbUKnots();
+    TColStd_Array1OfReal uk(1, nbuk);
+    BSplCLib::Reparametrize(0, 1, uk);
+    h_bsurface->SetUKnots(uk);
+    
+    //Reparametrize v dir
+    Standard_Integer nbvk = h_bsurface->NbVKnots();
+    TColStd_Array1OfReal vk(1, nbvk);
+    BSplCLib::Reparametrize(0, 1, vk);
+    h_bsurface->SetVKnots(vk);
+    
+    //convert Geom_BSplineSurface to TopoDS_Face
+    TopoDS_Wire wire = BRepTools::OuterWire(faceo);
+    TopoDS_Face res = BRepBuilderAPI_MakeFace(h_bsurface, wire, false);
 
-  const double uMid = (uMin + uMax)*0.5;
-  const double vMid = (vMin + vMax)*0.5;
+    Handle(ShapeFix_Wire)
+          sfw = new ShapeFix_Wire( wire,
+                                   face,
+                                   Precision::Confusion() );
 
-  Handle(Geom_Surface) surf    = BRep_Tool::Surface(face);
-  Handle(Geom2d_Line)  isoLine = new Geom2d_Line( gp_Lin2d( gp_Pnt2d(uMid, vMid), gp::DY2d() ) );
-
-  interp->GetPlotter().DRAW_CURVE( surf->UIso(uMid), Color_Green, false, "uIso" );
-
-  for ( TopExp_Explorer eexp(face, TopAbs_EDGE); eexp.More(); eexp.Next() )
-  {
-    const TopoDS_Edge& edge = TopoDS::Edge( eexp.Current() );
-
-    // Get pcurve of an edge.
-    double f, l;
-    Handle(Geom2d_Curve) pcurve = BRep_Tool::CurveOnSurface(edge, face, f, l);
-
-    Geom2dAPI_InterCurveCurve intersector(isoLine, pcurve);
-
-    if ( intersector.NbPoints() )
-    {
-      const int nsol = intersector.NbPoints();
-      for ( int isol = 1; isol <= nsol; ++isol )
-      {
-        gp_Pnt2d pt2d = intersector.Point(isol);
-        gp_Pnt   pt   = surf->Value( pt2d.X(), pt2d.Y() );
-
-        interp->GetPlotter().DRAW_POINT(pt, Color_Red, "intersectionPoint");
-      }
-    }
-  }
+    interp->GetPlotter().REDRAW_SHAPE("res", res);
 
   return TCL_OK;
 }

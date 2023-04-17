@@ -57,9 +57,11 @@
 #include <asiAlgo_PatchJointAdaptor.h>
 #include <asiAlgo_Utils.h>
 #include <asiAlgo_WriteREK.h>
+#include <asiAlgo_WriteSVG.h>
 
 // OpenCascade includes
 #include <BOPAlgo_Builder.hxx>
+#include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <TDF_Tool.hxx>
@@ -711,6 +713,38 @@ void asiUI_ObjectBrowser::onResetPartPrs()
       m_viewers[k]->PrsMgr()->DeletePresentation(selected_n);
       m_viewers[k]->PrsMgr()->Actualize(selected_n, false, true);
     }
+}
+//-----------------------------------------------------------------------------
+
+void asiUI_ObjectBrowser::onSaveToSVG()
+{
+  Handle(ActAPI_HNodeList) sel;
+  if ( !this->selectedNodes(sel) ) return;
+
+  TopoDS_Compound curvesComp;
+  BRep_Builder bbuilder;
+  bbuilder.MakeCompound(curvesComp);
+
+  for ( ActAPI_NodeList::Iterator nit(*sel); nit.More(); nit.Next() )
+  {
+    Handle(ActAPI_INode) node = nit.Value();
+    //
+    if ( !node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+      continue;
+
+    Handle(Geom_Curve)
+      curve = Handle(asiData_IVCurveNode)::DownCast(node)->GetCurve();
+
+    bbuilder.Add( curvesComp, BRepBuilderAPI_MakeEdge(curve) );
+  }
+
+  QString
+    filename = asiUI_Common::selectGraphicsFile(asiUI_Common::OpenSaveAction_Save);
+
+  if ( !asiAlgo_WriteSVG::Write( curvesComp, QStr2AsciiStr(filename), 1e-3 ) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Failed to save SVG.");
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -1603,8 +1637,8 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
            node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
       {
         pMenu->addSeparator();
-        pMenu->addAction( "Copy as JSON", this, SLOT( onCopyAsJSON () ) );
-        pMenu->addAction( "Set as part",  this, SLOT( onSetAsPart  () ) );
+        pMenu->addAction( "Copy as JSON",   this, SLOT( onCopyAsJSON () ) );
+        pMenu->addAction( "Set as part",    this, SLOT( onSetAsPart  () ) );
 
         if ( node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
         {
@@ -1655,6 +1689,12 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
         pMenu->addAction( "Dump joint info",       this, SLOT( onDumpJoint          () ) );
         pMenu->addAction( "Unify knots and align", this, SLOT( onUnifyKnotsAndAlign () ) );
       }
+    }
+
+    if ( node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+    {
+      pMenu->addSeparator();
+      pMenu->addAction( "Save to SVG...", this, SLOT( onSaveToSVG() ) );
     }
   }
 }

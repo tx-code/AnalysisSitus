@@ -102,7 +102,7 @@ void asiUI_Viewer3dListener::onContextMenu(const QPoint& globalPos)
 
   // Other actions
   pChangeBg     = menu.addAction("Set background color");
-  pDumpGraphics = menu.addAction("Dump graphics");
+  pDumpGraphics = menu.addAction("Dump graphics...");
   pToggleAxes   = menu.addAction("Toggle axes");
   pFitAll       = menu.addAction("Fit all");
 

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 18 March 2023
+// Created on: 17 April 2023
 //-----------------------------------------------------------------------------
 // Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,50 +28,59 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#pragma once
-
-// asiAlgo includes
-#include <asiAlgo_BaseCloud.h>
-
-#if defined USE_MOBIUS
-  // Mobius includes
-  #include <mobius/geom_PositionCloud.h>
-#endif
-
-// OpenCascade includes
-#include <Geom_BSplineSurface.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
+// Own include
+#include <asiTest_BuildGordonSurf.h>
 
 //-----------------------------------------------------------------------------
 
-//! Common function for PLATE, APPSURF1 and APPSURF2.
-namespace asiAlgo_AppSurfUtils
+outcome asiTest_BuildGordonSurf::runTestScript(const int   funcID,
+                                               const char* filename)
 {
-  //! Constructs initial spliny plane with the specified numbers of U and V knots.
-  //! The U and V degrees of the corresponding basis spline functions will be elevated
-  //! up to the passed values of `degU` and `degV` arguments.
-  asiAlgo_EXPORT Handle(Geom_BSplineSurface)
-    PrepareInitialPlane(const Handle(asiAlgo_BaseCloud<double>)& pts,
-                        const int                                numUKnots,
-                        const int                                numVKnots,
-                        const int                                degU,
-                        const int                                degV);
+  // Get filename of script to execute.
+  TCollection_AsciiString fullFilename = GetFilename(filename);
 
-#if defined USE_MOBIUS
-  //! Prepares pinpoint constraints for approximation as a point cloud.
-  asiAlgo_EXPORT void
-    PrepareConstraints(const double                             prec,
-                       const Handle(TopTools_HSequenceOfShape)& edges,
-                       const Handle(asiAlgo_BaseCloud<double>)& extras,
-                       const mobius::t_ptr<mobius::t_pcloud>&   pts);
-#endif
+  // Execute test script.
+  outcome res = evaluate(fullFilename, DescriptionFn(), funcID);
 
-  //! Measures the obtained deviation.
-  asiAlgo_EXPORT void
-    MeasureDeviation(const Handle(Geom_BSplineSurface)&       bsurf,
-                     const Handle(asiAlgo_BaseCloud<double>)& pts,
-                     double&                                  minDeviation,
-                     double&                                  maxDeviation,
-                     double&                                  avrDeviation,
-                     gp_Pnt&                                  maxDevPt);
+  // Set description variables.
+  SetVarDescr("filename", fullFilename,       ID(), funcID);
+  SetVarDescr("time",     res.elapsedTimeSec, ID(), funcID);
+
+  // Return status.
+  return res;
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test01(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_01.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test02(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_02.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test03(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_03.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test04(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_04.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test05(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_05.tcl");
 }

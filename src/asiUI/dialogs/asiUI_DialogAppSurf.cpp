@@ -838,8 +838,9 @@ void asiUI_DialogAppSurf::onApply()
    *  Measure deviation.
    * =================== */
 
+  gp_Pnt maxDevPt;
   double minDeviation = DBL_MAX, maxDeviation = DBL_MAX, avrDeviation = DBL_MAX;
-  asiAlgo_AppSurfUtils::MeasureDeviation(surf, finalConstraints, minDeviation, maxDeviation, avrDeviation);
+  asiAlgo_AppSurfUtils::MeasureDeviation(surf, finalConstraints, minDeviation, maxDeviation, avrDeviation, maxDevPt);
 
   m_progress.SendLogMessage(LogNotice(Normal) << "\n\tMax.     deviation: %1"
                                                  "\n\tMin.     deviation: %2"
