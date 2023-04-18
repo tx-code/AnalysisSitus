@@ -580,7 +580,7 @@ void asiUI_DialogAppSurf::onXYZSelected()
 #if defined WIN32
   if ( !cloud->Load( QStr2ExtStr(fileName).ToWideString() ) )
 #else
-  if ( !cloud->Load( QStr2StdStr(fileName).c_str() ) )
+  if ( !cloud->Load(QStr2StdStr(fileName).c_str() ) )
 #endif
   {
     m_progress.SendLogMessage( LogErr(Normal) << "Cannot load point cloud from '%1'."
