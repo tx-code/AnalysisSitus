@@ -39,6 +39,7 @@
 //
 #if defined USE_MOBIUS
   #include <asiUI_DialogAppSurf.h>
+  #include <asiUI_DialogAppSurfGordon.h>
 #endif
 
 // asiAlgo includes
@@ -213,6 +214,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFact
   m_pInvertFaces         (nullptr),
   m_pSplConvert          (nullptr),
   m_pFillEdges           (nullptr),
+  m_pGordon              (nullptr),
   m_pShowOriContour      (nullptr),
   m_pShowHatching        (nullptr),
   m_pCopyAsString        (nullptr),
@@ -248,6 +250,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pInvertFaces         (nullptr),
   m_pSplConvert          (nullptr),
   m_pFillEdges           (nullptr),
+  m_pGordon              (nullptr),
   m_pShowOriContour      (nullptr),
   m_pShowHatching        (nullptr),
   m_pCopyAsString        (nullptr),
@@ -709,6 +712,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   // Uncoditional actions.
   menu.addSeparator();
   m_pFillEdges = menu.addAction("Fit surface...");
+  m_pGordon = menu.addAction("Build Gordon Surface...");
 #endif
 }
 
@@ -1378,6 +1382,23 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
                                             m_widgetFactory->GetCommonFacilities()->MainWindow);
 
     pDlgAppSurf->onEdgePicked();
+    pDlgAppSurf->show();
+  }
+  //---------------------------------------------------------------------------
+  // ACTION: build Gordon surface
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pGordon )
+  {
+    asiUI_ViewerPart* pViewer = dynamic_cast<asiUI_ViewerPart*>(m_pViewer);
+
+    asiUI_DialogAppSurfGordon*
+      pDlgAppSurf = new asiUI_DialogAppSurfGordon(m_widgetFactory,
+                                                  m_model,
+                                                  pViewer,
+                                                  m_progress,
+                                                  m_plotter,
+                                                  m_widgetFactory->GetCommonFacilities()->MainWindow);
+
     pDlgAppSurf->show();
   }
 #endif
