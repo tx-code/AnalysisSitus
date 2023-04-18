@@ -188,10 +188,6 @@ void CTiglInterpolateCurveNetwork::MakeCurvesCompatible()
     // eliminate small inaccuracies of the intersection parameters:
     EliminateInaccuraciesNetworkIntersections(m_profiles, m_guides, intersection_params_u, intersection_params_v);
 
-    std::cout << "\n\nTIGL" << std::endl;
-    intersection_params_u.Dump(std::cout);
-    intersection_params_v.Dump(std::cout);
-
     std::vector<double> newParametersProfiles;
     for (int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx) {
         double sum = 0;

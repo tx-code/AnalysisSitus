@@ -43,7 +43,6 @@
 // OCCT includes
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
-#include <math_Matrix.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 
@@ -53,14 +52,6 @@
 class asiAlgo_BuildGordonSurf : public ActAPI_IAlgorithm
 {
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildGordonSurf, ActAPI_IAlgorithm)
-
-public:
-
-  enum Status
-  {
-    Status_Ok                              = 0x0000,
-    Status_InconsistentOrientationOfCurves = 0x0001
-  };
 
 public:
 
@@ -94,24 +85,16 @@ public:
 public:
 
   //! Builds Gordon surface as a B-spline surface.
-  //! \param[in]  profiles the collection of profile edges.
-  //! \param[in]  guides   the collection of guide edges.
-  //! \param[out] support  the constructed B-surface.
-  //! \param[out] face     the constructed face.
+  //! \param[in]  uEdges  the collection of boundary edges in the U direction.
+  //! \param[in]  vEdges  the collection of boundary edges in the V direction.
+  //! \param[out] support the constructed B-surface.
+  //! \param[out] face    the constructed face.
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Build(const std::vector<TopoDS_Edge>& profiles,
-          const std::vector<TopoDS_Edge>& guides,
+    Build(const std::vector<TopoDS_Edge>& uEdges,
+          const std::vector<TopoDS_Edge>& vEdges,
           Handle(Geom_BSplineSurface)&    support,
-          TopoDS_Face&                    face);
-
-public:
-
-  //! \return max approximation error.
-  double GetMaxError() const
-  {
-    return m_fMaxError;
-  }
+          TopoDS_Face&                    face) const;
 
 protected:
 
@@ -127,17 +110,6 @@ protected:
                    std::vector<Handle(Geom_BSplineCurve)>&       result,
                    std::vector<double>&                          params,
                    std::vector<double>&                          knots) const;
-
-  //! Computes intersection parameters between curves.
-  asiAlgo_EXPORT bool
-    computeCurveIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
-                              const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
-                              math_Matrix&                                  uParams,
-                              math_Matrix&                                  vParams) const;
-
-protected:
-
-  double m_fMaxError; //!< Achieved approximation error.
 
 };
 

@@ -1941,11 +1941,8 @@ int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
                        int                          argc,
                        const char**                 argv)
 {
-  Handle(asiEngine_Model)
-    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
-
   // Get the part.
-  asiEngine_Part partApi(M);
+  asiEngine_Part partApi(cmdEngine::cf->Model);
 
   // Read {p} ("profile") curves.
   std::vector<int> pIds;
@@ -2028,14 +2025,8 @@ int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Return max error.
-  *interp << buildGordon.GetMaxError();
-
-  // Get result name.
-  std::string name = "gordonSurf";
-  interp->GetKeyValue(argc, argv, "name", name);
-
-  interp->GetPlotter().REDRAW_SURFACE(name.c_str(), resSurf, Color_Default);
+  interp->GetPlotter().DRAW_SURFACE (resSurf, Color_Default, "gordonSurf");
+  interp->GetPlotter().DRAW_SHAPE   (resFace, Color_Default, "gordonFace");
 
   return TCL_OK;
 }
@@ -2303,10 +2294,9 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-gordon",
     //
-    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...] [-name <name>]\n"
+    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...]\n"
     "\t Builds a Gordon surface passing through the given {p} (\"profile\")\n"
-    "\t and {g} (\"guide\") curves specified as edge indices in the active part.\n"
-    "\t This function returns the max achieved approximation error.",
+    "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
     //
     __FILE__, group, ENGINE_BuildGordon);
 }
