@@ -5831,9 +5831,10 @@ bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
 //-----------------------------------------------------------------------------
 
 Handle(Image_AlienPixMap)
-  asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape& shape,
-                                          const int           width,
-                                          const int           height)
+  asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape&   shape,
+                                          const int             width,
+                                          const int             height,
+                                          const Quantity_Color& shapeColor)
 {
   Handle(Aspect_DisplayConnection)
     _displayConnection = new Aspect_DisplayConnection();
@@ -5900,7 +5901,7 @@ Handle(Image_AlienPixMap)
 
   //* Dump
   Handle(Image_AlienPixMap) pixmap = new Image_AlienPixMap;
-  Quantity_Color _shapeColor(200. / 255, 200. / 255, 200. / 255, Quantity_TOC_RGB);
+  Quantity_Color _shapeColor = shapeColor;
 
   Handle(AIS_Shape) _shapePrs = new AIS_Shape(shape);
   _shapePrs->SetColor(_shapeColor);
@@ -5914,13 +5915,14 @@ Handle(Image_AlienPixMap)
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
-                                              const int           width,
-                                              const int           height,
-                                              const std::string&  filename)
+bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape&   shape,
+                                              const int             width,
+                                              const int             height,
+                                              const std::string&    filename,
+                                              const Quantity_Color& shapeColor)
 {
   Handle(Image_AlienPixMap)
-    pixmap = GeneratePixmap(shape, width, height);
+    pixmap = GeneratePixmap(shape, width, height, shapeColor);
 
   if (pixmap.IsNull())
     return false;
