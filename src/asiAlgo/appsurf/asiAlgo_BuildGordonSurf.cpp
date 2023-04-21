@@ -35,6 +35,7 @@
 #include <asiAlgo_AppSurfUtils.h>
 #include <asiAlgo_Utils.h>
 
+#ifdef USE_MOBIUS
 // Mobius includes
 #include <mobius/bspl_UnifyKnots.h>
 #include <mobius/cascade.h>
@@ -42,6 +43,7 @@
 #include <mobius/geom_InterpolateMultiCurve.h>
 #include <mobius/geom_SkinSurface.h>
 #include <mobius/geom_UnifyBCurves.h>
+#endif
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
@@ -57,12 +59,15 @@
 #include <CTiglBSplineAlgorithms.h>
 #include <CTiglCurveNetworkSorter.h>
 
+#ifdef USE_MOBIUS
 using namespace mobius;
+#endif
 
 #undef USE_TIGL
 
 #define CurveOriginToler 1e-2
 
+#ifdef USE_MOBIUS
 namespace
 {
   template <class T>
@@ -311,7 +316,7 @@ namespace
     }
   }
 }
-
+#endif
 //-----------------------------------------------------------------------------
 
 void
@@ -323,6 +328,7 @@ void
                                           double&                            maxDev,
                                           ActAPI_PlotterEntry                plotter)
 {
+#ifdef USE_MOBIUS
   // Put all edges into a compound to compute the default deviation.
   TopoDS_Compound comp;
   BRep_Builder bbuilder;
@@ -369,6 +375,7 @@ void
 
   plotter.REDRAW_POINT("bndMaxDevPt",   bndMaxDevPt,   Color_Red);
   plotter.REDRAW_POINT("innerMaxDevPt", innerMaxDevPt, Color_Violet);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -386,6 +393,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
                                     Handle(Geom_BSplineSurface)&    support,
                                     TopoDS_Face&                    face)
 {
+#ifdef USE_MOBIUS
   if ( profiles.empty() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "No profile curves.");
@@ -1137,6 +1145,13 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
   face    = BRepBuilderAPI_MakeFace(support, Precision::Confusion());
 
   return true;
+#else
+  (void)profiles;
+  (void)guides;
+  (void)support;
+  (void)face;
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1146,6 +1161,7 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
                                              std::vector<double>&                          params,
                                              std::vector<double>&                          knots) const
 {
+#ifdef USE_MOBIUS
   /* =====================================================
    *  Discretize curves to have the same number of points.
    * ===================================================== */
@@ -1214,6 +1230,13 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
   }
 
   return true;
+#else
+  (void)curves;
+  (void)result;
+  (void)params;
+  (void)knots;
+  return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1223,6 +1246,7 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
                                                         math_Matrix&                                  uParams,
                                                         math_Matrix&                                  vParams) const
 {
+#ifdef USE_MOBIUS
   /* =================================
    *  Compute intersection parameters.
    * ================================= */
@@ -1350,4 +1374,11 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
   }
 
   return !fail;
+#else
+  (void)uCurves;
+  (void)vCurves;
+  (void)uParams;
+  (void)vParams;
+  return false;
+#endif
 }

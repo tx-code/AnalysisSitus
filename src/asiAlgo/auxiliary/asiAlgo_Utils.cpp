@@ -5859,9 +5859,10 @@ bool asiAlgo_Utils::IsInternal(const TopoDS_Face& face,
 //-----------------------------------------------------------------------------
 
 Handle(Image_AlienPixMap)
-  asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape& shape,
-                                          const int           width,
-                                          const int           height)
+  asiAlgo_Utils::Graphics::GeneratePixmap(const TopoDS_Shape&   shape,
+                                          const int             width,
+                                          const int             height,
+                                          const Quantity_Color& shapeColor)
 {
   Handle(Aspect_DisplayConnection)
     displayConnection = new Aspect_DisplayConnection();
@@ -5936,9 +5937,6 @@ Handle(Image_AlienPixMap)
   //* Dump
   Handle(Image_AlienPixMap) pixmap = new Image_AlienPixMap;
 
-  Quantity_Color shapeColor(180. / 255, 180. / 255, 180. / 255,
-                            Quantity_TOC_RGB);
-
   Handle(AIS_Shape) shapePrs = new AIS_Shape(shape);
   shapePrs->SetColor(shapeColor);
 
@@ -5952,13 +5950,14 @@ Handle(Image_AlienPixMap)
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape& shape,
-                                              const int           width,
-                                              const int           height,
-                                              const std::string&  filename)
+bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape&   shape,
+                                              const int             width,
+                                              const int             height,
+                                              const std::string&    filename,
+                                              const Quantity_Color& shapeColor)
 {
   Handle(Image_AlienPixMap)
-    pixmap = GeneratePixmap(shape, width, height);
+    pixmap = GeneratePixmap(shape, width, height, shapeColor);
 
   if (pixmap.IsNull())
     return false;

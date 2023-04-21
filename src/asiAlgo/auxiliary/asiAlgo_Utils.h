@@ -464,29 +464,45 @@ namespace asiAlgo_Utils
 
   namespace Graphics
   {
-    //! Generates the picture of the given shape from the axonometric camera view.
-    //! The off-screen rendering technique is used.
-    //! \param[in] shape  the shape to screeenshot.
-    //! \param[in] width  the target width of the output image.
-    //! \param[in] height the target height of the output image.
-    //! \return the generated in-memory pixmap.
-    asiAlgo_EXPORT Handle(Image_AlienPixMap)
-      GeneratePixmap(const TopoDS_Shape& shape,
-                     const int           width,
-                     const int           height);
+    //! Default copmonent of color of shape.
+    static constexpr double CompColorOfShape()
+    {
+      return 200.0 / 255.0;
+    }
 
     //! Generates the picture of the given shape from the axonometric camera view.
     //! The off-screen rendering technique is used.
-    //! \param[in] shape    the shape to screeenshot.
-    //! \param[in] width    the target width of the output image.
-    //! \param[in] height   the target height of the output image.
-    //! \param[in] filename the outcome filename.
+    //! \param[in] shape      the shape to screeenshot.
+    //! \param[in] width      the target width of the output image.
+    //! \param[in] height     the target height of the output image.
+    //! \param[in] shapeColor color of shape [0, 1].
+    //! \return the generated in-memory pixmap.
+    asiAlgo_EXPORT Handle(Image_AlienPixMap)
+      GeneratePixmap(const TopoDS_Shape&   shape,
+                     const int             width,
+                     const int             height,
+                     const Quantity_Color& shapeColor = Quantity_Color(CompColorOfShape(),
+                                                                       CompColorOfShape(),
+                                                                       CompColorOfShape(),
+                                                                       Quantity_TOC_RGB));
+
+    //! Generates the picture of the given shape from the axonometric camera view.
+    //! The off-screen rendering technique is used.
+    //! \param[in] shape      the shape to screeenshot.
+    //! \param[in] width      the target width of the output image.
+    //! \param[in] height     the target height of the output image.
+    //! \param[in] filename   the outcome filename.
+    //! \param[in] shapeColor color of shape [0, 1].
     //! \return true in case of success, false -- otherwise.
     asiAlgo_EXPORT bool
-      GeneratePicture(const TopoDS_Shape& shape,
-                      const int           width,
-                      const int           height,
-                      const std::string&  filename);
+      GeneratePicture(const TopoDS_Shape&   shape,
+                      const int             width,
+                      const int             height,
+                      const std::string&    filename,
+                      const Quantity_Color& shapeColor = Quantity_Color(CompColorOfShape(),
+                                                                        CompColorOfShape(),
+                                                                        CompColorOfShape(),
+                                                                        Quantity_TOC_RGB));
   } // Graphics namespace.
 
   //! Functions for working with 1-dimensional ranges.

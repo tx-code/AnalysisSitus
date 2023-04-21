@@ -37,8 +37,10 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+#ifdef USE_MOBIUS
 // Mobius includes
 #include <mobius/core_XYZ.h>
+#endif
 
 // OCCT includes
 #include <Geom_BSplineCurve.hxx>
