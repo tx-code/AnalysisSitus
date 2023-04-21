@@ -162,6 +162,7 @@ protected slots:
   void onShowPartEdges         ();
   void onResetPartPrs          ();
   //
+  void onSaveToSVG             ();
   void onCopyAsJSON            ();
   void onSaveToBREP            ();
   void onSetAsPart             ();

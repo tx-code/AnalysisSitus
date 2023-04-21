@@ -20,10 +20,41 @@ set (CPP_FILES
 
 set (appsurf_H_FILES
   appsurf/asiAlgo_AppSurfUtils.h
+  appsurf/asiAlgo_BuildCoonsSurf.h
+  appsurf/asiAlgo_BuildGordonSurf.h
+  appsurf/CTiglApproxResult.h
+  appsurf/CTiglIntersectBSplines.h
+  appsurf/CTiglPoint.h
+  appsurf/CTiglBSplineAlgorithms.h
+  appsurf/CTiglBSplineApproxInterp.h
+  appsurf/tiglcommonfunctions.h
+  appsurf/CTiglCurvesToSurface.h
+  appsurf/CTiglPointsToBSplineInterpolation.h
+  appsurf/CTiglCurveNetworkSorter.h
+  appsurf/CTiglInterpolateCurveNetwork.h
+  appsurf/CTiglGordonSurfaceBuilder.h
+  appsurf/CTiglIntersectionPoint.h
 )
 set (appsurf_CPP_FILES
   appsurf/asiAlgo_AppSurfUtils.cpp
+  appsurf/asiAlgo_BuildCoonsSurf.cpp
+  appsurf/asiAlgo_BuildGordonSurf.cpp
+  appsurf/CTiglIntersectBSplines.cpp
+  appsurf/CTiglPoint.cpp
+  appsurf/CTiglBSplineAlgorithms.cpp
+  appsurf/CTiglBSplineApproxInterp.cpp
+  appsurf/tiglcommonfunctions.cpp
+  appsurf/CTiglCurvesToSurface.cpp
+  appsurf/CTiglPointsToBSplineInterpolation.cpp
+  appsurf/CTiglCurveNetworkSorter.cpp
+  appsurf/CTiglInterpolateCurveNetwork.cpp
+  appsurf/CTiglGordonSurfaceBuilder.cpp
 )
+
+if (USE_MOBIUS)
+  list(APPEND appsurf_H_FILES   appsurf/asiAlgo_AppSurf2.h)
+  list(APPEND appsurf_CPP_FILES appsurf/asiAlgo_AppSurf2.cpp)
+endif()
 
 #------------------------------------------------------------------------------
 # Auxiliary
@@ -514,14 +545,12 @@ set (points_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (re_H_FILES
-  re/asiAlgo_BuildCoonsSurf.h
   re/asiAlgo_CheckDeviations.h
   re/asiAlgo_InterpolateSurfMesh.h
   re/asiAlgo_PatchJointAdaptor.h
   re/asiAlgo_PlateOnEdges.h
 )
 set (re_CPP_FILES
-  re/asiAlgo_BuildCoonsSurf.cpp
   re/asiAlgo_CheckDeviations.cpp
   re/asiAlgo_InterpolateSurfMesh.cpp
   re/asiAlgo_PatchJointAdaptor.cpp
@@ -555,8 +584,6 @@ set (utils_CPP_FILES
 if (USE_MOBIUS)
   list(APPEND utils_H_FILES   utils/asiAlgo_MobiusProgressNotifier.h)
   list(APPEND utils_CPP_FILES utils/asiAlgo_MobiusProgressNotifier.cpp)   
-  list(APPEND re_H_FILES      re/asiAlgo_AppSurf2.h)
-  list(APPEND re_CPP_FILES    re/asiAlgo_AppSurf2.cpp)
 endif()
 
 #------------------------------------------------------------------------------

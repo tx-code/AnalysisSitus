@@ -31,6 +31,7 @@
 // asiTest includes
 #include <asiTest_AAG.h>
 #include <asiTest_AppSurf.h>
+#include <asiTest_BuildGordonSurf.h>
 #include <asiTest_BuildQuickHull.h>
 #include <asiTest_ChangeColor.h>
 #include <asiTest_ConcatPCurves.h>
@@ -140,6 +141,9 @@ int main(int argc, char* argv[])
   std::cout << "asiTest : main()" << std::endl;
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
+  // Modeling.
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildGordonSurf> );
+
   // Main tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>          );
@@ -162,9 +166,6 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>           );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ComputeNegativeVolume> );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildQuickHull>        );
-
-  // Modeling.
-  //CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_AppSurf> );
 
   // Data exchange tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );

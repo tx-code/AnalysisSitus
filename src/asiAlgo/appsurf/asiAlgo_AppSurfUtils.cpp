@@ -78,7 +78,7 @@ namespace
     { m_current = pnt; }
 
     //! Implementation of inspection method.
-    NCollection_CellFilter_Action Inspect (const Target& obj)
+    NCollection_CellFilter_Action Inspect(const Target& obj)
     {
       const gp_XYZ pt = m_current.Subtracted(obj);
       const double sqDist = pt.SquareModulus();
@@ -289,7 +289,8 @@ void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineSurface)&  
                                             const Handle(asiAlgo_BaseCloud<double>)& pts,
                                             double&                                  minDeviation,
                                             double&                                  maxDeviation,
-                                            double&                                  avrDeviation)
+                                            double&                                  avrDeviation,
+                                            gp_Pnt&                                  maxDevPt)
 {
   double U, V, UMin, UMax, VMin, VMax;
   double curDev = 0, minDev = 0, maxDev = 0, summDev = 0;
@@ -333,7 +334,7 @@ void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineSurface)&  
     gp_Pnt Pntproj;
     bsurf->D0(U, V, Pntproj);
     const gp_XYZ gap3d(P - Pntproj.XYZ());
-    const gp_XY con2d(U,V);
+    const gp_XY con2d(U, V);
 
     curDev = Pntproj.Distance(P);
     summDev += curDev;
@@ -341,13 +342,18 @@ void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineSurface)&  
     {
       minDev = curDev;
       maxDev = curDev;
+
+      maxDevPt = P;
     }
     else
     {
       if ( curDev < minDev )
         minDev = curDev;
       if ( curDev > maxDev )
-        maxDev = curDev;
+      {
+        maxDev   = curDev;
+        maxDevPt = P;
+      }
     }
   }
 

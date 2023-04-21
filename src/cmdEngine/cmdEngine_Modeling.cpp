@@ -41,9 +41,10 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_BuildGordonSurf.h>
 #include <asiAlgo_BuildHLR.h>
-#include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_BuildOBB.h>
+#include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_MeshOffset.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
@@ -1936,6 +1937,111 @@ int ENGINE_Fill(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get the part.
+  asiEngine_Part partApi(M);
+
+  // Read {p} ("profile") curves.
+  std::vector<int> pIds;
+  int pIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "p", pIdx) )
+  {
+    int k = pIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+      pIds.push_back(eid);
+    }
+  }
+
+  // Read {g} ("guide") curves.
+  std::vector<int> gIds;
+  int gIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "g", gIdx) )
+  {
+    int k = gIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+      gIds.push_back(eid);
+    }
+  }
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "AAG is null.");
+    return false;
+  }
+  //
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
+
+  // Collect edges.
+  std::vector<TopoDS_Edge> pEdges, gEdges;
+  //
+  for ( const auto eid : pIds )
+  {
+    if ( eid < 1 || eid > allEdges.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Edge %1 is out of range [1, %2]."
+                                                           << eid << allEdges.Extent() );
+      return false;
+    }
+
+    pEdges.push_back( TopoDS::Edge( allEdges(eid) ) );
+  }
+  //
+  for ( const auto eid : gIds )
+  {
+    if ( eid < 1 || eid > allEdges.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Edge %1 is out of range [1, %2]."
+                                                           << eid << allEdges.Extent() );
+      return false;
+    }
+
+    gEdges.push_back( TopoDS::Edge( allEdges(eid) ) );
+  }
+
+  Handle(Geom_BSplineSurface) resSurf;
+  TopoDS_Face                 resFace;
+
+  // Build Gordon surface.
+  asiAlgo_BuildGordonSurf buildGordon( interp->GetProgress(),
+                                       interp->GetPlotter() );
+  //
+  if ( !buildGordon.Build(pEdges, gEdges, resSurf, resFace) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build Gordon surface.");
+    return TCL_ERROR;
+  }
+
+  std::string surfName = "gordonSurf";
+  interp->GetKeyValue(argc, argv, "name", surfName);
+
+  interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);
+
+  const double maxError = buildGordon.GetMaxError();
+
+  *interp << maxError;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
                                   const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -2193,4 +2299,13 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t with the <fid> face. There should be a mate face to fill until.",
     //
     __FILE__, group, ENGINE_Fill);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-gordon",
+    //
+    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...] [-name <surfName>]\n"
+    "\t Builds a Gordon surface passing through the given {p} (\"profile\")\n"
+    "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
+    //
+    __FILE__, group, ENGINE_BuildGordon);
 }

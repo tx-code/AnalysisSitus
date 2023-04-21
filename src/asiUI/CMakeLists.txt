@@ -267,6 +267,8 @@ set (dialogs_CPP_FILES
 if (USE_MOBIUS)
   list(APPEND dialogs_H_UI_FILES dialogs/asiUI_DialogAppSurf.h)
   list(APPEND dialogs_CPP_FILES  dialogs/asiUI_DialogAppSurf.cpp)
+  list(APPEND dialogs_H_UI_FILES dialogs/asiUI_DialogBuildGordon.h)
+  list(APPEND dialogs_CPP_FILES  dialogs/asiUI_DialogBuildGordon.cpp)
 endif()
 
 #------------------------------------------------------------------------------

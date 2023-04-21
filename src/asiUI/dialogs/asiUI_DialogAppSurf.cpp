@@ -218,7 +218,7 @@ asiUI_DialogAppSurf::asiUI_DialogAppSurf(const Handle(asiUI_WidgetFactory)& wf,
   m_widgets.pClearTable->setFocusPolicy(Qt::NoFocus);
 
   m_widgets.pInitialSurfaceLabel = new QLabel("Initial surface", this);
-  m_widgets.pInitialSurface = new asiUI_LineEdit(this);
+  m_widgets.pInitialSurface      = new asiUI_LineEdit(this);
 
   m_widgets.pFairingCoeff = wf->CreateEditor("Fairing_coeff", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
   m_widgets.pNumIters     = wf->CreateEditor("Num_iters",     this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
@@ -580,7 +580,7 @@ void asiUI_DialogAppSurf::onXYZSelected()
 #if defined WIN32
   if ( !cloud->Load( QStr2ExtStr(fileName).ToWideString() ) )
 #else
-  if ( !cloud->Load( QStr2StdStr(fileName).c_str() ) )
+  if ( !cloud->Load(QStr2StdStr(fileName).c_str() ) )
 #endif
   {
     m_progress.SendLogMessage( LogErr(Normal) << "Cannot load point cloud from '%1'."
@@ -838,8 +838,9 @@ void asiUI_DialogAppSurf::onApply()
    *  Measure deviation.
    * =================== */
 
+  gp_Pnt maxDevPt;
   double minDeviation = DBL_MAX, maxDeviation = DBL_MAX, avrDeviation = DBL_MAX;
-  asiAlgo_AppSurfUtils::MeasureDeviation(surf, finalConstraints, minDeviation, maxDeviation, avrDeviation);
+  asiAlgo_AppSurfUtils::MeasureDeviation(surf, finalConstraints, minDeviation, maxDeviation, avrDeviation, maxDevPt);
 
   m_progress.SendLogMessage(LogNotice(Normal) << "\n\tMax.     deviation: %1"
                                                  "\n\tMin.     deviation: %2"

@@ -46,8 +46,6 @@
 //! Utility to build Coons (4-sided) surfaces in form of B-surfaces.
 class asiAlgo_BuildCoonsSurf : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildCoonsSurf, ActAPI_IAlgorithm)
 
