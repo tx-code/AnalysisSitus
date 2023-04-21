@@ -200,6 +200,8 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   m_pViewer           (pViewer),
   m_model             (model),
   m_blockPointsChange (false),
+  m_pProfileSelector  (nullptr),
+  m_pGuideSelector    (nullptr),
   m_progress          (progress),
   m_plotter           (plotter)
 {
@@ -327,6 +329,10 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
     pButtonsLayout->addWidget(m_widgets.pClose);
   }
 
+  // Selectors.
+  m_pProfileSelector = new asiUI_DialogBuildGordonSelectEdges(m_model, this, m_pViewer, true);
+  m_pGuideSelector   = new asiUI_DialogBuildGordonSelectEdges(m_model, this, m_pViewer, false);
+
   //---------------------------------------------------------------------------
   // Progress indication
   //---------------------------------------------------------------------------
@@ -408,8 +414,7 @@ void asiUI_DialogBuildGordon::onEdgePicked(bool isProfile)
   asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
   // Get selected edges.
-  TColStd_PackedMapOfInteger eids;
-  partApi.GetHighlightedEdges(eids);
+  const std::vector<int>& eids = m_pProfileSelector->PickedEdgeIds;
   //
   Handle(asiAlgo_AAG) aag = partApi.GetAAG();
   //
@@ -427,10 +432,8 @@ void asiUI_DialogBuildGordon::onEdgePicked(bool isProfile)
   bbuilder.MakeCompound(edgeComp);
   //
   QStringList edgeIds;
-  for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
+  for ( const auto edgeId : eids )
   {
-    const int edgeId = eit.Key();
-
     if ( edgeId >= 1 && edgeId <= allEdges.Extent() )
     {
       bbuilder.Add( edgeComp, allEdges(edgeId) );
@@ -563,8 +566,10 @@ void asiUI_DialogBuildGordon::onCancel()
 void asiUI_DialogBuildGordon::onProfile()
 {
   this->hide();
-  asiUI_DialogBuildGordonSelectEdges* newWindow = new asiUI_DialogBuildGordonSelectEdges(this, true);
-  newWindow->show();
+  //
+  m_pProfileSelector->PickedEdgeIds.clear();
+  m_pProfileSelector->PickedEdgeGidsMap.Clear();
+  m_pProfileSelector->show();
 }
 
 //-----------------------------------------------------------------------------
@@ -572,25 +577,33 @@ void asiUI_DialogBuildGordon::onProfile()
 void asiUI_DialogBuildGordon::onGuide()
 {
   this->hide();
-  asiUI_DialogBuildGordonSelectEdges* newWindow = new asiUI_DialogBuildGordonSelectEdges(this, false);
-  newWindow->show();
+  //
+  m_pGuideSelector->PickedEdgeIds.clear();
+  m_pGuideSelector->PickedEdgeGidsMap.Clear();
+  m_pGuideSelector->show();
 }
 
 //-----------------------------------------------------------------------------
 
-asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(asiUI_DialogBuildGordon* mainDialog,
-                                                                       bool                     isProfile,
-                                                                       QWidget*                 parent)
-  : QDialog    (parent),
+asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(const Handle(asiEngine_Model)& model,
+                                                                       asiUI_DialogBuildGordon*       mainDialog,
+                                                                       asiUI_ViewerPart*              pViewer,
+                                                                       bool                           isProfile,
+                                                                       QWidget*                       parent)
+: QDialog      (parent),
+  m_model      (model),
   m_mainDialog (mainDialog),
+  m_pViewer    (pViewer),
   m_isProfile  (isProfile)
 {
   m_mainDialog->hide();
+
   // Main layout.
   m_pMainLayout = new QVBoxLayout();
 
   // Group box for parameters.
-  QFrame*    bButtonsFrameAC = new QFrame;
+  QFrame* bButtonsFrameAC = new QFrame;
+
   //---------------------------------------------------------------------------
   // Buttons
   //---------------------------------------------------------------------------
@@ -608,10 +621,12 @@ asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(asiUI_Dia
   m_widgets.pClose->setMaximumWidth(CONTROL_BTN_WIDTH);
 
   // Reaction.
-  connect( m_widgets.pApply, SIGNAL( clicked() ),
-    this,             SLOT  ( onApply() ) );
-  connect( m_widgets.pClose, SIGNAL( clicked() ),
-    this,             SLOT  ( onCancel() ) );
+  connect( m_widgets.pApply, SIGNAL ( clicked() ),
+           this,             SLOT   ( onApply() ) );
+  connect( m_widgets.pClose, SIGNAL ( clicked() ),
+           this,             SLOT   ( onCancel() ) );
+  connect( m_pViewer,        SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
+           this,             SLOT   ( onEdgePicked(asiVisu_PickerResult*) ) );
 
   // Layout for buttons.
   {
@@ -665,4 +680,46 @@ void asiUI_DialogBuildGordonSelectEdges::onCancel()
   this->reject();
   this->hide();
   m_mainDialog->show();
+}
+
+//------------------------------------------------------------------------------
+
+void asiUI_DialogBuildGordonSelectEdges::onEdgePicked(asiVisu_PickerResult* pickRes)
+{
+  Handle(asiVisu_CellPickerResult)
+    cellPickerResult = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+
+  TColStd_PackedMapOfInteger
+    pickedGids = cellPickerResult->GetPickedElementIds();
+  //
+  if ( pickedGids.IsEmpty() )
+  {
+    this->PickedEdgeGidsMap.Clear();
+    this->PickedEdgeIds.clear();
+  }
+
+  // Get sub-shapes map.
+  const TopTools_IndexedMapOfShape&
+    allSubShapes = m_model->GetPartNode()->GetAAG()->RequestMapOfSubShapes();
+
+  // Get map of edges.
+  const TopTools_IndexedMapOfShape&
+    allEdges = m_model->GetPartNode()->GetAAG()->RequestMapOfEdges();
+
+  // Add only new IDs.
+  pickedGids.Subtract(this->PickedEdgeGidsMap);
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator git(pickedGids); git.More(); git.Next() )
+  {
+    const int gid = git.Key();
+    this->PickedEdgeGidsMap.Add(gid);
+
+    // Get sub-shape.
+    const TopoDS_Shape& subShape = allSubShapes(gid);
+
+    // Get edge index.
+    const int eid = allEdges.FindIndex(subShape);
+
+    this->PickedEdgeIds.push_back(eid);
+  }
 }

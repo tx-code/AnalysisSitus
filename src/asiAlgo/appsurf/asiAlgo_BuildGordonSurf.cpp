@@ -55,8 +55,11 @@
 
 #include <CTiglInterpolateCurveNetwork.h>
 #include <CTiglBSplineAlgorithms.h>
+#include <CTiglCurveNetworkSorter.h>
 
 using namespace mobius;
+
+#define CurveOriginToler 1e-2
 
 namespace
 {
@@ -376,8 +379,8 @@ asiAlgo_BuildGordonSurf::asiAlgo_BuildGordonSurf(ActAPI_ProgressEntry progress,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
-                                    const std::vector<TopoDS_Edge>& vEdges,
+bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
+                                    const std::vector<TopoDS_Edge>& guides,
                                     Handle(Geom_BSplineSurface)&    support,
                                     TopoDS_Face&                    face)
 {
@@ -386,9 +389,9 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
    * ============= */
 
   // Get curves out of edges.
-  std::vector<Handle(Geom_BSplineCurve)> uCurves, vCurves;
+  std::vector<Handle(Geom_BSplineCurve)> profileCurves, guideCurves;
   //
-  for ( const auto& edge : uEdges )
+  for ( const auto& edge : profiles )
   {
     double f, l;
     Handle(Geom_Curve) C = BRep_Tool::Curve(edge, f, l);
@@ -399,10 +402,10 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
         C = new Geom_TrimmedCurve(C, f, l);
     }
 
-    uCurves.push_back( GeomConvert::CurveToBSplineCurve(C) );
+    profileCurves.push_back( GeomConvert::CurveToBSplineCurve(C) );
   }
   //
-  for ( const auto& edge : vEdges )
+  for ( const auto& edge : guides )
   {
     double f, l;
     Handle(Geom_Curve) C = BRep_Tool::Curve(edge, f, l);
@@ -413,7 +416,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
         C = new Geom_TrimmedCurve(C, f, l);
     }
 
-    vCurves.push_back( GeomConvert::CurveToBSplineCurve(C) );
+    guideCurves.push_back( GeomConvert::CurveToBSplineCurve(C) );
   }
 
   /* =========================================
@@ -422,21 +425,21 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
   // Find max used degree in U, V.
   int p = 3, q = 3; // Min desired degrees.
-  for ( const auto& C : uCurves )
+  for ( const auto& C : profileCurves )
   {
     p = Max( p, C->Degree() );
   }
-  for ( const auto& C : vCurves )
+  for ( const auto& C : guideCurves )
   {
     q = Max( q, C->Degree() );
   }
 
   // Elevate degrees with OpenCascade as Mobius cannot do this (March 2023).
-  for ( auto& C : uCurves )
+  for ( auto& C : profileCurves )
   {
     C->IncreaseDegree(p);
   }
-  for ( auto& C : vCurves )
+  for ( auto& C : guideCurves )
   {
     C->IncreaseDegree(q);
   }
@@ -445,11 +448,13 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
    *  Make curves compatible by their directions.
    * ============================================ */
 
-  int  numIsoU = (int) ( uCurves.size() );
-  int  numIsoV = (int) ( vCurves.size() );
+  int  numIsoU = (int) ( profileCurves.size() );
+  int  numIsoV = (int) ( guideCurves.size() );
   int  s       = 0;
   int  j       = 0;
   bool stop    = false;
+
+  // Orient profiles.
   do
   {
     ++j;
@@ -460,13 +465,13 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
       gp_Pnt Ps, Pj;
       gp_Vec Vs, Vj;
 
-      uCurves[s]->D1( 0.5*( uCurves[s]->FirstParameter() + uCurves[s]->LastParameter() ), Ps, Vs );
-      uCurves[j]->D1( 0.5*( uCurves[j]->FirstParameter() + uCurves[j]->LastParameter() ), Pj, Vj );
+      profileCurves[s]->D1( 0.5*( profileCurves[s]->FirstParameter() + profileCurves[s]->LastParameter() ), Ps, Vs );
+      profileCurves[j]->D1( 0.5*( profileCurves[j]->FirstParameter() + profileCurves[j]->LastParameter() ), Pj, Vj );
 
       const double dot = Vj.Dot(Vs);
 
       if ( dot < 0 )
-        uCurves[j]->Reverse();
+        profileCurves[j]->Reverse();
     }
     else
     {
@@ -475,14 +480,97 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   }
   while ( !stop );
 
-  // TODO: temporary
-  for ( const auto& C : vCurves )
+  // Orient guides.
+  s    = 0;
+  j    = 0;
+  stop = false;
+  do
   {
-    C->Reverse();
-  }
+    ++j;
+    s = j - 1;
 
-  // TODO: temporary
-  //std::reverse( vCurves.begin(), vCurves.end() );
+    if ( j < numIsoV )
+    {
+      gp_Pnt Ps, Pj;
+      gp_Vec Vs, Vj;
+
+      guideCurves[s]->D1( 0.5*( guideCurves[s]->FirstParameter() + guideCurves[s]->LastParameter() ), Ps, Vs );
+      guideCurves[j]->D1( 0.5*( guideCurves[j]->FirstParameter() + guideCurves[j]->LastParameter() ), Pj, Vj );
+
+      const double dot = Vj.Dot(Vs);
+
+      if ( dot < 0 )
+        guideCurves[j]->Reverse();
+    }
+    else
+    {
+      stop = true;
+    }
+  }
+  while ( !stop );
+
+  /* ====================================
+   *  Check origin of profiles vs guides.
+   * ==================================== */
+
+  std::vector< std::pair<unsigned, unsigned> >
+    oris = { {0u, 0u},
+             {0u, 1u},
+             {1u, 0u},
+             {1u, 1u} };
+
+  bool   syncStop    = false;
+  size_t syncAttempt = 0;
+  do
+  {
+    std::vector<Handle(Geom_BSplineCurve)> _profileCurves;
+    std::vector<Handle(Geom_BSplineCurve)> _guideCurves;
+
+    // Reverse profiles if the flag is true.
+    if ( oris[syncAttempt].first )
+    {
+      for ( const auto& C : profileCurves )
+      {
+        _profileCurves.push_back( Handle(Geom_BSplineCurve)::DownCast( C->Reversed() ) );
+      }
+    }
+    else
+    {
+      _profileCurves = profileCurves;
+    }
+
+    // Reverse guides if the flag is true.
+    if ( oris[syncAttempt].second )
+    {
+      for ( const auto& C : guideCurves )
+      {
+        _guideCurves.push_back( Handle(Geom_BSplineCurve)::DownCast( C->Reversed() ) );
+      }
+    }
+    else
+    {
+      _guideCurves = guideCurves;
+    }
+
+    const gp_Pnt OP = _profileCurves[0]->Value( _profileCurves[0] ->FirstParameter() );
+    const gp_Pnt OG = _guideCurves  [0]->Value( _guideCurves[0]   ->FirstParameter() );
+    //
+    m_plotter.REDRAW_POINT("OP", OP, Color_Red);
+    m_plotter.REDRAW_POINT("GP", OG, Color_Green);
+
+    if ( OP.Distance(OG) < CurveOriginToler )
+    {
+      syncStop      = true;
+      profileCurves = _profileCurves;
+      guideCurves   = _guideCurves;
+    }
+
+    if ( ++syncAttempt > 3 )
+    {
+      syncStop = true;
+    }
+  }
+  while ( !syncStop );
 
   /* ======================
    *  Reapproximate curves.
@@ -490,8 +578,8 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
   std::vector<double> uParams, uKnots, vParams, vKnots;
   //
-  this->reapproxCurves(uCurves, uCurves, uParams, uKnots);
-  this->reapproxCurves(vCurves, vCurves, vParams, vKnots);
+  this->reapproxCurves(profileCurves, profileCurves, uParams, uKnots);
+  this->reapproxCurves(guideCurves,   guideCurves,   vParams, vKnots);
 
   /* ====================================
    *  Find curve intersection parameters.
@@ -502,12 +590,30 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   math_Matrix intersection_params_v(0, numIsoU - 1,
                                     0, numIsoV - 1);
 
-  this->computeCurveIntersections(uCurves, vCurves,
+  this->computeCurveIntersections(profileCurves, guideCurves,
                                   intersection_params_u,
                                   intersection_params_v);
 
   intersection_params_u.Dump(std::cout);
   intersection_params_v.Dump(std::cout);
+
+  
+  /* =======================
+   *  Sort curves spatially.
+   * ======================= */
+
+  //tigl::CTiglCurveNetworkSorter sorterObj(std::vector<Handle(Geom_Curve)>(profileCurves.begin(), profileCurves.end()),
+  //                                        std::vector<Handle(Geom_Curve)>(guideCurves.begin(), guideCurves.end()),
+  //                                        intersection_params_u,
+  //                                        intersection_params_v);
+  //  sorterObj.Perform();
+
+  //  // get the sorted matrices and vectors
+  //  intersection_params_u = sorterObj.ProfileIntersectionParms();
+  //  intersection_params_v = sorterObj.GuideIntersectionParms();
+
+
+
 
   std::vector<double> newParametersProfiles;
   std::vector<double> newParametersGuides;
@@ -540,11 +646,13 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
     // Get maximum number of control points to figure out detail of spline
     size_t max_cp_u = 0, max_cp_v = 0;
-    for( const auto& C : uCurves ) {
-        max_cp_u = std::max(max_cp_u, static_cast<size_t>(C->NbPoles()));
+    for ( const auto& C : profileCurves )
+    {
+      max_cp_u = std::max( max_cp_u, static_cast<size_t>( C->NbPoles() ) );
     }
-    for( const auto& C : vCurves ) {
-        max_cp_v = std::max(max_cp_v, static_cast<size_t>(C->NbPoles()));
+    for ( const auto& C : guideCurves )
+    {
+      max_cp_v = std::max( max_cp_v, static_cast<size_t>( C->NbPoles() ) );
     }
 
     // we want to use at least 10 and max 80 control points to be able to reparametrize the geometry properly
@@ -553,8 +661,8 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
     // since we interpolate the intersections, we cannot use fewer control points than curves
     // We need to add two since we want c2 continuity, which adds two equations
-    size_t min_u = std::max(vCurves.size() + 2, mincp);
-    size_t min_v = std::max(uCurves.size() + 2, mincp);
+    size_t min_u = std::max(guideCurves.size() + 2, mincp);
+    size_t min_v = std::max(profileCurves.size() + 2, mincp);
 
     size_t max_u = std::max(min_u, maxcp);
     size_t max_v = std::max(min_v, maxcp);
@@ -588,7 +696,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
             newParametersProfiles.back() = 1;
         }
 
-        Handle(Geom_BSplineCurve)& profile = uCurves[static_cast<size_t>(spline_u_idx)];
+        Handle(Geom_BSplineCurve)& profile = profileCurves[static_cast<size_t>(spline_u_idx)];
         profile = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(profile, oldParametersProfile, newParametersProfiles, max_cp_u).curve;
     }
 
@@ -618,15 +726,15 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
             newParametersGuides.back() = 1;
         }
 
-        Handle(Geom_BSplineCurve)& guide = vCurves[static_cast<size_t>(spline_v_idx)];
+        Handle(Geom_BSplineCurve)& guide = guideCurves[static_cast<size_t>(spline_v_idx)];
         guide = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(guide, oldParameterGuide, newParametersGuides, max_cp_v).curve;
     }
   }
 
-  for ( const auto& C : uCurves )
+  for ( const auto& C : profileCurves )
     m_plotter.DRAW_CURVE(C, Color_Pink, true, "profile");
 
-  for ( const auto& C : vCurves )
+  for ( const auto& C : guideCurves )
     m_plotter.DRAW_CURVE(C, Color_Violet, true, "guide");
 
   /* =================
@@ -671,14 +779,14 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   // Convert to Mobius form.
   std::vector< t_ptr<t_bcurve> > uCurvesMb, vCurvesMb;
   //
-  for ( const auto& C : uCurves )
+  for ( const auto& C : profileCurves )
   {
     t_ptr<t_bcurve> crvMb = cascade::GetMobiusBCurve(C);
 
     uCurvesMb.push_back(crvMb);
   }
   //
-  for ( const auto& C : vCurves )
+  for ( const auto& C : guideCurves )
   {
     t_ptr<t_bcurve> crvMb = cascade::GetMobiusBCurve(C);
 
@@ -734,6 +842,9 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
 
   //std::vector<double> uKnots, uParams;
 
+  const int degP1S = Min(3, int(uCurvesMb.size()) - 1);
+  const int degP2S = 1;
+
   // Build P1S.
   t_ptr<t_bsurf> P1S;
   Handle(Geom_BSplineSurface) P1Socc;
@@ -741,7 +852,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
     // Prepare rail curves.
     std::vector< t_ptr<t_bcurve> > rails = uCurvesMb;
 
-    geom_SkinSurface skinner(rails, 3, false);
+    geom_SkinSurface skinner(rails, degP1S, false);
     //
     skinner.SetUseChordLength(false);
     skinner.ForceParameters(newParametersGuides);
@@ -779,7 +890,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
     // Prepare rail curves.
     std::vector< t_ptr<t_bcurve> > rails = vCurvesMb;
 
-    geom_SkinSurface skinner(rails, 1, false);
+    geom_SkinSurface skinner(rails, degP2S, false);
     //
     skinner.SetUseChordLength(false);
     skinner.ForceParameters(newParametersProfiles);
@@ -831,7 +942,12 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
    * ========================================= */
 
   t_ptr<t_bsurf> P12S;
-  ::InterpolateSurf(pointGrid, 1, 3, vParams, vKnots, uParams, uKnots, P12S);
+  //
+  if ( !::InterpolateSurf(pointGrid, degP2S, degP1S, vParams, vKnots, uParams, uKnots, P12S) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build P12S.");
+    return false;
+  }
 
   /*geom_InterpolateSurface interp(pointGrid, 1, 3, ParamsSelection_ChordLength, KnotsSelection_Average);
 
@@ -854,12 +970,12 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
    *  Unify components of Boolean sum
    * ================================= */
 
-  P1Socc->IncreaseDegree(3, 3);
-  P2Socc->IncreaseDegree(3, 3);
+  P1Socc ->IncreaseDegree(3, 3);
+  P2Socc ->IncreaseDegree(3, 3);
   P12Socc->IncreaseDegree(3, 3);
   //
-  P1S = cascade::GetMobiusBSurface(P1Socc);
-  P2S = cascade::GetMobiusBSurface(P2Socc);
+  P1S  = cascade::GetMobiusBSurface(P1Socc);
+  P2S  = cascade::GetMobiusBSurface(P2Socc);
   P12S = cascade::GetMobiusBSurface(P12Socc);
 
   //return true;
@@ -1005,7 +1121,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& uEdges,
   double bndDev, innerDev, maxDev;
   //
   CheckDeviation( cascade::GetOpenCascadeBSurface(gordonSurf),
-                  uEdges, vEdges, bndDev, innerDev, maxDev,
+                  profiles, guides, bndDev, innerDev, maxDev,
                   m_plotter );
 
   m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
@@ -1109,11 +1225,14 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
    *  Compute intersection parameters.
    * ================================= */
 
+  const int    numCurvesU = (int)( uCurves.size() );
+  const int    numCurvesV = (int)( vCurves.size() );
   const double spatialTol = 0.01;
-  bool fail = false;
-  for (int spline_u_idx = 0; spline_u_idx < static_cast<int>(uCurves.size()); ++spline_u_idx)
+  bool         fail       = false;
+  //
+  for ( int spline_u_idx = 0; spline_u_idx < numCurvesU; ++spline_u_idx )
   {
-    for (int spline_v_idx = 0; spline_v_idx < static_cast<int>(vCurves.size()); ++spline_v_idx)
+    for ( int spline_v_idx = 0; spline_v_idx < numCurvesV; ++spline_v_idx )
     {
       std::vector<std::pair<double, double> >
         currentIntersections = tigl::CTiglBSplineAlgorithms::intersections(uCurves[static_cast<size_t>(spline_u_idx)],
@@ -1132,11 +1251,14 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
       else if ( currentIntersections.size() == 2 ) // for closed curves
       {
         // only the u-directional B-spline curves are closed
-        if (uCurves[0]->IsClosed()) {
-          if (spline_v_idx == 0) {
+        if ( uCurves[0]->IsClosed() )
+        {
+          if ( spline_v_idx == 0 )
+          {
             uParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].first, currentIntersections[1].first);
           }
-          else if (spline_v_idx == static_cast<int>(vCurves.size() - 1)) {
+          else if ( spline_v_idx == static_cast<int>(vCurves.size() - 1) )
+          {
             uParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].first, currentIntersections[1].first);
           }
 
@@ -1145,20 +1267,23 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
         }
 
         // only the v-directional B-spline curves are closed
-        if (vCurves[0]->IsClosed()) {
-
-          if (spline_u_idx == 0) {
+        if ( vCurves[0]->IsClosed() )
+        {
+          if ( spline_u_idx == 0 )
+          {
             vParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].second, currentIntersections[1].second);
           }
-          else if (spline_u_idx == static_cast<int>(uCurves.size() - 1)) {
+          else if ( spline_u_idx == static_cast<int>(uCurves.size() - 1) )
+          {
             vParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].second, currentIntersections[1].second);
           }
+
           // intersection_params_vector[0].first == intersection_params_vector[1].first
           uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
         }
       }
 
-      else if (currentIntersections.size() > 2)
+      else if ( currentIntersections.size() > 2 )
       {
         return false;
       }
@@ -1169,45 +1294,57 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
    *  Beautify parameter values.
    * =========================== */
 
-   Standard_Integer nProfiles = static_cast<Standard_Integer>(uCurves.size());
-    Standard_Integer nGuides = static_cast<Standard_Integer>(vCurves.size());
-    // eliminate small inaccuracies of the intersection parameters:
+  int nProfiles = numCurvesU;
+  int nGuides   = numCurvesV;
 
-    // first intersection
-    for (Standard_Integer spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
-        if (std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1)) < 0.001) {
-            if (std::abs(uCurves[0]->Knot(1)) < 1e-10) {
-                uParams(spline_u_idx, 0) = 0;
-            }
-            else {
-                uParams(spline_u_idx, 0) = uCurves[0]->Knot(1);
-            }
-        }
-    }
+  /* eliminate small inaccuracies of the intersection parameters */
 
-    for (Standard_Integer spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
-        if (std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001) {
-            if (std::abs(vCurves[0]->Knot(1)) < 1e-10) {
-                vParams(0, spline_v_idx) = 0;
-            }
-            else {
-                vParams(0, spline_v_idx) = vCurves[0]->Knot(1);
-            }
-        }
+  // first intersection
+  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
+  {
+    if (std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1)) < 0.001)
+    {
+      if (std::abs(uCurves[0]->Knot(1)) < 1e-10)
+      {
+        uParams(spline_u_idx, 0) = 0;
+      }
+      else
+      {
+        uParams(spline_u_idx, 0) = uCurves[0]->Knot(1);
+      }
     }
+  }
 
-    // last intersection
-    for (Standard_Integer spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx) {
-        if (std::abs(uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot(uCurves[0]->NbKnots())) < 0.001) {
-            uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
-        }
+  for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx)
+  {
+    if (std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001)
+    {
+      if (std::abs(vCurves[0]->Knot(1)) < 1e-10)
+      {
+        vParams(0, spline_v_idx) = 0;
+      }
+      else
+      {
+        vParams(0, spline_v_idx) = vCurves[0]->Knot(1);
+      }
     }
+  }
 
-    for (Standard_Integer spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
-        if (std::abs(vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot(vCurves[0]->NbKnots())) < 0.001) {
-            vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot(vCurves[0]->NbKnots());
-        }
+  // last intersection
+  for (int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx)
+  {
+    if (std::abs(uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot(uCurves[0]->NbKnots())) < 0.001)
+    {
+      uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
     }
+  }
+
+  for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
+    if (std::abs(vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot(vCurves[0]->NbKnots())) < 0.001)
+    {
+      vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot(vCurves[0]->NbKnots());
+    }
+  }
 
   return !fail;
 }

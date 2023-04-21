@@ -51,6 +51,8 @@
 //
 #include <Standard_WarningsRestore.hxx>
 
+class asiUI_DialogBuildGordonSelectEdges;
+
 //-----------------------------------------------------------------------------
 
 //! Dialog for Gordon surface building.
@@ -149,6 +151,9 @@ protected:
   Handle(asiEngine_Model)    m_model;             //!< Data Model instance.
   bool                       m_blockPointsChange; //!< block for points table change.
 
+  asiUI_DialogBuildGordonSelectEdges* m_pProfileSelector;
+  asiUI_DialogBuildGordonSelectEdges* m_pGuideSelector;
+
   /* Diagnostics */
 
   ActAPI_ProgressEntry       m_progress;    //!< Progress notifier.
@@ -166,17 +171,21 @@ class asiUI_DialogBuildGordonSelectEdges : public QDialog
   public:
 
   //! Ctor.
-  //! \param[in] model     the data model instance.
-  //! \param[in] isProfile the flag for correct edge ids transportation.
-  //! \param[in] parent    the parent widget.
+  //! \param[in] model      the data model instance.
+  //! \param[in] mainDialog the main dialog.
+  //! \param[in] pViewer    the part viewer.
+  //! \param[in] isProfile  the flag for correct edge ids transportation.
+  //! \param[in] parent     the parent widget.
   asiUI_EXPORT
-    asiUI_DialogBuildGordonSelectEdges(asiUI_DialogBuildGordon* mainDialog,
-                                       bool                     isProfile,
-                                       QWidget*                 parent = nullptr);
+    asiUI_DialogBuildGordonSelectEdges(const Handle(asiEngine_Model)& model,
+                                       asiUI_DialogBuildGordon*       mainDialog,
+                                       asiUI_ViewerPart*              pViewer,
+                                       bool                           isProfile,
+                                       QWidget*                       parent = nullptr);
 
   //! Dtor.
-  asiUI_EXPORT
-    virtual ~asiUI_DialogBuildGordonSelectEdges() {}
+  asiUI_EXPORT virtual
+    ~asiUI_DialogBuildGordonSelectEdges() {}
 
 public slots:
 
@@ -185,6 +194,14 @@ public slots:
 
   //! Cancel button clicked.
   void onCancel();
+
+  //! Reaction on edge picking.
+  void onEdgePicked(asiVisu_PickerResult*);
+
+public:
+
+  std::vector<int>           PickedEdgeIds;
+  TColStd_PackedMapOfInteger PickedEdgeGidsMap;
 
 protected:
 
@@ -206,7 +223,9 @@ protected:
     }
   };
 
+  Handle(asiEngine_Model)  m_model;       //!< Data model instance.
   t_widgets                m_widgets;     //!< UI controls.
+  asiUI_ViewerPart*        m_pViewer;     //!< External reference to viewer.
   QVBoxLayout*             m_pMainLayout; //!< Layout of the widget.
   asiUI_DialogBuildGordon* m_mainDialog;  //!< Main dialog for surface constructing.
   bool                     m_isProfile;   //!< Boolean flag for correct edge ids transportation.
