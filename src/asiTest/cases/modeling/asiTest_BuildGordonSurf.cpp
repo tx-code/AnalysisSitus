@@ -98,3 +98,24 @@ outcome asiTest_BuildGordonSurf::test07(const int funcID)
 {
   return runTestScript(funcID, "re/build-gordon_07.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test08(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_08.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test09(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_09.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_BuildGordonSurf::test10(const int funcID)
+{
+  return runTestScript(funcID, "re/build-gordon_10.tcl");
+}

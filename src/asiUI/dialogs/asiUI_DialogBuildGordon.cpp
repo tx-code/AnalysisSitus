@@ -162,9 +162,9 @@ static const char* const image1_data[] = {
 ".......................fff......................",
 ".......................fff......................",
 ".......................fff......................",
-"...............fffffffffffffffffff..............",
-"...............fffffffffffffffffff..............",
 ".......................fff......................",
+"...............fffffffffffffffffff..............",
+"...............fffffffffffffffffff..............",
 ".......................fff......................",
 ".......................fff......................",
 ".......................fff......................",
@@ -202,6 +202,7 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   m_blockPointsChange (false),
   m_pProfileSelector  (nullptr),
   m_pGuideSelector    (nullptr),
+  m_bDiagnostics      (false),
   m_progress          (progress),
   m_plotter           (plotter)
 {
@@ -214,9 +215,11 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   // Group box for advanced settings.
   QGroupBox* pGroupAdvanced = new QGroupBox("Advanced");
 
-  // Group box for parameters.
-  QFrame* bButtonsFrame   = new QFrame;
-  QFrame* bButtonsFrameAC = new QFrame;
+  // Buttons frame.
+  QFrame* pButtonsFrame = new QFrame;
+
+  // Diagnostics frame.
+  QFrame* pDiagnosticsFrame = new QFrame;
 
   // Selected profiles.
   m_widgets.pProfiles = new asiUI_LineEdit();
@@ -232,6 +235,9 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   // UV degrees.
   m_widgets.pUDegree = wf->CreateEditor("UDegree", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
   m_widgets.pVDegree = wf->CreateEditor("VDegree", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+
+  // Diagnostics dumps.
+  m_widgets.pDiagnostics = new QCheckBox;
 
   //---------------------------------------------------------------------------
   // Buttons
@@ -259,12 +265,14 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   // Reaction.
   connect( m_widgets.pChooseProfile, SIGNAL( clicked() ),
            this,                     SLOT  ( onProfile() ) );
-  connect( m_widgets.pChooseGuides, SIGNAL( clicked() ),
-           this,                    SLOT  ( onGuide() ) );
-  connect( m_widgets.pApply, SIGNAL( clicked() ),
-           this,             SLOT  ( onApply() ) );
-  connect( m_widgets.pClose, SIGNAL( clicked() ),
-           this,             SLOT  ( close  () ) );
+  connect( m_widgets.pChooseGuides,  SIGNAL( clicked() ),
+           this,                     SLOT  ( onGuide() ) );
+  connect( m_widgets.pApply,         SIGNAL( clicked() ),
+           this,                     SLOT  ( onApply() ) );
+  connect( m_widgets.pClose,         SIGNAL( clicked() ),
+           this,                     SLOT  ( close  () ) );
+  connect( m_widgets.pDiagnostics,   SIGNAL( clicked() ),
+           this,                     SLOT  ( onDiagnostics() ) );
 
   //---------------------------------------------------------------------------
   // Layout
@@ -290,9 +298,9 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
 
   // Advanced.
   {
-    QVBoxLayout* pAdvLayout    = new QVBoxLayout(pGroupAdvanced);
-    QFrame*      pGridFrameTop = new QFrame;
-    QFrame*      pGridFrameBot = new QFrame;
+    QVBoxLayout* pAdvLayout     = new QVBoxLayout(pGroupAdvanced);
+    QFrame*      pGridFrameTop  = new QFrame;
+    QFrame*      pGridFrameBot1 = new QFrame;
 
     pAdvLayout->setAlignment(Qt::AlignTop);
 
@@ -307,22 +315,36 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
     pGridLayoutTop->addWidget(m_widgets.pNumDiscrPoints, 0, 1);
 
     // Layout with degrees.
-    QHBoxLayout* pGridLayoutBot = new QHBoxLayout(pGridFrameBot);
-    pGridLayoutBot->setSpacing(10);
-    pGridLayoutBot->setContentsMargins(10, 0, 10, 0);
+    QHBoxLayout* pGridLayoutBot1 = new QHBoxLayout(pGridFrameBot1);
+    pGridLayoutBot1->setSpacing(10);
+    pGridLayoutBot1->setContentsMargins(10, 0, 10, 0);
     //
-    m_widgets.pUDegree->AddTo(pGridLayoutBot);
-    m_widgets.pVDegree->AddTo(pGridLayoutBot);
+    m_widgets.pUDegree->AddTo(pGridLayoutBot1);
+    m_widgets.pVDegree->AddTo(pGridLayoutBot1);
     //
-    pGridLayoutBot->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    pGridLayoutBot1->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     //pAdvLayout->addWidget(pGridFrameTop);
-    pAdvLayout->addWidget(pGridFrameBot);
+    pAdvLayout->addWidget(pGridFrameBot1);
+  }
+
+  // Layout with diagnostics.
+  {
+    QLabel* pDiagnosticsLbl = new QLabel("Visual dumps");
+
+    QHBoxLayout* pDiagnosticsLayout = new QHBoxLayout(pDiagnosticsFrame);
+    //
+    pDiagnosticsLayout->addWidget(pDiagnosticsLbl);
+    pDiagnosticsLayout->addWidget(m_widgets.pDiagnostics);
+    pDiagnosticsLayout->addStretch(1);
+
+    pDiagnosticsLayout->setSpacing(10);
+    pDiagnosticsLayout->setContentsMargins(10, 10, 10, 0);
   }
 
   // Layout for buttons.
   {
-    QHBoxLayout* pButtonsLayout = new QHBoxLayout(bButtonsFrameAC);
+    QHBoxLayout* pButtonsLayout = new QHBoxLayout(pButtonsFrame);
     pButtonsLayout->setSpacing(10);
     //
     pButtonsLayout->addWidget(m_widgets.pApply);
@@ -334,55 +356,14 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
   m_pGuideSelector   = new asiUI_DialogBuildGordonSelectEdges(m_model, this, m_pViewer, false);
 
   //---------------------------------------------------------------------------
-  // Progress indication
-  //---------------------------------------------------------------------------
-
-  m_widgets.pProgressFrame = new QWidget(this);
-
-  // Progress indicator.
-  m_widgets.pProgressBar = new QProgressBar;
-  m_widgets.pProgressBar->setRange(0, 0);
-  m_widgets.pProgressBar->setTextVisible(false);
-  m_widgets.pProgressBar->setAlignment(Qt::AlignHCenter);
-  m_widgets.pProgressBar->setMinimumWidth(200);
-  m_widgets.pProgressFrame->hide();
-
-  // Cancel button
-  QIcon cancelIcon(":icons/asitus/asitus_cancel_icon_16x16.png");
-  //
-  QToolButton* pCancelButton = new QToolButton(m_widgets.pProgressFrame);
-  pCancelButton->setIcon(cancelIcon);
-  pCancelButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-  pCancelButton->setSizePolicy( QSizePolicy(QSizePolicy::Preferred,
-                                            QSizePolicy::Expanding) );
-  //
-  connect( pCancelButton, SIGNAL( clicked() ), this, SLOT( onCancel() ) );
-
-  // Configure layout.
-  QHBoxLayout* progressLayout = new QHBoxLayout();
-  progressLayout->setMargin(2);
-  progressLayout->setSpacing(3);
-  progressLayout->addWidget(m_widgets.pProgressBar, 10, Qt::AlignVCenter);
-  progressLayout->addWidget(pCancelButton, 0, Qt::AlignVCenter);
-  //
-  m_widgets.pProgressFrame->setLayout(progressLayout);
-
-#if defined USE_MOBIUS
-  // Progress entry.
-  m_mobProgress = mobius::core_ProgressEntry( new asiUI_MobiusProgressNotifier(m_progress,
-                                                                               m_widgets.pProgressBar) );
-#endif
-
-  //---------------------------------------------------------------------------
   // Main layout
   //---------------------------------------------------------------------------
 
   // Configure main layout.
   m_pMainLayout->addWidget(pGroupEConstraints);
   m_pMainLayout->addWidget(pGroupAdvanced);
-  m_pMainLayout->addWidget(m_widgets.pProgressFrame);
-  m_pMainLayout->addWidget(bButtonsFrame);
-  m_pMainLayout->addWidget(bButtonsFrameAC);
+  m_pMainLayout->addWidget(pDiagnosticsFrame);
+  m_pMainLayout->addWidget(pButtonsFrame);
   //
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
@@ -392,7 +373,6 @@ asiUI_DialogBuildGordon::asiUI_DialogBuildGordon(const Handle(asiUI_WidgetFactor
 
   this->setLayout(m_pMainLayout);
   this->setWindowModality(Qt::NonModal);
-  //this->setWindowFlag(Qt::WindowStaysOnTopHint);
   this->setWindowTitle("Build Gordon surface");
   this->setWindowIcon( QIcon( QPixmap( (const char**) image0_data ) ) );
 }
@@ -404,7 +384,7 @@ asiUI_DialogBuildGordon::~asiUI_DialogBuildGordon()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogBuildGordon::onEdgePicked(bool isProfile)
+void asiUI_DialogBuildGordon::grabPickedEdges(bool isProfile)
 {
   if ( !m_model || !m_pViewer )
     return;
@@ -414,7 +394,8 @@ void asiUI_DialogBuildGordon::onEdgePicked(bool isProfile)
   asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
   // Get selected edges.
-  const std::vector<int>& eids = m_pProfileSelector->PickedEdgeIds;
+  const std::vector<int>& eids = isProfile ? m_pProfileSelector->CachedEdgeIds
+                                           : m_pGuideSelector->CachedEdgeIds;
   //
   Handle(asiAlgo_AAG) aag = partApi.GetAAG();
   //
@@ -512,7 +493,7 @@ void asiUI_DialogBuildGordon::onApply()
       else
       {
         m_progress.SendLogMessage( LogErr(Normal) << "Input index %1 is out of range [1, %2]."
-          << eid << allEdges.Extent() );
+                                                  << eid << allEdges.Extent() );
       }
     }
   }
@@ -538,7 +519,7 @@ void asiUI_DialogBuildGordon::onApply()
   TopoDS_Face                 resFace;
 
   // Build Gordon surface.
-  asiAlgo_BuildGordonSurf buildGordon( m_progress, m_plotter );
+  asiAlgo_BuildGordonSurf buildGordon( m_progress, m_bDiagnostics ? m_plotter : nullptr );
   //
   if ( !buildGordon.Build(profiles, guides, resSurf, resFace) )
   {
@@ -550,15 +531,6 @@ void asiUI_DialogBuildGordon::onApply()
 
   if ( !resFace.IsNull() )
     m_plotter.DRAW_SHAPE(resFace, Color_Default, "gordonFace");
-
-  m_widgets.pProgressFrame->hide();
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_DialogBuildGordon::onCancel()
-{
-  m_mobProgress.AskCancel();
 }
 
 //-----------------------------------------------------------------------------
@@ -567,8 +539,6 @@ void asiUI_DialogBuildGordon::onProfile()
 {
   this->hide();
   //
-  m_pProfileSelector->PickedEdgeIds.clear();
-  m_pProfileSelector->PickedEdgeGidsMap.Clear();
   m_pProfileSelector->show();
 }
 
@@ -578,9 +548,14 @@ void asiUI_DialogBuildGordon::onGuide()
 {
   this->hide();
   //
-  m_pGuideSelector->PickedEdgeIds.clear();
-  m_pGuideSelector->PickedEdgeGidsMap.Clear();
   m_pGuideSelector->show();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogBuildGordon::onDiagnostics()
+{
+  m_bDiagnostics = m_widgets.pDiagnostics->isChecked();
 }
 
 //-----------------------------------------------------------------------------
@@ -617,8 +592,6 @@ asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(const Han
   // Sizing.
   m_widgets.pApply->setMinimumWidth(CONTROL_BTN_WIDTH);
   m_widgets.pClose->setMinimumWidth(CONTROL_BTN_WIDTH);
-  m_widgets.pApply->setMaximumWidth(CONTROL_BTN_WIDTH);
-  m_widgets.pClose->setMaximumWidth(CONTROL_BTN_WIDTH);
 
   // Reaction.
   connect( m_widgets.pApply, SIGNAL ( clicked() ),
@@ -649,7 +622,6 @@ asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(const Han
 
   // Set good initial size.
   this->setMinimumSize( QSize(150, 70) );
-
   this->setLayout(m_pMainLayout);
   this->setWindowModality(Qt::NonModal);
   this->setWindowFlag(Qt::WindowStaysOnTopHint);
@@ -662,14 +634,9 @@ asiUI_DialogBuildGordonSelectEdges::asiUI_DialogBuildGordonSelectEdges(const Han
 void asiUI_DialogBuildGordonSelectEdges::onApply()
 {
   this->accept();
-  if (m_isProfile)
-  {
-    m_mainDialog->onEdgePicked(true);
-  }
-  else
-  {
-    m_mainDialog->onEdgePicked(false);
-  }
+
+  m_mainDialog->grabPickedEdges(m_isProfile);
+
   this->hide();
 }
 
@@ -686,33 +653,37 @@ void asiUI_DialogBuildGordonSelectEdges::onCancel()
 
 void asiUI_DialogBuildGordonSelectEdges::onEdgePicked(asiVisu_PickerResult* pickRes)
 {
+  if ( !this->isVisible() )
+    return; // Do not react on selection if invisible.
+
+  // Get interactive selection from the viewer.
   Handle(asiVisu_CellPickerResult)
     cellPickerResult = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
-
+  //
   TColStd_PackedMapOfInteger
     pickedGids = cellPickerResult->GetPickedElementIds();
   //
   if ( pickedGids.IsEmpty() )
   {
-    this->PickedEdgeGidsMap.Clear();
-    this->PickedEdgeIds.clear();
+    this->CachedEdgeIdsMap.Clear();
+    this->CachedEdgeIds.clear();
+    return;
   }
 
-  // Get sub-shapes map.
+  // Get sub-shapes map to map global IDs.
   const TopTools_IndexedMapOfShape&
     allSubShapes = m_model->GetPartNode()->GetAAG()->RequestMapOfSubShapes();
 
-  // Get map of edges.
+  // Get map of edges to map "pedigree" edge IDs.
   const TopTools_IndexedMapOfShape&
     allEdges = m_model->GetPartNode()->GetAAG()->RequestMapOfEdges();
 
-  // Add only new IDs.
-  pickedGids.Subtract(this->PickedEdgeGidsMap);
+  // Turn picked global IDs to edge IDs.
+  TColStd_PackedMapOfInteger pickedEids;
   //
   for ( TColStd_PackedMapOfInteger::Iterator git(pickedGids); git.More(); git.Next() )
   {
     const int gid = git.Key();
-    this->PickedEdgeGidsMap.Add(gid);
 
     // Get sub-shape.
     const TopoDS_Shape& subShape = allSubShapes(gid);
@@ -720,6 +691,33 @@ void asiUI_DialogBuildGordonSelectEdges::onEdgePicked(asiVisu_PickerResult* pick
     // Get edge index.
     const int eid = allEdges.FindIndex(subShape);
 
-    this->PickedEdgeIds.push_back(eid);
+    pickedEids.Add(eid);
+  }
+
+  // Get rid of possibly unpicked edges.
+  auto it = std::begin(this->CachedEdgeIds);
+  //
+  while ( it != std::end(this->CachedEdgeIds) )
+  {
+    if ( !pickedEids.Contains(*it) )
+    {
+      this->CachedEdgeIdsMap.Remove(*it);
+      it = this->CachedEdgeIds.erase(it);
+    }
+    else
+    {
+      it++;
+    }
+  }
+
+  // Add only new IDs.
+  pickedEids.Subtract(this->CachedEdgeIdsMap);
+  //
+  for ( TColStd_PackedMapOfInteger::Iterator git(pickedEids); git.More(); git.Next() )
+  {
+    const int eid = git.Key();
+
+    this->CachedEdgeIds.push_back(eid);
+    this->CachedEdgeIdsMap.Add(eid);
   }
 }

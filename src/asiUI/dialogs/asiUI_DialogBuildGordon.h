@@ -33,7 +33,6 @@
 
 // asiUI includes
 #include <asiUI_LineEdit.h>
-#include <asiUI_MobiusProgressNotifier.h>
 #include <asiUI_ViewerPart.h>
 #include <asiUI_WidgetFactory.h>
 
@@ -43,6 +42,7 @@
 // Qt includes
 #include <Standard_WarningsDisable.hxx>
 //
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QProgressBar>
@@ -81,16 +81,15 @@ public:
   asiUI_EXPORT
     virtual ~asiUI_DialogBuildGordon();
 
-public slots:
+public:
 
-  //! Reaction on edge selection in the viewer.
-  void onEdgePicked(bool isProfile);
+  //! Grabs the selected edges from the selection dialogs into the main dialog.
+  void grabPickedEdges(bool isProfile);
+
+public slots:
 
   //! Reaction on clicking "Apply" button.
   void onApply();
-
-  //! Cancel button clicked.
-  void onCancel();
 
   //! Profile edge selection button clicked.
   void onProfile();
@@ -98,22 +97,24 @@ public slots:
   //! Guides edge selection button clicked.
   void onGuide();
 
+  //! Reaction on visual diagnostics (on/off).
+  void onDiagnostics();
+
 protected:
 
   //! Widgets.
   struct t_widgets
   {
-    QPushButton*      pApply;               //!< Apply surface fitting method.
-    QPushButton*      pClose;               //!< Closes the dialog.
-    QPushButton*      pChooseProfile;       //!< Choose profiles.
-    QPushButton*      pChooseGuides;        //!< Choose guides.
-    asiUI_LineEdit*   pProfiles;            //!< Indices of profile edges.
-    asiUI_LineEdit*   pGuides;              //!< Indices of guide edges.
-    asiUI_Datum*      pUDegree;             //!< U degree.
-    asiUI_Datum*      pVDegree;             //!< V degree.
-    asiUI_LineEdit*   pNumDiscrPoints;      //!< Number of discretisated points.
-    QWidget*          pProgressFrame;       //!< Progress widget.
-    QProgressBar*     pProgressBar;         //!< Progress bar.
+    QPushButton*      pApply;          //!< Apply surface fitting method.
+    QPushButton*      pClose;          //!< Closes the dialog.
+    QPushButton*      pChooseProfile;  //!< Choose profiles.
+    QPushButton*      pChooseGuides;   //!< Choose guides.
+    asiUI_LineEdit*   pProfiles;       //!< Indices of profile edges.
+    asiUI_LineEdit*   pGuides;         //!< Indices of guide edges.
+    asiUI_Datum*      pUDegree;        //!< U degree.
+    asiUI_Datum*      pVDegree;        //!< V degree.
+    asiUI_LineEdit*   pNumDiscrPoints; //!< Number of discretisated points.
+    QCheckBox*        pDiagnostics;    //!< Visual diagnostics on/off.
 
     //! Default ctor.
     t_widgets() : pApply          (nullptr),
@@ -125,8 +126,7 @@ protected:
                   pUDegree        (nullptr),
                   pVDegree        (nullptr),
                   pNumDiscrPoints (nullptr),
-                  pProgressFrame  (nullptr),
-                  pProgressBar    (nullptr)
+                  pDiagnostics    (nullptr)
     {}
 
     void Release()
@@ -140,26 +140,23 @@ protected:
       delete pUDegree;        pUDegree        = nullptr;
       delete pVDegree;        pVDegree        = nullptr;
       delete pNumDiscrPoints; pNumDiscrPoints = nullptr;
-      delete pProgressFrame;  pProgressFrame  = nullptr;
-      delete pProgressBar;    pProgressBar    = nullptr;
+      delete pDiagnostics;    pDiagnostics    = nullptr;
     }
   };
 
-  t_widgets                  m_widgets;           //!< UI controls.
-  QVBoxLayout*               m_pMainLayout;       //!< Layout of the widget.
-  asiUI_ViewerPart*          m_pViewer;           //!< External reference to viewer.
-  Handle(asiEngine_Model)    m_model;             //!< Data Model instance.
-  bool                       m_blockPointsChange; //!< block for points table change.
-
-  asiUI_DialogBuildGordonSelectEdges* m_pProfileSelector;
-  asiUI_DialogBuildGordonSelectEdges* m_pGuideSelector;
+  t_widgets                           m_widgets;           //!< UI controls.
+  QVBoxLayout*                        m_pMainLayout;       //!< Layout of the widget.
+  asiUI_ViewerPart*                   m_pViewer;           //!< External reference to viewer.
+  Handle(asiEngine_Model)             m_model;             //!< Data Model instance.
+  bool                                m_blockPointsChange; //!< block for points table change.
+  asiUI_DialogBuildGordonSelectEdges* m_pProfileSelector;  //!< Selector for profile edges.
+  asiUI_DialogBuildGordonSelectEdges* m_pGuideSelector;    //!< Selector for guide edges.
+  bool                                m_bDiagnostics;      //!< Visual diagnostics on/off.
 
   /* Diagnostics */
 
-  ActAPI_ProgressEntry       m_progress;    //!< Progress notifier.
-  ActAPI_PlotterEntry        m_plotter;     //!< Imperative plotter.
-
-  mobius::core_ProgressEntry m_mobProgress; //!< Mobius progress controller.
+  ActAPI_ProgressEntry m_progress; //!< Progress notifier.
+  ActAPI_PlotterEntry  m_plotter;  //!< Imperative plotter.
 
 };
 
@@ -200,8 +197,8 @@ public slots:
 
 public:
 
-  std::vector<int>           PickedEdgeIds;
-  TColStd_PackedMapOfInteger PickedEdgeGidsMap;
+  std::vector<int>           CachedEdgeIds;
+  TColStd_PackedMapOfInteger CachedEdgeIdsMap;
 
 protected:
 

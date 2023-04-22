@@ -59,6 +59,8 @@
 
 using namespace mobius;
 
+#undef USE_TIGL
+
 #define CurveOriginToler 1e-2
 
 namespace
@@ -283,30 +285,30 @@ namespace
   }
 
   //! Extracts points from the passed curve network.
-  void GetPointGrid(const std::vector< t_ptr<t_bcurve> >& uCurves,
-                    const std::vector< t_ptr<t_bcurve> >& vCurves,
-                    std::vector< std::vector<t_xyz> >&    points)
+  void GetPointGrid(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
+                    const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
+                    const math_Matrix&                            intersection_params_u,
+                    const math_Matrix&                            intersection_params_v,
+                    std::vector< std::vector<t_xyz> >&            points)
   {
-    std::vector<t_xyz> row;
+    (void) intersection_params_v;
 
-    for ( const auto& uCurve : uCurves )
+    /* We can evaluate only U */
+
+    for ( int r = 0; r < intersection_params_u.RowNumber(); ++r )
     {
-      t_xyz P = uCurve->D0( uCurve->GetMinParameter() );
+      std::vector<t_xyz> row;
 
-      row.push_back(P);
+      for ( int c = 0; c < intersection_params_u.ColNumber(); ++c )
+      {
+        const double u = intersection_params_u(r, c);
+        const gp_Pnt P = uCurves[r]->Value(u);
+
+        row.push_back( cascade::GetMobiusPnt(P) );
+      }
+      //
+      points.push_back(row);
     }
-    //
-    points.push_back(row);
-
-    row.clear();
-    for ( const auto& uCurve : uCurves )
-    {
-      t_xyz P = uCurve->D0( uCurve->GetMaxParameter() );
-
-      row.push_back(P);
-    }
-    //
-    points.push_back(row);
   }
 }
 
@@ -384,6 +386,18 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
                                     Handle(Geom_BSplineSurface)&    support,
                                     TopoDS_Face&                    face)
 {
+  if ( profiles.empty() )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "No profile curves.");
+    return false;
+  }
+
+  if ( guides.empty() )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "No guide curves.");
+    return false;
+  }
+
   /* =============
    *  Preparation.
    * ============= */
@@ -597,23 +611,31 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
   intersection_params_u.Dump(std::cout);
   intersection_params_v.Dump(std::cout);
 
-  
+  /* ===========================================
+   *  Collect curve network intersection points.
+   * =========================================== */
+
+  std::vector< std::vector<t_xyz> > pointGrid;
+
+  ::GetPointGrid(profileCurves, guideCurves, intersection_params_u, intersection_params_v, pointGrid);
+
+  // Draw.
+  {
+    Handle(asiAlgo_BaseCloud<double>) __pts = new asiAlgo_BaseCloud<double>;
+    //
+    for ( const auto& row : pointGrid )
+      for ( const auto& pt : row )
+      {
+        __pts->AddElement( pt.X(), pt.Y(), pt.Z() );/*
+        m_plotter.DRAW_POINT( gp_Pnt( pt.X(), pt.Y(), pt.Z() ), Color_Yellow, "pt" );*/
+      }
+
+    m_plotter.DRAW_POINTS( __pts->GetCoordsArray(), Color_Yellow, "points" );
+  }
+
   /* =======================
    *  Sort curves spatially.
    * ======================= */
-
-  //tigl::CTiglCurveNetworkSorter sorterObj(std::vector<Handle(Geom_Curve)>(profileCurves.begin(), profileCurves.end()),
-  //                                        std::vector<Handle(Geom_Curve)>(guideCurves.begin(), guideCurves.end()),
-  //                                        intersection_params_u,
-  //                                        intersection_params_v);
-  //  sorterObj.Perform();
-
-  //  // get the sorted matrices and vectors
-  //  intersection_params_u = sorterObj.ProfileIntersectionParms();
-  //  intersection_params_v = sorterObj.GuideIntersectionParms();
-
-
-
 
   std::vector<double> newParametersProfiles;
   std::vector<double> newParametersGuides;
@@ -741,36 +763,37 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
    *  Give TiGL a try.
    * ================= */
 
-  //// TODO: remove me
-  //{
-  //  std::vector<Handle(Geom_Curve)> uCurvesTigl, vCurvesTigl;
-  //  //
-  //  for ( const auto c : uCurves )
-  //    uCurvesTigl.push_back(c);
-  //  //
-  //  for ( const auto c : vCurves )
-  //    vCurvesTigl.push_back(c);
+#if defined USE_TIGL
+  {
+    std::vector<Handle(Geom_Curve)> uCurvesTigl, vCurvesTigl;
+    //
+    for ( const auto c : uCurves )
+      uCurvesTigl.push_back(c);
+    //
+    for ( const auto c : vCurves )
+      vCurvesTigl.push_back(c);
 
-  //  tigl::CTiglInterpolateCurveNetwork tiglGordon(uCurvesTigl, vCurvesTigl, 1e-3, m_progress, m_plotter);
+    tigl::CTiglInterpolateCurveNetwork tiglGordon(uCurvesTigl, vCurvesTigl, 1e-3, m_progress, m_plotter);
 
-  //  Handle(Geom_BSplineSurface) res = tiglGordon.Surface();
+    Handle(Geom_BSplineSurface) res = tiglGordon.Surface();
 
-  //  m_plotter.REDRAW_SURFACE("tiglGordon", res, Color_White);
+    m_plotter.REDRAW_SURFACE("tiglGordon", res, Color_White);
 
-  //  // Check surface deviation from the curve network.
-  //  double bndDev, innerDev, maxDev;
-  //  //
-  //  CheckDeviation( res,
-  //                  uEdges, vEdges, bndDev, innerDev, maxDev,
-  //                  m_plotter );
+    // Check surface deviation from the curve network.
+    double bndDev, innerDev, maxDev;
+    //
+    CheckDeviation( res,
+                    uEdges, vEdges, bndDev, innerDev, maxDev,
+                    m_plotter );
 
-  //  m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
-  //                                                 "\n\tInner deviation: %2."
-  //                                                 "\n\tMax deviation: %3."
-  //                                              << bndDev << innerDev << maxDev);
+    m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
+                                                   "\n\tInner deviation: %2."
+                                                   "\n\tMax deviation: %3."
+                                                << bndDev << innerDev << maxDev);
 
-  //  return true;
-  //}
+    return true;
+  }
+#endif
 
   /* ===================
    *  Convert to Mobius.
@@ -840,10 +863,8 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
    *  Skin U curves.
    * =============== */
 
-  //std::vector<double> uKnots, uParams;
-
   const int degP1S = Min(3, int(uCurvesMb.size()) - 1);
-  const int degP2S = 1;
+  const int degP2S = Min(3, int(vCurvesMb.size()) - 1);
 
   // Build P1S.
   t_ptr<t_bsurf> P1S;
@@ -881,8 +902,6 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
    *  Skin V curves.
    * =============== */
 
-  //std::vector<double> vKnots, vParams;
-
   // Build P1S.
   t_ptr<t_bsurf> P2S;
   Handle(Geom_BSplineSurface) P2Socc;
@@ -913,28 +932,6 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
     vParams = skinner.GetResultParams();
 
     m_plotter.DRAW_SURFACE( P2Socc, Color_Default, "P2S" );
-  }
-
-  /* ===========================================
-   *  Collect curve network intersection points.
-   * =========================================== */
-
-  std::vector< std::vector<t_xyz> > pointGrid;
-
-  ::GetPointGrid(uCurvesMb, vCurvesMb, pointGrid);
-
-  // Draw.
-  {
-    Handle(asiAlgo_BaseCloud<double>) __pts = new asiAlgo_BaseCloud<double>;
-    //
-    for ( const auto& row : pointGrid )
-      for ( const auto& pt : row )
-      {
-        __pts->AddElement( pt.X(), pt.Y(), pt.Z() );/*
-        m_plotter.DRAW_POINT( gp_Pnt( pt.X(), pt.Y(), pt.Z() ), Color_Yellow, "pt" );*/
-      }
-
-    m_plotter.DRAW_POINTS( __pts->GetCoordsArray(), Color_Yellow, "points" );
   }
 
   /* =========================================
@@ -1302,9 +1299,9 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
   // first intersection
   for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
   {
-    if (std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1)) < 0.001)
+    if ( std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1) ) < 0.001)
     {
-      if (std::abs(uCurves[0]->Knot(1)) < 1e-10)
+      if ( std::abs(uCurves[0]->Knot(1)) < 1e-10 )
       {
         uParams(spline_u_idx, 0) = 0;
       }
@@ -1315,11 +1312,11 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
     }
   }
 
-  for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx)
+  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
   {
-    if (std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001)
+    if ( std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001 )
     {
-      if (std::abs(vCurves[0]->Knot(1)) < 1e-10)
+      if ( std::abs( vCurves[0]->Knot(1) ) < 1e-10 )
       {
         vParams(0, spline_v_idx) = 0;
       }
@@ -1331,18 +1328,19 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
   }
 
   // last intersection
-  for (int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx)
+  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
   {
-    if (std::abs(uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot(uCurves[0]->NbKnots())) < 0.001)
+    if ( std::abs( uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot( uCurves[0]->NbKnots() ) ) < 0.001 )
     {
       uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
     }
   }
 
-  for (int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx) {
-    if (std::abs(vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot(vCurves[0]->NbKnots())) < 0.001)
+  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
+  {
+    if ( std::abs( vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot( vCurves[0]->NbKnots() ) ) < 0.001 )
     {
-      vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot(vCurves[0]->NbKnots());
+      vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot( vCurves[0]->NbKnots() );
     }
   }
 
