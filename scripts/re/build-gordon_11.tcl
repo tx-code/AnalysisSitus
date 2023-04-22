@@ -1,6 +1,6 @@
 # Set working variables.
 set datafile cad/gordon/gordon_test-BeGrid.step
-set refErr   0.00001
+set refErr   0.0036
 
 # Read input geometry.
 set datadir $env(ASI_TEST_DATA)

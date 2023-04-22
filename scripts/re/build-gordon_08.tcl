@@ -8,7 +8,7 @@ clear; load-part $datadir/$datafile; fit
 fit
 
 # Build Gordon surface.
-set maxErr [build-gordon -p 69 28 -g 2 1]
+set maxErr [build-gordon -p 69 65 56 52 28 -g 2 1]
 
 puts "Max error: $maxErr"
 

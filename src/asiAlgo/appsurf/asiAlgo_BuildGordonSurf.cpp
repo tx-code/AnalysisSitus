@@ -295,11 +295,11 @@ namespace
 
     /* We can evaluate only U */
 
-    for ( int r = 0; r < intersection_params_u.RowNumber(); ++r )
+    for ( int c = 0; c < intersection_params_u.ColNumber(); ++c )
     {
       std::vector<t_xyz> row;
 
-      for ( int c = 0; c < intersection_params_u.ColNumber(); ++c )
+      for ( int r = 0; r < intersection_params_u.RowNumber(); ++r )
       {
         const double u = intersection_params_u(r, c);
         const gp_Pnt P = uCurves[r]->Value(u);
@@ -955,6 +955,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
   }
 
   t_ptr<t_bsurf>              P12S    = interp.GetResult();*/
+  //P12S->ExchangeUV();
   Handle(Geom_BSplineSurface) P12Socc = cascade::GetOpenCascadeBSurface(P12S);
   //
   //P12Socc->IncreaseDegree(3, 3);
