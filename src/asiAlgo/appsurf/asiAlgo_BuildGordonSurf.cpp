@@ -644,20 +644,24 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
     const int nGuides   = numIsoV;
     const int nProfiles = numIsoU;
 
-    for (int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx) {
-        double sum = 0;
-        for (int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx) {
-            sum += intersection_params_u(spline_u_idx - 1, spline_v_idx - 1);
-        }
-        newParametersProfiles.push_back(sum / nProfiles);
+    for ( int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx )
+    {
+      double sum = 0;
+      for ( int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx )
+      {
+        sum += intersection_params_u(spline_u_idx - 1, spline_v_idx - 1);
+      }
+      newParametersProfiles.push_back(sum / nProfiles);
     }
 
-    for (int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx) {
-        double sum = 0;
-        for (int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx) {
-            sum += intersection_params_v(spline_u_idx - 1, spline_v_idx - 1);
-        }
-        newParametersGuides.push_back(sum / nGuides);
+    for ( int spline_u_idx = 1; spline_u_idx <= nProfiles; ++spline_u_idx )
+    {
+      double sum = 0;
+      for ( int spline_v_idx = 1; spline_v_idx <= nGuides; ++spline_v_idx )
+      {
+        sum += intersection_params_v(spline_u_idx - 1, spline_v_idx - 1);
+      }
+      newParametersGuides.push_back(sum / nGuides);
     }
 
     if ( newParametersProfiles.front() > 1e-4 || newParametersGuides.front() > 1e-4 )
