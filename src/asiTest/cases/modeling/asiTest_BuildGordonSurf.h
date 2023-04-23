@@ -76,6 +76,7 @@ public:
               << &test09
               << &test10
               << &test11
+              << &test12
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -97,6 +98,7 @@ private:
   static outcome test09(const int funcID);
   static outcome test10(const int funcID);
   static outcome test11(const int funcID);
+  static outcome test12(const int funcID);
 
 };
 
