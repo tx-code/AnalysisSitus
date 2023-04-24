@@ -170,6 +170,7 @@ protected:
   QAction* m_pMeasureLength;
   QAction* m_pGetSpannedAngle;
   QAction* m_pCheckThickness;
+  QAction* m_pJoinEdges;
 
 };
 

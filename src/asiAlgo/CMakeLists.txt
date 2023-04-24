@@ -285,6 +285,7 @@ set (editing_H_FILES
   editing/asiAlgo_InvertFaces.h
   editing/asiAlgo_InvertShells.h
   editing/asiAlgo_JoinEdges.h
+  editing/asiAlgo_Join3dEdges.h
   editing/asiAlgo_ModBase.h
   editing/asiAlgo_ModConstructEdge.h
   editing/asiAlgo_ModEdgeInfo.h
@@ -316,6 +317,7 @@ set (editing_CPP_FILES
   editing/asiAlgo_InvertFaces.cpp
   editing/asiAlgo_InvertShells.cpp
   editing/asiAlgo_JoinEdges.cpp
+  editing/asiAlgo_Join3dEdges.cpp
   editing/asiAlgo_ModBase.cpp
   editing/asiAlgo_ModConstructEdge.cpp
   editing/asiAlgo_Naming.cpp

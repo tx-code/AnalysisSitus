@@ -50,6 +50,7 @@
 #include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
+#include <asiAlgo_Join3dEdges.h>
 
 // asiEngine includes
 #include <asiEngine_Features.h>
@@ -225,7 +226,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFact
   m_pGetAsBLOB           (nullptr),
   m_pMeasureLength       (nullptr),
   m_pGetSpannedAngle     (nullptr),
-  m_pCheckThickness      (nullptr)
+  m_pCheckThickness      (nullptr),
+  m_pJoinEdges           (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -261,7 +263,8 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pGetAsBLOB           (nullptr),
   m_pMeasureLength       (nullptr),
   m_pGetSpannedAngle     (nullptr),
-  m_pCheckThickness      (nullptr)
+  m_pCheckThickness      (nullptr),
+  m_pJoinEdges           (nullptr)
 {}
 
 //-----------------------------------------------------------------------------
@@ -705,6 +708,10 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
          (faceIndices.Extent() == 2) )
     {
       m_pMeasureLength = menu.addAction("Measure distance");
+    }
+    if (edgeIndices.Extent() == 2)
+    {
+      m_pJoinEdges = menu.addAction("Join edges");
     }
   }
 
@@ -1364,6 +1371,68 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
 
     m_progress.SendLogMessage( LogInfo(Normal) << "Thickness is %1."
                                                << minDist);
+  }
+  //---------------------------------------------------------------------------
+  // ACTION: join edges
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pJoinEdges )
+  {
+    asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
+    Handle(asiData_PartNode) part_n = m_model->GetPartNode();
+
+    // Get highlighted faces.
+    asiAlgo_Feature edgeIndices;
+    partApi.GetHighlightedEdges(edgeIndices);
+
+    // Get AAG to access faces by indices.
+    Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+    //
+    if ( aag.IsNull() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "AAG is null.");
+      return;
+    }
+
+    // Get edges.
+    TopTools_IndexedMapOfShape selectedEdges;
+
+    auto shape = aag->GetMasterShape();
+
+    TopTools_IndexedMapOfShape shapeEdges;
+    TopExp::MapShapes(shape, TopAbs_EDGE, shapeEdges);
+
+    asiAlgo_Feature::Iterator it(edgeIndices);
+    for (; it.More(); it.Next())
+    {
+      selectedEdges.Add(shapeEdges(it.Key()).Located( TopLoc_Location() ));
+    }
+
+    /* ===================
+    *  Concatenate edges.
+    * =================== */
+
+    asiAlgo_Join3dEdges joiner(aag->GetMasterShape(), m_progress, m_plotter);
+    //
+    if ( !joiner.Perform(selectedEdges) )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Edge concatenation failed.");
+      return;
+    }
+
+    const TopoDS_Shape& result = joiner.Result();
+
+    // Update Data Model
+    m_model->OpenCommand();
+    {
+      asiEngine_Part(m_model).Update(result);
+    }
+    m_model->CommitCommand();
+
+    // Actualize
+    m_pViewer->PrsMgr()->Actualize(part_n);
+
+    m_progress.SendLogMessage( LogInfo(Normal) << "Join edges with ids %1, %2."
+      << edgeIndices.GetMinimalMapped() << edgeIndices.GetMaximalMapped());
   }
 
 #if defined USE_MOBIUS
