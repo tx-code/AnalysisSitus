@@ -57,6 +57,7 @@
 #include <asiAlgo_FeatureType.h>
 #include <asiAlgo_FindVisibleFaces.h>
 #include <asiAlgo_MeshConvert.h>
+#include <asiAlgo_MinimalBoundingCircle2d.h>
 #include <asiAlgo_PointInPoly.h>
 #include <asiAlgo_RecognizeBlends.h>
 #include <asiAlgo_RecognizeCanonical.h>
@@ -86,12 +87,16 @@
 
 // OCCT includes
 #include <Bnd_Box.hxx>
+#include <BRepAdaptor_Curve.hxx>
 #include <BRep_Builder.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepGProp.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepTools.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <GeomLProp_CLProps.hxx>
 #include <GProp_GProps.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
@@ -4165,6 +4170,101 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_BuildBoundingCircle2d(const Handle(asiTcl_Interp)& interp,
+                                 int                          argc,
+                                 const char**                 argv)
+{
+  /* ==============
+   *  Get prepared.
+   * ============== */
+
+  // Get part's AAG.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+
+  // Get part shape.
+  TopoDS_Shape shape = partNode->GetShape();
+  //
+  if ( shape.IsNull()) // Contract check.
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The input shape is null.");
+    return TCL_ERROR;
+  }
+
+  Handle(Geom_Plane) plane;
+  if (shape.ShapeType() != TopAbs_FACE || !asiAlgo_Utils::IsPlanar(TopoDS::Face(shape), plane) || plane.IsNull())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The input shape is not face.");
+    return TCL_ERROR;
+  }
+
+  gp_Trsf trsf;
+  trsf.SetDisplacement(gp_Ax3(plane->Axis().Location(), plane->Axis().Direction()), gp_Ax3());
+
+  const double linearTol = 0.001;
+  const double angularTol = 1.0 * M_PI / 180.0;
+
+  std::vector<gp_Pnt2d> points2d;
+  for (TopExp_Explorer exp(shape, TopAbs_EDGE); exp.More(); exp.Next())
+  {
+    BRepAdaptor_Curve brepAdaptor(TopoDS::Edge(exp.Value()));
+    GeomAdaptor_Curve geomAdaptor(Handle(Geom_Curve)::DownCast(brepAdaptor.Curve().Curve()->Transformed(exp.Value().Location().Transformation())));
+    const double fParam = brepAdaptor.FirstParameter();
+    const double lParam = brepAdaptor.LastParameter();
+    GCPnts_TangentialDeflection pntGen(geomAdaptor, fParam, lParam, angularTol, linearTol);
+    const int nbPnts = pntGen.NbPoints();
+    for (int index = 1; index <= nbPnts; ++index)
+    {
+      gp_Pnt pnt = geomAdaptor.Value(pntGen.Parameter(index));
+      pnt.Transform(trsf);
+      gp_Pnt2d pnt2d(pnt.X(), pnt.Y());
+      bool isFound = false;
+      for (int index1 = 0; index1 < points2d.size(); ++index1)
+      {
+        if (pnt2d.Distance(points2d[index1]) < Precision::Confusion())
+        {
+          isFound = true;
+          break;
+        }
+      }
+      if (!isFound)
+      {
+        points2d.push_back(pnt2d);
+      }
+    }
+  }
+
+  gp_Circ2d circle2d;
+  asiAlgo_MinimalBoundingCircle2d algo;
+  if (!algo.Perform(points2d, circle2d))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to build bounding cylinder in 2d.");
+    return TCL_ERROR;
+  }
+
+  // Draw.
+  gp_Circ circ;
+  circ.SetPosition(gp_Ax2(gp_Pnt(circle2d.Location().X(), circle2d.Location().Y(), 0.0), gp::DZ()));
+  circ.SetRadius(circle2d.Radius());
+  trsf.SetDisplacement(gp_Ax3(), gp_Ax3(plane->Axis().Location(), plane->Axis().Direction()));
+  circ.Transform(trsf);
+  TopoDS_Shape boundingCylinderShape = BRepBuilderAPI_MakeEdge(circ);
+  if (!cmdEngine::cf.IsNull())
+  {
+    cmdEngine::cf->Plotter.REDRAW_SHAPE("boundingCylinder", boundingCylinderShape, Color_Red, 1., true);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_CheckFacets(const Handle(asiTcl_Interp)& interp,
                        int                          argc,
                        const char**                 argv)
@@ -5083,6 +5183,13 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t entities, such as the convex hull, BVH, projection points, etc.",
     //
     __FILE__, group, ENGINE_RecognizeHull);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-bounding-circle-2d",
+    //
+    "build-bounding-circle-2d\n",
+    //
+    __FILE__, group, ENGINE_BuildBoundingCircle2d);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-facets",
