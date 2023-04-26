@@ -68,6 +68,7 @@ asiAlgo_ConvertCanonical::asiAlgo_ConvertCanonical(ActAPI_ProgressEntry progress
                                                    ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm(progress, plotter)
 {
+  m_history = new BRepTools_History();
 }
 
 //-----------------------------------------------------------------------------
@@ -75,7 +76,8 @@ asiAlgo_ConvertCanonical::asiAlgo_ConvertCanonical(ActAPI_ProgressEntry progress
 TopoDS_Shape asiAlgo_ConvertCanonical::Perform(const TopoDS_Shape& shape,
                                                const double        tol,
                                                const bool          convertSurfaces,
-                                               const bool          convertCurves)
+                                               const bool          convertCurves,
+                                               const bool          buildHistory)
 {
 #if defined COUT_DEBUG
   TIMER_NEW
@@ -137,6 +139,9 @@ TopoDS_Shape asiAlgo_ConvertCanonical::Perform(const TopoDS_Shape& shape,
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(m_progress, "asiAlgo_ConvertCanonical::Perform()")
 #endif
+
+  if (buildHistory)
+    fillHistory(shape, result);
 
   return result;
 }
@@ -258,3 +263,50 @@ void asiAlgo_ConvertCanonical::fixEdges(const TopoDS_Shape& result)
   // Fix same parameterization for edges.
   ShapeFix::SameParameter(result, false, 0.0);
 }
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_ConvertCanonical::fillHistory(const TopoDS_Shape& input,
+                                           const TopoDS_Shape& output)
+{
+  m_history->Clear();
+
+  // Here we take advantage of the fact that canonical recognition is
+  // realized as "homeomorphism" based on BRepTools_Modification. It
+  // means that topology of the model is not affected, and we can use
+  // the same face and solid indices in the result shape as the input shape has.
+
+  // build a history for solids
+  TopTools_IndexedMapOfShape inputSolids;
+  TopExp::MapShapes(input, TopAbs_SOLID, inputSolids);
+
+  TopTools_IndexedMapOfShape outputSolids;
+  TopExp::MapShapes(output, TopAbs_SOLID, outputSolids);
+
+  for (int si = 1; si <= inputSolids.Extent(); ++si)
+  {
+    const TopoDS_Shape& solid_in = inputSolids.FindKey(si);
+    const TopoDS_Shape& solid_out = outputSolids.FindKey(si);
+    if (!solid_in.IsSame(solid_out))
+      m_history->AddModified(solid_in, solid_out);
+  }
+
+  // build a history for faces
+  TopTools_IndexedMapOfShape inputFaces;
+  TopExp::MapShapes(input, TopAbs_FACE, inputFaces);
+
+  TopTools_IndexedMapOfShape outputFaces;
+  TopExp::MapShapes(output, TopAbs_FACE, outputFaces);
+
+  for ( int fi = 1; fi <= inputFaces.Extent(); ++fi )
+  {
+    const TopoDS_Face& face_in  = TopoDS::Face( inputFaces.FindKey(fi) );
+    const TopoDS_Face& face_out = TopoDS::Face( outputFaces.FindKey(fi) );
+
+    if ( !face_in.IsPartner(face_out) )
+    {
+      m_history->AddModified(face_in, face_out);
+    }
+  }
+}
+

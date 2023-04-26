@@ -37,6 +37,9 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+// OpenCascade includes
+#include <BRepTools_History.hxx>
+
 class ShapeBuild_ReShape;
 
 //-----------------------------------------------------------------------------
@@ -66,12 +69,14 @@ public:
   //! \param[in] tol             the recognition tolerance.
   //! \param[in] convertSurfaces the surface conversion mode (on/off).
   //! \param[in] convertCurves   the curve conversion mode (on/off).
+  //! \param[in] buildHistory    to obtain a history of modifications (on/off).
   //! \return the converted shape.
   asiAlgo_EXPORT TopoDS_Shape
     Perform(const TopoDS_Shape& shape,
             const double        tol,
             const bool          convertSurfaces = true,
-            const bool          convertCurves   = true);
+            const bool          convertCurves   = true,
+            const bool          buildHistory    = false);
 
 public:
 
@@ -79,6 +84,12 @@ public:
   const asiAlgo_ConvertCanonicalSummary& GetSummary() const
   {
     return m_summary;
+  }
+
+  //! \return modification history.
+  const Handle(BRepTools_History)& GetHistory() const
+  {
+    return m_history;
   }
 
 protected:
@@ -93,10 +104,18 @@ protected:
   //! converted shape.
   void fixEdges(const TopoDS_Shape& result);
 
+  //! Do mapping of input and output geometries.
+  //! History is prepared in Perform() method.
+  //! \param[in] input  initial shape.
+  //! \param[in] output result shape.
+  void fillHistory(const TopoDS_Shape& input,
+                   const TopoDS_Shape& output);
+
 protected:
 
   //! Conversion summary.
   asiAlgo_ConvertCanonicalSummary m_summary;
+  Handle(BRepTools_History)       m_history; //!< Modification history.
 
 };
 

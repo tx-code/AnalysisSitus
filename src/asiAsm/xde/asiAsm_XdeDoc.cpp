@@ -1703,11 +1703,6 @@ bool Doc::GetSubShapeColor(const PartId&       partId,
                            const TopoDS_Shape& subShape,
                            Quantity_ColorRGBA& color) const
 {
-  Quantity_ColorRGBA partColor;
-  //
-  if ( this->GetColor(partId, partColor) )
-    return false;
-
   Handle(XCAFDoc_ShapeTool) shapeTool = this->GetShapeTool();
   Handle(XCAFDoc_ColorTool) colorTool = this->GetColorTool();
 
