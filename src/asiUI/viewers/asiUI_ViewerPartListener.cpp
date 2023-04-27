@@ -709,10 +709,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
     {
       m_pMeasureLength = menu.addAction("Measure distance");
     }
-    if (edgeIndices.Extent() == 2)
-    {
-      m_pJoinEdges = menu.addAction("Join edges");
-    }
+    m_pJoinEdges = menu.addAction("Join edges");
   }
 
 #if defined USE_MOBIUS

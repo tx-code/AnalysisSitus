@@ -188,12 +188,10 @@ set (cases_inspection_CPP_FILES
 set (cases_modeling_H_FILES
   cases/modeling/asiTest_AppSurf.h
   cases/modeling/asiTest_BuildGordonSurf.h
-  cases/modeling/asiTest_JoinEdges.h
 )
 set (cases_modeling_CPP_FILES
   cases/modeling/asiTest_AppSurf.cpp
   cases/modeling/asiTest_BuildGordonSurf.cpp
-  cases/modeling/asiTest_JoinEdges.cpp
 )
 
 #------------------------------------------------------------------------------

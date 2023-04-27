@@ -3644,14 +3644,6 @@ int ENGINE_ConcatCurves(const Handle(asiTcl_Interp)& interp,
     while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
     {
       const int eid = atoi(argv[k]);
-
-      /*if ( eid < 1 || eid > 2 )
-      {
-        interp->GetProgress().SendLogMessage(LogErr(Normal) << "The passed edge ID %1 is out of range [1, %2]."
-                                                            << eid);
-        return TCL_ERROR;
-      }*/
-
       eids.push_back(eid);
     }
   }
@@ -3740,14 +3732,6 @@ int ENGINE_ConcatAndCheck(const Handle(asiTcl_Interp)& interp,
     while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
     {
       const int eid = atoi(argv[k]);
-
-      /*if ( eid < 1 || eid > 2 )
-      {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "The passed edge ID %1 is out of range [1, %2]."
-      << eid);
-      return TCL_ERROR;
-      }*/
-
       eids.push_back(eid);
     }
   }
@@ -3787,7 +3771,7 @@ int ENGINE_ConcatAndCheck(const Handle(asiTcl_Interp)& interp,
   * ============= */
 
   Handle(asiAlgo_AAG) newAag = new asiAlgo_AAG(result);
-  if (aag->RequestMapOfEdges().Size() - 1 != newAag->RequestMapOfEdges().Size()) {
+  if (aag->RequestMapOfEdges().Size() - selectedEdges.Extent() + 1 != newAag->RequestMapOfEdges().Size()) {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Wrong number of edges.");
     return TCL_ERROR;
   }
@@ -4315,9 +4299,9 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("concat-curves",
     //
-    "concat-curves -edges <e1> <e2>\n"
-    "\t Concatenates edges <e1> and <e2> belonging to the face <fid> into\n"
-    "\t a single edge. The indices <e1> and <e2> are defined locally and thereby\n"
+    "concat-curves -edges <eIds>\n"
+    "\t Concatenates edges <eIds> into a single edge.\n"
+    "\t The indices <eIds> are defined locally and thereby\n"
     "\t range from 1 to the number of edges in the face. The concatenation process\n"
     "\t is done at the level of pcurves.",
     //
@@ -4326,9 +4310,9 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("concat-curves-and-check",
     //
-    "reverse-curve name\n"
-    "\t Concatenates edges <e1> and <e2> belonging to the face <fid> into\n"
-    "\t a single edge. The indices <e1> and <e2> are defined locally and thereby\n"
+    "concat-curves -edges <eIds>\n"
+    "\t Concatenates edges <eIds> into a single edge.\n"
+    "\t The indices <eIds> are defined locally and thereby\n"
     "\t range from 1 to the number of edges in the face. The concatenation process\n"
     "\t is done at the level of pcurves.",
     //

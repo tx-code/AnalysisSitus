@@ -32,7 +32,6 @@
 #include <asiTest_AAG.h>
 #include <asiTest_AppSurf.h>
 #include <asiTest_BuildGordonSurf.h>
-#include <asiTest_JoinEdges.h>
 #include <asiTest_BuildQuickHull.h>
 #include <asiTest_ChangeColor.h>
 #include <asiTest_ConcatPCurves.h>
@@ -144,7 +143,6 @@ int main(int argc, char* argv[])
 
   // Modeling.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildGordonSurf> );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_JoinEdges> );
 
   // Main tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );

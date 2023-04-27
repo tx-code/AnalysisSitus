@@ -2028,14 +2028,14 @@ int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  std::string surfName = "gordonSurf";
-  interp->GetKeyValue(argc, argv, "name", surfName);
+  // Return max error.
+  *interp << buildGordon.GetMaxError();
 
-  interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);
+  // Get result name.
+  std::string name = "gordonSurf";
+  interp->GetKeyValue(argc, argv, "name", name);
 
-  const double maxError = buildGordon.GetMaxError();
-
-  *interp << maxError;
+  interp->GetPlotter().REDRAW_SURFACE(name.c_str(), resSurf, Color_Default);
 
   return TCL_OK;
 }
@@ -2303,9 +2303,10 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("build-gordon",
     //
-    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...] [-name <surfName>]\n"
+    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...] [-name <name>]\n"
     "\t Builds a Gordon surface passing through the given {p} (\"profile\")\n"
-    "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
+    "\t and {g} (\"guide\") curves specified as edge indices in the active part.\n"
+    "\t This function returns the max achieved approximation error.",
     //
     __FILE__, group, ENGINE_BuildGordon);
 }

@@ -77,3 +77,10 @@ outcome asiTest_JoinEdges::test04(const int funcID)
 {
   return runTestScript(funcID, "re/join-edges_04.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_JoinEdges::test04(const int funcID)
+{
+  return runTestScript(funcID, "re/join-edges_05.tcl");
+}

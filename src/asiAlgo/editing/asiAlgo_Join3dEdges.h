@@ -73,15 +73,6 @@ public:
   }
 
 protected:
-
-  //! Finds a correct geometric order in which the edges should follow one
-  //! after another in order to be joined properly.
-  //! \param edges   [in] initial collection of edges.
-  //! \param eFirst  [in] first edge.
-  //! \param eSecond [in] second edge.
-  void chooseOrder(const TopTools_IndexedMapOfShape& edges,
-                   TopoDS_Edge&                      eFirst,
-                   TopoDS_Edge&                      eSecond) const;
   
   //! Joins a couple of edges into a single edge.
   //! \param eFirst     [in]  first edge to join.

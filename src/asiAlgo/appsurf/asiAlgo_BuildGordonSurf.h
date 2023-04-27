@@ -37,10 +37,8 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
-#ifdef USE_MOBIUS
 // Mobius includes
 #include <mobius/core_XYZ.h>
-#endif
 
 // OCCT includes
 #include <Geom_BSplineCurve.hxx>
@@ -69,16 +67,16 @@ public:
   //! Checks deviation between the constructed surfaces and the initial
   //! curve network.
   //! \param[in]  surf     the surface of interest.
-  //! \param[in]  profiles the profile edges of the curve network.
-  //! \param[in]  guides   the guide edges of the curve network.
+  //! \param[in]  uEdges   the U edges of the curve network.
+  //! \param[in]  vEdges   the V edges of the curve network.
   //! \param[out] bndDev   the computed deviation along the boundary curves.
   //! \param[out] innerDev the computed deviation along the inner curves.
   //! \param[out] maxDev   the computed max deviation.
   //! \param[in]  plotter  the plotter entry.
   asiAlgo_EXPORT static void
     CheckDeviation(const Handle(Geom_BSplineSurface)& surf,
-                   const std::vector<TopoDS_Edge>&    profiles,
-                   const std::vector<TopoDS_Edge>&    guides,
+                   const std::vector<TopoDS_Edge>&    uEdges,
+                   const std::vector<TopoDS_Edge>&    vEdges,
                    double&                            bndDev,
                    double&                            innerDev,
                    double&                            maxDev,
@@ -96,20 +94,20 @@ public:
 public:
 
   //! Builds Gordon surface as a B-spline surface.
-  //! \param[in]  uEdges  the collection of boundary edges in the U direction.
-  //! \param[in]  vEdges  the collection of boundary edges in the V direction.
-  //! \param[out] support the constructed B-surface.
-  //! \param[out] face    the constructed face.
+  //! \param[in]  profiles the collection of profile edges.
+  //! \param[in]  guides   the collection of guide edges.
+  //! \param[out] support  the constructed B-surface.
+  //! \param[out] face     the constructed face.
   //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Build(const std::vector<TopoDS_Edge>& uEdges,
-          const std::vector<TopoDS_Edge>& vEdges,
+    Build(const std::vector<TopoDS_Edge>& profiles,
+          const std::vector<TopoDS_Edge>& guides,
           Handle(Geom_BSplineSurface)&    support,
           TopoDS_Face&                    face);
 
 public:
 
-  //! \return max achieved error.
+  //! \return max approximation error.
   double GetMaxError() const
   {
     return m_fMaxError;
@@ -139,7 +137,7 @@ protected:
 
 protected:
 
-  double m_fMaxError; //!< Max achieved approximation error.
+  double m_fMaxError; //!< Achieved approximation error.
 
 };
 
