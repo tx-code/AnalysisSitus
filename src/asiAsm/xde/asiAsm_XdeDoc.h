@@ -855,10 +855,12 @@ public:
     ExpandCompounds(const AssemblyItemIds& items);
 
   //! \Create new part with empty compound as shape.
-  asiAsm_EXPORT TDF_Label CreateEmptyPart();
+  asiAsm_EXPORT TDF_Label
+    CreateEmptyPart();
 
   //! \Create new empty assembly.
-  asiAsm_EXPORT TDF_Label CreateEmptyAssembly();
+  asiAsm_EXPORT TDF_Label
+    CreateEmptyAssembly();
 
   //! Adda a new component with the given location to the passed assembly.
   //! \param[in] assemblyLabel the target assembly's label.
