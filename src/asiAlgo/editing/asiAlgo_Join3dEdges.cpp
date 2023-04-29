@@ -65,6 +65,9 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
+// STL includes
+#include <algorithm>
+
 //-----------------------------------------------------------------------------
 
 namespace
@@ -219,83 +222,78 @@ asiAlgo_Join3dEdges::asiAlgo_Join3dEdges(const TopoDS_Shape&  masterCAD,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Join3dEdges::Perform(const TopTools_IndexedMapOfShape& edges)
+bool chooseOrder(const TopoDS_Edge& eFirst,
+                 const TopoDS_Edge& eSecond)
 {
-  if ( edges.Extent() != 2 )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Only a pair of edges is accepted.");
-    return false;
-  }
-
-  // Join edges
-  TopoDS_Edge E1, E2, newE;
-  chooseOrder(edges, E1, E2);
-  //
-  // Get orientation of the edges on their host faces. We want to have
-  // orientation irrelevant of face orientation, as we are going to
-  // work in the parametric domain.
-  TopAbs_Orientation eFirstOri = TopAbs_EXTERNAL, eSecondOri = TopAbs_EXTERNAL;
-  //
-  for (TopExp_Explorer exp(m_master, TopAbs_EDGE); exp.More(); exp.Next())
-  {
-    if (exp.Current().IsPartner(E1))
-      eFirstOri = exp.Current().Orientation();
-    else if (exp.Current().IsPartner(E2))
-      eSecondOri = exp.Current().Orientation();
-  }
-  // Choose orientation of the bridge edge being built.
-  bool isRev1, isRev2;
-  if (eFirstOri == TopAbs_FORWARD)
-    isRev1 = false;
-  else
-    isRev1 = true;
-  if (eSecondOri == TopAbs_FORWARD)
-    isRev2 = false;
-  else
-    isRev2 = true;
-  //
-  if (!joinEdges(E1, E2, eFirstOri, eSecondOri, newE, isRev1, isRev2))
-  {
-    return false;
-  }
-
-  // Change old face with the reconstructed one
-  Handle(BRepTools_ReShape) ReShape = new BRepTools_ReShape;
-  ReShape->Replace(E1, newE);
-  ReShape->Remove(E2);
-  m_result = ReShape->Apply(m_master);
-
-  m_progress.SendLogMessage(LogInfo(Normal) << "Edges have been concatenated successfully.");
-
-  return true; // Success
-}
-
-//-----------------------------------------------------------------------------
-
-void asiAlgo_Join3dEdges::chooseOrder(const TopTools_IndexedMapOfShape& edges,
-                                    TopoDS_Edge&                      eFirst,
-                                    TopoDS_Edge&                      eSecond) const
-{
-  const TopoDS_Edge& eCandidate1 = TopoDS::Edge( edges(1) );
-  const TopoDS_Edge& eCandidate2 = TopoDS::Edge( edges(2) );
-
   double f1, l1, f2, l2;
-  Handle(Geom_Curve) cCandidate1 = BRep_Tool::Curve(eCandidate1, f1, l1);
-  Handle(Geom_Curve) cCandidate2 = BRep_Tool::Curve(eCandidate2, f2, l2);
+  Handle(Geom_Curve) cCandidate1 = BRep_Tool::Curve(eFirst, f1, l1);
+  Handle(Geom_Curve) cCandidate2 = BRep_Tool::Curve(eSecond, f2, l2);
 
   const double dist1 = cCandidate1->Value(l1).Distance(cCandidate2->Value(f2));
   const double dist2 = cCandidate2->Value(l2).Distance(cCandidate1->Value(f1));
 
-  if (dist1 < dist2)
+  return dist1 < dist2;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Join3dEdges::Perform(const TopTools_IndexedMapOfShape& edges)
+{
+  std::vector<TopoDS_Edge> sortedEdges;
+  for (int i = 0; i < edges.Extent(); ++i)
   {
-    eFirst  = eCandidate1;
-    eSecond = eCandidate2;
+    sortedEdges.push_back(TopoDS::Edge(edges.FindKey(i + 1)));
   }
-  else
+  // sort edges.
+  std::sort(sortedEdges.begin(), sortedEdges.end(), chooseOrder);
+  //
+  m_result = m_master;
+  TopoDS_Edge E1 = sortedEdges[0];
+  for (int i = 1; i < sortedEdges.size(); ++i)
   {
-    eFirst  = eCandidate2;
-    eSecond = eCandidate1;
+    TopoDS_Edge E2 = sortedEdges[i];
+    // Join edges
+    //
+    // Get orientation of the edges on their host faces. We want to have
+    // orientation irrelevant of face orientation, as we are going to
+    // work in the parametric domain.
+    TopAbs_Orientation eFirstOri = TopAbs_EXTERNAL, eSecondOri = TopAbs_EXTERNAL;
+    //
+    for (TopExp_Explorer exp(m_result, TopAbs_EDGE); exp.More(); exp.Next())
+    {
+      if (exp.Current().IsPartner(E1))
+        eFirstOri = exp.Current().Orientation();
+      else if (exp.Current().IsPartner(E2))
+        eSecondOri = exp.Current().Orientation();
+    }
+    // Choose orientation of the bridge edge being built.
+    bool isRev1, isRev2;
+    if (eFirstOri == TopAbs_FORWARD)
+      isRev1 = false;
+    else
+      isRev1 = true;
+    if (eSecondOri == TopAbs_FORWARD)
+      isRev2 = false;
+    else
+      isRev2 = true;
+    //
+    TopoDS_Edge newE;
+    if (!joinEdges(E1, E2, eFirstOri, eSecondOri, newE, isRev1, isRev2))
+    {
+      return false;
+    }
+
+    // Change old edges with the reconstructed one
+    Handle(BRepTools_ReShape) ReShape = new BRepTools_ReShape;
+    ReShape->Replace(E2, newE);
+    ReShape->Remove(E1);
+    m_result = ReShape->Apply(m_result);
+    E1 = newE;
   }
+
+  m_progress.SendLogMessage(LogInfo(Normal) << "Edges have been concatenated successfully.");
+
+  return true; // Success
 }
 
 //-----------------------------------------------------------------------------
