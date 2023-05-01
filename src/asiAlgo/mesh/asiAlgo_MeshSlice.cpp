@@ -39,12 +39,17 @@
 #include <BRepBndLib.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepClass_FaceClassifier.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepTools_WireExplorer.hxx>
 #include <ElCLib.hxx>
 #include <gp_Lin.hxx>
 #include <gp_Pln.hxx>
+#include <NCollection_UBTreeFiller.hxx>
 #include <Poly_CoherentTriangulation.hxx>
+#include <Precision.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
+#include <ShapeFix_Face.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopExp_Explorer.hxx>
 #include <GProp_GProps.hxx>
@@ -57,6 +62,10 @@
 #if defined DRAW_DEBUG
   #pragma message("===== warning: DRAW_DEBUG is enabled")
 #endif
+
+//-----------------------------------------------------------------------------
+
+typedef NCollection_UBTree < int , Bnd_Box > boxBndTree;
 
 //-----------------------------------------------------------------------------
 
@@ -93,14 +102,124 @@ namespace {
     };
   };
 
+  //-----------------------------------------------------------------------------
 
-  //! Computes area of the passed shape.
-  double computeArea(const TopoDS_Shape& shape)
+  struct faceInfo {
+    TopoDS_Shape face;
+    TopoDS_Shape wire;
+
+    Bnd_Box      box;
+    double       boxMinX;
+    double       boxMaxX;
+    double       boxMinY;
+    double       boxMaxY;
+    double       boxArea;
+
+    gp_Pnt       point;
+
+    std::set< int > children;
+
+    faceInfo()
+      : boxMinX( 0.0 ),
+        boxMaxX( 0.0 ),
+        boxMinY( 0.0 ),
+        boxMaxY( 0.0 ),
+        boxArea( 0.0 )
+    {}
+
+    faceInfo( const TopoDS_Shape& f, const TopoDS_Shape& w, const gp_Pnt& p )
+      : faceInfo()
+    {
+      face = f;
+      wire = w;
+      point = p;
+
+      // Get box.
+      BRepBndLib::Add( face, box, true ); // Use triangulation.
+
+      double zMin, zMax;
+      box.Get( boxMinX, boxMinY, zMin, boxMaxX, boxMaxY, zMax );
+
+      boxArea = ( boxMaxX - boxMinX ) * ( boxMaxY - boxMinY );
+    }
+  };
+
+  //-----------------------------------------------------------------------------
+
+  class Selector_OverlappedFaces : public boxBndTree::Selector
   {
-    GProp_GProps props;
-    BRepGProp::SurfaceProperties(shape, props, 1.0e-2);
-    //
-    return props.Mass();
+    public:
+
+      Selector_OverlappedFaces(std::vector< faceInfo >& faces)
+        : m_faces( faces )
+      {}
+
+      void Define(const int& i)
+      {
+        m_index = i;
+      }
+
+      bool Reject(const Bnd_Box& box) const
+      {
+        return m_faces[ m_index - 1 ].box.IsOut( box );
+      }
+
+      bool Accept(const int& index)
+      {
+        // Reject same face.
+        if ( index == m_index )
+        {
+          return false;
+        }
+
+        const faceInfo& other = m_faces[ index - 1 ];
+        faceInfo& me = m_faces[ m_index - 1 ];
+
+        // Check AABB full overlapping.
+        if ( other.boxMinX > me.boxMaxX ||
+             other.boxMaxX < me.boxMinX ||
+             other.boxMaxY < me.boxMinY ||
+             other.boxMinY > me.boxMaxY )
+        {
+          return false;
+        }
+
+        // Check if some point of 'other' is located on face of 'me'.
+        BRepClass_FaceClassifier classifier;
+
+        classifier.Perform( TopoDS::Face( me.face ), other.point, Precision::Confusion() );
+        const TopAbs_State state = classifier.State();
+
+        if ( state == TopAbs_ON || state == TopAbs_IN )
+        {
+          me.children.insert( index - 1 );
+
+          return true;
+        }
+
+        return false;
+      }
+
+    private:
+
+      int m_index;
+      std::vector< faceInfo >& m_faces;
+  };
+
+  //-----------------------------------------------------------------------------
+
+  void getSubChildren(const std::vector< faceInfo >& faces,
+                      const std::set< int >&         children,
+                      std::set< int >&               subchildren)
+  {
+    for ( const int& i : children )
+    {
+      const std::set< int >& s = faces[i].children;
+
+      subchildren.insert( s.begin(), s.end() );
+
+      getSubChildren( faces, s, subchildren );
+    }
   }
 }
 
@@ -439,7 +558,7 @@ bool asiAlgo_MeshSlice::Perform(const int numSlices)
 
   for ( int i = 0; i < numPlanes; ++i )
   {
-    Handle(TopTools_HSequenceOfShape) facesBySlice = new TopTools_HSequenceOfShape;
+    std::vector< faceInfo > facesBySlice;
     //
     for ( TopTools_SequenceOfShape::Iterator wit(*wiresBySlices[i]); wit.More(); wit.Next() )
     {
@@ -453,6 +572,18 @@ bool asiAlgo_MeshSlice::Perform(const int numSlices)
         wire = Maximizer.Shape();
       }
 
+      // Get some point of wire.
+      gp_Pnt p;
+
+      BRepTools_WireExplorer wireExplorer;
+
+      wireExplorer.Init( TopoDS::Wire( wire ) );
+      TopoDS_Edge edge = wireExplorer.Current();
+      double f, l;
+
+      Handle(Geom_Curve) curve = BRep_Tool::Curve( edge, f, l );
+      curve->D0( f, p );
+
       bbuilder.Add(wiresComp, wire);
       //vout << wire;
 
@@ -460,7 +591,7 @@ bool asiAlgo_MeshSlice::Perform(const int numSlices)
       // as it would be too expensive.
       TopoDS_Face face = BRepBuilderAPI_MakeFace( planes[i], TopoDS::Wire(wire) );
       //
-      facesBySlice->Append(face);
+      facesBySlice.push_back( faceInfo( face, TopoDS::Wire( wire ), p ) );
     }
 
     /* Check whether the slice contains the nested faces. The nested faces
@@ -468,41 +599,97 @@ bool asiAlgo_MeshSlice::Perform(const int numSlices)
      * to cavities which slicers just fills in. For such cases, we do the
      * Boolean cut to get back the lost inner contours. */
 
-    // Search for a biggest face.
-    TopTools_HSequenceOfShape::Iterator fIt;
-    TopoDS_Shape biggest;
-    double maxArea = 0.0;
-    for ( fIt.Init(*facesBySlice.get()); fIt.More(); fIt.Next() )
-    {
-      double area = computeArea(fIt.Value());
-      if ( area - maxArea > 0.001 )
+    // Sort faces by box area.
+    std::sort( facesBySlice.begin(), facesBySlice.end(),
+               [&]( const faceInfo& f1,
+                    const faceInfo& f2 )
       {
-        maxArea = area;
-        biggest = fIt.Value();
+        return f1.boxArea > f2.boxArea;
       }
-    }
+    );
 
-    // Do the Boolean cut for the biggest face against others.
-    TopoDS_Shape result = biggest;
-    for ( fIt.Init(*facesBySlice.get()); fIt.More(); fIt.Next() )
+    // Restore hierarchy of faces and make Boolean cut then.
     {
-      if ( !fIt.Value().IsSame(biggest))
+      boxBndTree bbTree;
+      NCollection_UBTreeFiller< int, Bnd_Box > treeFiller( bbTree );
+      Selector_OverlappedFaces faceSelector( facesBySlice );
+
+      // Build destribution tree.
       {
-        result = asiAlgo_Utils::BooleanCut( result, fIt.Value() );
+        int index = 1;
+        for ( const auto& f : facesBySlice )
+        {
+          treeFiller.Add( index, f.box );
+          index++;
+        }
       }
+
+      // Fill the tree.
+      treeFiller.Fill();
+
+      // Find intersected faces.
+      {
+        for ( int index = 1; index <= facesBySlice.size(); ++index )
+        {
+          faceSelector.Define( index );
+
+          bbTree.Select( faceSelector );
+        }
+      }
+
+      // Find direct faces children.
+      for ( faceInfo& f : facesBySlice )
+      {
+        std::set< int > subchildren;
+
+        getSubChildren( facesBySlice, f.children, subchildren );
+
+        for ( const int& s : subchildren )
+        {
+          f.children.erase( s );
+        }
+      }
+
+      // Perform Boolean Cut.
+      Handle(TopTools_HSequenceOfShape) faces = new TopTools_HSequenceOfShape;
+
+      std::set< int > holes;
+
+      int index = -1;
+      for ( auto& f : facesBySlice )
+      {
+        index++;
+
+        // Skip holes.
+        if ( holes.count( index ) > 0 )
+        {
+          continue;
+        }
+
+        if ( !f.children.empty() )
+        {
+          BRep_Builder bb;
+
+          for ( const auto& s : f.children )
+          {
+            bb.Add( f.face, facesBySlice[s].wire.Reversed() );
+
+            holes.insert( s );
+          }
+
+          ShapeFix_Face sFix( TopoDS::Face( f.face ) );
+          sFix.FixOrientation();
+
+          faces->Append( sFix.Face() );
+        }
+        else
+        {
+          faces->Append( f.face );
+        }
+      }
+
+      m_faces.push_back( faces );
     }
-
-    // Keep the resultant face to slice.
-    facesBySlice->Clear();
-    for ( TopExp_Explorer exp(result, TopAbs_FACE); exp.More(); exp.Next() )
-    {
-      // ~DEBUGGING~
-      //m_plotter.DRAW_SHAPE(exp.Value(), "slice");
-
-      facesBySlice->Append(exp.Value());
-    }
-
-    m_faces.push_back(facesBySlice);
   }
 
   return true;
