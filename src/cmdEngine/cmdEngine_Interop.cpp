@@ -87,6 +87,7 @@
 #pragma warning(push, 0)
 #include <vtkCamera.h>
 #include <vtkXMLPolyDataWriter.h>
+#include <vtkOpenGLRenderWindow.h>
 #pragma warning(pop)
 
 // Qt includes
@@ -1476,6 +1477,32 @@ int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_GlInfo(const Handle(asiTcl_Interp)& interp,
+                  int                          argc,
+                  const char**                 argv)
+{
+  if (argc != 1)
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  auto window = vtkSmartPointer<vtkRenderWindow>::New();
+  auto oglwin = vtkOpenGLRenderWindow::SafeDownCast(window);
+  TCollection_AsciiString aSupportStr = TCollection_AsciiString("OpenGL supported: ") + oglwin->SupportsOpenGL();
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aSupportStr);
+  TCollection_AsciiString aBackendStr = TCollection_AsciiString("Backend: ") + oglwin->GetRenderingBackend();
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aBackendStr);
+  int vmaj = 0, vmin = 0;
+  oglwin->GetOpenGLVersion(vmaj, vmin);
+  TCollection_AsciiString aVersionStr = TCollection_AsciiString("OpenGL version: ") + vmaj + "." + vmin;
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aVersionStr);
+
+  return TCL_OK;
+}
+
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -1675,4 +1702,13 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t curves and surfaces to the interpreter.",
     //
     __FILE__, group, ENGINE_LoadAstra);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("vglinfo",
+    //
+    "vglinfo\n"
+    "\t Return info about Open GL.\n",
+    //
+    __FILE__, group, ENGINE_GlInfo);
+
 }
