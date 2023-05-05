@@ -1486,20 +1486,24 @@ int ENGINE_GlInfo(const Handle(asiTcl_Interp)& interp,
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  auto window = vtkSmartPointer<vtkRenderWindow>::New();
-  auto oglwin = vtkOpenGLRenderWindow::SafeDownCast(window);
-  TCollection_AsciiString aSupportStr = TCollection_AsciiString("OpenGL supported: ") + oglwin->SupportsOpenGL();
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aSupportStr);
-  TCollection_AsciiString aBackendStr = TCollection_AsciiString("Backend: ") + oglwin->GetRenderingBackend();
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aBackendStr);
+  vtkSmartPointer<vtkRenderWindow>
+    window = vtkSmartPointer<vtkRenderWindow>::New();
+  //
+  vtkOpenGLRenderWindow*
+    oglwin = vtkOpenGLRenderWindow::SafeDownCast(window);
+
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "OpenGL supported: %1."
+                                                        << oglwin->SupportsOpenGL() );
+  interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Backend: %1."
+                                                        << oglwin->GetRenderingBackend() );
+
   int vmaj = 0, vmin = 0;
   oglwin->GetOpenGLVersion(vmaj, vmin);
-  TCollection_AsciiString aVersionStr = TCollection_AsciiString("OpenGL version: ") + vmaj + "." + vmin;
-  interp->GetProgress().SendLogMessage(LogInfo(Normal) << aVersionStr);
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "OpenGL version: %1.%2."
+                                                       << vmaj << vmin);
 
   return TCL_OK;
 }
-
 
 //-----------------------------------------------------------------------------
 
@@ -1707,7 +1711,7 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("vglinfo",
     //
     "vglinfo\n"
-    "\t Return info about Open GL.\n",
+    "\t Prints information about OpenGL.\n",
     //
     __FILE__, group, ENGINE_GlInfo);
 
