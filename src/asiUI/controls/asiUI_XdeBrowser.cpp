@@ -113,9 +113,9 @@ asiUI_XdeBrowser::asiUI_XdeBrowser(const Handle(asiAsm::xde::Doc)&       doc,
 {
   // Configure.
   this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  this->setColumnCount(2);
+  this->setColumnCount(3);
   this->setAutoExpandDelay(0);
-  this->setHeaderLabels( QStringList() << "Assembly item" << "Persistent ID" );
+  this->setHeaderLabels( QStringList() << "Assembly item" << "Persistent ID" << "Serial ID" );
 
   // Configure selection.
   this->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -164,6 +164,7 @@ void asiUI_XdeBrowser::Populate()
                                                                   m_doc).ToCString() );
     //
     rootUi->setText  ( 1, m_asmGraph->GetPersistentId(rootId).ToCString() );
+    rootUi->setText  ( 2, asiAlgo_Utils::Str::ToString<int>(rootId).c_str() );
     rootUi->setFlags ( Qt::ItemIsEnabled | Qt::ItemIsSelectable );
     rootUi->setData  ( 0, BrowserRoleNodeId, rootId );
     rootUi->setIcon  ( 0, GetItemIcon(rootId, m_asmGraph) );
@@ -250,6 +251,7 @@ void asiUI_XdeBrowser::addChildren(const int        rootId,
                                                                    m_doc).ToCString() );
     //
     childUi->setText  ( 1, m_asmGraph->GetPersistentId(childId).ToCString() );
+    childUi->setText  ( 2, asiAlgo_Utils::Str::ToString<int>(childId).c_str() );
     childUi->setFlags ( Qt::ItemIsEnabled | Qt::ItemIsSelectable );
     childUi->setData  ( 0, BrowserRoleNodeId, childId );
     childUi->setIcon  ( 0, GetItemIcon(childId, m_asmGraph) );

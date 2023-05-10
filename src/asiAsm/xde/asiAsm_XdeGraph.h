@@ -47,7 +47,7 @@ namespace xde {
 //!
 //! \brief Assembly graph.
 //!
-//! This tool gives clear OCAF-agnostic interface to
+//! This tool gives a clear OCAF-agnostic interface to
 //! the assembly structure of a product. A graph is essentially a set of
 //! nodes {N} and a set of arcs {A} as defined formally.
 //!
