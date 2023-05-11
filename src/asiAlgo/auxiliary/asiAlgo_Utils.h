@@ -1019,6 +1019,17 @@ namespace asiAlgo_Utils
     IsCircular(const Handle(Geom_Curve)& curve,
                gp_Circ&                  circ);
 
+  //! Checks if the passed edge is circular with canonical conversion for freeform
+  //! curves plugged in.
+  //! \param[in]  edge   the edge to check.
+  //! \param[out] circ   the extracted circle.
+  //! \param[in]  canrec whether to try canonical recognition.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCircular(const TopoDS_Edge& edge,
+               gp_Circ&           circ,
+               const bool         canrec);
+
   //! Checks if the passed edge is straight.
   //! \param[in] edge edge to check.
   //! \return true/false.

@@ -1860,6 +1860,46 @@ bool asiAlgo_Utils::IsCircular(const Handle(Geom_Curve)& curve,
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsCircular(const TopoDS_Edge& edge,
+                               gp_Circ&           circ,
+                               const bool         canrec)
+{
+  // Get curve.
+  double f = 0.0, l = 0.0;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+  if ( curve.IsNull() )
+  {
+    return false;
+  }
+
+  if ( IsCircular(curve, circ) )
+  {
+    return true;
+  }
+
+  // If canonical conversion is allowed, let's do the last-chance check for splines.
+  if ( canrec )
+  {
+    if ( curve->IsKind( STANDARD_TYPE(Geom_BSplineCurve) ) )
+    {
+      Handle(Geom_BSplineCurve)
+        spl = Handle(Geom_BSplineCurve)::DownCast(curve);
+
+      double dev = 0.0, cf = 0.0, cl = 0.0;
+      Handle(Geom_Curve) newCurve = asiAlgo_RecognizeCanonical::FitCircle(curve, 1.e-2, f, l, cf, cl, dev);
+      if ( !newCurve.IsNull() )
+      {
+        circ = Handle(Geom_Circle)::DownCast(newCurve)->Circ();
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsStraight(const TopoDS_Edge& edge)
 {
   Handle(Geom_Line) line;
