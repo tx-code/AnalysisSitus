@@ -85,6 +85,65 @@
 #include <GeomConvert.hxx>
 #include <ShapeFix_Wire.hxx>
 
+#include <IGESControl_Reader.hxx>
+#include <BOPAlgo_PaveFiller.hxx>
+#include <BOPAlgo_Builder.hxx>
+#include <ShapeAnalysis_Curve.hxx>
+
+//-----------------------------------------------------------------------------
+
+bool LoadIGES(const TCollection_AsciiString& filename,
+              TopoDS_Shape&                  result)
+{
+  IGESControl_Reader reader;
+  IFSelect_ReturnStatus outcome = reader.ReadFile( filename.ToCString() );
+  //
+  if ( outcome != IFSelect_RetDone )
+    return false;
+
+  reader.TransferRoots();
+
+  result = reader.OneShape();
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+TopoDS_Shape BooleanGeneralFuse(const TopTools_ListOfShape& objects,
+                                const double                fuzz,
+                                BOPAlgo_Builder&            API,
+                                const bool                  glue)
+{
+  const bool bRunParallel = false;
+
+  BOPAlgo_PaveFiller DSFiller;
+  DSFiller.SetArguments(objects);
+  DSFiller.SetRunParallel(bRunParallel);
+  DSFiller.SetFuzzyValue(fuzz);
+  DSFiller.Perform();
+  bool hasErr = DSFiller.HasErrors();
+  //
+  if ( hasErr )
+  {
+    return TopoDS_Shape();
+  }
+
+  if ( glue )
+    API.SetGlue(BOPAlgo_GlueFull);
+
+  API.SetArguments(objects);
+  API.SetRunParallel(bRunParallel);
+  API.PerformWithFiller(DSFiller);
+  hasErr = API.HasErrors();
+  //
+  if ( hasErr )
+  {
+    return TopoDS_Shape();
+  }
+
+  return API.Shape();
+}
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
@@ -94,61 +153,75 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   asiEngine_Part partApi( cmdMisc::cf->Model,
                           cmdMisc::cf->ViewerPart->PrsMgr() );
 
-  // Access selected faces (if any).
-  asiAlgo_Feature selected;
+  // D:/Demos/lessons/Lesson21_split-curves/data/klp1.igs
+
+  TopoDS_Shape wf;
+  if ( !LoadIGES("D:/Demos/lessons/Lesson21_split-curves/data/klp1.igs", wf) )
+    return 1;
+
+  TopTools_ListOfShape args;
   //
-  if ( !cmdMisc::cf.IsNull() )
+  for ( TopExp_Explorer exp(wf, TopAbs_EDGE); exp.More(); exp.Next() )
   {
-    partApi.GetHighlightedFaces(selected);
+    args.Append( exp.Current() );
   }
 
-  // Get the face in question.
-  int fid = 0;
-  interp->GetKeyValue<int>(argc, argv, "fid", fid);
-  //
-  if ( fid ) selected.Add(fid);
+  BOPAlgo_Builder algo;
+  TopoDS_Shape fused = BooleanGeneralFuse(args, 0.1, algo, false);
 
-  if ( selected.Extent() != 1 )
+  interp->GetPlotter().REDRAW_SHAPE("fused", fused);
+
+  ShapeAnalysis_Curve sac;
+
+  // Get images of args.
+  for ( TopTools_ListIteratorOfListOfShape argIt(args); argIt.More(); argIt.Next() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select exactly one face.");
-    return TCL_ERROR;
+    const TopoDS_Edge& arg = TopoDS::Edge( argIt.Value() );
+
+    double f, l;
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(arg, f, l);
+
+    const TopTools_ListOfShape& modified = algo.History()->Modified(arg);
+
+    TopoDS_Compound modifiedComp;
+    BRep_Builder bbuilder;
+    bbuilder.MakeCompound(modifiedComp);
+    //
+    for ( TopTools_ListIteratorOfListOfShape lit(modified); lit.More(); lit.Next() )
+    {
+      bbuilder.Add(modifiedComp, lit.Value());
+    }
+
+    // Get vertices.
+    std::vector<double> params;
+    TopTools_IndexedMapOfShape splitVertices;
+    TopExp::MapShapes(modifiedComp, TopAbs_VERTEX, splitVertices);
+    //
+    for ( int vidx = 1; vidx <= splitVertices.Extent(); ++vidx )
+    {
+      const TopoDS_Vertex& V = TopoDS::Vertex( splitVertices(vidx) );
+      gp_Pnt               P = BRep_Tool::Pnt(V);
+      gp_Pnt               Pproj;
+      double               param;
+
+      sac.Project(c3d, P, 1e-3, Pproj, param);
+
+      params.push_back(param);
+    }
+
+    // Evaluate params back in 3D.
+    Handle(asiAlgo_BaseCloud<double>) curvePts = new asiAlgo_BaseCloud<double>;
+    //
+    for ( const auto p : params )
+    {
+      curvePts->AddElement( c3d->Value(p) );
+    }
+
+    interp->GetPlotter().DRAW_SHAPE(modifiedComp, "images");
+    interp->GetPlotter().DRAW_POINTS(curvePts->GetCoordsArray(), Color_Blue, "imagePts");
   }
 
-  fid = selected.GetMinimalMapped();
-
-  const TopoDS_Face& face = partApi.GetAAG()->GetFace(fid);
-
-  //convert a face_shape to Geom_BSplineSurface
-    TopoDS_Face faceo = TopoDS::Face(face);
-    BRepBuilderAPI_NurbsConvert nurbs_convert;
-    nurbs_convert = BRepBuilderAPI_NurbsConvert(faceo);
-    nurbs_convert.Perform(faceo);
-    TopoDS_Shape face_shape = nurbs_convert.Shape();
-    Handle(Geom_Surface) h_geomface = BRep_Tool::Surface(TopoDS::Face(face_shape));
-    Handle(Geom_BSplineSurface)h_bsurface = GeomConvert::SurfaceToBSplineSurface(h_geomface);
-    
-    //Reparametrize u dir
-    Standard_Integer nbuk = h_bsurface->NbUKnots();
-    TColStd_Array1OfReal uk(1, nbuk);
-    BSplCLib::Reparametrize(0, 1, uk);
-    h_bsurface->SetUKnots(uk);
-    
-    //Reparametrize v dir
-    Standard_Integer nbvk = h_bsurface->NbVKnots();
-    TColStd_Array1OfReal vk(1, nbvk);
-    BSplCLib::Reparametrize(0, 1, vk);
-    h_bsurface->SetVKnots(vk);
-    
-    //convert Geom_BSplineSurface to TopoDS_Face
-    TopoDS_Wire wire = BRepTools::OuterWire(faceo);
-    TopoDS_Face res = BRepBuilderAPI_MakeFace(h_bsurface, wire, false);
-
-    Handle(ShapeFix_Wire)
-          sfw = new ShapeFix_Wire( wire,
-                                   face,
-                                   Precision::Confusion() );
-
-    interp->GetPlotter().REDRAW_SHAPE("res", res);
+  BRepTools::Write(fused, "C:/users/user/desktop/fused.brep");
 
   return TCL_OK;
 }

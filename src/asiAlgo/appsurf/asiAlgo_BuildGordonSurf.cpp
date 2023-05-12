@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_AppSurfUtils.h>
+#include <asiAlgo_IntersectCurves.h>
 #include <asiAlgo_Utils.h>
 
 #ifdef USE_MOBIUS
@@ -50,11 +51,13 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 #include <GCPnts_QuasiUniformAbscissa.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include <GeomConvert.hxx>
 #include <Geom_BSplineCurve.hxx>
 
+// TiGL includes
 #include <CTiglInterpolateCurveNetwork.h>
 #include <CTiglBSplineAlgorithms.h>
 #include <CTiglCurveNetworkSorter.h>
@@ -63,6 +66,7 @@
 using namespace mobius;
 #endif
 
+// Define this macro to use vanilla TiGL
 #undef USE_TIGL
 
 #define CurveOriginToler 1e-2
@@ -612,12 +616,34 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
   math_Matrix intersection_params_v(0, numIsoU - 1,
                                     0, numIsoV - 1);
 
-  this->computeCurveIntersections(profileCurves, guideCurves,
-                                  intersection_params_u,
-                                  intersection_params_v);
+  //this->computeCurveIntersections(profileCurves, guideCurves,
+  //                                intersection_params_u,
+  //                                intersection_params_v);
 
-  intersection_params_u.Dump(std::cout);
-  intersection_params_v.Dump(std::cout);
+  //intersection_params_u.Dump(std::cout);
+  //intersection_params_v.Dump(std::cout);
+
+  /// Experimental
+  {
+    math_Matrix intersection_params_u2(0, numIsoU - 1,
+                                       0, numIsoV - 1);
+    math_Matrix intersection_params_v2(0, numIsoU - 1,
+                                       0, numIsoV - 1);
+
+    asiAlgo_IntersectCurves ccInt(m_progress, m_plotter);
+    ccInt.Perform(profileCurves, guideCurves,
+                  intersection_params_u2,
+                  intersection_params_v2);
+
+    intersection_params_u2.Dump(std::cout);
+    intersection_params_v2.Dump(std::cout);
+
+
+    intersection_params_u = intersection_params_u2;
+    intersection_params_v = intersection_params_v2;
+  }
+
+  //return false;
 
   /* ===========================================
    *  Collect curve network intersection points.
@@ -731,7 +757,16 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
         }
 
         Handle(Geom_BSplineCurve)& profile = profileCurves[static_cast<size_t>(spline_u_idx)];
-        profile = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(profile, oldParametersProfile, newParametersProfiles, max_cp_u).curve;
+
+        try
+        {
+          profile = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(profile, oldParametersProfile, newParametersProfiles, max_cp_u).curve;
+        }
+        catch ( ... )
+        {
+          m_plotter.DRAW_CURVE(profile, Color_Red, true, "failProfile");
+          return false;
+        }
     }
 
     // reparametrize v-directional B-splines
@@ -761,7 +796,16 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
         }
 
         Handle(Geom_BSplineCurve)& guide = guideCurves[static_cast<size_t>(spline_v_idx)];
-        guide = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(guide, oldParameterGuide, newParametersGuides, max_cp_v).curve;
+
+        try
+        {
+          guide = tigl::CTiglBSplineAlgorithms::reparametrizeBSplineContinuouslyApprox(guide, oldParameterGuide, newParametersGuides, max_cp_v).curve;
+        }
+        catch ( ... )
+        {
+          m_plotter.DRAW_CURVE(guide, Color_Red, true, "failGuide");
+          return false;
+        }
     }
   }
 
@@ -779,10 +823,10 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
   {
     std::vector<Handle(Geom_Curve)> uCurvesTigl, vCurvesTigl;
     //
-    for ( const auto c : uCurves )
+    for ( const auto c : profileCurves )
       uCurvesTigl.push_back(c);
     //
-    for ( const auto c : vCurves )
+    for ( const auto c : guideCurves )
       vCurvesTigl.push_back(c);
 
     tigl::CTiglInterpolateCurveNetwork tiglGordon(uCurvesTigl, vCurvesTigl, 1e-3, m_progress, m_plotter);
@@ -795,7 +839,7 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
     double bndDev, innerDev, maxDev;
     //
     CheckDeviation( res,
-                    uEdges, vEdges, bndDev, innerDev, maxDev,
+                    profiles, guides, bndDev, innerDev, maxDev,
                     m_plotter );
 
     m_progress.SendLogMessage(LogNotice(Normal) << "\n\tBoundary deviation: %1."
@@ -1166,6 +1210,20 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
    *  Discretize curves to have the same number of points.
    * ===================================================== */
 
+  //double maxlen = 0;
+  ////
+  //for ( const auto& curve : curves )
+  //{
+  //  GeomAdaptor_Curve gac(curve);
+  //  const double
+  //    len = GCPnts_AbscissaPoint::Length( gac, gac.FirstParameter(), gac.LastParameter() );
+
+  //  if ( len > maxlen )
+  //    maxlen = len;
+  //}
+
+  //const int numPts = maxlen / 1.;
+
   const int numPts = 100;
 
   // Get max degree.
@@ -1246,139 +1304,140 @@ bool asiAlgo_BuildGordonSurf::computeCurveIntersections(const std::vector<Handle
                                                         math_Matrix&                                  uParams,
                                                         math_Matrix&                                  vParams) const
 {
-#ifdef USE_MOBIUS
-  /* =================================
-   *  Compute intersection parameters.
-   * ================================= */
-
-  const int    numCurvesU = (int)( uCurves.size() );
-  const int    numCurvesV = (int)( vCurves.size() );
-  const double spatialTol = 0.01;
-  bool         fail       = false;
-  //
-  for ( int spline_u_idx = 0; spline_u_idx < numCurvesU; ++spline_u_idx )
-  {
-    for ( int spline_v_idx = 0; spline_v_idx < numCurvesV; ++spline_v_idx )
-    {
-      std::vector<std::pair<double, double> >
-        currentIntersections = tigl::CTiglBSplineAlgorithms::intersections(uCurves[static_cast<size_t>(spline_u_idx)],
-                                                                           vCurves[static_cast<size_t>(spline_v_idx)],
-                                                                           spatialTol);
-
-      if ( currentIntersections.size() < 1 )
-      {
-        fail = true;
-      }
-      else if ( currentIntersections.size() == 1 )
-      {
-        uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
-        vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
-      }
-      else if ( currentIntersections.size() == 2 ) // for closed curves
-      {
-        // only the u-directional B-spline curves are closed
-        if ( uCurves[0]->IsClosed() )
-        {
-          if ( spline_v_idx == 0 )
-          {
-            uParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].first, currentIntersections[1].first);
-          }
-          else if ( spline_v_idx == static_cast<int>(vCurves.size() - 1) )
-          {
-            uParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].first, currentIntersections[1].first);
-          }
-
-          // intersection_params_vector[0].second == intersection_params_vector[1].second
-          vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
-        }
-
-        // only the v-directional B-spline curves are closed
-        if ( vCurves[0]->IsClosed() )
-        {
-          if ( spline_u_idx == 0 )
-          {
-            vParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].second, currentIntersections[1].second);
-          }
-          else if ( spline_u_idx == static_cast<int>(uCurves.size() - 1) )
-          {
-            vParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].second, currentIntersections[1].second);
-          }
-
-          // intersection_params_vector[0].first == intersection_params_vector[1].first
-          uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
-        }
-      }
-
-      else if ( currentIntersections.size() > 2 )
-      {
-        return false;
-      }
-    }
-  }
-
-  /* ===========================
-   *  Beautify parameter values.
-   * =========================== */
-
-  int nProfiles = numCurvesU;
-  int nGuides   = numCurvesV;
-
-  /* eliminate small inaccuracies of the intersection parameters */
-
-  // first intersection
-  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
-  {
-    if ( std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1) ) < 0.001)
-    {
-      if ( std::abs(uCurves[0]->Knot(1)) < 1e-10 )
-      {
-        uParams(spline_u_idx, 0) = 0;
-      }
-      else
-      {
-        uParams(spline_u_idx, 0) = uCurves[0]->Knot(1);
-      }
-    }
-  }
-
-  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
-  {
-    if ( std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001 )
-    {
-      if ( std::abs( vCurves[0]->Knot(1) ) < 1e-10 )
-      {
-        vParams(0, spline_v_idx) = 0;
-      }
-      else
-      {
-        vParams(0, spline_v_idx) = vCurves[0]->Knot(1);
-      }
-    }
-  }
-
-  // last intersection
-  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
-  {
-    if ( std::abs( uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot( uCurves[0]->NbKnots() ) ) < 0.001 )
-    {
-      uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
-    }
-  }
-
-  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
-  {
-    if ( std::abs( vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot( vCurves[0]->NbKnots() ) ) < 0.001 )
-    {
-      vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot( vCurves[0]->NbKnots() );
-    }
-  }
-
-  return !fail;
-#else
-  (void)uCurves;
-  (void)vCurves;
-  (void)uParams;
-  (void)vParams;
+//#ifdef USE_MOBIUS
+//  /* =================================
+//   *  Compute intersection parameters.
+//   * ================================= */
+//
+//  const int    numCurvesU = (int)( uCurves.size() );
+//  const int    numCurvesV = (int)( vCurves.size() );
+//  const double spatialTol = 0.01;
+//  bool         fail       = false;
+//  //
+//  for ( int spline_u_idx = 0; spline_u_idx < numCurvesU; ++spline_u_idx )
+//  {
+//    for ( int spline_v_idx = 0; spline_v_idx < numCurvesV; ++spline_v_idx )
+//    {
+//      std::vector<std::pair<double, double> >
+//        currentIntersections = tigl::CTiglBSplineAlgorithms::intersections(uCurves[static_cast<size_t>(spline_u_idx)],
+//                                                                           vCurves[static_cast<size_t>(spline_v_idx)],
+//                                                                           spatialTol);
+//
+//      if ( currentIntersections.size() < 1 )
+//      {
+//        fail = true;
+//      }
+//      else if ( currentIntersections.size() == 1 )
+//      {
+//        uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
+//        vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
+//      }
+//      else if ( currentIntersections.size() == 2 ) // for closed curves
+//      {
+//        // only the u-directional B-spline curves are closed
+//        if ( uCurves[0]->IsClosed() )
+//        {
+//          if ( spline_v_idx == 0 )
+//          {
+//            uParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].first, currentIntersections[1].first);
+//          }
+//          else if ( spline_v_idx == static_cast<int>(vCurves.size() - 1) )
+//          {
+//            uParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].first, currentIntersections[1].first);
+//          }
+//
+//          // intersection_params_vector[0].second == intersection_params_vector[1].second
+//          vParams(spline_u_idx, spline_v_idx) = currentIntersections[0].second;
+//        }
+//
+//        // only the v-directional B-spline curves are closed
+//        if ( vCurves[0]->IsClosed() )
+//        {
+//          if ( spline_u_idx == 0 )
+//          {
+//            vParams(spline_u_idx, spline_v_idx) = std::min(currentIntersections[0].second, currentIntersections[1].second);
+//          }
+//          else if ( spline_u_idx == static_cast<int>(uCurves.size() - 1) )
+//          {
+//            vParams(spline_u_idx, spline_v_idx) = std::max(currentIntersections[0].second, currentIntersections[1].second);
+//          }
+//
+//          // intersection_params_vector[0].first == intersection_params_vector[1].first
+//          uParams(spline_u_idx, spline_v_idx) = currentIntersections[0].first;
+//        }
+//      }
+//
+//      else if ( currentIntersections.size() > 2 )
+//      {
+//        return false;
+//      }
+//    }
+//  }
+//
+//  /* ===========================
+//   *  Beautify parameter values.
+//   * =========================== */
+//
+//  int nProfiles = numCurvesU;
+//  int nGuides   = numCurvesV;
+//
+//  /* eliminate small inaccuracies of the intersection parameters */
+//
+//  // first intersection
+//  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
+//  {
+//    if ( std::abs(uParams(spline_u_idx, 0) - uCurves[0]->Knot(1) ) < 0.001)
+//    {
+//      if ( std::abs(uCurves[0]->Knot(1)) < 1e-10 )
+//      {
+//        uParams(spline_u_idx, 0) = 0;
+//      }
+//      else
+//      {
+//        uParams(spline_u_idx, 0) = uCurves[0]->Knot(1);
+//      }
+//    }
+//  }
+//
+//  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
+//  {
+//    if ( std::abs(vParams(0, spline_v_idx) - vCurves[0]->Knot(1)) < 0.001 )
+//    {
+//      if ( std::abs( vCurves[0]->Knot(1) ) < 1e-10 )
+//      {
+//        vParams(0, spline_v_idx) = 0;
+//      }
+//      else
+//      {
+//        vParams(0, spline_v_idx) = vCurves[0]->Knot(1);
+//      }
+//    }
+//  }
+//
+//  // last intersection
+//  for ( int spline_u_idx = 0; spline_u_idx < nProfiles; ++spline_u_idx )
+//  {
+//    if ( std::abs( uParams(spline_u_idx, nGuides - 1) - uCurves[0]->Knot( uCurves[0]->NbKnots() ) ) < 0.001 )
+//    {
+//      uParams(spline_u_idx, nGuides - 1) = uCurves[0]->Knot(uCurves[0]->NbKnots());
+//    }
+//  }
+//
+//  for ( int spline_v_idx = 0; spline_v_idx < nGuides; ++spline_v_idx )
+//  {
+//    if ( std::abs( vParams(nProfiles - 1, spline_v_idx) - vCurves[0]->Knot( vCurves[0]->NbKnots() ) ) < 0.001 )
+//    {
+//      vParams(nProfiles - 1, spline_v_idx) = vCurves[0]->Knot( vCurves[0]->NbKnots() );
+//    }
+//  }
+//
+//  return !fail;
+//#else
+//  (void)uCurves;
+//  (void)vCurves;
+//  (void)uParams;
+//  (void)vParams;
+//  return false;
+//#endif
   return false;
-#endif
 }

@@ -22,6 +22,7 @@ set (appsurf_H_FILES
   appsurf/asiAlgo_AppSurfUtils.h
   appsurf/asiAlgo_BuildCoonsSurf.h
   appsurf/asiAlgo_BuildGordonSurf.h
+  appsurf/asiAlgo_IntersectCurves.h
   appsurf/CTiglApproxResult.h
   appsurf/CTiglIntersectBSplines.h
   appsurf/CTiglPoint.h
@@ -39,6 +40,7 @@ set (appsurf_CPP_FILES
   appsurf/asiAlgo_AppSurfUtils.cpp
   appsurf/asiAlgo_BuildCoonsSurf.cpp
   appsurf/asiAlgo_BuildGordonSurf.cpp
+  appsurf/asiAlgo_IntersectCurves.cpp
   appsurf/CTiglIntersectBSplines.cpp
   appsurf/CTiglPoint.cpp
   appsurf/CTiglBSplineAlgorithms.cpp
