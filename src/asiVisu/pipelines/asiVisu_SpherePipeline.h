@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 03 April 2020
+// Created on: 19 April 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2023, Julia Slyadneva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,63 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiEngine_Thickness_h
-#define asiEngine_Thickness_h
+#pragma once
 
-// asiEngine includes
-#include <asiEngine_Base.h>
+// asiVisu includes
+#include <asiVisu_Pipeline.h>
+#include <asiVisu_Selection.h>
+#include <asiVisu_ShapeDisplayModeFilter.h>
+#include <asiVisu_ShapeRobustSource.h>
+#include <asiVisu_TriangleSource.h>
 
-// asiData includes
-#include <asiData_ThicknessNode.h>
+// Active Data includes
+#include <ActAPI_IPlotter.h>
+#include <ActAPI_IProgressNotifier.h>
+
+// VTK includes
+#pragma warning(push, 0)
+#include <vtkSphereSource.h>
+#include <vtkAppendPolyData.h>
+#pragma warning(pop)
 
 //-----------------------------------------------------------------------------
 
-//! Data Model API for thickness analysis.
-class asiEngine_Thickness : public asiEngine_Base
+//! Visualization pipeline for sphere indicating a scalar assigned to a triangulation facet.
+class asiVisu_SpherePipeline : public asiVisu_Pipeline
 {
 public:
 
-  //! Ctor.
-  //! \param[in] model    Data Model instance.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
-  asiEngine_Thickness(const Handle(asiEngine_Model)& model,
-                      ActAPI_ProgressEntry           progress = nullptr,
-                      ActAPI_PlotterEntry            plotter  = nullptr)
-  //
-  : asiEngine_Base(model, progress, plotter)
-  {}
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_SpherePipeline, asiVisu_Pipeline)
 
 public:
 
-  //! Creates Thickness Node under the passed owner Node.
-  //! \param[in] owner owner Node.
-  //! \return newly created Thickness Node.
-  asiEngine_EXPORT Handle(asiData_ThicknessNode)
-    CreateThickness(const Handle(ActAPI_INode)& owner);
+  asiVisu_EXPORT
+    asiVisu_SpherePipeline();
 
-  //! Switches from one to another execution function depending on the given check type (Ray-based, shrinking sphere, etc.)
-  //! \param[in] node thickness node to update
-  asiEngine_EXPORT void
-    ReconnectFunction(const Handle(asiData_ThicknessNode)& node);
+public:
 
+  asiVisu_EXPORT virtual void
+    SetInput(const Handle(asiVisu_DataProvider)& dataProvider);
+
+private:
+
+  virtual void callback_add_to_renderer      (vtkRenderer* renderer);
+  virtual void callback_remove_from_renderer (vtkRenderer* renderer);
+  virtual void callback_update               ();
+
+private:
+
+  //! Copying prohibited.
+  asiVisu_SpherePipeline(const asiVisu_SpherePipeline&);
+
+  //! Assignment prohibited.
+  asiVisu_SpherePipeline& operator=(const asiVisu_SpherePipeline&);
+
+protected:
+
+  vtkSmartPointer<vtkAppendPolyData>       m_appendFilter;
+  vtkSmartPointer<vtkSphereSource>         m_sphereSource;
+  vtkSmartPointer<asiVisu_TriangleSource>  m_triSource;
 };
 
-#endif

@@ -34,6 +34,7 @@
 // asiEngine includes
 #include <asiEngine_Part.h>
 #include <asiEngine_RE.h>
+#include <asiEngine_Thickness.h>
 
 //-----------------------------------------------------------------------------
 
@@ -213,6 +214,21 @@ void asiUI_ParameterEditorListenerDefault::afterParameterChanged(const Handle(Ac
 
         m_cf->ActualizeNodes(affectedNodes);
       }
+    }
+  }
+  /* ==================================
+   *  Customization for Thickness Node
+   * ================================== */
+
+  else if (N->IsKind(STANDARD_TYPE(asiData_ThicknessNode)))
+  {
+    Handle(asiData_ThicknessNode) thick_n = Handle(asiData_ThicknessNode)::DownCast(N);
+
+    // Reconnect execution function if type of analysis is changed.
+    if (pid == asiData_ThicknessNode::PID_ThicknessType)
+    {
+      asiEngine_Thickness thickApi(m_cf->Model, m_cf->Progress, m_cf->Plotter);
+      thickApi.ReconnectFunction(thick_n);
     }
   }
 }

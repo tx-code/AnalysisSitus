@@ -974,7 +974,7 @@ if (USE_MOBIUS)
       set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
     endif()
 
-    if (3RDPARTY_mobius_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_MOBIUS_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+    if (3RDPARTY_mobius_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_mobius_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
       target_link_libraries (asiAlgo debug ${3RDPARTY_mobius_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
       target_link_libraries (asiAlgo optimized ${3RDPARTY_mobius_LIBRARY_DIR}/${LIB_FILENAME})
     else()

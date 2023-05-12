@@ -83,6 +83,7 @@ set (pipelines_H_FILES
   pipelines/asiVisu_ReCoedgePipeline.h
   pipelines/asiVisu_RePatchPipeline.h
   pipelines/asiVisu_ShapePipeline.h
+  pipelines/asiVisu_SpherePipeline.h
   pipelines/asiVisu_SurfaceDeviationPipeline.h
   pipelines/asiVisu_TriangulationLinksPipeline.h
   pipelines/asiVisu_TriangulationPipeline.h
@@ -128,6 +129,7 @@ set (pipelines_CPP_FILES
   pipelines/asiVisu_ReCoedgePipeline.cpp
   pipelines/asiVisu_RePatchPipeline.cpp
   pipelines/asiVisu_ShapePipeline.cpp
+  pipelines/asiVisu_SpherePipeline.cpp
   pipelines/asiVisu_SurfaceDeviationPipeline.cpp
   pipelines/asiVisu_TriangulationLinksPipeline.cpp
   pipelines/asiVisu_TriangulationPipeline.cpp
@@ -177,7 +179,7 @@ set (presentations_H_FILES
   presentations/asiVisu_SurfDeviationPrs.h
   presentations/asiVisu_TessellationNormsPrs.h
   presentations/asiVisu_TessellationPrs.h
-  presentations/asiVisu_ThicknessPrs.h
+  presentations/asiVisu_ThicknessPrs.h       
   presentations/asiVisu_TolerantRangePrs.h
   presentations/asiVisu_TriangulationPrs.h
 )
@@ -219,7 +221,7 @@ set (presentations_CPP_FILES
   presentations/asiVisu_SurfDeviationPrs.cpp
   presentations/asiVisu_TessellationNormsPrs.cpp
   presentations/asiVisu_TessellationPrs.cpp
-  presentations/asiVisu_ThicknessPrs.cpp
+  presentations/asiVisu_ThicknessPrs.cpp      
   presentations/asiVisu_TolerantRangePrs.cpp
   presentations/asiVisu_TriangulationPrs.cpp
 )
@@ -270,6 +272,7 @@ set (providers_H_FILES
   providers/asiVisu_RePatchDataProvider.h
   providers/asiVisu_ReVertexDataProvider.h
   providers/asiVisu_ShapeDataProvider.h
+  providers/asiVisu_SphereDataProvider.h
   providers/asiVisu_SurfaceDataProvider.h
   providers/asiVisu_SurfaceDeviationDataProvider.h
   providers/asiVisu_TessNormalsDataProvider.h
@@ -313,6 +316,7 @@ set (providers_CPP_FILES
   providers/asiVisu_RePatchDataProvider.cpp
   providers/asiVisu_ReVertexDataProvider.cpp
   providers/asiVisu_ShapeDataProvider.cpp
+  providers/asiVisu_SphereDataProvider.cpp
   providers/asiVisu_SurfaceDeviationDataProvider.cpp
   providers/asiVisu_TessNormalsDataProvider.cpp
   providers/asiVisu_ThicknessDataProvider.cpp
@@ -377,6 +381,7 @@ set (sources_H_FILES
   sources/asiVisu_ShapeRobustTessellator.h
   sources/asiVisu_SurfaceSource.h
   sources/asiVisu_TriangulationSource.h
+  sources/asiVisu_TriangleSource.h
 )
 set (sources_CPP_FILES 
   sources/asiVisu_AxesSource.cpp
@@ -404,6 +409,7 @@ set (sources_CPP_FILES
   sources/asiVisu_ShapeRobustTessellator.cpp
   sources/asiVisu_SurfaceSource.cpp
   sources/asiVisu_TriangulationSource.cpp
+  sources/asiVisu_TriangleSource.cpp
 )
 
 #------------------------------------------------------------------------------

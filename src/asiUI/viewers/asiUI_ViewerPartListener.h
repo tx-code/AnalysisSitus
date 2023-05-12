@@ -131,6 +131,11 @@ protected slots:
   void
     onVertexHighlighted(asiVisu_PickerResult* pickRes);
 
+  //! Reaction on highlighting of anything.
+  //! \param[in] pickRes pick result.
+  void
+    onWhateverHighlighted(asiVisu_PickerResult* pickRes);
+
 protected:
 
   //! Populates the passed Qt menu with actions specific to Part viewer.

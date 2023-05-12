@@ -51,6 +51,7 @@
 asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name,         PID_Name);
+  REGISTER_PARAMETER(Int,          PID_ThicknessType);
   REGISTER_PARAMETER(IntArray,     PID_ThicknessFieldIds);
   REGISTER_PARAMETER(RealArray,    PID_ThicknessFieldValues);
   REGISTER_PARAMETER(Real,         PID_ScalarMin);
@@ -59,6 +60,8 @@ asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,         PID_Dx);
   REGISTER_PARAMETER(Real,         PID_Dy);
   REGISTER_PARAMETER(Real,         PID_Dz);
+  REGISTER_PARAMETER(Real,         PID_DMin);
+  REGISTER_PARAMETER(Real,         PID_DMax);
   REGISTER_PARAMETER(TreeFunction, PID_CheckThicknessFunc);
 
   this->registerParameter(PID_Mesh, asiData_MeshParameter::Instance(), false);
@@ -69,23 +72,29 @@ asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
 void asiData_ThicknessNode::Init()
 {
   // Initialize Parameters.
-  this->InitParameter(PID_Name,        "Name",             "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_ScalarMin,   "Min. scalar",      "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_ScalarMax,   "Max. scalar",      "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCustomDir, "Custom direction", "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dx,          "Dx",               "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dy,          "Dy",               "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_Dz,          "Dz",               "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,          "Name",             "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ThicknessType, "Type",             "ThicknessCheckType", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ScalarMin,     "Min. scalar",      "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_ScalarMax,     "Max. scalar",      "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCustomDir,   "Custom direction", "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dx,            "Dx",               "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dy,            "Dy",               "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Dz,            "Dz",               "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DMin,          "Min. diameter",    "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_DMax,          "Max. diameter",    "",                   ParameterFlag_IsVisible, true);
 
   // Set default values.
   this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
   //
-  ActParamTool::AsReal( this->Parameter(PID_ScalarMin) )   ->SetValue(-Precision::Infinite() );
-  ActParamTool::AsReal( this->Parameter(PID_ScalarMax) )   ->SetValue( Precision::Infinite() );
-  ActParamTool::AsBool( this->Parameter(PID_IsCustomDir) ) ->SetValue( false );
-  ActParamTool::AsReal( this->Parameter(PID_Dx) )          ->SetValue( 0. );
-  ActParamTool::AsReal( this->Parameter(PID_Dy) )          ->SetValue( 0. );
-  ActParamTool::AsReal( this->Parameter(PID_Dz) )          ->SetValue( 1. );
+  ActParamTool::AsInt ( this->Parameter(PID_ThicknessType))  ->SetValue( RayBased );
+  ActParamTool::AsBool( this->Parameter(PID_IsCustomDir))    ->SetValue( false );
+  ActParamTool::AsReal( this->Parameter(PID_ScalarMax) )     ->SetValue( Precision::Infinite() );
+  ActParamTool::AsBool( this->Parameter(PID_IsCustomDir) )   ->SetValue( false );
+  ActParamTool::AsReal( this->Parameter(PID_Dx) )            ->SetValue( 0. );
+  ActParamTool::AsReal( this->Parameter(PID_Dy) )            ->SetValue( 0. );
+  ActParamTool::AsReal( this->Parameter(PID_Dz) )            ->SetValue( 1. );
+  ActParamTool::AsReal( this->Parameter(PID_DMin) )          ->SetValue( 0.1 );
+  ActParamTool::AsReal( this->Parameter(PID_DMax) )          ->SetValue( 30. );
 }
 
 //-----------------------------------------------------------------------------

@@ -54,7 +54,8 @@ public:
 
   //! Instantiation routine.
   //! \return Tree Function instance.
-  static Handle(asiEngine_CheckThicknessFunc) Instance()
+  asiEngine_EXPORT 
+    static Handle(asiEngine_CheckThicknessFunc) Instance()
   {
     return new asiEngine_CheckThicknessFunc();
   }
@@ -88,29 +89,33 @@ public:
     return "Check thickness";
   }
 
-private:
+protected:
 
   //! Executes Tree Function on the given input and output arguments.
   //! \param[in]      inputs   input Parameters.
   //! \param[in, out] outputs  output Parameters.
   //! \param[in]      userData custom user data.
   //! \return execution status.
-  virtual int
+  asiEngine_EXPORT virtual int
     execute(const Handle(ActAPI_HParameterList)& inputs,
             const Handle(ActAPI_HParameterList)& outputs,
             const Handle(Standard_Transient)&    userData) const;
 
+  asiEngine_EXPORT virtual Standard_Boolean
+    validateInput(const Handle(ActAPI_HParameterList)& theArgsIN) const;
+
   //! \return expected input signature.
-  virtual ActAPI_ParameterTypeStream
+  asiEngine_EXPORT virtual ActAPI_ParameterTypeStream
     inputSignature() const;
 
   //! \return expected output signature.
-  virtual ActAPI_ParameterTypeStream
+  asiEngine_EXPORT virtual ActAPI_ParameterTypeStream
     outputSignature() const;
 
-private:
+protected:
 
-  asiEngine_CheckThicknessFunc() = default; //!< Default ctor.
+  asiEngine_EXPORT
+    asiEngine_CheckThicknessFunc() = default; //!< Default ctor.
 
 };
 
