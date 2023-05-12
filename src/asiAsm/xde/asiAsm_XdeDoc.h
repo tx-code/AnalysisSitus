@@ -111,20 +111,24 @@ public:
     LoadNative(const TCollection_AsciiString& filename);
 
   //! Loads STEP file to populate the internal XDE Document.
-  //! \param[in] filename name of the STEP file to load.
+  //! \param[in] filename      name of the STEP file to load.
+  //! \param[in] readSubshapes flag whether to read subshapes.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
-    LoadSTEP(const TCollection_AsciiString& filename);
+    LoadSTEP(const TCollection_AsciiString& filename,
+             const bool&                    readSubshapes = false);
 
   //! Loads STEP file to populate the internal XDE Document.
-  //! \param[in]  filename    name of the STEP file to load.
-  //! \param[out] units       units.
-  //! \param[out] scaleFactor scale factor of length units of the input file.
+  //! \param[in]  filename     name of the STEP file to load.
+  //! \param[out] units        units.
+  //! \param[out] scaleFactor  scale factor of length units of the input file.
+  //! \param[in] readSubshapes flag whether to read subshapes.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
     LoadSTEP(const TCollection_AsciiString& filename,
              std::string&                   units,
-             double&                        scaleFactor);
+             double&                        scaleFactor,
+             const bool&                    readSubshapes = false);
 
   //! Loads IGES file to populate the internal XDE Document.
   //! \param[in] filename name of the IGES file to load.
@@ -205,6 +209,14 @@ public:
   //! \return name of the part.
   asiAsm_EXPORT TCollection_ExtendedString
     GetPartName(const PartId& part) const;
+
+  //! Returns color associated with the subshape of the input part.
+  //! \param[in]  part     part ID in question.
+  //! \param[in]  subShape subshape to get name for.
+  //! \return name of the subshape.
+  asiAsm_EXPORT TCollection_ExtendedString
+    GetSubShapeName(const PartId&       part,
+                    const TopoDS_Shape& subShape) const;
 
   //! Returns all stored part's representations.
   //! \param[in]  partId part of interest.

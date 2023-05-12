@@ -312,18 +312,20 @@ inline static double fromSiName(const TCollection_AsciiString& unitStr)
 
 //-----------------------------------------------------------------------------
 
-bool Doc::LoadSTEP(const TCollection_AsciiString& filename)
+bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
+                   const bool&                    readSubshapes)
 {
   std::string units;
   double scaleFactor = 1.0;
-  return LoadSTEP(filename, units, scaleFactor);
+  return LoadSTEP(filename, units, scaleFactor, readSubshapes);
 }
 
 //-----------------------------------------------------------------------------
 
 bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
                    std::string&                   units,
-                   double&                        scaleFactor)
+                   double&                        scaleFactor,
+                   const bool&                    readSubshapes)
 {
   if ( m_doc.IsNull() )
   {
@@ -335,9 +337,15 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
   STEPCAFControl_Reader xdeReader;
   Handle(XSControl_WorkSession) WS = xdeReader.Reader().WS();
 
+  // Initialize parameters of reader
+
+  // To read sub-shape names from 'Name' attributes of STEP Representation Items
+  Interface_Static::SetIVal("read.stepcaf.subshapes.name", readSubshapes); 
+
   // Read CAD and associated data from file.
   try
   {
+
     // Read file.
     IFSelect_ReturnStatus outcome = xdeReader.ReadFile( filename.ToCString() );
     //
@@ -669,11 +677,35 @@ TCollection_ExtendedString
   Doc::GetPartName(const PartId& part) const
 {
   // Get label by part ID.
-  TDF_Label label;
-  TDF_Tool::Label(this->m_doc->GetData(), part.Entry, label);
+  TDF_Label label = this->GetLabel(part);
 
   // Get name.
   return this->GetObjectName(label);
+}
+
+//-----------------------------------------------------------------------------
+
+TCollection_ExtendedString
+  Doc::GetSubShapeName(const PartId&       part,
+                       const TopoDS_Shape& subShape) const
+{
+  // Get part label.
+  TDF_Label partLab = this->GetLabel(part);
+
+  // Find the subshape's attachment label.
+  TDF_Label subShapeL;
+  if (!this->GetShapeTool()->FindSubShape(partLab, subShape, subShapeL))
+  {
+    return TCollection_ExtendedString();
+  }
+
+  Handle(TDataStd_Name) nameAttr;
+  if (subShapeL.FindAttribute(TDataStd_Name::GetID(), nameAttr))
+  {
+    return nameAttr->Get();
+  }
+
+  return TCollection_ExtendedString();
 }
 
 //-----------------------------------------------------------------------------

@@ -67,6 +67,7 @@ endif()
 set (aux_H_FILES
   auxiliary/asiAlgo_AnalyzeWire.h
   auxiliary/asiAlgo_AttrFaceColor.h
+  auxiliary/asiAlgo_AttrFaceName.h
   auxiliary/asiAlgo_AttrFaceUniformGrid.h
   auxiliary/asiAlgo_BuildConvexHull.h
   auxiliary/asiAlgo_BuildHLR.h
