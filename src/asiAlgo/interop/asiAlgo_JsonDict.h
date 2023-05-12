@@ -88,4 +88,24 @@
 #define asiPropName_ExtrasCanRecCurveParabola      "nbCurveParabola"
 #define asiPropName_ExtrasCanRecIsValid            "isValidAfterConversion"
 
+#define asiScene_Name                              "graph"
+#define asiScene_RootsIds                          "roots"
+#define asiScene_AssembliesName                    "assemblies"
+#define asiScene_AssembliesAssemblyName            "assemblyName"
+#define asiScene_AssembliesAssemblyId              "assemblyId"
+#define asiScene_AssembliesAssemblyChildren        "children"
+
+#define asiScene_InstancesName                     "instances"
+#define asiScene_InstancesInstanceName             "instanceName"
+#define asiScene_InstancesInstanceId               "instanceId"
+#define asiScene_InstancesInstanceRef              "instanceRef"
+#define asiScene_InstancesAssemblyItemId           "assemblyItemId"
+#define asiScene_InstancesRotation                 "rotation"
+#define asiScene_InstancesTranslation              "translation"
+
+#define asiScene_PartsName                         "parts"
+#define asiScene_PartsPartName                     "partName"
+#define asiScene_PartsPartId                       "partId"
+#define asiScene_PartsPersistentId                 "persistentId"
+
 #endif
