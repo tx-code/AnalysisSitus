@@ -60,10 +60,19 @@ public:
 
 public:
 
+  enum ThicknessType
+  {
+    RayBased,
+    SphereBased
+  };
+
+public:
+
   //! IDs for the underlying Parameters.
   enum ParamId
   {
   //--------------------------//
+    PID_ThicknessType,        //!< Type of thickness check.
     PID_Name,                 //!< Name of the Node.
     PID_Mesh,                 //!< Mesh where thickness distribution was computed.
     PID_ThicknessFieldIds,    //!< Element ids to store thickness field.

@@ -287,14 +287,8 @@ void asiUI_ViewerPartListener::Connect()
   connect( m_pViewer, SIGNAL ( vertexPicked(asiVisu_PickerResult*) ),
            this,      SLOT   ( onVertexPicked(asiVisu_PickerResult*) ) );
   //
-  connect( m_pViewer, SIGNAL ( faceHighlighted(asiVisu_PickerResult*) ),
-           this,      SLOT   ( onFaceHighlighted(asiVisu_PickerResult*) ) );
-  //
-  connect( m_pViewer, SIGNAL ( edgeHighlighted(asiVisu_PickerResult*) ),
-           this,      SLOT   ( onEdgeHighlighted(asiVisu_PickerResult*) ) );
-  //
-  connect( m_pViewer, SIGNAL ( vertexHighlighted(asiVisu_PickerResult*) ),
-           this,      SLOT   ( onVertexHighlighted(asiVisu_PickerResult*) ) );
+  connect( m_pViewer, SIGNAL ( whateverHighlighted(asiVisu_PickerResult*) ),
+           this,      SLOT   ( onWhateverHighlighted(asiVisu_PickerResult*) ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -479,35 +473,17 @@ void asiUI_ViewerPartListener::onVertexPicked(asiVisu_PickerResult* pickRes)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
+void asiUI_ViewerPartListener::faceHighlighted(asiVisu_PickerResult* pickRes)
 {
-  // Check if part is highlighted
-  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
-  if (pickRes->GetPickedActor() && !nodeInfo)
-  {
-    if ( !m_statusBar.IsNull()  )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
   Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
-  Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
-  TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
-  if (gids.IsEmpty())
-  {
-    if ( !m_statusBar.IsNull() )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
   if ( geom_n->GetAAG().IsNull() )
     return;
 
+  Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+  TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
+
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
+  // Get map of faces.
   const TopTools_IndexedMapOfShape& allFaces = geom_n->GetAAG()->GetMapOfFaces();
   if ( !m_statusBar.IsNull() )
   {
@@ -522,35 +498,17 @@ void asiUI_ViewerPartListener::onFaceHighlighted(asiVisu_PickerResult* pickRes)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
+void asiUI_ViewerPartListener::edgeHighlighted(asiVisu_PickerResult* pickRes)
 {
-  // Check if part is highlighted
-  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
-  if (pickRes->GetPickedActor() && !nodeInfo)
-  {
-    if ( !m_statusBar.IsNull() )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
   Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  if (geom_n->GetAAG().IsNull())
+    return;
+
   Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
   TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
-  if (gids.IsEmpty())
-  {
-    if ( !m_statusBar.IsNull() )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
-  if ( geom_n->GetAAG().IsNull() )
-    return;
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
+  // Get map of edges.
   const TopTools_IndexedMapOfShape& allEdges = geom_n->GetAAG()->RequestMapOfEdges();
   if ( !m_statusBar.IsNull() )
   {
@@ -565,33 +523,14 @@ void asiUI_ViewerPartListener::onEdgeHighlighted(asiVisu_PickerResult* pickRes)
 
 //-----------------------------------------------------------------------------
 
-void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes)
+void asiUI_ViewerPartListener::vertexHighlighted(asiVisu_PickerResult* pickRes)
 {
-  // Check if part is highlighted
-  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
-  if (pickRes->GetPickedActor() && !nodeInfo)
-  {
-    if ( !m_statusBar.IsNull() )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
   Handle(asiData_PartNode) geom_n = m_model->GetPartNode();
+  if (geom_n->GetAAG().IsNull())
+    return;
+
   Handle(asiVisu_CellPickerResult) cellPickRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
   TColStd_PackedMapOfInteger gids = cellPickRes->GetPickedElementIds();
-  if (gids.IsEmpty())
-  {
-    if ( !m_statusBar.IsNull() )
-    {
-      m_statusBar->SetStatusText(m_statusBar->CurrentState());
-    }
-    return;
-  }
-
-  if ( geom_n->GetAAG().IsNull() )
-    return;
 
   const TopTools_IndexedMapOfShape& allSubShapes = geom_n->GetAAG()->RequestMapOfSubShapes();
   // Get map of vertices.
@@ -605,6 +544,42 @@ void asiUI_ViewerPartListener::onVertexHighlighted(asiVisu_PickerResult* pickRes
       m_statusBar->SetStatusText(TCollection_AsciiString("Vertex ID: ") + pedigreeId);
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_ViewerPartListener::onWhateverHighlighted(asiVisu_PickerResult* pickRes)
+{
+  Handle(asiVisu_CellPickerResult)
+    cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+
+  const TColStd_PackedMapOfInteger& elemIds = cellPickerRes->GetPickedElementIds();
+
+  if (elemIds.IsEmpty())
+  {
+    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    return;
+  }
+
+  const int facetId = elemIds.GetMinimalMapped();
+  if (!m_statusBar.IsNull())
+  {
+    m_statusBar->SetStatusText(TCollection_AsciiString("Facet ID: ") + facetId);
+  }
+
+  // Check if part is highlighted
+  asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
+  if (pickRes->GetPickedActor() && !nodeInfo)
+    return;
+
+  if (pickRes->IsSelectionFace())
+    faceHighlighted(pickRes);
+  
+  else if (pickRes->IsSelectionEdge())
+    edgeHighlighted(pickRes);
+  //
+  else if (pickRes->IsSelectionVertex())
+    vertexHighlighted(pickRes);
 }
 
 //-----------------------------------------------------------------------------

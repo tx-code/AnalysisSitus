@@ -116,22 +116,27 @@ protected slots:
   void
     onVertexPicked(asiVisu_PickerResult* pickRes);
 
+  //! Reaction on highlighting of anything.
+  //! \param[in] pickRes pick result.
+  void
+    onWhateverHighlighted(asiVisu_PickerResult* pickRes);
+
+protected:
+
   //! Reaction on face highlighting.
   //! \param[in] pickRes pick result.
   void
-    onFaceHighlighted(asiVisu_PickerResult* pickRes);
+    faceHighlighted(asiVisu_PickerResult* pickRes);
 
   //! Reaction on edge highlighting.
   //! \param[in] pickRes pick result.
   void
-    onEdgeHighlighted(asiVisu_PickerResult* pickRes);
+    edgeHighlighted(asiVisu_PickerResult* pickRes);
 
   //! Reaction on vertex highlighting.
   //! \param[in] pickRes pick result.
   void
-    onVertexHighlighted(asiVisu_PickerResult* pickRes);
-
-protected:
+    vertexHighlighted(asiVisu_PickerResult* pickRes);
 
   //! Populates the passed Qt menu with actions specific to Part viewer.
   //! \param[in] menu Qt menu to populate.

@@ -155,7 +155,6 @@ protected:
   asiAlgo_MeshWithFields     m_resField;     //!< Mesh with a scalar field.
   double                     m_fMinThick;    //!< Min thickness.
   double                     m_fMaxThick;    //!< Max thickness.
-
 };
 
 #endif

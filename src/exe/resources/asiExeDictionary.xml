@@ -100,16 +100,21 @@ Make sure to pass non-zero values to surface approximation methods in order to a
   </valueList>
 
   <valueList id="List-SVOSamplingStrategy" name="Display mode">
-    <value id="1">In</value>
-    <value id="2">On</value>
-    <value id="3">On | In</value>
-    <value id="4">Out</value>
-    <value id="5">In | Out</value>
-    <value id="6">On | Out</value>
-    <value id="7">In | On | Out</value>
+	<value id="1">In</value>
+	<value id="2">On</value>
+	<value id="3">On | In</value>
+	<value id="4">Out</value>
+	<value id="5">In | Out</value>
+	<value id="6">On | Out</value>
+	<value id="7">In | On | Out</value>
   </valueList>
 
-  <!-- Sampling strategy for SVO voxels/points -->
+  <valueList id="List-ThicknessCheckType" name="Display mode">
+    <value id="0">Ray-based</value>
+    <value id="1">Sphere-based</value>
+  </valueList>
+	
+	<!-- Sampling strategy for SVO voxels/points -->
   <datum id="Octree_SS" format="" label="Sampling strategy">
     <domain type="List" list="List-SVOSamplingStrategy" />
     <ui widget="ComboBox" />
@@ -247,6 +252,13 @@ Make sure to pass non-zero values to surface approximation methods in order to a
     <description>Free text comment</description>
   </datum>
 
+  <!-- Thickness check types -->
+  <datum id="ThicknessCheckType" format="" label="Type">
+	<domain type="List" list="List-ThicknessCheckType" />
+	<ui widget="ComboBox" />
+    <description>Thickness check type</description>
+  </datum>
+	
   <!-- ==================================================================== -->
   <!-- DEFINITIONS OF DIMENSIONS AND ASSOCIATED UNITS                       -->
   <!-- ==================================================================== -->
@@ -284,9 +296,9 @@ Make sure to pass non-zero values to surface approximation methods in order to a
     <unit name="rad" si="yes"/>
   </dimension>
   <dimension name="temperature">
-    <unit name="°K" si="yes"/>
-    <unit name="°C" si="no" k="1" b="-273.15"/>
-    <unit name="°F" si="no" k="0.5555555555556" b="-255.3722222222"/>
+    <unit name="ï¿½K" si="yes"/>
+    <unit name="ï¿½C" si="no" k="1" b="-273.15"/>
+    <unit name="ï¿½F" si="no" k="0.5555555555556" b="-255.3722222222"/>
   </dimension>
 
 </datadictionary>

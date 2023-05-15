@@ -94,15 +94,7 @@ Handle(asiData_ThicknessNode)
   node->SetMesh(mesh);
 
   // Attach tree function.
-  node->ConnectTreeFunction( asiData_ThicknessNode::PID_CheckThicknessFunc,
-                             asiEngine_CheckThicknessFunc::GUID(),
-                             ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_Mesh)
-                                              << node->Parameter(asiData_ThicknessNode::PID_IsCustomDir)
-                                              << node->Parameter(asiData_ThicknessNode::PID_Dx)
-                                              << node->Parameter(asiData_ThicknessNode::PID_Dy)
-                                              << node->Parameter(asiData_ThicknessNode::PID_Dz),
-                             ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
-                                              << node->Parameter(asiData_ThicknessNode::PID_ScalarMax) );
+  ReconnectFunction(node);
 
   // Set as child for the owner Node.
   owner->AddChildNode(node);
@@ -112,4 +104,35 @@ Handle(asiData_ThicknessNode)
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return nullptr;
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+void asiEngine_Thickness::ReconnectFunction(const Handle(asiData_ThicknessNode)& node)
+{
+  const int
+    type = ActParamTool::AsInt(node->Parameter(asiData_ThicknessNode::PID_ThicknessType))->GetValue();
+
+  if (type == asiData_ThicknessNode::RayBased)
+  {
+    node->ConnectTreeFunction( asiData_ThicknessNode::PID_CheckThicknessFunc,
+                               asiEngine_CheckThicknessFunc::GUID(),
+                               ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_Mesh)
+                                                << node->Parameter(asiData_ThicknessNode::PID_ThicknessType)
+                                                << node->Parameter(asiData_ThicknessNode::PID_IsCustomDir)
+                                                << node->Parameter(asiData_ThicknessNode::PID_Dx)
+                                                << node->Parameter(asiData_ThicknessNode::PID_Dy)
+                                                << node->Parameter(asiData_ThicknessNode::PID_Dz),
+                               ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
+                                                << node->Parameter(asiData_ThicknessNode::PID_ScalarMax) );
+  }
+  else if (type == asiData_ThicknessNode::SphereBased)
+  {
+    node->ConnectTreeFunction( asiData_ThicknessNode::PID_CheckThicknessFunc,
+                               asiEngine_CheckThicknessFunc::GUID(),
+                               ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_Mesh)
+                                                << node->Parameter(asiData_ThicknessNode::PID_ThicknessType),
+                               ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
+                                                << node->Parameter(asiData_ThicknessNode::PID_ScalarMax) );
+  }
 }

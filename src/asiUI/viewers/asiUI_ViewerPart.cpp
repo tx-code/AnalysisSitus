@@ -225,7 +225,7 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_pickCallback, SIGNAL( picked() ), this, SLOT( onWhateverPicked() ) );
 
     // Get notified once a sub-shape is highlighted
-    connect(m_pickCallback, SIGNAL(highlighted()), this, SLOT(onSubShapesHighlighted()));
+    connect(m_pickCallback, SIGNAL(highlighted()), this, SLOT( onWhateverHighlighted() ) );
 
     // Get notified about part events
     connect( m_partCallback, SIGNAL( findFace() ),           this, SLOT( onFindFace() ) );
@@ -505,20 +505,13 @@ void asiUI_ViewerPart::onSubShapesPicked()
 //-----------------------------------------------------------------------------
 
 //! Callback for highlighting event.
-void asiUI_ViewerPart::onSubShapesHighlighted()
+void asiUI_ViewerPart::onWhateverHighlighted()
 {
   // Access picking results
   const asiVisu_ActualSelection& sel = m_prs_mgr->GetCurrentSelection();
   const Handle(asiVisu_PickerResult)& highlight_res = sel.GetCellPickerResult(SelectionNature_Detection);
 
-  if (highlight_res->IsSelectionFace())
-    emit faceHighlighted(highlight_res.get());
-  //
-  else if (highlight_res->IsSelectionEdge())
-    emit edgeHighlighted(highlight_res.get());
-  //
-  else if (highlight_res->IsSelectionVertex())
-    emit vertexHighlighted(highlight_res.get());
+  emit whateverHighlighted(highlight_res.get());
 
   return;
 }

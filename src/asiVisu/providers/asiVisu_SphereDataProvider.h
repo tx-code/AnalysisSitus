@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 03 April 2020
+// Created on: 20 April 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2020-present, Sergey Slyadnev
+// Copyright (c) 2023, Julia Slyadneva
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,60 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiEngine_Thickness_h
-#define asiEngine_Thickness_h
+#pragma once
 
-// asiEngine includes
-#include <asiEngine_Base.h>
+// asiVisu includes
+#include <asiVisu_DataProvider.h>
 
 // asiData includes
-#include <asiData_ThicknessNode.h>
+#include <asiData_MeshParameter.h>
 
-//-----------------------------------------------------------------------------
-
-//! Data Model API for thickness analysis.
-class asiEngine_Thickness : public asiEngine_Base
+//! Data provider for a sphere to be displayed for a highlighted facet.
+class asiVisu_SphereDataProvider : public asiVisu_DataProvider
 {
 public:
 
-  //! Ctor.
-  //! \param[in] model    Data Model instance.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
-  asiEngine_Thickness(const Handle(asiEngine_Model)& model,
-                      ActAPI_ProgressEntry           progress = nullptr,
-                      ActAPI_PlotterEntry            plotter  = nullptr)
-  //
-  : asiEngine_Base(model, progress, plotter)
-  {}
+  // OCCT RTTI
+  DEFINE_STANDARD_RTTI_INLINE(asiVisu_SphereDataProvider, asiVisu_DataProvider)
 
 public:
 
-  //! Creates Thickness Node under the passed owner Node.
-  //! \param[in] owner owner Node.
-  //! \return newly created Thickness Node.
-  asiEngine_EXPORT Handle(asiData_ThicknessNode)
-    CreateThickness(const Handle(ActAPI_INode)& owner);
+  asiVisu_EXPORT
+    asiVisu_SphereDataProvider(const Handle(ActAPI_INode)& N);
 
-  //! Switches from one to another execution function depending on the given check type (Ray-based, shrinking sphere, etc.)
-  //! \param[in] node thickness node to update
-  asiEngine_EXPORT void
-    ReconnectFunction(const Handle(asiData_ThicknessNode)& node);
+public:
 
+  //! \return ID of the associated Data Node.
+  asiVisu_EXPORT virtual ActAPI_DataObjectId
+    GetNodeID() const;
+
+public:
+
+  //! Defines a facet being a source for getting sphere properties.
+  void SetFacetId(const int facetId);
+
+  //! Gets the diameter of the target sphere.
+  double GetDiameter() const;
+
+  //! Gets the center of the target sphere.
+  gp_Pnt GetLocation() const;
+
+  //! Gets coordinates of facet vertices.
+  void GetPoints(double coords[][3]) const;
+
+protected:
+
+  //! Enumerates Data Parameters playing as sources for DOMAIN -> VTK
+  //! translation process.
+  //! \return source Parameters.
+  asiVisu_EXPORT virtual Handle(ActAPI_HParameterList)
+    translationSources() const;
+
+private:
+
+  Handle(ActAPI_INode)          m_node;         //!< Source Node.
+  Handle(asiData_MeshParameter) m_triParam;     //!< Source Parameter with triangulation.
+  double                        m_diameter;     //!< Diameter of sphere
+  gp_Pnt                        m_loc;          //!< Location of sphere
+  double                        m_points[3][3]; //!< Vertices of facet
 };
-
-#endif

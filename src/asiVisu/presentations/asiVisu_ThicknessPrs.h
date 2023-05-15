@@ -33,6 +33,7 @@
 
 // asiVisu includes
 #include <asiVisu_DefaultPrs.h>
+#include <asiVisu_SphereDataProvider.h>
 
 // asiData includes
 #include <asiData_ThicknessNode.h>
@@ -58,7 +59,8 @@ public:
   //! Pipelines.
   enum PipelineId
   {
-    Pipeline_Main = 1
+    Pipeline_Main   = 1,
+    Pipeline_Sphere
   };
 
 public:
@@ -92,10 +94,20 @@ private:
   //! Callback for derendering.
   virtual void deRenderPipelines(vtkRenderer* renderer) const;
 
+protected:
+
+  asiVisu_EXPORT virtual void
+    highlight(vtkRenderer*                        renderer,
+              const Handle(asiVisu_PickerResult)& pickRes,
+              const asiVisu_SelectionNature       selNature) const;
+
+  asiVisu_EXPORT virtual void
+    unHighlight(vtkRenderer*                  renderer,
+                const asiVisu_SelectionNature selNature) const;
+
 private:
 
   vtkSmartPointer<vtkScalarBarWidget> m_scalarBarWidget; //!< Scalar bar.
-
 };
 
 #endif
