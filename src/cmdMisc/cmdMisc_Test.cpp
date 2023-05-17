@@ -144,6 +144,319 @@ TopoDS_Shape BooleanGeneralFuse(const TopTools_ListOfShape& objects,
   return API.Shape();
 }
 
+#include <asiAlgo_PSO.h>
+#include <asiAlgo_GradientDescent.h>
+
+//! Geometric primitive for 2D point.
+class Prim_UV
+{
+public:
+
+  static int num_coordinates()
+  {
+    return 2;
+  }
+
+// Construction & destruction:
+public:
+
+  Prim_UV();
+  Prim_UV(const double u, const double v);
+  Prim_UV(const Prim_UV& UV);
+  virtual ~Prim_UV();
+
+public:
+
+  //! Returns U coordinate of the 2D point.
+  //! \return U coordinate.
+  inline double U() const
+  {
+    return m_fU;
+  }
+
+  //! Sets U coordinate.
+  //! \param u [in] value to set.
+  inline void SetU(const double u)
+  {
+    m_fU = u;
+  }
+
+  //! Returns V coordinate of the 2D point.
+  //! \return V coordinate.
+  inline double V() const
+  {
+    return m_fV;
+  }
+
+  //! Sets V coordinate.
+  //! \param v [in] value to set.
+  inline void SetV(const double v)
+  {
+    m_fV = v;
+  }
+
+  //! Returns coordinate by its 0-based index.
+  //! \param idx [in] 0 for U, 1 for V.
+  //! \return requested coordinate.
+  inline double Coord(const int idx) const
+  {
+    if ( idx == 0 )
+      return this->U();
+
+    if ( idx == 1 )
+      return this->V();
+
+    return DBL_MAX;
+  }
+
+  //! Updates coordinate having the specified 0-based index with the
+  //! passed value.
+  //! \param idx [in] 0 for U, 1 for V.
+  //! \param val [in] value to set.
+  inline double SetCoord(const int idx,
+                         const double val)
+  {
+    double* coord = NULL;
+
+    if ( idx == 0 )
+      coord = &m_fU;
+    if ( idx == 1 )
+      coord = &m_fV;
+
+    if ( coord )
+      *coord = val;
+
+    return DBL_MAX;
+  }
+
+public:
+
+  double Modulus       ()                  const;
+  double SquaredModulus()                  const;
+  double Dot           (const Prim_UV& UV) const;
+
+public:
+
+  Prim_UV& operator=  (const Prim_UV& UV);
+  Prim_UV  operator*  (const double coeff) const;
+  Prim_UV  operator*= (const double coeff);
+  Prim_UV  operator/  (const double coeff) const;
+  Prim_UV  operator/= (const double coeff);
+  Prim_UV  operator+  (const Prim_UV& UV)  const;
+  Prim_UV& operator+= (const Prim_UV& UV);
+  Prim_UV  Invert()                        const;
+  Prim_UV  operator-  (const Prim_UV& UV)  const;
+  Prim_UV& operator-= (const Prim_UV& UV);
+
+private:
+
+  double m_fU; //!< U coordinate.
+  double m_fV; //!< V coordinate.
+
+};
+
+//! Default constructor. Initializes point coordinates with origin values:
+//! (0, 0).
+Prim_UV::Prim_UV()
+{
+  m_fU = m_fV = 0.0;
+}
+
+//! Complete constructor.
+//! \param u [in] first coordinate.
+//! \param v [in] second coordinate.
+Prim_UV::Prim_UV(const double u, const double v)
+{
+  m_fU = u;
+  m_fV = v;
+}
+
+//! Copy constructor.
+//! \param UV [in] point to copy.
+Prim_UV::Prim_UV(const Prim_UV& UV)
+{
+  this->operator=(UV);
+}
+
+//! Destructor.
+Prim_UV::~Prim_UV()
+{
+}
+
+//! Returns modulus of the point's radius vector.
+//! \return modulus.
+double Prim_UV::Modulus() const
+{
+  return sqrt( this->SquaredModulus() );
+}
+
+//! Returns squared modulus of the point's radius vector.
+//! \return modulus.
+double Prim_UV::SquaredModulus() const
+{
+  return m_fU*m_fU + m_fV*m_fV;
+}
+
+//! Calculates dot product between this and another vector.
+//! \param UV [in] another vector.
+//! \return dot product.
+double Prim_UV::Dot(const Prim_UV& UV) const
+{
+  return m_fU*UV.m_fU + m_fV*UV.m_fV;
+}
+
+//! Assignment operator.
+//! \param UV [in] point to copy into this one.
+//! \return this one.
+Prim_UV& Prim_UV::operator=(const Prim_UV& UV)
+{
+  m_fU = UV.m_fU;
+  m_fV = UV.m_fV;
+  return *this;
+}
+
+//! Multiplies copy of point by the passed scalar value.
+//! \param coeff [in] scalar value to multiply point by.
+//! \return resulting point.
+Prim_UV Prim_UV::operator*(const double coeff) const
+{
+  Prim_UV UV_Copy(*this);
+  UV_Copy *= coeff;
+  return UV_Copy;
+}
+
+//! Multiplies this point by the passed scalar value.
+//! \param coeff [in] scalar value to multiply point by.
+//! \return this point multiplied by the passed scalar.
+Prim_UV Prim_UV::operator*=(const double coeff)
+{
+  this->m_fU *= coeff;
+  this->m_fV *= coeff;
+  return *this;
+}
+
+//! Divides copy of point by the passed scalar value.
+//! \param coeff [in] scalar value to divide point by.
+//! \return resulting point.
+Prim_UV Prim_UV::operator/(const double coeff) const
+{
+  Prim_UV UV_Copy(*this);
+  UV_Copy /= coeff;
+  return UV_Copy;
+}
+
+//! Divides this point by the passed scalar value.
+//! \param coeff [in] scalar value to divide point by.
+//! \return this point multiplied by the passed scalar.
+Prim_UV Prim_UV::operator/=(const double coeff)
+{
+  this->m_fU /= coeff;
+  this->m_fV /= coeff;
+  return *this;
+}
+
+//! Adds the passed point to the copy of this one.
+//! \param UV [in] point to add.
+//! \return result of addition.
+Prim_UV Prim_UV::operator+(const Prim_UV& UV) const
+{
+  Prim_UV UV_Copy(*this);
+  UV_Copy += UV;
+  return UV_Copy;
+}
+
+//! Adds the passed point to this one.
+//! \param UV [in] point to add.
+//! \return result of addition.
+Prim_UV& Prim_UV::operator+=(const Prim_UV& UV)
+{
+  this->m_fU += UV.m_fU;
+  this->m_fV += UV.m_fV;
+  return *this;
+}
+
+//! Inverts the copy of this point.
+//! \return result of inversion.
+Prim_UV Prim_UV::Invert() const
+{
+  Prim_UV UV_Copy(*this);
+  UV_Copy.m_fU = -this->m_fU;
+  UV_Copy.m_fV = -this->m_fV;
+  return UV_Copy;
+}
+
+//! Subtracts the passed point from the copy of this one.
+//! \param UV [in] point to subtract.
+//! \return result of subtraction.
+Prim_UV Prim_UV::operator-(const Prim_UV& UV) const
+{
+  return this->operator+( UV.Invert() );
+}
+
+//! Adds the passed point to this one.
+//! \param UV [in] point to add.
+//! \return result of subtraction.
+Prim_UV& Prim_UV::operator-=(const Prim_UV& UV)
+{
+  return this->operator+=( UV.Invert() );
+}
+
+//! Objective function.
+class LowestZ : public asiAlgo_Function<Prim_UV>
+{
+public:
+
+  //! Ctor.
+  LowestZ(const Handle(Geom_Surface)& surf) : m_surf(surf) {}
+
+public:
+
+  inline virtual double Value(const Prim_UV& uv)
+  {
+    gp_Pnt P = m_surf->Value( uv.U(), uv.V() );
+
+    return P.Z();
+  }
+
+protected:
+
+  Handle(Geom_Surface) m_surf;
+
+};
+
+//! Objective function with gradient.
+class LowestZ_Grad : public asiAlgo_FunctionWithGradient<Prim_UV>
+{
+public:
+
+  LowestZ_Grad(const Handle(Geom_Surface)& surf) : m_surf(surf)
+  {}
+
+public:
+
+  inline virtual double Value(const Prim_UV& uv)
+  {
+    gp_Pnt P = m_surf->Value( uv.U(), uv.V() );
+
+    return P.Z();
+  }
+
+  inline virtual t_coord Gradient(const Prim_UV& uv)
+  {
+    const double d = 0.01;
+    const double z1 = Value(uv);
+    const double z2x = Value(uv + Prim_UV(d,0));
+    const double z2y = Value(uv + Prim_UV(0,d));
+    const Prim_UV grad( (z2x - z1)/d, (z2y - z1)/d );
+    return grad;
+  }
+
+protected:
+
+  Handle(Geom_Surface) m_surf;
+
+};
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
@@ -153,230 +466,65 @@ int MISC_Test(const Handle(asiTcl_Interp)& interp,
   asiEngine_Part partApi( cmdMisc::cf->Model,
                           cmdMisc::cf->ViewerPart->PrsMgr() );
 
-  // D:/Demos/lessons/Lesson21_split-curves/data/klp1.igs
+  asiAlgo_Feature fids;
+  partApi.GetHighlightedFaces(fids);
 
-  TopoDS_Shape wf;
-  if ( !LoadIGES("D:/Demos/lessons/Lesson21_split-curves/data/klp1.igs", wf) )
-    return 1;
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  const TopoDS_Face& F = aag->GetFace( fids.GetMinimalMapped() );
 
-  TopTools_ListOfShape args;
+  Handle(Geom_Surface) surf = BRep_Tool::Surface(F);
+
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(F, uMin, uMax, vMin, vMax);
+
+  // Objective function.
+  LowestZ func(surf);
+
+  asiAlgo_PSO<Prim_UV>::t_search_params pso_params;
   //
-  for ( TopExp_Explorer exp(wf, TopAbs_EDGE); exp.More(); exp.Next() )
+  pso_params.num_particles   = 10;                  // In PSO the number of agents is typically small
+  pso_params.num_iterations  = 5000;                 // More than enough in typical situations
+  pso_params.area.corner_min = Prim_UV(uMin, vMin); // Min corner of the search area
+  pso_params.area.corner_max = Prim_UV(uMax, vMax); // Max corner of the search area
+  pso_params.precision       = 1.0e-6;               // Less values are of no practical sense
+  pso_params.pFunc           = &func;                // Objective function
+  pso_params.m               = 0.729;                // Retain weight
+  pso_params.mu_cognition    = 0.4;                  // Pure social behavior
+  pso_params.nu_social       = 1.49445;              // Social determinant of an agent
+  //
+  asiAlgo_PSO<Prim_UV> pso(pso_params);
+
+  int pso_num_iters = 0;
+  pso.Perform(pso_num_iters);
+  const asiAlgo_PSO<Prim_UV>::t_measuring& pso_sol = pso.GetBestGlobal();
+
+  interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Iterations done: %1." << pso_num_iters);
+  interp->GetPlotter().REDRAW_POINT("sol", surf->Value(pso_sol.p.U(), pso_sol.p.V() ), Color_Red);
+
+  double u_sol, v_sol;
+  LowestZ_Grad F_Grad(surf);
+
+  // Gradient descent parameters
+  asiAlgo_GradientDescent<Prim_UV>::t_search_params grad_params;
+  grad_params.num_iterations = 10000;
+  grad_params.pFunc          = &F_Grad;
+  grad_params.precision      = 1.0e-9;
+  grad_params.start          = pso_sol.p;
+  grad_params.is_adaptive    = true;
+  grad_params.step           = 1.0e-1; // To be corrected by Armijo rule
+
+  // Run local optimization
+  int grad_num_iters = 0;
+  asiAlgo_GradientDescent<Prim_UV> Descent(grad_params);
+  if ( !Descent.Perform(grad_num_iters) )
   {
-    args.Append( exp.Current() );
+    // TODO: cout is a bad practice (some logger to be used instead)
+    interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Gradient descent did not converge.");
+    // Still, let's continue for better robustness of the method
   }
+  const Prim_UV& grad_sol = Descent.Solution();
 
-  BOPAlgo_Builder algo;
-  TopoDS_Shape fused = BooleanGeneralFuse(args, 0.1, algo, false);
-
-  interp->GetPlotter().REDRAW_SHAPE("fused", fused);
-
-  ShapeAnalysis_Curve sac;
-
-  // Get images of args.
-  for ( TopTools_ListIteratorOfListOfShape argIt(args); argIt.More(); argIt.Next() )
-  {
-    const TopoDS_Edge& arg = TopoDS::Edge( argIt.Value() );
-
-    double f, l;
-    Handle(Geom_Curve) c3d = BRep_Tool::Curve(arg, f, l);
-
-    const TopTools_ListOfShape& modified = algo.History()->Modified(arg);
-
-    TopoDS_Compound modifiedComp;
-    BRep_Builder bbuilder;
-    bbuilder.MakeCompound(modifiedComp);
-    //
-    for ( TopTools_ListIteratorOfListOfShape lit(modified); lit.More(); lit.Next() )
-    {
-      bbuilder.Add(modifiedComp, lit.Value());
-    }
-
-    // Get vertices.
-    std::vector<double> params;
-    TopTools_IndexedMapOfShape splitVertices;
-    TopExp::MapShapes(modifiedComp, TopAbs_VERTEX, splitVertices);
-    //
-    for ( int vidx = 1; vidx <= splitVertices.Extent(); ++vidx )
-    {
-      const TopoDS_Vertex& V = TopoDS::Vertex( splitVertices(vidx) );
-      gp_Pnt               P = BRep_Tool::Pnt(V);
-      gp_Pnt               Pproj;
-      double               param;
-
-      sac.Project(c3d, P, 1e-3, Pproj, param);
-
-      params.push_back(param);
-    }
-
-    // Evaluate params back in 3D.
-    Handle(asiAlgo_BaseCloud<double>) curvePts = new asiAlgo_BaseCloud<double>;
-    //
-    for ( const auto p : params )
-    {
-      curvePts->AddElement( c3d->Value(p) );
-    }
-
-    interp->GetPlotter().DRAW_SHAPE(modifiedComp, "images");
-    interp->GetPlotter().DRAW_POINTS(curvePts->GetCoordsArray(), Color_Blue, "imagePts");
-  }
-
-  BRepTools::Write(fused, "C:/users/user/desktop/fused.brep");
-
-  return TCL_OK;
-}
-
-//-----------------------------------------------------------------------------
-
-int MISC_TestBottle(const Handle(asiTcl_Interp)& interp,
-                    int                          argc,
-                    const char**                 argv)
-{
-  /* OpenCascade tutorial from
-     https://dev.opencascade.org/doc/overview/html/occt__tutorial.html
-   */
-
-  Standard_Real myWidth = 10;
-  interp->GetKeyValue(argc, argv, "w", myWidth);
-
-  Standard_Real myHeight = 15;
-  interp->GetKeyValue(argc, argv, "h", myHeight);
-
-  Standard_Real myThickness = 5;
-  interp->GetKeyValue(argc, argv, "t", myThickness);
-
-  // Profile : Define Support Points
-  gp_Pnt aPnt1(-myWidth / 2., 0, 0);        
-  gp_Pnt aPnt2(-myWidth / 2., -myThickness / 4., 0);
-  gp_Pnt aPnt3(0, -myThickness / 2., 0);
-  gp_Pnt aPnt4(myWidth / 2., -myThickness / 4., 0);
-  gp_Pnt aPnt5(myWidth / 2., 0, 0);
- 
-  // Profile : Define the Geometry
-  Handle(Geom_TrimmedCurve) anArcOfCircle = GC_MakeArcOfCircle(aPnt2,aPnt3,aPnt4);
-  Handle(Geom_TrimmedCurve) aSegment1 = GC_MakeSegment(aPnt1, aPnt2);
-  Handle(Geom_TrimmedCurve) aSegment2 = GC_MakeSegment(aPnt4, aPnt5);
- 
-  // Profile : Define the Topology
-  TopoDS_Edge anEdge1 = BRepBuilderAPI_MakeEdge(aSegment1);
-  TopoDS_Edge anEdge2 = BRepBuilderAPI_MakeEdge(anArcOfCircle);
-  TopoDS_Edge anEdge3 = BRepBuilderAPI_MakeEdge(aSegment2);
-  TopoDS_Wire aWire  = BRepBuilderAPI_MakeWire(anEdge1, anEdge2, anEdge3);
- 
-  // Complete Profile
-  gp_Ax1 xAxis = gp::OX();
-  gp_Trsf aTrsf;
- 
-  aTrsf.SetMirror(xAxis);
-  BRepBuilderAPI_Transform aBRepTrsf(aWire, aTrsf);
-  TopoDS_Shape aMirroredShape = aBRepTrsf.Shape();
-  TopoDS_Wire aMirroredWire = TopoDS::Wire(aMirroredShape);
- 
-  BRepBuilderAPI_MakeWire mkWire;
-  mkWire.Add(aWire);
-  mkWire.Add(aMirroredWire);
-  TopoDS_Wire myWireProfile = mkWire.Wire();
- 
-  // Body : Prism the Profile
-  TopoDS_Face myFaceProfile = BRepBuilderAPI_MakeFace(myWireProfile);
-  gp_Vec aPrismVec(0, 0, myHeight);
-  TopoDS_Shape myBody = BRepPrimAPI_MakePrism(myFaceProfile, aPrismVec);
- 
-  // Body : Apply Fillets
-  BRepFilletAPI_MakeFillet mkFillet(myBody);
-  TopExp_Explorer anEdgeExplorer(myBody, TopAbs_EDGE);
-  while(anEdgeExplorer.More()){
-      TopoDS_Edge anEdge = TopoDS::Edge(anEdgeExplorer.Current());
-      //Add edge to fillet algorithm
-      mkFillet.Add(myThickness / 12., anEdge);
-      anEdgeExplorer.Next();
-  }
- 
-  myBody = mkFillet.Shape();
- 
-  // Body : Add the Neck
-  gp_Pnt neckLocation(0, 0, myHeight);
-  gp_Dir neckAxis = gp::DZ();
-  gp_Ax2 neckAx2(neckLocation, neckAxis);
- 
-  Standard_Real myNeckRadius = myThickness / 4.;
-  Standard_Real myNeckHeight = myHeight / 10.;
- 
-  BRepPrimAPI_MakeCylinder MKCylinder(neckAx2, myNeckRadius, myNeckHeight);
-  TopoDS_Shape myNeck = MKCylinder.Shape();
- 
-  myBody = BRepAlgoAPI_Fuse(myBody, myNeck);
- 
-  // Body : Create a Hollowed Solid
-  TopoDS_Face   faceToRemove;
-  Standard_Real zMax = -1;
- 
-  for(TopExp_Explorer aFaceExplorer(myBody, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next()){
-      TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-      // Check if <aFace> is the top face of the bottle's neck 
-      Handle(Geom_Surface) aSurface = BRep_Tool::Surface(aFace);
-      if(aSurface->DynamicType() == STANDARD_TYPE(Geom_Plane)){
-          Handle(Geom_Plane) aPlane = Handle(Geom_Plane)::DownCast(aSurface);
-          gp_Pnt aPnt = aPlane->Location();
-          Standard_Real aZ   = aPnt.Z();
-          if(aZ > zMax){
-              zMax = aZ;
-              faceToRemove = aFace;
-          }
-      }
-  }
- 
-  TopTools_ListOfShape facesToRemove;
-  facesToRemove.Append(faceToRemove);
-  BRepOffsetAPI_MakeThickSolid aSolidMaker;
-  aSolidMaker.MakeThickSolidByJoin(myBody, facesToRemove, -myThickness / 50, 1.e-3);
-  myBody = aSolidMaker.Shape();
-  // Threading : Create Surfaces
-  Handle(Geom_CylindricalSurface) aCyl1 = new Geom_CylindricalSurface(neckAx2, myNeckRadius * 0.99);
-  Handle(Geom_CylindricalSurface) aCyl2 = new Geom_CylindricalSurface(neckAx2, myNeckRadius * 1.05);
- 
-  // Threading : Define 2D Curves
-  gp_Pnt2d aPnt(2. * M_PI, myNeckHeight / 2.);
-  gp_Dir2d aDir(2. * M_PI, myNeckHeight / 4.);
-  gp_Ax2d anAx2d(aPnt, aDir);
- 
-  Standard_Real aMajor = 2. * M_PI;
-  Standard_Real aMinor = myNeckHeight / 10;
- 
-  Handle(Geom2d_Ellipse) anEllipse1 = new Geom2d_Ellipse(anAx2d, aMajor, aMinor);
-  Handle(Geom2d_Ellipse) anEllipse2 = new Geom2d_Ellipse(anAx2d, aMajor, aMinor / 4);
-  Handle(Geom2d_TrimmedCurve) anArc1 = new Geom2d_TrimmedCurve(anEllipse1, 0, M_PI);
-  Handle(Geom2d_TrimmedCurve) anArc2 = new Geom2d_TrimmedCurve(anEllipse2, 0, M_PI);
-  gp_Pnt2d anEllipsePnt1 = anEllipse1->Value(0);
-  gp_Pnt2d anEllipsePnt2 = anEllipse1->Value(M_PI);
- 
-  Handle(Geom2d_TrimmedCurve) aSegment = GCE2d_MakeSegment(anEllipsePnt1, anEllipsePnt2);
-  // Threading : Build Edges and Wires
-  TopoDS_Edge anEdge1OnSurf1 = BRepBuilderAPI_MakeEdge(anArc1, aCyl1);
-  TopoDS_Edge anEdge2OnSurf1 = BRepBuilderAPI_MakeEdge(aSegment, aCyl1);
-  TopoDS_Edge anEdge1OnSurf2 = BRepBuilderAPI_MakeEdge(anArc2, aCyl2);
-  TopoDS_Edge anEdge2OnSurf2 = BRepBuilderAPI_MakeEdge(aSegment, aCyl2);
-  TopoDS_Wire threadingWire1 = BRepBuilderAPI_MakeWire(anEdge1OnSurf1, anEdge2OnSurf1);
-  TopoDS_Wire threadingWire2 = BRepBuilderAPI_MakeWire(anEdge1OnSurf2, anEdge2OnSurf2);
-  BRepLib::BuildCurves3d(threadingWire1);
-  BRepLib::BuildCurves3d(threadingWire2);
- 
-  // Create Threading 
-  BRepOffsetAPI_ThruSections aTool(Standard_True);
-  aTool.AddWire(threadingWire1);
-  aTool.AddWire(threadingWire2);
-  aTool.CheckCompatibility(Standard_False);
- 
-  TopoDS_Shape myThreading = aTool.Shape();
- 
-  // Building the Resulting Compound 
-  TopoDS_Compound aRes;
-  BRep_Builder aBuilder;
-  aBuilder.MakeCompound (aRes);
-  aBuilder.Add (aRes, myBody);
-  aBuilder.Add (aRes, myThreading);
-
-  interp->GetPlotter().REDRAW_SHAPE("bottle", aRes);
+  interp->GetPlotter().REDRAW_POINT("grad_sol", surf->Value(grad_sol.U(), grad_sol.V() ), Color_Green);
 
   return TCL_OK;
 }
@@ -388,6 +536,5 @@ void cmdMisc::Commands_Test(const Handle(asiTcl_Interp)&      interp,
 {
   static const char* group = "cmdMisc";
 
-  interp->AddCommand("test",        "Test anything.", __FILE__, group, MISC_Test);
-  interp->AddCommand("test-bottle", "Test bottle.",   __FILE__, group, MISC_TestBottle);
+  interp->AddCommand("test", "Test anything.", __FILE__, group, MISC_Test);
 }

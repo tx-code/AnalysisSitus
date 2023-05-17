@@ -306,9 +306,9 @@ protected:
                       const double      mu_random,
                       const double      nu_random)
   {
-    return v*m
+    return t_argument (v*m
          + (p_best_individual - p)*mu_congition*mu_random
-         + (p_best_social - p)*nu_social*nu_random;
+         + (p_best_social - p)*nu_social*nu_random );
   }
 
   //! Random number generator in range [0, 1]. Based on Ian C. Bullard's

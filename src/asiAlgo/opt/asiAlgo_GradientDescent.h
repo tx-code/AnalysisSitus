@@ -158,7 +158,7 @@ public:
           pos = pos - g*actual_step;
 
           ///
-          pos.Dump(std::cout);
+          //pos.Dump(std::cout);
           ///
 #if defined COUT_DEBUG
           std::cout << "F[" << num_iters << ", step " << actual_step
