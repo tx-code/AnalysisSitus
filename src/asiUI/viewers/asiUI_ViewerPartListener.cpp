@@ -40,6 +40,7 @@
 #if defined USE_MOBIUS
   #include <asiUI_DialogAppSurf.h>
   #include <asiUI_DialogBuildGordon.h>
+  #include <asiUI_DialogUntrimSurf.h>
 #endif
 
 // asiAlgo includes
@@ -216,6 +217,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFact
   m_pSplConvert          (nullptr),
   m_pFillEdges           (nullptr),
   m_pGordon              (nullptr),
+  m_pUntrim              (nullptr),
   m_pShowOriContour      (nullptr),
   m_pShowHatching        (nullptr),
   m_pCopyAsString        (nullptr),
@@ -253,6 +255,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pSplConvert          (nullptr),
   m_pFillEdges           (nullptr),
   m_pGordon              (nullptr),
+  m_pUntrim              (nullptr),
   m_pShowOriContour      (nullptr),
   m_pShowHatching        (nullptr),
   m_pCopyAsString        (nullptr),
@@ -721,6 +724,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
   //
   m_pFillEdges = menu.addAction("Fit surface...");
   m_pGordon    = menu.addAction("Build Gordon surface...");
+  m_pUntrim    = menu.addAction("Untrim surface...");
 #endif
 }
 
@@ -1470,6 +1474,23 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
                                                 m_widgetFactory->GetCommonFacilities()->MainWindow);
 
     pDlgAppSurf->show();
+  }
+  //---------------------------------------------------------------------------
+  // ACTION: untrim surface
+  //---------------------------------------------------------------------------
+  else if ( pAction == m_pUntrim )
+  {
+    asiUI_ViewerPart* pViewer = dynamic_cast<asiUI_ViewerPart*>(m_pViewer);
+
+    asiUI_DialogUntrimSurf*
+      pDlgUntrimSurf = new asiUI_DialogUntrimSurf(m_widgetFactory,
+                                                  m_model,
+                                                  pViewer,
+                                                  m_progress,
+                                                  m_plotter,
+                                                  m_widgetFactory->GetCommonFacilities()->MainWindow);
+
+    pDlgUntrimSurf->show();
   }
 #endif
 }

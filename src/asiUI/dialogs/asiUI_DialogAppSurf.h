@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #ifndef asiUI_DialogAppSurf_h
-#define asiUI_DialogSppSurf_h
+#define asiUI_DialogAppSurf_h
 
 // asiUI includes
 #include <asiUI_DatumTable.h>

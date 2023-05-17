@@ -41,12 +41,14 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_BuildCoonsPatches.h>
 #include <asiAlgo_BuildGordonSurf.h>
 #include <asiAlgo_BuildHLR.h>
 #include <asiAlgo_BuildOBB.h>
 #include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_MeshOffset.h>
 #include <asiAlgo_Timer.h>
+#include <asiAlgo_UntrimSurf.h>
 #include <asiAlgo_Utils.h>
 
 #if defined USE_MOBIUS
@@ -2042,6 +2044,110 @@ int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get the part.
+  asiEngine_Part partApi(M);
+
+  // Read faces.
+  std::vector<int> fIds;
+  int fIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "f", fIdx) )
+  {
+    int k = fIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int fid = atoi(argv[k]);
+      fIds.push_back(fid);
+    }
+  }
+
+  // Read edges.
+  std::vector<int> eIds;
+  int eIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "e", eIdx) )
+  {
+    int k = eIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+      eIds.push_back(eid);
+    }
+  }
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "AAG is null.");
+    return false;
+  }
+  //
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
+  const TopTools_IndexedMapOfShape& allFaces = aag->GetMapOfFaces();
+
+  // Collect edges.
+  Handle(TopTools_HSequenceOfShape) edges = new TopTools_HSequenceOfShape;
+  //
+  for ( const auto eid : eIds )
+  {
+    if ( eid < 1 || eid > allEdges.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Edge %1 is out of range [1, %2]."
+                                                           << eid << allEdges.Extent() );
+      return false;
+    }
+
+    edges->Append( allEdges(eid) );
+  }
+
+  // Collect faces.
+  Handle(TopTools_HSequenceOfShape) faces = new TopTools_HSequenceOfShape;
+  //
+  for ( const auto fid : fIds )
+  {
+    if ( fid < 1 || fid > allFaces.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Face %1 is out of range [1, %2]."
+                                                           << fid << allFaces.Extent() );
+      return false;
+    }
+
+    faces->Append( allFaces(fid) );
+  }
+
+  Handle(Geom_BSplineSurface) resSurf;
+  TopoDS_Face                 resFace;
+
+  // Untrim surface.
+  asiAlgo_UntrimSurf UNTRIM( interp->GetProgress(),
+                             interp->GetPlotter() );
+  //
+  if ( !UNTRIM.Build(faces, edges, resSurf, resFace) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "UNTRIM operator failed.");
+    return TCL_ERROR;
+  }
+
+  std::string surfName = "untrimSurf";
+  interp->GetKeyValue(argc, argv, "name", surfName);
+  interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
                                   const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -2308,4 +2414,12 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
     //
     __FILE__, group, ENGINE_BuildGordon);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("untrim-surf",
+    //
+    "untrim-surf -f <f1> [<f2> ...] -e <e1> <e2> [<e3> ...] [-name <surfName>]\n"
+    "\t Untrims surface.",
+    //
+    __FILE__, group, ENGINE_UntrimSurf);
 }

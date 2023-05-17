@@ -151,7 +151,7 @@ protected:
   asiUI_ObjectBrowser*        m_wBrowser;      //!< Object browser.
   Handle(asiUI_IStatusBar)    m_statusBar;     //!< Status bar string.
 
-  //! Custom actions.
+  /* Custom actions. */
   QAction* m_pSaveBREP;
   QAction* m_pSaveSTL;
   QAction* m_pShowNorms;
@@ -159,6 +159,7 @@ protected:
   QAction* m_pSplConvert;
   QAction* m_pFillEdges;
   QAction* m_pGordon;
+  QAction* m_pUntrim;
   QAction* m_pShowOriContour;
   QAction* m_pShowHatching;
   QAction* m_pCopyAsString;
