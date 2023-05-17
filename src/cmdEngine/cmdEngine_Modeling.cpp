@@ -41,7 +41,6 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
-#include <asiAlgo_BuildCoonsPatches.h>
 #include <asiAlgo_BuildGordonSurf.h>
 #include <asiAlgo_BuildHLR.h>
 #include <asiAlgo_BuildOBB.h>
