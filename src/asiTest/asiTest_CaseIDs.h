@@ -79,6 +79,7 @@ enum test_CaseID
 
   CaseID_AppSurf,
   CaseID_BuildGordonSurf,
+  CaseID_UntrimSurf,
 
 /* ------------------------------------------------------------------------ */
 

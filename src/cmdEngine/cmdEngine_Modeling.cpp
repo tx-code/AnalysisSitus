@@ -2142,6 +2142,10 @@ int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
   interp->GetKeyValue(argc, argv, "name", surfName);
   interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);
 
+  const double maxError = UNTRIM.GetMaxError();
+
+  *interp << maxError;
+
   return TCL_OK;
 }
 

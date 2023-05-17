@@ -55,6 +55,7 @@
 #include <asiTest_RecognizeConvexHull.h>
 #include <asiTest_RecognizeHoles.h>
 #include <asiTest_SuppressBlends.h>
+#include <asiTest_UntrimSurf.h>
 #include <asiTest_Utils.h>
 #include <asiTest_VertexVexity.h>
 #include <asiTest_XdeDoc.h>
@@ -142,11 +143,10 @@ int main(int argc, char* argv[])
   std::cout << "asiTest : main()" << std::endl;
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
-  // Modeling.
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildGordonSurf> );
-  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_JoinEdges> );
-
   // Main tests.
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_UntrimSurf>            );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildGordonSurf>       );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_JoinEdges>             );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConcatPCurves>         );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_InvertShells>          );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_KEV>                   );

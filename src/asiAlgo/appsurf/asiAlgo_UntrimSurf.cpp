@@ -37,6 +37,7 @@
 // OpenCascade includes
 #include <BRep_Tool.hxx>
 #include <ShapeAnalysis_Edge.hxx>
+#include <ShapeAnalysis_Surface.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -46,13 +47,97 @@
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_UntrimSurf::CheckDeviation(const Handle(Geom_BSplineSurface)& resSurf,
+                                        const Handle(Geom_BSplineSurface)& initSurf,
+                                        double&                            maxDev,
+                                        ActAPI_PlotterEntry                plotter)
+{
+  const int numSteps = 10;
+
+  /* ===============================================
+   *  Prepare probe points on the untrimmed surface.
+   * =============================================== */
+
+  double uMin, uMax, vMin, vMax;
+  resSurf->Bounds(uMin, uMax, vMin, vMax);
+
+  const double uStep = (uMax - uMin) / numSteps;
+  const double vStep = (vMax - vMin) / numSteps;
+
+  // Choose u values
+  std::vector<double> U;
+  {
+    double u     = uMin;
+    bool   uStop = false;
+    //
+    while ( !uStop )
+    {
+      if ( u > uMax )
+      {
+        u     = uMax;
+        uStop = true;
+      }
+
+      U.push_back(u);
+      u += uStep;
+    }
+  }
+
+  // Choose v values
+  std::vector<double> V;
+  {
+    double v     = vMin;
+    bool   vStop = false;
+    //
+    while ( !vStop )
+    {
+      if ( v > vMax )
+      {
+        v     = vMax;
+        vStop = true;
+      }
+
+      V.push_back(v);
+      v += vStep;
+    }
+  }
+
+  /* =======================================
+   *  Check distance to the initial surface.
+   * ======================================= */
+
+  ShapeAnalysis_Surface sas(initSurf);
+
+  double maxDist = 0;
+
+  for ( const auto u : U )
+  {
+    for ( const auto v : V )
+    {
+      gp_Pnt   probe  = resSurf->Value(u, v);
+      gp_Pnt2d projUV = sas.ValueOfUV(probe, 1e-3);
+      gp_Pnt   proj   = initSurf->Value( projUV.X(), projUV.Y() );
+
+      const double d = proj.Distance(probe);
+      //
+      if ( d > maxDist )
+        maxDist = d;
+    }
+  }
+
+  maxDev = maxDist;
+}
+
+//-----------------------------------------------------------------------------
+
 asiAlgo_UntrimSurf::asiAlgo_UntrimSurf(ActAPI_ProgressEntry progress,
                                        ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
   m_iNumUKnots      ( 2 ),
   m_iNumVKnots      ( 2 ),
   m_iDegU           ( 3 ),
-  m_iDegV           ( 3 )
+  m_iDegV           ( 3 ),
+  m_fMaxError       ( 0. )
 {}
 
 //-----------------------------------------------------------------------------
@@ -62,6 +147,10 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
                                Handle(Geom_BSplineSurface)&             outSupport,
                                TopoDS_Face&                             outFace)
 {
+  /* =======================
+   *  Apply contract checks.
+   * ======================= */
+
   if ( inFaces->Size() != 1 )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Only one face can be passed to UNTRIM.");
@@ -72,13 +161,17 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
 
   // Check surface type: only splines are currently allowed.
   Handle(Geom_BSplineSurface)
-    bsurf = Handle(Geom_BSplineSurface)::DownCast( BRep_Tool::Surface(face) );
+    initSurf = Handle(Geom_BSplineSurface)::DownCast( BRep_Tool::Surface(face) );
   //
-  if ( bsurf.IsNull() )
+  if ( initSurf.IsNull() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "The input face is not a B-spline surface.");
     return false;
   }
+
+  /* ===================================
+   *  Construct the initial Coons patch.
+   * =================================== */
 
   // Find rail curves.
   Handle(Geom_BSplineCurve) c0, c1, b0, b1;
@@ -103,6 +196,16 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
   m_plotter.REDRAW_SURFACE("coonsSurf", coonsSurf, Color_Default);
 
   // TODO: NYI
+
+  /* ==================
+   *  Check deviations.
+   * ================== */
+
+  // Check deviation from the initial surface.
+  CheckDeviation(coonsSurf, initSurf, m_fMaxError, m_plotter);
+
+  m_progress.SendLogMessage(LogNotice(Normal) << "Max deviation: %1."
+                                              << m_fMaxError);
 
   return true;
 }

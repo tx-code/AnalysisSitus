@@ -66,7 +66,7 @@ public:
 
 public:
 
-  //! Checks deviation between the constructed surfaces and the initial
+  //! Checks deviation between the constructed surface and the initial
   //! curve network.
   //! \param[in]  surf     the surface of interest.
   //! \param[in]  profiles the profile edges of the curve network.
