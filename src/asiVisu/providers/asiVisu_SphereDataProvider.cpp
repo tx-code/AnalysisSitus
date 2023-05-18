@@ -33,6 +33,7 @@
 
 // asiData includes
 #include <asiData_ThicknessNode.h>
+#include <asiData_ClearanceNode.h>
 
 #if defined USE_MOBIUS
 // Mobius includes
@@ -50,7 +51,6 @@ asiVisu_SphereDataProvider::asiVisu_SphereDataProvider(const Handle(ActAPI_INode
   m_diameter(0.),
   m_loc()
 {
-  m_triParam = Handle(asiData_MeshParameter)::DownCast(m_node->Parameter(asiData_ThicknessNode::PID_Mesh));
 }
 
 //-----------------------------------------------------------------------------
@@ -66,18 +66,31 @@ ActAPI_DataObjectId asiVisu_SphereDataProvider::GetNodeID() const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_SphereDataProvider::SetFacetId(const int facetId)
+void asiVisu_SphereDataProvider::SetFacetId(const int  facetId, 
+                                            const bool inward)
 {
+  Handle(asiData_MeshParameter) triParam;
+  Handle(HRealArray) scalars;
+  if (m_node->DynamicType() == STANDARD_TYPE(asiData_ThicknessNode))
+  {
+    triParam = Handle(asiData_MeshParameter)::DownCast(m_node->Parameter(asiData_ThicknessNode::PID_Mesh));
+    scalars  = ActParamTool::AsRealArray(m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldValues))->GetArray();
+  }
+  else if (m_node->DynamicType() == STANDARD_TYPE(asiData_ClearanceNode))
+  {
+    triParam = Handle(asiData_MeshParameter)::DownCast(m_node->Parameter(asiData_ClearanceNode::PID_Mesh));
+    scalars  = ActParamTool::AsRealArray(m_node->Parameter(asiData_ClearanceNode::PID_ClearanceFieldValues))->GetArray();
+  }
+
   // get a scalar assigned to a facet
   // the scalar means a diameter of a result sphere
-  Handle(HRealArray) scalars = ActParamTool::AsRealArray(m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldValues))->GetArray();
   m_diameter = scalars->Value(facetId);
 
   // compute a center of the result sphere
   // the center locates along direction opposite to outward normal 
   // at the distance of radius of sphere.
 #if defined USE_MOBIUS
-  t_ptr<t_mesh> poly = m_triParam->GetMesh();
+  t_ptr<t_mesh> poly = triParam->GetMesh();
 
   int i = 0;
   for (t_mesh::TriangleIterator tit(poly); tit.More(); tit.Next(), i++)
@@ -96,7 +109,9 @@ void asiVisu_SphereDataProvider::SetFacetId(const int facetId)
 
     t_xyz N;
     poly->ComputeNormal(th, N);
-    N.Reverse();
+    
+    if (inward)
+      N.Reverse();
 
     core_XYZ c = p + N.Normalized() * GetDiameter() / 2.;
 
@@ -118,12 +133,6 @@ void asiVisu_SphereDataProvider::SetFacetId(const int facetId)
     m_points[2][0] = v2.X();
     m_points[2][1] = v2.Y();
     m_points[2][2] = v2.Z();
-
-    //std::cout << "coords >>> " << std::endl;
-    //std::cout << m_points[0][0] << "  " << m_points[0][1] << "  " << m_points[0][2] << std::endl;
-    //std::cout << m_points[1][0] << "  " << m_points[1][1] << "  " << m_points[1][2] << std::endl;
-    //std::cout << m_points[2][0] << "  " << m_points[2][1] << "  " << m_points[2][2] << std::endl;
-    //std::cout << "coords <<< " << std::endl;
 
     break;
   }
@@ -166,13 +175,5 @@ void asiVisu_SphereDataProvider::GetPoints(double coords[][3]) const
 Handle(ActAPI_HParameterList) asiVisu_SphereDataProvider::translationSources() const
 {
   ActAPI_ParameterStream out;
-  out << m_node->Parameter(asiData_ThicknessNode::PID_Mesh)
-      << m_node->Parameter(asiData_ThicknessNode::PID_IsCustomDir)
-      << m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldIds)
-      << m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldValues)
-      << m_node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
-      << m_node->Parameter(asiData_ThicknessNode::PID_ScalarMax)
-      ;
-
   return out.List;
 }

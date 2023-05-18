@@ -57,7 +57,8 @@ public:
 public:
 
   //! Defines a facet being a source for getting sphere properties.
-  void SetFacetId(const int facetId);
+  void SetFacetId(const int  facetId,
+                  const bool inward = true);
 
   //! Gets the diameter of the target sphere.
   double GetDiameter() const;
@@ -78,9 +79,8 @@ protected:
 
 private:
 
-  Handle(ActAPI_INode)          m_node;     //!< Source Node.
-  Handle(asiData_MeshParameter) m_triParam; //!< Source Parameter with triangulation.
-  double                        m_diameter; //!< Diameter of sphere
-  gp_Pnt                        m_loc;      //!< Location of sphere
-  double                        m_points[3][3];   //!< Vertices of facet
+  Handle(ActAPI_INode)  m_node;         //!< Source Node.
+  double                m_diameter;     //!< Diameter of sphere
+  gp_Pnt                m_loc;          //!< Location of sphere
+  double                m_points[3][3]; //!< Vertices of facet
 };

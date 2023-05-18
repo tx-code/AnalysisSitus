@@ -96,9 +96,11 @@ Handle(asiData_ClearanceNode)
   // Attach tree function.
   node->ConnectTreeFunction( asiData_ClearanceNode::PID_CheckClearanceFunc,
                              asiEngine_CheckClearanceFunc::GUID(),
-                             ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_Mesh),
-                             ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
-                                              << node->Parameter(asiData_ThicknessNode::PID_ScalarMax) );
+                             ActParamStream() << node->Parameter(asiData_ClearanceNode::PID_Mesh)
+                                              << node->Parameter(asiData_ClearanceNode::PID_MinLimit)
+                                              << node->Parameter(asiData_ClearanceNode::PID_MaxLimit),
+                             ActParamStream() << node->Parameter(asiData_ClearanceNode::PID_ScalarMin)
+                                              << node->Parameter(asiData_ClearanceNode::PID_ScalarMax) );
 
   // Set as child for the owner Node.
   owner->AddChildNode(node);

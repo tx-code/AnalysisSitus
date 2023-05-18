@@ -86,29 +86,33 @@ public:
     return "Check clearance";
   }
 
-private:
+protected:
 
   //! Executes Tree Function on the given input and output arguments.
   //! \param[in]      inputs   input Parameters.
   //! \param[in, out] outputs  output Parameters.
   //! \param[in]      userData custom user data.
   //! \return execution status.
-  virtual int
-    execute(const Handle(ActAPI_HParameterList)& inputs,
-            const Handle(ActAPI_HParameterList)& outputs,
-            const Handle(Standard_Transient)&    userData) const;
+  asiEngine_EXPORT
+    virtual int
+      execute(const Handle(ActAPI_HParameterList)& inputs,
+              const Handle(ActAPI_HParameterList)& outputs,
+              const Handle(Standard_Transient)&    userData) const;
 
   //! \return expected input signature.
-  virtual ActAPI_ParameterTypeStream
-    inputSignature() const;
+  asiEngine_EXPORT
+    virtual ActAPI_ParameterTypeStream
+      inputSignature() const;
 
   //! \return expected output signature.
-  virtual ActAPI_ParameterTypeStream
-    outputSignature() const;
+  asiEngine_EXPORT
+    virtual ActAPI_ParameterTypeStream
+      outputSignature() const;
 
-private:
+protected:
 
-  asiEngine_CheckClearanceFunc() = default; //!< Default ctor.
+  asiEngine_EXPORT
+    asiEngine_CheckClearanceFunc() = default; //!< Default ctor.
 
 };
 

@@ -33,7 +33,6 @@
 
 // asiVisu includes
 #include <asiVisu_DefaultPrs.h>
-#include <asiVisu_SphereDataProvider.h>
 
 // asiData includes
 #include <asiData_ThicknessNode.h>
@@ -81,6 +80,18 @@ private:
   asiVisu_EXPORT asiVisu_ThicknessPrs(const Handle(ActAPI_INode)& N);
 
 // Callbacks:
+
+protected:
+
+  asiVisu_EXPORT virtual void
+    highlight(vtkRenderer*                        renderer,
+              const Handle(asiVisu_PickerResult)& pickRes,
+              const asiVisu_SelectionNature       selNature) const;
+
+  asiVisu_EXPORT virtual void
+    unHighlight(vtkRenderer*                  renderer,
+                const asiVisu_SelectionNature selNature) const;
+
 private:
 
   //! Callback for updating of Presentation pipelines invoked after the
@@ -93,17 +104,6 @@ private:
 
   //! Callback for derendering.
   virtual void deRenderPipelines(vtkRenderer* renderer) const;
-
-protected:
-
-  asiVisu_EXPORT virtual void
-    highlight(vtkRenderer*                        renderer,
-              const Handle(asiVisu_PickerResult)& pickRes,
-              const asiVisu_SelectionNature       selNature) const;
-
-  asiVisu_EXPORT virtual void
-    unHighlight(vtkRenderer*                  renderer,
-                const asiVisu_SelectionNature selNature) const;
 
 private:
 

@@ -135,9 +135,9 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
      * ====================== */
 
     const double
-      dMin = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_DMin))->GetValue();
+      dMin = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_MinLimit))->GetValue();
     const double
-      dMax = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_DMax))->GetValue();
+      dMax = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_MaxLimit))->GetValue();
 
     algo.SetMinDiameter(dMin);
     algo.SetMaxDiameter(dMax);

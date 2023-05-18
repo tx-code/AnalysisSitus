@@ -58,7 +58,8 @@ public:
   //! Pipelines.
   enum PipelineId
   {
-    Pipeline_Main = 1
+    Pipeline_Main = 1,
+    Pipeline_Sphere
   };
 
 public:
@@ -79,6 +80,18 @@ private:
   asiVisu_EXPORT asiVisu_ClearancePrs(const Handle(ActAPI_INode)& N);
 
 // Callbacks:
+
+protected:
+
+  asiVisu_EXPORT virtual void
+    highlight(vtkRenderer*                        renderer,
+              const Handle(asiVisu_PickerResult)& pickRes,
+              const asiVisu_SelectionNature       selNature) const;
+
+  asiVisu_EXPORT virtual void
+    unHighlight(vtkRenderer*                  renderer,
+                const asiVisu_SelectionNature selNature) const;
+
 private:
 
   //! Callback for updating of Presentation pipelines invoked after the

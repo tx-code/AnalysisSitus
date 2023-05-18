@@ -35,6 +35,7 @@
 #include <asiVisu_MeshEScalarPipeline.h>
 #include <asiVisu_MeshResultUtils.h>
 #include <asiVisu_ThicknessDataProvider.h>
+#include <asiVisu_SphereDataProvider.h>
 #include <asiVisu_SpherePipeline.h>
 
 // VTK includes
@@ -114,7 +115,7 @@ void asiVisu_ThicknessPrs::deRenderPipelines(vtkRenderer*) const
 //! Callback for highlighting.
 void asiVisu_ThicknessPrs::highlight(vtkRenderer*                        renderer,
                                      const Handle(asiVisu_PickerResult)& pickRes,
-                                     const asiVisu_SelectionNature       selNature) const
+                                     const asiVisu_SelectionNature       /*selNature*/) const
 {
   Handle(asiVisu_CellPickerResult)
     cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
@@ -144,7 +145,7 @@ void asiVisu_ThicknessPrs::highlight(vtkRenderer*                        rendere
 
 //! Callback for highlighting reset.
 void asiVisu_ThicknessPrs::unHighlight(vtkRenderer*                  renderer,
-                                       const asiVisu_SelectionNature selNature) const
+                                       const asiVisu_SelectionNature /*selNature*/) const
 {
   // Pipeline for the field.
   Handle(asiVisu_SpherePipeline)

@@ -71,6 +71,8 @@ public:
     PID_ScalarMin,            //!< Min scalar value.
     PID_ScalarMax,            //!< Max scalar value.
     PID_CheckClearanceFunc,   //!< Tree Function to check clearance.
+    PID_MinLimit,             //!< Min value to be checked.
+    PID_MaxLimit,             //!< Max value to be checked.
   //--------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -118,6 +120,14 @@ public:
   //! \param[in] mesh mesh and fields to store.
   asiData_EXPORT void
     SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh);
+
+  //! Sets a minimal value for inspection.
+  asiData_EXPORT void
+    SetMinLimit(const double value);
+
+  //! Sets a maximal value for inspection.
+  asiData_EXPORT void
+    SetMaxLimit(const double value);
 
 protected:
 

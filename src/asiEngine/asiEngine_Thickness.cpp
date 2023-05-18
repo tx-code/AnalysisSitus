@@ -132,8 +132,8 @@ void asiEngine_Thickness::ReconnectFunction(const Handle(asiData_ThicknessNode)&
                                asiEngine_CheckThicknessFunc::GUID(),
                                ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_Mesh)
                                                 << node->Parameter(asiData_ThicknessNode::PID_ThicknessType)
-                                                << node->Parameter(asiData_ThicknessNode::PID_DMin)
-                                                << node->Parameter(asiData_ThicknessNode::PID_DMax),
+                                                << node->Parameter(asiData_ThicknessNode::PID_MinLimit)
+                                                << node->Parameter(asiData_ThicknessNode::PID_MaxLimit),
                                ActParamStream() << node->Parameter(asiData_ThicknessNode::PID_ScalarMin)
                                                 << node->Parameter(asiData_ThicknessNode::PID_ScalarMax) );
   }

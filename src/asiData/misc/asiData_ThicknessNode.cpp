@@ -60,8 +60,8 @@ asiData_ThicknessNode::asiData_ThicknessNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Real,         PID_Dx);
   REGISTER_PARAMETER(Real,         PID_Dy);
   REGISTER_PARAMETER(Real,         PID_Dz);
-  REGISTER_PARAMETER(Real,         PID_DMin);
-  REGISTER_PARAMETER(Real,         PID_DMax);
+  REGISTER_PARAMETER(Real,         PID_MinLimit);
+  REGISTER_PARAMETER(Real,         PID_MaxLimit);
   REGISTER_PARAMETER(TreeFunction, PID_CheckThicknessFunc);
 
   this->registerParameter(PID_Mesh, asiData_MeshParameter::Instance(), false);
@@ -80,8 +80,8 @@ void asiData_ThicknessNode::Init()
   this->InitParameter(PID_Dx,            "Dx",               "",                   ParameterFlag_IsVisible, true);
   this->InitParameter(PID_Dy,            "Dy",               "",                   ParameterFlag_IsVisible, true);
   this->InitParameter(PID_Dz,            "Dz",               "",                   ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_DMin,          "Min. diameter",    "",                   ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_DMax,          "Max. diameter",    "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_MinLimit,      "Min. limit",       "",                   ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_MaxLimit,      "Max. limit",       "",                   ParameterFlag_IsVisible, true);
 
   // Set default values.
   this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
@@ -93,8 +93,8 @@ void asiData_ThicknessNode::Init()
   ActParamTool::AsReal( this->Parameter(PID_Dx) )            ->SetValue( 0. );
   ActParamTool::AsReal( this->Parameter(PID_Dy) )            ->SetValue( 0. );
   ActParamTool::AsReal( this->Parameter(PID_Dz) )            ->SetValue( 1. );
-  ActParamTool::AsReal( this->Parameter(PID_DMin) )          ->SetValue( 0.1 );
-  ActParamTool::AsReal( this->Parameter(PID_DMax) )          ->SetValue( 30. );
+  ActParamTool::AsReal( this->Parameter(PID_MinLimit) )      ->SetValue( 0.1 );
+  ActParamTool::AsReal( this->Parameter(PID_MaxLimit) )      ->SetValue( 30. );
 }
 
 //-----------------------------------------------------------------------------
@@ -163,3 +163,18 @@ void asiData_ThicknessNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mes
   }
 #endif
 }
+
+//-----------------------------------------------------------------------------
+
+void asiData_ThicknessNode::SetMinLimit(const double value)
+{
+  ActParamTool::AsReal(this->Parameter(PID_MinLimit))->SetValue(value);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_ThicknessNode::SetMaxLimit(const double value)
+{
+  ActParamTool::AsReal(this->Parameter(PID_MaxLimit))->SetValue(value);
+}
+
