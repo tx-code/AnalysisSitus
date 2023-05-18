@@ -32,6 +32,7 @@
 #define asiAlgo_BorderTrihedron_h
 
 // OCCT includes
+#include <gp_Ax3.hxx>
 #include <gp_Dir.hxx>
 
 //-----------------------------------------------------------------------------
@@ -58,6 +59,13 @@ public:
     V_x      = _V_x;
     V_y      = _V_y;
     V_z      = _V_z;
+  }
+
+  //! Converts this border trihedron to local axes frame.
+  //! \return OpenCascade axes.
+  operator gp_Ax3()
+  {
+    return gp_Ax3(V_origin, V_z, V_x);
   }
 
 public:

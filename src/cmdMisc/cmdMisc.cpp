@@ -4138,8 +4138,9 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, MISC_TestSection);
 
   // Load more commands.
-  Commands_Coons (interp, data);
-  Commands_Test  (interp, data);
+  Commands_Coons   (interp, data);
+  Commands_Test    (interp, data);
+  Commands_Folding (interp, data);
 }
 
 // Declare entry point

@@ -1,0 +1,426 @@
+{
+  "file": "D:/Work/step-inspector/data/other/ssv-sample-sheet-metal-01.stp",
+  "processingTime": 0.32640890002949163,
+  "scaleFactor": 1000,
+  "parts": [
+    {
+      "id": "0:1:1:1",
+      "name": "Solid",
+      "quantity": 1,
+      "bodies": [
+        {
+          "type": "FOLDED_SHEET_METAL",
+          "warnings": [
+          ],
+          "volume": 2009.8683619138183,
+          "totalArea": 4353.5513321581848,
+          "OBBLength": 36.519999999999996,
+          "OBBWidth": 25.370000000000001,
+          "OBBHeight": 13.74,
+          "flatOBBLength": 106.78336143134641,
+          "flatOBBWidth": 45.95238898038469,
+          "flatAABBLength": 106.78336143134641,
+          "flatAABBWidth": 45.95238898038469,
+          "flatFilledArea": 2009.8640211771699,
+          "flatOuterContourArea": 2009.8640211771697,
+          "flatOuterContourLength": 333.82328980384693,
+          "roundHoles": [
+          ],
+          "minCutoutShorterSide": null,
+          "minCutoutLongerSide": null,
+          "extras":
+            {
+              "canrecSummary": {
+                "isValidAfterConversion": null
+              },
+              "doubleUnfolding": false,
+              "cuttingContourLengths": [
+                333.82328980384693
+              ]
+            },
+          "bends": [
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 18.75,
+              "grossLength": 18.75,
+              "AAGNodeIds": [55, 56],
+              "flatPatternFaceIds": [12],
+              "bendLineIds": [1],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 11.740000001,
+                  "closestParallel": 11.74,
+                  "closestPoint": 11.74,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [50, 48],
+                  "bendAAGNodeIds": [56, 55],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 18.000000001,
+                  "closestParallel": 18,
+                  "closestPoint": 18,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [54, 40],
+                  "bendAAGNodeIds": [56, 55],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 17.5,
+              "grossLength": 17.5,
+              "AAGNodeIds": [38, 64],
+              "flatPatternFaceIds": [14],
+              "bendLineIds": [3],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 11.500000001,
+                  "closestParallel": 11.5,
+                  "closestPoint": 11.5,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [33, 34],
+                  "bendAAGNodeIds": [64, 38],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 18.000000001,
+                  "closestParallel": 18,
+                  "closestPoint": 18,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [54, 40],
+                  "bendAAGNodeIds": [64, 38],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 11.25,
+              "grossLength": 11.25,
+              "AAGNodeIds": [31, 32],
+              "flatPatternFaceIds": [15],
+              "bendLineIds": [4],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 6.3200000010000004,
+                  "closestParallel": 6.3200000000000003,
+                  "closestPoint": 6.3200000000000003,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [27, 26],
+                  "bendAAGNodeIds": [32, 31],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 18.000000001,
+                  "closestParallel": 18,
+                  "closestPoint": 18,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [33, 34],
+                  "bendAAGNodeIds": [32, 31],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 11.49,
+              "grossLength": 11.49,
+              "AAGNodeIds": [46, 47],
+              "flatPatternFaceIds": [13],
+              "bendLineIds": [2],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 8.3100000010000006,
+                  "closestParallel": 8.3100000000000005,
+                  "closestPoint": 8.3100000000000005,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [41, 42],
+                  "bendAAGNodeIds": [47, 46],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 19.000000001,
+                  "closestParallel": 19,
+                  "closestPoint": 19,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [50, 48],
+                  "bendAAGNodeIds": [47, 46],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Up",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 11.25,
+              "grossLength": 11.25,
+              "AAGNodeIds": [59, 60],
+              "flatPatternFaceIds": [16],
+              "bendLineIds": [5],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 11.520000001,
+                  "closestParallel": 11.52,
+                  "closestPoint": 11.52,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [24, 25],
+                  "bendAAGNodeIds": [60, 59],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 18.000000001,
+                  "closestParallel": 18,
+                  "closestPoint": 18,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [33, 34],
+                  "bendAAGNodeIds": [60, 59],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Up",
+              "innerRadius": 1,
+              "kFactor": 0.5,
+              "netLength": 11.5,
+              "grossLength": 11.5,
+              "AAGNodeIds": [22, 23],
+              "flatPatternFaceIds": [17],
+              "bendLineIds": [6],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 21.370000001000001,
+                  "closestParallel": 21.370000000000001,
+                  "closestPoint": 21.370000000000001,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [20, 21],
+                  "bendAAGNodeIds": [22, 23],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 11.520000001,
+                  "closestParallel": 11.52,
+                  "closestPoint": 11.52,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [24, 25],
+                  "bendAAGNodeIds": [22, 23],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Up",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 11.500000000000002,
+              "grossLength": 11.500000000000002,
+              "AAGNodeIds": [18, 19],
+              "flatPatternFaceIds": [18],
+              "bendLineIds": [7],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 5.2000000009999994,
+                  "closestParallel": 5.1999999999999993,
+                  "closestPoint": 5.1999999999999993,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [15, 17],
+                  "bendAAGNodeIds": [19, 18],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 21.370000001000001,
+                  "closestParallel": 21.370000000000001,
+                  "closestPoint": 21.370000000000001,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [20, 21],
+                  "bendAAGNodeIds": [19, 18],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Up",
+              "innerRadius": 1,
+              "kFactor": 0.5,
+              "netLength": 11.5,
+              "grossLength": 11.5,
+              "AAGNodeIds": [12, 13],
+              "flatPatternFaceIds": [19],
+              "bendLineIds": [8],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 14.370000001000001,
+                  "closestParallel": 14.370000000000001,
+                  "closestPoint": 14.370000000000001,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [10, 11],
+                  "bendAAGNodeIds": [12, 13],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 5.2000000009999994,
+                  "closestParallel": 5.1999999999999993,
+                  "closestPoint": 5.1999999999999993,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [15, 17],
+                  "bendAAGNodeIds": [12, 13],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 1,
+              "kFactor": 0.5,
+              "netLength": 11.500000000000002,
+              "grossLength": 11.500000000000002,
+              "AAGNodeIds": [8, 9],
+              "flatPatternFaceIds": [20],
+              "bendLineIds": [9],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 0.13000000100000086,
+                  "closestParallel": 0.13000000000000078,
+                  "closestPoint": 0.13000000000000078,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [7, 6],
+                  "bendAAGNodeIds": [9, 8],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 14.370000001000001,
+                  "closestParallel": 14.370000000000001,
+                  "closestPoint": 14.370000000000001,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [10, 11],
+                  "bendAAGNodeIds": [9, 8],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            },
+            {
+              "angle": 90,
+              "direction": "Down",
+              "innerRadius": 0.99999999999999889,
+              "kFactor": 0.5,
+              "netLength": 11.5,
+              "grossLength": 11.5,
+              "AAGNodeIds": [4, 5],
+              "flatPatternFaceIds": [21],
+              "bendLineIds": [10],
+              "clearances": [
+                {
+                  "maximumFlangeLength": 11.390000001000001,
+                  "closestParallel": 11.390000000000001,
+                  "closestPoint": 11.390000000000001,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [2, 1],
+                  "bendAAGNodeIds": [4, 5],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                },
+                {
+                  "maximumFlangeLength": 0.13000000100000075,
+                  "closestParallel": 0.13000000000000078,
+                  "closestPoint": 0.13000000000000078,
+                  "closestCutOut": null,
+                  "flangeAAGNodeIds": [7, 6],
+                  "bendAAGNodeIds": [4, 5],
+                  "hasSupportEdge": true,
+                  "cutoutDistances": [
+                  ]
+                }
+              ]
+            }
+          ],
+          "thickness": 1,
+          "piercings": 1,
+          "sheetArea": 3417.7674740000007,
+          "thicknessArea": 333.8232898038454,
+          "totalCuttingLength": 336.9648824574366,
+          "smoothCuttingLengths": [
+            11.5,
+            104.00796326794897,
+            74.725574287564285,
+            1.2498999999999998,
+            6.0700000000000003,
+            12.4999,
+            3.6415926535897931,
+            1.2499000000000002,
+            3.6415926535897931,
+            17.5,
+            1.2498999999999998,
+            12.7399,
+            8.0600000000000005,
+            30.451592653589792,
+            3.6415926535897931,
+            1.2499000000000002,
+            3.641592653589794,
+            32.631592653589792,
+            0.25,
+            2.0707963267948948,
+            1.25,
+            3.6415926535897931
+          ]
+        }
+      ]
+    }
+  ]
+}

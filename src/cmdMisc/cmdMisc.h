@@ -89,6 +89,10 @@ public:
     Commands_Coons(const Handle(asiTcl_Interp)&      interp,
                    const Handle(Standard_Transient)& data);
 
+  cmdMisc_EXPORT static void
+    Commands_Folding(const Handle(asiTcl_Interp)&      interp,
+                     const Handle(Standard_Transient)& data);
+
 public:
 
   static Handle(asiEngine_Model)        model; //!< Data Model instance.
