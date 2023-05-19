@@ -1190,10 +1190,10 @@ bool asiAlgo_BuildGordonSurf::Build(const std::vector<TopoDS_Edge>& profiles,
 
   return true;
 #else
-  (void)profiles;
-  (void)guides;
-  (void)support;
-  (void)face;
+  (void) profiles;
+  (void) guides;
+  (void) support;
+  (void) face;
   return false;
 #endif
 }
@@ -1289,10 +1289,10 @@ bool asiAlgo_BuildGordonSurf::reapproxCurves(const std::vector<Handle(Geom_BSpli
 
   return true;
 #else
-  (void)curves;
-  (void)result;
-  (void)params;
-  (void)knots;
+  (void) curves;
+  (void) result;
+  (void) params;
+  (void) knots;
   return false;
 #endif
 }

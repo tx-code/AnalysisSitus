@@ -40,6 +40,7 @@
 // OCCT includes
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
@@ -90,18 +91,18 @@ public:
 
 public:
 
-  //! Sets the number of U knots for the initial plane.
+  //! Sets the number of U isolines for the constructed surface.
   //! \param[in] num the value to set.
-  void SetNumUKnots(const int num)
+  void SetNumUIsos(const int num)
   {
-    m_iNumUKnots = num;
+    m_iNumUIsos = num;
   }
 
-  //! Sets the number of V knots for the initial plane.
+  //! Sets the number of V isolines for the constructed surface.
   //! \param[in] num the value to set.
-  void SetNumVKnots(const int num)
+  void SetNumVIsos(const int num)
   {
-    m_iNumVKnots = num;
+    m_iNumVIsos = num;
   }
 
   //! Sets the U degree for the initial plane.
@@ -124,6 +125,18 @@ public:
     return m_fMaxError;
   }
 
+  //! \return the constructed guide edges.
+  const std::vector<TopoDS_Edge>& GetGuides() const
+  {
+    return m_guides;
+  }
+
+  //! \return the constructed profile edges.
+  const std::vector<TopoDS_Edge>& GetProfiles() const
+  {
+    return m_profiles;
+  }
+
 protected:
 
   //! Finds the rail curves among the given collection of edges
@@ -135,13 +148,22 @@ protected:
               Handle(Geom_BSplineCurve)&               b0,
               Handle(Geom_BSplineCurve)&               b1) const;
 
+  //! Reapproximates constraint curves to make them more suitable
+  //! for Coons fitting.
+  asiAlgo_EXPORT bool
+    reapproxCurves(const std::vector<Handle(Geom_BSplineCurve)>& curves,
+                   std::vector<Handle(Geom_BSplineCurve)>&       result) const;
+
 protected:
 
-  int    m_iNumUKnots; //!< Number of U knots.
-  int    m_iNumVKnots; //!< Number of V knots.
-  int    m_iDegU;      //!< U degree.
-  int    m_iDegV;      //!< V degree.
-  double m_fMaxError;  //!< Max computed deviation of the untrimmed surface from the initial one.
+  int    m_iNumUIsos; //!< Number of U isolines.
+  int    m_iNumVIsos; //!< Number of V isolines.
+  int    m_iDegU;     //!< U degree.
+  int    m_iDegV;     //!< V degree.
+  double m_fMaxError; //!< Max computed deviation of the untrimmed surface from the initial one.
+
+  std::vector<TopoDS_Edge> m_guides;   //!< Guide edges.
+  std::vector<TopoDS_Edge> m_profiles; //!< Profile edges.
 
 };
 

@@ -93,7 +93,7 @@ bool asiAlgo_BuildHLR::performPrecise(const gp_Dir& direction)
   TopoDS_Shape VO = this->build3dCurves(shapes.OutLineVCompound()); // contours apparents visibly
   TopoDS_Shape VI = this->build3dCurves(shapes.IsoLineVCompound()); // isoparamtriques visibly
   TopoDS_Shape H  = this->build3dCurves(shapes.HCompound       ()); // hard edge invisibly
-  TopoDS_Shape H1 = this->build3dCurves(shapes.Rg1LineHCompound()); // Smoth edges invisibly
+  TopoDS_Shape H1 = this->build3dCurves(shapes.Rg1LineHCompound()); // smooth edges invisibly
   TopoDS_Shape HN = this->build3dCurves(shapes.RgNLineHCompound()); // contour edges invisibly
   TopoDS_Shape HO = this->build3dCurves(shapes.OutLineHCompound()); // contours apparents invisibly
   TopoDS_Shape HI = this->build3dCurves(shapes.IsoLineHCompound()); // isoparamtriques invisibly

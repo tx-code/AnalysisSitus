@@ -123,28 +123,33 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
                                                ActAPI_ProgressEntry               progress,
                                                ActAPI_PlotterEntry                plotter,
                                                QWidget*                           parent)
-: QDialog    (parent),
-  m_pViewer  (pViewer),
-  m_model    (model),
-  m_progress (progress),
-  m_plotter  (plotter)
+: QDialog        (parent),
+  m_pViewer      (pViewer),
+  m_model        (model),
+  m_bDiagnostics (false),
+  m_progress     (progress),
+  m_plotter      (plotter)
 {
   // Main layout.
   m_pMainLayout = new QVBoxLayout();
 
   // Group box for parameters.
-  QFrame*    pMethodPanel    = new QFrame;
-  QGroupBox* pGroupInputGeom = new QGroupBox("Input geometry");
-  QGroupBox* pGroupAdvanced  = new QGroupBox("Advanced");
-  QFrame*    bButtonsFrame   = new QFrame;
+  QFrame*    pMethodPanel      = new QFrame;
+  QGroupBox* pGroupInputGeom   = new QGroupBox("Input geometry");
+  QGroupBox* pGroupAdvanced    = new QGroupBox("Advanced");
+  QFrame*    bButtonsFrame     = new QFrame;
+  QFrame*    pDiagnosticsFrame = new QFrame; // Diagnostics frame.
 
   // Controls.
-  m_widgets.pFaces     = new asiUI_LineEdit();
-  m_widgets.pEdges     = new asiUI_LineEdit();
-  m_widgets.pNumUSpans = wf->CreateEditor("Num_USpans", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pNumVSpans = wf->CreateEditor("Num_VSpans", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pUDegree   = wf->CreateEditor("UDegree",    this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pVDegree   = wf->CreateEditor("VDegree",    this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pFaces    = new asiUI_LineEdit();
+  m_widgets.pEdges    = new asiUI_LineEdit();
+  m_widgets.pNumUIsos = wf->CreateEditor("Num_UIsos", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumVIsos = wf->CreateEditor("Num_VIsos", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pUDegree  = wf->CreateEditor("UDegree",   this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pVDegree  = wf->CreateEditor("VDegree",   this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+
+  // Diagnostics dumps.
+  m_widgets.pDiagnostics = new QCheckBox;
 
   //---------------------------------------------------------------------------
   // Buttons
@@ -161,10 +166,12 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
   m_widgets.pClose->setMaximumWidth(CONTROL_BTN_WIDTH);
 
   // Reaction.
-  connect( m_widgets.pApply, SIGNAL( clicked () ),
-           this,             SLOT  ( onApply () ) );
-  connect( m_widgets.pClose, SIGNAL( clicked () ),
-           this,             SLOT  ( close   () ) );
+  connect( m_widgets.pApply,       SIGNAL( clicked () ),
+           this,                   SLOT  ( onApply () ) );
+  connect( m_widgets.pClose,       SIGNAL( clicked () ),
+           this,                   SLOT  ( close   () ) );
+  connect( m_widgets.pDiagnostics, SIGNAL( clicked() ),
+           this,                   SLOT  ( onDiagnostics() ) );
 
   //---------------------------------------------------------------------------
   // Layout
@@ -199,8 +206,8 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
     pGridLayoutBot1->setSpacing(10);
     pGridLayoutBot1->setContentsMargins(10, 0, 10, 0);
     //
-    m_widgets.pNumUSpans->AddTo(pGridLayoutBot1);
-    m_widgets.pNumVSpans->AddTo(pGridLayoutBot1);
+    m_widgets.pNumUIsos->AddTo(pGridLayoutBot1);
+    m_widgets.pNumVIsos->AddTo(pGridLayoutBot1);
     //
     pGridLayoutBot1->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
@@ -215,7 +222,21 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
     pGridLayoutBot2->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     pAdvLayout->addWidget(pGridFrameBot1);
-    pAdvLayout->addWidget(pGridFrameBot2);
+    //pAdvLayout->addWidget(pGridFrameBot2);
+  }
+
+  // Layout with diagnostics.
+  {
+    QLabel* pDiagnosticsLbl = new QLabel("Visual dumps");
+
+    QHBoxLayout* pDiagnosticsLayout = new QHBoxLayout(pDiagnosticsFrame);
+    //
+    pDiagnosticsLayout->addWidget(pDiagnosticsLbl);
+    pDiagnosticsLayout->addWidget(m_widgets.pDiagnostics);
+    pDiagnosticsLayout->addStretch(1);
+
+    pDiagnosticsLayout->setSpacing(10);
+    pDiagnosticsLayout->setContentsMargins(10, 10, 10, 0);
   }
 
   // Layout for buttons.
@@ -235,6 +256,7 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
   m_pMainLayout->addWidget(pMethodPanel);
   m_pMainLayout->addWidget(pGroupInputGeom);
   m_pMainLayout->addWidget(pGroupAdvanced);
+  m_pMainLayout->addWidget(pDiagnosticsFrame);
   m_pMainLayout->addWidget(bButtonsFrame);
   //
   m_pMainLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -363,15 +385,9 @@ void asiUI_DialogUntrimSurf::onApply()
   if ( !m_model || !m_pViewer )
     return;
 
-  // Number of U/V spans.
-  const int numUSpans = QVariant( m_widgets.pNumUSpans->GetString() ).toInt();
-  const int numVSpans = QVariant( m_widgets.pNumVSpans->GetString() ).toInt();
-  //
-  if ( !numUSpans || !numVSpans )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Please, make sure to specify at least 1 span in U and V directions.");
-    return;
-  }
+  // Number of U/V isos.
+  const int numUIsos = QVariant( m_widgets.pNumUIsos->GetString() ).toInt();
+  const int numVIsos = QVariant( m_widgets.pNumVIsos->GetString() ).toInt();
 
   // U/V degrees.
   const int UDegree = QVariant( m_widgets.pUDegree->GetString() ).toInt();
@@ -446,10 +462,10 @@ void asiUI_DialogUntrimSurf::onApply()
   TopoDS_Face                 face;
 
   // Prepare untrimming tool.
-  asiAlgo_UntrimSurf UNTRIM(m_progress, m_plotter);
+  asiAlgo_UntrimSurf UNTRIM(m_progress, m_bDiagnostics ? m_plotter : nullptr);
   //
-  UNTRIM.SetNumUKnots(numUSpans + 1);
-  UNTRIM.SetNumVKnots(numVSpans + 1);
+  UNTRIM.SetNumUIsos (numUIsos);
+  UNTRIM.SetNumVIsos (numVIsos);
   UNTRIM.SetDegreeU  (UDegree);
   UNTRIM.SetDegreeV  (VDegree);
 
@@ -462,9 +478,39 @@ void asiUI_DialogUntrimSurf::onApply()
 
   m_progress.SendLogMessage(LogInfo(Normal) << "UNTRIM operation is done.");
 
+  // Visually dump guide and profile curves.
+  BRep_Builder    bbuilder;
+  TopoDS_Compound guidesComp, profilesComp;
+  //
+  bbuilder.MakeCompound(guidesComp);
+  bbuilder.MakeCompound(profilesComp);
+  //
+  const std::vector<TopoDS_Edge>& guides   = UNTRIM.GetGuides();
+  const std::vector<TopoDS_Edge>& profiles = UNTRIM.GetProfiles();
+  //
+  for ( const auto& guide : guides )
+  {
+    bbuilder.Add(guidesComp, guide);
+  }
+  //
+  for ( const auto& profile : profiles )
+  {
+    bbuilder.Add(profilesComp, profile);
+  }
+  //
+  m_plotter.REDRAW_SHAPE("guides",   guidesComp,   Color_Red);
+  m_plotter.REDRAW_SHAPE("profiles", profilesComp, Color_Green);
+
   if ( !surf.IsNull() )
     m_plotter.DRAW_SURFACE(surf, Color_Default, "untrimSurf");
 
   if ( !face.IsNull() )
     m_plotter.DRAW_SHAPE(face, Color_Default, "untrimFace");
+}
+
+//-----------------------------------------------------------------------------
+
+void asiUI_DialogUntrimSurf::onDiagnostics()
+{
+  m_bDiagnostics = m_widgets.pDiagnostics->isChecked();
 }

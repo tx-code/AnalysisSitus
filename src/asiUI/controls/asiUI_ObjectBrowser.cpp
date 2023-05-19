@@ -778,19 +778,51 @@ void asiUI_ObjectBrowser::onCopyAsJSON()
 
 void asiUI_ObjectBrowser::onSaveToBREP()
 {
-  Handle(ActAPI_INode) selected_n;
-  if ( !this->selectedNode(selected_n) ) return;
+  Handle(ActAPI_HNodeList) sel;
+  if ( !this->selectedNodes(sel) ) return;
 
-  if ( !selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
-    return;
+  Handle(ActAPI_INode) selected_n = sel->First();
 
-  Handle(asiData_IVTopoItemNode)
-    topoNode = Handle(asiData_IVTopoItemNode)::DownCast(selected_n);
-
+  // Outcome filename.
   QString filename = asiUI_Common::selectBRepFile(asiUI_Common::OpenSaveAction_Save);
 
+  // Shape to write.
+  TopoDS_Shape shape;
+
+  /* TOPOLOGY */
+  if ( selected_n->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
+  {
+    Handle(asiData_IVTopoItemNode)
+      topoNode = Handle(asiData_IVTopoItemNode)::DownCast(selected_n);
+
+    shape = topoNode->GetShape();
+  }
+
+  /* CURVE */
+  else if ( selected_n->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+  {
+    TopoDS_Compound curvesComp;
+    BRep_Builder bbuilder;
+    bbuilder.MakeCompound(curvesComp);
+
+    for ( ActAPI_NodeList::Iterator nit(*sel); nit.More(); nit.Next() )
+    {
+      Handle(ActAPI_INode) node = nit.Value();
+      //
+      if ( !node->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
+        continue;
+
+      Handle(Geom_Curve)
+        curve = Handle(asiData_IVCurveNode)::DownCast(node)->GetCurve();
+
+      bbuilder.Add( curvesComp, BRepBuilderAPI_MakeEdge(curve) );
+    }
+
+    shape = curvesComp;
+  }
+
   // Save shape.
-  if ( !asiAlgo_Utils::WriteBRep( topoNode->GetShape(), QStr2AsciiStr(filename) ) )
+  if ( shape.IsNull() || !asiAlgo_Utils::WriteBRep( shape, QStr2AsciiStr(filename) ) )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot save shape.");
     return;
@@ -1695,6 +1727,7 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
     {
       pMenu->addSeparator();
       pMenu->addAction( "Save to SVG...", this, SLOT( onSaveToSVG() ) );
+      pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP() ) );
     }
   }
 }

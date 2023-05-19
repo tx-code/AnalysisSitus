@@ -2083,6 +2083,11 @@ int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
     }
   }
 
+  // Read number of isos.
+  int numUIsos = 2, numVIsos = 2;
+  interp->GetKeyValue(argc, argv, "u", numUIsos);
+  interp->GetKeyValue(argc, argv, "v", numVIsos);
+
   // Get AAG.
   Handle(asiAlgo_AAG) aag = partApi.GetAAG();
   //
@@ -2130,7 +2135,10 @@ int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
 
   // Untrim surface.
   asiAlgo_UntrimSurf UNTRIM( interp->GetProgress(),
-                             interp->GetPlotter() );
+                             nullptr );
+  //
+  UNTRIM.SetNumUIsos(numUIsos);
+  UNTRIM.SetNumVIsos(numVIsos);
   //
   if ( !UNTRIM.Build(faces, edges, resSurf, resFace) )
   {
@@ -2141,6 +2149,29 @@ int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
   std::string surfName = "untrimSurf";
   interp->GetKeyValue(argc, argv, "name", surfName);
   interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);
+
+  // Visually dump guide and profile curves.
+  BRep_Builder    bbuilder;
+  TopoDS_Compound guidesComp, profilesComp;
+  //
+  bbuilder.MakeCompound(guidesComp);
+  bbuilder.MakeCompound(profilesComp);
+  //
+  const std::vector<TopoDS_Edge>& guides   = UNTRIM.GetGuides();
+  const std::vector<TopoDS_Edge>& profiles = UNTRIM.GetProfiles();
+  //
+  for ( const auto& guide : guides )
+  {
+    bbuilder.Add(guidesComp, guide);
+  }
+  //
+  for ( const auto& profile : profiles )
+  {
+    bbuilder.Add(profilesComp, profile);
+  }
+  //
+  interp->GetPlotter().REDRAW_SHAPE("guides",   guidesComp,   Color_Red);
+  interp->GetPlotter().REDRAW_SHAPE("profiles", profilesComp, Color_Green);
 
   const double maxError = UNTRIM.GetMaxError();
 
@@ -2421,7 +2452,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("untrim-surf",
     //
-    "untrim-surf -f <f1> [<f2> ...] -e <e1> <e2> [<e3> ...] [-name <surfName>]\n"
+    "untrim-surf -f <f1> [<f2> ...] -e <e1> <e2> [<e3> ...] [-name <surfName>] [-u <numIsosU>] [-v <numIsosV>]\n"
     "\t Untrims surface.",
     //
     __FILE__, group, ENGINE_UntrimSurf);

@@ -140,6 +140,13 @@ bool asiAlgo_IntersectCurves::Perform(const std::vector<Handle(Geom_BSplineCurve
     std::vector<double> params;
     this->getEdgeParameters( uEdges[i], algo.History(), params );
 
+    if ( uParams.ColNumber() < params.size() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "The number of intersection parameters "
+                                                  "exceeds the number of curves.");
+      return false;
+    }
+
     for ( int k = 0; k < (int) params.size(); ++k )
     {
       uParams(i, k) = params[k];
@@ -151,6 +158,13 @@ bool asiAlgo_IntersectCurves::Perform(const std::vector<Handle(Geom_BSplineCurve
   {
     std::vector<double> params;
     this->getEdgeParameters( vEdges[i], algo.History(), params );
+
+    if ( vParams.RowNumber() < params.size() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "The number of intersection parameters "
+                                                  "exceeds the number of curves.");
+      return false;
+    }
 
     for ( int k = 0; k < (int) params.size(); ++k )
     {

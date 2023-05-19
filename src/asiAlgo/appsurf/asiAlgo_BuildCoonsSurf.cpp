@@ -128,8 +128,8 @@ bool asiAlgo_BuildCoonsSurf::performBilinear()
 
   // Draw.
   m_plotter.REDRAW_POINT("p00", cascade::GetOpenCascadePnt(p00), Color_Yellow);
-  m_plotter.REDRAW_POINT("p01", cascade::GetOpenCascadePnt(p10), Color_Yellow);
-  m_plotter.REDRAW_POINT("p10", cascade::GetOpenCascadePnt(p01), Color_Yellow);
+  m_plotter.REDRAW_POINT("p10", cascade::GetOpenCascadePnt(p10), Color_Yellow);
+  m_plotter.REDRAW_POINT("p01", cascade::GetOpenCascadePnt(p01), Color_Yellow);
   m_plotter.REDRAW_POINT("p11", cascade::GetOpenCascadePnt(p11), Color_Yellow);
 
   /* =================================

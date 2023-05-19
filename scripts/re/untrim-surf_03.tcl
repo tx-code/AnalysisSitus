@@ -1,6 +1,6 @@
 # Set working variables.
 set datafile cad/untrim/test.igs
-set refErr   56
+set refErr   7.0
 
 # Read input geometry.
 set datadir $env(ASI_TEST_DATA)

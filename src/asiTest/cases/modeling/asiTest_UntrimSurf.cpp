@@ -77,3 +77,38 @@ outcome asiTest_UntrimSurf::test04(const int funcID)
 {
   return runTestScript(funcID, "re/untrim-surf_04.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_UntrimSurf::test05(const int funcID)
+{
+  return runTestScript(funcID, "re/untrim-surf_05.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_UntrimSurf::test06(const int funcID)
+{
+  return runTestScript(funcID, "re/untrim-surf_06.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_UntrimSurf::test07(const int funcID)
+{
+  return runTestScript(funcID, "re/untrim-surf_07.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_UntrimSurf::test08(const int funcID)
+{
+  return runTestScript(funcID, "re/untrim-surf_08.tcl");
+}
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_UntrimSurf::test09(const int funcID)
+{
+  return runTestScript(funcID, "re/untrim-surf_09.tcl");
+}

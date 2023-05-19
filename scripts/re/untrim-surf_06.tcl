@@ -1,6 +1,6 @@
 # Set working variables.
-set datafile cad/untrim/test.igs
-set refErr   7.0
+set datafile cad/turbines/Partition_3.step
+set refErr   0.001
 
 # Read input geometry.
 set datadir $env(ASI_TEST_DATA)
@@ -8,7 +8,7 @@ clear; load-part $datadir/$datafile; fit
 fit
 
 # Untrim surface.
-set maxErr [untrim-surf -f 1 -e 11 17 18 20]
+set maxErr [untrim-surf -f 13 -e 15 26 27 28 -u 10 -v 10]
 
 puts "Max error: $maxErr"
 

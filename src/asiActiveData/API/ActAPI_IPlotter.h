@@ -910,10 +910,10 @@ public:
 //---------------------------------------------------------------------------//
 
   void
-    DRAW_CURVE(const Handle(Geom_Curve)& curve,
-               const ActAPI_Color&       color,
-               const bool                showOri,
-               const TCollection_ExtendedString&        name = "")
+    DRAW_CURVE(const Handle(Geom_Curve)&         curve,
+               const ActAPI_Color&               color,
+               const bool                        showOri,
+               const TCollection_ExtendedString& name = "")
   {
     if ( m_iv.IsNull() ) return;
     //
@@ -923,10 +923,10 @@ public:
 //---------------------------------------------------------------------------//
 
   void
-    REDRAW_CURVE(const TCollection_ExtendedString&        name,
-                 const Handle(Geom_Curve)& curve,
-                 const ActAPI_Color&       color,
-                 const bool                showOri)
+    REDRAW_CURVE(const TCollection_ExtendedString& name,
+                 const Handle(Geom_Curve)&         curve,
+                 const ActAPI_Color&               color,
+                 const bool                        showOri)
   {
     if ( m_iv.IsNull() ) return;
     //

@@ -42,6 +42,7 @@
 // Qt includes
 #include <Standard_WarningsDisable.hxx>
 //
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QPushButton>
@@ -88,48 +89,55 @@ public slots:
   //! Reaction on clicking "Apply" button.
   void onApply();
 
+  //! Reaction on visual diagnostics (on/off).
+  void onDiagnostics();
+
 protected:
 
   //! Widgets.
   struct t_widgets
   {
-    QPushButton*    pApply;     //!< Performs untrimming.
-    QPushButton*    pClose;     //!< Closes the dialog.
-    asiUI_LineEdit* pFaces;     //!< Indices of the faces to untrim.
-    asiUI_LineEdit* pEdges;     //!< Indices of the boundary edges.
-    asiUI_Datum*    pNumUSpans; //!< Number of U spans.
-    asiUI_Datum*    pNumVSpans; //!< Number of V spans.
-    asiUI_Datum*    pUDegree;   //!< U degree.
-    asiUI_Datum*    pVDegree;   //!< V degree.
+    QPushButton*    pApply;       //!< Performs untrimming.
+    QPushButton*    pClose;       //!< Closes the dialog.
+    asiUI_LineEdit* pFaces;       //!< Indices of the faces to untrim.
+    asiUI_LineEdit* pEdges;       //!< Indices of the boundary edges.
+    asiUI_Datum*    pNumUIsos;    //!< Number of U spans.
+    asiUI_Datum*    pNumVIsos;    //!< Number of V spans.
+    asiUI_Datum*    pUDegree;     //!< U degree.
+    asiUI_Datum*    pVDegree;     //!< V degree.
+    QCheckBox*      pDiagnostics; //!< Visual diagnostics on/off.
 
     //! Default ctor.
-    t_widgets() : pApply     (nullptr),
-                  pClose     (nullptr),
-                  pFaces     (nullptr),
-                  pEdges     (nullptr),
-                  pNumUSpans (nullptr),
-                  pNumVSpans (nullptr),
-                  pUDegree   (nullptr),
-                  pVDegree   (nullptr)
+    t_widgets() : pApply       (nullptr),
+                  pClose       (nullptr),
+                  pFaces       (nullptr),
+                  pEdges       (nullptr),
+                  pNumUIsos    (nullptr),
+                  pNumVIsos    (nullptr),
+                  pUDegree     (nullptr),
+                  pVDegree     (nullptr),
+                  pDiagnostics (nullptr)
     {}
 
     void Release()
     {
-      delete pApply;     pApply     = nullptr;
-      delete pClose;     pClose     = nullptr;
-      delete pFaces;     pFaces     = nullptr;
-      delete pEdges;     pEdges     = nullptr;
-      delete pNumUSpans; pNumUSpans = nullptr;
-      delete pNumVSpans; pNumVSpans = nullptr;
-      delete pUDegree;   pUDegree   = nullptr;
-      delete pVDegree;   pVDegree   = nullptr;
+      delete pApply;       pApply       = nullptr;
+      delete pClose;       pClose       = nullptr;
+      delete pFaces;       pFaces       = nullptr;
+      delete pEdges;       pEdges       = nullptr;
+      delete pNumUIsos;    pNumUIsos    = nullptr;
+      delete pNumVIsos;    pNumVIsos    = nullptr;
+      delete pUDegree;     pUDegree     = nullptr;
+      delete pVDegree;     pVDegree     = nullptr;
+      delete pDiagnostics; pDiagnostics = nullptr;
     }
   };
 
-  t_widgets               m_widgets;     //!< UI controls.
-  QVBoxLayout*            m_pMainLayout; //!< Layout of the widget.
-  asiUI_ViewerPart*       m_pViewer;     //!< External reference to viewer.
-  Handle(asiEngine_Model) m_model;       //!< Data Model instance.
+  t_widgets               m_widgets;      //!< UI controls.
+  QVBoxLayout*            m_pMainLayout;  //!< Layout of the widget.
+  asiUI_ViewerPart*       m_pViewer;      //!< External reference to viewer.
+  Handle(asiEngine_Model) m_model;        //!< Data Model instance.
+  bool                    m_bDiagnostics; //!< Visual diagnostics on/off.
 
   /* Diagnostics */
 

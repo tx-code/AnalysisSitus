@@ -63,6 +63,18 @@ Make sure to pass non-zero values to surface approximation methods in order to a
     <description>Number of knot spans in the V curvilinear direction of the initial plane (if surface name is not specified).</description>
   </datum>
 
+  <datum id="Num_UIsos" format="" label="U isos">
+    <domain type="Integer" min="1" max="1e99" default="1"/>
+    <ui widget="SpinBox" widgetParams="step=1"/>
+    <description>Number of intermediate isolines in the U curvilinear direction.</description>
+  </datum>
+
+  <datum id="Num_VIsos" format="" label="V isos">
+    <domain type="Integer" min="1" max="1e99" default="1"/>
+    <ui widget="SpinBox" widgetParams="step=1"/>
+    <description>Number of intermediate isolines in the V curvilinear direction.</description>
+  </datum>
+
   <datum id="UDegree" format="" label="U degree">
     <domain type="Integer" min="1" max="8" default="3"/>
     <ui widget="SpinBox" widgetParams="step=1"/>

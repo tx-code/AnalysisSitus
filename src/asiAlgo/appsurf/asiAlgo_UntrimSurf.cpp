@@ -33,17 +33,33 @@
 
 // asiAlgo includes
 #include "asiAlgo_BuildCoonsSurf.h"
+#include "asiAlgo_BuildGordonSurf.h"
+
+#ifdef USE_MOBIUS
+// Mobius includes
+#include <mobius/cascade.h>
+#include <mobius/geom_InterpolateMultiCurve.h>
+#endif
 
 // OpenCascade includes
 #include <BRep_Tool.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepLib.hxx>
+#include <GCPnts_QuasiUniformAbscissa.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAPI.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_Surface.hxx>
+#include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
 
 // Standard includes
 #include <set>
+
+using namespace mobius;
 
 //-----------------------------------------------------------------------------
 
@@ -72,7 +88,7 @@ void asiAlgo_UntrimSurf::CheckDeviation(const Handle(Geom_BSplineSurface)& resSu
     //
     while ( !uStop )
     {
-      if ( u > uMax )
+      if ( (u > uMax) || Abs(u - uMax) < 1e-6 )
       {
         u     = uMax;
         uStop = true;
@@ -91,7 +107,7 @@ void asiAlgo_UntrimSurf::CheckDeviation(const Handle(Geom_BSplineSurface)& resSu
     //
     while ( !vStop )
     {
-      if ( v > vMax )
+      if ( (v > vMax) || Abs(v - vMax) < 1e-6 )
       {
         v     = vMax;
         vStop = true;
@@ -133,8 +149,8 @@ void asiAlgo_UntrimSurf::CheckDeviation(const Handle(Geom_BSplineSurface)& resSu
 asiAlgo_UntrimSurf::asiAlgo_UntrimSurf(ActAPI_ProgressEntry progress,
                                        ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm ( progress, plotter ),
-  m_iNumUKnots      ( 2 ),
-  m_iNumVKnots      ( 2 ),
+  m_iNumUIsos       ( 2 ),
+  m_iNumVIsos       ( 2 ),
   m_iDegU           ( 3 ),
   m_iDegV           ( 3 ),
   m_fMaxError       ( 0. )
@@ -182,27 +198,179 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
     return false;
   }
 
-  // Build a Coons patch.
-  asiAlgo_BuildCoonsSurf coonsAlgo(c0, c1, b0, b1, m_progress, m_plotter);
-  //
-  if ( !coonsAlgo.Perform() )
+  /* Make curves compatible by their degrees. */
+
+  std::vector<Handle(Geom_BSplineCurve)>
+    coonsRails = { c0, c1, b0, b1 };
+
+  // Find max used degree.
+  int p = 3; // Min desired degree.
+  for ( const auto& C : coonsRails )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build a bilinear Coons patch.");
+    p = Max( p, C->Degree() );
+  }
+
+  // Elevate degrees with OpenCascade as Mobius cannot do this (March 2023).
+  for ( auto& C : coonsRails )
+  {
+    C->IncreaseDegree(p);
+  }
+
+  std::vector<Handle(Geom_BSplineCurve)> coonsRailsReapprox;
+  this->reapproxCurves(coonsRails, coonsRailsReapprox);
+  //
+  c0 = coonsRailsReapprox[0];
+  c1 = coonsRailsReapprox[1];
+  b0 = coonsRailsReapprox[2];
+  b1 = coonsRailsReapprox[3];
+
+  // Build a Coons patch.
+  Handle(Geom_BSplineSurface) coonsSurf;
+  //
+  try
+  {
+    asiAlgo_BuildCoonsSurf coonsAlgo(c0, c1, b0, b1, m_progress, m_plotter);
+    //
+    if ( !coonsAlgo.Perform() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Cannot build a bilinear Coons patch.");
+      return false;
+    }
+    //
+    coonsSurf = coonsAlgo.GetResult();
+  }
+  catch ( ... )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Failed to build a Coons patch.");
     return false;
   }
   //
-  const Handle(Geom_BSplineSurface)& coonsSurf = coonsAlgo.GetResult();
-  //
   m_plotter.REDRAW_SURFACE("coonsSurf", coonsSurf, Color_Default);
+  m_plotter.REDRAW_SURFACE("initSurf", initSurf, Color_Default);
 
-  // TODO: NYI
+  /* =============================
+   *  Extract isoparametric lines.
+   * ============================= */
+
+  double uMin, uMax, vMin, vMax;
+  coonsSurf->Bounds(uMin, uMax, vMin, vMax);
+
+  const double uStep = (uMax - uMin) / (m_iNumUIsos + 1);
+  const double vStep = (vMax - vMin) / (m_iNumVIsos + 1);
+
+  // Choose u values
+  std::vector<double> U;
+  {
+    double u     = uMin;
+    bool   uStop = false;
+    //
+    while ( !uStop )
+    {
+      if ( (u > uMax) || Abs(u - uMax) < 1e-6 )
+      {
+        u     = uMax;
+        uStop = true;
+      }
+
+      U.push_back(u);
+      u += uStep;
+    }
+  }
+
+  // Choose v values
+  std::vector<double> V;
+  {
+    double v     = vMin;
+    bool   vStop = false;
+    //
+    while ( !vStop )
+    {
+      if ( (v > vMax) || Abs(v - vMax) < 1e-6 )
+      {
+        v     = vMax;
+        vStop = true;
+      }
+
+      V.push_back(v);
+      v += vStep;
+    }
+  }
+
+  std::vector<TopoDS_Edge> guides, profiles;
+
+  ShapeConstruct_ProjectCurveOnSurface projector;
+  projector.Init(initSurf, 1e-3);
+
+  for ( const auto u : U )
+  {
+    Handle(Geom_Curve) c = coonsSurf->UIso(u);
+
+    m_plotter.DRAW_CURVE( c, Color_Green, true, "unprojGuide" );
+
+    Handle(Geom2d_Curve) c2d;
+    projector.Perform(c, c->FirstParameter(), c->LastParameter(), c2d);
+
+    TopoDS_Edge projEdge = BRepBuilderAPI_MakeEdge(c2d, initSurf);
+
+    const double prec = Max( 1.e-5, BRep_Tool::Tolerance(projEdge) );
+
+    BRepLib::BuildCurve3d(projEdge, prec,
+                          GeomAbs_C1, 3, 300);
+
+    //Handle(Geom_Curve) pc = GeomProjLib::Project(c, initSurf);
+
+    guides.push_back( projEdge );
+
+    double ff, ll;
+    m_plotter.DRAW_CURVE( BRep_Tool::Curve(projEdge, ff, ll), Color_Red, true, "guide" );
+  }
+
+  for ( const auto v : V )
+  {
+    Handle(Geom_Curve) c  = coonsSurf->VIso(v);
+
+    m_plotter.DRAW_CURVE( c, Color_Green, true, "unprojProfile" );
+
+    Handle(Geom2d_Curve) c2d;
+    projector.Perform(c, c->FirstParameter(), c->LastParameter(), c2d);
+
+    TopoDS_Edge projEdge = BRepBuilderAPI_MakeEdge(c2d, initSurf);
+
+    const double prec = Max( 1.e-5, BRep_Tool::Tolerance(projEdge) );
+
+    BRepLib::BuildCurve3d(projEdge, prec,
+                          GeomAbs_C1, 3, 300);
+
+    //Handle(Geom_Curve) pc = GeomProjLib::Project(c, initSurf);
+
+    profiles.push_back( projEdge );
+
+    double ff, ll;
+    m_plotter.DRAW_CURVE( BRep_Tool::Curve(projEdge, ff, ll), Color_Green, true, "profile" );
+  }
+
+  // Set guides and profiles as member fields to consult them externally.
+  m_guides   = guides;
+  m_profiles = profiles;
+
+  /* ======================
+   *  Build Gordon surface.
+   * ====================== */
+
+  asiAlgo_BuildGordonSurf GORDON(m_progress, m_plotter);
+
+  if ( !GORDON.Build(profiles, guides, outSupport, outFace) )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build a Gordon surface.");
+    return false;
+  }
 
   /* ==================
    *  Check deviations.
    * ================== */
 
   // Check deviation from the initial surface.
-  CheckDeviation(coonsSurf, initSurf, m_fMaxError, m_plotter);
+  CheckDeviation(outSupport, initSurf, m_fMaxError, m_plotter);
 
   m_progress.SendLogMessage(LogNotice(Normal) << "Max deviation: %1."
                                               << m_fMaxError);
@@ -212,19 +380,43 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_UntrimSurf::sortEdges(const Handle(TopTools_HSequenceOfShape)& edges,
+bool asiAlgo_UntrimSurf::sortEdges(const Handle(TopTools_HSequenceOfShape)& initEdges,
                                    Handle(Geom_BSplineCurve)&               c0,
                                    Handle(Geom_BSplineCurve)&               c1,
                                    Handle(Geom_BSplineCurve)&               b0,
                                    Handle(Geom_BSplineCurve)&               b1) const
 {
-  if ( edges->Size() != 4 )
+  if ( initEdges->Size() != 4 )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Only 4 edges are supported.");
     return false; // contract check
   }
 
   const double tol3d = 1e-2;
+
+  /* Make sure that edge curves are trimmed properly */
+  Handle(TopTools_HSequenceOfShape)
+    edges = new TopTools_HSequenceOfShape;
+  //
+  for ( int eidx = 1; eidx <= initEdges->Length(); ++eidx )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( (*initEdges)(eidx) );
+
+    // Get range of the edge.
+    double ef, el;
+    BRep_Tool::Range(edge, ef, el);
+
+    // Get range of the curve.
+    double cf, cl;
+    Handle(Geom_BSplineCurve)
+      c3d = Handle(Geom_BSplineCurve)::DownCast( BRep_Tool::Curve(edge, cf, cl) );
+    //
+    cf = c3d->FirstParameter();
+    cl = c3d->LastParameter();
+
+    c3d->Segment(ef, el);
+    edges->Append( BRepBuilderAPI_MakeEdge(c3d) );
+  }
 
   // Edge analysis tool.
   ShapeAnalysis_Edge sae;
@@ -372,10 +564,102 @@ bool asiAlgo_UntrimSurf::sortEdges(const Handle(TopTools_HSequenceOfShape)& edge
     }
   }
 
+  // Corner check 1: c0(l) != b1(f) && c0(f) == b0(f) -> reverse b1
+  {
+    gp_Pnt c0_Pl = c0->Value( c0->LastParameter() );
+    gp_Pnt b1_Pf = b1->Value( b1->FirstParameter() );
+    gp_Pnt c0_Pf = c0->Value( c0->FirstParameter() );
+    gp_Pnt b0_Pf = b0->Value( b0->FirstParameter() );
+    //
+    const double controlDist1 = c0_Pl.Distance(b1_Pf);
+    const double controlDist2 = c0_Pf.Distance(b0_Pf);
+    //
+    if ( controlDist1 > tol3d && controlDist2 < tol3d )
+    {
+      b1->Reverse();
+    }
+  }
+
   m_plotter.REDRAW_CURVE("c0", c0, Color_Red,   true);
   m_plotter.REDRAW_CURVE("c1", c1, Color_Red,   true);
   m_plotter.REDRAW_CURVE("b0", b0, Color_Green, true);
   m_plotter.REDRAW_CURVE("b1", b1, Color_Green, true);
 
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_UntrimSurf::reapproxCurves(const std::vector<Handle(Geom_BSplineCurve)>& curves,
+                                        std::vector<Handle(Geom_BSplineCurve)>&       result) const
+{
+#ifdef USE_MOBIUS
+  /* =====================================================
+   *  Discretize curves to have the same number of points.
+   * ===================================================== */
+
+  const int numPts = 100;
+
+  // Set max degree.
+  int degree = 3;
+
+  // Prepare interpolation tool.
+  geom_InterpolateMultiCurve interpTool(degree,
+                                        ParamsSelection_ChordLength,
+                                        KnotsSelection_Average);
+
+  for ( const auto& C : curves )
+  {
+    // Discretize with a uniform curvilinear step.
+    GeomAdaptor_Curve gac(C);
+    GCPnts_QuasiUniformAbscissa Defl(gac, numPts);
+    //
+    if ( !Defl.IsDone() )
+      return false;
+
+    // Fill row of points.
+    std::vector<t_xyz> ptsRow;
+    //
+    for ( int i = 1; i <= numPts; ++i )
+    {
+      const double param = Defl.Parameter(i);
+      t_xyz P = cascade::GetMobiusPnt( C->Value(param) );
+      //
+      ptsRow.push_back(P);
+    }
+
+    // Add points to the interpolation tool.
+    interpTool.AddRow(ptsRow);
+  }
+
+  /* ========================
+   *  Interpolate multicurve.
+   * ======================== */
+
+  if ( !interpTool.Perform() )
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Multicurve interpolation failed.");
+    return false;
+  }
+
+  result.clear(); // in case it's the same as the input
+
+  for ( int k = 0; k < interpTool.GetNumRows(); ++k )
+  {
+    Handle(Geom_BSplineCurve)
+      resCurve = cascade::GetOpenCascadeBCurve( interpTool.GetResult(k) );
+
+    result.push_back(resCurve);
+
+    m_plotter.DRAW_CURVE(resCurve, Color_Khaki, true, "reapproxedCurve");
+  }
+
+  return true;
+#else
+  (void) curves;
+  (void) result;
+  (void) params;
+  (void) knots;
+  return false;
+#endif
 }
