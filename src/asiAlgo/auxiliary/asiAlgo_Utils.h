@@ -399,6 +399,14 @@ namespace asiAlgo_Utils
     //! \return a JSON array containing the elements of the pair.
     asiAlgo_EXPORT std::string
       FromPair(const tl::optional< std::pair<int, int> >& pair);
+
+    //! Handles special symbols in string 's' and escape them using
+    //! additional backslash.
+    //! \param[in] s the string to proceed.
+    //! \return a string with 'escaped' symbols.
+    asiAlgo_EXPORT std::string
+      EscapeJson(const std::string& s);
+
   }
 
   //! Functions for verification of results.

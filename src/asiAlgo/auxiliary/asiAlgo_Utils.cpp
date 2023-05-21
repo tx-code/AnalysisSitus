@@ -981,6 +981,42 @@ std::string
 
 //-----------------------------------------------------------------------------
 
+// https://stackoverflow.com/a/33799784/2058753
+std::string
+  asiAlgo_Utils::Json::EscapeJson(const std::string& s)
+{
+  std::ostringstream o;
+  for ( auto c = s.cbegin(); c != s.cend(); c++ )
+  {
+    switch ( *c )
+    {
+      case '"':  o << "\\\""; break;
+      case '\\': o << "\\\\"; break;
+      case '\b': o << "\\b";  break;
+      case '\f': o << "\\f";  break;
+      case '\n': o << "\\n";  break;
+      case '\r': o << "\\r";  break;
+      case '\t': o << "\\t";  break;
+      default:
+      {
+        if ( '\x00' <= *c && *c <= '\x1f' )
+        {
+          o << "\\u"
+            << std::hex << std::setw(4) << std::setfill('0') << (int)* c;
+        }
+        else
+        {
+          o << *c;
+        }
+      }
+    }
+  }
+
+  return o.str();
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::Verify::CompareOccurrences(const std::vector<double>& V1,
                                                const std::vector<double>& V2,
                                                const double               prec)
