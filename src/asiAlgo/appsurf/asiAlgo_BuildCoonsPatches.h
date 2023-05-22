@@ -105,6 +105,24 @@ public:
                                    const math_Matrix&                            vParams,
                                    std::vector<Handle(Geom_Curve)>&              uTrimmedCurves,
                                    std::vector<Handle(Geom_Curve)>&              vTrimmedCurves) const;
+
+  //! trim curves using points.
+  //! \param[in]  uCurves        profiles to trim.
+  //! \param[in]  vCurves        guides to trim.
+  //! \param[in]  uParams        u params for trimming uCurves in the correct parts.
+  //! \param[in]  vParams        v params for trimming vCurves in the correct parts.
+  //! \param[out] uTrimmedCurves trimmed profiles.
+  //! \param[out] vTrimmedCurves trimmed guides.
+  //! \return true in the case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    concatEdgesIntoPatches(std::vector<Handle(Geom_Curve)>& uEdge,
+                           std::vector<Handle(Geom_Curve)>& vEdge) const;
+
+  bool findCommonEdge(const Handle(Geom_Curve)&        v1,
+                      const Handle(Geom_Curve)&        v2,
+                      const Handle(Geom_Curve)&        uEdge,
+                      std::vector<Handle(Geom_Curve)>& uEdges,
+                      Handle(Geom_Curve)&              resEdge) const;
 };
 
 #endif

@@ -38,6 +38,7 @@
 #include <GeomConvert.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <ShapeAnalysis_Curve.hxx>
+#include <asiAlgo_AAG.h>
 
 // Tigl include
 #include "CTiglInterpolateCurveNetwork.h"
@@ -381,6 +382,7 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
     return false;
   }
 
+  TopTools_IndexedMapOfShape edges;
   for (const auto& i : uTrimmedCurves)
   {
     auto edge = BRepBuilderAPI_MakeEdge(i);
@@ -391,6 +393,12 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
     auto edge = BRepBuilderAPI_MakeEdge(i);
     guidesEdges.push_back(edge);
   }
+
+  if (!concatEdgesIntoPatches(uTrimmedCurves, vTrimmedCurves))
+  {
+    return false;
+  }
+
 
   return true;
 #else
@@ -539,4 +547,85 @@ bool asiAlgo_BuildCoonsPatches::computeCurvesFromIntersections(const std::vector
     }
   }
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_BuildCoonsPatches::concatEdgesIntoPatches(std::vector<Handle(Geom_Curve)>& uEdge,
+                                                       std::vector<Handle(Geom_Curve)>& vEdge) const
+{
+  std::vector<std::vector<Handle(Geom_Curve)>> patches;
+  for (auto& ue : uEdge)
+  {
+    auto fVertU = ue->Value(ue->FirstParameter());
+    auto lVertU = ue->Value(ue->LastParameter());
+    std::vector<Handle(Geom_Curve)> commonCurve;
+    for (auto& ve : vEdge)
+    {
+      auto fVertV = ve->Value(ve->FirstParameter());
+      auto lVertV = ve->Value(ve->FirstParameter());
+      if (fVertU.IsEqual(fVertV, 0.001) || fVertU.IsEqual(lVertV, 0.001) ||
+          lVertU.IsEqual(fVertV, 0.001) || lVertU.IsEqual(lVertV, 0.001))
+      {
+        commonCurve.emplace_back(ve);
+      }
+    }
+    if (commonCurve.empty())
+    {
+      continue;
+    }
+    for (size_t i = 0; i < commonCurve.size() - 1; ++i)
+    {
+      for (size_t j = i + 1; j < commonCurve.size(); ++j)
+      {
+        Handle(Geom_Curve) resEdge;
+        if (findCommonEdge(commonCurve[i], commonCurve[j], ue, uEdge, resEdge))
+        {
+          std::vector<Handle(Geom_Curve)> patch;
+          patch.emplace_back(commonCurve[i]);
+          patch.emplace_back(commonCurve[j]);
+          patch.emplace_back(ue);
+          patch.emplace_back(resEdge);
+          patches.emplace_back(patch);
+          m_plotter.DRAW_CURVE(commonCurve[i], Color_Red, "vEdge" );
+          m_plotter.DRAW_CURVE(commonCurve[j], Color_Red, "vEdge" );
+          m_plotter.DRAW_CURVE(ue, Color_Red, "vEdge" );
+          m_plotter.DRAW_CURVE(resEdge, Color_Red, "vEdge" );
+          break;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool asiAlgo_BuildCoonsPatches::findCommonEdge(const Handle(Geom_Curve)&        v1,
+                                               const Handle(Geom_Curve)&        v2,
+                                               const Handle(Geom_Curve)&        uEdge,
+                                               std::vector<Handle(Geom_Curve)>& uEdges,
+                                               Handle(Geom_Curve)&              resEdge) const
+{
+  auto fVertV1 = v1->Value(v1->FirstParameter());
+  auto lVertV1 = v1->Value(v1->LastParameter());
+  //
+  auto fVertV2 = v2->Value(v2->FirstParameter());
+  auto lVertV2 = v2->Value(v2->LastParameter());
+  for (auto& ue : uEdges)
+  {
+    if (uEdge == ue)
+    {
+      continue;
+    }
+    auto fVertU = ue->Value(ue->FirstParameter());
+    auto lVertU = ue->Value(ue->LastParameter());
+    if ((fVertU.IsEqual(fVertV1, 0.001) || fVertU.IsEqual(lVertV1, 0.001) ||
+      lVertU.IsEqual(fVertV1, 0.001) || lVertU.IsEqual(lVertV1, 0.001)) &&
+      (fVertU.IsEqual(fVertV2, 0.001) || fVertU.IsEqual(lVertV2, 0.001) ||
+        lVertU.IsEqual(fVertV2, 0.001) || lVertU.IsEqual(lVertV2, 0.001)))
+    {
+      resEdge = ue;
+      return true;
+    }
+  }
+  return false;
 }
