@@ -21,6 +21,7 @@ set (CPP_FILES
 set (appsurf_H_FILES
   appsurf/asiAlgo_AppSurfUtils.h
   appsurf/asiAlgo_BuildCoonsSurf.h
+  appsurf/asiAlgo_BuildCoonsPatches.h
   appsurf/asiAlgo_BuildGordonSurf.h
   appsurf/asiAlgo_IntersectCurves.h
   appsurf/asiAlgo_UntrimSurf.h
@@ -40,6 +41,7 @@ set (appsurf_H_FILES
 set (appsurf_CPP_FILES
   appsurf/asiAlgo_AppSurfUtils.cpp
   appsurf/asiAlgo_BuildCoonsSurf.cpp
+  appsurf/asiAlgo_BuildCoonsPatches.cpp
   appsurf/asiAlgo_BuildGordonSurf.cpp
   appsurf/asiAlgo_IntersectCurves.cpp
   appsurf/asiAlgo_UntrimSurf.cpp

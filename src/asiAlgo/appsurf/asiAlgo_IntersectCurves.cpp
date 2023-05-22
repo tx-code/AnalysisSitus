@@ -250,7 +250,7 @@ void asiAlgo_IntersectCurves::getEdgeParameters(const TopoDS_Edge&              
       curvePts->AddElement( c3d->Value(p) );
     }
 
-    m_plotter.DRAW_SHAPE(modifiedComp, "images");
-    m_plotter.DRAW_POINTS(curvePts->GetCoordsArray(), Color_Blue, "imagePts");
+    /*m_plotter.DRAW_SHAPE(modifiedComp, "images");
+    m_plotter.DRAW_POINTS(curvePts->GetCoordsArray(), Color_Blue, "imagePts");*/
   }
 }
