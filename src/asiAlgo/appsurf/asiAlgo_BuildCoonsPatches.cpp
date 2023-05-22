@@ -60,6 +60,8 @@
   using namespace mobius;
 #endif
 
+//-----------------------------------------------------------------------------
+
 void GetPointGrid(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
   const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
   const math_Matrix&                            intersection_params_u,
@@ -94,10 +96,12 @@ void GetPointGrid(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
 {
 }
 
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
                                       const std::vector<TopoDS_Edge>& guides,
-                                      Handle(Geom_BSplineSurface)&    support,
-                                      TopoDS_Face&                    face)
+                                      std::vector<TopoDS_Edge>&       profileEdges,
+                                      std::vector<TopoDS_Edge>&       guidesEdges)
 {
 #ifdef USE_MOBIUS
   if ( profiles.empty() )
@@ -337,8 +341,6 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
     intersection_params_v = intersection_params_v2;
   }
 
-  //return false;
-
   /* ===========================================
   *  Collect curve network intersection points.
   * =========================================== */
@@ -356,49 +358,56 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
       for ( const auto& pt : row )
       {
         pnts.push_back({pt.X(), pt.Y(), pt.Z()});
-        __pts->AddElement( pt.X(), pt.Y(), pt.Z() );/*
-        m_plotter.DRAW_POINT( gp_Pnt( pt.X(), pt.Y(), pt.Z() ), Color_Yellow, "pt" );*/
+        __pts->AddElement( pt.X(), pt.Y(), pt.Z() );
       }
 
     m_plotter.DRAW_POINTS( __pts->GetCoordsArray(), Color_Yellow, "points" );
   }
-  //
+
   /* =============
   *  Trim Curves.
   * ============= */
+
   std::vector<Handle(Geom_Curve)> uTrimmedCurves;
   std::vector<Handle(Geom_Curve)> vTrimmedCurves;
 
   if (!computeCurvesFromIntersections(profileCurves,
                                       guideCurves,
+                                      intersection_params_u,
+                                      intersection_params_v,
                                       uTrimmedCurves,
-                                      vTrimmedCurves,
-                                      pnts))
+                                      vTrimmedCurves))
   {
     return false;
   }
 
-  std::vector<TopoDS_Edge> uEdges;
-  std::vector<TopoDS_Edge> vEdges;
-  for (auto& i : uTrimmedCurves)
+  for (const auto& i : uTrimmedCurves)
   {
     auto edge = BRepBuilderAPI_MakeEdge(i);
-    uEdges.push_back(edge);
-    m_plotter.DRAW_SHAPE(edge, Color_Red, "uEdge" );
+    profileEdges.push_back(edge);
   }
-  for (auto& i : vTrimmedCurves)
+  for (const auto& i : vTrimmedCurves)
   {
     auto edge = BRepBuilderAPI_MakeEdge(i);
-    vEdges.push_back(edge);
-    m_plotter.DRAW_SHAPE(edge, Color_Red, "vEdge" );
+    guidesEdges.push_back(edge);
   }
+
+  return true;
+#else
+  (void)curves;
+  (void)result;
+  (void)params;
+  (void)knots;
+  return false;
 #endif
 }
 
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_BuildCoonsPatches::reapproxCurves(const std::vector<Handle(Geom_BSplineCurve)>& curves,
-  std::vector<Handle(Geom_BSplineCurve)>&       result,
-  std::vector<double>&                          params,
-  std::vector<double>&                          knots) const
+                                               std::vector<Handle(Geom_BSplineCurve)>&       result,
+                                               std::vector<double>&                          params,
+                                               std::vector<double>&                          knots) const
 {
 #ifdef USE_MOBIUS
   /* =====================================================
@@ -476,68 +485,56 @@ bool asiAlgo_BuildCoonsPatches::reapproxCurves(const std::vector<Handle(Geom_BSp
 #endif
 }
 
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_BuildCoonsPatches::computeCurvesFromIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
                                                                const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
+                                                               const math_Matrix&                            uParams,
+                                                               const math_Matrix&                            vParams,
                                                                std::vector<Handle(Geom_Curve)>&              uTrimmedCurves,
-                                                               std::vector<Handle(Geom_Curve)>&              vTrimmedCurves,
-                                                               const std::vector<gp_Pnt>&                    points) const
+                                                               std::vector<Handle(Geom_Curve)>&              vTrimmedCurves) const
 {
   ShapeAnalysis_Curve sac;
-  for (auto& curve : uCurves)
+  for (int row = 0; row < uParams.RowNumber(); ++row)
   {
-    double uPrev = 0;
-    bool isFirst = true;
-    for (auto& pnt : points)
+    double prev = 0;
+    for (int col = 0; col < (int) uParams.ColNumber(); ++col)
     {
-      gp_Pnt proj;
-      double param;
-      sac.Project(curve, pnt, Precision::Confusion(), proj, param);
-      if (pnt.IsEqual(proj, 0.001))
+      auto param = uParams(row, col);
+      if (abs(prev - param) <=  0.001 || param < prev)
       {
-        if (isFirst || uPrev == param)
-        {
-          isFirst = false;
-          uPrev = param;
-          continue;
-        }
-        try
-        {
-          Handle(Geom_Curve) uTrimmedCurve = new Geom_TrimmedCurve(curve, uPrev, param);
-          uPrev = param;
-          uTrimmedCurves.emplace_back(uTrimmedCurve);
-        } catch (...)
-        {
-          return false;
-        }
+        continue;
+      }
+      try
+      {
+        auto uTrimmedCurve = GeomConvert::SplitBSplineCurve(uCurves[row], prev, param, 0.001, true);
+        prev = param;
+        uTrimmedCurves.emplace_back(uTrimmedCurve);
+      } catch (...)
+      {
+        continue;
       }
     }
   }
-  for (auto& curve : vCurves)
+
+  for (int col = 0; col < (int) vParams.ColNumber(); ++col)
   {
-    double uPrev = 0;
-    bool isFirst = true;
-    for (auto& pnt : points)
+    double prev = 0;
+    for (int row = 0; row < vParams.RowNumber(); ++row)
     {
-      gp_Pnt proj;
-      double param;
-      sac.Project(curve, pnt, Precision::Confusion(), proj, param);
-      if (pnt.IsEqual(proj, 0.001))
+      auto param = vParams(row, col);
+      if (abs(prev - param) <=  0.001 || param < prev)
       {
-        if (isFirst || uPrev == param)
-        {
-          isFirst = false;
-          uPrev = param;
-          continue;
-        }
-        try
-        {
-          Handle(Geom_Curve) TrimmedCurve = new Geom_TrimmedCurve(curve, uPrev, param);
-          uPrev = param;
-          vTrimmedCurves.emplace_back(TrimmedCurve);
-        } catch (...)
-        {
-          return false;
-        }
+        continue;
+      }
+      try
+      {
+        auto vTrimmedCurve = GeomConvert::SplitBSplineCurve(vCurves[col], prev, param, 0.001, true);
+        prev = param;
+        vTrimmedCurves.emplace_back(vTrimmedCurve);
+      } catch (...)
+      {
+        continue;
       }
     }
   }

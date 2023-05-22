@@ -65,24 +65,46 @@ public:
                               ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
+  //! Builds Patches.
+  //! \param[in]  uEdges       the collection of boundary edges in the U direction.
+  //! \param[in]  vEdges       the collection of boundary edges in the V direction.
+  //! \param[out] profileEdges the constructed trimmed edges.
+  //! \param[out] guidesEdges  the constructed trimmed edges.
+  //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
                                      const std::vector<TopoDS_Edge>& guides,
-                                     Handle(Geom_BSplineSurface)&    support,
-                                     TopoDS_Face&                    face);
+                                     std::vector<TopoDS_Edge>&       profileEdges,
+                                     std::vector<TopoDS_Edge>&       guidesEdges);
 
+  //! Reapproximates the passed curves to ensure they all have identical
+  //! parameterization.
+  //! \param[in]  curves the curves to reapproximate.
+  //! \param[out] result the reapproximated curves.
+  //! \param[out] params the chosen parameterization for points.
+  //! \param[out] knots  the chosen knot vector.
+  //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
   asiAlgo_BuildCoonsPatches::reapproxCurves(const std::vector<Handle(Geom_BSplineCurve)>& curves,
-    std::vector<Handle(Geom_BSplineCurve)>&       result,
-    std::vector<double>&                          params,
-    std::vector<double>&                          knots) const;
+                                            std::vector<Handle(Geom_BSplineCurve)>&       result,
+                                            std::vector<double>&                          params,
+                                            std::vector<double>&                          knots) const;
 
+  //! trim curves using points.
+  //! \param[in]  uCurves        profiles to trim.
+  //! \param[in]  vCurves        guides to trim.
+  //! \param[in]  uParams        u params for trimming uCurves in the correct parts.
+  //! \param[in]  vParams        v params for trimming vCurves in the correct parts.
+  //! \param[out] uTrimmedCurves trimmed profiles.
+  //! \param[out] vTrimmedCurves trimmed guides.
+  //! \return true in the case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     computeCurvesFromIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
                                    const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
+                                   const math_Matrix&                            uParams,
+                                   const math_Matrix&                            vParams,
                                    std::vector<Handle(Geom_Curve)>&              uTrimmedCurves,
-                                   std::vector<Handle(Geom_Curve)>&              vTrimmedCurves,
-                                   const std::vector<gp_Pnt>&                    points) const;
+                                   std::vector<Handle(Geom_Curve)>&              vTrimmedCurves) const;
 };
 
 #endif
