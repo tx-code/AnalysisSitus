@@ -35,6 +35,8 @@
 #include <asiVisu_MeshEScalarPipeline.h>
 #include <asiVisu_MeshResultUtils.h>
 #include <asiVisu_ThicknessDataProvider.h>
+#include <asiVisu_SphereDataProvider.h>
+#include <asiVisu_SpherePipeline.h>
 
 // VTK includes
 #pragma warning(push, 0)
@@ -51,11 +53,18 @@ asiVisu_ThicknessPrs::asiVisu_ThicknessPrs(const Handle(ActAPI_INode)& N)
     TN = Handle(asiData_ThicknessNode)::DownCast(N);
 
   // Create Data Provider.
-  Handle(asiVisu_ThicknessDataProvider) DP = new asiVisu_ThicknessDataProvider(TN);
+  Handle(asiVisu_ThicknessDataProvider) TDP = new asiVisu_ThicknessDataProvider(TN);
+  Handle(asiVisu_SphereDataProvider)    SDS = new asiVisu_SphereDataProvider(TN);
 
   // Create Pipeline.
   this->addPipeline        ( Pipeline_Main, new asiVisu_MeshEScalarPipeline );
-  this->assignDataProvider ( Pipeline_Main, DP );
+  this->assignDataProvider ( Pipeline_Main, TDP);
+
+  this->addPipeline        ( Pipeline_Sphere, new asiVisu_SpherePipeline );
+  this->assignDataProvider ( Pipeline_Sphere, SDS);
+
+  //
+  this->GetPipeline(Pipeline_Sphere)->Actor()->SetVisibility(0);
 
   // Initialize scalar bar.
   m_scalarBarWidget = vtkSmartPointer<vtkScalarBarWidget>::New();
@@ -75,6 +84,11 @@ void asiVisu_ThicknessPrs::afterUpdatePipelines() const
   // Initialize scalar bar actor.
   m_scalarBarWidget->GetScalarBarActor()->SetLookupTable( pl->Mapper()->GetLookupTable() );
   m_scalarBarWidget->GetScalarBarActor()->SetTitle("Thickness distribution");
+
+  Handle(asiVisu_SpherePipeline)
+    spl = Handle(asiVisu_SpherePipeline)::DownCast(this->GetPipeline(Pipeline_Sphere));
+  //spl->Actor()->GetProperty()->SetColor(0., 208., 255.);
+  spl->Actor()->GetProperty()->SetLineWidth(3.);
 }
 
 //-----------------------------------------------------------------------------
@@ -94,4 +108,48 @@ void asiVisu_ThicknessPrs::renderPipelines(vtkRenderer* renderer) const
 void asiVisu_ThicknessPrs::deRenderPipelines(vtkRenderer*) const
 {
   m_scalarBarWidget->Off();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for highlighting.
+void asiVisu_ThicknessPrs::highlight(vtkRenderer*                        renderer,
+                                     const Handle(asiVisu_PickerResult)& pickRes,
+                                     const asiVisu_SelectionNature       /*selNature*/) const
+{
+  Handle(asiVisu_CellPickerResult)
+    cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+
+  const TColStd_PackedMapOfInteger& elemIds = cellPickerRes->GetPickedElementIds();
+
+  if ( elemIds.IsEmpty() )
+    return;
+
+  this->GetPipeline(Pipeline_Sphere)->Actor()->SetVisibility(1);
+
+  const int facetId = elemIds.GetMinimalMapped();
+
+  // Pipeline for the field.
+  Handle(asiVisu_SpherePipeline)
+    pl = Handle(asiVisu_SpherePipeline)::DownCast( this->GetPipeline(Pipeline_Sphere) );
+
+  Handle(asiVisu_SphereDataProvider) ds = Handle(asiVisu_SphereDataProvider)::DownCast(dataProvider(Pipeline_Sphere));
+  ds->SetFacetId(facetId);
+
+  pl->SetInput(ds);
+
+  renderer->AddActor( pl->Actor() );
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for highlighting reset.
+void asiVisu_ThicknessPrs::unHighlight(vtkRenderer*                  renderer,
+                                       const asiVisu_SelectionNature /*selNature*/) const
+{
+  // Pipeline for the field.
+  Handle(asiVisu_SpherePipeline)
+    pl = Handle(asiVisu_SpherePipeline)::DownCast(this->GetPipeline(Pipeline_Sphere));
+
+  renderer->RemoveActor(pl->Actor());
 }

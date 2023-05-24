@@ -60,10 +60,19 @@ public:
 
 public:
 
+  enum ThicknessType
+  {
+    RayBased,
+    ShrinkingSphere
+  };
+
+public:
+
   //! IDs for the underlying Parameters.
   enum ParamId
   {
   //--------------------------//
+    PID_ThicknessType,        //!< Type of thickness check.
     PID_Name,                 //!< Name of the Node.
     PID_Mesh,                 //!< Mesh where thickness distribution was computed.
     PID_ThicknessFieldIds,    //!< Element ids to store thickness field.
@@ -75,6 +84,8 @@ public:
     PID_Dy,                   //!< Direction in OY.
     PID_Dz,                   //!< Direction in OZ.
     PID_CheckThicknessFunc,   //!< Tree Function to check thickness.
+    PID_MinLimit,             //!< Min value to be checked.
+    PID_MaxLimit,             //!< Max value to be checked.
   //--------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -122,6 +133,14 @@ public:
   //! \param[in] mesh mesh and fields to store.
   asiData_EXPORT void
     SetMeshWithScalars(const asiAlgo_MeshWithFields& mesh);
+
+  //! Sets a minimal value for inspection.
+  asiData_EXPORT void
+    SetMinLimit(const double value);
+
+  //! Sets a maximal value for inspection.
+  asiData_EXPORT void
+    SetMaxLimit(const double value);
 
 protected:
 

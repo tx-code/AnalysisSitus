@@ -55,6 +55,8 @@ asiData_ClearanceNode::asiData_ClearanceNode() : ActData_BaseNode()
   REGISTER_PARAMETER(RealArray,    PID_ClearanceFieldValues);
   REGISTER_PARAMETER(Real,         PID_ScalarMin);
   REGISTER_PARAMETER(Real,         PID_ScalarMax);
+  REGISTER_PARAMETER(Real,         PID_MinLimit);
+  REGISTER_PARAMETER(Real,         PID_MaxLimit);
   REGISTER_PARAMETER(TreeFunction, PID_CheckClearanceFunc);
 
   this->registerParameter(PID_Mesh, asiData_MeshParameter::Instance(), false);
@@ -68,12 +70,16 @@ void asiData_ClearanceNode::Init()
   this->InitParameter(PID_Name,        "Name",        "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_ScalarMin,   "Min. scalar", "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_ScalarMax,   "Max. scalar", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_MinLimit,    "Min. limit",  "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_MaxLimit,    "Max. limit",  "", ParameterFlag_IsVisible, true);
 
   // Set default values.
   this->SetMeshWithScalars( asiAlgo_MeshWithFields() );
   //
   ActParamTool::AsReal( this->Parameter(PID_ScalarMin) ) ->SetValue(-Precision::Infinite() );
   ActParamTool::AsReal( this->Parameter(PID_ScalarMax) ) ->SetValue( Precision::Infinite() );
+  ActParamTool::AsReal( this->Parameter(PID_MinLimit) )  ->SetValue( 0.1 );
+  ActParamTool::AsReal( this->Parameter(PID_MaxLimit) )  ->SetValue( 30. );
 }
 
 //-----------------------------------------------------------------------------
@@ -144,4 +150,18 @@ void asiData_ClearanceNode::SetMeshWithScalars(const asiAlgo_MeshWithFields& mes
     ActParamTool::AsRealArray( this->Parameter(PID_ClearanceFieldValues) )->SetArray(nullptr);
   }
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_ClearanceNode::SetMinLimit(const double value)
+{
+  ActParamTool::AsReal( this->Parameter(PID_MinLimit) )->SetValue( value );
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_ClearanceNode::SetMaxLimit(const double value)
+{
+  ActParamTool::AsReal(this->Parameter(PID_MaxLimit))->SetValue(value);
 }

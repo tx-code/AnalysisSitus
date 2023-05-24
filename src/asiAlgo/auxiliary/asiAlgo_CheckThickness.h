@@ -102,6 +102,20 @@ public:
   }
 #endif
 
+  //! Sets minimal diameter of sphere to be checked.
+  //! \param[in] on true/false.
+  void SetMinDiameter(const double value)
+  {
+    m_minDiameter = value;
+  }
+
+  //! Sets maximal diameter of sphere to be checked.
+  //! \param[in] on true/false.
+  void SetMaxDiameter(const double value)
+  {
+    m_maxDiameter = value;
+  }
+
   //! \return result of thickness check which is a faceted representation
   //!         of the CAD part with associated distance field. The scalar
   //!         values representing the distance field are bounded to the
@@ -152,10 +166,11 @@ protected:
 #if defined USE_MOBIUS
   mobius::t_xyz              m_customDir;    //!< Custom direction.
 #endif
+  double                     m_minDiameter;  //!< Minimal diameter of shrinking sphere.
+  double                     m_maxDiameter;  //!< Maximal diameter of shrinking sphere.
   asiAlgo_MeshWithFields     m_resField;     //!< Mesh with a scalar field.
   double                     m_fMinThick;    //!< Min thickness.
   double                     m_fMaxThick;    //!< Max thickness.
-
 };
 
 #endif

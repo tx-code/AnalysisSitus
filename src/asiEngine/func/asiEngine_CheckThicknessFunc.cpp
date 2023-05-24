@@ -77,47 +77,80 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   Handle(asiData_ThicknessNode)
     TN = Handle(asiData_ThicknessNode)::DownCast( trisParam->GetNode() );
 
-  // Custom direction.
-  const bool
-    isCustomDir = ActParamTool::AsBool( TN->Parameter(asiData_ThicknessNode::PID_IsCustomDir) )->GetValue();
-  //
-  const double
-    dx = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dx) )->GetValue();
-  const double
-    dy = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dy) )->GetValue();
-  const double
-    dz = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dz) )->GetValue();
-
-  gp_Vec dirVec(dx, dy, dz);
-  //
-  if ( dirVec.Magnitude() < 1.e-6 )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Undefined direction.");
-    return 1; // Error.
-  }
-
-  /* ===================
-   *  Analyze thickness.
-   * =================== */
-
-  TIMER_NEW
-  TIMER_GO
-
   // Initialize the algorithm.
   asiAlgo_CheckThickness algo(tris, m_progress, m_plotter);
-  //
-  algo.SetIsCustomDir(isCustomDir);
-  algo.SetCustomDir( t_xyz(dx, dy, dz) );
 
-  // Perform.
-  if ( !algo.Perform_RayMethod() )
+  // Check type.
+  const int
+    checkType = ActParamTool::AsInt(TN->Parameter(asiData_ThicknessNode::PID_ThicknessType))->GetValue();
+
+  if (checkType == asiData_ThicknessNode::RayBased)
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "Thickness analysis failed.");
-    return 1; // Error.
-  }
+    // Custom direction.
+    const bool
+      isCustomDir = ActParamTool::AsBool( TN->Parameter(asiData_ThicknessNode::PID_IsCustomDir) )->GetValue();
+    //
+    const double
+      dx = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dx) )->GetValue();
+    const double
+      dy = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dy) )->GetValue();
+    const double
+      dz = ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_Dz) )->GetValue();
 
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(progress, "Check thickness")
+    gp_Vec dirVec(dx, dy, dz);
+    //
+    if ( dirVec.Magnitude() < 1.e-6 )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Undefined direction.");
+      return 1; // Error.
+    }
+
+    TIMER_NEW
+    TIMER_GO
+
+    //
+    algo.SetIsCustomDir(isCustomDir);
+    algo.SetCustomDir( t_xyz(dx, dy, dz) );
+
+    /* ===================
+     *  Perform Ray-based.
+     * =================== */
+
+    if ( !algo.Perform_RayMethod() )
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Thickness analysis failed.");
+      return 1; // Error.
+    }
+    
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(progress, "Check thickness by ray")
+  }
+  else if (checkType == asiData_ThicknessNode::ShrinkingSphere)
+  {
+    TIMER_NEW
+    TIMER_GO
+
+    /* ======================
+     *  Perform Sphere-based.
+     * ====================== */
+
+    const double
+      dMin = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_MinLimit))->GetValue();
+    const double
+      dMax = ActParamTool::AsReal(TN->Parameter(asiData_ThicknessNode::PID_MaxLimit))->GetValue();
+
+    algo.SetMinDiameter(dMin);
+    algo.SetMaxDiameter(dMax);
+
+    if (!algo.Perform_SphereMethod())
+    {
+      m_progress.SendLogMessage(LogErr(Normal) << "Thickness analysis failed.");
+      return 1; // Error.
+    }
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(progress, "Check thickness by sphere")
+  }
 
   /* =======================
    *  Set output Parameters.
@@ -135,6 +168,15 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
   m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
   return 1;
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+Standard_Boolean
+  asiEngine_CheckThicknessFunc::validateInput(const Handle(ActAPI_HParameterList)& /*theArgsIN*/) const
+{
+  return true; // avoid validating input parameters as their signature
+               // is changed dynamically depending on the thickness check type.
 }
 
 //-----------------------------------------------------------------------------

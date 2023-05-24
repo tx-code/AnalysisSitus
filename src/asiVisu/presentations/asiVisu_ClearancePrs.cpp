@@ -35,6 +35,8 @@
 #include <asiVisu_ClearanceDataProvider.h>
 #include <asiVisu_MeshEScalarPipeline.h>
 #include <asiVisu_MeshResultUtils.h>
+#include <asiVisu_SphereDataProvider.h>
+#include <asiVisu_SpherePipeline.h>
 
 // VTK includes
 #pragma warning(push, 0)
@@ -51,11 +53,18 @@ asiVisu_ClearancePrs::asiVisu_ClearancePrs(const Handle(ActAPI_INode)& N)
     CN = Handle(asiData_ClearanceNode)::DownCast(N);
 
   // Create Data Provider.
-  Handle(asiVisu_ClearanceDataProvider) DP = new asiVisu_ClearanceDataProvider(CN);
+  Handle(asiVisu_ClearanceDataProvider) DP  = new asiVisu_ClearanceDataProvider(CN);
+  Handle(asiVisu_SphereDataProvider)    SDS = new asiVisu_SphereDataProvider(CN);
 
   // Create Pipeline.
   this->addPipeline        ( Pipeline_Main, new asiVisu_MeshEScalarPipeline );
   this->assignDataProvider ( Pipeline_Main, DP );
+
+  this->addPipeline(Pipeline_Sphere, new asiVisu_SpherePipeline);
+  this->assignDataProvider(Pipeline_Sphere, SDS);
+
+  //
+  this->GetPipeline(Pipeline_Sphere)->Actor()->SetVisibility(0);
 
   // Initialize scalar bar.
   m_scalarBarWidget = vtkSmartPointer<vtkScalarBarWidget>::New();
@@ -95,3 +104,48 @@ void asiVisu_ClearancePrs::deRenderPipelines(vtkRenderer*) const
 {
   m_scalarBarWidget->Off();
 }
+
+//-----------------------------------------------------------------------------
+
+//! Callback for highlighting.
+void asiVisu_ClearancePrs::highlight(vtkRenderer*                        renderer,
+                                     const Handle(asiVisu_PickerResult)& pickRes,
+                                     const asiVisu_SelectionNature       selNature) const
+{
+  Handle(asiVisu_CellPickerResult)
+    cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
+
+  const TColStd_PackedMapOfInteger& elemIds = cellPickerRes->GetPickedElementIds();
+
+  if ( elemIds.IsEmpty() )
+    return;
+
+  this->GetPipeline(Pipeline_Sphere)->Actor()->SetVisibility(1);
+
+  const int facetId = elemIds.GetMinimalMapped();
+
+  // Pipeline for the field.
+  Handle(asiVisu_SpherePipeline)
+    pl = Handle(asiVisu_SpherePipeline)::DownCast( this->GetPipeline(Pipeline_Sphere) );
+
+  Handle(asiVisu_SphereDataProvider) ds = Handle(asiVisu_SphereDataProvider)::DownCast(dataProvider(Pipeline_Sphere));
+  ds->SetFacetId(facetId, false);
+
+  pl->SetInput(ds);
+
+  renderer->AddActor( pl->Actor() );
+}
+
+//-----------------------------------------------------------------------------
+
+//! Callback for highlighting reset.
+void asiVisu_ClearancePrs::unHighlight(vtkRenderer*                  renderer,
+                                       const asiVisu_SelectionNature selNature) const
+{
+  // Pipeline for the field.
+  Handle(asiVisu_SpherePipeline)
+    pl = Handle(asiVisu_SpherePipeline)::DownCast(this->GetPipeline(Pipeline_Sphere));
+
+  renderer->RemoveActor(pl->Actor());
+}
+
