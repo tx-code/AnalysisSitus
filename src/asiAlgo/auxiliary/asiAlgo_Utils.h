@@ -1544,10 +1544,12 @@ namespace asiAlgo_Utils
 
   //! Fuses the passed shapes.
   //! \param[in]  objects shapes to fuse.
+  //! \param[in]  fuzz    fuzzy value (pass 0 to disable the "fuzzy" mode).
   //! \param[out] history accumulated modification history.
   //! \return result of the Boolean operation.
   asiAlgo_EXPORT TopoDS_Shape
     BooleanFuse(const TopTools_ListOfShape& objects,
+                const double                fuzz,
                 Handle(BRepTools_History)&  history);
 
   //! Fuses the passed shapes and optionally maximizes faces in the

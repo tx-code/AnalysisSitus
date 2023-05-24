@@ -3551,6 +3551,7 @@ TopoDS_Shape asiAlgo_Utils::BooleanFuse(const TopTools_ListOfShape& objects)
 //-----------------------------------------------------------------------------
 
 TopoDS_Shape asiAlgo_Utils::BooleanFuse(const TopTools_ListOfShape& objects,
+                                        const double                fuzz,
                                         Handle(BRepTools_History)&  history)
 {
   TopTools_ListIteratorOfListOfShape it(objects);
@@ -3563,7 +3564,37 @@ TopoDS_Shape asiAlgo_Utils::BooleanFuse(const TopTools_ListOfShape& objects,
   for ( ; it.More(); it.Next() )
   {
     TopoDS_Shape arg = it.Value();
-    BRepAlgoAPI_Fuse API(result, arg);
+
+    // For pave filler.
+    TopTools_ListOfShape ops;
+    ops.Append(result);
+    ops.Append(arg);
+
+    // For the Boolean Operation filtering.
+    TopTools_ListOfShape args;
+    args.Append(result);
+    //
+    TopTools_ListOfShape tools;
+    tools.Append(arg);
+
+    // Use pave filler to pass the fuzzy value.
+    BOPAlgo_PaveFiller DSFiller;
+    DSFiller.SetArguments(ops);
+    DSFiller.SetRunParallel(false);
+    DSFiller.SetFuzzyValue(fuzz);
+    DSFiller.Perform();
+    bool hasErr = DSFiller.HasErrors();
+    //
+    if ( hasErr )
+    {
+      return TopoDS_Shape();
+    }
+
+    // Fuse with a pave filler.
+    BRepAlgoAPI_Fuse API(DSFiller);
+    API.SetArguments(args);
+    API.SetTools(tools);
+    API.Build();
     //
     result = API.Shape();
     history->Merge( API.History() );
@@ -3580,7 +3611,7 @@ TopoDS_Shape asiAlgo_Utils::BooleanFuse(const TopTools_ListOfShape& objects,
 {
   // Fuse.
   Handle(BRepTools_History) bopHistory;
-  TopoDS_Shape              fused = BooleanFuse(objects, bopHistory);
+  TopoDS_Shape              fused = BooleanFuse(objects, 0., bopHistory);
 
   // Check if face maximization was requested.
   if ( !maximizeFaces )

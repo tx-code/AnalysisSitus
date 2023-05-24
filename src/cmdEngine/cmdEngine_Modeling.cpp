@@ -1109,10 +1109,13 @@ int ENGINE_BOPFuse(const Handle(asiTcl_Interp)& interp,
                    int                          argc,
                    const char**                 argv)
 {
-  if ( argc != 4 )
+  if ( argc != 4 && argc != 5 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
+
+  // Fuzzy value.
+  const double fuzz = (argc > 4 ? Atof(argv[4]) : 0.0);
 
   // Get topological items which are the operands.
   Handle(asiData_IVTopoItemNode)
@@ -1139,7 +1142,8 @@ int ENGINE_BOPFuse(const Handle(asiTcl_Interp)& interp,
   arguments.Append( topoItem2->GetShape() );
 
   // Fuse.
-  TopoDS_Shape fused = asiAlgo_Utils::BooleanFuse(arguments);
+  Handle(BRepTools_History) history;
+  TopoDS_Shape fused = asiAlgo_Utils::BooleanFuse(arguments, fuzz, history);
   //
   interp->GetPlotter().REDRAW_SHAPE(argv[1], fused);
 
@@ -2336,8 +2340,9 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("bop-fuse",
     //
-    "bop-fuse <result> <op1> <op2>\n"
-    "\t Fuses the passed two operands using Boolean Fuse operation.",
+    "bop-fuse <result> <op1> <op2> [<fuzz>]\n"
+    "\t Fuses the passed two operands using Boolean Fuse operation.\n"
+    "\t It is possible to affect the fusion tolerance with <fuzz> argument.\n",
     //
     __FILE__, group, ENGINE_BOPFuse);
 
