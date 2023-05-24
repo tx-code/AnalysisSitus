@@ -59,7 +59,9 @@
 // Standard includes
 #include <set>
 
+#ifdef USE_MOBIUS
 using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -658,8 +660,6 @@ bool asiAlgo_UntrimSurf::reapproxCurves(const std::vector<Handle(Geom_BSplineCur
 #else
   (void) curves;
   (void) result;
-  (void) params;
-  (void) knots;
   return false;
 #endif
 }
