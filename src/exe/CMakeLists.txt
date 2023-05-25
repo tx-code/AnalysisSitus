@@ -91,6 +91,7 @@ set (VTK_LIB_FILES
   vtkRenderingFreeType-8.2
   vtkRenderingOpenGL2-8.2
   vtkRenderingGL2PSOpenGL2-8.2
+  vtkRenderingLabel-8.2
   vtkViewsContext2D-8.2
   vtkViewsInfovis-8.2
 )

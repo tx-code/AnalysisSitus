@@ -65,7 +65,8 @@ public:
 
   //! \return single instance of facilities.
   asiUI_EXPORT static Handle(asiUI_BatchFacilities)
-    Instance(const bool initBatch = true,
+    Instance(const bool initModel = true,
+             const bool initBatch = true,
              const bool initInterp = true,
              const bool overrideTclChannels = false);
 
@@ -73,7 +74,8 @@ protected:
 
   //! Ctor.
   asiUI_EXPORT
-    asiUI_BatchFacilities(const bool initBatch = true,
+    asiUI_BatchFacilities(const bool initModel = true,
+                          const bool initBatch = true,
                           const bool initInterp = true,
                           const bool overrideTclChannels = false);
 

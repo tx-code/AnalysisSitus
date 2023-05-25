@@ -52,7 +52,7 @@ class asiVisu_PointsSource : public vtkPolyDataAlgorithm
 public:
 
   vtkTypeMacro(asiVisu_PointsSource, vtkPolyDataAlgorithm);
-  static asiVisu_PointsSource* New();
+  asiVisu_EXPORT static asiVisu_PointsSource* New();
 
 // Kernel methods:
 public:

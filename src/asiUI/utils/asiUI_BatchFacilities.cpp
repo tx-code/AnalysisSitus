@@ -40,24 +40,28 @@
 
 //-----------------------------------------------------------------------------
 
-asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initBatch,
+asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initModel,
+                                             const bool initBatch,
                                              const bool initInterp,
                                              const bool overrideTclChannels)
 //
 : Standard_Transient()
 {
   // Create Data Model.
-  this->Model = new asiEngine_Model;
-  if ( !Model->NewEmpty() )
+  if ( initModel )
   {
-    Standard_ProgramError::Raise("Cannot create Data Model");
+    this->Model = new asiEngine_Model;
+    if ( !Model->NewEmpty() )
+    {
+      Standard_ProgramError::Raise("Cannot create Data Model");
+    }
+    //
+    this->Model->DisableTransactions();
+    {
+      this->Model->Populate();
+    }
+    this->Model->EnableTransactions();
   }
-  //
-  this->Model->DisableTransactions();
-  {
-    this->Model->Populate();
-  }
-  this->Model->EnableTransactions();
 
   if ( initBatch )
   {
@@ -70,7 +74,7 @@ asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initBatch,
 
     // Prepare presentation manager for offscreen rendering.
     vtkSmartPointer<asiVisu_PrsManager>
-            prsMgr3d = vtkSmartPointer<asiVisu_PrsManager>::New();
+      prsMgr3d = vtkSmartPointer<asiVisu_PrsManager>::New();
     //
     prsMgr3d->Initialize(nullptr, true); // Offscreen rendering mode.
 
@@ -95,12 +99,13 @@ asiUI_BatchFacilities::asiUI_BatchFacilities(const bool initBatch,
 //-----------------------------------------------------------------------------
 
 Handle(asiUI_BatchFacilities)
-  asiUI_BatchFacilities::Instance(const bool initBatch,
+  asiUI_BatchFacilities::Instance(const bool initModel,
+                                  const bool initBatch,
                                   const bool initInterp,
                                   const bool overrideTclChannels)
 {
   static Handle(asiUI_BatchFacilities)
-    ref = new asiUI_BatchFacilities(initBatch, initInterp, overrideTclChannels);
+    ref = new asiUI_BatchFacilities(initModel, initBatch, initInterp, overrideTclChannels);
 
   return ref;
 }

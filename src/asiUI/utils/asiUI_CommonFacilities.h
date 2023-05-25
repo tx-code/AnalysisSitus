@@ -60,9 +60,11 @@ class asiUI_CommonFacilities : public asiUI_BatchFacilities
 public:
 
   //! Ctor.
+  //! \param[in] initModel whether to initialize data model.
   //! \param[in] initBatch whether to initialize batch facilities.
   asiUI_EXPORT
-    asiUI_CommonFacilities(const bool initBatch = false);
+    asiUI_CommonFacilities(const bool initModel = true,
+                           const bool initBatch = false);
 
 public:
 

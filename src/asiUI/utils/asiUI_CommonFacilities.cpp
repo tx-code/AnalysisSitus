@@ -37,9 +37,10 @@
 
 //-----------------------------------------------------------------------------
 
-asiUI_CommonFacilities::asiUI_CommonFacilities(const bool initBatch)
+asiUI_CommonFacilities::asiUI_CommonFacilities(const bool initModel,
+                                               const bool initBatch)
 //
-: asiUI_BatchFacilities (initBatch),
+: asiUI_BatchFacilities (initModel, initBatch),
   MainWindow            (nullptr),
   ObjectBrowser         (nullptr),
   ViewerPart            (nullptr),
