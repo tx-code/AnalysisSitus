@@ -47,6 +47,7 @@
 #include <asiAlgo_JoinSurf.h>
 #include <asiAlgo_MeshOBB.h>
 #include <asiAlgo_MeshOffset.h>
+#include <asiAlgo_BuildOptBoundingCyl.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_UntrimSurf.h>
 #include <asiAlgo_Utils.h>
@@ -1681,6 +1682,18 @@ int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
+  // Check if an equivalent cylinder or sphere is requested.
+  const bool isCyl    = interp->HasKeyword(argc, argv, "cyl");
+  const bool isSphere = interp->HasKeyword(argc, argv, "sphere");
+
+  if (isCyl || isSphere)
+  {
+    if (argc < 3)
+    {
+      return interp->ErrorOnWrongArgs(argv[0]);
+    }
+  }
+
   Handle(asiEngine_Model)
     M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
 
@@ -1699,11 +1712,8 @@ int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
   // Get OBB data structure.
   const asiAlgo_OBB& obb = mkOBB.GetResult();
 
+  // Get result shape.
   TopoDS_Shape obbShape;
-
-  // Check if an equivalent cylinder or sphere is requested.
-  const bool isCyl = interp->HasKeyword(argc, argv, "cyl");
-  const bool isSphere = interp->HasKeyword(argc, argv, "sphere");
   //
   if ( isCyl )
   {
@@ -1719,6 +1729,37 @@ int ENGINE_BuildOBB(const Handle(asiTcl_Interp)& interp,
   }
 
   interp->GetPlotter().REDRAW_SHAPE(argv[1], obbShape, Color_Yellow, 1.0, true);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_BuildOptBoundingCyl(const Handle(asiTcl_Interp)& interp,
+                               int                          argc,
+                               const char**                 argv)
+{
+  if (argc < 2)
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast(interp->GetModel());
+
+  // Get part.
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Build bounding cylinder.
+  asiAlgo_BuildOptBoundingCyl mkBndCyl(interp->GetProgress(),
+                                       interp->GetPlotter());
+  if (!mkBndCyl.Perform(partNode->GetAAG()))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Operation failed.");
+    return TCL_ERROR;
+  }
+
+  interp->GetPlotter().REDRAW_SHAPE(argv[1], mkBndCyl.GetResult().shape, Color_Yellow, 1.0, true);
 
   return TCL_OK;
 }
@@ -2557,6 +2598,14 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t into an circumscribed cylinder or sphere.",
     //
     __FILE__, group, ENGINE_BuildOBB);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-opt-bnd-cyl",
+    //
+    "build-opt-bnd-cyl <res>\n"
+    "\t Builds the optimal bounding cylinder for the active part.\n",
+    //
+    __FILE__, group, ENGINE_BuildOptBoundingCyl);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("fill",
