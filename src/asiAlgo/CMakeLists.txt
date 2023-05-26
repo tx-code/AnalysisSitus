@@ -107,6 +107,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_IntersectionPointCS.h
   auxiliary/asiAlgo_IntersectSS.h
   auxiliary/asiAlgo_Membership.h
+  auxiliary/asiAlgo_BuildOptBoundingCyl.h
   auxiliary/asiAlgo_ModelRefine.h
   auxiliary/asiAlgo_OBB.h
   auxiliary/asiAlgo_Optional.h
@@ -153,6 +154,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_IntersectCC.cpp
   auxiliary/asiAlgo_IntersectCS.cpp
   auxiliary/asiAlgo_IntersectSS.cpp
+  auxiliary/asiAlgo_BuildOptBoundingCyl.cpp
   auxiliary/asiAlgo_ModelRefine.cpp
   auxiliary/asiAlgo_OBB.cpp
   auxiliary/asiAlgo_OrientCnc.cpp
