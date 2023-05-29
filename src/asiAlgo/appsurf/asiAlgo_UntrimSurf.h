@@ -137,7 +137,7 @@ public:
     return m_profiles;
   }
 
-protected:
+//protected:
 
   //! Finds the rail curves among the given collection of edges
   //! to prepare for Coons surface construction.

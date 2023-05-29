@@ -42,6 +42,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_BuildGordonSurf.h>
+#include <asiAlgo_BuildCoonsPatches.h>
 #include <asiAlgo_BuildHLR.h>
 #include <asiAlgo_BuildOBB.h>
 #include <asiAlgo_MeshOBB.h>
@@ -842,6 +843,66 @@ int ENGINE_MakeCurve(const Handle(asiTcl_Interp)& interp,
 
   // Set result.
   interp->GetPlotter().REDRAW_CURVE(argv[1], curve, Color_White, true);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_MakeCurveByEdgeId(const Handle(asiTcl_Interp)& interp,
+                             int                          argc,
+                             const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node to access the selected edge.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  const TopTools_IndexedMapOfShape&
+    subShapes = partNode->GetAAG()->RequestMapOfSubShapes();
+
+  // Curve Node is expected.
+  Handle(asiData_CurveNode) curveNode = partNode->GetCurveRepresentation();
+  //
+  if ( curveNode.IsNull() || !curveNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Curve Node is null or ill-defined.");
+    return TCL_OK;
+  }
+
+  // Get ID of the edge.
+  int edgeIdx = std::atoi(argv[1]);
+  //
+  if ( edgeIdx <= 0 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select edge first.");
+    return TCL_OK;
+  }
+
+  // Get host curve of the selected edge.
+  const TopoDS_Shape& edgeShape = partNode->GetAAG()->RequestMapOfEdges().FindKey(edgeIdx);
+  //
+  if ( edgeShape.ShapeType() != TopAbs_EDGE )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
+    return TCL_OK;
+  }
+  //
+  double f, l;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
+
+  // Set result.
+  auto name = "curve_" + std::string(argv[1]);
+  interp->GetPlotter().REDRAW_CURVE(name.c_str(), curve, Color_White, true);
 
   return TCL_OK;
 }
@@ -2043,6 +2104,108 @@ int ENGINE_BuildGordon(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_BuildPatches(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get the part.
+  asiEngine_Part partApi(M);
+
+  // Read {p} ("profile") curves.
+  std::vector<int> pIds;
+  int pIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "p", pIdx) )
+  {
+    int k = pIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+      pIds.push_back(eid);
+    }
+  }
+
+  // Read {g} ("guide") curves.
+  std::vector<int> gIds;
+  int gIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "g", gIdx) )
+  {
+    int k = gIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const int eid = atoi(argv[k]);
+      gIds.push_back(eid);
+    }
+  }
+
+  // Get AAG.
+  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
+  //
+  if ( aag.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "AAG is null.");
+    return false;
+  }
+  //
+  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
+
+  // Collect edges.
+  std::vector<TopoDS_Edge> pEdges, gEdges;
+  //
+  for ( const auto eid : pIds )
+  {
+    if ( eid < 1 || eid > allEdges.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Edge %1 is out of range [1, %2]."
+                                                           << eid << allEdges.Extent() );
+      return false;
+    }
+
+    pEdges.push_back( TopoDS::Edge( allEdges(eid) ) );
+  }
+  //
+  for ( const auto eid : gIds )
+  {
+    if ( eid < 1 || eid > allEdges.Extent() )
+    {
+      interp->GetProgress().SendLogMessage( LogErr(Normal) << "Edge %1 is out of range [1, %2]."
+                                                           << eid << allEdges.Extent() );
+      return false;
+    }
+
+    gEdges.push_back( TopoDS::Edge( allEdges(eid) ) );
+  }
+
+  std::vector<TopoDS_Edge> uTrimmed;
+  std::vector<TopoDS_Edge> vTrimmed;
+
+  // Build Gordon surface.
+  asiAlgo_BuildCoonsPatches buildPatches( interp->GetProgress(),
+                                        interp->GetPlotter() );
+  //
+  if ( !buildPatches.Build(pEdges, gEdges, uTrimmed, vTrimmed) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build Gordon surface.");
+    return TCL_ERROR;
+  }
+
+  /*std::string surfName = "gordonSurf";
+  interp->GetKeyValue(argc, argv, "name", surfName);
+
+  interp->GetPlotter().REDRAW_SURFACE(surfName.c_str(), resSurf, Color_Default);*/
+
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_UntrimSurf(const Handle(asiTcl_Interp)& interp,
                       int                          argc,
                       const char**                 argv)
@@ -2300,6 +2463,14 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_MakeCurve);
 
   //-------------------------------------------------------------------------//
+  interp->AddCommand("make-curve-by-edgeId",
+    //
+    "make-curve-by-edge <edgeId>\n"
+    "\t Creates a curve from the edge.",
+    //
+    __FILE__, group, ENGINE_MakeCurveByEdgeId);
+
+  //-------------------------------------------------------------------------//
   interp->AddCommand("make-surf",
     //
     "make-surf <surfName> [<faceName>] [-spl]\n"
@@ -2448,6 +2619,15 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
     //
     __FILE__, group, ENGINE_BuildGordon);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("build-patches",
+    //
+    "build-gordon -p <e1> <e2> [<e3> ...] -g <e1> <e2> [<e3> ...] [-name <surfName>]\n"
+    "\t Builds a Gordon surface passing through the given {p} (\"profile\")\n"
+    "\t and {g} (\"guide\") curves specified as edge indices in the active part.",
+    //
+    __FILE__, group, ENGINE_BuildPatches);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("untrim-surf",

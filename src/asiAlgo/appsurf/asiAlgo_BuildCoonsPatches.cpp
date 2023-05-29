@@ -39,6 +39,8 @@
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <asiAlgo_AAG.h>
+#include <asiAlgo_UntrimSurf.h>
+#include <asiAlgo_BuildCoonsSurf.h>
 
 // Tigl include
 #include "CTiglInterpolateCurveNetwork.h"
@@ -46,6 +48,8 @@
 #include "GeomAdaptor_Curve.hxx"
 #include "GCPnts_QuasiUniformAbscissa.hxx"
 #include "BRepBuilderAPI_MakeEdge.hxx"
+#include "BRep_Builder.hxx"
+#include "CTiglBSplineAlgorithms.h"
 
 #ifdef USE_MOBIUS
 #include <mobius/bspl_UnifyKnots.h>
@@ -304,15 +308,6 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
   }
   while ( !syncStop );
 
-  /* ======================
-  *  Reapproximate curves.
-  * ====================== */
-
-  std::vector<double> uParams, uKnots, vParams, vKnots;
-  //
-  this->reapproxCurves(profileCurves, profileCurves, uParams, uKnots);
-  this->reapproxCurves(guideCurves,   guideCurves,   vParams, vKnots);
-
   /* ====================================
   *  Find curve intersection parameters.
   * ==================================== */
@@ -387,11 +382,13 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
   {
     auto edge = BRepBuilderAPI_MakeEdge(i);
     profileEdges.push_back(edge);
+   // m_plotter.DRAW_SHAPE(edge, Color_Red, "u");
   }
   for (const auto& i : vTrimmedCurves)
   {
     auto edge = BRepBuilderAPI_MakeEdge(i);
     guidesEdges.push_back(edge);
+   // m_plotter.DRAW_SHAPE(edge, Color_Red, "v" );
   }
 
   if (!concatEdgesIntoPatches(uTrimmedCurves, vTrimmedCurves))
@@ -412,89 +409,6 @@ bool asiAlgo_BuildCoonsPatches::Build(const std::vector<TopoDS_Edge>& profiles,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildCoonsPatches::reapproxCurves(const std::vector<Handle(Geom_BSplineCurve)>& curves,
-                                               std::vector<Handle(Geom_BSplineCurve)>&       result,
-                                               std::vector<double>&                          params,
-                                               std::vector<double>&                          knots) const
-{
-#ifdef USE_MOBIUS
-  /* =====================================================
-  *  Discretize curves to have the same number of points.
-  * ===================================================== */
-
-  const int numPts = 100;
-
-  // Get max degree.
-  int degree = 3;
-  for ( const auto& C : curves )
-  {
-    degree = Max( degree, C->Degree() );
-  }
-
-  // Prepare interpolation tool.
-  geom_InterpolateMultiCurve interpTool(degree,
-    ParamsSelection_ChordLength,
-    KnotsSelection_Average);
-
-  for ( const auto& C : curves )
-  {
-    // Discretize with a uniform curvilinear step.
-    GeomAdaptor_Curve gac(C);
-    GCPnts_QuasiUniformAbscissa Defl(gac, numPts);
-    //
-    if ( !Defl.IsDone() )
-      return false;
-
-    // Fill row of points.
-    std::vector<t_xyz> ptsRow;
-    //
-    for ( int i = 1; i <= numPts; ++i )
-    {
-      const double param = Defl.Parameter(i);
-      t_xyz P = cascade::GetMobiusPnt( C->Value(param) );
-      //
-      ptsRow.push_back(P);
-    }
-
-    // Add points to the interpolation tool.
-    interpTool.AddRow(ptsRow);
-  }
-
-  /* ========================
-  *  Interpolate multicurve.
-  * ======================== */
-
-  if ( !interpTool.Perform() )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Multicurve interpolation failed.");
-    return false;
-  }
-
-  result.clear(); // in case it's the same as the input
-
-  params = interpTool.GetResultParams();
-  knots  = interpTool.GetResultKnots();
-
-  for ( int k = 0; k < interpTool.GetNumRows(); ++k )
-  {
-    Handle(Geom_BSplineCurve)
-      resCurve = cascade::GetOpenCascadeBCurve( interpTool.GetResult(k) );
-
-    result.push_back(resCurve);
-  }
-
-  return true;
-#else
-  (void)curves;
-  (void)result;
-  (void)params;
-  (void)knots;
-  return false;
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
 bool asiAlgo_BuildCoonsPatches::computeCurvesFromIntersections(const std::vector<Handle(Geom_BSplineCurve)>& uCurves,
                                                                const std::vector<Handle(Geom_BSplineCurve)>& vCurves,
                                                                const math_Matrix&                            uParams,
@@ -502,14 +416,20 @@ bool asiAlgo_BuildCoonsPatches::computeCurvesFromIntersections(const std::vector
                                                                std::vector<Handle(Geom_Curve)>&              uTrimmedCurves,
                                                                std::vector<Handle(Geom_Curve)>&              vTrimmedCurves) const
 {
-  ShapeAnalysis_Curve sac;
   for (int row = 0; row < uParams.RowNumber(); ++row)
   {
     double prev = 0;
+    bool isFirst = true;
     for (int col = 0; col < (int) uParams.ColNumber(); ++col)
     {
       auto param = uParams(row, col);
-      if (abs(prev - param) <=  0.001 || param < prev)
+      if (isFirst)
+      {
+        prev = param;
+        isFirst = false;
+        continue;
+      }
+      if (abs(param - prev) < 0.01)
       {
         continue;
       }
@@ -528,10 +448,17 @@ bool asiAlgo_BuildCoonsPatches::computeCurvesFromIntersections(const std::vector
   for (int col = 0; col < (int) vParams.ColNumber(); ++col)
   {
     double prev = 0;
+    bool isFirst = true;
     for (int row = 0; row < vParams.RowNumber(); ++row)
     {
       auto param = vParams(row, col);
-      if (abs(prev - param) <=  0.001 || param < prev)
+      if (isFirst)
+      {
+        prev = param;
+        isFirst = false;
+        continue;
+      }
+      if (abs(param - prev) < 0.01)
       {
         continue;
       }
@@ -582,16 +509,54 @@ bool asiAlgo_BuildCoonsPatches::concatEdgesIntoPatches(std::vector<Handle(Geom_C
         if (findCommonEdge(commonCurve[i], commonCurve[j], ue, uEdge, resEdge))
         {
           std::vector<Handle(Geom_Curve)> patch;
-          patch.emplace_back(commonCurve[i]);
-          patch.emplace_back(commonCurve[j]);
-          patch.emplace_back(ue);
-          patch.emplace_back(resEdge);
+          //
+          Handle(TopTools_HSequenceOfShape) patchS = new TopTools_HSequenceOfShape;
+          patchS->Append(BRepBuilderAPI_MakeEdge(commonCurve[i]).Edge());
+          patchS->Append(BRepBuilderAPI_MakeEdge(commonCurve[j]).Edge());
+          patchS->Append(BRepBuilderAPI_MakeEdge(ue).Edge());
+          patchS->Append(BRepBuilderAPI_MakeEdge(resEdge).Edge());
+
+          Handle(Geom_BSplineCurve) c0, c1, b0, b1;
+          //
+          asiAlgo_UntrimSurf surf;
+          if ( !surf.sortEdges(patchS, c0, c1, b0, b1) )
+          {
+            continue;
+          }
+          tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*c0, 0., 1., 0.0001);
+          tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*c1, 0., 1., 0.0001);
+          tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*b0, 0., 1., 0.0001);
+          tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*b1, 0., 1., 0.0001);
+          c0->IncreaseDegree(3);
+          c1->IncreaseDegree(3);
+          b0->IncreaseDegree(3);
+          b1->IncreaseDegree(3);
+          //
+          patch.emplace_back(c0);
+          patch.emplace_back(c1);
+          patch.emplace_back(b0);
+          patch.emplace_back(b1);
+          //
+          return true;
+          //
           patches.emplace_back(patch);
-          m_plotter.DRAW_CURVE(commonCurve[i], Color_Red, "vEdge" );
-          m_plotter.DRAW_CURVE(commonCurve[j], Color_Red, "vEdge" );
-          m_plotter.DRAW_CURVE(ue, Color_Red, "vEdge" );
-          m_plotter.DRAW_CURVE(resEdge, Color_Red, "vEdge" );
-          break;
+          //
+          asiAlgo_BuildCoonsSurf coons(c0, c1, b0, b1, m_progress, m_plotter);
+          try {
+            if (!coons.Perform())
+            {
+              continue;
+            }
+            auto surface = coons.GetResult();
+            m_plotter.DRAW_SURFACE(surface, Color_Green, "vEdge0" );
+
+            m_plotter.DRAW_CURVE(c0, Color_Red, "vEdge0" );
+            m_plotter.DRAW_CURVE(c1, Color_Red, "vEdge1" );
+            m_plotter.DRAW_CURVE(b0, Color_Red, "vEdge0" );
+            m_plotter.DRAW_CURVE(b1, Color_Red, "vEdge1" );
+          } catch (...) {
+            continue;
+          }
         }
       }
     }
