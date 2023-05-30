@@ -6,6 +6,7 @@ project(cmdEngine)
 
 set (H_FILES
   cmdEngine.h
+  cmdEngine_IStream.h
 )
 set (CPP_FILES
   cmdEngine.cpp
@@ -14,6 +15,7 @@ set (CPP_FILES
   cmdEngine_Inspection.cpp
   cmdEngine_Interaction.cpp
   cmdEngine_Interop.cpp
+  cmdEngine_IStream.cpp
   cmdEngine_Modeling.cpp
   cmdEngine_Naming.cpp
   cmdEngine_Viewer.cpp
@@ -139,3 +141,5 @@ install (TARGETS cmdEngine
 if (MSVC)
   install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/cmdEngine.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)
 endif()
+
+install (FILES ${H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)

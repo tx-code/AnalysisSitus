@@ -327,6 +327,29 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
                    double&                        scaleFactor,
                    const bool&                    readSubshapes)
 {
+  std::istream* stream = nullptr;
+  return LoadSTEP(filename, *stream, units, scaleFactor, readSubshapes, false);
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::LoadSTEPFromStream(std::istream& stream,
+                             std::string&  units,
+                             double&       scaleFactor,
+                             const bool&   readSubshapes)
+{
+  return LoadSTEP("", stream, units, scaleFactor, readSubshapes, true);
+}
+
+//-----------------------------------------------------------------------------
+
+bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
+                   std::istream&                  stream,
+                   std::string&                   units,
+                   double&                        scaleFactor,
+                   const bool&                    readSubshapes,
+                   bool                           isStream)
+{
   if ( m_doc.IsNull() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot load into null Document.");
@@ -347,7 +370,15 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
   {
 
     // Read file.
-    IFSelect_ReturnStatus outcome = xdeReader.ReadFile( filename.ToCString() );
+    IFSelect_ReturnStatus outcome;
+    if (isStream)
+    {
+      outcome = xdeReader.ChangeReader().ReadStream("", stream);
+    }
+    else
+    {
+      outcome = xdeReader.ReadFile(filename.ToCString());
+    }
     //
     if ( outcome != IFSelect_RetDone )
     {

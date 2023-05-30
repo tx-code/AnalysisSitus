@@ -39,6 +39,7 @@ set (cmdTest_include_dir ${cmdTest_include_dir_loc} PARENT_SCOPE)
 
 include_directories ( SYSTEM
                       ${cmdTest_include_dir_loc}
+                      ${cmdEngine_include_dir}
                       ${asiActiveData_include_dir}
                       ${asiTcl_include_dir}
                       ${asiAlgo_include_dir}
@@ -67,7 +68,7 @@ add_library (cmdTest SHARED
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(cmdTest asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
+target_link_libraries(cmdTest cmdEngine asiTcl asiAlgo asiAsm asiData asiVisu asiEngine asiUI)
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software

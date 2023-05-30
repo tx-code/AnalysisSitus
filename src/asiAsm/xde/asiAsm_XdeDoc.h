@@ -119,16 +119,44 @@ public:
              const bool&                    readSubshapes = false);
 
   //! Loads STEP file to populate the internal XDE Document.
-  //! \param[in]  filename     name of the STEP file to load.
-  //! \param[out] units        units.
-  //! \param[out] scaleFactor  scale factor of length units of the input file.
-  //! \param[in] readSubshapes flag whether to read subshapes.
+  //! \param[in]  filename      name of the STEP file to load.
+  //! \param[out] units         units.
+  //! \param[out] scaleFactor   scale factor of length units of the input file.
+  //! \param[in]  readSubshapes flag whether to read subshapes.
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
     LoadSTEP(const TCollection_AsciiString& filename,
              std::string&                   units,
              double&                        scaleFactor,
              const bool&                    readSubshapes = false);
+
+  //! Loads STEP file to populate the internal XDE Document.
+  //! \param[in]  stream        stream.
+  //! \param[out] units         units.
+  //! \param[out] scaleFactor   scale factor of length units of the input file.
+  //! \param[in]  readSubshapes flag whether to read subshapes.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    LoadSTEPFromStream(std::istream& stream,
+                       std::string&  units,
+                       double&       scaleFactor,
+                       const bool&   readSubshapes = false);
+
+  //! Loads STEP file to populate the internal XDE Document.
+  //! \param[in]  filename      name of the STEP file to load.
+  //! \param[in]  stream        stream.
+  //! \param[out] units         units.
+  //! \param[out] scaleFactor   scale factor of length units of the input file.
+  //! \param[in]  readSubshapes flag whether to read subshapes.
+  //! \param[in]  isStream      indicator showing that data from the stream is being used.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    LoadSTEP(const TCollection_AsciiString& filename,
+             std::istream&                  stream,
+             std::string&                   units,
+             double&                        scaleFactor,
+             const bool&                    readSubshapes = false,
+             bool                           isStream      = false);
 
   //! Loads IGES file to populate the internal XDE Document.
   //! \param[in] filename name of the IGES file to load.

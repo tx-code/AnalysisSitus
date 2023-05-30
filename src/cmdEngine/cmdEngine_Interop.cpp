@@ -30,6 +30,7 @@
 
 // cmdEngine includes
 #include <cmdEngine.h>
+#include <cmdEngine_IStream.h>
 
 // asiEngine includes
 #include <asiEngine_IVTopoItemSTEPWriterInput.h>
@@ -203,6 +204,64 @@ int ENGINE_LoadStep(const Handle(asiTcl_Interp)& interp,
 
   // Update object browser.
   if ( cmdEngine::cf && cmdEngine::cf->ObjectBrowser )
+    cmdEngine::cf->ObjectBrowser->Populate();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_LoadStreamStep(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  if ( argc != 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  TCollection_AsciiString varName(argv[1]);
+  Handle(cmdEngine_IStream) cncResVar = Handle(cmdEngine_IStream)::DownCast(interp->GetVar(varName.ToCString()));
+  if (cncResVar.IsNull())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Stream not found.");
+    return TCL_ERROR;
+  }
+
+  std::istream* stream = cncResVar->GetStream();
+  if (stream == nullptr)
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Stream not found.");
+    return TCL_ERROR;
+  }
+
+  Handle(asiData_PartNode) partNode;
+  cmdEngine::model->OpenCommand(); // tx start
+  {
+
+  std::string units = "";
+  double scaleF = 0.0;
+  asiAsm::xde::Doc doc;
+
+  if (!doc.LoadSTEPFromStream(*stream, units, scaleF))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "STEP reader failed.");
+    cmdEngine::model->AbortCommand();
+    return TCL_ERROR;
+  }
+
+  partNode = asiEngine_Part(cmdEngine::model).Update(doc.GetOneShape());
+  partNode->SetFilenameIn("");
+  partNode->SetOriginalUnits(units.c_str()); // Units as defined in the original file.
+  }
+  cmdEngine::model->CommitCommand();
+
+  // Update viewer.
+  if (cmdEngine::cf && cmdEngine::cf->ViewerPart)
+    cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+
+  // Update object browser.
+  if (cmdEngine::cf && cmdEngine::cf->ObjectBrowser)
     cmdEngine::cf->ObjectBrowser->Populate();
 
   return TCL_OK;
@@ -1524,6 +1583,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t Loads STEP file to the active part.",
     //
     __FILE__, group, ENGINE_LoadStep);
+
+    //-------------------------------------------------------------------------//
+  interp->AddCommand("load-stream-step",
+    //
+    "load-stream-step <varName>\n"
+    "\t Loads stream to the active part.",
+    //
+    __FILE__, group, ENGINE_LoadStreamStep);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("save-step",
