@@ -38,6 +38,9 @@
 // asiTcl includes
 #include <asiTcl_PluginMacro.h>
 
+// cmdEngine includes
+#include <cmdEngine_IStream.h>
+
 // OCCT includes
 #include <BRepBndLib.hxx>
 #include <BRepCheck_Analyzer.hxx>
@@ -362,6 +365,72 @@ int TEST_CheckPartShape(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int TEST_CreateStream(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  if ( argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::string filename;
+  if (!interp->GetKeyValue(argc, argv, "filename", filename))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No key '-filename' was found.");
+    return TCL_ERROR;
+  }
+
+  std::string varName;
+  if (!interp->GetKeyValue(argc, argv, "var", varName))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No key '-var' was found.");
+    return TCL_ERROR;
+  }
+
+  std::ifstream* inputStream = new std::ifstream();
+  inputStream->open(filename, std::ios_base::in | std::ios_base::binary);
+
+  interp->SetVar(varName, new cmdEngine_IStream(inputStream));
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int TEST_DeleteStream(const Handle(asiTcl_Interp)& interp,
+                      int                          argc,
+                      const char**                 argv)
+{
+  if ( argc != 3 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  std::string varName;
+  if (!interp->GetKeyValue(argc, argv, "var", varName))
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "No key '-var' was found.");
+    return TCL_ERROR;
+  }
+
+  Handle(cmdEngine_IStream) cncResVar = Handle(cmdEngine_IStream)::DownCast(interp->GetVar(varName));
+  if (cncResVar.IsNull())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Stream not found.");
+    return TCL_ERROR;
+  }
+
+  std::ifstream* stream = dynamic_cast<std::ifstream*>(cncResVar->GetStream());
+  stream->close();
+  delete stream;
+  cncResVar->SetStream(nullptr);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdTest::Commands_Shape(const Handle(asiTcl_Interp)&      interp,
                              const Handle(Standard_Transient)& cmdTest_NotUsed(data))
 {
@@ -399,4 +468,20 @@ void cmdTest::Commands_Shape(const Handle(asiTcl_Interp)&      interp,
     "\t Checks part shape.",
     //
     __FILE__, group, TEST_CheckPartShape);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("create-stream",
+    //
+    "create-stream -filename <filename> -var <varName>\n"
+    "\t Create IStream.",
+    //
+    __FILE__, group, TEST_CreateStream);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("delete-stream",
+    //
+    "delete-stream -var <varName>\n"
+    "\t Delete IStream.",
+    //
+    __FILE__, group, TEST_DeleteStream);
 }
