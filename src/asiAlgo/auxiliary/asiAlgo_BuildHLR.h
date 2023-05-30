@@ -57,6 +57,34 @@ public:
     Mode_Discrete     //!< Discrete.
   };
 
+  //! Settings to control which types of edges to output
+  struct t_outputEdges
+  {
+    bool OutputVisibleSharpEdges;
+    bool OutputVisibleSmoothEdges;
+    bool OutputVisibleOutlineEdges;
+    bool OutputVisibleSewnEdges;
+    bool OutputVisibleIsoLines;
+    bool OutputHiddenSharpEdges;
+    bool OutputHiddenSmoothEdges;
+    bool OutputHiddenOutlineEdges;
+    bool OutputHiddenSewnEdges;
+    bool OutputHiddenIsoLines;
+
+    t_outputEdges()
+    : OutputVisibleSharpEdges   (true),
+      OutputVisibleSmoothEdges  (true),
+      OutputVisibleOutlineEdges (true),
+      OutputVisibleSewnEdges    (true),
+      OutputVisibleIsoLines     (true),
+      OutputHiddenSharpEdges    (false),
+      OutputHiddenSmoothEdges   (false),
+      OutputHiddenOutlineEdges  (false),
+      OutputHiddenSewnEdges     (false),
+      OutputHiddenIsoLines      (false)
+    {}
+  };
+
 public:
 
   //! Ctor.
@@ -75,8 +103,9 @@ public:
   //! \param[in] mode          the HLR computation mode (precise is the default).
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    Perform(const gp_Dir& projectionDir,
-            const Mode    mode = Mode_Precise);
+    Perform(const gp_Dir&        projectionDir,
+            const Mode           mode       = Mode_Precise,
+            const t_outputEdges& visibility = t_outputEdges());
 
   //! \return the extracted feature lines.
   asiAlgo_EXPORT const TopoDS_Shape&
@@ -88,7 +117,8 @@ protected:
   //! \param[in] projectionDir the direction of projection to use.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    performPrecise(const gp_Dir& projectionDir);
+    performPrecise(const gp_Dir&       projectionDir,
+                   const t_outputEdges visibility);
 
   //! Runs discrete HLR.
   //! \param[in] projectionDir the direction of projection to use.
@@ -104,9 +134,8 @@ protected:
 
 protected:
 
-  TopoDS_Shape m_input;  //!< Input shape.
-  TopoDS_Shape m_result; //!< Result shape.
-
+  TopoDS_Shape  m_input;      //!< Input shape.
+  TopoDS_Shape  m_result;     //!< Result shape.
 };
 
 #endif

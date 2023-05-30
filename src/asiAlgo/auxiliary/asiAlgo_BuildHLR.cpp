@@ -54,13 +54,14 @@ asiAlgo_BuildHLR::asiAlgo_BuildHLR(const TopoDS_Shape&  shape,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildHLR::Perform(const gp_Dir& projectionDir,
-                               const Mode    mode)
+bool asiAlgo_BuildHLR::Perform(const gp_Dir&        projectionDir,
+                               const Mode           mode,
+                               const t_outputEdges& visibility)
 {
   switch ( mode )
   {
     case Mode_Precise:
-      return this->performPrecise(projectionDir);
+      return this->performPrecise(projectionDir, visibility);
     case Mode_Discrete:
       return this->performDiscrete(projectionDir);
     default:
@@ -71,7 +72,8 @@ bool asiAlgo_BuildHLR::Perform(const gp_Dir& projectionDir,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_BuildHLR::performPrecise(const gp_Dir& direction)
+bool asiAlgo_BuildHLR::performPrecise(const gp_Dir&       direction,
+                                      const t_outputEdges visibility)
 {
   Handle(HLRBRep_Algo) brep_hlr = new HLRBRep_Algo;
   brep_hlr->Add(m_input);
@@ -101,35 +103,35 @@ bool asiAlgo_BuildHLR::performPrecise(const gp_Dir& direction)
   TopoDS_Compound C;
   BRep_Builder().MakeCompound(C);
   //
-  if ( !V.IsNull() )
+  if ( !V.IsNull() && visibility.OutputVisibleSharpEdges)
     BRep_Builder().Add(C, V);
   //
-  if ( !V1.IsNull() )
+  if ( !V1.IsNull() && visibility.OutputVisibleSmoothEdges)
     BRep_Builder().Add(C, V1);
   //
-  if ( !VN.IsNull() )
+  if ( !VN.IsNull() && visibility.OutputVisibleOutlineEdges)
     BRep_Builder().Add(C, VN);
   //
-  if ( !VO.IsNull() )
+  if ( !VO.IsNull() && visibility.OutputVisibleSewnEdges)
     BRep_Builder().Add(C, VO);
   //
-  if ( !VI.IsNull() )
+  if ( !VI.IsNull() && visibility.OutputVisibleIsoLines)
     BRep_Builder().Add(C, VI);
-  ////
-  //if ( !H.IsNull() )
-  //  BRep_Builder().Add(C, H);
-  ////
-  //if ( !H1.IsNull() )
-  //  BRep_Builder().Add(C, H1);
-  ////
-  //if ( !HN.IsNull() )
-  //  BRep_Builder().Add(C, HN);
-  ////
-  /*if ( !HO.IsNull() )
-    BRep_Builder().Add(C, HO);*/
   //
-  /*if ( !HI.IsNull() )
-    BRep_Builder().Add(C, HI);*/
+  if ( !H.IsNull() && visibility.OutputHiddenSharpEdges)
+    BRep_Builder().Add(C, H);
+  //
+  if ( !H1.IsNull() && visibility.OutputHiddenSmoothEdges)
+    BRep_Builder().Add(C, H1);
+  //
+  if ( !HN.IsNull() && visibility.OutputHiddenOutlineEdges)
+    BRep_Builder().Add(C, HN);
+  //
+  if ( !HO.IsNull() && visibility.OutputHiddenSewnEdges)
+    BRep_Builder().Add(C, HO);
+  
+  if ( !HI.IsNull() && visibility.OutputHiddenIsoLines)
+    BRep_Builder().Add(C, HI);
 
   gp_Trsf T;
   T.SetTransformation( gp_Ax3(transform) );

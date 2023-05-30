@@ -615,7 +615,12 @@ int ENGINE_SaveSVG(const Handle(asiTcl_Interp)& interp,
   dir.SetY(dY);
   dir.SetZ(dZ);
 
-  if ( !asiAlgo_WriteSVG::WriteWithHLR(shape, dir, filename.c_str(), 0.1) )
+  if ( !asiAlgo_WriteSVG::WriteWithHLR(shape, dir,
+                                       filename.c_str(),
+                                       0.1, 
+                                       asiAlgo_WriteSVG::t_drawingStyle(),
+                                       interp->GetProgress(),
+                                       interp->GetPlotter()) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to save SVG.");
     return TCL_ERROR;

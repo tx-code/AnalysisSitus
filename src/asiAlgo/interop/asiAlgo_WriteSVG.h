@@ -33,6 +33,8 @@
 
 // asiAlgo includes
 #include <asiAlgo.h>
+#include <ActAPI_IProgressNotifier.h>
+#include <ActAPI_IPlotter.h>
 
 // OCCT includes
 #include <TCollection_AsciiString.hxx>
@@ -41,27 +43,47 @@
 //! Services to save a drawing as an SVG file.
 namespace asiAlgo_WriteSVG
 {
+  //! Auxiliary structure to control drawing settings. 
+  struct t_drawingStyle
+  {
+    int   CanvasPadding       = 25;
+    float PaddingScaleCoeff   = 0.01f;  //!< Coeff controlling a ratio between padding and canvas size.
+    float LineWidthScaleCoeff = 0.3f;   //!< Coeff controlling a line width which is defined as a ratio between image and canvas sizes
+    float DiscrCurveLinDefl   = 0.001f;
+    float DiscrCurveAngDefl   = (float)(0.5 * M_PI / 180.0);
+  };
+
   //! Saves the passed data to SVG after preprocessing it with HLR algorithm.
-  //! \param[in] shape the shape to dump to SVG.
-  //! \param[in] dir   the projection direction.
-  //! \param[in] path  the SVG path to save to.
-  //! \param[in] tol   the discretization tolerance for edges.
+  //! \param[in] shape   the shape to dump to SVG.
+  //! \param[in] dir     the projection direction.
+  //! \param[in] path    the SVG path to save to.
+  //! \param[in] tol     the discretization tolerance for edges.
+  //! \param[in] style   the drawing settings.
+  //! \param[in] plotter imperative plotter.
   //! \return true if SVG file was saved, false -- otherwise.
   asiAlgo_EXPORT bool
     WriteWithHLR(const TopoDS_Shape&            shape,
                  const gp_Dir&                  dir,
                  const TCollection_AsciiString& path,
-                 const double                   tol);
+                 const double                   tol,
+                 const t_drawingStyle&          style    = t_drawingStyle(),
+                 ActAPI_ProgressEntry           progress = nullptr,
+                 ActAPI_PlotterEntry            plotter  = nullptr);
 
-  //! Saves the passed data to SVG .
-  //! \param[in] shape the shape to dump to SVG.
-  //! \param[in] path  the SVG path to save to.
-  //! \param[in] tol   the discretization tolerance for edges.
+  //! Saves the passed data to SVG.
+  //! The given shape is expected to be planar and located in XOY. 
+  //! \param[in] shape   the shape to dump to SVG.
+  //! \param[in] path    the SVG path to save to.
+  //! \param[in] tol     the discretization tolerance for edges.
+  //! \param[in] style   the drawing settings.
+  //! \param[in] plotter imperative plotter.
   //! \return true if SVG file was saved, false -- otherwise.
   asiAlgo_EXPORT bool
     Write(const TopoDS_Shape&            shape,
           const TCollection_AsciiString& path,
-          const double                   tol);
+          const double                   tol,
+          const t_drawingStyle&          style   = t_drawingStyle(),
+          ActAPI_PlotterEntry            plotter = nullptr);
 
 }
 

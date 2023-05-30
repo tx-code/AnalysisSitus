@@ -43,6 +43,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 #include <gp_Circ.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <TopExp_Explorer.hxx>
@@ -54,16 +55,16 @@
 
 //-----------------------------------------------------------------------------
 
-#define DrawingCanvasSize 800
-#define DrawingCanvasPadding 25
-
-//-----------------------------------------------------------------------------
-
 namespace svg
 {
   void printCircle(const BRepAdaptor_Curve& c,
-                   std::ostream&            out)
+                   std::ostream&            out,
+                   ActAPI_PlotterEntry      plotter = nullptr)
   {
+    // Note: we'll flip Y-direction down the code as
+    //       Y direction of image goes from top to down what is opposite for geometry,
+    //       so by flipping makes the coordinate systemes coplanar.
+
     gp_Circ       circ = c.Circle();
     const gp_Pnt& p    = circ.Location();
 
@@ -77,6 +78,7 @@ namespace svg
 
     gp_Vec v1( m, s );
     gp_Vec v2( m, e );
+    v2.Reverse();
     gp_Vec v3( 0, 0, 1 );
 
     double a = v3.DotCross( v1, v2 );
@@ -85,16 +87,16 @@ namespace svg
     if ( fabs( l - f ) > 1.0 && s.SquareDistance( e ) < 0.001 )
     {
       out << "  <circle cx =\""
-          << p.X() << "\" cy =\""
-          << p.Y() << "\" r =\""
-          << r     << "\" />";
+          << p.X()  << "\" cy =\""
+          << -p.Y() << "\" r =\""
+          << r      << "\" />";
     }
     // Arc of circle.
     else
     {
       out << "  <path d=\"M"
           << s.X() << " "
-          << s.Y()
+          << -s.Y()
           << " A"
           << r << " "
           << r << " "
@@ -102,17 +104,26 @@ namespace svg
           << ( ( l - f > M_PI ) ? '1' : '0' ) << " " // Large-arc-flag.
           << ( ( a < 0 ) ? '1' : '0' ) << " " // Sweep-flag, i.e. clockwise (0) or counter-clockwise (1).
           << e.X() << " "
-          << e.Y() << "\" />";
+          << -e.Y() << "\" />";
     }
   }
 
   //-----------------------------------------------------------------------------
 
-  void printGeneric(const BRepAdaptor_Curve& bac, int id, std::ostream& out)
+  void printGeneric(const BRepAdaptor_Curve& bac,
+                    int                      id,
+                    const double             angDef,
+                    const double             linDef,
+                    std::ostream&            out,
+                    ActAPI_PlotterEntry      plotter = nullptr)
   {
     TopLoc_Location location;
     Handle(Poly_Polygon3D) polygon =
       BRep_Tool::Polygon3D( bac.Edge(), location );
+
+    // Note: we'll flip Y-direction down the code as
+    //       Y direction of image goes from top to down what is opposite for geometry,
+    //       so by flipping makes the coordinate systemes coplanar.
 
     if ( !polygon.IsNull() )
     {
@@ -123,7 +134,8 @@ namespace svg
 
       for ( int i = nodes.Lower(); i <= nodes.Upper(); i++ )
       {
-        out << c << " " << nodes(i).X() << " " << nodes(i).Y()<< " " ;
+        gp_Pnt placedNode = nodes(i).Transformed(location);
+        out << c << " " << placedNode.X() << " " << -placedNode.Y() << " ";
         c = 'L';
       }
 
@@ -147,21 +159,44 @@ namespace svg
 
       out << c << " "
           << s.X() << " "
-          << s.Y()<< " ";
+          << -s.Y()<< " ";
 
       c = 'L';
 
       out << c << " "
           << e.X() << " "
-          << e.Y()<< " ";
+          << -e.Y()<< " ";
 
       out << "\" />" << std::endl;
+    }
+    else
+    {
+      GCPnts_TangentialDeflection pntGen(bac, angDef, linDef);
+      const int nbPnt = pntGen.NbPoints();
+      if ( nbPnt > 1 )
+      {
+        char c = 'M';
+
+        out << "  <path id= \"" /*<< ViewName*/ << id << "\" d=\" ";
+
+        for ( int index = 1; index <= nbPnt; ++index )
+        {
+          gp_Pnt pnt = bac.Value(pntGen.Parameter(index));
+          out << c << " " << pnt.X() << " " << -pnt.Y() << " ";
+          c = 'L';
+        }
+
+        out << "\" />" << std::endl;
+      }
     }
   }
 
   //-----------------------------------------------------------------------------
 
-  std::string ExportEdges(const TopoDS_Shape& input)
+  std::string exportEdges(const TopoDS_Shape& input,
+                          const double        angDef,
+                          const double        linDef,
+                          ActAPI_PlotterEntry plotter  = nullptr)
   {
     std::stringstream result;
 
@@ -174,11 +209,11 @@ namespace svg
       BRepAdaptor_Curve adapt( edge );
       if ( adapt.GetType() == GeomAbs_Circle )
       {
-        printCircle( adapt, result );
+        printCircle( adapt, result, plotter);
       }
       else
       {
-        printGeneric( adapt, i, result );
+        printGeneric( adapt, i, angDef, linDef, result, plotter );
       }
     }
 
@@ -201,9 +236,11 @@ namespace svg
   //-----------------------------------------------------------------------------
 
   void printEdges(const TopoDS_Shape& shape,
-                  std::stringstream&  result,
                   const double        lineWidth,
-                  const double        tolerance)
+                  const double        angDef,
+                  const double        linDef,
+                  std::stringstream&  result,
+                  ActAPI_PlotterEntry plotter = nullptr)
   {
     if ( shape.IsNull() )
     {
@@ -217,10 +254,10 @@ namespace svg
       " stroke-linejoin=\"round\""
       " stroke-width=\"" + std::to_string( lineWidth ) + "\">\n";
 
-    BRepMesh_IncrementalMesh(shape, tolerance);
+    BRepMesh_IncrementalMesh(shape, linDef);
 
     result << style.c_str()
-           << ExportEdges(shape)
+           << exportEdges(shape, angDef, linDef, plotter)
            << "</g>"
            << std::endl;
   }
@@ -231,7 +268,10 @@ namespace svg
 bool asiAlgo_WriteSVG::WriteWithHLR(const TopoDS_Shape&            shape,
                                     const gp_Dir&                  dir,
                                     const TCollection_AsciiString& path,
-                                    const double                   tol)
+                                    const double                   tol,
+                                    const t_drawingStyle&          style,
+                                    ActAPI_ProgressEntry           progress,
+                                    ActAPI_PlotterEntry            plotter)
 {
   TIMER_NEW
   TIMER_GO
@@ -252,62 +292,53 @@ bool asiAlgo_WriteSVG::WriteWithHLR(const TopoDS_Shape&            shape,
 
   /* Relocate the projection to XOY plane */
   {
-    // Reference plane.
-    gp_Ax3 drawingPlnAx( gp::XOY() );
-    //
-    Handle(Geom_Plane) drawingPlane = new Geom_Plane(drawingPlnAx);
+    gp_Ax3 toCS  ( gp::XOY() );
+    gp_Ax3 fromCS( gp::Origin(), dir );
 
     // Relocation transformation.
-    gp_Trsf T;
-
-    // Get the referene plane.
-    gp_Ax3 fpAx3(gp::Origin(), dir);
-
-    // B goes to global origin.
-    gp_Trsf T_B;
-    T_B.SetTransformation(fpAx3);
-
-    // Global origin goes to A.
-    gp_Trsf T_A;
-    T_A.SetTransformation(drawingPlnAx);
-    T_A.Invert();
-
-    // Final transformation from B to A.
-    T = T_A * T_B;
+    gp_Trsf T = asiAlgo_Utils::GetAlignmentTrsf( toCS, fromCS );
 
     // Transform.
-    hlrResult = BRepBuilderAPI_Transform(hlrResult, T, true);
+    hlrResult = BRepBuilderAPI_Transform( hlrResult, T, true );
   }
 
   TopoDS_Shape V = svg::build3dCurves(hlrResult);
 
-  return Write(V, path, tol);
+  return Write(V, path, tol, style, plotter);
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
                              const TCollection_AsciiString& path,
-                             const double                   tol)
+                             const double                   tol,
+                             const t_drawingStyle&          style,
+                             ActAPI_PlotterEntry            plotter)
 {
   double xMin, yMin, zMin, xMax, yMax, zMax;
-  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax);
-
-  std::vector<double> dim = {xMax - xMin, yMax - yMin, zMax - zMin};
-  std::sort( dim.begin(), dim.end() );
+  asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax, tol, true);
 
   // Compute line width.
-  const double width  = dim[2] + DrawingCanvasPadding;
-  const double height = dim[1] + DrawingCanvasPadding;
-  const double maxDimension = Max( width, height );
+  const double width        = std::abs(xMax - xMin);
+  const double height       = std::abs(yMax - yMin);
+  const double maxDimension = Max(width, height);
 
-  const double scaledLineWidth = maxDimension / DrawingCanvasSize;
-  const double scaledPadding = ( maxDimension * DrawingCanvasPadding ) / DrawingCanvasSize;
+  const double scaledPadding = maxDimension * style.CanvasPadding * style.PaddingScaleCoeff;
+  const int    canvasWidth   = (int)std::round(width  + scaledPadding * 2);
+  const int    canvasHeight  = (int)std::round(height + scaledPadding * 2);
+
+  const double maxDimensionCanvas = Max(canvasWidth, canvasHeight);
+  //
+  const double scaledLineWidth = maxDimension / maxDimensionCanvas * style.LineWidthScaleCoeff;
 
   // Get results.
   std::stringstream result;
 
-  svg::printEdges(shape, result, scaledLineWidth, tol);
+  svg::printEdges(shape, 
+                  scaledLineWidth, 
+                  style.DiscrCurveAngDefl, style.DiscrCurveLinDefl,
+                  result,
+                  plotter);
 
   // Save results to file.
   std::ofstream FILE;
@@ -320,17 +351,19 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
   }
 
   TCollection_AsciiString head = "<svg width=\"";
-  head += DrawingCanvasSize + DrawingCanvasPadding;
+  head += width;
   head += "\" height=\"";
-  head += DrawingCanvasSize + DrawingCanvasPadding;
+  head += height;
+  head += "\" saveAspectRatio=\"";
+  head += "xMinYMin meet";
   head += "\" viewBox=\"";
   head += xMin - scaledPadding;
   head += " ";
-  head += yMin - scaledPadding;
+  head += -yMax - scaledPadding;
   head += " ";
-  head += width + 2.0 * scaledPadding;
+  head += canvasWidth;
   head += " ";
-  head += height + 2.0 * scaledPadding;
+  head += canvasHeight;
   head += "\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n\n";
 
   FILE << head
