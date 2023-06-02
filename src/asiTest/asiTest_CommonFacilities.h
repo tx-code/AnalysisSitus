@@ -47,17 +47,15 @@ class asiTcl_Interp;
 //! Common tools and objects for unit tests.
 class asiTest_CommonFacilities : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiTest_CommonFacilities, Standard_Transient)
 
 public:
 
-  Handle(asiEngine_Model)  Model;    //!< Data Model instance.
-  ActAPI_ProgressEntry     Progress; //!< Progress notifier.
-  ActAPI_PlotterEntry      Plotter;  //!< Plotter.
-  Handle(asiTcl_Interp)    Interp;   //!< Tcl interpreter.
+  Handle(asiEngine_Model) Model;    //!< Data Model instance.
+  ActAPI_ProgressEntry    Progress; //!< Progress notifier.
+  ActAPI_PlotterEntry     Plotter;  //!< Plotter.
+  Handle(asiTcl_Interp)   Interp;   //!< Tcl interpreter.
 
 public:
 

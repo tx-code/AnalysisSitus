@@ -38,7 +38,7 @@
 #include <asiTestEngine.h>
 
 //! IDs for Test Cases.
-enum test_CaseID
+enum asiTest_CaseID
 {
   CaseID_InvertShells = 1,
   CaseID_KEV,
