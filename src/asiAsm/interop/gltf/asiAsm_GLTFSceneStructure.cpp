@@ -35,12 +35,7 @@ using namespace asiAsm::xde;
 //-----------------------------------------------------------------------------
 glTFSceneStructure::~glTFSceneStructure()
 {
-  for (auto n : m_nodes)
-  {
-    delete n;
-    n = nullptr;
-  }
-  m_nodes.clear();
+  Clear();
 }
 
 //-----------------------------------------------------------------------------
@@ -61,6 +56,12 @@ glTFNode* glTFSceneStructure::PrependNode()
 //-----------------------------------------------------------------------------
 void glTFSceneStructure::Clear()
 {
+  for (auto n : m_nodes)
+  {
+    delete n;
+    n = nullptr;
+  }
+
   m_nodes.clear();
   m_nodes.shrink_to_fit();
 

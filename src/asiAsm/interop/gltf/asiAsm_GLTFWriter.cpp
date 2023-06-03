@@ -1234,23 +1234,20 @@ void glTFWriter::writeMeshes(const glTFMaterialMap& materialMap)
   {
     const TCollection_AsciiString& nodeName = itNodes2Primitives.Key()->Name;
 
-    bool toStartPrims = true;
+    // start "mesh" object
+    m_jsonWriter->StartObject();
+    m_jsonWriter->Key("name");
+    m_jsonWriter->String(nodeName.ToCString());
+
+    // start "primitives" array
+    m_jsonWriter->Key("primitives");
+    m_jsonWriter->StartArray();
 
     NCollection_Vector<glTFPrimitive>::Iterator itPrm(itNodes2Primitives.Value());
     for (; itPrm.More(); itPrm.Next())
     {
-      if ( toStartPrims )
-      {
-        toStartPrims = false;
-        m_jsonWriter->StartObject();
-        m_jsonWriter->Key("name");
-        m_jsonWriter->String( nodeName.ToCString() );
-        m_jsonWriter->Key("primitives");
-        m_jsonWriter->StartArray();
-      }
-
-      const glTFPrimitive& primitive = itPrm.Value();
-      const TCollection_AsciiString matId    = materialMap.FindMaterial(primitive.Style );
+      const glTFPrimitive&      primitive = itPrm.Value();
+      const TCollection_AsciiString matId = materialMap.FindMaterial(primitive.Style );
 
       m_jsonWriter->StartObject();
       {
@@ -1301,11 +1298,10 @@ void glTFWriter::writeMeshes(const glTFMaterialMap& materialMap)
       m_jsonWriter->EndObject();
     }
 
-    if ( !toStartPrims )
-    {
-      m_jsonWriter->EndArray();
-      m_jsonWriter->EndObject();
-    }
+    // end "primitives" array
+    m_jsonWriter->EndArray();
+    // end "mesh" object
+    m_jsonWriter->EndObject();
   }
   m_jsonWriter->EndArray();
 #else
