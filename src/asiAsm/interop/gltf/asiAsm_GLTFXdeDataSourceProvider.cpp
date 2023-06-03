@@ -186,6 +186,8 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
     if (!XCAFDoc_ShapeTool::GetShape(itM.Value(), shape) || shape.IsNull())
       continue;
 
+    int meshInd = m_meshes.Add(itM.Key(), NCollection_Vector<glTFPrimitive>());
+
     //* Gather 'face' primitives
     TopExp_Explorer expl(shape, TopAbs_FACE);
     for (; expl.More(); expl.Next())
@@ -207,12 +209,7 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
         continue;
       }
 
-      if (!m_meshes.Contains(itM.Key()))
-      {
-        m_meshes.Add(itM.Key(), NCollection_Vector<glTFPrimitive>());
-      }
-
-      m_meshes.ChangeFromKey(itM.Key()).Append(facePrimitive);
+      m_meshes(meshInd).Append(facePrimitive);
     }
 
     /* =========================
@@ -235,12 +232,7 @@ void glTFXdeDataSourceProvider::processSceneMeshes(t_Node2Label&         solids,
       if ( !processEdgePrimitive(e, styles, edgePrimitive) )
         continue;
 
-      if (!m_meshes.Contains(itM.Key()))
-      {
-        m_meshes.Add(itM.Key(), NCollection_Vector<glTFPrimitive>());
-      }
-
-      m_meshes.ChangeFromKey(itM.Key()).Append(edgePrimitive);
+      m_meshes(meshInd).Append(edgePrimitive);
     }
   }
 }
