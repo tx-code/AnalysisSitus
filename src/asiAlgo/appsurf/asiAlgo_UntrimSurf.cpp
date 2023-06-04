@@ -49,6 +49,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAPI.hxx>
+#include <GeomConvert.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
@@ -408,15 +409,25 @@ bool asiAlgo_UntrimSurf::sortEdges(const Handle(TopTools_HSequenceOfShape)& init
     double ef, el;
     BRep_Tool::Range(edge, ef, el);
 
-    // Get range of the curve.
+    // Get curve.
     double cf, cl;
-    Handle(Geom_BSplineCurve)
-      c3d = Handle(Geom_BSplineCurve)::DownCast( BRep_Tool::Curve(edge, cf, cl) );
+    Handle(Geom_Curve) c3d = BRep_Tool::Curve(edge, cf, cl);
     //
+    if ( !c3d->IsKind( STANDARD_TYPE(Geom_BSplineCurve) ) )
+    {
+      if ( !c3d->IsKind( STANDARD_TYPE(Geom_TrimmedCurve) ) )
+      {
+        c3d = new Geom_TrimmedCurve(c3d, cf, cl);
+      }
+
+      c3d = GeomConvert::CurveToBSplineCurve(c3d);
+    }
+
+    // Get range of the curve.
     cf = c3d->FirstParameter();
     cl = c3d->LastParameter();
 
-    c3d->Segment(ef, el);
+    Handle(Geom_BSplineCurve)::DownCast(c3d)->Segment(ef, el);
     edges->Append( BRepBuilderAPI_MakeEdge(c3d) );
   }
 
