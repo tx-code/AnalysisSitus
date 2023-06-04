@@ -128,10 +128,10 @@ namespace
         curve->Segment(Max(curve->FirstParameter(), first),
                        Min(curve->LastParameter(), last));
       }
-    } 
+    }
   }
 
-  template<class Curve> 
+  template<class Curve>
   static inline Curve GetCurveCopy(const Curve&              curve, 
                                    double&                   first,
                                    double&                   last, 

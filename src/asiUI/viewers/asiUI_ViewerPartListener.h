@@ -160,6 +160,7 @@ protected:
   QAction* m_pFillEdges;
   QAction* m_pGordon;
   QAction* m_pUntrim;
+  QAction* m_pJoinSurf;
   QAction* m_pShowOriContour;
   QAction* m_pShowHatching;
   QAction* m_pCopyAsString;

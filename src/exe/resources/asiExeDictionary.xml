@@ -75,6 +75,30 @@ Make sure to pass non-zero values to surface approximation methods in order to a
     <description>Number of intermediate isolines in the V curvilinear direction.</description>
   </datum>
 
+  <datum id="Num_ProfilesS1" format="" label="Num. profiles (S1)">
+    <domain type="Integer" min="1" max="1e99" default="5"/>
+    <ui widget="SpinBox" widgetParams="step=1"/>
+    <description>Number of intermediate isolines in the profile direction on the first surface.</description>
+  </datum>
+
+  <datum id="Num_ProfilesS2" format="" label="Num. profiles (S2)">
+    <domain type="Integer" min="1" max="1e99" default="5"/>
+    <ui widget="SpinBox" widgetParams="step=1"/>
+    <description>Number of intermediate isolines in the profile direction on the second surface.</description>
+  </datum>
+
+  <datum id="Num_Guides" format="" label="Num. guides">
+    <domain type="Integer" min="1" max="1e99" default="10"/>
+    <ui widget="SpinBox" widgetParams="step=1"/>
+    <description>Number of intermediate guide curves on both surfaces.</description>
+  </datum>
+
+  <datum id="JoinSurfOffset" format="%5.5x" label="Boundary offset">
+    <domain type="Float" min="0" max="1e99" default="1.0"/>
+    <ui widget="SpinBox" widgetParams="step=0.5"/>
+    <description>Boundary offset for smooth transitioning across the common edge.</description>
+  </datum>
+
   <datum id="UDegree" format="" label="U degree">
     <domain type="Integer" min="1" max="8" default="3"/>
     <ui widget="SpinBox" widgetParams="step=1"/>

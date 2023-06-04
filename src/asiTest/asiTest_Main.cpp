@@ -47,6 +47,7 @@
 #include <asiTest_FaceGrid.h>
 #include <asiTest_InvertShells.h>
 #include <asiTest_IsContourClosed.h>
+#include <asiTest_JoinSurf.h>
 #include <asiTest_GenerateFacets.h>
 #include <asiTest_KEV.h>
 #include <asiTest_RebuildEdge.h>
@@ -144,6 +145,7 @@ int main(int argc, char* argv[])
   std::vector< Handle(asiTestEngine_CaseLauncherAPI) > CaseLaunchers;
 
   // Main tests.
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_JoinSurf>              );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_UntrimSurf>            );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildGordonSurf>       );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_JoinEdges>             );

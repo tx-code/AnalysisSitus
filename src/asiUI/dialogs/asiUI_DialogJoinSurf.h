@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 17 May 2023
+// Created on: 26 May 2023
 //-----------------------------------------------------------------------------
 // Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
@@ -28,8 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#ifndef asiUI_DialogUntrimSurf_h
-#define asiUI_DialogUntrimSurf_h
+#ifndef asiUI_DialogJoinSurf_h
+#define asiUI_DialogJoinSurf_h
 
 // asiUI includes
 #include <asiUI_LineEdit.h>
@@ -52,8 +52,9 @@
 
 //-----------------------------------------------------------------------------
 
-//! Dialog for surface untrimming.
-class asiUI_DialogUntrimSurf : public QDialog
+//! Dialog for joining neighbor surfaces into a single surface across their
+//! common boundary.
+class asiUI_DialogJoinSurf : public QDialog
 {
   Q_OBJECT
 
@@ -67,21 +68,18 @@ public:
   //! \param[in] plotter  the imperative plotter.
   //! \param[in] parent   the parent widget.
   asiUI_EXPORT
-    asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)& wf,
-                           const Handle(asiEngine_Model)&     model,
-                           asiUI_ViewerPart*                  pViewer,
-                           ActAPI_ProgressEntry               progress,
-                           ActAPI_PlotterEntry                plotter,
-                           QWidget*                           parent = nullptr);
+    asiUI_DialogJoinSurf(const Handle(asiUI_WidgetFactory)& wf,
+                         const Handle(asiEngine_Model)&     model,
+                         asiUI_ViewerPart*                  pViewer,
+                         ActAPI_ProgressEntry               progress,
+                         ActAPI_PlotterEntry                plotter,
+                         QWidget*                           parent = nullptr);
 
   //! Dtor.
   asiUI_EXPORT virtual
-    ~asiUI_DialogUntrimSurf();
+    ~asiUI_DialogJoinSurf();
 
 public slots:
-
-  //! Reaction on edge selection in the viewer.
-  void onEdgePicked();
 
   //! Reaction on face selection in the viewer.
   void onFacePicked();
@@ -97,39 +95,36 @@ protected:
   //! Widgets.
   struct t_widgets
   {
-    QPushButton*    pApply;       //!< Performs untrimming.
-    QPushButton*    pClose;       //!< Closes the dialog.
-    asiUI_LineEdit* pFaces;       //!< Indices of the faces to untrim.
-    asiUI_LineEdit* pEdges;       //!< Indices of the boundary edges.
-    asiUI_Datum*    pNumUIsos;    //!< Number of U isos.
-    asiUI_Datum*    pNumVIsos;    //!< Number of V isos.
-    asiUI_Datum*    pUDegree;     //!< U degree.
-    asiUI_Datum*    pVDegree;     //!< V degree.
-    QCheckBox*      pDiagnostics; //!< Visual diagnostics on/off.
+    QPushButton*    pApply;         //!< Performs surface concatenation.
+    QPushButton*    pClose;         //!< Closes the dialog.
+    asiUI_LineEdit* pFaces;         //!< Indices of the faces to join.
+    asiUI_Datum*    pNumProfilesS1; //!< Number of profiles on the 1-st surface.
+    asiUI_Datum*    pNumProfilesS2; //!< Number of profiles on the 2-nd surface.
+    asiUI_Datum*    pNumGuides;     //!< Number of guide curves.
+    asiUI_Datum*    pOffset;        //!< Offset from the common edge for smooth transitioning.
+    QCheckBox*      pDiagnostics;   //!< Visual diagnostics on/off.
 
     //! Default ctor.
-    t_widgets() : pApply       (nullptr),
-                  pClose       (nullptr),
-                  pFaces       (nullptr),
-                  pEdges       (nullptr),
-                  pNumUIsos    (nullptr),
-                  pNumVIsos    (nullptr),
-                  pUDegree     (nullptr),
-                  pVDegree     (nullptr),
-                  pDiagnostics (nullptr)
+    t_widgets() : pApply         (nullptr),
+                  pClose         (nullptr),
+                  pFaces         (nullptr),
+                  pNumProfilesS1 (nullptr),
+                  pNumProfilesS2 (nullptr),
+                  pNumGuides     (nullptr),
+                  pOffset        (nullptr),
+                  pDiagnostics   (nullptr)
     {}
 
     void Release()
     {
-      delete pApply;       pApply       = nullptr;
-      delete pClose;       pClose       = nullptr;
-      delete pFaces;       pFaces       = nullptr;
-      delete pEdges;       pEdges       = nullptr;
-      delete pNumUIsos;    pNumUIsos    = nullptr;
-      delete pNumVIsos;    pNumVIsos    = nullptr;
-      delete pUDegree;     pUDegree     = nullptr;
-      delete pVDegree;     pVDegree     = nullptr;
-      delete pDiagnostics; pDiagnostics = nullptr;
+      delete pApply;         pApply         = nullptr;
+      delete pClose;         pClose         = nullptr;
+      delete pFaces;         pFaces         = nullptr;
+      delete pNumProfilesS1; pNumProfilesS1 = nullptr;
+      delete pNumProfilesS2; pNumProfilesS2 = nullptr;
+      delete pNumGuides;     pNumGuides     = nullptr;
+      delete pOffset;        pOffset        = nullptr;
+      delete pDiagnostics;   pDiagnostics   = nullptr;
     }
   };
 
@@ -146,4 +141,4 @@ protected:
 
 };
 
-#endif // asiUI_DialogUntrimSurf_h
+#endif // asiUI_DialogJoinSurf_h

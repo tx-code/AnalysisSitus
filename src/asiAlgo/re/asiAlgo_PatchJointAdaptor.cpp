@@ -61,24 +61,33 @@ bool asiAlgo_PatchJointAdaptor::AnalyzeJoint(const Handle(Geom_Curve)&   curve,
   if ( curve.IsNull() )
     return false;
 
-  // Get sample point (midpoint) on the joint curve.
+  // Get sample point (midpoint) on the joint candidate curve.
   const double f = curve->FirstParameter();
   const double l = curve->LastParameter();
   const double m = (f + l)*0.5;
   //
   gp_Pnt C = curve->Value(m);
 
-  // Projection precision.
-  const double projPrec = 1e-4;
+  // Compute surface bounds and define the tolerance
+  // based on these bounds.
+  surf->Bounds(uMin, uMax, vMin, vMax);
 
-  // Invert point to the left surface.
+  // Projection precision.
+  const double tolSensitivity  = Min( Abs(uMax - uMin), Abs(vMax - vMin) )*0.0001;
+  const double tolShift        = tolSensitivity*10;
+  const double projPrec        = 1e-4;
+
+  // Invert point to the surface in question.
   ShapeAnalysis_Surface sas(surf);
   gp_Pnt2d uv = sas.ValueOfUV(C, projPrec);
+  //
+  if ( sas.Gap() > tolShift ) // Projection should be close enough to the surface.
+    return false;
 
   // Step for small perturbation.
-  const double d = (l - f)*0.01;
+  const double d = (l - f)*tolShift;
 
-  // Give the sample paramter a small perturbation to define another point
+  // Give the sample parameter a small perturbation to define another point
   // on the surface and determine which curvilinear coordinate is effective.
   const double tShifted = m + d;
   gp_Pnt       CShifted = curve->Value(tShifted);
@@ -93,18 +102,14 @@ bool asiAlgo_PatchJointAdaptor::AnalyzeJoint(const Handle(Geom_Curve)&   curve,
   double Cproj_V_next = uvShifted.Y();
 
   // Initialize output values.
-  surf->Bounds(uMin, uMax, vMin, vMax);
-  //
   isSurfGoesU = false;
   isLeftBound = false;
 
-  // Define which curvilinear axis works out this shift. Here we rely on the
-  // fact that the joint curve is an isoparametric curve for both surfaces.
-  const double confPrec    = 1e-5;
-  //bool         sameSense   = true;
+  // Define which curvilinear axis works for this shift. Here we rely on the
+  // fact that the joint curve is an isoparametric curve for a surface.
   //
-  if ( fabs(Cproj_U_next - Cproj_U) < confPrec &&
-       fabs(Cproj_V_next - Cproj_V) > confPrec )
+  if ( fabs(Cproj_U_next - Cproj_U) < tolSensitivity &&
+       fabs(Cproj_V_next - Cproj_V) > tolSensitivity )
   {
     isSurfGoesU = false;
     //sameSense   = (Cproj_V_next - Cproj_V) > 0;
@@ -112,8 +117,8 @@ bool asiAlgo_PatchJointAdaptor::AnalyzeJoint(const Handle(Geom_Curve)&   curve,
     if ( fabs(Cproj_U - uMin) < projPrec )
       isLeftBound = true;
   }
-  else if ( fabs(Cproj_U_next - Cproj_U) > confPrec &&
-            fabs(Cproj_V_next - Cproj_V) < confPrec )
+  else if ( fabs(Cproj_U_next - Cproj_U) > tolSensitivity &&
+            fabs(Cproj_V_next - Cproj_V) < tolSensitivity )
   {
     isSurfGoesU = true;
     //sameSense   = (Cproj_U_next - Cproj_U) > 0;

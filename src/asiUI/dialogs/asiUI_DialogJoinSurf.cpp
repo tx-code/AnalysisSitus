@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Created on: 17 May 2023
+// Created on: 26 May 2023
 //-----------------------------------------------------------------------------
 // Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
@@ -29,10 +29,10 @@
 //-----------------------------------------------------------------------------
 
 // Own include
-#include "asiUI_DialogUntrimSurf.h"
+#include "asiUI_DialogJoinSurf.h"
 
 // asiAlgo includes
-#include <asiAlgo_UntrimSurf.h>
+#include <asiAlgo_JoinSurf.h>
 
 // asiEngine includes
 #include <asiEngine_Part.h>
@@ -117,12 +117,12 @@ static const char* const image0_data[] = {
 
 //-----------------------------------------------------------------------------
 
-asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)& wf,
-                                               const Handle(asiEngine_Model)&     model,
-                                               asiUI_ViewerPart*                  pViewer,
-                                               ActAPI_ProgressEntry               progress,
-                                               ActAPI_PlotterEntry                plotter,
-                                               QWidget*                           parent)
+asiUI_DialogJoinSurf::asiUI_DialogJoinSurf(const Handle(asiUI_WidgetFactory)& wf,
+                                           const Handle(asiEngine_Model)&     model,
+                                           asiUI_ViewerPart*                  pViewer,
+                                           ActAPI_ProgressEntry               progress,
+                                           ActAPI_PlotterEntry                plotter,
+                                           QWidget*                           parent)
 : QDialog        (parent),
   m_pViewer      (pViewer),
   m_model        (model),
@@ -141,12 +141,11 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
   QFrame*    pDiagnosticsFrame = new QFrame; // Diagnostics frame.
 
   // Controls.
-  m_widgets.pFaces    = new asiUI_LineEdit();
-  m_widgets.pEdges    = new asiUI_LineEdit();
-  m_widgets.pNumUIsos = wf->CreateEditor("Num_UIsos", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pNumVIsos = wf->CreateEditor("Num_VIsos", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pUDegree  = wf->CreateEditor("UDegree",   this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
-  m_widgets.pVDegree  = wf->CreateEditor("VDegree",   this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pFaces         = new asiUI_LineEdit();
+  m_widgets.pNumProfilesS1 = wf->CreateEditor("Num_ProfilesS1", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumProfilesS2 = wf->CreateEditor("Num_ProfilesS1", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pNumGuides     = wf->CreateEditor("Num_Guides",     this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
+  m_widgets.pOffset        = wf->CreateEditor("JoinSurfOffset", this, asiUI_Datum::All | asiUI_Datum::UseMinMaxRange);
 
   // Diagnostics dumps.
   m_widgets.pDiagnostics = new QCheckBox;
@@ -182,11 +181,8 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
     QGridLayout* pGrid = new QGridLayout(pGroupInputGeom);
     pGrid->setSpacing(10);
     //
-    pGrid->addWidget(new QLabel("Faces to untrim"), 0, 0);
-    pGrid->addWidget(m_widgets.pFaces,              0, 1);
-    //
-    pGrid->addWidget(new QLabel("Boundary edges"), 1, 0);
-    pGrid->addWidget(m_widgets.pEdges,             1, 1);
+    pGrid->addWidget(new QLabel("Faces to join"), 0, 0);
+    pGrid->addWidget(m_widgets.pFaces,            0, 1);
     //
     pGrid->setColumnStretch(0, 0);
     pGrid->setColumnStretch(1, 1);
@@ -197,32 +193,22 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
   {
     QVBoxLayout* pAdvLayout     = new QVBoxLayout(pGroupAdvanced);
     QFrame*      pGridFrameBot1 = new QFrame;
-    QFrame*      pGridFrameBot2 = new QFrame;
 
     pAdvLayout->setAlignment(Qt::AlignTop);
 
     // Bottom grid 1.
-    QHBoxLayout* pGridLayoutBot1 = new QHBoxLayout(pGridFrameBot1);
+    QGridLayout* pGridLayoutBot1 = new QGridLayout(pGridFrameBot1);
     pGridLayoutBot1->setSpacing(10);
     pGridLayoutBot1->setContentsMargins(10, 0, 10, 0);
     //
-    m_widgets.pNumUIsos->AddTo(pGridLayoutBot1);
-    m_widgets.pNumVIsos->AddTo(pGridLayoutBot1);
+    m_widgets.pNumProfilesS1->AddTo(pGridLayoutBot1, 0, 0);
+    m_widgets.pNumProfilesS2->AddTo(pGridLayoutBot1, 0, 3);
+    m_widgets.pNumGuides    ->AddTo(pGridLayoutBot1, 1, 0);
+    m_widgets.pOffset       ->AddTo(pGridLayoutBot1, 1, 3);
     //
     pGridLayoutBot1->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
-    // Bottom grid 2.
-    QHBoxLayout* pGridLayoutBot2 = new QHBoxLayout(pGridFrameBot2);
-    pGridLayoutBot2->setSpacing(10);
-    pGridLayoutBot2->setContentsMargins(10, 0, 10, 0);
-    //
-    m_widgets.pUDegree->AddTo(pGridLayoutBot2);
-    m_widgets.pVDegree->AddTo(pGridLayoutBot2);
-    //
-    pGridLayoutBot2->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-
     pAdvLayout->addWidget(pGridFrameBot1);
-    //pAdvLayout->addWidget(pGridFrameBot2);
   }
 
   // Layout with diagnostics.
@@ -263,19 +249,16 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
   m_pMainLayout->setContentsMargins(10, 10, 10, 10);
 
   // Set good initial size.
-  this->setMinimumSize( QSize(450, 300) );
+  this->setMinimumSize( QSize(550, 300) );
 
   this->setLayout(m_pMainLayout);
   this->setWindowModality(Qt::NonModal);
   //this->setWindowFlag(Qt::WindowStaysOnTopHint);
-  this->setWindowTitle("Untrim surface");
+  this->setWindowTitle("Join neighbor surfaces");
   this->setWindowIcon( QIcon( QPixmap( (const char**) image0_data ) ) );
 
   if ( m_pViewer )
   {
-    connect( m_pViewer, SIGNAL ( edgePicked(asiVisu_PickerResult*) ),
-             this,      SLOT   ( onEdgePicked() ) );
-
     connect( m_pViewer, SIGNAL ( facePicked(asiVisu_PickerResult*) ),
              this,      SLOT   ( onFacePicked() ) );
   }
@@ -283,60 +266,12 @@ asiUI_DialogUntrimSurf::asiUI_DialogUntrimSurf(const Handle(asiUI_WidgetFactory)
 
 //-----------------------------------------------------------------------------
 
-asiUI_DialogUntrimSurf::~asiUI_DialogUntrimSurf()
+asiUI_DialogJoinSurf::~asiUI_DialogJoinSurf()
 {}
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogUntrimSurf::onEdgePicked()
-{
-  if ( !m_model || !m_pViewer )
-    return;
-
-  asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
-
-  // Get selected edges.
-  TColStd_PackedMapOfInteger eids;
-  partApi.GetHighlightedEdges(eids);
-  //
-  Handle(asiAlgo_AAG) aag = partApi.GetAAG();
-  //
-  if ( aag.IsNull() )
-  {
-    m_progress.SendLogMessage(LogWarn(Normal) << "Active part is null. Please, load a model before setting edge constraints.");
-    return;
-  }
-
-  const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
-
-  // Collect edges.
-  BRep_Builder bbuilder;
-  TopoDS_Compound edgeComp;
-  bbuilder.MakeCompound(edgeComp);
-  //
-  QStringList edgeIds;
-  for ( TColStd_PackedMapOfInteger::Iterator eit(eids); eit.More(); eit.Next() )
-  {
-    const int edgeId = eit.Key();
-
-    if ( edgeId >= 1 && edgeId <= allEdges.Extent() )
-    {
-      bbuilder.Add( edgeComp, allEdges(edgeId) );
-      edgeIds.append( QString::number(edgeId) );
-    }
-    else
-    {
-      m_progress.SendLogMessage(LogWarn(Normal) << "Edge with ID %1 does not exist in the model."
-                                                << edgeId);
-    }
-  }
-
-  m_widgets.pEdges->setText(edgeIds.join(" "));
-}
-
-//-----------------------------------------------------------------------------
-
-void asiUI_DialogUntrimSurf::onFacePicked()
+void asiUI_DialogJoinSurf::onFacePicked()
 {
   if ( !m_model || !m_pViewer )
     return;
@@ -380,24 +315,18 @@ void asiUI_DialogUntrimSurf::onFacePicked()
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogUntrimSurf::onApply()
+void asiUI_DialogJoinSurf::onApply()
 {
   if ( !m_model || !m_pViewer )
     return;
 
   // Number of U/V isos.
-  const int numUIsos = QVariant( m_widgets.pNumUIsos->GetString() ).toInt();
-  const int numVIsos = QVariant( m_widgets.pNumVIsos->GetString() ).toInt();
+  const int numProfilesS1 = QVariant( m_widgets.pNumProfilesS1->GetString() ).toInt();
+  const int numProfilesS2 = QVariant( m_widgets.pNumProfilesS2->GetString() ).toInt();
+  const int numGuides     = QVariant( m_widgets.pNumGuides->GetString() ).toInt();
 
-  // U/V degrees.
-  const int UDegree = QVariant( m_widgets.pUDegree->GetString() ).toInt();
-  const int VDegree = QVariant( m_widgets.pVDegree->GetString() ).toInt();
-  //
-  if ( !UDegree || !VDegree )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Please, make sure to specify correct U and V surface degrees.");
-    return;
-  }
+  // Boundary offset.
+  const double bndOffset = QVariant( m_widgets.pOffset->GetString() ).toDouble();
 
   /* ==================
    *  Read constraints.
@@ -407,32 +336,11 @@ void asiUI_DialogUntrimSurf::onApply()
 
   Handle(asiAlgo_AAG) aag = partApi.GetAAG();
 
-  Handle(TopTools_HSequenceOfShape) hedges = new TopTools_HSequenceOfShape;
   Handle(TopTools_HSequenceOfShape) hfaces = new TopTools_HSequenceOfShape;
 
   if ( !aag.IsNull() )
   {
-    const TopTools_IndexedMapOfShape& allEdges = aag->RequestMapOfEdges();
     const TopTools_IndexedMapOfShape& allFaces = aag->GetMapOfFaces();
-
-    // Read edge indices.
-    QStringList eidList = m_widgets.pEdges->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
-    //
-    for ( const auto& eidStr : eidList )
-    {
-      const int eid = eidStr.toInt();
-
-      if ( (eid > 0) && ( eid <= allEdges.Extent() ) )
-      {
-        const TopoDS_Shape& edge = allEdges.FindKey(eid);
-        hedges->Append(edge);
-      }
-      else
-      {
-        m_progress.SendLogMessage( LogErr(Normal) << "Input edge index %1 is out of range [1, %2]."
-                                                  << eid << allEdges.Extent() );
-      }
-    }
 
     // Read face indices.
     QStringList fidList = m_widgets.pFaces->text().split(QRegExp("[\\D]+"), QString::SkipEmptyParts);
@@ -454,29 +362,29 @@ void asiUI_DialogUntrimSurf::onApply()
     }
   }
 
-  /* ================
-   *  Untrim surface.
-   * ================ */
+  /* ===============
+   *  Join surfaces.
+   * =============== */
 
   Handle(Geom_BSplineSurface) surf;
   TopoDS_Face                 face;
 
   // Prepare untrimming tool.
-  asiAlgo_UntrimSurf UNTRIM(m_progress, m_bDiagnostics ? m_plotter : nullptr);
+  asiAlgo_JoinSurf JOINSURF(m_progress, m_bDiagnostics ? m_plotter : nullptr);
   //
-  UNTRIM.SetNumUIsos (numUIsos);
-  UNTRIM.SetNumVIsos (numVIsos);
-  UNTRIM.SetDegreeU  (UDegree);
-  UNTRIM.SetDegreeV  (VDegree);
+  JOINSURF.SetNumProfilesS1  (numProfilesS1);
+  JOINSURF.SetNumProfilesS2  (numProfilesS2);
+  JOINSURF.SetNumGuides      (numGuides);
+  JOINSURF.SetBoundaryOffset (bndOffset);
 
   // Perform.
-  if ( !UNTRIM.Build(hfaces, hedges, surf, face) )
+  if ( !JOINSURF.Build(hfaces, surf, face) )
   {
-    m_progress.SendLogMessage(LogErr(Normal) << "UNTRIM failed.");
+    m_progress.SendLogMessage(LogErr(Normal) << "JOIN failed.");
     return;
   }
 
-  m_progress.SendLogMessage(LogInfo(Normal) << "UNTRIM operation is done.");
+  m_progress.SendLogMessage(LogInfo(Normal) << "JOIN operation is done.");
 
   // Visually dump guide and profile curves.
   BRep_Builder    bbuilder;
@@ -485,8 +393,8 @@ void asiUI_DialogUntrimSurf::onApply()
   bbuilder.MakeCompound(guidesComp);
   bbuilder.MakeCompound(profilesComp);
   //
-  const std::vector<TopoDS_Edge>& guides   = UNTRIM.GetGuides();
-  const std::vector<TopoDS_Edge>& profiles = UNTRIM.GetProfiles();
+  const std::vector<TopoDS_Edge>& guides   = JOINSURF.GetGuides();
+  const std::vector<TopoDS_Edge>& profiles = JOINSURF.GetProfiles();
   //
   for ( const auto& guide : guides )
   {
@@ -502,15 +410,15 @@ void asiUI_DialogUntrimSurf::onApply()
   m_plotter.REDRAW_SHAPE("profiles", profilesComp, Color_Green);
 
   if ( !surf.IsNull() )
-    m_plotter.DRAW_SURFACE(surf, Color_Default, "untrimSurf");
+    m_plotter.DRAW_SURFACE(surf, Color_Default, "jointSurf");
 
   if ( !face.IsNull() )
-    m_plotter.DRAW_SHAPE(face, Color_Default, "untrimFace");
+    m_plotter.DRAW_SHAPE(face, Color_Default, "jointFace");
 }
 
 //-----------------------------------------------------------------------------
 
-void asiUI_DialogUntrimSurf::onDiagnostics()
+void asiUI_DialogJoinSurf::onDiagnostics()
 {
   m_bDiagnostics = m_widgets.pDiagnostics->isChecked();
 }
