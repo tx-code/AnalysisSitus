@@ -570,27 +570,31 @@ void asiUI_ViewerPartListener::onWhateverHighlighted(asiVisu_PickerResult* pickR
 
   const TColStd_PackedMapOfInteger& elemIds = cellPickerRes->GetPickedElementIds();
 
-  if (elemIds.IsEmpty())
+  if ( elemIds.IsEmpty() )
   {
-    m_statusBar->SetStatusText(m_statusBar->CurrentState());
+    if ( !m_statusBar.IsNull() )
+      m_statusBar->SetStatusText( m_statusBar->CurrentState() );
+
     return;
   }
 
   const int facetId = elemIds.GetMinimalMapped();
-  if (!m_statusBar.IsNull())
+
+  if ( !m_statusBar.IsNull() )
   {
     m_statusBar->SetStatusText(TCollection_AsciiString("Facet ID: ") + facetId);
   }
 
   // Check if part is highlighted
   asiVisu_PartNodeInfo* nodeInfo = asiVisu_PartNodeInfo::Retrieve(pickRes->GetPickedActor());
-  if (pickRes->GetPickedActor() && !nodeInfo)
+  //
+  if ( pickRes->GetPickedActor() && !nodeInfo )
     return;
 
-  if (pickRes->IsSelectionFace())
+  if ( pickRes->IsSelectionFace() )
     onFaceHighlighted(pickRes);
-  
-  else if (pickRes->IsSelectionEdge())
+  //
+  else if ( pickRes->IsSelectionEdge() )
     onEdgeHighlighted(pickRes);
   //
   else if (pickRes->IsSelectionVertex())
