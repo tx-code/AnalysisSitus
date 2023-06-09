@@ -54,20 +54,6 @@ class asiAlgo_UntrimSurf : public ActAPI_IAlgorithm
 
 public:
 
-  //! Checks deviation between the constructed surface and the initial
-  //! host surface that was supposed to be untrimmed.
-  //! \param[in]  resSurf  the constructed surface.
-  //! \param[in]  initSurf the initial surface.
-  //! \param[out] maxDev   the computed max deviation.
-  //! \param[in]  plotter  the plotter entry.
-  asiAlgo_EXPORT static void
-    CheckDeviation(const Handle(Geom_BSplineSurface)& resSurf,
-                   const Handle(Geom_BSplineSurface)& initSurf,
-                   double&                            maxDev,
-                   ActAPI_PlotterEntry                plotter);
-
-public:
-
   //! Default ctor.
   //! \param[in] progress the progress indicator.
   //! \param[in] plotter  the imperative plotter.

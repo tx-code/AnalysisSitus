@@ -32,6 +32,7 @@
 #include "asiAlgo_UntrimSurf.h"
 
 // asiAlgo includes
+#include "asiAlgo_AppSurfUtils.h"
 #include "asiAlgo_BuildCoonsSurf.h"
 #include "asiAlgo_BuildGordonSurf.h"
 
@@ -63,89 +64,6 @@
 #ifdef USE_MOBIUS
 using namespace mobius;
 #endif
-
-//-----------------------------------------------------------------------------
-
-void asiAlgo_UntrimSurf::CheckDeviation(const Handle(Geom_BSplineSurface)& resSurf,
-                                        const Handle(Geom_BSplineSurface)& initSurf,
-                                        double&                            maxDev,
-                                        ActAPI_PlotterEntry                plotter)
-{
-  const int numSteps = 10;
-
-  /* ===============================================
-   *  Prepare probe points on the untrimmed surface.
-   * =============================================== */
-
-  double uMin, uMax, vMin, vMax;
-  resSurf->Bounds(uMin, uMax, vMin, vMax);
-
-  const double uStep = (uMax - uMin) / numSteps;
-  const double vStep = (vMax - vMin) / numSteps;
-
-  // Choose u values
-  std::vector<double> U;
-  {
-    double u     = uMin;
-    bool   uStop = false;
-    //
-    while ( !uStop )
-    {
-      if ( (u > uMax) || Abs(u - uMax) < 1e-6 )
-      {
-        u     = uMax;
-        uStop = true;
-      }
-
-      U.push_back(u);
-      u += uStep;
-    }
-  }
-
-  // Choose v values
-  std::vector<double> V;
-  {
-    double v     = vMin;
-    bool   vStop = false;
-    //
-    while ( !vStop )
-    {
-      if ( (v > vMax) || Abs(v - vMax) < 1e-6 )
-      {
-        v     = vMax;
-        vStop = true;
-      }
-
-      V.push_back(v);
-      v += vStep;
-    }
-  }
-
-  /* =======================================
-   *  Check distance to the initial surface.
-   * ======================================= */
-
-  ShapeAnalysis_Surface sas(initSurf);
-
-  double maxDist = 0;
-
-  for ( const auto u : U )
-  {
-    for ( const auto v : V )
-    {
-      gp_Pnt   probe  = resSurf->Value(u, v);
-      gp_Pnt2d projUV = sas.ValueOfUV(probe, 1e-3);
-      gp_Pnt   proj   = initSurf->Value( projUV.X(), projUV.Y() );
-
-      const double d = proj.Distance(probe);
-      //
-      if ( d > maxDist )
-        maxDist = d;
-    }
-  }
-
-  maxDev = maxDist;
-}
 
 //-----------------------------------------------------------------------------
 
@@ -373,7 +291,7 @@ bool asiAlgo_UntrimSurf::Build(const Handle(TopTools_HSequenceOfShape)& inFaces,
    * ================== */
 
   // Check deviation from the initial surface.
-  CheckDeviation(outSupport, initSurf, m_fMaxError, m_plotter);
+  asiAlgo_AppSurfUtils::MeasureDeviation(outSupport, initSurf, m_fMaxError, m_plotter);
 
   m_progress.SendLogMessage(LogNotice(Normal) << "Max deviation: %1."
                                               << m_fMaxError);

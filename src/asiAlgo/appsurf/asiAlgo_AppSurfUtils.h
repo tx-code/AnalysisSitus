@@ -38,6 +38,9 @@
   #include <mobius/geom_PositionCloud.h>
 #endif
 
+// Active Data includes
+#include <ActAPI_IPlotter.h>
+
 // OpenCascade includes
 #include <Geom_BSplineSurface.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
@@ -66,7 +69,8 @@ namespace asiAlgo_AppSurfUtils
                        const mobius::t_ptr<mobius::t_pcloud>&   pts);
 #endif
 
-  //! Measures the obtained deviation.
+  //! Measures the deviation between the passed B-spline surface and
+  //! a scattered point cloud.
   asiAlgo_EXPORT void
     MeasureDeviation(const Handle(Geom_BSplineSurface)&       bsurf,
                      const Handle(asiAlgo_BaseCloud<double>)& pts,
@@ -74,4 +78,15 @@ namespace asiAlgo_AppSurfUtils
                      double&                                  maxDeviation,
                      double&                                  avrDeviation,
                      gp_Pnt&                                  maxDevPt);
+
+  //! Measures the deviation between two passed B-spline surfaces.
+  //! \param[in]  resSurf  the surface constructed by an approximation algorithm.
+  //! \param[in]  initSurf the initial surface to compare with.
+  //! \param[out] maxDev   the computed max deviation.
+  //! \param[in]  plotter  the plotter entry.
+  asiAlgo_EXPORT void
+    MeasureDeviation(const Handle(Geom_BSplineSurface)& resSurf,
+                     const Handle(Geom_BSplineSurface)& initSurf,
+                     double&                            maxDev,
+                     ActAPI_PlotterEntry                plotter);
 }

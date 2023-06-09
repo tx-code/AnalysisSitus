@@ -154,6 +154,10 @@ asiUI_Console::asiUI_Console(const Handle(asiTcl_Interp)& interp,
                  .arg(TCL_RELEASE_LEVEL)
                  .arg(TCL_RELEASE_SERIAL), false, false );
 
+  this->addText(READY_PROMPT, true, false);
+  this->addText( QString("set scripts-dir $env(ASI_TEST_SCRIPTS); puts ${scripts-dir}"),
+                 false, false );
+
   // Add prompt
   m_prompt = READY_PROMPT;
   this->addText(READY_PROMPT, true, false);

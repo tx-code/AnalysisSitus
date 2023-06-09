@@ -38,6 +38,7 @@
 #include <asiTcl_PluginMacro.h>
 
 // asiAlgo includes
+#include <asiAlgo_AppSurfUtils.h>
 #include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_DivideByContinuity.h>
 #include <asiAlgo_EulerKEF.h>
@@ -105,6 +106,43 @@
 
   using namespace mobius;
 #endif
+
+namespace
+{
+  static void SimplifySurface(Handle(Geom_BSplineSurface)& BS,
+                              const double                 Tol,
+                              const int                    MultMin)
+
+  {
+    int  multU, multV, ii;
+    bool Ok;
+
+    const TColStd_Array1OfReal&    U  = BS->UKnots();
+    const TColStd_Array1OfReal&    V  = BS->VKnots();
+    const TColStd_Array1OfInteger& UM = BS->UMultiplicities();
+    const TColStd_Array1OfInteger& VM = BS->VMultiplicities();
+
+    for ( ii = U.Length() - 1; ii > 1; ii-- )
+    {
+      Ok    = true;
+      multU = UM.Value(ii);
+      for  ( ; Ok && multU > MultMin; multU-- )
+      {
+        Ok = BS->RemoveUKnot(ii, 1, Tol);
+      }
+    }
+
+    for ( ii = V.Length() - 1; ii > 1; ii-- )
+    {
+      Ok    = true;
+      multV = VM.Value(ii);
+      for  ( ; Ok && multV > MultMin; multV-- )
+      {
+        Ok = BS->RemoveVKnot(ii, 1, Tol);
+      }
+    }
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -3814,6 +3852,90 @@ int ENGINE_ConcatAndCheck(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConvertSurfC2(const Handle(asiTcl_Interp)& interp,
+                         int                          argc,
+                         const char**                 argv)
+{
+  if ( argc < 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  Handle(asiData_IVSurfaceNode)
+    node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
+  //
+  if ( node.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find surface object with name %1." << argv[1]);
+    return TCL_ERROR;
+  }
+
+  // Get parametric surface.
+  Handle(Geom_Surface) surf = node->GetSurface();
+  //
+  if ( surf.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
+    return TCL_ERROR;
+  }
+
+  // The input surface has to be a B-spline surface.
+  Handle(Geom_BSplineSurface) bsurfInit = Handle(Geom_BSplineSurface)::DownCast( surf );
+  Handle(Geom_BSplineSurface) bsurfCopy = Handle(Geom_BSplineSurface)::DownCast( surf->Copy() );
+  //
+  if ( bsurfCopy.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is not a B-spline surface.");
+    return TCL_ERROR;
+  }
+
+  // Whether to add knots.
+  const bool addKnots = interp->HasKeyword(argc, argv, "add-knots");
+  //
+  if ( addKnots )
+  {
+    const TColStd_Array1OfReal& U  = bsurfInit->UKnots();
+    const TColStd_Array1OfReal& V  = bsurfInit->VKnots();
+
+    for ( int ii = 1; ii < U.Length(); ++ii )
+    {
+      const double u_prev = U(ii);
+      const double u_next = U(ii + 1);
+
+      bsurfCopy->InsertUKnot( (3*u_prev +   u_next)*0.25, 1, Precision::PConfusion() );
+      bsurfCopy->InsertUKnot( (  u_prev + 3*u_next)*0.25, 1, Precision::PConfusion() );
+    }
+
+    for ( int ii = 1; ii < V.Length(); ++ii )
+    {
+      const double v_prev = V(ii);
+      const double v_next = V(ii + 1);
+
+      bsurfCopy->InsertVKnot( (3*v_prev +   v_next)*0.25, 1, Precision::PConfusion() );
+      bsurfCopy->InsertVKnot( (  v_prev + 3*v_next)*0.25, 1, Precision::PConfusion() );
+    }
+  }
+
+  // Read conversion tolerance.
+  double tol = 1e10;
+  interp->GetKeyValue(argc, argv, "tol", tol);
+
+  // Simplify.
+  ::SimplifySurface(bsurfCopy, tol, 1);
+  //
+  interp->GetPlotter().REDRAW_SURFACE( TCollection_AsciiString(argv[1]) + "_C2", bsurfCopy, Color_Default);
+
+  // Measure deviation.
+  double maxDev = 0;
+  asiAlgo_AppSurfUtils::MeasureDeviation( bsurfCopy, bsurfInit, maxDev, interp->GetPlotter() );
+
+  (*interp) << maxDev;
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4290,7 +4412,6 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     //
     __FILE__, group, ENGINE_ClearPart);
 
-  
   //-------------------------------------------------------------------------//
   interp->AddCommand("orient-part",
     //
@@ -4326,11 +4447,21 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("concat-curves-and-check",
     //
-    "reverse-curve name\n"
+    "concat-curves-and-check -edges <e1> <e2>\n"
     "\t Concatenates edges <e1> and <e2> belonging to the face <fid> into\n"
     "\t a single edge. The indices <e1> and <e2> are defined locally and thereby\n"
     "\t range from 1 to the number of edges in the face. The concatenation process\n"
     "\t is done at the level of pcurves.",
     //
     __FILE__, group, ENGINE_ConcatAndCheck);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("convert-surf-c2",
+    //
+    "convert-surf-c2 <name> [-tol <tol>] [-add-knots]\n"
+    "\t Converts the surface named <name> to C2 continuity class if possible.\n"
+    "\t You can pass the tolerance value via the '-tol' key to protect knot removal\n"
+    "\t operation from distorting the input surface too much.",
+    //
+    __FILE__, group, ENGINE_ConvertSurfC2);
 }
