@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: rebuild edge</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/convert C1 surfaces to C2 class
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1>Convert C1 curves and surfaces to C2 class</h1>
+
+<h2>Surfaces</h2>
+
+<h3>Overview</h3>
+
+<p>
+  In engineering practice, C1-class surfaces are sometimes undesirable. For example, such surfaces may pose substantial difficulties in 3-rd party modeling systems, e.g., in Catia (where a single surface might end up broken down onto separate patches due to continuity defects). The following image illustrates a C1-class surface loaded into Analysis Situs from IGES:
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_01.png"/></div>
+
+<p>
+  Analysis Situs was designed from the day one to focus on the differential and topological props of CAD geometric models. That is why the continuity of B-spline surfaces is exposed directly in the viewer and does not require any dedicated analysis to be launched explicitly. The following color legend is used for decoding various orders of continuity at knot isolines on a B-spline surface:
+</p>
+
+<table>
+<tr>
+  <td class="code-cell" style="background-color: #da0808; color: white;">C0</td>
+  <td class="code-cell" style="background-color: #fbff0a; color: black;">C1</td>
+</tr>
+<tr>
+  <td class="code-cell" style="background-color: #5fb2ff; color: black;">C2</td>
+  <td class="code-cell" style="background-color: #E2E2E2; color: black;">C3</td>
+</tr>
+</table>
+
+<p>
+  To turn a C1-continuous B-spline surface into a C2-continuous surface, use <span class="code-inline">convert-surf-c2</span> Tcl command.
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_02.png"/></div>
+
+<p>
+  This command removes the duplicated knots, i.e., decreases their multiplicities. If the <span class="code-inline">-add-knots</span> argument is passed, extra nodes will be added to refine the resulting surface and make it fit better the input one.
+</p>
+
+<p>
+  The conversion operation also checks how the constructed surface deviates from the input one. Such a fitting test is necessary because knot removal operation is not shape-preserving. The max obtained deviation is reported as a return value of the corresponding Tcl command, so you can check it as follows:
+</p>
+
+<div class="code">
+> puts "Max conversion error: [convert-surf-c2 s -add-knots]"
+</div>
+
+<h3>With or without knots</h3>
+
+<p>
+  The <span class="code-inline">convert-surf-c2</span> command comes with the optional <span class="code-inline">-add-knots</span> argument that determines whether to add extra knots in the U and V directions of the surface. If this argument is not passed, then C2 continuity is achieved simply by decreasing the existing multiplicities of knots (following the rule that the order of continuity equals the degree of spline minus knot multiplicity). Here is the example (<a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/data/cad/astra/narvakd.dat">narvakd.dat</a> ASTRA file) of a turbine blade with C1 continuity at knot isoparametric lines:
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_03.png"/></div>
+
+<p>
+  Without <span class="code-inline">-add-knots</span> option, the C2 continuity can be achieved by simply removing the repeated knot values:
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_04.png"/></div>
+
+<p>
+  It is known from theory that such a naive approach might distort the original surface quite a bit. In the example above, the obtained max deviation measured between the modified and original surfaces was 0.33 mm. If we add more knots in each span using the <span class="code-inline">-add-knots</span> option, then the deviation decreases to 0.018 mm in this particular case.
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_05.png"/></div>
+
+<h2>Curves</h2>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

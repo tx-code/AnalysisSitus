@@ -882,34 +882,23 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get ID of the selected face.
-  const int faceIdx = surfNode->GetAnySelectedFace();
+  int faceIdx = surfNode->GetAnySelectedFace();
   //
   if ( faceIdx > 0 )
   {
     faceShape = subShapes(faceIdx);
   }
-  else if ( argc >= 3 )
+  else
   {
-    /* The face might have been passed by name */
+    /* The face might have been passed by ID */
 
-    // Find Node by name.
-    Handle(ActAPI_INode)
-      baseN = cmdEngine::model->FindNodeByName(argv[2]);
-    //
-    Handle(asiData_IVTopoItemNode)
-      topoN = Handle(asiData_IVTopoItemNode)::DownCast(baseN);
-    //
-    if ( topoN.IsNull() || !topoN->IsWellFormed() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Object '%1' is not a topological item."
-                                                          << argv[2]);
-      return TCL_ERROR;
-    }
+    interp->GetKeyValue(argc, argv, "fid", faceIdx);
 
     // Get shape.
-    faceShape = topoN->GetShape();
+    faceShape = partNode->GetAAG()->GetMapOfFaces()(faceIdx);
   }
-  else
+
+  if ( !faceIdx )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "The target face is not specified.");
     return TCL_ERROR;
@@ -2428,7 +2417,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-surf",
     //
-    "make-surf <surfName> [<faceName>] [-spl]\n"
+    "make-surf <surfName> [-fid <fid>] [-spl]\n"
     "\t Creates a surface from the selected face or a face with the given name.\n"
     "\t If the '-spl' flag is passed, the surface will be converted to spline.",
     //
