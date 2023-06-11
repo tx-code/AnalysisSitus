@@ -39,6 +39,7 @@
 #include <asiTest_CommonFacilities.h>
 #include <asiTest_ComputeNegativeVolume.h>
 #include <asiTest_ConvertCanonical.h>
+#include <asiTest_ConvertToC2.h>
 #include <asiTest_EdgeVexity.h>
 #include <asiTest_Exchange.h>
 #include <asiTest_ExchangeAstra.h>
@@ -166,6 +167,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Utils>                 );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_XdeDoc>                );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertCanonical>      );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ConvertToC2>           );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_GenerateFacets>        );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>           );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ComputeNegativeVolume> );

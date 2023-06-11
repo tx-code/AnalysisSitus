@@ -17,6 +17,12 @@
   </script>
   <!-- [end] Google Analytics -->
 
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
  </head>
 <body>
 
@@ -45,11 +51,13 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1>Convert C1 curves and surfaces to C2 class</h1>
+<h1 id="toc-convert-to-c2">Convert C1 curves and surfaces to C2 class</h1>
 
-<h2>Surfaces</h2>
+<div class="toc-panel"><div id="toc"></div></div>
 
-<h3>Overview</h3>
+<h2 id="toc-convert-to-c2-surf">Surfaces</h2>
+
+<h3 id="toc-convert-to-c2-surf-overview">Overview</h3>
 
 <p>
   In engineering practice, C1-class surfaces are sometimes undesirable. For example, such surfaces may pose substantial difficulties in 3-rd party modeling systems, e.g., in Catia (where a single surface might end up broken down onto separate patches due to continuity defects). The following image illustrates a C1-class surface loaded into Analysis Situs from IGES:
@@ -73,44 +81,62 @@
 </table>
 
 <p>
-  To turn a C1-continuous B-spline surface into a C2-continuous surface, use <span class="code-inline">convert-surf-c2</span> Tcl command.
+  To turn a C1-continuous B-spline surface into a C2-continuous surface, use <span class="code-inline">convert-to-c2</span> Tcl command.
 </p>
 
 <div align="center"><img src="../imgs/cae/cae_convert-c1-c2_02.png"/></div>
 
 <p>
-  This command removes the duplicated knots, i.e., decreases their multiplicities. If the <span class="code-inline">-add-knots</span> argument is passed, extra nodes will be added to refine the resulting surface and make it fit better the input one.
+  This command removes the duplicated knots, i.e., decreases their multiplicities. Knot removal would not happen if the shape modification it would induce is greater than the specified tolerance value (<span class="code-inline">-tol</span> argument). By default, this tolerance is not restricted, so local shape distortion is perfectly allowed. If the <span class="code-inline">-add-knots</span> argument is passed, extra nodes will be added to refine the resulting surface and make it fit better the input one.
 </p>
 
 <p>
-  The conversion operation also checks how the constructed surface deviates from the input one. Such a fitting test is necessary because knot removal operation is not shape-preserving. The max obtained deviation is reported as a return value of the corresponding Tcl command, so you can check it as follows:
+  The conversion operation also checks how the constructed surface deviates from the input one in the global sense (i.e., not just near knots as controlled by the <span class="code-inline">-tol</span> argument). Such a fitting test is necessary because knot removal operation is not shape-preserving. The max obtained deviation is reported as a return value of the corresponding Tcl command, so you can check it as follows:
 </p>
 
 <div class="code">
-> puts "Max conversion error: [convert-surf-c2 s -add-knots]"
+> puts "Max conversion error: [convert-to-c2 s -add-knots]"
 </div>
 
-<h3>With or without knots</h3>
+<h3 id="toc-convert-to-c2-surf-with-knots">With or without knots</h3>
 
 <p>
-  The <span class="code-inline">convert-surf-c2</span> command comes with the optional <span class="code-inline">-add-knots</span> argument that determines whether to add extra knots in the U and V directions of the surface. If this argument is not passed, then C2 continuity is achieved simply by decreasing the existing multiplicities of knots (following the rule that the order of continuity equals the degree of spline minus knot multiplicity). Here is the example (<a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/data/cad/astra/narvakd.dat">narvakd.dat</a> ASTRA file) of a turbine blade with C1 continuity at knot isoparametric lines:
+  The <span class="code-inline">convert-to-c2</span> command comes with the optional <span class="code-inline">-add-knots</span> argument that determines whether to add extra knots in the U and V directions of the surface. If this argument is not passed, then C2 continuity is achieved simply by decreasing the existing multiplicities of knots (following the rule that the order of continuity equals the degree of spline minus knot multiplicity). Here is the example (<a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/data/cad/astra/narvakd.dat">narvakd.dat</a> ASTRA file) of a turbine blade with C1 continuity at knot isoparametric lines (C1 continuity is encoded with yellow color):
 </p>
 
 <div align="center"><img src="../imgs/cae/cae_convert-c1-c2_03.png"/></div>
 
 <p>
-  Without <span class="code-inline">-add-knots</span> option, the C2 continuity can be achieved by simply removing the repeated knot values:
+  Without <span class="code-inline">-add-knots</span> option, the C2 continuity can be achieved by simply removing the repeated knot values (C2 continuity is encoded with blue color):
 </p>
 
 <div align="center"><img src="../imgs/cae/cae_convert-c1-c2_04.png"/></div>
 
 <p>
-  It is known from theory that such a naive approach might distort the original surface quite a bit. In the example above, the obtained max deviation measured between the modified and original surfaces was 0.33 mm. If we add more knots in each span using the <span class="code-inline">-add-knots</span> option, then the deviation decreases to 0.018 mm in this particular case.
+  It is known from theory that such a naive approach might distort the original surface quite a bit. In the example above, the obtained max deviation measured between the modified and original surfaces was 0.33 mm (we did not use the <span class="code-inline">-tol</span> argument to restrict local surface deformations). If we add more knots in each span using the <span class="code-inline">-add-knots</span> option, then the deviation decreases to 0.018 mm in this particular case.
 </p>
 
 <div align="center"><img src="../imgs/cae/cae_convert-c1-c2_05.png"/></div>
 
-<h2>Curves</h2>
+<h2 id="toc-convert-to-c2-curve">Curves</h2>
+
+<p>
+  Curve conversion is similar to surface conversion and is also based on knot removal atomic operation. The following image illustrates a C1-continuous spline curve imported from the <a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/data/cad/astra/narvakd.dat">narvakd.dat</a> ASTRA file:
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_06.png"/></div>
+
+<p>
+  Without adding extra knots, the complexity of the curve can be decreased while improving its order of smoothness. The following image illustrates the same curve after <span class="code-inline">convert-to-c2</span> command execution. The global deviation between the obtained and the original curve is around 0.1 mm.
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_07.png"/></div>
+
+<p>
+  As in the case with surfaces, you may want to add more knots in the curve spans (the regions between spline knots) for decreasing the global deviation. With the <span class="code-inline">-add-knots</span> flag passed, the complexity of the curve substantionally increases while the global measured deviation becomes only 0.001 mm.
+</p>
+
+<div align="center"><img src="../imgs/cae/cae_convert-c1-c2_08.png"/></div>
 
 <!-- [END] contents -->
 </div>

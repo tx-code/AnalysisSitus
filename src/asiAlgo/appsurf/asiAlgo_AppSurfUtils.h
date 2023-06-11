@@ -42,6 +42,7 @@
 #include <ActAPI_IPlotter.h>
 
 // OpenCascade includes
+#include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
@@ -89,4 +90,15 @@ namespace asiAlgo_AppSurfUtils
                      const Handle(Geom_BSplineSurface)& initSurf,
                      double&                            maxDev,
                      ActAPI_PlotterEntry                plotter);
+
+  //! Measures the deviation between two passed B-spline curves.
+  //! \param[in]  resCurve  the B-spline curve constructed by an approximation algorithm.
+  //! \param[in]  initCurve the initial curve to compare with.
+  //! \param[out] maxDev    the computed max deviation.
+  //! \param[in]  plotter   the plotter entry.
+  asiAlgo_EXPORT void
+    MeasureDeviation(const Handle(Geom_BSplineCurve)& resCurve,
+                     const Handle(Geom_BSplineCurve)& initCurve,
+                     double&                          maxDev,
+                     ActAPI_PlotterEntry              plotter);
 }

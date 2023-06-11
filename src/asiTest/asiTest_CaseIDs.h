@@ -47,6 +47,7 @@ enum asiTest_CaseID
   CaseID_SuppressBlends,
   CaseID_ConvertCanonical,
   CaseID_ConcatPCurves,
+  CaseID_ConvertToC2,
 
 /* ------------------------------------------------------------------------ */
 

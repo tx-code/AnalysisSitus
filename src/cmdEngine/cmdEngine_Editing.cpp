@@ -109,6 +109,7 @@
 
 namespace
 {
+  //! Improves the continuity of the passed surface by knot removal.
   static void SimplifySurface(Handle(Geom_BSplineSurface)& BS,
                               const double                 Tol,
                               const int                    MultMin)
@@ -139,6 +140,29 @@ namespace
       for  ( ; Ok && multV > MultMin; multV-- )
       {
         Ok = BS->RemoveVKnot(ii, 1, Tol);
+      }
+    }
+  }
+
+  //! Improves the continuity of the passed curve by knot removal.
+  static void SimplifyCurve(Handle(Geom_BSplineCurve)& BC,
+                            const double               Tol,
+                            const int                  MultMin)
+
+  {
+    int  mult, ii;
+    bool Ok;
+
+    const TColStd_Array1OfReal&    U = BC->Knots();
+    const TColStd_Array1OfInteger& M = BC->Multiplicities();
+
+    for ( ii = U.Length() - 1; ii > 1; ii-- )
+    {
+      Ok   = true;
+      mult = M.Value(ii);
+      for  ( ; Ok && mult > MultMin; mult-- )
+      {
+        Ok = BC->RemoveKnot(ii, 1, Tol);
       }
     }
   }
@@ -3852,82 +3876,146 @@ int ENGINE_ConcatAndCheck(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
-int ENGINE_ConvertSurfC2(const Handle(asiTcl_Interp)& interp,
-                         int                          argc,
-                         const char**                 argv)
+int ENGINE_ConvertToC2(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
 {
   if ( argc < 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
+  // Assuming that `argv[1]` is UTF-8.
+  TCollection_ExtendedString name(argv[1], true);
+
+  // Get node.
   Handle(asiData_IVSurfaceNode)
-    node = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(argv[1]) );
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
   //
-  if ( node.IsNull() )
+  Handle(asiData_IVCurveNode)
+    curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+  //
+  if ( surfNode.IsNull() && curveNode.IsNull() )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find surface object with name %1." << argv[1]);
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find geometric object with the name %1." << name);
     return TCL_ERROR;
-  }
-
-  // Get parametric surface.
-  Handle(Geom_Surface) surf = node->GetSurface();
-  //
-  if ( surf.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
-    return TCL_ERROR;
-  }
-
-  // The input surface has to be a B-spline surface.
-  Handle(Geom_BSplineSurface) bsurfInit = Handle(Geom_BSplineSurface)::DownCast( surf );
-  Handle(Geom_BSplineSurface) bsurfCopy = Handle(Geom_BSplineSurface)::DownCast( surf->Copy() );
-  //
-  if ( bsurfCopy.IsNull() )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is not a B-spline surface.");
-    return TCL_ERROR;
-  }
-
-  // Whether to add knots.
-  const bool addKnots = interp->HasKeyword(argc, argv, "add-knots");
-  //
-  if ( addKnots )
-  {
-    const TColStd_Array1OfReal& U  = bsurfInit->UKnots();
-    const TColStd_Array1OfReal& V  = bsurfInit->VKnots();
-
-    for ( int ii = 1; ii < U.Length(); ++ii )
-    {
-      const double u_prev = U(ii);
-      const double u_next = U(ii + 1);
-
-      bsurfCopy->InsertUKnot( (3*u_prev +   u_next)*0.25, 1, Precision::PConfusion() );
-      bsurfCopy->InsertUKnot( (  u_prev + 3*u_next)*0.25, 1, Precision::PConfusion() );
-    }
-
-    for ( int ii = 1; ii < V.Length(); ++ii )
-    {
-      const double v_prev = V(ii);
-      const double v_next = V(ii + 1);
-
-      bsurfCopy->InsertVKnot( (3*v_prev +   v_next)*0.25, 1, Precision::PConfusion() );
-      bsurfCopy->InsertVKnot( (  v_prev + 3*v_next)*0.25, 1, Precision::PConfusion() );
-    }
   }
 
   // Read conversion tolerance.
   double tol = 1e10;
   interp->GetKeyValue(argc, argv, "tol", tol);
 
-  // Simplify.
-  ::SimplifySurface(bsurfCopy, tol, 1);
-  //
-  interp->GetPlotter().REDRAW_SURFACE( TCollection_AsciiString(argv[1]) + "_C2", bsurfCopy, Color_Default);
+  // Whether to add knots.
+  const bool addKnots = interp->HasKeyword(argc, argv, "add-knots");
 
-  // Measure deviation.
+  // Max achieved deviation.
   double maxDev = 0;
-  asiAlgo_AppSurfUtils::MeasureDeviation( bsurfCopy, bsurfInit, maxDev, interp->GetPlotter() );
+
+  /* ====================
+   *  Surface conversion.
+   * ==================== */
+
+  if ( !surfNode.IsNull() )
+  {
+    // Get parametric surface.
+    Handle(Geom_Surface) surf = surfNode->GetSurface();
+    //
+    if ( surf.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
+      return TCL_ERROR;
+    }
+
+    // The input surface has to be a B-spline surface.
+    Handle(Geom_BSplineSurface) bsurfInit = Handle(Geom_BSplineSurface)::DownCast( surf );
+    Handle(Geom_BSplineSurface) bsurfCopy = Handle(Geom_BSplineSurface)::DownCast( surf->Copy() );
+    //
+    if ( bsurfCopy.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is not a B-spline surface.");
+      return TCL_ERROR;
+    }
+
+    if ( addKnots )
+    {
+      const TColStd_Array1OfReal& U  = bsurfInit->UKnots();
+      const TColStd_Array1OfReal& V  = bsurfInit->VKnots();
+
+      for ( int ii = 1; ii < U.Length(); ++ii )
+      {
+        const double u_prev = U(ii);
+        const double u_next = U(ii + 1);
+
+        bsurfCopy->InsertUKnot( (3*u_prev +   u_next)*0.25, 1, Precision::PConfusion() );
+        bsurfCopy->InsertUKnot( (  u_prev + 3*u_next)*0.25, 1, Precision::PConfusion() );
+      }
+
+      for ( int ii = 1; ii < V.Length(); ++ii )
+      {
+        const double v_prev = V(ii);
+        const double v_next = V(ii + 1);
+
+        bsurfCopy->InsertVKnot( (3*v_prev +   v_next)*0.25, 1, Precision::PConfusion() );
+        bsurfCopy->InsertVKnot( (  v_prev + 3*v_next)*0.25, 1, Precision::PConfusion() );
+      }
+    }
+
+    // Simplify.
+    ::SimplifySurface(bsurfCopy, tol, 1);
+    //
+    interp->GetPlotter().REDRAW_SURFACE(name + "_C2", bsurfCopy, Color_Default);
+
+    // Measure deviation.
+    asiAlgo_AppSurfUtils::MeasureDeviation( bsurfCopy, bsurfInit, maxDev, interp->GetPlotter() );
+  }
+
+  /* ==================
+   *  Curve conversion.
+   * ================== */
+
+  if ( !curveNode.IsNull() )
+  {
+    // Get parametric curve.
+    Handle(Geom_Curve) curve = curveNode->GetCurve();
+    //
+    if ( curve.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target curve is null.");
+      return TCL_ERROR;
+    }
+
+    // The input curve has to be a B-spline curve.
+    Handle(Geom_BSplineCurve) bcurveInit = Handle(Geom_BSplineCurve)::DownCast( curve );
+    Handle(Geom_BSplineCurve) bcurveCopy = Handle(Geom_BSplineCurve)::DownCast( curve->Copy() );
+    //
+    if ( bcurveCopy.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target curve is not a B-spline curve.");
+      return TCL_ERROR;
+    }
+
+    if ( addKnots )
+    {
+      const TColStd_Array1OfReal& U = bcurveInit->Knots();
+
+      for ( int ii = 1; ii < U.Length(); ++ii )
+      {
+        const double u_prev = U(ii);
+        const double u_next = U(ii + 1);
+
+        bcurveCopy->InsertKnot( (3*u_prev +   u_next)*0.25, 1, Precision::PConfusion() );
+        bcurveCopy->InsertKnot( (  u_prev + 3*u_next)*0.25, 1, Precision::PConfusion() );
+      }
+    }
+
+    // Simplify.
+    ::SimplifyCurve(bcurveCopy, tol, 1);
+    //
+    interp->GetPlotter().REDRAW_CURVE(name + "_C2", bcurveCopy, Color_Default, true);
+
+    // Measure deviation.
+    asiAlgo_AppSurfUtils::MeasureDeviation( bcurveCopy, bcurveInit, maxDev, interp->GetPlotter() );
+  }
 
   (*interp) << maxDev;
 
@@ -4456,12 +4544,12 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     __FILE__, group, ENGINE_ConcatAndCheck);
 
   //-------------------------------------------------------------------------//
-  interp->AddCommand("convert-surf-c2",
+  interp->AddCommand("convert-to-c2",
     //
-    "convert-surf-c2 <name> [-tol <tol>] [-add-knots]\n"
-    "\t Converts the surface named <name> to C2 continuity class if possible.\n"
+    "convert-to-c2 <name> [-tol <tol>] [-add-knots]\n"
+    "\t Converts the curve or surface named <name> to C2 continuity class if possible.\n"
     "\t You can pass the tolerance value via the '-tol' key to protect knot removal\n"
-    "\t operation from distorting the input surface too much.",
+    "\t operation from distorting the input geometry too much.",
     //
-    __FILE__, group, ENGINE_ConvertSurfC2);
+    __FILE__, group, ENGINE_ConvertToC2);
 }

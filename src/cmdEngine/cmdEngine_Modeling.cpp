@@ -794,7 +794,7 @@ int ENGINE_MakeCurve(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
 {
-  if ( argc != 2 )
+  if ( argc < 2 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
   }
@@ -820,18 +820,26 @@ int ENGINE_MakeCurve(const Handle(asiTcl_Interp)& interp,
     return TCL_OK;
   }
 
+  TopoDS_Shape edgeShape;
+
   // Get ID of the selected edge.
-  const int edgeIdx = curveNode->GetSelectedEdge();
+  int edgeIdx = curveNode->GetSelectedEdge();
   //
-  if ( edgeIdx <= 0 )
+  if ( edgeIdx > 0 )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select edge first.");
-    return TCL_OK;
+    edgeShape = subShapes(edgeIdx);
+  }
+  else
+  {
+    /* The edge might have been passed by ID */
+
+    interp->GetKeyValue(argc, argv, "eid", edgeIdx);
+
+    // Get shape.
+    edgeShape = partNode->GetAAG()->RequestMapOfEdges()(edgeIdx);
   }
 
   // Get host curve of the selected edge.
-  const TopoDS_Shape& edgeShape = subShapes(edgeIdx);
-  //
   if ( edgeShape.ShapeType() != TopAbs_EDGE )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
@@ -2409,8 +2417,8 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-curve",
     //
-    "make-curve <curveName>\n"
-    "\t Creates a curve from the selected edge.",
+    "make-curve <curveName> [-eid <eid>]\n"
+    "\t Creates a curve from the selected edge or the edge with the passed ID.",
     //
     __FILE__, group, ENGINE_MakeCurve);
 

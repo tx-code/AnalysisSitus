@@ -54,12 +54,14 @@
 
 <h1 id="toc-recognize-cnc-features">Recognize CNC milling features</h1>
 
+<h2 id="toc-recognize-cnc-features-preamble">Preamble</h2>
+
 <p>
-  The recognition of general CNC features is a challenging area. CNC feature recognition can help in such engineering workflows as automating quotation (MaaS = Manufacturing as a Service) and design for manufacturing (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with some machining operations.
+ CNC feature recognition can help in such engineering workflows as automating quotation (MaaS = Manufacturing as a Service) and manufacturability analysis (DFM). Both use cases require to match the low-level geometric information encoded in B-rep with the corresponding machining operations.
 </p>
 
 <p>
-  The problem can be formulated as follows. Given a 3D representation of an object to manufacture, automatically detect all machined features, including rough milling features, finishing milling features and possibly some post-processing operations, such as deburred edges. Some basic volume features, such as <a href="./features_recognize-drill-holes.html">drilled holes</a> are to be extracted explicitly, while other volume features, such as bosses and pockets are often application-dependent and are not always necessary to extract. It is to be noted that feature recognition is quite dependent on the setup (from which direction a tool approaches a stock) and available tooling (e.g., holes with a too large diameter could not be drilled and should be milled).
+  The problem can be formulated as follows. Given a 3D representation of an object to manufacture, automatically detect all machined features, including <i>rough milling</i> features, <i>finishing milling</i> features and possibly some post-processing operations, such as edge deburring. Some basic volume features, such as <a href="./features_recognize-drill-holes.html">drilled holes</a> are to be extracted explicitly, while other volume features, such as bosses and pockets are often application-dependent and are not always necessary to extract. It should be noted that feature recognition is quite dependent on the setup (from which direction a tool approaches a workpiece) and available tooling (e.g., holes with a too large diameter could not be drilled and should be milled).
 </p>
 
 <p>

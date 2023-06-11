@@ -46,6 +46,7 @@
 #include <GeomConvert.hxx>
 #include <GeomLib.hxx>
 #include <NCollection_CellFilter.hxx>
+#include <ShapeAnalysis_Curve.hxx>
 #include <ShapeAnalysis_Surface.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
@@ -441,6 +442,67 @@ void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineSurface)& r
       if ( d > maxDist )
         maxDist = d;
     }
+  }
+
+  maxDev = maxDist;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_AppSurfUtils::MeasureDeviation(const Handle(Geom_BSplineCurve)& resCurve,
+                                            const Handle(Geom_BSplineCurve)& initCurve,
+                                            double&                          maxDev,
+                                            ActAPI_PlotterEntry              plotter)
+{
+  const int numSteps = 10;
+
+  /* =============================================
+   *  Prepare probe points on the untrimmed curve.
+   * ============================================= */
+
+  const double uMin  = resCurve->FirstParameter();
+  const double uMax  = resCurve->LastParameter();
+  const double uStep = (uMax - uMin) / numSteps;
+
+  // Choose u values
+  std::vector<double> U;
+  {
+    double u     = uMin;
+    bool   uStop = false;
+    //
+    while ( !uStop )
+    {
+      if ( (u > uMax) || Abs(u - uMax) < 1e-6 )
+      {
+        u     = uMax;
+        uStop = true;
+      }
+
+      U.push_back(u);
+      u += uStep;
+    }
+  }
+
+  /* =====================================
+   *  Check distance to the initial curve.
+   * ===================================== */
+
+  ShapeAnalysis_Curve sac;
+
+  double maxDist = 0;
+
+  for ( const auto u : U )
+  {
+    gp_Pnt probe = resCurve->Value(u);
+
+    // Project onto the initial curve.
+    gp_Pnt proj;
+    double param;
+    //
+    const double d = sac.Project(initCurve, probe, 1e-3, proj, param);
+
+    if ( d > maxDist )
+      maxDist = d;
   }
 
   maxDev = maxDist;

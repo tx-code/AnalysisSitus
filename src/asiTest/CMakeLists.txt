@@ -118,6 +118,7 @@ set (cases_asm_CPP_FILES
 set (cases_editing_H_FILES
   cases/editing/asiTest_ConcatPCurves.h
   cases/editing/asiTest_ConvertCanonical.h
+  cases/editing/asiTest_ConvertToC2.h
   cases/editing/asiTest_InvertShells.h
   cases/editing/asiTest_KEV.h
   cases/editing/asiTest_RebuildEdge.h
@@ -126,6 +127,7 @@ set (cases_editing_H_FILES
 set (cases_editing_CPP_FILES
   cases/editing/asiTest_ConcatPCurves.cpp
   cases/editing/asiTest_ConvertCanonical.cpp
+  cases/editing/asiTest_ConvertToC2.cpp
   cases/editing/asiTest_InvertShells.cpp
   cases/editing/asiTest_KEV.cpp
   cases/editing/asiTest_RebuildEdge.cpp
