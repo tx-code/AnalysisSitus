@@ -79,7 +79,7 @@ RUN make -j8 install
 WORKDIR /usr/local/bin/analysissitus/bin
 
 EXPOSE 7755/udp
-CMD ["./asiExeServer.sh", "\/host=0.0.0.0", "\/port=7755"]
+CMD ["./asiExeServer.sh", "/host=0.0.0.0", "/port=7755"]
 
 ### Run with:
 ### > docker run --rm -it -e DISPLAY=192.168.1.42:0.0 -p 7755:7755/udp asitus-server:latest
