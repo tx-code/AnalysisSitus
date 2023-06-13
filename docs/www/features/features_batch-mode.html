@@ -105,6 +105,8 @@ Make sure to use forward slashes in the path to your script. To redirect output 
 
 <h2>Server</h2>
 
+<h3>Overview</h3>
+
 <p>
   To run UDP server, launch the <span class="code-inline">asiExeServer</span> executable. Any external application could connect to the specific port as a UDP client and send datagrams for execution. The server is ready once the "socket is ready" message is printed to the standard output.
 </p>
@@ -127,6 +129,26 @@ Make sure to use forward slashes in the path to your script. To redirect output 
 
 <p class="note">
   You can download the C# UDP client for Analysis Situs <a href="http://analysissitus.org/forum/index.php?resources/c-executable-to-test-analysis-situs-udp-server.4/">on our forum</a>. Make sure to fix all absolute paths to be able to run it.
+</p>
+
+<h3>Running on docker</h3>
+
+<p>
+  Analysis Situs Server can be build as a docker container with <span class="code-inline">Dockerfile.server</span> dockerfile located in the root directory. By default, the port number 7755 is listened by the UDP server and this same port should be exposed by the running container. In the docker environment under Windows, it is necessary to initialize the containerized server with IP=0.0.0.0 and then connect the host client to the localhost in order for this communication to work.
+</p>
+
+<div align="center"><img src="../imgs/docker-server.png" width="60%"/></div>
+
+<p>
+  If the 0.0.0.0 IP-address is not used to launch the dockerized server, any datagrams sent by a UDP client would not be consumed by the server. The following command runs the docker container named "asitus-server". A client code should open connection to "127.0.0.1:7755" to communicate with this server.
+</p>
+
+<div class="code">
+  docker run --rm -it -e DISPLAY=192.168.1.42:0.0 -p 7755:7755/udp asitus-server:latest
+</div>
+
+<p>
+  It should be noted that the server (as well as CLI) works in a headless mode, so any <a href="./features_active-script.html">Active Script</a> commands that employ visualization would not work.
 </p>
 
 <!-- [END] contents -->

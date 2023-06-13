@@ -81,4 +81,5 @@ WORKDIR /usr/local/bin/analysissitus/bin
 EXPOSE 7755/udp
 CMD ./asiExeServer.sh
 
-### Run with: docker run --network host --rm -it -e DISPLAY=192.168.1.42:0.0 -p 127.0.0.1:7755:7755/udp asitus-server:latest
+### Run with:
+### > docker run --rm -it -e DISPLAY=192.168.1.42:0.0 -p 7755:7755/udp asitus-server:latest
