@@ -74,6 +74,11 @@ namespace CliUtils
 //! main().
 int main(int argc, char** argv)
 {
+  for ( int i = 0; i < argc; ++i )
+  {
+    std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
+  }
+
   // Read host and port for the server.
   CliUtils::Host    = CLI_HostDefault;
   CliUtils::PortNum = CLI_PortDefault;
@@ -81,12 +86,22 @@ int main(int argc, char** argv)
   //
   if ( asiExeCli::GetKeyValue(argc, argv, "host", addrStr) )
   {
+    std::cout << "Passed address: " << addrStr.c_str() << std::endl;
     CliUtils::Host.setAddress( addrStr.c_str() );
+  }
+  else
+  {
+    std::cout << "Default address is used" << std::endl;
   }
   //
   if ( asiExeCli::GetKeyValue(argc, argv, "port", portStr) )
   {
+    std::cout << "Passed port: " << asiAlgo_Utils::Str::ToNumber<int>(portStr) << std::endl;
     CliUtils::PortNum = asiAlgo_Utils::Str::ToNumber<int>(portStr);
+  }
+  else
+  {
+    std::cout << "Default port is used" << std::endl;
   }
 
   //---------------------------------------------------------------------------
