@@ -247,6 +247,28 @@ bool asiAlgo_Join3dEdges::Perform(const TopTools_IndexedMapOfShape& edges)
   // sort edges.
   std::sort(sortedEdges.begin(), sortedEdges.end(), chooseOrder);
   //
+  ShapeAnalysis_Edge sae;
+  for (size_t i = 0; i < sortedEdges.size() - 1; ++i)
+  {
+    TopoDS_Vertex vert1 = sae.LastVertex(sortedEdges[i]);
+    gp_Pnt pnt1 = BRep_Tool::Pnt(vert1);
+    //
+    TopoDS_Vertex vert2 = sae.FirstVertex(sortedEdges[i + 1]);
+    gp_Pnt pnt2 = BRep_Tool::Pnt(vert2);
+    if (!pnt1.IsEqual(pnt2, 0.001))
+    {
+      vert1 = sae.FirstVertex(sortedEdges[i]);
+      gp_Pnt pnt1 = BRep_Tool::Pnt(vert1);
+      //
+      vert2 = sae.LastVertex(sortedEdges[i + 1]);
+      gp_Pnt pnt2 = BRep_Tool::Pnt(vert2);
+      if (!pnt1.IsEqual(pnt2, 0.001))
+      {
+        return false;
+      }
+    }
+  }
+  //
   m_result = m_master;
   TopoDS_Edge E1 = sortedEdges[0];
   for (int i = 1; i < sortedEdges.size(); ++i)
