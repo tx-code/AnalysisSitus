@@ -197,7 +197,7 @@ bool asiAlgo_BuildOptBoundingCyl::Perform(const Handle(asiAlgo_AAG)& aag,
     m_cylinder.placement = *orient.GetAxes();
   }
   m_cylinder.trsf      = orient.GetTrsf();
-  m_progress.SendLogMessage(LogNotice(Normal) << "Cylinder volume: %1." << m_cylinder.volume);
+  m_progress.SendLogMessage(LogInfo(Normal) << "Cylinder volume: %1." << m_cylinder.volume);
  
   //m_plotter.DRAW_SHAPE(Xcyl.shape.Moved(orient.GetTrsf().Inverted()), Color_Red,   "Xcyl");
   //m_plotter.DRAW_SHAPE(Ycyl.shape.Moved(orient.GetTrsf().Inverted()), Color_Green, "Ycyl");

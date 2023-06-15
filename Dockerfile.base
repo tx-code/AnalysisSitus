@@ -1,0 +1,92 @@
+FROM ubuntu:20.04
+
+###############################################################################
+#
+# Base Dockerfile for Extensions depends on the following FOSS products:
+#
+# - OpenCascade:    this is the geometric modeling kernel which provides the
+#                   essential services such as B-rep modeling & shape
+#                   interrogation, data exchange, shape healing, etc.
+#                   https://github.com/Open-Cascade-SAS/OCCT
+#
+# - Eigen:          linear algebra, vectors, matrices.
+#                   https://eigen.tuxfamily.org/index.php?title=Main_Page
+#
+# - Rapidjson:      output to JSON and export to glTF (Analysis Situs).
+#                   https://rapidjson.org
+#
+# The base image is ubuntu. You can switch to something more minimalistic,
+# e.g., alpine but that would require patching a few things in OpenCascade.
+#
+# Ex. to build:
+# > docker build --pull --rm -f "Dockerfile.base" -t asitus-base:latest "." --no-cache
+###############################################################################
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Installing inotify to listen to file changes
+RUN apt-get update && apt-get -y install inotify-tools
+
+# Build tools.
+RUN apt-get -y install build-essential git cmake wget
+
+# Some 3-rd parties, such as OpenGL-related things, required for OpenCascade compilation.
+# Btw, freeimage is added to enable PNG snapshots.
+RUN apt-get -y install tcl tcl-dev tk tk-dev libfreeimage-dev zlib1g-dev
+RUN apt-get -y install libfreetype6-dev
+RUN apt-get -y install libxmu-dev libxi-dev
+RUN apt-get -y install libosmesa6-dev
+
+# Xvfb provides an X server that can run on machines with no
+# display hardware and no physical input devices. It emulates a
+# dumb framebuffer using virtual memory.
+RUN apt-get -y install xvfb
+
+# Extra 3-rd parties for Analysis Situs.
+RUN apt-get -y install libeigen3-dev rapidjson-dev
+
+# OpenCascade.
+# =============
+RUN git clone https://github.com/Open-Cascade-SAS/OCCT.git opencascade
+WORKDIR /opencascade
+RUN git checkout V7_6_0 -b dfm
+RUN mkdir -p build
+WORKDIR /opencascade/build
+RUN cmake .. \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_RPATH="" \
+  -DCMAKE_INSTALL_PREFIX=/usr \
+  -DUSE_FREEIMAGE=on \
+  -DUSE_FFMPEG=off \
+  -DUSE_VTK=off \
+  -DUSE_TBB=off
+RUN make
+RUN make install
+
+# Installing QT
+# =============
+RUN apt-get -y install qtcreator qt5-default
+RUN apt-get -y install libqt5x11extras5-dev
+RUN apt-get -y install qttools5-dev
+
+# Building VTK
+# =============
+RUN apt-get -y install libxt-dev libgl1-mesa-dev
+WORKDIR /home
+RUN wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+RUN tar xvfz ./VTK-8.2.0.tar.gz
+WORKDIR /home/VTK-8.2.0
+RUN mkdir build
+WORKDIR /home/VTK-8.2.0/build
+RUN cmake .. \
+  -DVTK_Group_Qt=ON \
+  -DVTK_QT_VERSION=5 \
+  -DVTK_RENDERING_BACKEND=OpenGL2 \
+  -DVTK_Group_Imaging=YES \
+  -DVTK_Group_Qt=YES \
+  -DVTK_Group_Views=YES \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr
+RUN make -j8
+RUN make -j8 install
