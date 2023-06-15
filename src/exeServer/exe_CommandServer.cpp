@@ -118,7 +118,14 @@ void exe_CommandServer::onStarted()
   std::cout << "Looking for plugins at "
             << pluginDirStr.ToCString() << "..." << std::endl;
   //
-  QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+  QString ext;
+#ifdef _WIN32
+  ext = "*.dll";
+#else
+  ext = "*.so";
+#endif
+
+  QStringList cmdLibs = pluginDir.entryList(QStringList() << ext, QDir::Files);
   //
   foreach ( QString cmdLib, cmdLibs )
   {
@@ -156,9 +163,18 @@ void exe_CommandServer::initSocket()
   if ( m_pSocket->state() != m_pSocket->BoundState )
   {
     m_bReady = m_pSocket->bind( m_hostAddr, (quint16) (m_iPort) );
+  }
 
-    if ( m_bReady )
-      std::cout << "Socket is ready." << std::endl;
+  if ( m_bReady )
+  { 
+    m_progress.SendLogMessage(LogInfo(Normal) << "Socket is ready on %1:%2."
+                                              << m_hostAddr.toString().toStdString()
+                                              << m_iPort);
+  }
+  else
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Unable to start the server: %1."
+                                             << m_pSocket->errorString().toStdString());
   }
 }
 
@@ -171,8 +187,11 @@ void exe_CommandServer::processDatagram(QNetworkDatagram* pDatagram)
 
   std::cout << "Received datagram: " << cmdString.ToCString() << std::endl;
 
-  if ( !m_interp.IsNull() )
+  if ( m_interp.IsNull() )
   {
-    m_interp->Eval(cmdString);
+    std::cout << "Command interpreter is undefined." << std::endl;
+    return;
   }
+  
+  m_interp->Eval(cmdString);
 }

@@ -32,6 +32,9 @@
 #include <exe_CommandServer.h>
 #include <exe_Keywords.h>
 
+// asiAlgo
+#include <asiAlgo_ProgressNotifier.h>
+
 // OpenCascade includes
 #include <OSD_Process.hxx>
 
@@ -129,7 +132,8 @@ int main(int argc, char** argv)
 
   // Create common facilities out of threads.
   Handle(asiUI_BatchFacilities)
-    cf = asiUI_BatchFacilities::Instance(true, true, false);
+    cf = asiUI_BatchFacilities::Instance(true, false, false);
+  cf->Progress = ActAPI_ProgressEntry(new asiAlgo_ProgressNotifier(std::cout));
 
   //---------------------------------------------------------------------------
   // Create server thread
