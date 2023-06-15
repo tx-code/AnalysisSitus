@@ -100,13 +100,17 @@
 #include <QVBoxLayout>
 #pragma warning(pop)
 
+#include <GeomConvert.hxx>
+
 #if defined USE_MOBIUS
   #include <mobius/cascade.h>
   #include <mobius/geom_ReadAstra.h>
+  #include <mobius/geom_SaveAstra.h>
   #include <mobius/poly_Mesh.h>
 
   using namespace mobius;
 #endif
+#include "CTiglBSplineAlgorithms.h"
 
 //-----------------------------------------------------------------------------
 
@@ -1451,6 +1455,113 @@ static void SimplifySurface(Handle(Geom_BSplineSurface)& BS,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_SaveAstra(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+#if defined USE_MOBIUS
+  if ( argc < 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  int from = -1;
+  std::string filename;
+  std::vector<t_ptr<t_bcurve>> curves;
+  std::vector<t_ptr<t_bsurf>>  surfaces;
+  std::vector<t_surfOfRev>     surfacesOfRev;
+
+  if (interp->HasKeyword(argc, argv, "vars", from))
+  {
+    int to = -1;
+    if (interp->HasKeyword(argc, argv, "filename", to))
+    {
+      for (int i = from + 1; i < to; ++i)
+      {
+        QString qstr = CStr2QStr( argv[i] );
+        if (qstr.size() > 4 && std::isdigit(QStr2StdStr(qstr.at(0))[0]))
+        {
+          interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write to ASTRA file. Incorrect name of variable: " << QStr2ExtStr(qstr));
+          return TCL_ERROR;
+        }
+        // try to read curve
+        Handle(asiData_IVCurveNode)
+          curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(QStr2ExtStr(qstr)) );
+        //
+        if ( !curveNode.IsNull() )
+        {
+          double f, l;
+          Handle(Geom_Curve) curve = curveNode->GetCurve(f, l);
+          //
+          if ( !curve.IsNull() )
+          {
+            t_ptr<geom_BSplineCurve> c = cascade::GetMobiusBCurve(GeomConvert::CurveToBSplineCurve(curve));
+            c->SetName(argv[i]);
+            curves.push_back(c);
+          }
+        }
+        // try to read surface
+        Handle(asiData_IVSurfaceNode)
+          surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(QStr2ExtStr(qstr)) );
+        //
+        if ( !surfNode.IsNull() )
+        {
+          double f, l;
+          Handle(Geom_Surface) surface = surfNode->GetSurface();
+          //
+          if ( !surface.IsNull() )
+          {
+            // try to read surface of revolution
+            if (surface->IsKind(STANDARD_TYPE(Geom_SurfaceOfRevolution)))
+            {
+              Handle(Geom_SurfaceOfRevolution) aRS =
+                Handle(Geom_SurfaceOfRevolution)::DownCast(surface);
+              auto dir = aRS->Direction();
+              auto loc = aRS->Location();
+              auto name = QStr2ExtStr(qstr.toLower());
+              TCollection_AsciiString ascii = name;
+              surfacesOfRev.push_back({argv[i], ascii.ToCString(), {loc.X(), loc.Y(), loc.Z()}, {dir.X(), dir.Y(), dir.Z()}});
+            } // try to read surface
+            else
+            {
+              auto bSurf = GeomConvert::SurfaceToBSplineSurface(surface);
+              t_ptr<geom_BSplineSurface> s = cascade::GetMobiusBSurface(bSurf);
+              s->SetName(argv[i]);
+              surfaces.push_back(s);
+            }
+          }
+        }
+      }
+      filename = argv[to + 1];
+    }
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write to ASTRA file.");
+    return TCL_ERROR;
+  }
+
+  // Save data to ASTRA file.
+  geom_SaveAstra saveAstra( MobiusProgress( interp->GetProgress() ) );
+  //
+  if ( !saveAstra.Perform(filename, curves, surfaces, surfacesOfRev) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read ASTRA file.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_LoadAstra(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
@@ -1778,6 +1889,14 @@ void cmdEngine::Commands_Interop(const Handle(asiTcl_Interp)&      interp,
     "\t curves and surfaces to the interpreter.",
     //
     __FILE__, group, ENGINE_LoadAstra);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("save-astra",
+    //
+    "save-astra -vars <name1> [name2] -filename <filename> \n"
+    "\t Saves curves and surfaces to ASTRA file.",
+    //
+    __FILE__, group, ENGINE_SaveAstra);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("vglinfo",
