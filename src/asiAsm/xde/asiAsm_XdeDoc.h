@@ -172,9 +172,23 @@ public:
 
   //! Saves this document to a STEP file with the given name.
   //! \param[in] filename name of the output STEP file.
+  //! \param[in] units    Defines a unit in which the STEP file should be written.
+  //!                     If set to unit other than 'MM', the model is converted
+  //!                     to these units during the translation.
+  //!                     Default value is 'MM'. Other options include:
+  //!                       "INCH"
+  //!                       "FT"
+  //!                       "MI"
+  //!                       "M"
+  //!                       "KM"
+  //!                       "MIL"
+  //!                       "UM"
+  //!                       "CM"
+  //!                       "UI"
   //! \return true in case of success, false -- otherwise.
   asiAsm_EXPORT bool
-    SaveSTEP(const TCollection_AsciiString& filename);
+    SaveSTEP(const TCollection_AsciiString& filename,
+             const TCollection_AsciiString& units = "MM");
 
   //! \return true if the Assembly Document is empty, i.e. the XDE Document
   //!         is either null or contains no roots.

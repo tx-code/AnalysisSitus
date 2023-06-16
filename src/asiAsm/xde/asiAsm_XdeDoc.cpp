@@ -512,9 +512,31 @@ bool Doc::SaveAs(const TCollection_AsciiString& filename)
 
 //-----------------------------------------------------------------------------
 
-bool Doc::SaveSTEP(const TCollection_AsciiString& filename)
+bool Doc::SaveSTEP(const TCollection_AsciiString& filename,
+                   const TCollection_AsciiString& units)
 {
+  // Check input units.
+  if ( units != "MM"
+    && units != "INCH"
+    && units != "FT"
+    && units != "MI"
+    && units != "M"
+    && units != "KM"
+    && units != "MIL"
+    && units != "UM"
+    && units != "CM"
+    && units != "UI")
+  {
+    m_progress.SendLogMessage(LogErr(Normal) << "Wrong units name '%1'." << units);
+
+    return false;
+  }
+
   STEPControl_Controller::Init();
+
+  // Set output units.
+  Interface_Static::SetCVal( "write.step.unit", units.ToCString() );
+
   try
   {
     STEPCAFControl_Writer writer;
