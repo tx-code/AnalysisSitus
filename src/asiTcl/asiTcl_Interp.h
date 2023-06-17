@@ -406,7 +406,7 @@ public:
   bool CollectValues(const int                 argc,
                      const char**              argv,
                      const std::string&        key,
-                     std::vector<std::string>& values)
+                     std::vector<t_extString>& values)
   {
     values.clear();
     for ( int iter = 0; iter < argc; ++iter )
@@ -419,7 +419,10 @@ public:
       //
       while ( iter < argc && !IsKeyword(argv[iter]) )
       {
-        values.push_back(argv[iter++]);
+        // Assuming that `argv[i]` is UTF-8.
+        t_extString valueStr(argv[iter++], true);
+        //
+        values.push_back(valueStr);
       }
       break;
     }
@@ -437,7 +440,7 @@ public:
                      const std::string& key,
                      std::vector<int>&  values)
   {
-    std::vector<std::string> valuesStr;
+    std::vector<t_extString> valuesStr;
 
     if ( !CollectValues(argc, argv, key, valuesStr) )
     {
@@ -446,10 +449,12 @@ public:
 
     try
     {
-      std::vector<std::string>::const_iterator itVS = valuesStr.cbegin();
+      std::vector<t_extString>::const_iterator itVS = valuesStr.cbegin();
       for ( ; itVS != valuesStr.cend(); ++itVS )
       {
-        values.push_back(std::atoi(itVS->c_str()));
+        const int value = TCollection_AsciiString(*itVS).IntegerValue();
+
+        values.push_back(value);
       }
     }
     catch ( ... )

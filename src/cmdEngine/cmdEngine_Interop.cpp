@@ -1465,88 +1465,126 @@ int ENGINE_SaveAstra(const Handle(asiTcl_Interp)& interp,
     return interp->ErrorOnWrongArgs(argv[0]);
   }
 
-  int from = -1;
+  // Read filename.
   std::string filename;
-  std::vector<t_ptr<t_bcurve>> curves;
-  std::vector<t_ptr<t_bsurf>>  surfaces;
-  std::vector<t_surfOfRev>     surfacesOfRev;
-
-  if (interp->HasKeyword(argc, argv, "vars", from))
+  //
+  if ( !interp->GetKeyValue(argc, argv, "filename", filename) )
   {
-    int to = -1;
-    if (interp->HasKeyword(argc, argv, "filename", to))
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, specify the target filename with "
+                                                           "the -filename keyword.");
+    return TCL_ERROR;
+  }
+
+  // Read geometry names.
+  std::vector<t_extString> names;
+  //
+  if ( !interp->CollectValues(argc, argv, "vars", names) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, specify the entities to export using "
+                                                           "the -vars keyword.");
+    return TCL_ERROR;
+  }
+
+  // Find entities in the data model and populate the lists to export.
+  std::vector< t_ptr<t_bcurve> >    bCurves;
+  std::vector< t_ptr<t_bsurf> >     bSurfaces;
+  std::vector< t_ptr<t_surfRevol> > revolSurfaces;
+  //
+  for ( const auto& name : names )
+  {
+    // Find curve.
+    Handle(asiData_IVCurveNode)
+      curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+    //
+    if ( !curveNode.IsNull() )
     {
-      for (int i = from + 1; i < to; ++i)
+      double f, l;
+      Handle(Geom_Curve) curve = curveNode->GetCurve(f, l);
+      //
+      if ( curve.IsNull() )
       {
-        QString qstr = CStr2QStr( argv[i] );
-        if (qstr.size() > 4 && std::isdigit(QStr2StdStr(qstr.at(0))[0]))
-        {
-          interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write to ASTRA file. Incorrect name of variable: " << QStr2ExtStr(qstr));
-          return TCL_ERROR;
-        }
-        // try to read curve
-        Handle(asiData_IVCurveNode)
-          curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(QStr2ExtStr(qstr)) );
+        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "The curve named '%1' is null, skipped..."
+                                                             << name);
+        continue;
+      }
+
+      t_ptr<geom_BSplineCurve>
+        c = cascade::GetMobiusBCurve( GeomConvert::CurveToBSplineCurve(curve) );
+      //
+      c->SetName( ExtStr2StdStr(name) );
+
+      // Add to the list.
+      bCurves.push_back(c);
+    }
+    else
+    {
+      // Find surface.
+      Handle(asiData_IVSurfaceNode)
+        surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+      //
+      if ( !surfNode.IsNull() )
+      {
+        Handle(Geom_Surface) surface = surfNode->GetSurface();
         //
-        if ( !curveNode.IsNull() )
+        if ( surface.IsNull() )
         {
-          double f, l;
-          Handle(Geom_Curve) curve = curveNode->GetCurve(f, l);
-          //
-          if ( !curve.IsNull() )
-          {
-            t_ptr<geom_BSplineCurve> c = cascade::GetMobiusBCurve(GeomConvert::CurveToBSplineCurve(curve));
-            c->SetName(argv[i]);
-            curves.push_back(c);
-          }
+          interp->GetProgress().SendLogMessage(LogWarn(Normal) << "The surface named '%1' is null, skipped..."
+                                                             << name);
+          continue;
         }
-        // try to read surface
-        Handle(asiData_IVSurfaceNode)
-          surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(QStr2ExtStr(qstr)) );
-        //
-        if ( !surfNode.IsNull() )
+
+        /* Check surface type */
+
+        if ( surface->IsKind( STANDARD_TYPE(Geom_SurfaceOfRevolution) ) )
         {
-          double f, l;
-          Handle(Geom_Surface) surface = surfNode->GetSurface();
+          Handle(Geom_SurfaceOfRevolution)
+            occSurf = Handle(Geom_SurfaceOfRevolution)::DownCast(surface);
+
+          // Convert to Mobius.
+          t_ptr<t_surfRevol> mbSurf = cascade::GetMobiusRevolSurf(occSurf);
           //
-          if ( !surface.IsNull() )
+          if ( mbSurf.IsNull() )
           {
-            // try to read surface of revolution
-            if (surface->IsKind(STANDARD_TYPE(Geom_SurfaceOfRevolution)))
-            {
-              Handle(Geom_SurfaceOfRevolution) aRS =
-                Handle(Geom_SurfaceOfRevolution)::DownCast(surface);
-              auto dir = aRS->Direction();
-              auto loc = aRS->Location();
-              auto name = QStr2ExtStr(qstr.toLower());
-              TCollection_AsciiString ascii = name;
-              surfacesOfRev.push_back({argv[i], ascii.ToCString(), {loc.X(), loc.Y(), loc.Z()}, {dir.X(), dir.Y(), dir.Z()}});
-            } // try to read surface
-            else
-            {
-              auto bSurf = GeomConvert::SurfaceToBSplineSurface(surface);
-              t_ptr<geom_BSplineSurface> s = cascade::GetMobiusBSurface(bSurf);
-              s->SetName(argv[i]);
-              surfaces.push_back(s);
-            }
+            interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Failed to convert a surface of revolution, skipped...");
+            continue;
           }
+
+          // Set surface name.
+          mbSurf->SetName( ExtStr2StdStr(name) );
+
+          // Add to the list.
+          revolSurfaces.push_back(mbSurf);
+        }
+        else if ( surface->IsKind( STANDARD_TYPE(Geom_BSplineSurface) ) )
+        {
+          Handle(Geom_BSplineSurface)
+            occSurf = GeomConvert::SurfaceToBSplineSurface(surface);
+
+          // Convert to Mobius.
+          t_ptr<t_bsurf> mbSurf = cascade::GetMobiusBSurface(occSurf);
+          //
+          if ( mbSurf.IsNull() )
+          {
+            interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Failed to convert a B-spline surface, skipped...");
+            continue;
+          }
+
+          // Set surface name.
+          mbSurf->SetName( ExtStr2StdStr(name) );
+
+          // Add to the list.
+          bSurfaces.push_back(mbSurf);
         }
       }
-      filename = argv[to + 1];
     }
-  }
-  else
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot write to ASTRA file.");
-    return TCL_ERROR;
   }
 
   // Save data to ASTRA file.
   geom_SaveAstra saveAstra( MobiusProgress( interp->GetProgress() ) );
   //
-  if ( !saveAstra.Perform(filename, curves, surfaces, surfacesOfRev) )
+  if ( !saveAstra.Perform(filename, bCurves, bSurfaces, revolSurfaces) )
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot read ASTRA file.");
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot save ASTRA file.");
     return TCL_ERROR;
   }
 

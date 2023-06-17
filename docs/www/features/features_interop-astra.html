@@ -51,17 +51,55 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1 id="toc-step-intro">ASTRA translator</h1>
-
-<p class="note">
-  You can learn more about ASTRA and the technical details behind our implementation in the <a href="http://quaoar.su/blog/page/read-astra-curves-and-surfaces">Manifold Geometry blog</a>.
-</p>
+<h1 id="toc-astra-intro">ASTRA translator</h1>
 
 <div class="toc-panel"><div id="toc"></div></div>
 
-<h2 id="toc-astra-read">Read</h2>
+<p>
+  ASTRA is a CAD/CAM/CAE software package developed in Sobolev Institute of Mathematics (Novosibirsk). As far as we are concerned, this system is helpful for preparing CAD models to numerical simulation although its scope is much broader. This system supports the following types of geometric primitives:
+</p>
 
-<h2 id="toc-astra-write">Write</h2>
+<ul>
+  <li>Spline curves (C1-concatenated Bezier segments).</li>
+  <li>Spline surfaces (C1-concatenated Bezier patches).</li>
+  <li>Surfaces of revolution (with spline generatrix).</li>
+</ul>
+
+<p>
+  All surfaces in ASTRA are untrimmed, i.e., splines are bounded by the extremities of their formal parametric ranges. While such surfaces are easily convertable to OpenCascade representation (they are a subset of NURBS), the reversed operation of writing OpenCascade's NURBS to ASTRA is more troublesome as the geometries have to be specifically prepared. The surfaces have to be converted to C1-continuous patchwork of 3-degree Bezier. The curves should be segmented into C1-continuous chains of Bezier curves.
+</p>
+
+<p class="note">
+  You can read more about our take on ASTRA in the <a href="http://quaoar.su/blog/page/read-astra-curves-and-surfaces">Manifold Geometry blog</a>.
+</p>
+
+<h2 id="toc-astra-reader">Reader</h2>
+
+<p>
+  Use the following command to read an ASTRA file:
+</p>
+
+<div class="code">
+> load-astra &lt;filename&gt;
+</div>
+
+<p>
+  All curves and surfaces will be loaded into the imperative viewer. The generatrix curves for surfaces of revolution will be created as explicit entities.
+</p>
+
+<h2 id="toc-astra-writer">Writer</h2>
+
+<p>
+  Use the following command to save an ASTRA file:
+</p>
+
+<div class="code">
+> save-astra -vars &lt;var1&gt; &lt;var2&gt; ... -filename &lt;filename&gt; 
+</div>
+
+<p>
+  The variables are taken from the imperative viewer's section. All surfaces become untrimmed. The generatrix curves of surfaces of revolution are converted to splines.
+</p>
 
 <h2 id="toc-astra-rus">Note for Russian users</h2>
 

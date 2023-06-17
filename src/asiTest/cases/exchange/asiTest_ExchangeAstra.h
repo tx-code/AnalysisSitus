@@ -68,6 +68,11 @@ public:
   {
     functions << &test_load_001
               << &test_load_002
+              << &test_save_001
+              << &test_save_002
+              << &test_save_003
+              << &test_save_004
+              << &test_save_005
     ; // Put semicolon here for convenient adding new functions above ;)
   }
 
@@ -79,6 +84,11 @@ private:
   // Runnable tests.
   static outcome test_load_001(const int funcID);
   static outcome test_load_002(const int funcID);
+  static outcome test_save_001(const int funcID);
+  static outcome test_save_002(const int funcID);
+  static outcome test_save_003(const int funcID);
+  static outcome test_save_004(const int funcID);
+  static outcome test_save_005(const int funcID);
 
 };
 
