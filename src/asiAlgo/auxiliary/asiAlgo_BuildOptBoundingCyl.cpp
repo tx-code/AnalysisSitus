@@ -140,7 +140,7 @@ bool asiAlgo_BuildOptBoundingCyl::Perform(const Handle(asiAlgo_AAG)& aag,
                            m_progress,
                            m_plotter);
   //
-  if (!orient.Perform())
+  if ( !orient.Perform() )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Re-orientation failed.");
     return false;

@@ -30,8 +30,7 @@
 
 #pragma once
 
-// Analysis Situs includes
-#include <asiAlgo.h>
+// asiAlgo includes
 #include <asiAlgo_AAG.h>
 
 // Active Data includes
@@ -39,6 +38,7 @@
 
 //-----------------------------------------------------------------------------
 
+//! Constructs tight bounding cylinder for a part.
 class asiAlgo_BuildOptBoundingCyl : public ActAPI_IAlgorithm
 {
   // OCCT RTTI
@@ -85,16 +85,24 @@ public:
                                 ActAPI_PlotterEntry  plotter);
 
   //! Runs calculation.
-  //! \param[in] aag      the attributed adjacency graph.
-  asiAlgo_EXPORT
-    bool Perform(const Handle(asiAlgo_AAG)& aag,
-                 const bool                 forceTriangulate = false);
+  //! \param[in] aag              the attributed adjacency graph.
+  //! \param[in] forceTriangulate the Boolean flag indicating whether
+  //!                             triangulation on a part is requested
+  //!                             to be forcibly regenerated even if it
+  //!                             already exists.
+  asiAlgo_EXPORT bool
+    Perform(const Handle(asiAlgo_AAG)& aag,
+            const bool                 forceTriangulate = false);
 
-  //! Gets the result oriented minimal bounding cylinder.
-  asiAlgo_EXPORT
-    const t_optBnd& GetResult() { return m_cylinder; }
+public:
+
+  //! \return the oriented minimal bounding cylinder.
+  const t_optBnd& GetResult() const
+  {
+    return m_cylinder;
+  }
 
 private:
 
-  t_optBnd m_cylinder;
+  t_optBnd m_cylinder; //!< The constructed cylinder.
 };

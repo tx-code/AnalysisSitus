@@ -2600,7 +2600,7 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("build-opt-bnd-cyl",
     //
     "build-opt-bnd-cyl <res>\n"
-    "\t Builds the optimal bounding cylinder for the active part.\n",
+    "\t Builds an optimal bounding cylinder for the active part.",
     //
     __FILE__, group, ENGINE_BuildOptBoundingCyl);
 
