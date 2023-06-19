@@ -407,6 +407,21 @@ namespace asiAlgo_Utils
     asiAlgo_EXPORT std::string
       EscapeJson(const std::string& s);
 
+    //! Reads the passed JSON block as a array of integers and
+    //! populates the second argument to compose a vector out
+    //! of that array.
+    //! \param[in]  jsonBlock the JSON block to interpret.
+    //! \param[out] vector    the vector to compose.
+    asiAlgo_EXPORT void
+      ReadVector(void*             pJsonBlock,
+                 std::vector<int>& vector);
+
+    //! Dumps the passed vector of integers as a JSON array.
+    //! \param[in] v the vector to dump.
+    //! \return a JSON array containing the elements of the vector.
+    asiAlgo_EXPORT std::string
+      FromVector(const std::vector<int>& v);
+
   }
 
   //! Functions for verification of results.

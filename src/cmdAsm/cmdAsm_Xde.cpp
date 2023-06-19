@@ -39,6 +39,7 @@
 #include <asiAlgo_Timer.h>
 
 // asiAsm includes
+#include <asiAsm_SceneTree.h>
 #include <asiAsm_XdeDocIterator.h>
 
 // asiEngine includes
@@ -53,6 +54,7 @@
 #include <fbx_XdeWriter.h>
 
 // asiUI includes
+#include <asiUI_DialogDump.h>
 #include <asiUI_DialogXdeSummary.h>
 #include <asiUI_XdeBrowser.h>
 
@@ -1608,6 +1610,49 @@ int ASMXDE_Transform(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_DumpJson(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  // Get model name.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Construct scene tree.
+  asiAsm_SceneTree SceneTree;
+  //
+  SceneTree.Build(xdeDoc);
+
+  // Dump to JSON.
+  std::stringstream sstream;
+  asiAsm_SceneTree::ToJSON(SceneTree, 0, true, sstream);
+  //
+  asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump( "Scene Tree" );
+  pDumpDlg->Populate( sstream.str() );
+  pDumpDlg->show();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -1823,4 +1868,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t are specified in degrees.",
     //
     __FILE__, group, ASMXDE_Transform);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-dump-json",
+    //
+    "asm-xde-dump-json -model <M>\n"
+    "\t Dumps the passed model to JSON as a scene tree.",
+    //
+    __FILE__, group, ASMXDE_DumpJson);
 }

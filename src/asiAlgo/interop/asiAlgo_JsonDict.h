@@ -89,6 +89,7 @@
 #define asiPropName_ExtrasCanRecIsValid                   "isValidAfterConversion"
 
 // Scene tree
+#define asiPropName_SceneTree                             "sceneTree"
 #define asiPropName_SceneRootsIds                         "roots"
 #define asiPropName_ScenePrototypes                       "prototypes"
 #define asiPropName_SceneChildId                          "id"

@@ -348,20 +348,20 @@ class asiAsm_SceneTree_Instance : public asiAsm_SceneTree_Child
       std::string nl = "\n" + ws;
 
       out << "," << nl << std::quoted( asiPropName_SceneInstancesInstancePrototype ) << ": " << prototype;
-/*
-      out << "," << nl << std::quoted( asiScene_InstancesAssemblyItemId ) << ": " << std::quoted( assemblyItemId );
 
-      out << "," << nl << std::quoted( asiScene_InstancesRotation ) << ": [ "
+      out << "," << nl << std::quoted( asiPropName_SceneInstancesAssemblyItemId ) << ": " << std::quoted( assemblyItemId );
+
+      out << "," << nl << std::quoted( asiPropName_SceneInstancesRotation ) << ": [ "
          << xyz.X() << ", "
          << xyz.Y() << ", "
          << xyz.Z() << ", "
          << angle   << " ]";
 
-      out << "," << nl << std::quoted( asiScene_InstancesTranslation ) << ": [ "
+      out << "," << nl << std::quoted( asiPropName_SceneInstancesTranslation ) << ": [ "
          << translation.X() << ", "
          << translation.Y() << ", "
          << translation.Z() << " ]";
-*/
+
     }
 
     //! Checks is this instance is equal to the passed one.
@@ -595,7 +595,7 @@ void asiAsm_SceneTree::getChildInfo(const Handle(asiAsm::xde::Doc)&       doc,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_SceneTree::Perform(const Handle(asiAsm::xde::Doc)& doc)
+void asiAsm_SceneTree::Build(const Handle(asiAsm::xde::Doc)& doc)
 {
   // Clean up previously saved data.
   this->cleanUpData();
@@ -859,9 +859,22 @@ void asiAsm_SceneTree::FromJSON(void*              pJsonGenericObj,
 //-----------------------------------------------------------------------------
 
 void asiAsm_SceneTree::ToJSON(const asiAsm_SceneTree& info,
-                               const int                indent,
-                               std::ostream&            out)
+                              const int               idnt,
+                              const bool              self,
+                              std::ostream&           out)
 {
+  int indent;
+  //
+  if ( self )
+  {
+    out << "{";
+    indent = 2;
+  }
+  else
+  {
+    indent = idnt;
+  }
+
   std::string ws(indent, ' ');
   std::string nl = "\n" + ws;
 
@@ -901,4 +914,9 @@ void asiAsm_SceneTree::ToJSON(const asiAsm_SceneTree& info,
   out << nl << "  ]"; // End instances.
 
   out << nl << "}"; // End scene tree.
+
+  if ( self )
+  {
+    out << "\n}";
+  }
 }

@@ -67,32 +67,44 @@ public:
   //! Converts the passed data structure to JSON (the passed `out` stream).
   //! \param[in]     info   the data structure to serialize.
   //! \param[in]     indent the pretty indentation shift.
+  //! \param[in]     self   the Boolean flag indicating whether this document is self-sufficient.
   //! \param[in,out] out    the output JSON string stream.
   asiAsm_EXPORT static void
     ToJSON(const asiAsm_SceneTree& info,
            const int               indent,
+           const bool              self,
            std::ostream&           out);
 
 public:
 
   //! Constructor.
-  asiAsm_SceneTree();
+  asiAsm_EXPORT
+    asiAsm_SceneTree();
+
+public:
 
   //! Computes scene hierarchy of a model.
   //! \param[in] doc XDE document with the CAD assembly.
-  void Perform(const Handle(asiAsm::xde::Doc)& doc);
+  asiAsm_EXPORT void
+    Build(const Handle(asiAsm::xde::Doc)& doc);
+
+public:
 
   //! Get assemblies.
-  const std::vector< Handle(asiAsm_SceneTree_Assembly) >& GetAssemblies() const;
+  asiAsm_EXPORT const std::vector<Handle(asiAsm_SceneTree_Assembly)>&
+    GetAssemblies() const;
 
   //! Get instances.
-  const std::vector< Handle(asiAsm_SceneTree_Instance) >& GetInstances() const;
+  asiAsm_EXPORT const std::vector<Handle(asiAsm_SceneTree_Instance)>&
+    GetInstances() const;
 
   //! Get parts.
-  const std::vector< Handle(asiAsm_SceneTree_Part) >& GetParts() const;
+  asiAsm_EXPORT const std::vector<Handle(asiAsm_SceneTree_Part)>&
+    GetParts() const;
 
   //! Get roots.
-  const std::vector< int >& GetRoots() const;
+  asiAsm_EXPORT const std::vector<int>&
+    GetRoots() const;
 
 private:
 

@@ -1017,6 +1017,44 @@ std::string
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_Utils::Json::ReadVector(void*             pJsonBlock,
+                                     std::vector<int>& vector)
+{
+  t_jsonArray*
+    jsonBlock = reinterpret_cast<t_jsonArray*>(pJsonBlock);
+
+  for ( t_jsonValue::ValueIterator vit = jsonBlock->Begin();
+        vit != jsonBlock->End(); vit++ )
+  {
+    vector.push_back( vit->GetInt() );
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+std::string asiAlgo_Utils::Json::FromVector(const std::vector<int>& v)
+{
+  std::stringstream out;
+
+  out << "[";
+  int i = 0;
+  for ( const auto& value : v )
+  {
+    out << value;
+    if ( i != v.size() - 1 )
+    {
+      out << ", ";
+    }
+
+    ++i;
+  }
+  out << "]";
+
+  return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::Verify::CompareOccurrences(const std::vector<double>& V1,
                                                const std::vector<double>& V2,
                                                const double               prec)
