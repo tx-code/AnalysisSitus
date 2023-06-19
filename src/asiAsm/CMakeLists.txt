@@ -15,8 +15,10 @@ set (CPP_FILES
 set (entity_H_FILES
   entity/asiAsm_EntBase.h
   entity/asiAsm_EntPrototype.h
+  entity/asiAsm_SceneTree.h
 )
 set (entity_CPP_FILES
+  entity/asiAsm_SceneTree.cpp
 )
 
 #------------------------------------------------------------------------------

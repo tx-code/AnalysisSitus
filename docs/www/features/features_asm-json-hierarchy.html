@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Analysis Situs: construct bounding cylinder</title>
+  <title>Analysis Situs: assembly JSON hierarchy</title>
   <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
   <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
 
@@ -18,9 +18,9 @@
   <!-- [end] Google Analytics -->
 
   <!--
-   Quick navigation script. Use a div with "toc-panel" class having a
-   nested div with "toc" id to place the navigation panel.
-  -->
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
   <script src="../js/jquery-3.5.1.min.js"></script>
   <script src="../js/toc.js"></script>
 
@@ -34,7 +34,7 @@
   <td align="left" class="header">
     <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
     &nbsp;
-    ./<a class="header-href" href="../features.html">features</a>/bounding cylinder
+    ./<a class="header-href" href="../features.html">features</a>/assembly JSON hierarchy
   </td>
 </tr>
 </table>
@@ -47,32 +47,37 @@
   <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
 </tr>
 </table>
-</table></tr></td>
+</td></tr></table>
 
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1 id="toc-bounding-cyl">Bounding cylinder</h1>
+<h1 id="toc-asm-json">Assembly JSON hierarchy</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-asm-preface">Preface</h2>
 
 <p>
-  An optimally oriented bounding cylinder allows to guess a stock bar for a part before machining. The shape of input part is first examined to determine its geometric properties and key symmetries. For example, if a part contains cylindrical holes, their axes can be used as a hint for sensible part orientation with respect to a machine. We wish to define the local reference frame of a part using those machining-wise axes. The image below illustrates such a local reference frame "baked into" the part. This frame is not necessarily aligned with the global reference frame of the modeling space (small axes in the bottom-left corner).
+    Any CAD product definition coming from a CAD file contains geometric information and metadata, including assembly hierarchy (can be plain) and metadata (colors, names, etc.). Analysis Situs employs <a href="./features_asm-xde-document.html">OCAF/XDE</a> data structures for storing format-agnostic product representation. The assembly representation in XDE is a Hierarchical Assembly Graph (HAG, see <a href="../references.html#rappoport-1993">[Rappoport, 1993]</a>), which can be turned into a scene tree by visiting its nodes and reporting all unique paths.
 </p>
-
-<p class="note">
-  Check the <span class="code-inline"><a href="../commands.html#orient-part">orient-part</a></span> Tcl command for more information on extracting local reference frames.
-</p>
-
-<div align="center"><img src="../imgs/part-local-axes.png"/></div>
 
 <p>
-  Based on the extracted reference axes, three candidate cylinders are constructed: one for each axis (local X, local Y, local Z). Among these three, the minimal one is chosen:
+    To read a CAD file into an XDE document and observe its structure, use:
 </p>
 
-<div align="center"><img src="../imgs/opt-cyl_01.png"/></div>
+<div class="code">
+<pre>
+> asm-xde-load -model M -filename as1-oc-214.stp
+> asm-xde-browse -model M
+</pre>
+</div>
 
 <p>
-  Use the <span class="code-inline"><a href="../commands.html#build-opt-bnd-cyl">build-opt-bnd-cyl</a></span> Tcl command to build the optimal bounding cylinder for the active part.
+    The last command would open a browser window where you can visually navigate over the assembly structure.
 </p>
+
+<div align="center"><img src="../imgs/asm/asm-browser_01.png"/></div>
 
 <!-- [END] contents -->
 </div>
