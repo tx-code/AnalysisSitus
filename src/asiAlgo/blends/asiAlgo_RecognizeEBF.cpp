@@ -341,6 +341,12 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
   // Compute length of a EBF element based on the spring edges.
   blendAttr->Length = this->computeBlendLength(springEdgeIndices);
 
+  if (blendAttr->Kind == BlendType_Cliff)
+  {
+    // We have one springEdge. Therefore, its length does not need to be divided by 2.
+    blendAttr->Length *= 2.0;
+  }
+
   return true;
 }
 
