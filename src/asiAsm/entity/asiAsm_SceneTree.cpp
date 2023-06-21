@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_JsonDict.h>
+#include <asiAlgo_ShapeSerializer.h>
 #include <asiAlgo_Utils.h>
 
 // Standard includes
@@ -40,13 +41,17 @@
 
 // Rapidjson includes
 #include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
+
+// OpenCascade include
+#include <BRepBuilderAPI_Transform.hxx>
+#include <gp_Quaternion.hxx>
 
 //-----------------------------------------------------------------------------
 
 typedef rapidjson::Document::Array     t_jsonArray;
 typedef rapidjson::Document::ValueType t_jsonValue;
 
-//-----------------------------------------------------------------------------
 
 //! Base assembly tree child item.
 class asiAsm_SceneTree_Child : public Standard_Transient
@@ -177,6 +182,7 @@ class asiAsm_SceneTree_Part : public asiAsm_SceneTree_Child
   public:
 
     std::string persistentId;
+    std::string shape;
 
   protected:
 
@@ -194,6 +200,10 @@ class asiAsm_SceneTree_Part : public asiAsm_SceneTree_Child
       {
         this->persistentId = pJsonObj->GetString();
       }
+      if ( prop == asiPropName_ScenePartsRepresentation )
+      {
+        this->shape = pJsonObj->GetString();
+      }
     }
 
     //! Dumps this part data structure to JSON (the passed `out` stream).
@@ -206,6 +216,9 @@ class asiAsm_SceneTree_Part : public asiAsm_SceneTree_Child
       std::string nl = "\n" + ws;
 
       out << "," << nl << std::quoted( asiPropName_ScenePartsPersistentId ) << ": " << std::quoted( persistentId );
+
+      if (!shape.empty())
+        out << "," << nl << std::quoted(asiPropName_ScenePartsRepresentation) << ": " << std::quoted( shape );
     }
 
     //! Checks is this part is equal to the passed one.
@@ -335,6 +348,31 @@ class asiAsm_SceneTree_Instance : public asiAsm_SceneTree_Child
       if ( prop == asiPropName_SceneInstancesInstancePrototype )
       {
         this->prototype = pJsonObj->GetInt();
+      }
+      // Id.
+      if (prop == asiPropName_SceneInstancesAssemblyItemId)
+      {
+        this->assemblyItemId = pJsonObj->GetString();
+      }
+      // Rotation
+      if (prop == asiPropName_SceneInstancesRotation)
+      {
+        t_jsonArray arr = pJsonObj->GetArray();
+
+        this->xyz.ChangeCoord(1) = arr[0].GetDouble();
+        this->xyz.ChangeCoord(2) = arr[1].GetDouble();
+        this->xyz.ChangeCoord(3) = arr[2].GetDouble();
+        this->angle              = arr[3].GetDouble();
+      }
+      // Translation
+      if (prop == asiPropName_SceneInstancesTranslation)
+      {
+        t_jsonArray arr = pJsonObj->GetArray();
+        gp_XYZ coords;
+        asiAlgo_Utils::Json::ReadCoords(&arr, coords);
+        //
+        if (coords.Modulus() > RealEpsilon())
+          this->translation = coords;
       }
     }
 
@@ -595,7 +633,8 @@ void asiAsm_SceneTree::getChildInfo(const Handle(asiAsm::xde::Doc)&       doc,
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_SceneTree::Build(const Handle(asiAsm::xde::Doc)& doc)
+void asiAsm_SceneTree::Build(const Handle(asiAsm::xde::Doc)& doc,
+                             const bool                      doDumpShapes)
 {
   // Clean up previously saved data.
   this->cleanUpData();
@@ -613,7 +652,7 @@ void asiAsm_SceneTree::Build(const Handle(asiAsm::xde::Doc)& doc)
 
     Handle(asiAsm_SceneTree_Child) child;
 
-    populate( doc, graph, rootId, child, graph->GetPersistentId( rootId ).ToCString() );
+    populate( doc, graph, rootId, child, graph->GetPersistentId( rootId ).ToCString(), doDumpShapes);
   }
 }
 
@@ -623,10 +662,11 @@ void asiAsm_SceneTree::populate(const Handle(asiAsm::xde::Doc)&   doc,
                                 const Handle(asiAsm::xde::Graph)& graph,
                                 const int                         parentId,
                                 Handle(asiAsm_SceneTree_Child)&   parent,
-                                const std::string&                path)
+                                const std::string&                path,
+                                const bool                        doDumpShapes)
 {
   // Check parent. If it is a root, need to add it to the collection.
-  // Otherwise, it had collected yet.
+  // Otherwise, it has collected already being a child of another object.
   if ( graph->GetRoots().Contains( parentId ) )
   {
     asiAsm::xde::Graph::NodeType nodeType = graph->GetNodeType( parentId );
@@ -698,7 +738,7 @@ void asiAsm_SceneTree::populate(const Handle(asiAsm::xde::Doc)&   doc,
 
           m_assemblies.push_back( assembly );
 
-          populate( doc, graph, childId, assembly, path + "/" + name );
+          populate( doc, graph, childId, assembly, path + "/" + name, doDumpShapes);
         }
         //
         if ( ( nodeType == asiAsm::xde::Graph::NodeType_PartOccurrence ) ||
@@ -710,7 +750,7 @@ void asiAsm_SceneTree::populate(const Handle(asiAsm::xde::Doc)&   doc,
 
           m_instances.push_back( instance );
 
-          populate( doc, graph, childId, instance, path + "/" + name );
+          populate( doc, graph, childId, instance, path + "/" + name, doDumpShapes);
         }
         //
         if ( nodeType == asiAsm::xde::Graph::NodeType_Part )
@@ -721,7 +761,7 @@ void asiAsm_SceneTree::populate(const Handle(asiAsm::xde::Doc)&   doc,
 
           m_parts.push_back( part );
 
-          populate( doc, graph, childId, part, path + "/" + name );
+          populate( doc, graph, childId, part, path + "/" + name, doDumpShapes);
         }
       }
       // If parent is an assembly, collect its child id.
@@ -736,32 +776,25 @@ void asiAsm_SceneTree::populate(const Handle(asiAsm::xde::Doc)&   doc,
 
         instance->prototype = childId;
 
-        Handle(asiAsm::xde::HAssemblyItemIdsMap)
-          leaves = new asiAsm::xde::HAssemblyItemIdsMap;
-
         asiAsm::xde::AssemblyItemId id( instance->assemblyItemId.c_str() );
-        doc->GetLeafAssemblyItems( id, leaves );
+        gp_Trsf trsf = doc->GetOwnLocation( id ).Transformation();
 
-        for ( asiAsm::xde::HAssemblyItemIdsMap::Iterator it( *leaves ); it.More(); it.Next() )
-        {
-          const asiAsm::xde::AssemblyItemId& aiid = it.Value();
+        gp_XYZ axis;
+        double angle;
+        trsf.GetRotation( axis, angle );
 
-          TopLoc_Location T;
-          TopoDS_Shape shape = doc->GetShape( aiid );
-          T = T * shape.Location();
-
-          gp_Trsf trsf = T.Transformation();
-
-          gp_XYZ axis;
-          double angle;
-          trsf.GetRotation( axis, angle );
-
-          instance->xyz = axis;
-          instance->angle = angle;
-          instance->translation = trsf.TranslationPart();
-        }
+        instance->xyz = axis;
+        instance->angle = angle;
+        instance->translation = trsf.TranslationPart();
       }
     }
+  }
+  else if (doDumpShapes && parent->DynamicType() == STANDARD_TYPE(asiAsm_SceneTree_Part))
+  {
+    // If parent is a part, collect its boundary representation.
+    Handle(asiAsm_SceneTree_Part) part = Handle(asiAsm_SceneTree_Part)::DownCast(parent);
+    TopoDS_Shape shape = doc->GetShape(asiAsm::xde::PartId(part->persistentId.c_str()));
+    asiAlgo_ShapeSerializer::Serialize(shape, part->shape);
   }
 }
 
@@ -799,8 +832,25 @@ const std::vector<int>&
 
 //-----------------------------------------------------------------------------
 
-void asiAsm_SceneTree::FromJSON(void*              pJsonGenericObj,
-                                 asiAsm_SceneTree& info)
+void asiAsm_SceneTree::FromJSON(std::ifstream&    in,
+                                asiAsm_SceneTree& info)
+{
+  // Populate JSON document.
+  rapidjson::Document doc;
+  rapidjson::IStreamWrapper streamWrapper(in);
+  doc.ParseStream(streamWrapper);
+
+  t_jsonValue::MemberIterator it = doc.FindMember(asiPropName_SceneTree);
+  if (it == doc.MemberEnd())
+    return;
+
+  asiAsm_SceneTree::FromJSON(&it->value, info);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_SceneTree::FromJSON(void*             pJsonGenericObj,
+                                asiAsm_SceneTree& info)
 {
   t_jsonValue*
     pJsonObj = reinterpret_cast< t_jsonValue* >( pJsonGenericObj );
@@ -918,5 +968,88 @@ void asiAsm_SceneTree::ToJSON(const asiAsm_SceneTree& info,
   if ( self )
   {
     out << "\n}";
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void iterateInDepth(const std::vector<Handle(asiAsm_SceneTree_Child)>& allSceneObjects,
+                    const Handle(asiAsm_SceneTree_Child)&              sceneObj,
+                    gp_Trsf&                                           resultTrsf,
+                    ActAPI_PlotterEntry                                plotter)
+{
+  // in case of assemblies iterate all its children.
+  if (sceneObj->DynamicType() == STANDARD_TYPE(asiAsm_SceneTree_Assembly))
+  {
+    Handle(asiAsm_SceneTree_Assembly) assemblyObj = Handle(asiAsm_SceneTree_Assembly)::DownCast(sceneObj);
+    for (const int chId : assemblyObj->children)
+    {
+      auto comparator = [chId](const Handle(asiAsm_SceneTree_Child)& c)
+      {
+        return c->id == chId;
+      };
+      auto chIt = std::find_if( allSceneObjects.begin(), allSceneObjects.end(), comparator );
+      gp_Trsf T = resultTrsf;
+      iterateInDepth( allSceneObjects, *chIt, T, plotter );
+    }
+  }
+  // in case of instance accumulate transformation and move to instance's reference (prototype)
+  else if (sceneObj->DynamicType() == STANDARD_TYPE(asiAsm_SceneTree_Instance))
+  {
+    Handle(asiAsm_SceneTree_Instance) instanceObj = Handle(asiAsm_SceneTree_Instance)::DownCast(sceneObj);
+
+    gp_Trsf T;
+    T.SetRotation( gp_Quaternion( instanceObj->xyz, instanceObj->angle ) );
+    T.SetTranslationPart( instanceObj->translation );
+    resultTrsf.Multiply( T );
+
+    int refId = instanceObj->prototype;
+    auto comparator = [refId](const Handle(asiAsm_SceneTree_Child)& c)
+    {
+      return c->id == refId;
+    };
+    auto refIt = std::find_if( allSceneObjects.begin(), allSceneObjects.end(), comparator );
+
+    iterateInDepth( allSceneObjects, *refIt, resultTrsf, plotter );
+  }
+  // in case of part apply the accumulated transformation and draw the shape
+  else if ( sceneObj->DynamicType() == STANDARD_TYPE(asiAsm_SceneTree_Part) )
+  {
+    TopoDS_Shape shape;
+
+    Handle(asiAsm_SceneTree_Part) partObj = Handle(asiAsm_SceneTree_Part)::DownCast( sceneObj );
+    asiAlgo_ShapeSerializer::Deserialize( partObj->shape, shape );
+
+    BRepBuilderAPI_Transform transformer( resultTrsf );
+    transformer.Perform( shape );
+
+    plotter.DRAW_SHAPE( transformer.Shape(), partObj->name.c_str() );
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAsm_SceneTree::Dislay(ActAPI_PlotterEntry plotter)
+{
+  std::vector<Handle(asiAsm_SceneTree_Child)> sceneObjects;
+  std::copy(m_assemblies.begin(), m_assemblies.end(), back_inserter(sceneObjects));
+  std::copy(m_instances.begin(),  m_instances.end(),  back_inserter(sceneObjects));
+  std::copy(m_parts.begin(),      m_parts.end(),      back_inserter(sceneObjects));
+
+  // iterate from top to bottom accumulating parent transformations for leaves 
+  for (const int& rootId : GetRoots())
+  {
+    auto comparator = [rootId](const Handle(asiAsm_SceneTree_Child)& c)
+    {
+      return c->id == rootId;
+    };
+
+    auto it = std::find_if(sceneObjects.begin(), sceneObjects.end(), comparator);
+    Handle(asiAsm_SceneTree_Child) root = *it;
+
+    // Iterate scene tree until parts, while iterating gather all parent's transformation
+    // to apply them to parts and then draw the parts in the given plotter.
+    gp_Trsf trsf;
+    iterateInDepth(sceneObjects, root, trsf, plotter);
   }
 }

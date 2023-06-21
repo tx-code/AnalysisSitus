@@ -64,6 +64,7 @@
 // OpenCascade includes
 #include <BRep_Builder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <OSD_OpenFile.hxx>
 #include <TopExp_Explorer.hxx>
 #include <UnitsMethods.hxx>
 
@@ -1623,6 +1624,9 @@ int ASMXDE_DumpJson(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  // Get model name.
+  bool doDumpShapes = interp->HasKeyword(argc, argv, "doDumpShapes");
+
   // Get the XDE document.
   Handle(asiTcl_Variable) var = interp->GetVar(name);
   //
@@ -1638,7 +1642,7 @@ int ASMXDE_DumpJson(const Handle(asiTcl_Interp)& interp,
   // Construct scene tree.
   asiAsm_SceneTree SceneTree;
   //
-  SceneTree.Build(xdeDoc);
+  SceneTree.Build(xdeDoc, doDumpShapes);
 
   // Dump to JSON.
   std::stringstream sstream;
@@ -1647,6 +1651,46 @@ int ASMXDE_DumpJson(const Handle(asiTcl_Interp)& interp,
   asiUI_DialogDump* pDumpDlg = new asiUI_DialogDump( "Scene Tree" );
   pDumpDlg->Populate( sstream.str() );
   pDumpDlg->show();
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ASMXDE_DisplayJson(const Handle(asiTcl_Interp)& interp,
+                       int                          argc,
+                       const char**                 argv)
+{
+  if (argc != 2)
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get file name containig scene tree description.
+  std::string filename = argv[1];
+  //
+  if (filename.empty())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find JSON with the name '%1'." << argv[1]);
+    return TCL_ERROR;
+  }
+
+  // Load json file.
+  std::ifstream stream;
+  OSD_OpenStream(stream, filename.c_str(), std::ios::in);
+  //
+  if (!stream.is_open() || stream.fail())
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot open file '%1'." << filename);
+    return TCL_ERROR;
+  }
+
+  // Construct scene tree.
+  asiAsm_SceneTree sceneTree;
+  asiAsm_SceneTree::FromJSON(stream, sceneTree);
+
+  // Visualize the scene tree content in 3D viewer.
+  sceneTree.Dislay(interp->GetPlotter());
 
   return TCL_OK;
 }
@@ -1876,4 +1920,13 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Dumps the passed model to JSON as a scene tree.",
     //
     __FILE__, group, ASMXDE_DumpJson);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-display-json",
+    //
+    "asm-xde-display-json \n"
+    "\t Displays shapes out of JSON representing a scene tree.",
+    //
+    __FILE__, group, ASMXDE_DisplayJson);
+  
 }

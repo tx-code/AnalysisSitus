@@ -57,6 +57,13 @@ public:
           const asiAsm_SceneTree& R2,
           ActAPI_ProgressEntry    progress);
 
+  //! Constructs a scene tree structure from a stream keeping description of the structure.
+  //! \param[in]  in   the input stream containing description of the structure.
+  //! \param[out] info the outcome data structure.
+  asiAsm_EXPORT static void
+    FromJSON(std::ifstream&     in,
+             asiAsm_SceneTree& info);
+
   //! Constructs the scene tree structure from a JSON object.
   //! \param[in]  pJsonGenericObj the JSON object to construct the data structure from.
   //! \param[out] info            the outcome data structure.
@@ -84,9 +91,15 @@ public:
 public:
 
   //! Computes scene hierarchy of a model.
-  //! \param[in] doc XDE document with the CAD assembly.
+  //! \param[in] doc          XDE document with the CAD assembly.
+  //! \param[in] doDumpShapes flag indicating whether shapes representations should be dumped.
   asiAsm_EXPORT void
-    Build(const Handle(asiAsm::xde::Doc)& doc);
+    Build(const Handle(asiAsm::xde::Doc)& doc,
+          const bool                      doDumpShapes = false);
+
+  //! Displays the geometric entities of the structure in the given plotter. 
+  asiAsm_EXPORT void
+    Dislay(ActAPI_PlotterEntry plotter);
 
 public:
 
@@ -109,16 +122,18 @@ public:
 private:
 
   //! Collects information about children.
-  //! \param[in] doc      XDE document with the CAD assembly.
-  //! \param[in] graph    assembly graph.
-  //! \param[in] parentId parent Id which children needs to be found.
-  //! \param[in] parent   pointer to parent.
-  //! \param[in] path     assembly item id of the parent.
+  //! \param[in] doc          XDE document with the CAD assembly.
+  //! \param[in] graph        assembly graph.
+  //! \param[in] parentId     parent Id which children needs to be found.
+  //! \param[in] parent       pointer to parent.
+  //! \param[in] path         assembly item id of the parent.
+  //! \param[in] doDumpShapes flag indicating whether shapes representations should be dumped.
   void populate(const Handle(asiAsm::xde::Doc)&   doc,
                 const Handle(asiAsm::xde::Graph)& graph,
                 const int                         parentId,
                 Handle(asiAsm_SceneTree_Child)&   parent,
-                const std::string&                path);
+                const std::string&                path,
+                const bool                        doDumpShapes);
 
   //! Collects information about child.
   //! \param[in] doc      XDE document with the CAD assembly.

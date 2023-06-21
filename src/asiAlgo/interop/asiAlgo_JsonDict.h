@@ -103,5 +103,6 @@
 #define asiPropName_SceneInstancesTranslation             "translation"
 #define asiPropName_ScenePartsName                        "parts"
 #define asiPropName_ScenePartsPersistentId                "persistentId"
+#define asiPropName_ScenePartsRepresentation              "shape"
 
 #endif
