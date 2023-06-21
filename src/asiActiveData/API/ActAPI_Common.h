@@ -82,6 +82,9 @@
 //! ACT API is an entry point to framework. It enumerates its basic entities.
 //-----------------------------------------------------------------------------
 
+typedef TCollection_AsciiString    t_asciiString;
+typedef TCollection_ExtendedString t_extString;
+
 //! \ingroup AD_ALGO
 //!
 //! Complex number.

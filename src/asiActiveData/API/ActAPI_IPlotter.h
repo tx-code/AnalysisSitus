@@ -48,8 +48,6 @@ class Geom_Surface;
 class Poly_Triangulation;
 class ActData_Mesh;
 
-typedef TCollection_ExtendedString t_extString;
-
 //-----------------------------------------------------------------------------
 
 //! \ingroup AD_API
