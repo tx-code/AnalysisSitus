@@ -119,6 +119,8 @@ set (aux_H_FILES
   auxiliary/asiAlgo_ResampleADF.h
   auxiliary/asiAlgo_RTCD.h
   auxiliary/asiAlgo_SampleFace.h
+  auxiliary/asiAlgo_SegmentsInfo.h
+  auxiliary/asiAlgo_SegmentsInfoExtractor.h
   auxiliary/asiAlgo_SemanticCode.h
   auxiliary/asiAlgo_ShapeSerializer.h
   auxiliary/asiAlgo_TopoSummary.h
@@ -165,6 +167,8 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_ResampleADF.cpp
   auxiliary/asiAlgo_RTCD.cpp
   auxiliary/asiAlgo_SampleFace.cpp
+  auxiliary/asiAlgo_SegmentsInfo.cpp
+  auxiliary/asiAlgo_SegmentsInfoExtractor.cpp
   auxiliary/asiAlgo_ShapeSerializer.cpp
   auxiliary/asiAlgo_UnifySameDomain.cpp
   auxiliary/asiAlgo_Utils.cpp

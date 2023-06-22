@@ -65,6 +65,12 @@
 #define asiPropName_Bodies                                "bodies"
 #define asiPropName_Type                                  "type"
 #define asiPropName_Volume                                "volume"
+#define asiPropName_CuttingLength                         "cuttingLength"
+#define asiPropName_NextSegment                           "nextSegment"
+#define asiPropName_AngleToNextSegment                    "angleToNextSegment"
+#define asiPropName_Radius                                "radius"
+#define asiPropName_Angle                                 "angle"
+#define asiPropName_Segments                              "segments"
 
 // JSON properties
 #define asiPropName_ExtrasCanRecSummary                   "canrecSummary"
