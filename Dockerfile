@@ -89,12 +89,15 @@ RUN apt-get install -y libfreetype6-dev
 
 # Building Analysis Situs
 # =======================
+
 # Copy sources of Analysis Situs
-COPY cmake          /as/cmake
-COPY src            /as/src
-COPY data           /as/data
-COPY asiExe.sh      /as
-COPY CMakeLists.txt /as
+COPY cmake           /as/cmake
+COPY src             /as/src
+COPY data            /as/data
+COPY asiExe.sh       /as
+COPY asiExeServer.sh /as
+COPY CMakeLists.txt  /as
+
 # Analysis Situs dependencies
 RUN apt-get -y install libeigen3-dev rapidjson-dev
 # Hack: symlink the VTK build/lib directory to /usr/lib/vtk-8.2, as the VTK installation doesn't seem to
