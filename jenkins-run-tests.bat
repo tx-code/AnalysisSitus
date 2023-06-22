@@ -6,6 +6,7 @@ REM ===========================================================================
 REM Configure environment on Jenkins machine
 REM ===========================================================================
 
+call "%~dp0"jenkins-clone-data.bat
 call "%~dp0"jenkins-custom.bat
 
 set "JENKINS_3RDPARTIES=%~dp03rd-parties"
