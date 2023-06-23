@@ -1730,6 +1730,8 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
       pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP() ) );
     }
   }
+
+  emit populateMenu(pMenu);
 }
 
 //-----------------------------------------------------------------------------

@@ -144,6 +144,7 @@ signals:
   void showOnly      (const ActAPI_DataObjectId&);
   void hide          (const ActAPI_DataObjectId&);
   void nodesSelected (const ActAPI_DataObjectIdList&);
+  void populateMenu  (QMenu* pMenu);
 
 //-----------------------------------------------------------------------------
 protected slots:
