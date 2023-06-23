@@ -62,14 +62,75 @@
 #include <BOPAlgo_Builder.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 
+  #include <stdio.h>
+
+void fixprint(char *s, const int len)
+{
+  if ( s[0] == '-' )
+  {
+    for ( int j = 2; j <= len; ++j  )
+      s[j-1] = s[j];
+
+    s[len] = '\0'; // Zero-trailing.
+  }
+}
+
+char* format_fortran_float(
+  char*    result,  // where to write the formatted number. Must have
+  unsigned width,   // room for width + 1 characters.
+  double   number
+  ) {
+
+   // 31.415926535 -> 0.314159E+02
+
+  // First, we'll learn the exponent and adjust the number to the range [0.0,1.0]
+  int exponent = 0;
+  for (; Abs(number) > 1.0; exponent++) number /= 10;
+  //for (; number < 0.0; exponent--) number *= 10;
+
+  // Next, we'll print the number as mantissa in [0,1] and exponent
+  //if ( number > 0 )
+    sprintf( result, "%.*fE%+03d", 7, number, exponent );
+  /*else
+   printf( result, "%.10e", (width - 4), number, exponent ); */
+
+  fixprint(result, width);
+
+  // Finally, we'll return the new string
+  return result;
+  }
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
-  return TCL_OK;
+  char buf[ 14 ];
+  printf(
+    "The number is %s\n",
+    format_fortran_float( buf, 12, 31.415926535 )
+    );
+  printf(
+    "The number is %s\n",
+    format_fortran_float( buf, 12, -31.415926535 )
+    );
+  return 0;
 }
+
+//-----------------------------------------------------------------------------
+
+//int MISC_Test(const Handle(asiTcl_Interp)& interp,
+//              int                          argc,
+//              const char**                 argv)
+//{
+//  float x = 31.415926535;
+//        char s[14];
+//        sprintf(s,"% 8.2f",x);
+//        fixprint(s);
+//        printf("%s\n",s);
+//  return 0;
+//}
 
 //-----------------------------------------------------------------------------
 
