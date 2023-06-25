@@ -64,6 +64,7 @@
 #include <asiAlgo_TopoAttrOrientation.h>
 #include <asiAlgo_TopoKill.h>
 #include <asiAlgo_Utils.h>
+#include <asiAlgo_ConvertToBezier.h>
 
 // OCCT includes
 #include <BRep_Builder.hxx>
@@ -4024,6 +4025,83 @@ int ENGINE_ConvertToC2(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
+                           int                          argc,
+                           const char**                 argv)
+{
+  if ( argc < 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Assuming that `argv[1]` is UTF-8.
+  TCollection_ExtendedString name(argv[1], true);
+
+  // Get node.
+  Handle(asiData_IVSurfaceNode)
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+  //
+  Handle(asiData_IVCurveNode)
+    curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+  //
+  if ( surfNode.IsNull() && curveNode.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find geometric object with the name %1." << name);
+    return TCL_ERROR;
+  }
+
+  /* ====================
+  *  Surface conversion.
+  * ==================== */
+
+  if ( !surfNode.IsNull() )
+  {
+    // Get parametric surface.
+    Handle(Geom_Surface) surf = surfNode->GetSurface();
+    //
+    if ( surf.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
+      return TCL_ERROR;
+    }
+    asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
+    converter.Perform(surf);
+    //
+    for (auto s : converter.GetSurfaces())
+    {
+      interp->GetPlotter().DRAW_SURFACE(s, Color_Red, name + "_Bezier");
+    }
+  }
+
+  /* ==================
+  *  Curve conversion.
+  * ================== */
+
+  if ( !curveNode.IsNull() )
+  {
+    // Get parametric curve.
+    Handle(Geom_Curve) curve = curveNode->GetCurve();
+    //
+    if ( curve.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target curve is null.");
+      return TCL_ERROR;
+    }
+    //
+    asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
+    converter.Perform(curve);
+    //
+    /*for (auto c : converter.GetCurves())
+    {
+      interp->GetPlotter().DRAW_CURVE(c, Color_Red, true, name + "_Bezier");
+    }*/
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4552,4 +4630,14 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t operation from distorting the input geometry too much.",
     //
     __FILE__, group, ENGINE_ConvertToC2);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("convert-to-bezier",
+    //
+    "convert-to-c2 <name>\n"
+    "\t Converts the curve or surface named <name> to C2 continuity class if possible.\n"
+    "\t You can pass the tolerance value via the '-tol' key to protect knot removal\n"
+    "\t operation from distorting the input geometry too much.",
+    //
+    __FILE__, group, ENGINE_ConvertToBezier);
 }
