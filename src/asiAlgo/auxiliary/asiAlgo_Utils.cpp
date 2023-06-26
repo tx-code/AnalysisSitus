@@ -1020,6 +1020,7 @@ std::string
 void asiAlgo_Utils::Json::ReadVector(void*             pJsonBlock,
                                      std::vector<int>& vector)
 {
+#if defined USE_RAPIDJSON
   t_jsonArray*
     jsonBlock = reinterpret_cast<t_jsonArray*>(pJsonBlock);
 
@@ -1028,6 +1029,10 @@ void asiAlgo_Utils::Json::ReadVector(void*             pJsonBlock,
   {
     vector.push_back( vit->GetInt() );
   }
+#else
+  (void) pJsonBock;
+  (void) vector;
+#endif
 }
 
 //-----------------------------------------------------------------------------
