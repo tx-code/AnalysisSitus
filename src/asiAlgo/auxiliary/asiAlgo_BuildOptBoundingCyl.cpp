@@ -70,7 +70,7 @@ namespace aux
       result.radius = Max(dist, result.radius);
     }
 
-    // Calculates cylinder's height as a maximal size of 
+    // Calculates cylinder's height as a maximal size of
     // a given bounding box along the given direction.
     result.height = Max((aabb.CornerMax().X() - aabb.CornerMin().X()) * orientation.X(),
                         (aabb.CornerMax().Y() - aabb.CornerMin().Y()) * orientation.Y());
@@ -82,7 +82,7 @@ namespace aux
     result.volume = M_PI * result.height * pow(result.radius, 2);
 
     // Get a reference plane for cylinder's base. The plane is
-    // orthogonal to the given direction and placed at the center of 
+    // orthogonal to the given direction and placed at the center of
     // a minimal side of bounding box which is orthogonal to the given direction.
 
     gp_Ax2 plane(gp_Pnt(center.X() * (1. - orientation.X()) + aabb.CornerMin().X() * orientation.X(),
@@ -95,8 +95,8 @@ namespace aux
                                    result.radius,
                                    result.height);
     result.shape = mkCyl.Solid();
-  }  
-};
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ bool asiAlgo_BuildOptBoundingCyl::Perform(const Handle(asiAlgo_AAG)& aag,
   }
   m_cylinder.trsf      = orient.GetTrsf();
   m_progress.SendLogMessage(LogNotice(Normal) << "Cylinder volume: %1." << m_cylinder.volume);
- 
+
   //m_plotter.DRAW_SHAPE(Xcyl.shape.Moved(orient.GetTrsf().Inverted()), Color_Red,   "Xcyl");
   //m_plotter.DRAW_SHAPE(Ycyl.shape.Moved(orient.GetTrsf().Inverted()), Color_Green, "Ycyl");
   //m_plotter.DRAW_SHAPE(Zcyl.shape.Moved(orient.GetTrsf().Inverted()), Color_Blue,  "Zcyl");

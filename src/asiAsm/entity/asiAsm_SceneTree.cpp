@@ -138,8 +138,8 @@ class asiAsm_SceneTree_Child : public Standard_Transient
     std::string ws(indent, ' ');
     std::string nl = "\n" + ws;
 
-    out        << nl << std::quoted( asiPropName_SceneChildId )   << ": " << value->id;
-    out << "," << nl << std::quoted( asiPropName_SceneChildName ) << ": " << std::quoted( asiAlgo_Utils::Json::EscapeJson( value->name ) );
+    out        << nl << "\"" << asiPropName_SceneChildId   << "\"" << ": " << value->id;
+    out << "," << nl << "\"" << asiPropName_SceneChildName << "\"" << ": " << "\"" << asiAlgo_Utils::Json::EscapeJson( value->name ) << "\"";
 
     // Dump delivered classes data.
     value->toJSON( indent, out );
@@ -215,10 +215,10 @@ class asiAsm_SceneTree_Part : public asiAsm_SceneTree_Child
       std::string ws(indent, ' ');
       std::string nl = "\n" + ws;
 
-      out << "," << nl << std::quoted( asiPropName_ScenePartsPersistentId ) << ": " << std::quoted( persistentId );
+      out << "," << nl << "\"" << asiPropName_ScenePartsPersistentId << "\"" << ": " << "\"" << persistentId << "\"";
 
       if (!shape.empty())
-        out << "," << nl << std::quoted(asiPropName_ScenePartsRepresentation) << ": " << std::quoted( shape );
+        out << "," << nl << "\"" << asiPropName_ScenePartsRepresentation << "\"" << ": " << "\"" << shape << "\"";
     }
 
     //! Checks is this part is equal to the passed one.
@@ -280,7 +280,7 @@ class asiAsm_SceneTree_Assembly : public asiAsm_SceneTree_Child
       std::string ws(indent, ' ');
       std::string nl = "\n" + ws;
 
-      out << "," << nl << std::quoted( asiPropName_SceneAssembliesAssemblyChildInstances ) << ": ";
+      out << "," << nl << "\"" << asiPropName_SceneAssembliesAssemblyChildInstances << "\"" << ": ";
 
       out << asiAlgo_Utils::Json::FromVector( children );
     }
@@ -385,20 +385,20 @@ class asiAsm_SceneTree_Instance : public asiAsm_SceneTree_Child
       std::string ws(indent, ' ');
       std::string nl = "\n" + ws;
 
-      out << "," << nl << std::quoted( asiPropName_SceneInstancesInstancePrototype ) << ": " << prototype;
+      out << "," << nl << "\"" << asiPropName_SceneInstancesInstancePrototype << "\"" << ": " << prototype;
 
-      out << "," << nl << std::quoted( asiPropName_SceneInstancesAssemblyItemId ) << ": " << std::quoted( assemblyItemId );
+      out << "," << nl << "\"" << asiPropName_SceneInstancesAssemblyItemId << "\"" << ": " << "\"" << assemblyItemId << "\"";
 
-      out << "," << nl << std::quoted( asiPropName_SceneInstancesRotation ) << ": [ "
-         << xyz.X() << ", "
-         << xyz.Y() << ", "
-         << xyz.Z() << ", "
-         << angle   << " ]";
+      out << "," << nl << "\"" << asiPropName_SceneInstancesRotation << "\"" << ": [ "
+          << xyz.X() << ", "
+          << xyz.Y() << ", "
+          << xyz.Z() << ", "
+          << angle   << " ]";
 
-      out << "," << nl << std::quoted( asiPropName_SceneInstancesTranslation ) << ": [ "
-         << translation.X() << ", "
-         << translation.Y() << ", "
-         << translation.Z() << " ]";
+      out << "," << nl << "\"" << asiPropName_SceneInstancesTranslation << "\"" << ": [ "
+          << translation.X() << ", "
+          << translation.Y() << ", "
+          << translation.Z() << " ]";
 
     }
 
@@ -928,26 +928,26 @@ void asiAsm_SceneTree::ToJSON(const asiAsm_SceneTree& info,
   std::string ws(indent, ' ');
   std::string nl = "\n" + ws;
 
-  out << nl << std::quoted( asiPropName_SceneTree ) << ": {";
+  out << nl << "\"" << asiPropName_SceneTree << "\"" << ": {";
 
   // Roots.
-  out << nl << "  " << std::quoted( asiPropName_SceneRootsIds ) << ": ";
+  out << nl << "  " << "\"" << asiPropName_SceneRootsIds << "\"" << ": ";
 
   out << asiAlgo_Utils::Json::FromVector( info.GetRoots() );
 
   // Prototypes.
-  out << "," << nl << "  " << std::quoted( asiPropName_ScenePrototypes ) << ": {";
+  out << "," << nl << "  " << "\"" << asiPropName_ScenePrototypes << "\"" << ": {";
 
   {
     // Parts.
-    out << nl << "    " << std::quoted( asiPropName_ScenePartsName ) << ": [";
+    out << nl << "    " << "\"" << asiPropName_ScenePartsName << "\"" << ": [";
     //
     dumpChildren< asiAsm_SceneTree_Part >( indent + 6, info.GetParts(), out );
 
     out << nl << "    ]"; // End parts.
 
     // Assemblies.
-    out << "," << nl << "    " << std::quoted( asiPropName_SceneAssembliesName ) << ": [";
+    out << "," << nl << "    " << "\"" << asiPropName_SceneAssembliesName << "\"" << ": [";
     //
     dumpChildren< asiAsm_SceneTree_Assembly >( indent + 6, info.GetAssemblies(), out );
 
@@ -957,7 +957,7 @@ void asiAsm_SceneTree::ToJSON(const asiAsm_SceneTree& info,
   out << nl << "  }"; // End prototypes.
 
   // Instances.
-  out << "," << nl << "  " << std::quoted( asiPropName_SceneInstancesName ) << ": [";
+  out << "," << nl << "  " << "\"" << asiPropName_SceneInstancesName << "\"" << ": [";
 
   dumpChildren< asiAsm_SceneTree_Instance >( indent + 4, info.GetInstances(), out );
 
@@ -1036,7 +1036,7 @@ void asiAsm_SceneTree::Dislay(ActAPI_PlotterEntry plotter)
   std::copy(m_instances.begin(),  m_instances.end(),  back_inserter(sceneObjects));
   std::copy(m_parts.begin(),      m_parts.end(),      back_inserter(sceneObjects));
 
-  // iterate from top to bottom accumulating parent transformations for leaves 
+  // iterate from top to bottom accumulating parent transformations for leaves
   for (const int& rootId : GetRoots())
   {
     auto comparator = [rootId](const Handle(asiAsm_SceneTree_Child)& c)
