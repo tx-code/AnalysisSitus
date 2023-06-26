@@ -168,20 +168,20 @@ namespace asiAlgo_PartBodyTypeUtils
   {
     switch ( type )
     {
-      case PartBodyType_Unrecognized:     return PropVal_Type_Unrecognized;
-      case PartBodyType_FlatShape:        return PropVal_Type_FlatShape;
-      case PartBodyType_FoldedSheetMetal: return PropVal_Type_FoldedSheetMetal;
-      case PartBodyType_RectTube:         return PropVal_Type_RectTube;
-      case PartBodyType_CylTube:          return PropVal_Type_CylTube;
-      case PartBodyType_OtherTube:        return PropVal_Type_OtherTube;
-      case PartBodyType_Profile:          return PropVal_Type_Profile;
-      case PartBodyType_CncMilling:       return PropVal_Type_CncMilling;
-      case PartBodyType_CncLathe:         return PropVal_Type_CncLathe;
-      case PartBodyType_CncLatheMilling:  return PropVal_Type_CncLatheMilling;
+      case PartBodyType_Unrecognized:     return asiPropVal_Type_Unrecognized;
+      case PartBodyType_FlatShape:        return asiPropVal_Type_FlatShape;
+      case PartBodyType_FoldedSheetMetal: return asiPropVal_Type_FoldedSheetMetal;
+      case PartBodyType_RectTube:         return asiPropVal_Type_RectTube;
+      case PartBodyType_CylTube:          return asiPropVal_Type_CylTube;
+      case PartBodyType_OtherTube:        return asiPropVal_Type_OtherTube;
+      case PartBodyType_Profile:          return asiPropVal_Type_Profile;
+      case PartBodyType_CncMilling:       return asiPropVal_Type_CncMilling;
+      case PartBodyType_CncLathe:         return asiPropVal_Type_CncLathe;
+      case PartBodyType_CncLatheMilling:  return asiPropVal_Type_CncLatheMilling;
       default: break;
     }
 
-    return PropVal_Type_Unknown;
+    return asiPropVal_Type_Unknown;
   }
 
   //! Returns body type by name.
@@ -189,25 +189,25 @@ namespace asiAlgo_PartBodyTypeUtils
   //! \return body type.
   inline asiAlgo_PartBodyType GetTypeByName(const std::string& name)
   {
-    if ( name == PropVal_Type_Unrecognized )
+    if ( name == asiPropVal_Type_Unrecognized )
       return PartBodyType_Unrecognized;
-    if ( name == PropVal_Type_FlatShape )
+    if ( name == asiPropVal_Type_FlatShape )
       return PartBodyType_FlatShape;
-    if ( name == PropVal_Type_FoldedSheetMetal )
+    if ( name == asiPropVal_Type_FoldedSheetMetal )
       return PartBodyType_FoldedSheetMetal;
-    if ( name == PropVal_Type_RectTube )
+    if ( name == asiPropVal_Type_RectTube )
       return PartBodyType_RectTube;
-    if ( name == PropVal_Type_CylTube )
+    if ( name == asiPropVal_Type_CylTube )
       return PartBodyType_CylTube;
-    if ( name == PropVal_Type_OtherTube )
+    if ( name == asiPropVal_Type_OtherTube )
       return PartBodyType_OtherTube;
-    if ( name == PropVal_Type_Profile )
+    if ( name == asiPropVal_Type_Profile )
       return PartBodyType_Profile;
-    if ( name == PropVal_Type_CncMilling )
+    if ( name == asiPropVal_Type_CncMilling )
       return PartBodyType_CncMilling;
-    if ( name == PropVal_Type_CncLathe )
+    if ( name == asiPropVal_Type_CncLathe )
       return PartBodyType_CncLathe;
-    if ( name == PropVal_Type_CncLatheMilling )
+    if ( name == asiPropVal_Type_CncLatheMilling )
       return PartBodyType_CncLatheMilling;
 
     return PartBodyType_Unrecognized;

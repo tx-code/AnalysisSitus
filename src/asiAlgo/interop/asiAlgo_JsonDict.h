@@ -32,22 +32,22 @@
 #define asiAlgo_JsonDict_HeaderFile
 
 // Filename extension.
-#define Ref_Ext "ref"
+#define asiRef_Ext "ref"
 
 // Consts
-#define PropVal_OS_Win                                    "win"
-#define PropVal_OS_Lin                                    "lin"
-#define PropVal_Type_Unrecognized                         "UNRECOGNIZED"
-#define PropVal_Type_FlatShape                            "SHEET_METAL_FLAT"
-#define PropVal_Type_FoldedSheetMetal                     "SHEET_METAL_FOLDED"
-#define PropVal_Type_RectTube                             "TUBE_RECTANGULAR"
-#define PropVal_Type_CylTube                              "TUBE_ROUND"
-#define PropVal_Type_Profile                              "PROFILE"
-#define PropVal_Type_OtherTube                            "TUBE_OTHER"
-#define PropVal_Type_CncMilling                           "CNC_MILLING"
-#define PropVal_Type_CncLathe                             "CNC_LATHE"
-#define PropVal_Type_CncLatheMilling                      "CNC_LATHE_MILLING"
-#define PropVal_Type_Unknown                              "UNKNOWN"
+#define asiPropVal_OS_Win                                 "win"
+#define asiPropVal_OS_Lin                                 "lin"
+#define asiPropVal_Type_Unrecognized                      "UNRECOGNIZED"
+#define asiPropVal_Type_FlatShape                         "SHEET_METAL_FLAT"
+#define asiPropVal_Type_FoldedSheetMetal                  "SHEET_METAL_FOLDED"
+#define asiPropVal_Type_RectTube                          "TUBE_RECTANGULAR"
+#define asiPropVal_Type_CylTube                           "TUBE_ROUND"
+#define asiPropVal_Type_Profile                           "PROFILE"
+#define asiPropVal_Type_OtherTube                         "TUBE_OTHER"
+#define asiPropVal_Type_CncMilling                        "CNC_MILLING"
+#define asiPropVal_Type_CncLathe                          "CNC_LATHE"
+#define asiPropVal_Type_CncLatheMilling                   "CNC_LATHE_MILLING"
+#define asiPropVal_Type_Unknown                           "UNKNOWN"
 
 // Common props
 #define asiPropName_Sdk                                   "sdk"
