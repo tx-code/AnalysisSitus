@@ -1030,7 +1030,7 @@ void asiAlgo_Utils::Json::ReadVector(void*             pJsonBlock,
     vector.push_back( vit->GetInt() );
   }
 #else
-  (void) pJsonBock;
+  (void) pJsonBlock;
   (void) vector;
 #endif
 }
