@@ -1625,7 +1625,7 @@ int ASMXDE_DumpJson(const Handle(asiTcl_Interp)& interp,
   }
 
   // Get model name.
-  bool doDumpShapes = interp->HasKeyword(argc, argv, "doDumpShapes");
+  bool doDumpShapes = interp->HasKeyword(argc, argv, "shapes");
 
   // Get the XDE document.
   Handle(asiTcl_Variable) var = interp->GetVar(name);
@@ -1916,17 +1916,19 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-dump-json",
     //
-    "asm-xde-dump-json -model <M>\n"
-    "\t Dumps the passed model to JSON as a scene tree.",
+    "asm-xde-dump-json -model <M> [-shapes]\n"
+    "\t Dumps the passed model to JSON as a scene tree. If the '-shapes' flag\n"
+    "\t is passed, the B-rep geometry of unique parts will be added as base64-encoded\n"
+    "\t BLOBs in the extra 'shape' properties. This would make the dumped JSON file\n"
+    "\t self-contained.",
     //
     __FILE__, group, ASMXDE_DumpJson);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-display-json",
     //
-    "asm-xde-display-json \n"
+    "asm-xde-display-json <filename>\n"
     "\t Displays shapes out of JSON representing a scene tree.",
     //
     __FILE__, group, ASMXDE_DisplayJson);
-  
 }

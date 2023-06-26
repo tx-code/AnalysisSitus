@@ -56,7 +56,7 @@
 
 <div class="toc-panel"><div id="toc"></div></div>
 
-<h2 id="toc-asm-preface">Preface</h2>
+<h2 id="toc-asm-browse">Browse</h2>
 
 <p>
     Any CAD product definition coming from a CAD file contains geometric information and metadata, including assembly hierarchy (can be plain) and metadata (colors, names, etc.). Analysis Situs employs <a href="./features_asm-xde-document.html">OCAF/XDE</a> data structures for storing format-agnostic product representation. The assembly representation in XDE is a Hierarchical Assembly Graph (HAG, see <a href="../references.html#rappoport-1993">[Rappoport, 1993]</a>), which can be turned into a scene tree by visiting its nodes and reporting all unique paths.
@@ -78,6 +78,90 @@
 </p>
 
 <div align="center"><img src="../imgs/asm/asm-browser_01.png"/></div>
+
+<h2 id="toc-asm-dump-json">Dump to JSON</h2>
+
+<p>
+  The scene hierarchy exposed by the <span class="code-inline"><a href="../commands.html#asm-xde-browse">asm-xde-browse</a></span> command can be used algorithmically if dumped in the JSON format. To dump an assembly tree to JSON use the <span class="code-inline"><a href="../commands.html#asm-xde-dump-json">asm-xde-dump-json</a></span> command.
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-browser_02.png"/></div>
+
+<p>
+  JSON serialization of an assembly tree is based on the following template (the contents of the following JSON are deliberately reduced to give it an observable structure):
+</p>
+
+<pre class="code">
+{
+  assemblyTree: {
+    roots: [1],
+    prototypes: {
+      parts: [
+        {
+          id: 3,
+          name: "TS4-3",
+          persistentId: "0:1:1:2"
+        }
+      ],
+      assemblies: [
+        {
+          id: 1,
+          name: "=>[0:1:1:2]",
+          childInstances: [2]
+        }
+      ]
+    },
+    instances: [
+      {
+        id: 2,
+        name: "1",
+        prototype: 3,
+        rotation: [ 0, 0, 1, 0 ],
+        translation: [ -10, -7.5, 185 ]
+      }
+    ]
+  }
+}
+</pre>
+
+<p>
+  The following key observations are used in this template:
+</p>
+
+<ol>
+<li>
+  All reusable data containers (i.e., parts and subassemblies) are embraced by the <span class="code-inline">prototypes</span> object. A "prototype" is something that can be instantiated.
+</li>
+<li>
+  An instance is a reference to a prototype with the transformation properties represented with rotation (axis and angle) and translation.
+</li>
+<li>
+  Rotation and translation are defined at the level of instances. It is always an instance that holds the transformation props of a prototype. An instance holds a reference to the prototype via the <span class="code-inline">prototype</span> integer property.
+</li>
+<li>
+To make it clear that an assembly can only contain instances as its components (children), and assembly prototype has a field named <span class="code-inline">childInstances</span>.
+</li>
+</ol>
+
+<p>
+  It is possible to dump the assembly hierarchy together with the base64-encoded B-rep shape buffers of each unique part. To do that in Analysis Situs, pass the additional <span class="code-inline">-shapes</span> flag to the <span class="code-inline"><a href="../commands.html#asm-xde-dump-json">asm-xde-dump-json</a></span> command:
+</p>
+
+<div class="code">
+> asm-xde-dump-json -model M -shapes
+</div>
+
+<p>
+  This JSON can be saved to a text file by manually copying and pasting its contents.
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-browser_03.png"/></div>
+
+<p>
+  To validate the transformations encoded in the JSON file, you can use the <span class="code-inline"><a href="../commands.html#asm-xde-display-json">asm-xde-display-json</a></span> command followed by the JSON filename. If shape BLOBs are available, this command will deserialize them into B-rep geometries and apply the hierarchy of transformations for a visual check.
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-browser_04.png"/></div>
 
 <!-- [END] contents -->
 </div>
