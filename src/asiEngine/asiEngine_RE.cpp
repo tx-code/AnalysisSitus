@@ -533,23 +533,23 @@ bool
   // Get BVH from the working triangulation.
   Handle(asiAlgo_BVHFacets) bvh = m_model->GetTriangulationNode()->GetBVH();
 
-#if defined DRAW_DEBUG
+//#if defined DRAW_DEBUG
   {
     // Extract sub-mesh.
     m_plotter.REDRAW_TRIANGULATION("bndTris",
-                                   asiAlgo_Utils::GetSubMesh(tris, boundaryInds),
+                                   asiAlgo_Utils::GetSubMesh(tris, boundaryInds, false),
                                    Color_Red, 1.0);
   }
-#endif
+//#endif
 
   // Get center point of the contour.
   gp_XYZ center = this->ComputeMidPoint(patch);
 
-#if defined DRAW_DEBUG
+//#if defined DRAW_DEBUG
   {
     m_plotter.REDRAW_POINT("center", center, Color_Red);
   }
-#endif
+//#endif
 
   // Project midpoint to extract the central facet.
   asiAlgo_ProjectPointOnMesh pointToMesh(bvh, m_progress, m_plotter);
@@ -564,7 +564,7 @@ bool
   }
 
   // Convert facet index to triangle index.
-  const int centerTriangleId = bvh->GetFacet(centerFacetInd).FaceIndex;
+  const int centerTriangleId = bvh->GetFacet(centerFacetInd).FaceIndex + 1;
 
   // Index of the central facet should be decremented as in the coherent
   // triangulation we have 0-based indexation.
@@ -605,7 +605,7 @@ bool
     //
     if ( id == -1 ) continue;
 
-    const int cohId = id - 1; // Minus one for coherent notation.
+    const int cohId = id;
     boundary.Add( &cohTris->Triangle(cohId) );
   }
 
@@ -705,9 +705,9 @@ bool
   // Set result and return.
   region = new Poly_Triangulation(newNodesArr, newTrisArr);
 
-#if defined DRAW_DEBUG
+//#if defined DRAW_DEBUG
   m_plotter.REDRAW_TRIANGULATION("region", region, Color_Blue, 1.0);
-#endif
+//#endif
 
   return true;
 #else

@@ -387,12 +387,12 @@ bool asiAlgo_HitFacet::testLeaf(const gp_Lin&    ray,
     {
       if ( currentParam < resultRayParamNormalized )
       {
-        if ( !m_plotter.Access().IsNull() )
+        /*if ( !m_plotter.Access().IsNull() )
         {
           TCollection_AsciiString name("facet_");
           name += fidx;
           m_plotter.REDRAW_TRIANGLE(name, p0, p1, p2, Color_Red);
-        }
+        }*/
 
         resultFacet              = fidx;
         resultRayParamNormalized = currentParam;

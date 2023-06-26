@@ -5156,7 +5156,8 @@ TopoDS_Shape
 
 Handle(Poly_Triangulation)
   asiAlgo_Utils::GetSubMesh(const Handle(Poly_Triangulation)& mesh,
-                            const TColStd_PackedMapOfInteger& elems)
+                            const TColStd_PackedMapOfInteger& elems,
+                            const bool                        oneBased)
 {
   // Prepare triangulation.
   std::vector<Poly_Triangle> selectedTrisVec;
@@ -5169,7 +5170,7 @@ Handle(Poly_Triangulation)
     if ( tid == -1 )
       continue;
 
-    const Poly_Triangle& triangle = mesh->Triangle(tid);
+    const Poly_Triangle& triangle = mesh->Triangle(oneBased ? tid : tid + 1);
 
     int n1, n2, n3;
     triangle.Get(n1, n2, n3);

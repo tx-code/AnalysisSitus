@@ -2117,12 +2117,14 @@ namespace asiAlgo_Utils
   //! Extracts sub-triangulation from the given source by the passed indices.
   //! Only the mesh elements with the passed indices will be returned in a new
   //! triangulation.
-  //! \param[in] mesh  source triangulation.
-  //! \param[in] elems elements to keep.
+  //! \param[in] mesh     source triangulation.
+  //! \param[in] elems    elements to keep.
+  //! \param[in] oneBased indicates whether the passed indices are 0-based or 1-based.
   //! \return sub-triangulation.
   asiAlgo_EXPORT Handle(Poly_Triangulation)
     GetSubMesh(const Handle(Poly_Triangulation)& mesh,
-               const TColStd_PackedMapOfInteger& elems);
+               const TColStd_PackedMapOfInteger& elems,
+               const bool                        oneBased);
 
   //! Computes the average point for the passed point set.
   //! \param[in] pts point set in question.
