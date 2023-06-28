@@ -55,44 +55,36 @@ class asiAlgo_ConvertToBezier : public ActAPI_IAlgorithm
 {
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ConvertToBezier, ActAPI_IAlgorithm)
 
+  //! Constructor.
+  //! \param[in] wViewerPart   part viewer.
   asiAlgo_ConvertToBezier(ActAPI_ProgressEntry progress,
                           ActAPI_PlotterEntry  plotter) : ActAPI_IAlgorithm(progress, plotter) {}
 
+  //! Convert Curve to Bezier curve, degree 3, continuity C1.
+  //! \param[in] curve curve.
+  //! \param[in] f     first u parameter.
+  //! \param[in] l     last u parameter.
   asiAlgo_EXPORT bool
     Perform(const Handle(Geom_Curve)& curve, double f, double l);
 
+  //! Convert Surface to Bezier surface, degree (3, 3), continuity C1.
+  //! \param[in] surface  surface.
+  //! \param[in] toApprox whether to approximate or not.
   asiAlgo_EXPORT bool
-    Perform(const Handle(Geom_Surface)& surface);
+    Perform(const Handle(Geom_Surface)& surface, bool toApprox = false);
 
-  asiAlgo_EXPORT std::vector<Handle(Geom_Curve)>
-    GetCurves() const;
-
-  asiAlgo_EXPORT Handle(Geom_BSplineSurface)
+  //! Get result surface.
+  asiAlgo_EXPORT Handle(Geom_Surface)
     GetSurface() const;
 
-  asiAlgo_EXPORT std::vector<Handle(Geom_Curve)>
-    GetSurfaceCurves() const;
+  //! Get result curve.
+  asiAlgo_EXPORT Handle(Geom_Curve)
+    GetCurve() const;
 
 private:
-  void BuildCurveV(const Handle(Geom_Surface)& patch, std::vector<Handle(Geom_Curve)>& curves, bool last = false);
 
-  void BuildCurveU(const Handle(Geom_Surface)& patch, std::vector<Handle(Geom_Curve)>& curves, bool last = false);
-
-  Handle(Geom_BSplineSurface) SplitBezier(const Handle(Geom_BezierSurface)& surface);
-
-  void CreateSurfaceU0(Handle(Geom_BSplineSurface)& bspline);
-
-  void CreateSurfaceU1(Handle(Geom_BSplineSurface)& bspline);
-
-  void CreateSurfaceU2(Handle(Geom_BSplineSurface)& bspline);
-
-  void CreateSurfaceU3(Handle(Geom_BSplineSurface)& bspline);
-
-  std::vector<Handle(Geom_Curve)> m_bCurves;
-  Handle(Geom_BSplineSurface) m_bSurface;
-  std::vector<std::vector<Handle(Geom_BSplineSurface)>> m_bSplineSurfaces;
-  std::vector<Handle(Geom_BSplineCurve)> m_bSurfCurves;
-  std::vector<std::vector<mobius::t_ptr<mobius::geom_BSplineSurface>>> m_mobBSurfaces;
+  Handle(Geom_Curve)          m_bCurve;   // result curve.
+  Handle(Geom_BSplineSurface) m_bSurface; // result surface.
 };
 
 #endif

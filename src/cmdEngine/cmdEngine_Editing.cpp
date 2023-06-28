@@ -4037,32 +4037,10 @@ int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
   // Assuming that `argv[1]` is UTF-8.
   TCollection_ExtendedString name(argv[1], true);
 
-  /* ====================
-  *  Surface conversion.
-  * ==================== */
-
-  // Get node.
-  Handle(asiData_IVSurfaceNode)
-    surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
-
-  if ( !surfNode.IsNull() )
-  {
-    // Get parametric surface.
-    Handle(Geom_Surface) surf = surfNode->GetSurface();
-    //
-    if ( surf.IsNull() )
-    {
-      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
-      return TCL_ERROR;
-    }
-    asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
-    converter.Perform(surf);
-    //
-    interp->GetPlotter().DRAW_SURFACE(converter.GetSurface(), Color_Red, name + "_Bezier");
-     return TCL_OK;
-  }
+  // Whether to approximate.
+  const bool toApprox = interp->HasKeyword(argc, argv, "toApprox");
   //
-  // Get Part Node to access the selected edge.
+  // Get Part Node to access the selected edge or face.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
   if ( (partNode.IsNull() || !partNode->IsWellFormed() ) )
@@ -4070,56 +4048,103 @@ int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface and edge are null.");
     return TCL_OK;
   }
-  //
   const TopTools_IndexedMapOfShape&
     subShapes = partNode->GetAAG()->RequestMapOfSubShapes();
 
-  // Curve Node is expected.
-  Handle(asiData_CurveNode) curveNode = partNode->GetCurveRepresentation();
-  //
-  if ( curveNode.IsNull() || !curveNode->IsWellFormed() )
+  /* ====================
+  *  Surface conversion.
+  * ==================== */
   {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Curve Node is null or ill-defined.");
-    return TCL_OK;
+    // Surface Node is expected.
+    Handle(asiData_SurfNode) surfNode = partNode->GetSurfaceRepresentation();
+    //
+    if ( surfNode.IsNull() || !surfNode->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Surface Node is null or ill-defined.");
+      return TCL_ERROR;
+    }
+
+    // Get ID of the selected face.
+    int faceIdx = surfNode->GetAnySelectedFace();
+
+    if ( faceIdx )
+    {
+      TopoDS_Shape faceShape = subShapes(faceIdx);
+
+      // Check type.
+      if ( faceShape.ShapeType() != TopAbs_FACE )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected face.");
+        return TCL_OK;
+      }
+
+      Handle(Geom_Surface) surf = BRep_Tool::Surface( TopoDS::Face(faceShape) );
+      if (surf->IsKind(STANDARD_TYPE(Geom_CylindricalSurface)) ||
+          surf->IsKind(STANDARD_TYPE(Geom_ConicalSurface)) ||
+          surf->IsKind(STANDARD_TYPE(Geom_SphericalSurface)))
+      {
+        faceShape = ShapeCustom::ConvertToRevolution(faceShape);
+        faceShape = ShapeCustom::ConvertToBSpline(faceShape, true, true, true, true);
+        surf = BRep_Tool::Surface( TopoDS::Face(faceShape) );
+      }
+      asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
+      if (converter.Perform(surf, toApprox))
+      {
+        interp->GetPlotter().DRAW_SURFACE(converter.GetSurface(), Color_Red, name + "_Bezier");
+        return TCL_OK;
+      }
+    }
   }
 
-  TopoDS_Shape edgeShape;
-
-  // Get ID of the selected edge.
-  int edgeIdx = curveNode->GetSelectedEdge();
-  //
-  if ( edgeIdx > 0 )
-  {
-    edgeShape = subShapes(edgeIdx);
-  }
-  else
-  {
-    /* The edge might have been passed by ID */
-
-    interp->GetKeyValue(argc, argv, "eid", edgeIdx);
-
-    // Get shape.
-    edgeShape = partNode->GetAAG()->RequestMapOfEdges()(edgeIdx);
-  }
-
-  // Get host curve of the selected edge.
-  if ( edgeShape.ShapeType() != TopAbs_EDGE )
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
-    return TCL_OK;
-  }
-
-  /* ==================
+  /* ====================
   *  Curve conversion.
-  * ================== */
-  // Get parametric curve.
-  double f, l;
-  Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
-  //
-  asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
-  converter.Perform(curve, f, l);
+  * ==================== */
+  {
+    // Curve Node is expected.
+    Handle(asiData_CurveNode) curveNode = partNode->GetCurveRepresentation();
+    //
+    if ( curveNode.IsNull() || !curveNode->IsWellFormed() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Curve Node is null or ill-defined.");
+      return TCL_OK;
+    }
 
-  return TCL_OK;
+    TopoDS_Shape edgeShape;
+
+    // Get ID of the selected edge.
+    int edgeIdx = curveNode->GetSelectedEdge();
+    //
+    if ( edgeIdx > 0 )
+    {
+      edgeShape = subShapes(edgeIdx);
+    }
+    else
+    {
+      /* The edge might have been passed by ID */
+
+      interp->GetKeyValue(argc, argv, "eid", edgeIdx);
+
+      // Get shape.
+      edgeShape = partNode->GetAAG()->RequestMapOfEdges()(edgeIdx);
+    }
+
+    // Get host curve of the selected edge.
+    if ( edgeShape.ShapeType() != TopAbs_EDGE )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
+      return TCL_OK;
+    }
+
+    // Get parametric curve.
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve( TopoDS::Edge(edgeShape), f, l );
+    //
+    asiAlgo_ConvertToBezier converter(interp->GetProgress(), interp->GetPlotter());
+    converter.Perform(curve, f, l);
+    return TCL_OK;
+  }
+
+  return TCL_ERROR;
 }
 
 //-----------------------------------------------------------------------------
@@ -4656,7 +4681,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("convert-to-bezier",
     //
-    "convert-to-c2 <name>\n"
+    "convert-to-c2 <name> [-toApprox]\n"
     "\t Converts the curve or surface named <name> to C2 continuity class if possible.\n"
     "\t You can pass the tolerance value via the '-tol' key to protect knot removal\n"
     "\t operation from distorting the input geometry too much.",
