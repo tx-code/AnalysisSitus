@@ -59,7 +59,7 @@ class asiAlgo_ConvertToBezier : public ActAPI_IAlgorithm
                           ActAPI_PlotterEntry  plotter) : ActAPI_IAlgorithm(progress, plotter) {}
 
   asiAlgo_EXPORT bool
-    Perform(const Handle(Geom_Curve)& curve);
+    Perform(const Handle(Geom_Curve)& curve, double f, double l);
 
   asiAlgo_EXPORT bool
     Perform(const Handle(Geom_Surface)& surface);
@@ -67,8 +67,8 @@ class asiAlgo_ConvertToBezier : public ActAPI_IAlgorithm
   asiAlgo_EXPORT std::vector<Handle(Geom_Curve)>
     GetCurves() const;
 
-  asiAlgo_EXPORT std::vector<Handle(Geom_BezierSurface)>
-    GetSurfaces() const;
+  asiAlgo_EXPORT Handle(Geom_BSplineSurface)
+    GetSurface() const;
 
   asiAlgo_EXPORT std::vector<Handle(Geom_Curve)>
     GetSurfaceCurves() const;
@@ -78,10 +78,19 @@ private:
 
   void BuildCurveU(const Handle(Geom_Surface)& patch, std::vector<Handle(Geom_Curve)>& curves, bool last = false);
 
-  bool SplitBezier(const Handle(Geom_BezierSurface)& surface);
+  Handle(Geom_BSplineSurface) SplitBezier(const Handle(Geom_BezierSurface)& surface);
+
+  void CreateSurfaceU0(Handle(Geom_BSplineSurface)& bspline);
+
+  void CreateSurfaceU1(Handle(Geom_BSplineSurface)& bspline);
+
+  void CreateSurfaceU2(Handle(Geom_BSplineSurface)& bspline);
+
+  void CreateSurfaceU3(Handle(Geom_BSplineSurface)& bspline);
 
   std::vector<Handle(Geom_Curve)> m_bCurves;
-  std::vector<Handle(Geom_BezierSurface)> m_bSurfaces;
+  Handle(Geom_BSplineSurface) m_bSurface;
+  std::vector<std::vector<Handle(Geom_BSplineSurface)>> m_bSplineSurfaces;
   std::vector<Handle(Geom_BSplineCurve)> m_bSurfCurves;
   std::vector<std::vector<mobius::t_ptr<mobius::geom_BSplineSurface>>> m_mobBSurfaces;
 };

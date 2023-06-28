@@ -44,6 +44,7 @@
 #include <Adaptor3d_Surface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <ShapeAnalysis_Surface.hxx>
+#include <asiAlgo_BSplineSurface.h>
 
 #include <CTiglBSplineAlgorithms.h>
 
@@ -113,11 +114,9 @@ bool JoinCurves(const Handle(Geom_Curve)& c3d1,
   return true;
 }
 
-bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve)
+bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve, double f, double l)
 {
   Handle(ShapeUpgrade_ConvertCurve3dToBezier) curve3dConverter = new ShapeUpgrade_ConvertCurve3dToBezier;
-  auto f = curve->FirstParameter();
-  auto l = curve->LastParameter();
   curve3dConverter->Init(curve,f,l);
   curve3dConverter->Perform();
   Handle(TColGeom_HArray1OfCurve) curves = curve3dConverter->GetCurves();
@@ -144,138 +143,664 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve)
   return true;
 }
 
-void asiAlgo_ConvertToBezier::BuildCurveV(const Handle(Geom_Surface)& patch, std::vector<Handle(Geom_Curve)>& curves, bool last)
+void asiAlgo_ConvertToBezier::CreateSurfaceU0(Handle(Geom_BSplineSurface)& bspline)
 {
-  double u1, u2, v1, v2;
-  patch->Bounds(u1, u2, v1, v2);
-  u1 = last ? u2 : u1;
-  double vv = v1;
-  double step = 0.001;
-  auto max = (v2 - v1) / step;
-  Handle(TColgp_HArray1OfPnt) pnts = new TColgp_HArray1OfPnt(1, max);
-  TColgp_Array1OfVec tangs(1, max);
-  Handle(TColStd_HArray1OfBoolean) flags = new TColStd_HArray1OfBoolean(1, max);
-  int i = 1;
-  while (vv <= v2)
+  GeomAPI_ProjectPointOnSurf proj;
+  ShapeAnalysis_Surface sas(bspline);
+  //
+  std::vector<Handle(Geom_BSplineSurface)> segments;
+
+  /* ----------------------------
+  * NbUPoles > NbVPoles
+  ------------------------------ */
+  if (bspline->NbUPoles() > bspline->NbVPoles())
   {
-    gp_Pnt pnt;
-    gp_Vec d1u, d1v;
-    patch->D1(u1, vv, pnt, d1u, d1v);
-    pnts->SetValue(i, pnt);
-    tangs.SetValue(i, d1v);
-    flags->SetValue(i++, true);
-    vv += step;
+    int diff = bspline->NbUPoles() - bspline->NbVPoles();
+    for (int i = 0; i < diff; ++i)
+    {
+      auto newV = (bspline->Pole(1, 2).XYZ() - bspline->Pole(1, 1).XYZ()) / 2. + bspline->Pole(1, 1).XYZ();
+      bspline->SetPole(1, 2, newV);
+    }
   }
-  Handle(Geom_BezierCurve) bcurve;
-  GeomAPI_Interpolate Interpol(pnts, Standard_False, Precision::Confusion());
-  Interpol.Load(tangs, flags, true);
-  Interpol.Perform();
-  if (!Interpol.IsDone())
+  
+  /* ----------------------------
+  * NbUPoles == NbVPoles
+  ------------------------------ */
+  if (bspline->NbUPoles() == bspline->NbVPoles())
   {
-    std::cout<<std::endl<<"Interpolation failed"<<std::endl;
+    int uNum = (bspline->NbUPoles() + 1) % 4;
+    for (int i = 0; i < uNum; ++i)
+    {
+      gp_Pnt lPnt = bspline->Pole(i * 3 + 1, i * 3 + 1);
+      proj.Init(lPnt, bspline);
+      auto lUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+      //
+      gp_Pnt rPnt = bspline->Pole(i * 3 + 4, i * 4 + 1);
+      proj.Init(rPnt, bspline);
+      auto rUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+      //
+      Handle(asiAlgo_BSplineSurface) res = new asiAlgo_BSplineSurface(bspline->Poles(), bspline->UKnots(), bspline->VKnots(), bspline->UMultiplicities(),
+        bspline->VMultiplicities(), bspline->UDegree(), bspline->VDegree());
+      res->Segment(lUV.X(), rUV.X(), lUV.Y(), rUV.Y(), 3, 3);
+
+      Handle(Geom_BSplineSurface) segment = new Geom_BSplineSurface(res->Poles(),
+                                             res->UKnots(),
+                                             res->VKnots(),
+                                             res->UMultiplicities(),
+                                             res->VMultiplicities(),
+                                             res->UDegree(),
+                                             res->VDegree());
+
+      //m_bSplineSurfaces.push_back(segment);
+      m_plotter.DRAW_SURFACE(segment, Color_Yellow, "bspl_Seg");
+    }
   }
-  auto curve = Interpol.Curve();
-  curves.push_back(curve);
-  m_plotter.DRAW_SURFACE(patch, Color_Purple, "bspl_SURFACE");
+  /* ----------------------------
+  * NbUPoles < NbVPoles
+  ------------------------------ */
+  if (bspline->NbUPoles() < bspline->NbVPoles())
+  {
+    int uNum = (bspline->NbUPoles() + 1) % 4;
+    for (int i = 0; i < uNum; ++i)
+    {
+      gp_Pnt lPnt = bspline->Pole(i * 3 + 1, i * 3 + 1);
+      proj.Init(lPnt, bspline);
+      auto lUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+      //
+      gp_Pnt rPnt = bspline->Pole(i * 3 + 4, i * 4 + 1);
+      proj.Init(rPnt, bspline);
+      auto rUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+      //
+      Handle(asiAlgo_BSplineSurface) res = new asiAlgo_BSplineSurface(bspline->Poles(), bspline->UKnots(), bspline->VKnots(), bspline->UMultiplicities(),
+        bspline->VMultiplicities(), bspline->UDegree(), bspline->VDegree());
+      res->Segment(lUV.X(), rUV.X(), lUV.Y(), rUV.Y(), 3, 3);
+
+      segments.push_back(new Geom_BSplineSurface(res->Poles(),
+                                                 res->UKnots(),
+                                                 res->VKnots(),
+                                                 res->UMultiplicities(),
+                                                 res->VMultiplicities(),
+                                                 res->UDegree(),
+                                                 res->VDegree()));
+      m_plotter.DRAW_SURFACE(segments.back(), Color_Yellow, "bspl_Seg");
+    }
+    //
+    //int vNum = (bspline->NbUPoles() + 1) % 4;
+    //for (int i = 0; i < uNum; ++i)
+    //{
+    //  gp_Pnt lPnt = bspline->Pole(i * 3 + 1, i * 3 + 1);
+    //  proj.Init(lPnt, bspline);
+    //  auto lUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+    //  //
+    //  gp_Pnt rPnt = bspline->Pole(i * 3 + 4, i * 4 + 1);
+    //  proj.Init(rPnt, bspline);
+    //  auto rUV = sas.ValueOfUV(proj.Point(1), 1e-15);
+    //  //
+    //  Handle(asiAlgo_BSplineSurface) res = new asiAlgo_BSplineSurface(bspline->Poles(), bspline->UKnots(), bspline->VKnots(), bspline->UMultiplicities(),
+    //    bspline->VMultiplicities(), bspline->UDegree(), bspline->VDegree());
+    //  res->Segment(lUV.X(), rUV.X(), lUV.Y(), rUV.Y(), 3, 3);
+
+    //  segments.push_back(new Geom_BSplineSurface(res->Poles(),
+    //    res->UKnots(),
+    //    res->VKnots(),
+    //    res->UMultiplicities(),
+    //    res->VMultiplicities(),
+    //    res->UDegree(),
+    //    res->VDegree()));
+    //  m_plotter.DRAW_SURFACE(segments.back(), Color_Yellow, "bspl_Seg");
+    //}
+  }
 }
 
-void asiAlgo_ConvertToBezier::BuildCurveU(const Handle(Geom_Surface)& patch, std::vector<Handle(Geom_Curve)>& curves, bool last)
+void asiAlgo_ConvertToBezier::CreateSurfaceU1(Handle(Geom_BSplineSurface)& bspline)
 {
-  double u1, u2, v1, v2;
-  patch->Bounds(u1, u2, v1, v2);
-  v1 = last ? v2 : v1;
-  double uu = u1;
-  double step = 0.001;
-  auto max = (u2 - u1) / step;
-  Handle(TColgp_HArray1OfPnt) pnts = new TColgp_HArray1OfPnt(1, max);
-  TColgp_Array1OfVec tangs(1, max);
-  Handle(TColStd_HArray1OfBoolean) flags = new TColStd_HArray1OfBoolean(1, max);
-  int i = 1;
-  while (uu <= u2)
-  {
-    gp_Pnt pnt;
-    gp_Vec d1u, d1v;
-    patch->D1(uu, v1, pnt, d1u, d1v);
-    pnts->SetValue(i, pnt);
-    tangs.SetValue(i, d1v);
-    flags->SetValue(i++, true);
-    uu += step;
-  }
-  Handle(Geom_BezierCurve) bcurve;
-  GeomAPI_Interpolate Interpol(pnts, Standard_False, Precision::Confusion());
-  Interpol.Load(tangs, flags, true);
-  Interpol.Perform();
-  if (!Interpol.IsDone())
-  {
-    std::cout<<std::endl<<"Interpolation failed"<<std::endl;
-  }
-  auto curve = Interpol.Curve();
-  curves.push_back(curve);
+  GeomAPI_ProjectPointOnSurf proj;
+  ShapeAnalysis_Surface sas(bspline);
 
-  auto bezier = Handle(Geom_BezierSurface)::DownCast(patch);
-  //bezier->Increase(3,3);
+  /* ----------------------------
+  * NbUPoles == NbVPoles
+  ------------------------------ */
 
+  if (bspline->Pole(1, 1).Distance(bspline->Pole(1, bspline->NbVPoles())) < 1. &&
+      bspline->Pole(1, 1).Distance(bspline->Pole(bspline->NbUPoles(), 1)) < 1.)
+  {
+    TColgp_Array2OfPnt poles(1, 4, 1, 4);
+    poles.SetValue(1, 1, bspline->Pole(1, 1));
+    //
+    poles.SetValue(1, 2, bspline->Pole(1, 2));
+    poles.SetValue(1, 3, bspline->Pole(1, bspline->NbVPoles() - 1));
+    poles.SetValue(1, 4, bspline->Pole(1, bspline->NbVPoles()));
+    //
+    poles.SetValue(2, 1, bspline->Pole(2, 1));
+    poles.SetValue(2, 2, bspline->Pole(2, 2));
+    poles.SetValue(2, 3, bspline->Pole(2, bspline->NbVPoles() - 1));
+    poles.SetValue(2, 4, bspline->Pole(2, bspline->NbVPoles()));
+    //
+    poles.SetValue(3, 1, bspline->Pole(bspline->NbUPoles() - 1, 1));
+    //
+    poles.SetValue(3, 2, bspline->Pole(bspline->NbUPoles() - 1, 2));
+    poles.SetValue(3, 3, bspline->Pole(bspline->NbUPoles() - 1, bspline->NbVPoles() - 1));
+    poles.SetValue(3, 4, bspline->Pole(bspline->NbUPoles() - 1, bspline->NbVPoles()));
+    //
+    poles.SetValue(4, 1, bspline->Pole(bspline->NbUPoles(), 1));
+    //
+    poles.SetValue(4, 2, bspline->Pole(bspline->NbUPoles(), 2));
+    poles.SetValue(4, 3, bspline->Pole(bspline->NbUPoles(), bspline->NbVPoles() - 1));
+    //
+    poles.SetValue(4, 4, bspline->Pole(bspline->NbUPoles(), bspline->NbVPoles()));
+
+    Handle(Geom_BezierSurface) bezier = new Geom_BezierSurface(poles);
+    bspline = GeomConvert::SurfaceToBSplineSurface(bezier);
+    m_plotter.DRAW_SURFACE(bezier, Color_Red, "bezier_Res");
+    return;
+  }
+  int uNum = bspline->NbUPoles() % 4;
+  if (bspline->Pole(1, 1).Distance(bspline->Pole(1, bspline->NbVPoles())) < 1.)
+  {
+    m_bSplineSurfaces.resize(1);
+    TColgp_Array2OfPnt poles(1, 4, 1, 4);
+    TColStd_Array1OfReal uKnots(1, 2);
+    TColStd_Array1OfReal vKnots(1, 2);
+    TColStd_Array1OfInteger uMults(1, 2);
+    TColStd_Array1OfInteger vMults(1, 2);
+    uKnots.SetValue(1, 0.);
+    uKnots.SetValue(2, 1.);
+    vKnots.SetValue(1, 0.);
+    vKnots.SetValue(2, 1.);
+    bool isFirst = true;
+    gp_Pnt prevV1;
+    gp_Pnt prevV2;
+    gp_Pnt prevV3;
+    gp_Pnt prevV4;
+    for (int j = 0; j < uNum; ++j)
+    {
+      if (isFirst)
+      {
+        isFirst = false;
+        //
+        poles.SetValue(1, 1, bspline->Pole(1, j * 3 + 1));
+        poles.SetValue(1, 2, bspline->Pole(1, j * 3 + 2));
+        poles.SetValue(1, 3, bspline->Pole(1, j * 3 + 3));
+        //
+        gp_Pnt pnt = (bspline->Pole(1, 4).XYZ() + bspline->Pole(1, 3).XYZ()) / 2.;
+        proj.Init(pnt, bspline);
+        auto project = proj.Point(1);\
+          poles.SetValue(1, 4, project);
+        //
+        poles.SetValue(2, 1, bspline->Pole(2, j * 3 + 1));
+        poles.SetValue(2, 2, bspline->Pole(2, j * 3 + 2));
+        poles.SetValue(2, 3, bspline->Pole(2, j * 3 + 3));
+        //
+        pnt = (bspline->Pole(2, 4).XYZ() + bspline->Pole(2, 3).XYZ()) / 2.;
+        proj.Init(pnt, bspline);
+        project = proj.Point(1);
+        poles.SetValue(2, 4, project);
+        //
+        poles.SetValue(3, 1, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 1));
+        poles.SetValue(3, 2, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 2));
+        poles.SetValue(3, 3, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 3));
+        //
+        pnt = (bspline->Pole(bspline->NbUPoles() - 1, 4).XYZ() + bspline->Pole(bspline->NbUPoles() - 1, 3).XYZ()) / 2.;
+        proj.Init(pnt, bspline);
+        project = proj.Point(1);
+        poles.SetValue(3, 4, project);
+        //
+        poles.SetValue(4, 1, bspline->Pole(bspline->NbUPoles(), j * 3 + 1));
+        poles.SetValue(4, 2, bspline->Pole(bspline->NbUPoles(), j * 3 + 2));
+        poles.SetValue(4, 3, bspline->Pole(bspline->NbUPoles(), j * 3 + 3));
+        //
+        pnt = (bspline->Pole(bspline->NbUPoles(), 4).XYZ() + bspline->Pole(bspline->NbUPoles(), 3).XYZ()) / 2.;
+        proj.Init(pnt, bspline);
+        project = proj.Point(1);
+        poles.SetValue(4, 4, project);
+        //
+        prevV1 = (bspline->Pole(1, j * 3 + 4).XYZ() + bspline->Pole(1, j * 3 + 3).XYZ()) / 2.;
+        prevV2 = (bspline->Pole(2, j * 3 + 4).XYZ() + bspline->Pole(2, j * 3 + 3).XYZ()) / 2.;
+        prevV3 = (bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 4).XYZ() + bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 3).XYZ()) / 2.;
+        prevV4 = (bspline->Pole(bspline->NbUPoles(), j * 3 + 4).XYZ() + bspline->Pole(bspline->NbUPoles(), j * 3 + 3).XYZ()) / 2.;
+
+        /*for (int p = 0; p < poles.NbRows(); ++p)
+        {
+        for (int g = 0; g < poles.NbColumns(); ++g)
+        {
+        m_plotter.DRAW_POINT(poles.Value(p + 1, g + 1), Color_Green, "point");
+        }
+        }*/
+      }
+      else
+      {
+        proj.Init(prevV1, bspline);
+        auto project = proj.Point(1);
+        poles.SetValue(1, 1, project);
+        //
+        poles.SetValue(1, 2, bspline->Pole(1, j * 3 + 1));
+        poles.SetValue(1, 3, bspline->Pole(1, j * 3 + 2));
+        poles.SetValue(1, 4, bspline->Pole(1, j * 3 + 3));
+        //
+        proj.Init(prevV2, bspline);
+        project = proj.Point(1);
+        poles.SetValue(2, 1, project);
+        //
+        poles.SetValue(2, 2, bspline->Pole(4, j * 3 + 1));
+        poles.SetValue(2, 3, bspline->Pole(4, j * 3 + 2));
+        poles.SetValue(2, 4, bspline->Pole(4, j * 3 + 3));
+        //
+        proj.Init(prevV3, bspline);
+        project = proj.Point(1);
+        poles.SetValue(3, 1, project);
+        //
+        poles.SetValue(3, 2, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 1));
+        poles.SetValue(3, 3, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 2));
+        poles.SetValue(3, 4, bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 3));
+        //
+        proj.Init(prevV4, bspline);
+        project = proj.Point(1);
+        poles.SetValue(4, 1, project);
+        //
+        poles.SetValue(4, 2, bspline->Pole(bspline->NbUPoles(), j * 3 + 1));
+        poles.SetValue(4, 3, bspline->Pole(bspline->NbUPoles(), j * 3 + 2));
+        poles.SetValue(4, 4, bspline->Pole(bspline->NbUPoles(), j * 3 + 3));
+        //
+        prevV1 = bspline->Pole(1, j * 3 + 3).XYZ();
+        prevV2 = bspline->Pole(2, j * 3 + 3).XYZ();
+        prevV3 = bspline->Pole(bspline->NbUPoles() - 1, j * 3 + 3).XYZ();
+        prevV4 = bspline->Pole(bspline->NbUPoles(), j * 3 + 3).XYZ();
+      }
+    }
+    Handle(asiAlgo_BSplineSurface) algoBspline = new asiAlgo_BSplineSurface(bspline->Poles(), bspline->UKnots(),
+                                                     bspline->VKnots(), bspline->UMultiplicities(),
+                                                     bspline->VMultiplicities(), bspline->UDegree(), bspline->VDegree());
+    //
+    gp_Pnt2d lUV = sas.ValueOfUV(poles.Value(1, 1), 1e-15);
+    gp_Pnt2d rUV = sas.ValueOfUV(poles.Value(4, 4), 1e-15);
+    //
+    algoBspline->Segment(lUV.X(), rUV.X(), lUV.Y(), rUV.Y(), 3, 3);
+    //
+    uMults.SetValue(1, algoBspline->UMultiplicity(1));
+    uMults.SetValue(2, algoBspline->UMultiplicity(2));
+    vMults.SetValue(1, algoBspline->VMultiplicity(1));
+    vMults.SetValue(2, algoBspline->VMultiplicity(2));
+    //
+    Handle(Geom_BSplineSurface) segment = new Geom_BSplineSurface(poles, uKnots, vKnots, uMults, vMults, 3, 3);
+    //
+    Handle(Geom_BezierSurface) bezier = new Geom_BezierSurface(poles);
+    m_bSplineSurfaces[0].push_back(segment);
+    //m_plotter.DRAW_SURFACE(segment, Color_Red, "bezierSegment_Res");
+  }
+  else
+  {
+    m_bSplineSurfaces.resize(uNum);
+    bool isFirst = true;
+    //
+    gp_Pnt prevU1;
+    gp_Pnt prevU2;
+    gp_Pnt prevU3;
+    gp_Pnt prevU4;
+    //
+    for (int i = 0; i < uNum; ++i)
+    {
+      // col iteration
+      // || ||     ||
+      // \/ \/ ... \/
+      bool isFirstJ = true;
+      gp_Pnt prevV1;
+      gp_Pnt prevV2;
+      gp_Pnt prevV3;
+      gp_Pnt prevV4;
+      //
+      gp_Pnt prevV1_;
+      gp_Pnt prevV2_;
+      gp_Pnt prevV3_;
+      gp_Pnt prevV4_;
+      for (int j = 0; j < uNum; ++j)
+      {
+        TColgp_Array2OfPnt poles(1, 4, 1, 4);
+        TColStd_Array2OfReal weights(1, 4, 1, 4);
+        TColStd_Array1OfReal uKnots(1, 2);
+        TColStd_Array1OfReal vKnots(1, 2);
+        TColStd_Array1OfInteger uMults(1, 2);
+        TColStd_Array1OfInteger vMults(1, 2);
+        uKnots.SetValue(1, 0.);
+        uKnots.SetValue(2, 1.);
+        vKnots.SetValue(1, 0.);
+        vKnots.SetValue(2, 1.);
+        if (isFirst)
+        {
+          if (isFirstJ)
+          {
+            isFirstJ = false;
+            //
+            poles.SetValue(1, 1, bspline->Pole(1, j * 3 + 1));
+            poles.SetValue(1, 2, bspline->Pole(1, j * 3 + 2));
+            poles.SetValue(1, 3, bspline->Pole(1, j * 3 + 3));
+            //
+            gp_Pnt pnt = (bspline->Pole(1, 4).XYZ() + bspline->Pole(1, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            auto project = proj.Point(1);\
+            poles.SetValue(1, 4, project);
+            //
+            poles.SetValue(2, 1, bspline->Pole(2, j * 3 + 1));
+            poles.SetValue(2, 2, bspline->Pole(2, j * 3 + 2));
+            poles.SetValue(2, 3, bspline->Pole(2, j * 3 + 3));
+            //
+            pnt = (bspline->Pole(2, 4).XYZ() + bspline->Pole(2, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(2, 4, project);
+            //
+            poles.SetValue(3, 1, bspline->Pole(3, j * 3 + 1));
+            poles.SetValue(3, 2, bspline->Pole(3, j * 3 + 2));
+            poles.SetValue(3, 3, bspline->Pole(3, j * 3 + 3));
+            //
+            pnt = (bspline->Pole(3, 4).XYZ() + bspline->Pole(3, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(3, 4, project);
+            //
+            pnt = (bspline->Pole(4, 1).XYZ() + bspline->Pole(3, 1).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 1, project);
+            //
+            pnt = (bspline->Pole(4, 2).XYZ() + bspline->Pole(3, 2).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 2, project);
+            //
+            pnt = (bspline->Pole(4, 3).XYZ() + bspline->Pole(3, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 3, project);
+            //
+            pnt = (bspline->Pole(4, 4).XYZ() + bspline->Pole(3, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 4, project);
+            //
+            prevV1 = (bspline->Pole(1, j * 3 + 4).XYZ() + bspline->Pole(1, j * 3 + 3).XYZ()) / 2.;
+            prevV2 = (bspline->Pole(2, j * 3 + 4).XYZ() + bspline->Pole(2, j * 3 + 3).XYZ()) / 2.;
+            prevV3 = (bspline->Pole(3, j * 3 + 4).XYZ() + bspline->Pole(3, j * 3 + 3).XYZ()) / 2.;
+            prevV4 = (bspline->Pole(4, j * 3 + 4).XYZ() + bspline->Pole(3, j * 3 + 3).XYZ()) / 2.;
+            //
+            prevU1 = (bspline->Pole(4, 1).XYZ() + bspline->Pole(3, 1).XYZ()) / 2.;
+            prevU2 = (bspline->Pole(4, 2).XYZ() + bspline->Pole(3, 2).XYZ()) / 2.;
+            prevU3 = (bspline->Pole(4, 3).XYZ() + bspline->Pole(3, 3).XYZ()) / 2.;
+            prevU4 = (bspline->Pole(4, 4).XYZ() + bspline->Pole(3, 3).XYZ()) / 2.;
+
+            /*for (int p = 0; p < poles.NbRows(); ++p)
+            {
+              for (int g = 0; g < poles.NbColumns(); ++g)
+              {
+                m_plotter.DRAW_POINT(poles.Value(p + 1, g + 1), Color_Green, "point");
+              }
+            }*/
+          }
+          else
+          {
+            proj.Init(prevV1, bspline);
+            auto project = proj.Point(1);
+            poles.SetValue(1, 1, project);
+            //
+            poles.SetValue(1, 2, bspline->Pole(1, j * 3 + 1));
+            poles.SetValue(1, 3, bspline->Pole(1, j * 3 + 2));
+            poles.SetValue(1, 4, bspline->Pole(1, j * 3 + 3));
+            //
+            proj.Init(prevV2, bspline);
+            project = proj.Point(1);
+            poles.SetValue(2, 1, project);
+            //
+            poles.SetValue(2, 2, bspline->Pole(4, j * 3 + 1));
+            poles.SetValue(2, 3, bspline->Pole(4, j * 3 + 2));
+            poles.SetValue(2, 4, bspline->Pole(4, j * 3 + 3));
+            //
+            proj.Init(prevV3, bspline);
+            project = proj.Point(1);
+            poles.SetValue(3, 1, project);
+            //
+            poles.SetValue(3, 2, bspline->Pole(3, j * 3 + 1));
+            poles.SetValue(3, 3, bspline->Pole(3, j * 3 + 2));
+            poles.SetValue(3, 4, bspline->Pole(3, j * 3 + 3));
+            //
+            proj.Init(prevV4, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 1, project);
+            //
+            auto pnt = (bspline->Pole(4, j * 3 + 1).XYZ() + bspline->Pole(3, j * 3 + 1).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 2, project);
+            //
+            pnt = (bspline->Pole(4, j * 3 + 2).XYZ() + bspline->Pole(3, j * 3 + 2).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 3, project);
+            //
+            pnt = (bspline->Pole(4, j * 3 + 3).XYZ() + bspline->Pole(3, j * 3 + 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 4, project);
+            //
+            prevV1 = bspline->Pole(1, j * 3 + 3).XYZ();
+            prevV2 = bspline->Pole(2, j * 3 + 3).XYZ();
+            prevV3 = bspline->Pole(3, j * 3 + 3).XYZ();
+            prevV4 = bspline->Pole(4, j * 3 + 3).XYZ();
+          }
+        }
+        else
+        {
+          if (isFirstJ)
+          {
+            isFirstJ = false;
+            //
+            proj.Init(prevU1, bspline);
+            auto project = proj.Point(1);
+            poles.SetValue(1, 1, project);
+            //
+            proj.Init(prevU2, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 2, project);
+            //
+            proj.Init(prevU3, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 3, project);
+            //
+            proj.Init(prevU4, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 4, project);
+            //
+            poles.SetValue(2, 1, bspline->Pole(i * 3 + 1, j * 3 + 1));
+            poles.SetValue(2, 2, bspline->Pole(i * 3 + 1, j * 3 + 2));
+            poles.SetValue(2, 3, bspline->Pole(i * 3 + 1, j * 3 + 3));
+            //
+            auto pnt = (bspline->Pole(i * 3 + 1, 4).XYZ() + bspline->Pole(i * 3 + 1, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(2, 4, project);
+            //
+            poles.SetValue(3, 1, bspline->Pole(i * 3 + 2, j * 3 + 1));
+            poles.SetValue(3, 2, bspline->Pole(i * 3 + 2, j * 3 + 2));
+            poles.SetValue(3, 3, bspline->Pole(i * 3 + 2, j * 3 + 3));
+            //
+            pnt = (bspline->Pole(i * 3 + 2, 4).XYZ() + bspline->Pole(i * 3 + 2, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(3, 4, project);
+            //
+            poles.SetValue(4, 1, bspline->Pole(i * 3 + 3, 1));
+            poles.SetValue(4, 2, bspline->Pole(i * 3 + 3, 2));
+            poles.SetValue(4, 3, bspline->Pole(i * 3 + 3, 3));
+            //
+            pnt = (bspline->Pole(i * 3 + 3, 4).XYZ() + bspline->Pole(i * 3 + 3, 3).XYZ()) / 2.;
+            proj.Init(pnt, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 4, project);
+            //
+            prevV1 = (bspline->Pole(i * 3 + 1, j * 3 + 4).XYZ() + bspline->Pole(i * 3, j * 3 + 4).XYZ()) / 2.;
+            prevV2 = (bspline->Pole(i * 3 + 1, j * 3 + 5).XYZ() + bspline->Pole(i * 3, j * 3 + 5).XYZ()) / 2.;
+            prevV3 = (bspline->Pole(i * 3 + 1, j * 3 + 6).XYZ() + bspline->Pole(i * 3, j * 3 + 6).XYZ()) / 2.;
+            //
+            prevV1_ = (bspline->Pole(i * 3 + 1, j * 3 + 4).XYZ() + bspline->Pole(i * 3, j * 3 + 3).XYZ()) / 2.;
+            prevV2_ = (bspline->Pole(i * 3 + 1, j * 3 + 4).XYZ() + bspline->Pole(i * 3 + 1, j * 3 + 3).XYZ()) / 2.;
+            prevV3_ = (bspline->Pole(i * 3 + 2, j * 3 + 4).XYZ() + bspline->Pole(i * 3 + 2, j * 3 + 3).XYZ()) / 2.;
+            prevV4_ = (bspline->Pole(i * 3 + 3, j * 3 + 4).XYZ() + bspline->Pole(i * 3 + 3, j * 3 + 3).XYZ()) / 2.;
+          }
+          else
+          {
+            proj.Init(prevV1_, bspline);
+            auto project = proj.Point(1);
+            poles.SetValue(1, 1, project);
+            //
+            proj.Init(prevV1, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 2, project);
+            //
+            proj.Init(prevV2, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 3, project);
+            //
+            proj.Init(prevV3, bspline);
+            project = proj.Point(1);
+            poles.SetValue(1, 4, project);
+            //
+            proj.Init(prevV2_, bspline);
+            project = proj.Point(1);
+            poles.SetValue(2, 1, project);
+            //
+            poles.SetValue(2, 2, bspline->Pole(i * 3 + 1, j * 3 + 1));
+            poles.SetValue(2, 3, bspline->Pole(i * 3 + 1, j * 3 + 2));
+            poles.SetValue(2, 4, bspline->Pole(i * 3 + 1, j * 3 + 3));
+            //
+            proj.Init(prevV3_, bspline);
+            project = proj.Point(1);
+            poles.SetValue(3, 1, project);
+            //
+            poles.SetValue(3, 2, bspline->Pole(i * 3 + 2, 4));
+            poles.SetValue(3, 3, bspline->Pole(i * 3 + 2, 5));
+            poles.SetValue(3, 4, bspline->Pole(i * 3 + 2, 6));
+            //
+            proj.Init(prevV4_, bspline);
+            project = proj.Point(1);
+            poles.SetValue(4, 1, project);
+            //
+            poles.SetValue(4, 2, bspline->Pole(i * 3 + 3, j * 3 + 1));
+            poles.SetValue(4, 3, bspline->Pole(i * 3 + 3, j * 3 + 2));
+            poles.SetValue(4, 4, bspline->Pole(i * 3 + 3, j * 3 + 3));
+
+            //
+            prevV1 = bspline->Pole(1, j * 3 + 3).XYZ();
+            prevV2 = bspline->Pole(2, j * 3 + 3).XYZ();
+            prevV3 = bspline->Pole(3, j * 3 + 3).XYZ();
+            prevV4 = bspline->Pole(4, j * 3 + 3).XYZ();
+
+          }
+        }
+        //
+        Handle(asiAlgo_BSplineSurface) algoBspline = new asiAlgo_BSplineSurface(bspline->Poles(), bspline->UKnots(),
+          bspline->VKnots(), bspline->UMultiplicities(),
+          bspline->VMultiplicities(), bspline->UDegree(), bspline->VDegree());
+        //
+        gp_Pnt2d lUV = sas.ValueOfUV(poles.Value(1, 1), 1e-15);
+        gp_Pnt2d rUV = sas.ValueOfUV(poles.Value(4, 4), 1e-15);
+        //
+        algoBspline->Segment(lUV.X(), rUV.X(), lUV.Y(), rUV.Y(), 3, 3);
+        //
+        uMults.SetValue(1, algoBspline->UMultiplicity(1));
+        uMults.SetValue(2, algoBspline->UMultiplicity(2));
+        vMults.SetValue(1, algoBspline->VMultiplicity(1));
+        vMults.SetValue(2, algoBspline->VMultiplicity(2));
+        //
+        Handle(Geom_BSplineSurface) segment = new Geom_BSplineSurface(poles, uKnots, vKnots, uMults, vMults, 3, 3);
+        m_bSplineSurfaces[i].push_back(segment);
+        //m_plotter.DRAW_SURFACE(segment, Color_Red, "bspl_Seg");
+      }
+      isFirst = false;
+    }
+  }
+  /*---------------------------
+  * Concat segments 
+  ---------------------------*/
+  std::vector<std::vector<mobius::t_ptr<mobius::geom_BSplineSurface>>> mobBSurfaces;
+  mobBSurfaces.resize(m_bSplineSurfaces.size());
+  int k = 0;
+  for (auto surfs : m_bSplineSurfaces)
+  {
+    bool isFirst = true;
+    double prevU = -1;
+    double prevV = -1;
+    int iter = 0;
+    for (auto surf : surfs)
+    {
+      if (!isFirst)
+      {
+        tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*surf.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
+      }
+      auto mobBSpline = mobius::cascade::GetMobiusBSurface(surf);
+      mobBSurfaces[k].push_back(mobBSpline);
+      isFirst = false;
+      prevU = surf->UKnot(surf->UKnots().Length());
+      prevV = surf->VKnot(surf->VKnots().Length());
+    }
+    k++;
+  }
+  std::vector<mobius::t_ptr<mobius::geom_BSplineSurface>> spln;
+  double prevU = -1;
+  double prevV = -1;
+  bool isFirst = true;
+  for (size_t i = 0; i < mobBSurfaces.size(); ++i )
+  {
+    auto res = mobBSurfaces[i][0];
+    for ( size_t j = 1; j < mobBSurfaces[i].size(); ++j )
+    {
+      if (!res->ConcatenateCompatible(mobBSurfaces[i][j], true))
+        res->ConcatenateCompatible(mobBSurfaces[i][j], false);
+    }
+    auto cascSurf = mobius::cascade::GetOpenCascadeBSurface(res);
+    if (!isFirst)
+    {
+      tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*cascSurf.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
+    }
+    auto mobBSpline = mobius::cascade::GetMobiusBSurface(cascSurf);
+    isFirst = false;
+    prevU = cascSurf->UKnot(cascSurf->UKnots().Length());
+    prevV = cascSurf->VKnot(cascSurf->VKnots().Length());
+    spln.push_back(mobBSpline);
+  }
+  auto res = spln[0];
+  for ( size_t j = 1; j < spln.size(); ++j )
+  {
+    if (!res->ConcatenateCompatible(spln[j], true))
+      res->ConcatenateCompatible(spln[j], false);
+  }
+  Handle(Geom_BezierSurface) bezier = new Geom_BezierSurface(mobius::cascade::GetOpenCascadeBSurface(res)->Poles());
+  bspline = mobius::cascade::GetOpenCascadeBSurface(res);
+  //m_plotter.DRAW_SURFACE(mobius::cascade::GetOpenCascadeBSurface(res), Color_Red, "bspl_Res");
+  m_bSplineSurfaces.clear();
 }
 
-bool asiAlgo_ConvertToBezier::SplitBezier(const Handle(Geom_BezierSurface)& surface)
+void asiAlgo_ConvertToBezier::CreateSurfaceU2(Handle(Geom_BSplineSurface)& bspline)
+{
+  CreateSurfaceU0(bspline);
+}
+
+void asiAlgo_ConvertToBezier::CreateSurfaceU3(Handle(Geom_BSplineSurface)& bspline)
+{
+  CreateSurfaceU0(bspline);
+}
+
+//----------------------------------------------------------------------------------------------
+
+Handle(Geom_BSplineSurface) asiAlgo_ConvertToBezier::SplitBezier(const Handle(Geom_BezierSurface)& surface)
 {
   auto bspline = GeomConvert::SurfaceToBSplineSurface(surface);
-  auto uKnots = bspline->NbUPoles();
-  int nbUPoles = (bspline->NbUPoles() + 2) / 3;
-  if (bspline->NbUPoles() % 4)
+  int uNum = 4 - (bspline->NbUPoles() + 1) % 4;
+  switch (uNum)
   {
-    int num = bspline->NbUPoles() % 4;
-    for (int i = 0; i < num; ++i)
-    {
-      for (int v = 1; v < bspline->NbVPoles() + 1; ++v)
-      {
-        double value;
-        auto uNext = (bspline->Pole(4, v).XYZ() - bspline->Pole(3, v).XYZ()) / 2. + bspline->Pole(3, v).XYZ();
-        GeomAPI_ProjectPointOnSurf proj(uNext, bspline);
-        if (proj.IsDone())
-        {
-          bspline->SetPole(4, v, proj.Point(1));
-        }
-      }
-      //bspline->Po(4);
-    }
+    case 0 : CreateSurfaceU0(bspline); break;
+    case 1 : CreateSurfaceU1(bspline); break;
+    case 2 : CreateSurfaceU2(bspline); break;
+    case 3 : CreateSurfaceU3(bspline); break;
   }
-  ShapeAnalysis_Surface sas(bspline);
-  for (int u = 0; u < nbUPoles; ++u)
-  {
-    auto uvMin = sas.ValueOfUV(bspline->Pole(u * 3 + 1, 1), 1e-15);
-    auto uvMax = sas.ValueOfUV(bspline->Pole(u * 3 + 3, bspline->NbVPoles()), 1e-15);
-    auto res = tigl::CTiglBSplineAlgorithms::trimSurface(bspline, uvMin.X(), uvMax.X(), uvMin.Y(), uvMax.Y());
-    //
-    //auto res2 = GeomConvert::SplitBSplineSurface(bspline, uvMin.X(), uvMax.X(), true);
-    //m_plotter.DRAW_SURFACE(res2, Color_Purple, "bspl_RES");
-    //
-    Handle(ShapeUpgrade_ConvertSurfaceToBezierBasis) surf3dConverter = new ShapeUpgrade_ConvertSurfaceToBezierBasis;
-    surf3dConverter->Init(res);
-    surf3dConverter->Perform(true);
-    Handle(ShapeExtend_CompositeSurface) surfaces = surf3dConverter->ResSurfaces();
-    int k = 0;
-    for (auto u = surfaces->UJointValues()->begin(); u != surfaces->UJointValues()->end(); ++u)
-    {
-      //std::vector<Handle(Geom_Curve)> curves;
-      bool isFirst = true;
-      double prevU = -1;
-      double prevV = -1;
-      for (auto v = surfaces->VJointValues()->begin(); v != surfaces->VJointValues()->end(); ++v)
-      {
-        auto patch = surfaces->Patch({*u,*v});
-        //BuildCurveV(patch, curves);
-
-        auto bspline = GeomConvert::SurfaceToBSplineSurface(patch);
-        Handle(Geom_BezierSurface) bezier = Handle(Geom_BezierSurface)::DownCast(patch);
-
-        m_plotter.DRAW_SURFACE(GeomConvert::SurfaceToBSplineSurface(bezier), Color_Blue, "bspl_RES");
-      }
-      k++;
-    }
-
-  }
-  return true;
+  return bspline;
 }
 
 bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface)
@@ -292,32 +817,46 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface)
   int k = 0;
   for (auto u = surfaces->UJointValues()->begin(); u != surfaces->UJointValues()->end(); ++u)
   {
-    //std::vector<Handle(Geom_Curve)> curves;
+    for (auto v = surfaces->VJointValues()->begin(); v != surfaces->VJointValues()->end(); ++v)
+    {
+      Handle(Geom_BSplineSurface) bspline;
+      Handle(Geom_BezierSurface) bezier = Handle(Geom_BezierSurface)::DownCast(surfaces->Patch({*u,*v}));
+      if (bezier->NbUPoles() > 3 || bezier->NbUPoles() > 3)
+      {
+        bspline = SplitBezier(bezier);
+      }
+      else
+      {
+        bspline->IncreaseDegree(3, 3);
+      }
+      auto mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
+      m_plotter.DRAW_SURFACE(bspline, Color_Purple, "bspl_SURFACE");
+      m_mobBSurfaces[k].push_back(mobBSpline);
+    }
+    k++;
+  }
+  /*---------------------------
+  * Concat segments 
+  ---------------------------*/
+  k = 0;
+  for (auto surfs : m_mobBSurfaces)
+  {
     bool isFirst = true;
     double prevU = -1;
     double prevV = -1;
-    for (auto v = surfaces->VJointValues()->begin(); v != surfaces->VJointValues()->end(); ++v)
+    int iter = 0;
+    for (auto surf : surfs)
     {
-      auto patch = surfaces->Patch({*u,*v});
-      //BuildCurveV(patch, curves);
-
-      auto bspline = GeomConvert::SurfaceToBSplineSurface(patch);
-      Handle(Geom_BezierSurface) bezier = Handle(Geom_BezierSurface)::DownCast(patch);
-      if (bezier->NbUPoles() > 3)
-      {
-        SplitBezier(bezier);
-      }
-      Handle(Geom_BezierSurface) surf = new Geom_BezierSurface(bspline->Poles());
-      //bspline->IncreaseDegree(3, 3);
+      auto mobBSpline = mobius::cascade::GetOpenCascadeBSurface(surf);
       if (!isFirst)
       {
-        tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*bspline.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
+        tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*mobBSpline.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
       }
-      auto mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
-      m_mobBSurfaces[k].push_back(mobBSpline);
+      surf = mobius::cascade::GetMobiusBSurface(mobBSpline);
+      m_mobBSurfaces[k].push_back(surf);
       isFirst = false;
-      prevU = bspline->UKnot(bspline->UKnots().Length());
-      prevV = bspline->VKnot(bspline->VKnots().Length());
+      prevU = surf->GetKnots_U().back();
+      prevV = surf->GetKnots_V().back();
     }
     k++;
   }
@@ -328,7 +867,6 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface)
   for (size_t i = 0; i < m_mobBSurfaces.size(); ++i )
   {
     auto res = m_mobBSurfaces[i][0];
-    //
     for ( size_t j = 1; j < m_mobBSurfaces[i].size(); ++j )
     {
       if (!res->ConcatenateCompatible(m_mobBSurfaces[i][j], true))
@@ -339,7 +877,6 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface)
     {
       tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*cascSurf.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
     }
-    //cascSurf->IncreaseDegree(3,3);
     auto mobBSpline = mobius::cascade::GetMobiusBSurface(cascSurf);
     isFirst = false;
     prevU = cascSurf->UKnot(cascSurf->UKnots().Length());
@@ -352,7 +889,9 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface)
     if (!res->ConcatenateCompatible(spln[j], true))
       res->ConcatenateCompatible(spln[j], false);
   }
-  m_plotter.DRAW_SURFACE(mobius::cascade::GetOpenCascadeBSurface(res), Color_Purple, "bspl_SURFACE");
+  m_bSurface = mobius::cascade::GetOpenCascadeBSurface(res);
+  m_bSurface = mobius::cascade::GetOpenCascadeBSurface(res);
+  //m_plotter.DRAW_SURFACE(, Color_Purple, "bspl_SURFACE");
   return true;
 }
 
@@ -361,7 +900,7 @@ std::vector<Handle(Geom_Curve)> asiAlgo_ConvertToBezier::GetCurves() const
   return m_bCurves;
 }
 
-std::vector<Handle(Geom_BezierSurface)> asiAlgo_ConvertToBezier::GetSurfaces() const
+Handle(Geom_BSplineSurface) asiAlgo_ConvertToBezier::GetSurface() const
 {
-  return m_bSurfaces;
+  return m_bSurface;
 }
