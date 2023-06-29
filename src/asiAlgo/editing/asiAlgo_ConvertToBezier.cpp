@@ -191,7 +191,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve, double f,
   curve3dConverter->Init(curve,f,l);
   curve3dConverter->Perform();
   Handle(TColGeom_HArray1OfCurve) curves = curve3dConverter->GetCurves();
-  auto res = GeomConvert::CurveToBSplineCurve(curves->First());
+  Handle(Geom_BSplineCurve) res = GeomConvert::CurveToBSplineCurve(curves->First());
   bool isFirst = true;
   for (auto it = curves->begin(); it != curves->end(); ++it)
   {
@@ -204,7 +204,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve, double f,
         res = approx.Curve();
       continue;
     }
-    auto bspline = GeomConvert::CurveToBSplineCurve(*it);
+    Handle(Geom_BSplineCurve) bspline = GeomConvert::CurveToBSplineCurve(*it);
     GeomConvert_ApproxCurve approx (bspline, 1e-15, GeomAbs_C1, 1, 3 );
     if ( approx.HasResult() )
       bspline = approx.Curve();
@@ -216,13 +216,13 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve, double f,
   }
   if (res->Continuity() == GeomAbs_C0)
   {
-    auto bspline = GeomConvert::CurveToBSplineCurve(res);
+    Handle(Geom_BSplineCurve) bspline = GeomConvert::CurveToBSplineCurve(res);
     GeomConvert::C0BSplineToC1BSplineCurve(bspline, 1e-7);
     res = bspline;
   }
   if (res->Continuity() == GeomAbs_C2)
   {
-    auto bspline = GeomConvert::CurveToBSplineCurve(res);
+    Handle(Geom_BSplineCurve) bspline = GeomConvert::CurveToBSplineCurve(res);
     SimplifyCurve(bspline);
     res = bspline;
   }
@@ -234,7 +234,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Curve)& curve, double f,
 
 bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool toApprox)
 {
-  auto bspline_surface = GeomConvert::SurfaceToBSplineSurface(surface);
+  Handle(Geom_BSplineSurface) bspline_surface = GeomConvert::SurfaceToBSplineSurface(surface);
   if (bspline_surface->UDegree() < 3 && bspline_surface->VDegree() < 3)
   {
     bspline_surface->IncreaseDegree(3, 3);
@@ -278,7 +278,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
           //
           bspline->InsertVKnot(bspline->VKnot(1), 1, Precision::Confusion());
           bspline->InsertVKnot(bspline->VKnots().Last(), 1, Precision::Confusion());
-          auto mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
+          mobius::core_Ptr<mobius::geom_BSplineSurface> mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
           ocBSurfaces[k].push_back(bspline);
         }
         k++;
@@ -310,7 +310,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
           {
             bspline->IncreaseDegree(3, 3);
           }
-          auto mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
+          mobius::core_Ptr<mobius::geom_BSplineSurface> mobBSpline = mobius::cascade::GetMobiusBSurface(bspline);
           ocBSurfaces[k].push_back(bspline);
         }
         k++;
@@ -321,7 +321,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
     * Concat segments 
     ---------------------------*/
     int k = 0;
-    for (auto surfs : ocBSurfaces)
+    for (auto& surfs : ocBSurfaces)
     {
       bool isFirst = true;
       double prevU = -1;
@@ -333,7 +333,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
         {
           tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*surf.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
         }
-        auto mobBSpline = mobius::cascade::GetMobiusBSurface(surf);
+        mobius::core_Ptr<mobius::geom_BSplineSurface> mobBSpline = mobius::cascade::GetMobiusBSurface(surf);
         mobBSurfaces[k].push_back(mobBSpline);
         isFirst = false;
         prevU = surf->UKnot(surf->UKnots().Length());
@@ -351,18 +351,18 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
     }
     for (size_t i = 0; i < mobBSurfaces.size(); ++i )
     {
-      auto res = mobBSurfaces[i][0];
+      mobius::core_Ptr<mobius::geom_BSplineSurface> res = mobBSurfaces[i][0];
       for ( size_t j = 1; j < mobBSurfaces[i].size(); ++j )
       {
         if (!res->ConcatenateCompatible(mobBSurfaces[i][j], true))
           res->ConcatenateCompatible(mobBSurfaces[i][j], false);
       }
-      auto cascSurf = mobius::cascade::GetOpenCascadeBSurface(res);
+      Handle(Geom_BSplineSurface) cascSurf = mobius::cascade::GetOpenCascadeBSurface(res);
       if (!isFirst)
       {
         tigl::CTiglBSplineAlgorithms::reparametrizeBSpline(*cascSurf.get(), prevU, prevU + 1., prevV, prevV + 1., 1e-15);
       }
-      auto mobBSpline = mobius::cascade::GetMobiusBSurface(cascSurf);
+      mobius::core_Ptr<mobius::geom_BSplineSurface> mobBSpline = mobius::cascade::GetMobiusBSurface(cascSurf);
       isFirst = false;
       prevU = cascSurf->UKnot(cascSurf->UKnots().Length());
       prevV = cascSurf->VKnot(cascSurf->VKnots().Length());
@@ -372,7 +372,7 @@ bool asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface, bool 
     {
       return false;
     }
-    auto res = spln[0];
+    mobius::core_Ptr<mobius::geom_BSplineSurface> res = spln[0];
     for ( size_t j = 1; j < spln.size(); ++j )
     {
       if (!res->ConcatenateCompatible(spln[j], true))
