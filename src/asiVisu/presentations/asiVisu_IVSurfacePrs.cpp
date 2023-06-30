@@ -66,7 +66,7 @@ asiVisu_IVSurfacePrs::asiVisu_IVSurfacePrs(const Handle(ActAPI_INode)& N)
   this->addPipeline        ( Pipeline_Main, mainPl );
   this->assignDataProvider ( Pipeline_Main, DP );
   //
-  this->GetPipeline(Pipeline_Main)->Actor()->SetVisibility( ivNode->GetSurfaceType() == asiData_IVSurfaceNode::SurfaceType_Plane ? 0 : 1 );
+  this->GetPipeline(Pipeline_Main)->Actor()->SetVisibility(1);
 
   // Colorize backface so that inverted faces are immediately visible.
   mainPl->Actor()->SetBackfaceProperty( asiVisu_Utils::DefaultBackfaceProp() );
@@ -128,23 +128,23 @@ void asiVisu_IVSurfacePrs::Colorize(const ActAPI_Color& color) const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_IVSurfacePrs::renderPipelines(vtkRenderer* renderer) const
+void asiVisu_IVSurfacePrs::renderPipelines(vtkRenderer* /*renderer*/) const
 {
-  if ( !m_node->IsInstance( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
-    return;
+  //if ( !m_node->IsInstance( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+  //  return;
 
-  // Check surface type.
-  Handle(asiData_IVSurfaceNode)
-    N = Handle(asiData_IVSurfaceNode)::DownCast(m_node);
-  //
-  if ( N->GetSurfaceType() != asiData_IVSurfaceNode::SurfaceType_Plane )
-    return;
+  //// Check surface type.
+  //Handle(asiData_IVSurfaceNode)
+  //  N = Handle(asiData_IVSurfaceNode)::DownCast(m_node);
+  ////
+  //if ( N->GetSurfaceType() != asiData_IVSurfaceNode::SurfaceType_Plane )
+  //  return;
 
-  if ( !m_planeWidget->GetInteractor() )
-    m_planeWidget->SetInteractor( renderer->GetRenderWindow()->GetInteractor() );
+  //if ( !m_planeWidget->GetInteractor() )
+  //  m_planeWidget->SetInteractor( renderer->GetRenderWindow()->GetInteractor() );
 
-  m_planeWidget->SetModel(m_model);
-  m_planeWidget->On();
+  //m_planeWidget->SetModel(m_model);
+  //m_planeWidget->On();
 }
 
 //-----------------------------------------------------------------------------
