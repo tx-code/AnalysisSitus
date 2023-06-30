@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: convert curves and surfaces to Bezier</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/toc.js"></script>
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/convert to Bézier
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-convert-to-bezier">Convert curves and surfaces to Bézier</h1>
+
+<p>
+  Analysis Situs provides a set of functions for converting curves and surfaces to give them the desired analytical properties while minimizing geometrical distortion. One such function is <span class="code-inline">convert-to-bezier</span>, which takes a curve or a surface as input and attempts to simplify its analytical description in order to convert it to a piecewise Bézier.
+</p>
+
+<p>
+  According to the theory <a href="../references.html#piegl-tiller-1995">[Piegl & Tiller, 1995]</a>, a B-spline curve or a surface can be turned into a piecewise Bézier representation by increasing the multiplicities of all knots until G0 continuity is achieved. As a result of this repetitive knot insertion, the initial geometry falls apart onto the desired Bézier pieces. This conversion, however, does not entail modifying the polynomial degrees of the Bézier segments used.
+</p>
+
+<p>
+  Furthermore, in general, degree reduction is known to deform the shape of a spline curve/surface (see A5.11 from <a href="../references.html#piegl-tiller-1995">[Piegl & Tiller, 1995]</a>). As a result, Analysis Situs does not guarantee that the modified geometry fits perfectly within the input shape after conversion. Nonetheless, the obtained deviation is measured and returned by the Tcl function explicitly:
+</p>
+
+<div class="code">
+> puts "Max conversion error: [convert-to-bezier s]"
+</div>
+
+<p>
+  The conversion algorithm can process not only freeform surfaces but also analytical planes, conical surfaces, cylinders, and so on. The analytical surfaces are first converted to splines and then handled in the same way as any other spline entity.
+</p>
+
+<p class="note">
+  You can read more about the implementation details behind the <span class="code-inline">convert-to-bezier</span> command on our <a href='https://quaoar.su/blog/page/convert-bspline-curves-surfaces-bezier'>blog</a>.
+</p>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

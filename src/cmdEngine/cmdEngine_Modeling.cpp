@@ -938,12 +938,19 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
   TopoDS_Face          face = TopoDS::Face(faceShape);
   Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
 
-  // Take UV bounds from the original face.
-  double uMin, uMax, vMin, vMax;
-  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
+  if ( surf->IsKind( STANDARD_TYPE(Geom_BoundedSurface) ) )
+  {
+    interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, Color_Default);
+  }
+  else
+  {
+    // Take UV bounds from the original face.
+    double uMin, uMax, vMin, vMax;
+    BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
 
-  // Set result.
-  interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, uMin, uMax, vMin, vMax, Color_White);
+    // Set result.
+    interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, uMin, uMax, vMin, vMax, Color_Default);
+  }
 
   return TCL_OK;
 }

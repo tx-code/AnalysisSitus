@@ -48,10 +48,12 @@
 #include <CTiglBSplineAlgorithms.h>
 
 // Mobius includes
-#include <mobius/cascade.h>
-#include <mobius/geom_BSplineSurface.h>
+#if defined USE_MOBIUS
+  #include <mobius/cascade.h>
+  #include <mobius/geom_BSplineSurface.h>
 
-using namespace mobius;
+  using namespace mobius;
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -246,6 +248,7 @@ Handle(Geom_Surface)
   asiAlgo_ConvertToBezier::Perform(const Handle(Geom_Surface)& surface,
                                    const bool                  toApprox)
 {
+#if defined USE_MOBIUS
   m_fMaxError = 0.;
 
   Handle(Geom_BSplineSurface)
@@ -477,4 +480,11 @@ Handle(Geom_Surface)
   asiAlgo_AppSurfUtils::MeasureDeviation(converted, GeomConvert::SurfaceToBSplineSurface(surface), m_fMaxError, m_plotter);
 
   return converted;
+#else
+  (void) surface;
+  (void) toApprox;
+
+  m_progress.SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+  return nullptr;
+#endif
 }

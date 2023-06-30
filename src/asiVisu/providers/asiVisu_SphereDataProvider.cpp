@@ -66,7 +66,7 @@ ActAPI_DataObjectId asiVisu_SphereDataProvider::GetNodeID() const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_SphereDataProvider::SetFacetId(const int  facetId, 
+void asiVisu_SphereDataProvider::SetFacetId(const int  facetId,
                                             const bool inward)
 {
   Handle(asiData_MeshParameter) triParam;
@@ -136,6 +136,8 @@ void asiVisu_SphereDataProvider::SetFacetId(const int  facetId,
 
     break;
   }
+#else
+  (void) inward;
 #endif
 }
 
