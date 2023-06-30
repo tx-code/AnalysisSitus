@@ -4057,6 +4057,9 @@ int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
   asiAlgo_ConvertToBezier converter( interp->GetProgress(),
                                      interp->GetPlotter() );
 
+  // Max achieved error.
+  double maxErr = 0.;
+
   /* ====================
    *  Surface conversion.
    * ==================== */
@@ -4095,6 +4098,10 @@ int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
 
+    // Return max achieved error.
+    maxErr = converter.GetMaxError();
+    *interp << maxErr;
+
     interp->GetPlotter().REDRAW_SURFACE(name + "_B", converted, Color_Default);
     return TCL_OK;
   }
@@ -4122,6 +4129,10 @@ int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Conversion failed.");
       return TCL_ERROR;
     }
+
+    // Return max achieved error.
+    maxErr = converter.GetMaxError();
+    *interp << maxErr;
 
     interp->GetPlotter().REDRAW_CURVE(name + "_B", converted, Color_Default, true);
     return TCL_OK;

@@ -48,6 +48,7 @@ enum asiTest_CaseID
   CaseID_ConvertCanonical,
   CaseID_ConcatPCurves,
   CaseID_ConvertToC2,
+  CaseID_ConvertToBezier,
 
 /* ------------------------------------------------------------------------ */
 
