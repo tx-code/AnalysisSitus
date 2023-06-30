@@ -76,6 +76,7 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepTools.hxx>
 #include <Geom_Plane.hxx>
 #include <gp_Pln.hxx>
 #include <Precision.hxx>
@@ -834,7 +835,11 @@ int ENGINE_MakeCurve(const Handle(asiTcl_Interp)& interp,
   {
     /* The edge might have been passed by ID */
 
-    interp->GetKeyValue(argc, argv, "eid", edgeIdx);
+    if ( !interp->GetKeyValue(argc, argv, "eid", edgeIdx) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Edge ID is not provided (use '-eid' keyword).");
+      return TCL_ERROR;
+    }
 
     // Get shape.
     edgeShape = partNode->GetAAG()->RequestMapOfEdges()(edgeIdx);
@@ -901,7 +906,11 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
   {
     /* The face might have been passed by ID */
 
-    interp->GetKeyValue(argc, argv, "fid", faceIdx);
+    if ( !interp->GetKeyValue(argc, argv, "fid", faceIdx) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Face ID is not provided (use '-fid' keyword).");
+      return TCL_ERROR;
+    }
 
     // Get shape.
     faceShape = partNode->GetAAG()->GetMapOfFaces()(faceIdx);
@@ -926,10 +935,15 @@ int ENGINE_MakeSurf(const Handle(asiTcl_Interp)& interp,
     faceShape = ShapeCustom::ConvertToBSpline(faceShape, true, true, true, true);
   }
 
-  Handle(Geom_Surface) surf = BRep_Tool::Surface( TopoDS::Face(faceShape) );
+  TopoDS_Face          face = TopoDS::Face(faceShape);
+  Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
+
+  // Take UV bounds from the original face.
+  double uMin, uMax, vMin, vMax;
+  BRepTools::UVBounds(face, uMin, uMax, vMin, vMax);
 
   // Set result.
-  interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, Color_White);
+  interp->GetPlotter().REDRAW_SURFACE(argv[1], surf, uMin, uMax, vMin, vMax, Color_White);
 
   return TCL_OK;
 }

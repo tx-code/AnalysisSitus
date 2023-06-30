@@ -64,6 +64,7 @@
 #include <asiAlgo_TopoAttrOrientation.h>
 #include <asiAlgo_TopoKill.h>
 #include <asiAlgo_Utils.h>
+#include <asiAlgo_ConvertToBezier.h>
 
 // OCCT includes
 #include <BRep_Builder.hxx>
@@ -4024,6 +4025,113 @@ int ENGINE_ConvertToC2(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_ConvertToBezier(const Handle(asiTcl_Interp)& interp,
+                           int                          argc,
+                           const char**                 argv)
+{
+  if ( argc < 2 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Assuming that `argv[1]` is UTF-8.
+  TCollection_ExtendedString name(argv[1], true);
+
+  // Get node.
+  Handle(asiData_IVSurfaceNode)
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+  //
+  Handle(asiData_IVCurveNode)
+    curveNode = Handle(asiData_IVCurveNode)::DownCast( cmdEngine::model->FindNodeByName(name) );
+  //
+  if ( surfNode.IsNull() && curveNode.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot find geometric object with the name %1." << name);
+    return TCL_ERROR;
+  }
+
+  // Whether to approximate.
+  const bool toApprox = interp->HasKeyword(argc, argv, "approx");
+
+  // Prepare the converter.
+  asiAlgo_ConvertToBezier converter( interp->GetProgress(),
+                                     interp->GetPlotter() );
+
+  /* ====================
+   *  Surface conversion.
+   * ==================== */
+
+  if ( !surfNode.IsNull() )
+  {
+    // Get parametric surface.
+    Handle(Geom_Surface) surf = surfNode->GetSurface();
+    //
+    if ( surf.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target surface is null.");
+      return TCL_ERROR;
+    }
+
+    // Check if the surface is untrimmed and make sure to trim it on a finite rectangle,
+    // so that NURBS conversion can handle it.
+    // Check for infinite bounds.
+    double uMin, uMax, vMin, vMax;
+    surf->Bounds(uMin, uMax, vMin, vMax);
+    //
+    if ( Precision::IsInfinite(uMin) || Precision::IsInfinite(uMax) ||
+         Precision::IsInfinite(vMin) || Precision::IsInfinite(vMax) )
+    {
+      surfNode->GetLimits(uMin, uMax, vMin, vMax);
+      //
+      surf = new Geom_RectangularTrimmedSurface(surf, uMin, uMax, vMin, vMax);
+    }
+
+    // Convert.
+    Handle(Geom_Surface) converted = converter.Perform(surf, toApprox);
+    //
+    if ( converted.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Conversion failed.");
+      return TCL_ERROR;
+    }
+
+    interp->GetPlotter().REDRAW_SURFACE(name + "_B", converted, Color_Default);
+    return TCL_OK;
+  }
+
+  /* ==================
+   *  Curve conversion.
+   * ================== */
+
+  if ( !curveNode.IsNull() )
+  {
+    // Get parametric curve.
+    Handle(Geom_Curve) curve = curveNode->GetCurve();
+    //
+    if ( curve.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Target curve is null.");
+      return TCL_ERROR;
+    }
+
+    // Convert.
+    Handle(Geom_Curve) converted = converter.Perform(curve);
+    //
+    if ( converted.IsNull() )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Conversion failed.");
+      return TCL_ERROR;
+    }
+
+    interp->GetPlotter().REDRAW_CURVE(name + "_B", converted, Color_Default, true);
+    return TCL_OK;
+  }
+
+  return TCL_ERROR; // Should never happen.
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
                                  const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -4552,4 +4660,14 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
     "\t operation from distorting the input geometry too much.",
     //
     __FILE__, group, ENGINE_ConvertToC2);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("convert-to-bezier",
+    //
+    "convert-to-c2 <name> [-toApprox]\n"
+    "\t Converts the curve or surface named <name> to C2 continuity class if possible.\n"
+    "\t You can pass the tolerance value via the '-tol' key to protect knot removal\n"
+    "\t operation from distorting the input geometry too much.",
+    //
+    __FILE__, group, ENGINE_ConvertToBezier);
 }
