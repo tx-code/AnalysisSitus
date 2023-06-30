@@ -52,86 +52,71 @@
 <div class="content-body">
 <!-- [BEGIN] contents -->
 
-<h1 id="toc-asm">Assemblies code architecture</h1>
+<h1 id="toc-asm">CAD assemblies</h1>
 
 <div class="toc-panel"><div id="toc"></div></div>
 
-<h2 id="toc-asm-preface">Preface</h2>
+<h2 id="toc-asm-preface">Motivation</h2>
 
 <p>
-  In boundary representation, we do not have many design choices: any model is composed of vertices, edges and faces. The representation of assemblies is, in contrast, often application-dependent as it expresses not just a shape, but some domain knowledge as well. The attempts to design generic representation schemes for CAD assemblies gave rise to verbose standards like STEP, PRC or JT. A comprehensive representation scheme covers many digital product representation aspects, such as versioning, design review notes, configurations, and many others. While having a rich data model is a must for enterprise applications, you do not really need all these options for the geometry-centric CAD algorithms. Therefore, we will not focus on niche or rare use cases below. In Analysis Situs, we designed our data framework for CAD assemblies based on the following requirements:
+  We don't have many design options in boundary representation: any CAD model is made up of vertices, edges, and faces. Assembly representation, on the other hand, is frequently application-dependent because it expresses not only a shape but also certain domain knowledge. Attempts to create general representation schemes for CAD assemblies resulted in verbose standards like STEP, PRC, JT, and others.
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-chassis.png" width="40%"/></div>
+
+<p>
+  A comprehensive data scheme covers many aspects of a digital product representation, such as versioning, design review notes, configurations, and so on. While such a rich data model is required for enterprise apps, geometry-centric CAD workflows do not need all of these possibilities. In Analysis Situs, we designed the architecture for CAD assemblies based on the following simple requirements:
 </p>
 
 <ol>
-  <li><i>In-memory access has the first-class support.</i> For performant algorithms, the data should be available in memory. Of course, you cannot store everything in RAM in some scenarios, especially if you work with huge CAD assemblies. Hence the second requirement.</li>
+  <li><i>In-memory access.</i> Data should be available in memory for efficient algorithms. In some cases, such as when working with huge CAD assemblies, you cannot save everything in RAM and might prefer serializing data to files or databases. We leave such scenarios out of scope.</li>
   <br/>
-  <li><i>Clear implementation-independent API.</i> We have been working with many data frameworks that violated this simple rule not to mix up the exposed API with the implementation details. In some frameworks, it is a B-rep shape that is messed up with the assembly structure. In others, it is the need to call SQL queries to get product structure from databases. A good data model should not bother the caller code with the nuances of its implementation. The underlying technology (whether it is OCAF, Mongo, or Sqlite) should be kept where it is supposed to be: in the engine room.</li>
-  <br/>
-  <li><i>Extensibility.</i> The data framework should expose some extension points so that the client applications are free to add their domain-specific information. Think of all sorts of metadata, including the design review notes mentioned above. A good data model should not fall apart whenever a new object type is added there.</li>
+  <li><i>Extensibility.</i> The data framework should offer extension points, allowing client applications to contribute domain-specific data. Consider all types of metadata, including the previously mentioned design review notes. A good data model should not crumble when a new object type is introduced.</li>
 </ol>
 
-<h2 id="toc-asm-ent">Entities</h2>
-
 <p>
-  Building up a data framework requires careful thinking of the employed primitive types and their interplay. We have derived the entity types based on years of experience in the CAD domain and other products we've ever touched, used or developed ourselves.
+  Both requirements can be satisfied if the assembly model is based on <a href="./features_asm-xde-document.html">OCAF/XDE</a> which is the design choice of Analysis Situs. In what follows, we introduce the key data types used when working with assemblies.
 </p>
+
+<h2 id="toc-asm-ent">Entities</h2>
 
 <h3 id="toc-asm-ent-part">Part</h3>
 
 <p>
-  The first entity type that's one step close to a geometric primitive is a <i>Part</i>. A Part does not have to contain any geometry though. Also, it might contain more than one representation, e.g., you may have a single bolt represented with different levels of detail (LOD). A Part is something <i>instanced</i> in the assembly structure, i.e., it can have multiple occurrences with different locations in the modeling space.
+  The first entity type that represents a true geometric primitive is a Part. A Part, on the other hand, is not required to contain any geometry. It may also contain multiple visual representations, such as a single bolt associated with varied levels of detail (LOD). Parts are instanced in the assembly structure, which implies they might have several occurrences in the modeling space.
 </p>
+
+<div align="center"><img src="../imgs/asm/asm-chassis-part2.png" width="60%"/></div>
 
 <h3 id="toc-asm-ent-subassembly">Subassembly</h3>
 
 <p>
-  A <i>Subassembly</i> is a composite unit containing references (Instances) to several Parts or nested Subassemblies (yeah, recursive definition is intentional here).
+  A Subassembly is a composite unit containing references (Instances) to several Parts or nested Subassemblies (recursive definition).
 </p>
+
+<div align="center"><img src="../imgs/asm/asm-chassis-subassembly.png" width="60%"/></div>
 
 <h3 id="toc-asm-ent-instance">Instance</h3>
 
 <p>
-  An <i>Instance</i> is a located reference to a Part or Subassembly. An Instance is nested into a Subassembly, i.e., a Subassembly contains Instances as its child elements.
+  An Instance is a reference to a specific Part or Subassembly. An Instance is contained within a Subassembly, which has Instances as child elements. Think about an Instance to be a pointer in a computer language.
 </p>
+
+<div align="center"><img src="../imgs/asm/asm-chassis-instance.png" width="60%"/></div>
 
 <h3 id="toc-asm-ent-prototype">Prototype</h3>
 
 <p>
-  A <i>Prototype</i> is something instanced. I.e., it is either a Part or a Subassembly. A Prototype is a term we use to denote reusable units in the assembly structure.
+  Anything that can be instanced is a Prototype. In other words, it is either a Part or a Subassembly. We use the term "prototype" to refer to reusable units in the assembly structure.
 </p>
 
-<h3 id="toc-asm-ent-representation">Representation</h3>
+<div align="center"><img src="../imgs/asm/asm-chassis-prototypes.png" width="60%"/></div>
 
 <p>
-  A <i>Representation</i> is a piece of geometric data associated with a Prototype. One Prototype may have a set of Representations, e.g., a B-rep and a series of LOD. It is also valid for a Subassembly to have some Representations (hence Representations are attached to Prototypes and not to Parts).
+  If Instance is a "pointer," then Prototype is the actual thing it points to. All Prototypes can be arranged into a plain list that may be viewed as a bill of materials. The following view is the JSON representation of the assembly structure in Analysis Situs:
 </p>
 
-<h3 id="toc-asm-ent-subdomain">Subdomain</h3>
-
-<p>
-  A <i>Subdomain</i> is a subset selection of elements in a specific representation. It is assumed that any Representation is indexed in some way (e.g., all B-rep or mesh elements are given numeric IDs), and a Subdomain contains a series of indices of interest. Subdomains capture a geometric region of a Representation that allows for attaching boundary conditions, materials or appearance attributes, such as colors.
-</p>
-
-<h3 id="toc-asm-ent-metadata">Metadata</h3>
-
-<p>
-  A <i>Metadata</i> is an abstract object that can be attached to the following entities:
-</p>
-
-<ol>
-  <li>Prototype.</li>
-  <li>Representation.</li>
-  <li>Subdomain.</li>
-  <li><a href="./features_asm-code-architecture.html#toc-asm-hag-item">Assembly item</a>.</li>
-</ol>
-
-<h2 id="toc-asm-hag">Hierarchical Assembly Graph</h2>
-
-<h3 id="toc-asm-hag-overview">Overview</h3>
-
-<h3 id="toc-asm-hag-item">Assembly item</h3>
-
-<h3 id="toc-asm-hag-scene-tree">Scene tree</h3>
+<div align="center"><img src="../imgs/asm/asm-chassis-prototypes2.png" width="40%"/></div>
 
 <!-- [END] contents -->
 </div>
