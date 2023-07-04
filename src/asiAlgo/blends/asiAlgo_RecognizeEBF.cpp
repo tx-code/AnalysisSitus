@@ -62,10 +62,11 @@
 asiAlgo_RecognizeEBF::asiAlgo_RecognizeEBF(const Handle(asiAlgo_AAG)& aag,
                                            ActAPI_ProgressEntry       progress,
                                            ActAPI_PlotterEntry        plotter)
-: ActAPI_IAlgorithm (progress, plotter),
-  m_aag             (aag),
-  m_pEdgeLengthMap  (nullptr),
-  m_bAllowCones     (true)
+: ActAPI_IAlgorithm        (progress, plotter),
+  m_aag                    (aag),
+  m_pEdgeLengthMap         (nullptr),
+  m_bAllowCones            (true),
+  m_bAllowLinearExtrusions (false)
 {}
 
 //-----------------------------------------------------------------------------
@@ -73,6 +74,13 @@ asiAlgo_RecognizeEBF::asiAlgo_RecognizeEBF(const Handle(asiAlgo_AAG)& aag,
 void asiAlgo_RecognizeEBF::SetAllowCones(const bool on)
 {
   m_bAllowCones = on;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeEBF::SetAllowLinearExtrusions(const bool on)
+{
+  m_bAllowLinearExtrusions = on;
 }
 
 //-----------------------------------------------------------------------------
@@ -102,6 +110,11 @@ bool asiAlgo_RecognizeEBF::Perform(const int    fid,
     return false;
   //
   if ( !m_bAllowCones && asiAlgo_Utils::IsConical(face) ) // ... but we might wanna change that.
+    return false;
+
+  // Linear extrusions might be unwanted.
+  if ( !m_bAllowLinearExtrusions &&
+        asiAlgo_Utils::IsTypeOf<Geom_SurfaceOfLinearExtrusion>(face) )
     return false;
 
   // Prepare tool to find smooth edges.

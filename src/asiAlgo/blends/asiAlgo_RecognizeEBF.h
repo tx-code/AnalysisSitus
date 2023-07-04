@@ -70,6 +70,12 @@ public:
   asiAlgo_EXPORT void
     SetAllowCones(const bool on);
 
+  //! Sets a Boolean flag indicating whether linear extrusion EBFs are
+  //! allowed or not. If not, all linear extrusion faces are to be skipped.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetAllowLinearExtrusions(const bool on);
+
   //! Sets the cache to use for computing edge lengths.
   //! \param[in] ptr the raw pointer to the cache to use.
   asiAlgo_EXPORT void
@@ -125,9 +131,10 @@ protected:
 
 protected:
 
-  Handle(asiAlgo_AAG)              m_aag;            //!< Attributed Adjacency Graph instance.
-  std::unordered_map<int, double>* m_pEdgeLengthMap; //!< Cached edge lengths.
-  bool                             m_bAllowCones;    //!< Whether to allow conical blends.
+  Handle(asiAlgo_AAG)              m_aag;                    //!< Attributed Adjacency Graph instance.
+  std::unordered_map<int, double>* m_pEdgeLengthMap;         //!< Cached edge lengths.
+  bool                             m_bAllowCones;            //!< Whether to allow conical blends.
+  bool                             m_bAllowLinearExtrusions; //!< Whether to allow linear extrusion blends.
 
 };
 
