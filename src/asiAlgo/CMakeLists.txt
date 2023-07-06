@@ -55,6 +55,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_CSG.h
   auxiliary/asiAlgo_DesignLaw.h
   auxiliary/asiAlgo_DivideByContinuity.h
+  auxiliary/asiAlgo_FindBridge.h
   auxiliary/asiAlgo_FindVisibleFaces.h
   auxiliary/asiAlgo_FuncUnivariate.h
   auxiliary/asiAlgo_GeomSummary.h
@@ -106,6 +107,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_ConvertCurve.cpp
   auxiliary/asiAlgo_DesignLaw.cpp
   auxiliary/asiAlgo_DivideByContinuity.cpp
+  auxiliary/asiAlgo_FindBridge.cpp
   auxiliary/asiAlgo_FindVisibleFaces.cpp
   auxiliary/asiAlgo_FuncUnivariate.cpp
   auxiliary/asiAlgo_HitFacet.cpp

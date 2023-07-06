@@ -38,8 +38,12 @@
 #include <asiAlgo_AAG.h>
 #include <asiAlgo_AAGIterator.h>
 #include <asiAlgo_FeatureAttrAngle.h>
+#include <asiAlgo_FindBridge.h>
 
 // OpenCascade includes
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <ShapeAnalysis_Edge.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
 #include <TopExp_Explorer.hxx>
 
 #undef COUT_DEBUG
@@ -195,12 +199,241 @@ void asiAlgo_RecognizeCavities::findSeeds(asiAlgo_Feature& seeds)
 
     const TopoDS_Face& face = m_aag->GetFace(fid);
 
-    // Loop over the inner wires.
-    const TopoDS_Wire& outerWire = asiAlgo_Utils::OuterWire(face);
     //
-    for( TopExp_Explorer wexp(face, TopAbs_WIRE); wexp.More(); wexp.Next() )
+    std::vector<TopoDS_Wire> wires;
+    const TopoDS_Wire& outerWire = asiAlgo_Utils::OuterWire(face);
+
+    // Check the outer contour for subcontours.
     {
-      const TopoDS_Wire& wire = TopoDS::Wire( wexp.Current() );
+      TopTools_IndexedDataMapOfShapeListOfShape verticesEdgesMap;
+      TopTools_IndexedDataMapOfShapeListOfShape edgesVerticesMap;
+      NCollection_IndexedDataMap<TopoDS_Shape, int, TopTools_ShapeMapHasher> vertexIDMap;
+      int id = 0;
+
+      {
+        TopExp::MapShapesAndAncestors(outerWire, TopAbs_VERTEX, TopAbs_EDGE, verticesEdgesMap);
+        TopTools_IndexedDataMapOfShapeListOfShape::Iterator itVEM(verticesEdgesMap);
+        for (; itVEM.More(); itVEM.Next())
+        {
+          vertexIDMap.Add(itVEM.Key(), id++);
+
+          const TopTools_ListOfShape& listOfEdges = itVEM.Value();
+          TopTools_ListOfShape::Iterator itLE(listOfEdges);
+          for (; itLE.More(); itLE.Next())
+          {
+            if (!edgesVerticesMap.Contains(itLE.Value()))
+            {
+              TopTools_ListOfShape listOfVertices;
+              listOfVertices.Append(itVEM.Key());
+              edgesVerticesMap.Add(itLE.Value(), listOfVertices);
+            }
+            else
+            {
+              edgesVerticesMap.ChangeFromKey(itLE.Value()).Append(itVEM.Key());
+            }
+          }
+        }
+      }
+
+      NCollection_IndexedDataMap<TopoDS_Shape, int, TopTools_ShapeMapHasher> edgeIDMap;
+      id = 0;
+      {
+        TopTools_IndexedDataMapOfShapeListOfShape::Iterator itEVM(edgesVerticesMap);
+        for (; itEVM.More(); itEVM.Next())
+        {
+          // Loop in graph.
+          if (itEVM.Value().Size() == 1)
+          {
+            TopoDS_Wire wire = BRepBuilderAPI_MakeWire(TopoDS::Edge(itEVM.Key()));
+            wires.push_back(wire);
+            continue;
+          }
+
+          edgeIDMap.Add(itEVM.Key(), id++);
+        }
+      }
+
+      std::vector<std::vector<std::pair<int, int>>> graph(vertexIDMap.Size());
+
+      TopTools_IndexedDataMapOfShapeListOfShape::Iterator itVEM(verticesEdgesMap);
+      for (; itVEM.More(); itVEM.Next())
+      {
+        const TopoDS_Vertex& vertex = TopoDS::Vertex(itVEM.Key());
+        id = vertexIDMap.FindFromKey(vertex);
+
+        NCollection_IndexedDataMap<TopoDS_Shape, int, TopTools_ShapeMapHasher> vertexMultiplicityMap;
+
+        const TopTools_ListOfShape& listOfEdges = itVEM.Value();
+        TopTools_ListOfShape::Iterator itLE(listOfEdges);
+        for (; itLE.More(); itLE.Next())
+        {
+          const TopoDS_Edge& edge = TopoDS::Edge(itLE.Value());
+          const TopTools_ListOfShape& listOfVertices = edgesVerticesMap.FindFromKey(edge);
+          TopTools_ListOfShape::Iterator itLV(listOfVertices);
+          for (; itLV.More(); itLV.Next())
+          {
+            const TopoDS_Vertex& toVertex = TopoDS::Vertex(itLV.Value());
+            if (toVertex.IsEqual(vertex))
+            {
+              continue;
+            }
+
+            if (vertexMultiplicityMap.Contains(toVertex))
+            {
+              ++(vertexMultiplicityMap.ChangeFromKey(toVertex));
+            }
+            else
+            {
+              vertexMultiplicityMap.Add(toVertex, 1);
+            }
+          }
+        }
+
+        std::vector<std::pair<int, int>> connectivityList;
+        NCollection_IndexedDataMap<TopoDS_Shape, int, TopTools_ShapeMapHasher>::Iterator itVM(vertexMultiplicityMap);
+        for (; itVM.More(); itVM.Next())
+        {
+          int subId = vertexIDMap.FindFromKey(itVM.Key());
+          connectivityList.push_back(std::pair<int, int>(subId, itVM.Value()));
+        }
+        graph[id] = connectivityList;
+
+      }
+
+      Handle(TopTools_HSequenceOfShape) edgesForContours = new TopTools_HSequenceOfShape();
+
+      asiAlgo_FindBridge bridgeFinder;
+      bridgeFinder.Init(graph);
+      if (bridgeFinder.Perform())
+      {
+        const std::vector<std::pair<int, int>>& bridges = bridgeFinder.GetBridges();
+
+        if (bridges.size())
+        {
+          TopTools_IndexedDataMapOfShapeListOfShape::Iterator itEVM(edgesVerticesMap);
+          for (; itEVM.More(); itEVM.Next())
+          {
+            TColStd_PackedMapOfInteger ids;
+            const TopoDS_Edge& edge = TopoDS::Edge(itEVM.Key());
+            const TopTools_ListOfShape& listOfVertices = edgesVerticesMap.FindFromKey(edge);
+            TopTools_ListOfShape::Iterator itLV(listOfVertices);
+            for (; itLV.More(); itLV.Next())
+            {
+              id = vertexIDMap.FindFromKey(itLV.Value());
+              ids.Add(id);
+            }
+
+            if (ids.Extent() < 2)
+            {
+              continue;
+            }
+
+            bool isFound = false;
+            std::vector<std::pair<int, int>>::const_iterator itB = bridges.cbegin();
+            for (; itB != bridges.cend(); ++itB)
+            {
+              if (std::min((*itB).first, (*itB).second) == ids.GetMinimalMapped() &&
+                std::max((*itB).first, (*itB).second) == ids.GetMaximalMapped())
+              {
+                isFound = true;
+                break;
+              }
+            }
+
+            if (isFound)
+            {
+              continue;
+            }
+
+            edgesForContours->Append(edge);
+          }
+        }
+      }
+
+      Handle(TopTools_HSequenceOfShape) auxWires;
+      ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edgesForContours, 1e-3, false, auxWires);
+      if (!auxWires.IsNull())
+      {
+        TopTools_HSequenceOfShape::Iterator itAW(*auxWires);
+        for (; itAW.More(); itAW.Next())
+        {
+          const TopoDS_Wire& wire = TopoDS::Wire(itAW.Value());
+
+          BRepBuilderAPI_MakeWire wireMaker;
+
+          for (TopExp_Explorer exp(wire, TopAbs_EDGE); exp.More(); exp.Next())
+          {
+            const TopoDS_Edge& auxEdge = TopoDS::Edge(exp.Value());
+            ShapeAnalysis_Edge edgeAnalysis;
+            const TopoDS_Vertex& firstVertex = edgeAnalysis.FirstVertex(auxEdge);
+            const TopoDS_Vertex& lastVertex = edgeAnalysis.LastVertex(auxEdge);
+            gp_Pnt fPnt = BRep_Tool::Pnt(firstVertex);
+            gp_Pnt lPnt = BRep_Tool::Pnt(lastVertex);
+
+            TopTools_HSequenceOfShape::Iterator itEC(*edgesForContours);
+            for (; itEC.More(); itEC.Next())
+            {
+              const TopoDS_Edge& checkedEdge = TopoDS::Edge(itEC.Value());
+              const TopoDS_Vertex& firstVertexC = edgeAnalysis.FirstVertex(checkedEdge);
+              const TopoDS_Vertex& lastVertexC = edgeAnalysis.LastVertex(checkedEdge);
+              gp_Pnt fPntC = BRep_Tool::Pnt(firstVertexC);
+              gp_Pnt lPntC = BRep_Tool::Pnt(lastVertexC);
+              if (fPnt.IsEqual(fPntC, std::max(Precision::Confusion(), std::max(BRep_Tool::Tolerance(firstVertexC), BRep_Tool::Tolerance(firstVertex)))) &&
+                  lPnt.IsEqual(lPntC, std::max(Precision::Confusion(), std::max(BRep_Tool::Tolerance(lastVertexC), BRep_Tool::Tolerance(lastVertex)))) ||
+                  fPnt.IsEqual(lPntC, std::max(Precision::Confusion(), std::max(BRep_Tool::Tolerance(firstVertex), BRep_Tool::Tolerance(lastVertexC)))) &&
+                  lPnt.IsEqual(fPntC, std::max(Precision::Confusion(), std::max(BRep_Tool::Tolerance(lastVertex), BRep_Tool::Tolerance(firstVertexC)))))
+              {
+                wireMaker.Add(checkedEdge);
+                break;
+              }
+            }
+          }
+
+          const TopoDS_Wire& newWire = wireMaker.Wire();
+          if (newWire.IsNull())
+          {
+            continue;
+          }
+
+          bool isOpened = false;
+          TopTools_IndexedDataMapOfShapeListOfShape veMap;
+          TopExp::MapShapesAndAncestors(newWire, TopAbs_VERTEX, TopAbs_EDGE, veMap);
+          for (int index = 1; index <= veMap.Extent(); ++index)
+          {
+            const TopTools_ListOfShape& edges = verticesEdgesMap(index);
+
+            if (edges.Extent() == 1)
+            {
+              isOpened = true;
+              break;
+            }
+          }
+
+          if (!isOpened)
+          {
+            wires.push_back(newWire);
+            m_plotter.DRAW_SHAPE(newWire, "Outer");
+          }
+        }
+      }
+
+    }
+
+    // Loop over the inner wires.
+    for (TopExp_Explorer wexp(face, TopAbs_WIRE); wexp.More(); wexp.Next())
+    {
+      const TopoDS_Wire& wire = TopoDS::Wire(wexp.Current());
+      //
+      if (wire.IsPartner(outerWire))
+        continue;
+
+      wires.push_back(wire);
+    }
+
+    std::vector<TopoDS_Wire>::const_iterator itW = wires.cbegin();
+    for (; itW != wires.cend(); ++itW)
+    {
+      const TopoDS_Wire& wire = *itW;
       //
       if ( wire.IsPartner(outerWire) )
         continue;
