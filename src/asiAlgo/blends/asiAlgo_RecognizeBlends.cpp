@@ -141,21 +141,25 @@ namespace asiAlgo_AAGIterationRule
   public:
 
     //! Ctor.
-    //! \param[in] aag        attributed adjacency graph keeping information on the
-    //!                       recognized properties of the model.
-    //! \param[in] maxRadius  max allowed radius.
-    //! \param[in] allowCones whether to allow conical faces as EBFs.
-    //! \param[in] progress   progress notifier.
-    //! \param[in] plottter   imperative plotter.
+    //! \param[in] aag                attributed adjacency graph keeping information on the
+    //!                               recognized properties of the model.
+    //! \param[in] maxRadius          max allowed radius.
+    //! \param[in] allowCones         whether to allow conical faces as EBFs.
+    //! \param[in] allowLinExtrusions whether to allow linear extrusion faces as EBFs.
+    //! \param[in] progress           progress notifier.
+    //! \param[in] plottter           imperative plotter.
     RecognizeEdgeBlends(const Handle(asiAlgo_AAG)& aag,
                         const double               maxRadius,
                         const bool                 allowCones,
+                        const bool                 allowLinExtrusions,
                         ActAPI_ProgressEntry       progress = nullptr,
                         ActAPI_PlotterEntry        plotter  = nullptr)
+    //
     : m_aag(aag), m_fMaxRadius(maxRadius), m_bBlockingModeOn(true)
     {
       m_localReco = new asiAlgo_RecognizeEBF(aag, progress, plotter);
       m_localReco->SetAllowCones(allowCones);
+      m_localReco->SetAllowLinearExtrusions(allowLinExtrusions);
     }
 
   public:
@@ -363,8 +367,9 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const TopoDS_Shape&  masterCAD,
                                                  ActAPI_ProgressEntry progress,
                                                  ActAPI_PlotterEntry  plotter)
 //
-: asiAlgo_Recognizer (masterCAD, nullptr, progress, plotter),
-  m_bAllowCones      (true)
+: asiAlgo_Recognizer    (masterCAD, nullptr, progress, plotter),
+  m_bAllowCones         (true),
+  m_bAllowLinExtrusions (false)
 {}
 
 //-----------------------------------------------------------------------------
@@ -374,8 +379,9 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const TopoDS_Shape&        mast
                                                  ActAPI_ProgressEntry       progress,
                                                  ActAPI_PlotterEntry        plotter)
 //
-: asiAlgo_Recognizer (masterCAD, aag, progress, plotter),
-  m_bAllowCones      (true)
+: asiAlgo_Recognizer    (masterCAD, aag, progress, plotter),
+  m_bAllowCones         (true),
+  m_bAllowLinExtrusions (false)
 {}
 
 //-----------------------------------------------------------------------------
@@ -384,8 +390,9 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const Handle(asiAlgo_AAG)& aag,
                                                  ActAPI_ProgressEntry       progress,
                                                  ActAPI_PlotterEntry        plotter)
 //
-: asiAlgo_Recognizer (aag->GetMasterShape(), aag, progress, plotter),
-  m_bAllowCones      (true)
+: asiAlgo_Recognizer    (aag->GetMasterShape(), aag, progress, plotter),
+  m_bAllowCones         (true),
+  m_bAllowLinExtrusions (false)
 {}
 
 //-----------------------------------------------------------------------------
@@ -393,6 +400,13 @@ asiAlgo_RecognizeBlends::asiAlgo_RecognizeBlends(const Handle(asiAlgo_AAG)& aag,
 void asiAlgo_RecognizeBlends::SetAllowCones(const bool on)
 {
   m_bAllowCones = on;
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_RecognizeBlends::SetAllowLinearExtrusions(const bool on)
+{
+  m_bAllowLinExtrusions = on;
 }
 
 //-----------------------------------------------------------------------------
@@ -429,6 +443,7 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
     ebfRule = new asiAlgo_AAGIterationRule::RecognizeEdgeBlends(m_aag,
                                                                 radius,
                                                                 m_bAllowCones,
+                                                                m_bAllowLinExtrusions,
                                                                 m_progress,
                                                                 m_plotter);
 
@@ -562,6 +577,7 @@ bool asiAlgo_RecognizeBlends::Perform(const int    faceId,
     ebfRule = new asiAlgo_AAGIterationRule::RecognizeEdgeBlends(m_aag,
                                                                 radius,
                                                                 m_bAllowCones,
+                                                                m_bAllowLinExtrusions,
                                                                 m_progress,
                                                                 m_plotter);
 

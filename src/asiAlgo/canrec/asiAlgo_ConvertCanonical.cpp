@@ -32,6 +32,7 @@
 #include <asiAlgo_ConvertCanonical.h>
 
 // asiAlgo includes
+#include <asiAlgo_BRepNormalizer.h>
 #include <asiAlgo_ConvertCanonicalMod.h>
 #include <asiAlgo_GeomSummary.h>
 #include <asiAlgo_Utils.h>
@@ -48,7 +49,6 @@
 #include <Geom_Plane.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeBuild_ReShape.hxx>
-#include <ShapeCustom.hxx>
 #include <ShapeFix.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Face.hxx>
@@ -61,6 +61,90 @@
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
+
+namespace
+{
+  //! This is a copy of `ShapeCustom::ApplyModifier` giving us more control on
+  //! what's going on.
+  TopoDS_Shape ApplyModifier(const TopoDS_Shape&                      S,
+                             const Handle(asiAlgo_BRepNormalization)& M,
+                             TopTools_DataMapOfShapeShape&            context,
+                             asiAlgo_BRepNormalizer&                  MD,
+                             ActAPI_ProgressEntry                     progress,
+                             ActAPI_PlotterEntry                      plotter,
+                             const Handle(ShapeBuild_ReShape)&        reShape = nullptr)
+  {
+    // protect against INTERNAL/EXTERNAL shapes
+    TopoDS_Shape SF = S.Oriented(TopAbs_FORWARD);
+  
+    // Process COMPOUNDs separately in order to handle sharing in assemblies
+    if ( SF.ShapeType() == TopAbs_COMPOUND )
+    {
+      bool locModified = false;
+      TopoDS_Compound C;
+      BRep_Builder B;
+      B.MakeCompound(C);
+
+      for ( TopoDS_Iterator it(SF); it.More(); it.Next() )
+      {
+        TopoDS_Shape    shape = it.Value();
+        TopLoc_Location L     = shape.Location(), nullLoc;
+        shape.Location(nullLoc);
+        TopoDS_Shape res;
+
+        if ( context.IsBound(shape) )
+          res = context.Find(shape).Oriented ( shape.Orientation() );
+        else
+          res = ApplyModifier(shape, M, context, MD, progress, plotter);
+
+        if ( !res.IsSame(shape) )
+        {
+          context.Bind(shape, res);
+          locModified = true;
+        }
+
+        res.Location(L, false);
+        B.Add(C, res);
+      }
+
+      if ( !locModified )
+        return S;
+
+      context.Bind(SF, C);
+      return C.Oriented( S.Orientation() );
+    }
+
+    // Modify the shape
+    MD.Init(SF);
+    MD.Perform(M);
+
+    if ( !reShape.IsNull() )
+    {
+      for ( TopoDS_Iterator it(SF, false); it.More(); it.Next() )
+      {
+        const TopoDS_Shape& current = it.Value();
+        TopoDS_Shape result;
+
+        if ( !MD.ModifiedShape(current, result) )
+        {
+          progress.SendLogMessage(LogErr(Normal) << "Failed to modify shape.");
+          continue;
+        }
+
+        if ( !result.IsNull() && !current.IsSame(result) )
+        {
+          reShape->Replace(current, result);
+        }
+      }
+    }
+
+    TopoDS_Shape RS;
+    if ( MD.ModifiedShape(SF, RS) )
+      return RS.Oriented( S.Orientation() );
+
+    return TopoDS_Shape();
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -100,12 +184,12 @@ TopoDS_Shape asiAlgo_ConvertCanonical::Perform(const TopoDS_Shape& shape,
    * ==================== */
 
   TopTools_DataMapOfShapeShape context;
-  BRepTools_Modifier           MD;
+  asiAlgo_BRepNormalizer       MD(m_progress, m_plotter);
   TopoDS_Shape                 result;
 
   try // You never know...
   {
-    result = ShapeCustom::ApplyModifier(shape, M, context, MD);
+    result = ::ApplyModifier(shape, M, context, MD, m_progress, m_plotter);
   }
   catch ( ... )
   {
@@ -140,8 +224,8 @@ TopoDS_Shape asiAlgo_ConvertCanonical::Perform(const TopoDS_Shape& shape,
   TIMER_COUT_RESULT_NOTIFIER(m_progress, "asiAlgo_ConvertCanonical::Perform()")
 #endif
 
-  if (buildHistory)
-    fillHistory(shape, result);
+  if ( buildHistory )
+    this->fillHistory(shape, result);
 
   return result;
 }
@@ -166,7 +250,8 @@ void asiAlgo_ConvertCanonical::fixFaces(const TopoDS_Shape&         result,
 
     // Perform fixes for the elementary surfaces only as these are presumably
     // the outcomes of canonical conversion.
-    if ( surf->IsKind( STANDARD_TYPE(Geom_ElementarySurface) ) )
+    if ( surf->IsKind( STANDARD_TYPE(Geom_ElementarySurface) ) ||
+         surf->IsKind( STANDARD_TYPE(Geom_SweptSurface) ) )
     {
       int nbWires = 0;
 
@@ -240,7 +325,8 @@ void asiAlgo_ConvertCanonical::fixFaces(const TopoDS_Shape&         result,
       //
       if ( surf->IsKind( STANDARD_TYPE(Geom_Plane) )              ||
            surf->IsKind( STANDARD_TYPE(Geom_CylindricalSurface) ) ||
-           surf->IsKind( STANDARD_TYPE(Geom_ConicalSurface) ) )
+           surf->IsKind( STANDARD_TYPE(Geom_ConicalSurface) )     ||
+           surf->IsKind( STANDARD_TYPE(Geom_SweptSurface) ) )
       {
         bbuilder.NaturalRestriction(face, false);
       }
@@ -283,11 +369,12 @@ void asiAlgo_ConvertCanonical::fillHistory(const TopoDS_Shape& input,
   TopTools_IndexedMapOfShape outputSolids;
   TopExp::MapShapes(output, TopAbs_SOLID, outputSolids);
 
-  for (int si = 1; si <= inputSolids.Extent(); ++si)
+  for ( int si = 1; si <= inputSolids.Extent(); ++si )
   {
-    const TopoDS_Shape& solid_in = inputSolids.FindKey(si);
+    const TopoDS_Shape& solid_in  = inputSolids.FindKey(si);
     const TopoDS_Shape& solid_out = outputSolids.FindKey(si);
-    if (!solid_in.IsSame(solid_out))
+    //
+    if ( !solid_in.IsSame(solid_out) )
       m_history->AddModified(solid_in, solid_out);
   }
 
@@ -309,4 +396,3 @@ void asiAlgo_ConvertCanonical::fillHistory(const TopoDS_Shape& input,
     }
   }
 }
-

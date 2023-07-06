@@ -39,6 +39,7 @@
 #include <ElSLib.hxx>
 #include <Geom_Line.hxx>
 #include <GeomAdaptor_Surface.hxx>
+#include <ShapeAnalysis_Surface.hxx>
 
 #define MagicTwist 1000
 
@@ -110,7 +111,10 @@ Handle(Geom_Surface)
   Handle(Geom_Curve)   UIso   = TrSurf->UIso(UMid);
   Handle(Geom_Curve)   VIso   = TrSurf->VIso(VMid);
 
+  // Try converting curves.
+  bool   uvIsosConverted = true;
   double cuf, cul, cvf, cvl;
+  //
   Handle(Geom_Curve)
     umidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(UIso, toler, V1, V2, cuf, cul);
   //
@@ -119,179 +123,193 @@ Handle(Geom_Surface)
   //
   if ( umidiso.IsNull() || vmidiso.IsNull() )
   {
-    return newSurf;
+    uvIsosConverted = false;
   }
 
-  // Verify plane using the middle isolines.
-  gp_Pnt FP, LP;
-  gp_Pln plane;
-  if ( umidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
+  if ( uvIsosConverted )
   {
-    gp_Circ circ = Handle(Geom_Circle)::DownCast(umidiso)->Circ();
-
-    plane = gp_Pln( circ.Location(),
-                    circ.Axis().Direction() );
-
-    FP = vmidiso->Value(cuf);
-    LP = vmidiso->Value(cul);
-
-    if ( (plane.Distance(FP) <= toler) && (plane.Distance(LP) <= toler) )
+    // Verify plane using the middle isolines.
+    gp_Pnt FP, LP;
+    gp_Pln plane;
+    if ( umidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
     {
-      if ( !newSurf.IsNull() )
-        return newSurf;
+      gp_Circ circ = Handle(Geom_Circle)::DownCast(umidiso)->Circ();
+
+      plane = gp_Pln( circ.Location(),
+                      circ.Axis().Direction() );
+
+      FP = vmidiso->Value(cuf);
+      LP = vmidiso->Value(cul);
+
+      if ( (plane.Distance(FP) <= toler) && (plane.Distance(LP) <= toler) )
+      {
+        if ( !newSurf.IsNull() )
+          return newSurf;
+      }
     }
-  }
-  else if ( vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
-  {
-    gp_Circ circ = Handle(Geom_Circle)::DownCast(vmidiso)->Circ();
-
-    plane = gp_Pln( circ.Location(),
-                    circ.Axis().Direction() );
-
-    FP = umidiso->Value(cvf);
-    LP = umidiso->Value(cvl);
-
-    if ( (plane.Distance(FP) <= toler) && (plane.Distance(LP) <= toler) )
+    else if ( vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
     {
-      if ( !newSurf.IsNull() )
-        return newSurf;
+      gp_Circ circ = Handle(Geom_Circle)::DownCast(vmidiso)->Circ();
+
+      plane = gp_Pln( circ.Location(),
+                      circ.Axis().Direction() );
+
+      FP = umidiso->Value(cvf);
+      LP = umidiso->Value(cvl);
+
+      if ( (plane.Distance(FP) <= toler) && (plane.Distance(LP) <= toler) )
+      {
+        if ( !newSurf.IsNull() )
+          return newSurf;
+      }
     }
-  }
-  //
-  bool VCase = false;
-
-  if ( umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
-  {
-    return newSurf;
-  }
-
-  if ( umidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
-  {
-    isTorusSphere = true;
-  }
-  else if ( umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
-  {
-    isCylinderCone = true; VCase = true;
-  }
-  else if ( umidiso->IsKind(STANDARD_TYPE(Geom_Circle)) && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
-  {
-    isCylinderCone = true;
-  }
-
-  double cl = 0.0;
-
-  /* torus or sphere */
-  if ( isTorusSphere )
-  {
-    Handle(Geom_Circle) Ucircle = Handle(Geom_Circle)::DownCast(umidiso);
-    Handle(Geom_Circle) Vcircle = Handle(Geom_Circle)::DownCast(vmidiso);
-
-    // torus
-    // try when V isolines is with same radius
-    Handle(Geom_Surface) obj;
-    asiAlgo_RecognizeCanonical::CheckIsTorusSphere(m_surf, Vcircle, Ucircle, V1, V2, U1, U2, toler, true, obj);
     //
-    if ( obj.IsNull() ) // try when U isolines is with same radius
-      asiAlgo_RecognizeCanonical::CheckIsTorusSphere(m_surf, Ucircle, Vcircle, U1, U2, V1, V2, toler, false, obj);
+    bool VCase = false;
 
-    if ( !obj.IsNull() )
-      newSurf = obj;
-  }
-
-  /* cone or cylinder */
-  else if ( isCylinderCone )
-  {
-    double              param1, param2, cf1, cf2;
-    Handle(Geom_Curve)  firstiso, lastiso;
-    Handle(Geom_Circle) firstisocirc, lastisocirc, midisocirc;
-    gp_Dir              isoline;
-
-    if ( VCase )
+    if ( umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
     {
-      param1     = U1;
-      param2     = U2;
-      firstiso   = TrSurf->VIso(V1);
-      lastiso    = TrSurf->VIso(V2);
-      midisocirc = Handle(Geom_Circle)::DownCast(vmidiso);
-      isoline    = Handle(Geom_Line)::DownCast(umidiso)->Lin().Direction();
-    }
-    else
-    {
-      param1     = V1;
-      param2     = V2;
-      firstiso   = TrSurf->UIso(U1);
-      lastiso    = TrSurf->UIso(U2);
-      midisocirc = Handle(Geom_Circle)::DownCast(umidiso);
-      isoline    = Handle(Geom_Line)::DownCast(vmidiso)->Lin().Direction();
+      return newSurf;
     }
 
-    firstisocirc = Handle(Geom_Circle)::DownCast( asiAlgo_ConvertCanonicalCurve::ConvertCurve(firstiso, toler, param1, param2, cf1, cl) );
-    lastisocirc  = Handle(Geom_Circle)::DownCast( asiAlgo_ConvertCanonicalCurve::ConvertCurve(lastiso, toler, param1, param2, cf2, cl) );
-
-    if ( !firstisocirc.IsNull() || !lastisocirc.IsNull() )
+    if ( umidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
     {
-      double R1, R2, R3;
-      gp_Pnt P1, P2, P3;
+      isTorusSphere = true;
+    }
+    else if ( umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) && vmidiso->IsKind( STANDARD_TYPE(Geom_Circle) ) )
+    {
+      isCylinderCone = true; VCase = true;
+    }
+    else if ( umidiso->IsKind(STANDARD_TYPE(Geom_Circle)) && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
+    {
+      isCylinderCone = true;
+    }
 
-      if ( !firstisocirc.IsNull() )
+    double cl = 0.0;
+
+    /* torus or sphere */
+    if ( isTorusSphere )
+    {
+      Handle(Geom_Circle) Ucircle = Handle(Geom_Circle)::DownCast(umidiso);
+      Handle(Geom_Circle) Vcircle = Handle(Geom_Circle)::DownCast(vmidiso);
+
+      // torus
+      // try when V isolines is with same radius
+      Handle(Geom_Surface) obj;
+      asiAlgo_RecognizeCanonical::CheckIsTorusSphere(m_surf, Vcircle, Ucircle, V1, V2, U1, U2, toler, true, obj);
+      //
+      if ( obj.IsNull() ) // try when U isolines is with same radius
+        asiAlgo_RecognizeCanonical::CheckIsTorusSphere(m_surf, Ucircle, Vcircle, U1, U2, V1, V2, toler, false, obj);
+
+      if ( !obj.IsNull() )
+        newSurf = obj;
+    }
+
+    /* cone or cylinder */
+    else if ( isCylinderCone )
+    {
+      double              param1, param2, cf1, cf2;
+      Handle(Geom_Curve)  firstiso, lastiso;
+      Handle(Geom_Circle) firstisocirc, lastisocirc, midisocirc;
+      gp_Dir              isoline;
+
+      if ( VCase )
       {
-        R1 = firstisocirc->Circ().Radius();
-        P1 = firstisocirc->Circ().Location();
+        param1     = U1;
+        param2     = U2;
+        firstiso   = TrSurf->VIso(V1);
+        lastiso    = TrSurf->VIso(V2);
+        midisocirc = Handle(Geom_Circle)::DownCast(vmidiso);
+        isoline    = Handle(Geom_Line)::DownCast(umidiso)->Lin().Direction();
       }
       else
       {
-        R1 = 0;
-        P1 = firstiso->Value( (firstiso->LastParameter() - firstiso->FirstParameter() )/2 );
+        param1     = V1;
+        param2     = V2;
+        firstiso   = TrSurf->UIso(U1);
+        lastiso    = TrSurf->UIso(U2);
+        midisocirc = Handle(Geom_Circle)::DownCast(umidiso);
+        isoline    = Handle(Geom_Line)::DownCast(vmidiso)->Lin().Direction();
       }
 
-      R2 = midisocirc->Circ().Radius();
-      P2 = midisocirc->Circ().Location();
+      firstisocirc = Handle(Geom_Circle)::DownCast( asiAlgo_ConvertCanonicalCurve::ConvertCurve(firstiso, toler, param1, param2, cf1, cl) );
+      lastisocirc  = Handle(Geom_Circle)::DownCast( asiAlgo_ConvertCanonicalCurve::ConvertCurve(lastiso, toler, param1, param2, cf2, cl) );
 
-      if ( !lastisocirc.IsNull() )
+      if ( !firstisocirc.IsNull() || !lastisocirc.IsNull() )
       {
-        R3 = lastisocirc->Circ().Radius();
-        P3 = lastisocirc->Circ().Location();
-      }
-      else
-      {
-        R3 = 0;
-        P3 = lastiso->Value( (lastiso->LastParameter() - lastiso->FirstParameter() )/2 );
-      }
+        double R1, R2, R3;
+        gp_Pnt P1, P2, P3;
 
-      // cylinder
-      if ( ( Abs(R2-R1) < toler ) && ( Abs(R3-R1) < toler ) && ( Abs(R3-R2) < toler ) )
-      {
-        gp_Ax3 Axes( P1, gp_Vec(P1, P3) );
-
-        newSurf = new Geom_CylindricalSurface(Axes, R1);
-      }
-
-      // cone
-      else if ( ((Abs(R1) > Abs(R2)) && (Abs(R2) > Abs(R3))) ||
-                ((Abs(R3) > Abs(R2)) && (Abs(R2) > Abs(R1))) )
-      {
-        double radius;
-        gp_Ax3 Axes;
-        double semiangle = gp_Vec(isoline).Angle( gp_Vec(P3, P1) );
-
-        if ( semiangle > M_PI/2 )
-          semiangle = M_PI - semiangle;
-
-        if ( R1 > R3 )
+        if ( !firstisocirc.IsNull() )
         {
-          radius = R3;
-          Axes = gp_Ax3( P3, gp_Vec(P3, P1) );
+          R1 = firstisocirc->Circ().Radius();
+          P1 = firstisocirc->Circ().Location();
         }
         else
         {
-          radius = R1;
-          Axes = gp_Ax3( P1, gp_Vec(P1, P3) );
+          R1 = 0;
+          P1 = firstiso->Value( (firstiso->LastParameter() - firstiso->FirstParameter() )/2 );
         }
 
-        newSurf = new Geom_ConicalSurface(Axes, semiangle, radius);
+        R2 = midisocirc->Circ().Radius();
+        P2 = midisocirc->Circ().Location();
+
+        if ( !lastisocirc.IsNull() )
+        {
+          R3 = lastisocirc->Circ().Radius();
+          P3 = lastisocirc->Circ().Location();
+        }
+        else
+        {
+          R3 = 0;
+          P3 = lastiso->Value( (lastiso->LastParameter() - lastiso->FirstParameter() )/2 );
+        }
+
+        // cylinder
+        if ( ( Abs(R2-R1) < toler ) && ( Abs(R3-R1) < toler ) && ( Abs(R3-R2) < toler ) )
+        {
+          gp_Ax3 Axes( P1, gp_Vec(P1, P3) );
+
+          newSurf = new Geom_CylindricalSurface(Axes, R1);
+        }
+
+        // cone
+        else if ( ((Abs(R1) > Abs(R2)) && (Abs(R2) > Abs(R3))) ||
+                  ((Abs(R3) > Abs(R2)) && (Abs(R2) > Abs(R1))) )
+        {
+          double radius;
+          gp_Ax3 Axes;
+          double semiangle = gp_Vec(isoline).Angle( gp_Vec(P3, P1) );
+
+          if ( semiangle > M_PI/2 )
+            semiangle = M_PI - semiangle;
+
+          if ( R1 > R3 )
+          {
+            radius = R3;
+            Axes = gp_Ax3( P3, gp_Vec(P3, P1) );
+          }
+          else
+          {
+            radius = R1;
+            Axes = gp_Ax3( P1, gp_Vec(P1, P3) );
+          }
+
+          newSurf = new Geom_ConicalSurface(Axes, semiangle, radius);
+        }
       }
+      else return newSurf;
     }
-    else return newSurf;
+  }
+  else // uvIsosConverted == false
+  {
+    // Try linear extrusion surface.
+    Handle(Geom_Line)  straightIso;
+    Handle(Geom_Curve) profileIso;
+    //
+    if ( asiAlgo_RecognizeCanonical::CheckIsLinearExtrusion(m_surf, toler, straightIso, profileIso) )
+    {
+      newSurf = new Geom_SurfaceOfLinearExtrusion( profileIso, straightIso->Lin().Direction() );
+    }
   }
 
   if ( newSurf.IsNull() )
@@ -303,17 +321,20 @@ Handle(Geom_Surface)
 
   m_fGap = 0.;
 
+  ShapeAnalysis_Surface sas(newSurf); // For general-case projection.
+
   Handle(GeomAdaptor_Surface)
     SurfAdapt = new GeomAdaptor_Surface(newSurf);
 
-  const int          NP = 21;
-  double             S = 0., T = 0.;
-  gp_Pnt             P3d, P3d2;
-  bool               onSurface = true;
-  double             dis;
-  double             DU, DV;
-  int                j, i;
-  Handle(Geom_Curve) iso;
+  const int              NP = 21;
+  double                 S = 0., T = 0.;
+  gp_Pnt                 P3d, P3d2;
+  bool                   onSurface = true;
+  double                 dis;
+  double                 DU, DV;
+  int                    j, i;
+  Handle(Geom_Curve)     iso;
+  tl::optional<gp_Pnt2d> uvPrev;
 
   DU = (U2 - U1) / (NP - 1);
   DV = (V2 - V1) / (NP - 1);
@@ -360,7 +381,25 @@ Handle(Geom_Surface)
           ElSLib::Parameters(Torus, P3d, S, T);
           break;
         }
-        default: break;
+        default:
+        {
+          gp_Pnt2d projUV;
+
+          if ( !uvPrev.has_value() )
+          {
+            projUV = sas.ValueOfUV(P3d, 1e-3);
+          }
+          else
+          {
+            projUV = sas.NextValueOfUV(*uvPrev, P3d, 1e-3);
+          }
+
+          uvPrev = projUV;
+
+          S = projUV.X();
+          T = projUV.Y();
+          break;
+        }
       }
 
       newSurf->D0(S, T, P3d2);

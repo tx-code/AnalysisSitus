@@ -58,6 +58,7 @@
 //------------------------------------------------------------------------------
 
 #define INF_LIMIT 100
+#define MAGIC     21.
 
 //------------------------------------------------------------------------------
 
@@ -862,6 +863,7 @@ bool
   asiAlgo_RecognizeCanonical::CheckIsLinearExtrusion(const Handle(Geom_Surface)& surf,
                                                      const double                tol,
                                                      Handle(Geom_Line)&          straightIso,
+                                                     Handle(Geom_Curve)&         profileIso,
                                                      ActAPI_ProgressEntry        progress,
                                                      ActAPI_PlotterEntry         plotter)
 {
@@ -888,6 +890,14 @@ bool
   Handle(Geom_Curve)   UIso   = TrSurf->UIso(UMid);
   Handle(Geom_Curve)   VIso   = TrSurf->VIso(VMid);
 
+  // Check lengths.
+  const double uIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(UIso), tol);
+  const double vIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(VIso), tol);
+  //
+  if ( uIsoLen > 15.*vIsoLen || vIsoLen > 15.*uIsoLen )
+    return false;
+
+  // Try converting isos.
   double cuf, cul, cvf, cvl;
   Handle(Geom_Curve)
     umidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(UIso, tol, V1, V2, cuf, cul);
@@ -895,19 +905,131 @@ bool
   Handle(Geom_Curve)
     vmidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(VIso, tol, U1, U2, cvf, cvl);
 
+  /* CASE 1: U iso is a straight line */
   if ( !umidiso.IsNull() && umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
   {
     straightIso = Handle(Geom_Line)::DownCast(umidiso);
+
+    const gp_Dir& refDir = straightIso->Lin().Direction();
+
+    // Add more isolines in this parametric direction.
+    const double uStep = (U2 - U1) / MAGIC;
+    //
+    std::vector<double> U;
+    {
+      double u     = U1;
+      bool   uStop = false;
+      //
+      while ( !uStop )
+      {
+        if ( (u > U2) || Abs(u - U2) < 1e-6 )
+        {
+          u     = U2;
+          uStop = true;
+        }
+
+        U.push_back(u);
+        u += uStep;
+      }
+    }
+
+    // All these isos should be straight and parallel to the reference one.
+    for ( const auto& u : U )
+    {
+      Handle(Geom_Curve) probeIso = TrSurf->UIso(u);
+
+      // Try converting.
+      double probeF, probeL;
+      //
+      Handle(Geom_Curve)
+        probeIsoConverted = asiAlgo_ConvertCanonicalCurve::ConvertCurve(probeIso, tol, V1, V2, probeF, probeL);
+      //
+      if ( probeIsoConverted.IsNull() || !probeIsoConverted->IsKind( STANDARD_TYPE(Geom_Line) ) )
+        return false;
+
+      Handle(Geom_Line)
+        probeIsoLine = Handle(Geom_Line)::DownCast(probeIsoConverted);
+
+      const gp_Dir& nextDir = probeIsoLine->Lin().Direction();
+
+      if ( !nextDir.IsParallel(refDir, 1.*M_PI/180.) )
+        return false;
+    }
+
+    profileIso = VIso;
     return true;
   }
 
+  /* CASE 2: V iso is a straight line */
   if ( !vmidiso.IsNull() && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
   {
     straightIso = Handle(Geom_Line)::DownCast(vmidiso);
+
+    const gp_Dir& refDir = straightIso->Lin().Direction();
+
+    // Add more isolines in this parametric direction.
+    const double vStep = (V2 - V1) / MAGIC;
+    //
+    std::vector<double> V;
+    {
+      double v     = V1;
+      bool   vStop = false;
+      //
+      while ( !vStop )
+      {
+        if ( (v > V2) || Abs(v - V2) < 1e-6 )
+        {
+          v     = V2;
+          vStop = true;
+        }
+
+        V.push_back(v);
+        v += vStep;
+      }
+    }
+
+    // All these isos should be straight and parallel to the reference one.
+    for ( const auto& v : V )
+    {
+      Handle(Geom_Curve) probeIso = TrSurf->VIso(v);
+
+      // Try converting.
+      double probeF, probeL;
+      //
+      Handle(Geom_Curve)
+        probeIsoConverted = asiAlgo_ConvertCanonicalCurve::ConvertCurve(probeIso, tol, U1, U2, probeF, probeL);
+      //
+      if ( probeIsoConverted.IsNull() || !probeIsoConverted->IsKind( STANDARD_TYPE(Geom_Line) ) )
+        return false;
+
+      Handle(Geom_Line)
+        probeIsoLine = Handle(Geom_Line)::DownCast(probeIsoConverted);
+
+      const gp_Dir& nextDir = probeIsoLine->Lin().Direction();
+
+      if ( !nextDir.IsParallel(refDir, 1.*M_PI/180.) )
+        return false;
+    }
+
+    profileIso = UIso;
     return true;
   }
 
   return false;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+  asiAlgo_RecognizeCanonical::CheckIsLinearExtrusion(const Handle(Geom_Surface)& surf,
+                                                     const double                tol,
+                                                     ActAPI_ProgressEntry        progress,
+                                                     ActAPI_PlotterEntry         plotter)
+{
+  Handle(Geom_Line)  straightIso;
+  Handle(Geom_Curve) profileIso;
+  //
+  return CheckIsLinearExtrusion(surf, tol, straightIso, profileIso, progress, plotter);
 }
 
 //-----------------------------------------------------------------------------
@@ -954,11 +1076,13 @@ Handle(Standard_Type)
 
   // Check linear extrusion.
   {
-    Handle(Geom_Line) straightIso;
+    Handle(Geom_Line)  straightIso;
+    Handle(Geom_Curve) profileIso;
     //
     if ( CheckIsLinearExtrusion(surface,
                                 toler,
                                 straightIso,
+                                profileIso,
                                 progress, plotter) )
     {
       return STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion);

@@ -82,6 +82,12 @@ public:
   asiAlgo_EXPORT void
     SetAllowCones(const bool on);
 
+  //! Sets a Boolean flag indicating whether linear extrustion EBFs are
+  //! allowed or not. If not, all linear extrustion faces are to be skipped.
+  //! \param[in] on the Boolean value to set.
+  asiAlgo_EXPORT void
+    SetAllowLinearExtrusions(const bool on);
+
   //! Performs recognition of fillets for the entire model.
   //! \param[in] radius radius of interest.
   //! \return true in case of success, false -- otherwise.
@@ -109,7 +115,8 @@ public:
 
 protected:
 
-  bool m_bAllowCones; //!< Whether to allow conical EBFs.
+  bool m_bAllowCones;         //!< Whether to allow conical EBFs.
+  bool m_bAllowLinExtrusions; //!< Whether to allow linear extrusion EBFs.
 
 };
 
