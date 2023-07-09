@@ -594,7 +594,7 @@ void asiUI_IV::REDRAW_AXES(const t_extString& name,
 
 void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)& curve,
                           const ActAPI_Color&       color,
-                          const TCollection_ExtendedString&        name)
+                          const t_extString&        name)
 {
   this->draw_curve(curve, color, name, true, false, true);
 }
@@ -604,14 +604,14 @@ void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)& curve,
 void asiUI_IV::DRAW_CURVE(const Handle(Geom_Curve)& curve,
                           const ActAPI_Color&       color,
                           const bool                drawOri,
-                          const TCollection_ExtendedString&        name)
+                          const t_extString&        name)
 {
   this->draw_curve(curve, color, name, drawOri, false, true);
 }
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_CURVE(const TCollection_ExtendedString&        name,
+void asiUI_IV::REDRAW_CURVE(const t_extString&        name,
                             const Handle(Geom_Curve)& curve,
                             const ActAPI_Color&       color)
 {
@@ -620,7 +620,7 @@ void asiUI_IV::REDRAW_CURVE(const TCollection_ExtendedString&        name,
 
 //---------------------------------------------------------------------------//
 
-void asiUI_IV::REDRAW_CURVE(const TCollection_ExtendedString&        name,
+void asiUI_IV::REDRAW_CURVE(const t_extString&        name,
                             const Handle(Geom_Curve)& curve,
                             const ActAPI_Color&       color,
                             const bool                drawOri)
@@ -1536,7 +1536,7 @@ void asiUI_IV::draw_vectors(const Handle(HRealArray)& points,
 
 void asiUI_IV::draw_curve(const Handle(Geom_Curve)& curve,
                           const ActAPI_Color&       color,
-                          const TCollection_ExtendedString&        name,
+                          const t_extString&        name,
                           const bool                drawOri,
                           const bool                is2dViewer,
                           const bool                newPrimitive)
@@ -1775,7 +1775,7 @@ void asiUI_IV::draw_shape(const TopoDS_Shape& shape,
 void asiUI_IV::draw_link(const gp_XYZ&       p1,
                          const gp_XYZ&       p2,
                          const ActAPI_Color& color,
-                         const TCollection_ExtendedString&  name,
+                         const t_extString&  name,
                          const bool          is2dViewer,
                          const bool          newPrimitive)
 {
@@ -1816,6 +1816,10 @@ void asiUI_IV::draw_link(const gp_XYZ&       p1,
     m_lastObj = curve_n;
   }
 
+  // Update persistent color.
+  curve_n->SetHasColor(true);
+  curve_n->SetColor( asiVisu_Utils::ColorToInt(color) );
+
   // Commit transaction
   if ( isTx )
     m_model->CommitCommand();
@@ -1829,7 +1833,7 @@ void asiUI_IV::draw_link(const gp_XYZ&       p1,
 void asiUI_IV::draw_link(const gp_XYZ&       p1,
                          const gp_XYZ&       p2,
                          const ActAPI_Color& color,
-                         const TCollection_ExtendedString&  name,
+                         const t_extString&  name,
                          const bool          newPrimitive)
 {
   this->draw_link(p1, p2, color, name, false, newPrimitive);
@@ -1840,7 +1844,7 @@ void asiUI_IV::draw_link(const gp_XYZ&       p1,
 void asiUI_IV::draw_link(const gp_XY&        p1,
                          const gp_XY&        p2,
                          const ActAPI_Color& color,
-                         const TCollection_ExtendedString&  name,
+                         const t_extString&  name,
                          const bool          newPrimitive)
 {
   gp_XYZ p1_3d(p1.X(), p1.Y(), 0.0), p2_3d(p2.X(), p2.Y(), 0.0);
@@ -1852,7 +1856,7 @@ void asiUI_IV::draw_link(const gp_XY&        p1,
 
 void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
                              const ActAPI_Color&        color,
-                             const TCollection_ExtendedString&         name,
+                             const t_extString&         name,
                              const bool                 is2dViewer,
                              const bool                 newPrimitive)
 {
@@ -1865,7 +1869,7 @@ void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
 
 void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
                              const ActAPI_Color&        color,
-                             const TCollection_ExtendedString&         name,
+                             const t_extString&         name,
                              const bool                 newPrimitive)
 {
   Handle(Geom_BSplineCurve) curve = asiAlgo_Utils::PolylineAsSpline(poles);
@@ -1877,7 +1881,7 @@ void asiUI_IV::draw_polyline(const std::vector<gp_XYZ>& poles,
 
 void asiUI_IV::draw_polyline(const std::vector<gp_XY>& poles,
                              const ActAPI_Color&       color,
-                             const TCollection_ExtendedString&        name,
+                             const t_extString&        name,
                              const bool                newPrimitive)
 {
   // Convert 2-dimensional poles to 3-dimensional poles for unification

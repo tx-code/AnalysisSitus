@@ -55,7 +55,7 @@ class Face
   enum AlgoKind
   {
     AKClassifier        = 0,    // classifier of a point IN, ON, OUT
-    AKQuadTree          = 1,    // quad tree divider
+    AKQuadTree          = 1,    // quadtree divider
     AKCircleBndTree     = 2,    // b-tree of circles of triangles of bgr mesh
     AKInterpolator      = 3,    // natural interpolation algo
     AKFaceBndSegTree    = 4,    // facesegboxbnd tree algo
@@ -161,12 +161,12 @@ class Face
 
   // ---------- PRIVATE FIELDS ----------
 
-  TColStd_Array1OfTransient   myAlgos;
-  BgrMesh              * myMesh;
-  Wire                 * myWires;
-  int            myNbWires;
-  int            myOuterWire;
-  bool            myIsForward;
+  TColStd_Array1OfTransient myAlgos;
+  BgrMesh*                  myMesh;
+  Wire*                     myWires;
+  int                       myNbWires;
+  int                       myOuterWire;
+  bool                      myIsForward;
 
 };
 
