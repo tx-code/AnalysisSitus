@@ -163,6 +163,10 @@ To make it clear that an assembly can only contain instances as its components (
 
 <div align="center"><img src="../imgs/asm/asm-browser_04.png"/></div>
 
+<p>
+  If a CAD file is exported from a single-part design system, no instances may be present in the scene tree. We only output instances if they are contained in the STEP file (as NEXT_ASSEMBLY_USAGE_OCCURENCE entities); otherwise, while populating the scene tree, no new entities are added. For single-part files, you quite frequently only have the individual parts and no instances. This is a valid scenario because a part is often exported from CAD modules for part design (as opposed to modules for assembly design) without any transformation matrix.
+</p>
+
 <!-- [END] contents -->
 </div>
 <br/>
