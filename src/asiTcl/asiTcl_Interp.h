@@ -465,6 +465,35 @@ public:
     return true;
   }
 
+  //! Collects values.
+  //! \param[in]  argc   number of command line arguments.
+  //! \param[in]  argv   command line arguments.
+  //! \param[in]  key    key.
+  //! \param[out] values values.
+  //! \return true/false.
+  bool CollectValues(const int                   argc,
+                     const char**                argv,
+                     const std::string&          key,
+                     std::vector<t_asciiString>& values)
+  {
+    values.clear();
+    for ( int iter = 0; iter < argc; ++iter )
+    {
+      if ( !IsKeyword(argv[iter], key) )
+      {
+        continue;
+      }
+      ++iter;
+      //
+      while ( iter < argc && !IsKeyword(argv[iter]) )
+      {
+        values.push_back(argv[iter++]);
+      }
+      break;
+    }
+    return true;
+  }
+
   //! Reads value as a hex number.
   bool GetKeyValueHex(const int          argc,
                       const char**       argv,
