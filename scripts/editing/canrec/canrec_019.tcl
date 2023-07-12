@@ -5,12 +5,12 @@ set datafile cad/milled/milled_001.stp
 
 # Reference numbers.
 set ref_nbSurfBezier     0
-set ref_nbSurfSpl        6
+set ref_nbSurfSpl        2
 set ref_nbSurfConical    4
 set ref_nbSurfCyl        41
 set ref_nbSurfOffset     0
 set ref_nbSurfSph        0
-set ref_nbSurfLinExtr    10
+set ref_nbSurfLinExtr    14
 set ref_nbSurfOfRevol    0
 set ref_nbSurfToroidal   0
 set ref_nbSurfPlane      97

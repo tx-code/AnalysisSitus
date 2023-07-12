@@ -57,8 +57,10 @@
 
 //------------------------------------------------------------------------------
 
-#define INF_LIMIT 100
-#define MAGIC     21.
+#define INF_LIMIT     100
+#define MAGIC         21.
+#define MAGIC_RATIO   15.
+#define ELEVATION_TOL 0.666
 
 //------------------------------------------------------------------------------
 
@@ -890,13 +892,6 @@ bool
   Handle(Geom_Curve)   UIso   = TrSurf->UIso(UMid);
   Handle(Geom_Curve)   VIso   = TrSurf->VIso(VMid);
 
-  // Check lengths.
-  const double uIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(UIso), tol);
-  const double vIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(VIso), tol);
-  //
-  if ( uIsoLen > 15.*vIsoLen || vIsoLen > 15.*uIsoLen )
-    return false;
-
   // Try converting isos.
   double cuf, cul, cvf, cvl;
   Handle(Geom_Curve)
@@ -904,6 +899,92 @@ bool
   //
   Handle(Geom_Curve)
     vmidiso = asiAlgo_ConvertCanonicalCurve::ConvertCurve(VIso, tol, U1, U2, cvf, cvl);
+
+  // Check lengths.
+  const double uIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(UIso), tol);
+  const double vIsoLen = GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(VIso), tol);
+  //
+  if ( uIsoLen > MAGIC_RATIO*vIsoLen || vIsoLen > MAGIC_RATIO*uIsoLen )
+  {
+    /* Suspicious surface: much longer in one parametric dimension compared to another. */
+
+    // Get the direction of extrusion.
+    tl::optional<gp_Ax1> refAx;
+    tl::optional<gp_Pnt> refPos; // Reference position on the sweeping axis.
+    bool                 straightIsoU = true;
+    //
+    if ( !umidiso.IsNull() && umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
+    {
+      gp_Dir refDir = Handle(Geom_Line)::DownCast(umidiso)->Lin().Direction();
+
+      refPos       = UIso->Value( ( UIso->FirstParameter() + UIso->LastParameter() )*0.5 );
+      straightIsoU = true;
+
+      refAx = gp_Ax1(*refPos, refDir);
+
+      plotter.DRAW_CURVE( UIso, Color_Yellow, false, "refIso" );
+    }
+    else if ( !vmidiso.IsNull() && vmidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )
+    {
+      gp_Dir refDir = Handle(Geom_Line)::DownCast(vmidiso)->Lin().Direction();
+
+      refPos       = VIso->Value( ( VIso->FirstParameter() + VIso->LastParameter() )*0.5 );
+      straightIsoU = false;
+
+      refAx = gp_Ax1(*refPos, refDir);
+
+      plotter.DRAW_CURVE( VIso, Color_Yellow, false, "refIso" );
+    }
+    //
+    if ( !refAx.has_value() || !refPos.has_value() )
+      return false;
+
+    plotter.DRAW_POINT    ( refAx->Location(), Color_Yellow, "refPt" );
+    plotter.DRAW_VECTOR_AT( refAx->Location(), refAx->Direction(), Color_Yellow, "refAxis" );
+
+    // Reference projection parameter to check elevation.
+    const double refDot = 0.;
+
+    const double P1 = straightIsoU ? U1 : V1;
+    const double P2 = straightIsoU ? U2 : V2;
+
+    // Add probe points in the curved parametric direction.
+    const double tStep = (P2 - P1) / MAGIC;
+    //
+    std::vector<double> T;
+    {
+      double t     = P1;
+      bool   tStop = false;
+      //
+      while ( !tStop )
+      {
+        if ( (t > P2) || Abs(t - P2) < 1e-6 )
+        {
+          t     = P2;
+          tStop = true;
+        }
+
+        T.push_back(t);
+        t += tStep;
+      }
+    }
+
+    for ( const auto& t : T )
+    {
+      Handle(Geom_Curve) testIso = straightIsoU ? TrSurf->UIso(t) : TrSurf->VIso(t);
+      gp_Pnt             testPos = testIso->Value( ( testIso->FirstParameter() + testIso->LastParameter() )*0.5 );
+
+      // Test projection to check elevation.
+      const double
+        testDot = ( testPos.XYZ() - refAx->Location().XYZ() ).Dot( refAx->Direction().XYZ() );
+
+      plotter.DRAW_CURVE( testIso, Color_Red, false, "testIso" );
+      plotter.DRAW_POINT( refAx->Location().XYZ() + refAx->Direction().XYZ()*testDot, Color_Blue, "testPt" );
+
+      if ( Abs(testDot - refDot) > ELEVATION_TOL )
+        return false;
+    }
+  }
 
   /* CASE 1: U iso is a straight line */
   if ( !umidiso.IsNull() && umidiso->IsKind( STANDARD_TYPE(Geom_Line) ) )

@@ -5,12 +5,12 @@ set datafile cad/canrec/rhino_solidworks_comparison_Sketched-Bend4_cr.stp
 
 # Reference numbers.
 set ref_nbSurfBezier     0
-set ref_nbSurfSpl        6
+set ref_nbSurfSpl        0
 set ref_nbSurfConical    0
 set ref_nbSurfCyl        250
 set ref_nbSurfOffset     0
 set ref_nbSurfSph        0
-set ref_nbSurfLinExtr    13
+set ref_nbSurfLinExtr    19
 set ref_nbSurfOfRevol    0
 set ref_nbSurfToroidal   0
 set ref_nbSurfPlane      141
