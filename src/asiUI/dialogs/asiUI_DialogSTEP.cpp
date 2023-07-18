@@ -87,7 +87,7 @@ asiUI_DialogSTEP::asiUI_DialogSTEP(const Handle(ActAPI_IModel)&    model,
   m_isProceed(false)
 {
   // Window title
-  this->setWindowTitle("Loading STEP parameters");
+  this->setWindowTitle("STEP translator parameters");
 
   // Main layout
   m_pMainLayout = new QVBoxLayout();
