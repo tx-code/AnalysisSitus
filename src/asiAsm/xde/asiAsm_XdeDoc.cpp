@@ -48,11 +48,14 @@
 #include <CDM_MetaData.hxx>
 #include <gp_Quaternion.hxx>
 #include <IGESCAFControl_Reader.hxx>
+#include <Interface_EntityIterator.hxx>
 #include <Interface_Static.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <STEPCAFControl_Writer.hxx>
 #include <STEPControl_Controller.hxx>
+#include <StepData_StepModel.hxx>
+#include <StepShape_AdvancedFace.hxx>
 #include <TColStd_HSequenceOfExtendedString.hxx>
 #include <TDataStd_ChildNodeIterator.hxx>
 #include <TDataStd_Name.hxx>
@@ -66,6 +69,8 @@
 #include <TNaming_Tool.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_MapOfOrientedShape.hxx>
+#include <Transfer_TransientProcess.hxx>
+#include <TransferBRep_ShapeBinder.hxx>
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
@@ -363,7 +368,7 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
   // Initialize parameters of reader
 
   // To read sub-shape names from 'Name' attributes of STEP Representation Items
-  Interface_Static::SetIVal("read.stepcaf.subshapes.name", readSubshapes); 
+  Interface_Static::SetIVal("read.stepcaf.subshapes.name", readSubshapes);
 
   // Read CAD and associated data from file.
   try
@@ -395,6 +400,57 @@ bool Doc::LoadSTEP(const TCollection_AsciiString& filename,
       //
       this->clearSession(WS);
       return false;
+    }
+
+    /* Populate original entity IDs */
+
+    m_faceEntityIds.Clear();
+
+    // Access reader and the populated Entity Model.
+    const STEPControl_Reader&  baseReader = xdeReader.Reader();
+    Handle(StepData_StepModel) stepModel  = baseReader.StepModel();
+    Interface_EntityIterator   entIt      = stepModel->Entities();
+    //
+    // Print number of entities.
+    m_progress.SendLogMessage( LogInfo(Normal) << "Read %1 entities from STEP file" << entIt.NbEntities() );
+
+    const Handle(XSControl_TransferReader)&
+      tr = baseReader.WS()->TransferReader();
+
+    // Iterate all entities.
+    for ( ; entIt.More(); entIt.Next() )
+    {
+      const Handle(Standard_Transient)& ent     = entIt.Value();
+      const Handle(Standard_Type)&      entType = ent->DynamicType();
+      const int                         entId   = stepModel->Number(ent);
+  
+      if ( ent->IsKind( STANDARD_TYPE(StepShape_AdvancedFace) ) )
+      {
+        Handle(StepShape_AdvancedFace)
+          advFaceEnt = Handle(StepShape_AdvancedFace)::DownCast(ent);
+
+        Handle(TransferBRep_ShapeBinder)
+          transferBinder = Handle(TransferBRep_ShapeBinder)::DownCast( tr->TransientProcess()->Find(ent) );
+
+        if ( transferBinder.IsNull() )
+        {
+          m_progress.SendLogMessage(LogWarn(Normal) << "Shape binder is null for the entity #%1."
+                                                    << entId);
+          continue;
+        }
+
+        TopoDS_Face face = transferBinder->Face();
+        //
+        if ( face.IsNull() )
+        {
+          m_progress.SendLogMessage(LogWarn(Normal) << "B-rep face for the entity #%1 is null."
+                                                    << entId);
+          continue;
+        }
+
+        // Store the original entity ID.
+        m_faceEntityIds.Bind(face, entId);
+      }
     }
 
     this->clearSession(WS);
@@ -2580,6 +2636,13 @@ Handle(XCAFDoc_ShapeTool) Doc::GetShapeTool() const
 Handle(XCAFDoc_ColorTool) Doc::GetColorTool() const
 {
   return XCAFDoc_DocumentTool::ColorTool( m_doc->Main() );
+}
+
+//-----------------------------------------------------------------------------
+
+const NCollection_DataMap<TopoDS_Face, int>& Doc::GetFaceEntityIds() const
+{
+  return m_faceEntityIds;
 }
 
 //-----------------------------------------------------------------------------

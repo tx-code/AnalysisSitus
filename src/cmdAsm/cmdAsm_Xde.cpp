@@ -237,6 +237,36 @@ int ASMXDE_Load(const Handle(asiTcl_Interp)& interp,
   // Set as variable.
   interp->SetVar( name, new cmdAsm_XdeModel(doc) );
 
+  if ( interp->HasKeyword(argc, argv, "fids") )
+  {
+    TopoDS_Shape docShape = doc->GetOneShape();
+
+    // Index topologies.
+    asiAlgo_IndexedMapOfTShape allFaces;
+    asiAlgo_Utils::MapTShapes(docShape, TopAbs_FACE, allFaces);
+
+    // Get face original entity IDs.
+    const NCollection_DataMap<TopoDS_Face, int>& faceEntityIds = doc->GetFaceEntityIds();
+    //
+    for ( NCollection_DataMap<TopoDS_Face, int>::Iterator it(faceEntityIds); it.More(); it.Next() )
+    {
+      const TopoDS_Face& face     = it.Key();
+      const int          entityId = it.Value();
+
+      if ( !allFaces.Contains(face) )
+      {
+        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Cannot find actual face for the entity #%1."
+                                                             << entityId);
+        continue;
+      }
+
+      const int fid = allFaces.FindIndex(face);
+
+      interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Face %1 is the entity #%2."
+                                                           << fid << entityId);
+    }
+  }
+
   return TCL_OK;
 }
 

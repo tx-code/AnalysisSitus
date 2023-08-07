@@ -1017,6 +1017,10 @@ public:
   asiAsm_EXPORT Handle(XCAFDoc_ColorTool)
     GetColorTool() const;
 
+  //! \return the map of faces to their original entity IDs.
+  asiAsm_EXPORT const NCollection_DataMap<TopoDS_Face, int>&
+    GetFaceEntityIds() const;
+
 protected:
 
   //! Initializes Data Model with the passed CAF Document and prepares integral
@@ -1242,6 +1246,9 @@ protected:
   mutable NCollection_DataMap<TDF_Label,
                               TCollection_AsciiString,
                               TDF_LabelMapHasher> m_LECache;
+
+  //! Faces and their corresponding entity IDs.
+  NCollection_DataMap<TopoDS_Face, int> m_faceEntityIds;
 
   /* Diagnostics tools */
 
