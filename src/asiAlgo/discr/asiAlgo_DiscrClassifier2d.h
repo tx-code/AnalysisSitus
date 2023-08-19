@@ -147,11 +147,11 @@ private:
     // Additionally, if the result is asiAlgo_DiscrON outputs the real distance (theTol).
     // theWireIndex designates the contour, whose segments are considered;
     // 0 means all the contours
-    Location  Locate     (const gp_Pnt2d&        thePnt,
-                                 double&         theTol,
-                                 SegAddress& theSrc,
-                                 double&         thePar,
-                                 const int theWireIndex) const;
+    Location Locate(const gp_Pnt2d& thePnt,
+                    double&         theTol,
+                    SegAddress&     theSrc,
+                    double&         thePar,
+                    const int       theWireIndex) const;
 
   private:
     // fields

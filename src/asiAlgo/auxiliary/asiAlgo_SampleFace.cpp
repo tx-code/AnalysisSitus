@@ -248,7 +248,7 @@ bool asiAlgo_SampleFace::Perform(const int numBins)
     // Access the discrete model.
     m_discrModel = discretizer.GetModel();
     //
-    if (m_discrModel.IsNull() )
+    if ( m_discrModel.IsNull() )
       return false;
 
     // Get the discretized face.
