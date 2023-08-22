@@ -634,7 +634,17 @@ void asiUI_IV::DRAW_CURVE2D(const Handle(Geom2d_Curve)& curve,
                             const ActAPI_Color&         color,
                             const t_extString&          name)
 {
-  this->draw_curve2d(curve, color, name, true);
+  this->draw_curve2d(curve, color, name, true, true);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::DRAW_CURVE2D(const Handle(Geom2d_Curve)& curve,
+                            const ActAPI_Color&         color,
+                            const bool                  drawOri,
+                            const t_extString&          name)
+{
+  this->draw_curve2d(curve, color, name, drawOri, true);
 }
 
 //---------------------------------------------------------------------------//
@@ -643,7 +653,17 @@ void asiUI_IV::REDRAW_CURVE2D(const t_extString&          name,
                               const Handle(Geom2d_Curve)& curve,
                               const ActAPI_Color&         color)
 {
-  this->draw_curve2d(curve, color, name, false);
+  this->draw_curve2d(curve, color, name, true, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_CURVE2D(const t_extString&          name,
+                              const Handle(Geom2d_Curve)& curve,
+                              const ActAPI_Color&         color,
+                              const bool                  drawOri)
+{
+  this->draw_curve2d(curve, color, name, drawOri, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -1592,6 +1612,7 @@ void asiUI_IV::draw_curve(const Handle(Geom_Curve)& curve,
 void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)& curve,
                             const ActAPI_Color&         color,
                             const t_extString&          name,
+                            const bool                  drawOri,
                             const bool                  newPrimitive)
 {
   if ( curve.IsNull() )
@@ -1618,20 +1639,22 @@ void asiUI_IV::draw_curve2d(const Handle(Geom2d_Curve)& curve,
     curve_n = asiEngine_IV(m_model).Find_Curve2d(name);
     //
     if ( !curve_n.IsNull() )
-      asiEngine_IV(m_model).Update_Curve2d(curve_n, curve, hostPlane, 1000);
+      asiEngine_IV(m_model).Update_Curve2d(curve_n, curve, hostPlane, 1000, drawOri);
     else
       doCreate = true;
   }
 
   if ( doCreate )
   {
-    curve_n = asiEngine_IV(m_model).Create_Curve2d(curve, hostPlane, 1000, name, newPrimitive);
+    curve_n = asiEngine_IV(m_model).Create_Curve2d(curve, hostPlane, 1000, drawOri, name, newPrimitive);
 
     // Update the last created object
     m_lastObj = curve_n;
   }
 
-  curve_n->SetColor(asiVisu_Utils::ColorToInt(color));
+  // Update persistent color.
+  curve_n->SetHasColor(true);
+  curve_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
 
   // Commit transaction
   if ( isTx )

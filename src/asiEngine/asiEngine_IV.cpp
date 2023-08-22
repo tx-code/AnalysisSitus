@@ -787,6 +787,7 @@ Handle(asiData_IVCurve2dNode)
 //! \param curve         [in] parametric curve to store.
 //! \param surface       [in] host surface.
 //! \param uLimit        [in] absolute value to bound infinite parametric domain.
+//! \param drawOriTip    [in] Boolean flag indicating whether to draw orientation tip.
 //! \param name          [in] name to set (auto-generated if empty).
 //! \param useAutoNaming [in] indicates whether to auto-name entities.
 //! \return newly created Node.
@@ -794,6 +795,7 @@ Handle(asiData_IVCurve2dNode)
   asiEngine_IV::Create_Curve2d(const Handle(Geom2d_Curve)& curve,
                                const Handle(Geom_Surface)& surface,
                                const double                uLimit,
+                               const bool                  drawOriTip,
                                const t_extString&          name,
                                const bool                  useAutoNaming)
 {
@@ -815,7 +817,7 @@ Handle(asiData_IVCurve2dNode)
   item_n->SetName(item_name);
 
   // Initialize Node
-  Update_Curve2d(item_n, curve, surface, uLimit);
+  Update_Curve2d(item_n, curve, surface, uLimit, drawOriTip);
 
   // Add as child
   IV_Parent->AddChildNode(item_n);
@@ -827,14 +829,16 @@ Handle(asiData_IVCurve2dNode)
 //-----------------------------------------------------------------------------
 
 //! Updates Curve Node with the passed curve data.
-//! \param node    [in] Curve Node to update.
-//! \param curve   [in] parametric curve to store.
-//! \param surface [in] host surface.
-//! \param uLimit  [in] absolute value to bound infinite parametric domain.
+//! \param node       [in] Curve Node to update.
+//! \param curve      [in] parametric curve to store.
+//! \param surface    [in] host surface.
+//! \param uLimit     [in] absolute value to bound infinite parametric domain.
+//! \param drawOriTip [in] indicates whether to draw orientation tip.
 void asiEngine_IV::Update_Curve2d(const Handle(asiData_IVCurve2dNode)& node,
                                   const Handle(Geom2d_Curve)&          curve,
                                   const Handle(Geom_Surface)&          surface,
-                                  const double                         uLimit)
+                                  const double                         uLimit,
+                                  const bool                           drawOriTip)
 {
   // Handle infinite domains
   double               f      = curve->FirstParameter();
@@ -859,9 +863,10 @@ void asiEngine_IV::Update_Curve2d(const Handle(asiData_IVCurve2dNode)& node,
     geometry = curve;
 
   // Initialize
-  node->Init();
-  node->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
-  node->SetCONS(geometry, surface, f, l);
+  node->Init                  ();
+  node->SetUserFlags          (NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
+  node->SetCONS               (geometry, surface, f, l);
+  node->SetDrawOrientationTip (drawOriTip);
 }
 
 //-----------------------------------------------------------------------------

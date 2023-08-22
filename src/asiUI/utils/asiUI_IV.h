@@ -86,13 +86,17 @@ public:
 public:
 
   asiUI_EXPORT virtual void
-    FIT3D();
+    FIT3D() override;
 
   asiUI_EXPORT virtual void
-    ERASE_ALL();
+    ERASE_ALL() override;
 
   asiUI_EXPORT virtual void
-    ERASE(const t_extString&);
+    ERASE(const t_extString&) override;
+
+public:
+
+  /* Not overridden */
 
   asiUI_EXPORT virtual void
     DONLY(const t_extString&);
@@ -109,98 +113,98 @@ public:
   asiUI_EXPORT virtual void
     DRAW_POINT(const gp_XY&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POINT(const gp_Pnt2d&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POINT(const gp_XYZ&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POINT(const gp_Pnt&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINT(const t_extString&,
                  const gp_XY&,
-                 const ActAPI_Color&);
+                 const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINT(const t_extString&,
                  const gp_Pnt2d&,
-                 const ActAPI_Color&);
+                 const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINT(const t_extString&,
                  const gp_XYZ&,
-                 const ActAPI_Color&);
+                 const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINT(const t_extString&,
                  const gp_Pnt&,
-                 const ActAPI_Color&);
+                 const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POINTS(const Handle(HRealArray)&,
                 const ActAPI_Color&,
-                const t_extString&);
+                const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POINTS(const std::vector<gp_XYZ>&,
                 const ActAPI_Color&,
-                const t_extString&);
+                const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINTS(const t_extString&,
                   const Handle(HRealArray)&,
-                  const ActAPI_Color&);
+                  const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POINTS(const t_extString&,
                   const std::vector<gp_XYZ>&,
-                  const ActAPI_Color&);
+                  const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_VECTORS(const Handle(HRealArray)&,
                  const Handle(HRealArray)&,
                  const ActAPI_Color&,
-                 const t_extString&);
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_VECTORS(const t_extString&,
                    const Handle(HRealArray)&,
                    const Handle(HRealArray)&,
-                   const ActAPI_Color&);
+                   const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_VECTOR_AT(const gp_Pnt&,
                    const gp_Vec&,
                    const ActAPI_Color&,
-                   const t_extString&);
+                   const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_VECTOR_AT(const t_extString&,
                      const gp_Pnt&,
                      const gp_Vec&,
-                     const ActAPI_Color&);
+                     const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_VECTORS_AT(const gp_Pnt&,
                     const std::vector<gp_Vec>&,
                     const ActAPI_Color&,
-                    const t_extString&);
+                    const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_VECTORS_AT(const t_extString&,
                       const gp_Pnt&,
                       const std::vector<gp_Vec>&,
-                      const ActAPI_Color&);
+                      const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_AXES(const gp_Pnt&,
@@ -208,7 +212,7 @@ public:
               const gp_Dir&,
               const gp_Dir&,
               const double,
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_AXES(const t_extString&,
@@ -216,50 +220,62 @@ public:
                 const gp_Dir&,
                 const gp_Dir&,
                 const gp_Dir&,
-                const double);
+                const double) override;
 
   asiUI_EXPORT virtual void
     DRAW_CURVE(const Handle(Geom_Curve)&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_CURVE(const Handle(Geom_Curve)&,
                const ActAPI_Color&,
                const bool,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_CURVE(const t_extString&,
                  const Handle(Geom_Curve)&,
-                 const ActAPI_Color&);
+                 const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_CURVE(const t_extString&,
                  const Handle(Geom_Curve)&,
                  const ActAPI_Color&,
-                 const bool);
+                 const bool) override;
 
   asiUI_EXPORT virtual void
     DRAW_CURVE2D(const Handle(Geom2d_Curve)&,
                  const ActAPI_Color&,
-                 const t_extString&);
+                 const t_extString&) override;
+
+  asiUI_EXPORT virtual void
+    DRAW_CURVE2D(const Handle(Geom2d_Curve)&,
+                 const ActAPI_Color&,
+                 const bool,
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_CURVE2D(const t_extString&,
                    const Handle(Geom2d_Curve)&,
-                   const ActAPI_Color&);
+                   const ActAPI_Color&) override;
+
+  asiUI_EXPORT virtual void
+    REDRAW_CURVE2D(const t_extString&,
+                   const Handle(Geom2d_Curve)&,
+                   const ActAPI_Color&,
+                   const bool) override;
 
   asiUI_EXPORT virtual void
     DRAW_SURFACE(const Handle(Geom_Surface)&,
                  const ActAPI_Color&,
-                 const t_extString&);
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SURFACE(const Handle(Geom_Surface)&,
                  const ActAPI_Color&,
                  const double, // opacity
-                 const t_extString&);
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SURFACE(const Handle(Geom_Surface)&,
@@ -268,7 +284,7 @@ public:
                  const double, // V min
                  const double, // V max
                  const ActAPI_Color&,
-                 const t_extString&);
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SURFACE(const Handle(Geom_Surface)&,
@@ -278,18 +294,18 @@ public:
                  const double, // V max
                  const ActAPI_Color&,
                  const double, // opacity
-                 const t_extString&);
+                 const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_SURFACE(const t_extString&,
                    const Handle(Geom_Surface)&,
-                   const ActAPI_Color&);
+                   const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_SURFACE(const t_extString&,
                    const Handle(Geom_Surface)&,
                    const ActAPI_Color&,
-                   const double); // opacity
+                   const double) override; // opacity
 
   asiUI_EXPORT virtual void
     REDRAW_SURFACE(const t_extString&,
@@ -298,7 +314,7 @@ public:
                    const double, // U max
                    const double, // V min
                    const double, // V max
-                   const ActAPI_Color&);
+                   const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_SURFACE(const t_extString&,
@@ -308,64 +324,64 @@ public:
                    const double, // V min
                    const double, // V max
                    const ActAPI_Color&,
-                   const double); // opacity
+                   const double) override; // opacity
 
 // TOPOLOGY:
 public:
 
   asiUI_EXPORT virtual void
     DRAW_SHAPE(const TopoDS_Shape&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SHAPE(const TopoDS_Shape&,
                const ActAPI_Color&,
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SHAPE(const TopoDS_Shape&,
                const double, // opacity
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SHAPE(const TopoDS_Shape&,
                const ActAPI_Color&,
                const double, // opacity
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_SHAPE(const TopoDS_Shape&,
                const ActAPI_Color&,
                const double, // opacity
                const bool, // is wireframe
-               const t_extString&);
+               const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_SHAPE(const t_extString&,
-                 const TopoDS_Shape&);
-
-  asiUI_EXPORT virtual void
-    REDRAW_SHAPE(const t_extString&,
-                 const TopoDS_Shape&,
-                 const ActAPI_Color&);
+                 const TopoDS_Shape&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_SHAPE(const t_extString&,
                  const TopoDS_Shape&,
-                 const double); // opacity
+                 const ActAPI_Color&) override;
+
+  asiUI_EXPORT virtual void
+    REDRAW_SHAPE(const t_extString&,
+                 const TopoDS_Shape&,
+                 const double) override; // opacity
 
   asiUI_EXPORT virtual void
     REDRAW_SHAPE(const t_extString&,
                  const TopoDS_Shape&,
                  const ActAPI_Color&,
-                 const double); // opacity
+                 const double) override; // opacity
 
   asiUI_EXPORT virtual void
     REDRAW_SHAPE(const t_extString&,
                  const TopoDS_Shape&,
                  const ActAPI_Color&,
                  const double, // opacity
-                 const bool); // is wireframe
+                 const bool) override; // is wireframe
 
 // TESSELLATION:
 public:
@@ -374,162 +390,162 @@ public:
     DRAW_LINK(const gp_Pnt&,
               const gp_Pnt&,
               const ActAPI_Color&,
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_LINK(const gp_XYZ&,
               const gp_XYZ&,
               const ActAPI_Color&,
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_LINK(const gp_Pnt2d&,
               const gp_Pnt2d&,
               const ActAPI_Color&,
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_LINK(const gp_XY&,
               const gp_XY&,
               const ActAPI_Color&,
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_LINK(const t_extString&,
                 const gp_Pnt&,
                 const gp_Pnt&,
-                const ActAPI_Color&);
+                const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_LINK(const t_extString&,
                 const gp_XYZ&,
                 const gp_XYZ&,
-                const ActAPI_Color&);
+                const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_LINK(const t_extString&,
                 const gp_Pnt2d&,
                 const gp_Pnt2d&,
-                const ActAPI_Color&);
+                const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_LINK(const t_extString&,
                 const gp_XY&,
                 const gp_XY&,
-                const ActAPI_Color&);
+                const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POLYLINE(const std::vector<gp_XYZ>&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_POLYLINE(const std::vector<gp_XY>&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POLYLINE(const t_extString&,
                     const std::vector<gp_XYZ>&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_POLYLINE(const t_extString&,
                     const std::vector<gp_XY>&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_TRIANGLE(const gp_Pnt&,
                   const gp_Pnt&,
                   const gp_Pnt&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_TRIANGLE(const gp_XYZ&,
                   const gp_XYZ&,
                   const gp_XYZ&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_TRIANGLE(const gp_Pnt2d&,
                   const gp_Pnt2d&,
                   const gp_Pnt2d&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     DRAW_TRIANGLE(const gp_XY&,
                   const gp_XY&,
                   const gp_XY&,
                   const ActAPI_Color&,
-                  const t_extString&);
+                  const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TRIANGLE(const t_extString&,
                     const gp_Pnt&,
                     const gp_Pnt&,
                     const gp_Pnt&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TRIANGLE(const t_extString&,
                     const gp_XYZ&,
                     const gp_XYZ&,
                     const gp_XYZ&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TRIANGLE(const t_extString&,
                     const gp_Pnt2d&,
                     const gp_Pnt2d&,
                     const gp_Pnt2d&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TRIANGLE(const t_extString&,
                     const gp_XY&,
                     const gp_XY&,
                     const gp_XY&,
-                    const ActAPI_Color&);
+                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
     DRAW_TRIANGULATION(const Handle(Poly_Triangulation)&,
                        const ActAPI_Color&,
                        const double, // opacity
-                       const t_extString&);
+                       const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TRIANGULATION(const t_extString&,
                          const Handle(Poly_Triangulation)&,
                          const ActAPI_Color&,
-                         const double); // opacity
+                         const double) override; // opacity
 
   asiUI_EXPORT virtual void
     DRAW_MESH(const Handle(ActData_Mesh)&,
               const ActAPI_Color&,
               const double, // opacity
               const double, // edge width
-              const t_extString&);
+              const t_extString&) override;
 
   asiUI_EXPORT virtual void
     REDRAW_MESH(const t_extString&,
                 const Handle(ActData_Mesh)&,
                 const ActAPI_Color&,
                 const double, // opacity
-                const double); // edge width
+                const double) override; // edge width
 
 // TEXT
 public:
 
   asiUI_EXPORT virtual void
     DRAW_TEXT(const t_extString& text,
-              const t_extString& name);
+              const t_extString& name) override;
 
   asiUI_EXPORT virtual void
     REDRAW_TEXT(const t_extString& name,
-                const t_extString& text);
+                const t_extString& text) override;
 
 // A-SITUS SPECIFIC:
 public:
@@ -664,6 +680,7 @@ protected:
     draw_curve2d(const Handle(Geom2d_Curve)& curve,
                  const ActAPI_Color&         color,
                  const t_extString&          name,
+                 const bool                  drawOri,
                  const bool                  newPrimitive);
 
   asiUI_EXPORT void

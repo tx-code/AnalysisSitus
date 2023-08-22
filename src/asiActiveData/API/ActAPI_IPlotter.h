@@ -274,7 +274,12 @@ public:
     DRAW_CURVE(const Handle(Geom_Curve)&,
                const ActAPI_Color&,
                const bool,
-               const TCollection_ExtendedString&) {}
+               const t_extString&) {}
+
+  virtual void
+    DRAW_CURVE(const Handle(Geom_Curve)&,
+               const ActAPI_Color&,
+               const t_extString&) {}
 
   virtual void
     REDRAW_CURVE(const TCollection_ExtendedString&,
@@ -282,12 +287,29 @@ public:
                  const ActAPI_Color&,
                  const bool) {}
 
+  virtual void
+    REDRAW_CURVE(const TCollection_ExtendedString&,
+                 const Handle(Geom_Curve)&,
+                 const ActAPI_Color&) {}
+
   //-------------------------------------------------------------------------//
 
   virtual void
     DRAW_CURVE2D(const Handle(Geom2d_Curve)&,
                  const ActAPI_Color&,
+                 const bool,
                  const t_extString&) {}
+
+  virtual void
+    DRAW_CURVE2D(const Handle(Geom2d_Curve)&,
+                 const ActAPI_Color&,
+                 const t_extString&) {}
+
+  virtual void
+    REDRAW_CURVE2D(const t_extString&,
+                   const Handle(Geom2d_Curve)&,
+                   const ActAPI_Color&,
+                   const bool) {}
 
   virtual void
     REDRAW_CURVE2D(const t_extString&,
@@ -921,6 +943,18 @@ public:
 //---------------------------------------------------------------------------//
 
   void
+    DRAW_CURVE(const Handle(Geom_Curve)&         curve,
+               const ActAPI_Color&               color,
+               const TCollection_ExtendedString& name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_CURVE(curve, color, true, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
     REDRAW_CURVE(const TCollection_ExtendedString& name,
                  const Handle(Geom_Curve)&         curve,
                  const ActAPI_Color&               color,
@@ -934,13 +968,51 @@ public:
 //---------------------------------------------------------------------------//
 
   void
+    REDRAW_CURVE(const TCollection_ExtendedString& name,
+                 const Handle(Geom_Curve)&         curve,
+                 const ActAPI_Color&               color)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_CURVE(name, curve, color, true);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    DRAW_CURVE2D(const Handle(Geom2d_Curve)& curve,
+                 const ActAPI_Color&         color,
+                 const bool                  showOri,
+                 const t_extString&          name = "")
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_CURVE2D(curve, color, showOri, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
     DRAW_CURVE2D(const Handle(Geom2d_Curve)& curve,
                  const ActAPI_Color&         color,
                  const t_extString&          name = "")
   {
     if ( m_iv.IsNull() ) return;
     //
-    m_iv->DRAW_CURVE2D(curve, color, name);
+    m_iv->DRAW_CURVE2D(curve, color, true, name);
+  }
+
+//---------------------------------------------------------------------------//
+
+  void
+    REDRAW_CURVE2D(const t_extString&          name,
+                   const Handle(Geom2d_Curve)& curve,
+                   const ActAPI_Color&         color,
+                   const bool                  showOri)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_CURVE2D(name, curve, color, showOri);
   }
 
 //---------------------------------------------------------------------------//
@@ -952,7 +1024,7 @@ public:
   {
     if ( m_iv.IsNull() ) return;
     //
-    m_iv->REDRAW_CURVE2D(name, curve, color);
+    m_iv->REDRAW_CURVE2D(name, curve, color, true);
   }
 
 //---------------------------------------------------------------------------//

@@ -157,6 +157,7 @@ public:
     Create_Curve2d(const Handle(Geom2d_Curve)& curve,
                    const Handle(Geom_Surface)& surface,
                    const double                uLimit,
+                   const bool                  drawOriTip,
                    const t_extString&          name,
                    const bool                  useAutoNaming);
 
@@ -164,7 +165,8 @@ public:
     Update_Curve2d(const Handle(asiData_IVCurve2dNode)& node,
                    const Handle(Geom2d_Curve)&          curve,
                    const Handle(Geom_Surface)&          surface,
-                   const double                         uLimit);
+                   const double                         uLimit,
+                   const bool                           drawOriTip);
 
   asiEngine_EXPORT void
     Clean_Curves2d();
