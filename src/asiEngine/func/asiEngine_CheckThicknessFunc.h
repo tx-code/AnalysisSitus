@@ -54,7 +54,8 @@ public:
 
   //! Instantiation routine.
   //! \return Tree Function instance.
-  static Handle(asiEngine_CheckThicknessFunc) Instance()
+  asiEngine_EXPORT 
+    static Handle(asiEngine_CheckThicknessFunc) Instance()
   {
     return new asiEngine_CheckThicknessFunc();
   }

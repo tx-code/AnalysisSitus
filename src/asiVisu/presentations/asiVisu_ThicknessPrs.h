@@ -33,6 +33,7 @@
 
 // asiVisu includes
 #include <asiVisu_DefaultPrs.h>
+#include <asiVisu_SphereDataProvider.h>
 
 // asiData includes
 #include <asiData_ThicknessNode.h>
