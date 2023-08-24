@@ -1017,6 +1017,18 @@ public:
   asiAsm_EXPORT Handle(XCAFDoc_ColorTool)
     GetColorTool() const;
 
+public:
+
+  //! Faster analogue of `TDF_Tool::Entry()` which uses cache of labels and their
+  //! entries.
+  //! \param[in]  label label to access entry for.
+  //! \param[out] entry entry composed dynamically or taken from cache.
+  void Entry(const TDF_Label&         label,
+             TCollection_AsciiString& entry) const
+  {
+    this->__entry(label, entry);
+  }
+
 protected:
 
   //! Initializes Data Model with the passed CAF Document and prepares integral
@@ -1192,14 +1204,16 @@ private:
   //! and simply takes child labels for the given father label. It also
   //! populates a vector instead of a sequence for the sake to provide
   //! efficient direct access.
-  void __getComponents(const TDF_Label& l, std::vector<TDF_Label>& labels) const;
+  asiAsm_EXPORT void
+    __getComponents(const TDF_Label& l, std::vector<TDF_Label>& labels) const;
 
   //! Faster analogue of TDF_Tool::Entry() which uses cache of labels and their
   //! entries.
   //! \param[in]  label label to access entry for.
   //! \param[out] entry entry composed dynamically or taken from cache.
-  void __entry(const TDF_Label&         label,
-               TCollection_AsciiString& entry) const;
+  asiAsm_EXPORT void
+    __entry(const TDF_Label&         label,
+            TCollection_AsciiString& entry) const;
 
   //! Faster analogue of IsInstance() method from xde_AssemblyDoc. The difference
   //! here is that Shape Tool is not accessed but simply passed.
@@ -1207,9 +1221,10 @@ private:
   //! \param[in]  itemLab   label to check.
   //! \param[out] originLab label of the prototype entity (part or subassembly).
   //! \return true/false.
-  bool __isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
-                    const TDF_Label&                 itemLab,
-                    TDF_Label&                       originLab) const;
+  asiAsm_EXPORT bool
+    __isInstance(const Handle(XCAFDoc_ShapeTool)& ST,
+                 const TDF_Label&                 itemLab,
+                 TDF_Label&                       originLab) const;
 
   //! Adds the passed shape as a part without any checks. This method does not
   //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most
@@ -1217,8 +1232,9 @@ private:
   //! \param[in] shape the shape to add as a new part.
   //! \param[in] name  the part name.
   //! \return the newly added label.
-  TDF_Label __addPart(const TopoDS_Shape& shape,
-                      const std::string&  name = "");
+  asiAsm_EXPORT TDF_Label
+    __addPart(const TopoDS_Shape& shape,
+              const std::string&  name = "");
 
   //! Adds a subshape's label under the passed part's label. This method does not
   //! use `XCAFDoc_ShapeTool` of XDE, so it adds labels/attributes in the most
@@ -1226,8 +1242,9 @@ private:
   //! \param[in] partLabel the part's label.
   //! \param[in] subshape  the subshape to add a label for.
   //! \return the newly created label.
-  TDF_Label __addSubShape(const TDF_Label&    partLabel,
-                          const TopoDS_Shape& subshape);
+  asiAsm_EXPORT TDF_Label
+    __addSubShape(const TDF_Label&    partLabel,
+                  const TopoDS_Shape& subshape);
 
 protected:
 

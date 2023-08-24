@@ -537,6 +537,9 @@ bool Doc::SaveSTEP(const TCollection_AsciiString& filename,
   // Set output units.
   Interface_Static::SetCVal( "write.step.unit", units.ToCString() );
 
+  // Do not write pcurves.
+  Interface_Static::SetIVal( "write.surfacecurve.mode", 0 );
+
   try
   {
     STEPCAFControl_Writer writer;

@@ -6,11 +6,13 @@ project(cmdAsm)
 
 set (H_FILES
   cmdAsm.h
+  cmdAsm_XdeItemFeature.h
   cmdAsm_XdeModel.h
 )
 set (CPP_FILES
   cmdAsm.cpp
   cmdAsm_Xde.cpp
+  cmdAsm_XdeItemFeature.cpp
   cmdAsm_XdeModel.cpp
 )
 

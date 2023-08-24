@@ -601,6 +601,27 @@ typedef NCollection_IndexedDataMap<TDF_Label,
                                    AssemblyItemIdList,
                                    TDF_LabelMapHasher> LabelsToInstancesMap;
 
+//! \ingroup ASIASM
+//!
+//! Features associated with assembly item IDs.
+typedef NCollection_DataMap<AssemblyItemId,
+                            asiAlgo_Feature,
+                            AssemblyItemId::Hasher> UngroupedFeatureMap;
+
+//! \ingroup ASIASM
+//!
+//! Features associated with prototypes.
+typedef NCollection_DataMap<TDF_Label,
+                            asiAlgo_Feature,
+                            TDF_LabelMapHasher> UngroupedFeatureMapOnOriginals;
+
+//! \ingroup ASIASM
+//!
+//! Features associated with part IDs.
+typedef NCollection_DataMap<PartId,
+                            asiAlgo_Feature,
+                            PartId::Hasher> UngroupedFeatureMapOnParts;
+
 } // xde
 } // asiAsm
 
