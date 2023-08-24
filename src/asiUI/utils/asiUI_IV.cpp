@@ -1805,50 +1805,21 @@ void asiUI_IV::draw_link(const gp_XYZ&       p1,
   if ( (p1 - p2).Modulus() < 1.0e-5 )
     return;
 
-  // Create a straight line segment between two passed points
-  Handle(Geom_TrimmedCurve) C = GC_MakeSegment(p1, p2);
-
-  // Open transaction
-  bool isTx = false;
-  if ( !m_model->HasOpenCommand() )
+  if ( is2dViewer )
   {
-    m_model->OpenCommand();
-    isTx = true;
-  }
+    // Create a straight line segment between two passed points
+    Handle(Geom2d_TrimmedCurve) C = GCE2d_MakeSegment( gp_XY( p1.X(), p1.Y() ),
+                                                       gp_XY( p2.X(), p2.Y() ) );
 
-  // Modify data
-  Handle(asiData_IVCurveNode) curve_n;
-  //
-  bool doCreate = newPrimitive;
-  //
-  if ( !doCreate )
+    this->draw_curve2d(C, color, name, false, newPrimitive);
+  }
+  else
   {
-    curve_n = asiEngine_IV(m_model).Find_Curve(name);
-    //
-    if ( !curve_n.IsNull() )
-      asiEngine_IV(m_model).Update_Curve( curve_n, C, Precision::Infinite(), false );
-    else
-      doCreate = true;
+    // Create a straight line segment between two passed points
+    Handle(Geom_TrimmedCurve) C = GC_MakeSegment(p1, p2);
+
+    this->draw_curve(C, color, name, false, false, newPrimitive);
   }
-
-  if ( doCreate )
-  {
-    curve_n = asiEngine_IV(m_model).Create_Curve(C, Precision::Infinite(), false, name, newPrimitive);
-
-    // Update the last created object
-    m_lastObj = curve_n;
-  }
-
-  // Update persistent color.
-  curve_n->SetHasColor(true);
-  curve_n->SetColor( asiVisu_Utils::ColorToInt(color) );
-
-  // Commit transaction
-  if ( isTx )
-    m_model->CommitCommand();
-
-  // Visualize
-  this->visualize(is2dViewer, curve_n, true, color, 1.0, false);
 }
 
 //---------------------------------------------------------------------------//
