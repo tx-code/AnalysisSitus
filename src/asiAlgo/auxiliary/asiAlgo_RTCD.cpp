@@ -86,11 +86,26 @@ RTCD::Point RTCD::Point::operator-(const Vector& V)
 
 RTCD::AABB::AABB(const Bnd_Box& bbox)
 {
+  this->IsVoid = false;
+
   gp_Pnt Pmin = bbox.CornerMin();
   gp_Pnt Pmax = bbox.CornerMax();
 
   this->min = Point( Pmin.X(), Pmin.Y(), Pmin.Z() );
   this->max = Point( Pmax.X(), Pmax.Y(), Pmax.Z() );
+}
+
+//-----------------------------------------------------------------------------
+
+RTCD::AABB::AABB(const Bnd_Box2d& bbox)
+{
+  this->IsVoid = false;
+
+  double xMin, yMin, xMax, yMax;
+  bbox.Get(xMin, yMin, xMax, yMax);
+
+  this->min = Point( xMin, yMin, 0. );
+  this->max = Point( xMax, yMax, 0. );
 }
 
 //-----------------------------------------------------------------------------

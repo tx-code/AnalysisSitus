@@ -36,6 +36,7 @@
 
 // OpenCascade includes
 #include <Bnd_Box.hxx>
+#include <Bnd_Box2d.hxx>
 #include <gp_Pln.hxx>
 
 //! Algorithms from "Real-Time Collision Detection" by Christer Ericson.
@@ -143,6 +144,9 @@ namespace RTCD
 
     asiAlgo_EXPORT
       AABB(const Bnd_Box& bbox); //!< Ctor from OpenCascade type.
+
+    asiAlgo_EXPORT
+      AABB(const Bnd_Box2d& bbox); //!< Ctor from OpenCascade type ignoring Z dimension.
 
     asiAlgo_EXPORT void
       Get(double& xmin, double& ymin, double& zmin,

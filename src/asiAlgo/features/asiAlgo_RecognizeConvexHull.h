@@ -41,8 +41,6 @@ class TopoDS_Face;
 //! Recognizes all faces lying on a convex hull of the CAD part.
 class asiAlgo_RecognizeConvexHull : public asiAlgo_Recognizer
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeConvexHull, asiAlgo_Recognizer)
 
@@ -107,6 +105,10 @@ public:
   asiAlgo_EXPORT bool
     GetCacheSampling() const;
 
+  //! \return the constructed hull.
+  asiAlgo_EXPORT const Handle(Poly_Triangulation)&
+    GetHullMesh() const;
+
 public:
 
   //! Performs recognition.
@@ -132,5 +134,8 @@ protected:
 
   //! Flag whether to keep the result of sampling.
   bool m_bCacheSampl;
+
+  //! Constructed hull as a mesh.
+  Handle(Poly_Triangulation) m_hullMesh;
 };
 

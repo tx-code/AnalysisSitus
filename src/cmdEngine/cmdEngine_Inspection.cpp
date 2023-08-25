@@ -4188,6 +4188,9 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
   // Print out.
   interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Convex-hull faces: %1" << ids);
 
+  // Draw hull.
+  interp->GetPlotter().REDRAW_TRIANGULATION("hull", recognizer.GetHullMesh(), Color_Default, 1.0);
+
   return TCL_OK;
 }
 

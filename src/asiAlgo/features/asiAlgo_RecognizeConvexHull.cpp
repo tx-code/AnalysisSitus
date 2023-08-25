@@ -134,6 +134,13 @@ bool asiAlgo_RecognizeConvexHull::GetCacheSampling() const
 
 //-----------------------------------------------------------------------------
 
+const Handle(Poly_Triangulation)& asiAlgo_RecognizeConvexHull::GetHullMesh() const
+{
+  return m_hullMesh;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_RecognizeConvexHull::Perform()
 {
   // Clean up the result.
@@ -182,6 +189,8 @@ bool asiAlgo_RecognizeConvexHull::Perform()
     m_progress.SendLogMessage(LogErr(Normal) << "Failed to build convex hull.");
     return false;
   }
+  //
+  m_hullMesh = hull;
 
 #if defined COUT_DEBUG
   TIMER_FINISH
@@ -284,7 +293,6 @@ bool asiAlgo_RecognizeConvexHull::Perform()
   if ( toDraw )
   {
     m_plotter.REDRAW_POINTS("proj", projPts3d->GetCoordsArray(), Color_Violet);
-    m_plotter.REDRAW_TRIANGULATION("hull", hull, Color_Default, 1.0);
   }
 
   m_progress.SendLogMessage(LogInfo(Normal) << "Total number of points processed: %1."
