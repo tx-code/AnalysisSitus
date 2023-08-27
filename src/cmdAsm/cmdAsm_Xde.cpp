@@ -651,7 +651,7 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
   PartIds pids;
   //
   if ( !items.IsEmpty() || (itemsIdx == -1) )
-  xdeDoc->GetParts(items, pids);
+    xdeDoc->GetParts(items, pids);
 
   TIMER_FINISH
   TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "asm-xde-get-parts")
