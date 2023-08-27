@@ -1413,7 +1413,8 @@ void Doc::GetLeafAssemblyItems(AssemblyItemIds& items) const
   AssemblyItemIds parents;
   this->GetRootAssemblyItems(parents);
   //
-  this->GetLeafAssemblyItems(parents, items);
+  if ( !parents.IsEmpty() )
+    this->GetLeafAssemblyItems(parents, items);
 }
 
 //-----------------------------------------------------------------------------

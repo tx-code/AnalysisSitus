@@ -646,10 +646,11 @@ int ASMXDE_GetParts(const Handle(asiTcl_Interp)& interp,
   TIMER_NEW
   TIMER_GO
 
-  // If the collection of items is empty, all parts of the model will
-  // be gathered.
+  // If the collection of items is empty and '-items' keyword hasn't been passed,
+  // then all parts of the model will be gathered.
   PartIds pids;
   //
+  if ( !items.IsEmpty() || (itemsIdx == -1) )
   xdeDoc->GetParts(items, pids);
 
   TIMER_FINISH
