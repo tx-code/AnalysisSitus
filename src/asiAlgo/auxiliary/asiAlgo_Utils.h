@@ -72,6 +72,7 @@
 #include <Geom_ToroidalSurface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <gp_Lin2d.hxx>
 #include <gp_Trsf.hxx>
 #include <math_BullardGenerator.hxx>
@@ -688,6 +689,37 @@ namespace asiAlgo_Utils
   //! \return address of TShape as string.
   asiAlgo_EXPORT std::string
     ShapeAddr(const TopoDS_Shape& shape);
+
+  //! Checks curve type.
+  //! \param[in]  curve     the curve to check.
+  //! \param[out] basecurve the extracted basis curve if the originally
+  //!                       passed one is trimmed.
+  //! \return true/false.
+  template<typename TCurve>
+  bool IsTypeOf(const Handle(Geom2d_Curve)& curve,
+                Handle(TCurve)&             basecurve)
+  {
+    if ( curve->IsInstance( STANDARD_TYPE(TCurve) ) )
+    {
+      basecurve = Handle(TCurve)::DownCast(curve);
+      return true;
+    }
+
+    if ( curve->IsInstance( STANDARD_TYPE(Geom2d_TrimmedCurve) ) )
+    {
+      Handle(Geom2d_TrimmedCurve) trimmed =
+        Handle(Geom2d_TrimmedCurve)::DownCast(curve);
+
+      Handle(Geom2d_Curve) basis = trimmed->BasisCurve();
+
+      if ( IsTypeOf<TCurve>(basis, basecurve) )
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   //! Checks curve type.
   //! \param[in]  curve     the curve to check.
