@@ -168,6 +168,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
 
 // For offscreen rendering
 #include <AIS_InteractiveContext.hxx>
@@ -1389,6 +1390,55 @@ TCollection_AsciiString
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::
+  ConnectEdgesToWires(const std::vector<TopoDS_Edge>& edges,
+                      const bool                      isShared,
+                      std::vector<TopoDS_Wire>&       contours,
+                      const double                    tolerance)
+{
+  Handle(TopTools_HSequenceOfShape) edgesSeq = new TopTools_HSequenceOfShape();
+  //
+  std::vector<TopoDS_Edge>::const_iterator itE = edges.cbegin();
+  for ( ; itE != edges.cend(); ++itE )
+  {
+    if ( BRep_Tool::Degenerated(*itE) )
+      continue;
+    //
+    edgesSeq->Append(*itE);
+  }
+  //
+  return ConnectEdgesToWires(isShared, edgesSeq, contours, tolerance);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::
+  ConnectEdgesToWires(const bool                         isShared,
+                      Handle(TopTools_HSequenceOfShape)& edges,
+                      std::vector<TopoDS_Wire>&          contours,
+                      const double                       tolerance)
+{
+  if ( edges.IsNull() )
+    return false;
+  //
+  // Compose border wires from the naked edges.
+  Handle(TopTools_HSequenceOfShape) borderWires;
+  ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, tolerance, isShared, borderWires);
+  //
+  if ( borderWires.IsNull() )
+    return false;
+  //
+  for ( TopTools_HSequenceOfShape::Iterator wit(*borderWires); wit.More(); wit.Next() )
+  {
+    TopoDS_Wire wire = TopoDS::Wire( wit.Value() );
+    contours.push_back(wire);
+  }
+  //
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 TCollection_AsciiString
   asiAlgo_Utils::LocationToString(const TopLoc_Location& loc)
 {
@@ -2384,6 +2434,32 @@ bool asiAlgo_Utils::Bounds(const Handle(Poly_Triangulation)& tris,
   BRep_Builder().UpdateFace(fictiveFace, tris);
 
   return Bounds(fictiveFace, XMin, YMin, ZMin, XMax, YMax, ZMax, tolerance);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiAlgo_Utils::Bounds(const Handle(Poly_Triangulation)& mesh,
+                           const TopLoc_Location&            loc,
+                           Bnd_Box&                          bndBox)
+{
+  if ( mesh.IsNull() )
+    return false;
+
+  const int nbNodes = mesh->NbNodes();
+
+  TColgp_Array1OfPnt nodes(1, mesh->NbNodes());
+  for (int i = 1; i <= mesh->NbNodes(); i++)
+    nodes(i) = mesh->Node(i);
+  //
+  for ( int i = 1; i <= nbNodes; ++i )
+  {
+    if ( loc.IsIdentity() )
+      bndBox.Add( nodes(i) );
+    else
+      bndBox.Add( nodes(i).Transformed(loc) );
+  }
+  bndBox.Enlarge( mesh->Deflection() );
+  return true;
 }
 
 //-----------------------------------------------------------------------------

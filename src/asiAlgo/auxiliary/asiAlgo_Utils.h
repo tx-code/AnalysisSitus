@@ -641,6 +641,35 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT TCollection_AsciiString
     ContinuityToString(const GeomAbs_Shape cont);
 
+  //! Method for combining edges to wires.
+  //! \param[in]  edges     edges.
+  //! \param[in]  isShared  indicator showing how the merge should take place.
+  //!                       If true, then edges with the same vertex are merged.
+  //!                       If false, then the edges are merged within the tolerance.
+  //! \param[out] contours  extracted contours.
+  //! \param[in]  tolerance tolerance.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ConnectEdgesToWires(const std::vector<TopoDS_Edge>& edges,
+                        const bool                      isShared,
+                        std::vector<TopoDS_Wire>&       contours,
+                        const double                    tolerance = 1e-3);
+
+  //! Method for combining edges to wires.
+  //! Note: there is no check for degenerate edges. External verification required.
+  //! \param[in]      isShared  indicator showing how the merge should take place.
+  //!                           If true, then edges with the same vertex are merged.
+  //!                           If false, then the edges are merged within the tolerance.
+  //! \param[in, out] edges     edges.
+  //! \param[out]     contours  extracted contours.
+  //! \param[in]      tolerance tolerance.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    ConnectEdgesToWires(const bool                         isShared,
+                        Handle(TopTools_HSequenceOfShape)& edges,
+                        std::vector<TopoDS_Wire>&          contours,
+                        const double                       tolerance = 1e-3);
+
   //! Converts the passed location to string.
   //! \param loc [in] location to convert.
   //! \return string representation of location.
@@ -1251,6 +1280,16 @@ namespace asiAlgo_Utils
            const bool          useFacets,
            const bool          keepGap,
            Bnd_Box&            bndBox);
+
+  //! Calculates bounding box for the given triangulation.
+  //! \param[in]  mesh        input mesh.
+  //! \param[in]  loc         transformation to apply to the input mesh.
+  //! \param[out] bndBox      bounding box.
+  //! \return true if operation is successful and false otherwise.
+  asiAlgo_EXPORT bool
+    Bounds(const Handle(Poly_Triangulation)& mesh,
+           const TopLoc_Location&            loc,
+           Bnd_Box&                          bndBox);
 
   //! Calculates bounding box for the given triangulation.
   //! \param tris      [in]  input triangulation.
