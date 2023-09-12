@@ -164,6 +164,12 @@ public:
   asiAsm_EXPORT bool
     LoadIGES(const TCollection_AsciiString& filename);
 
+  //! Loads BRep file to populate the internal XDE Document.
+  //! \param[in] filename name of the BREP file to load.
+  //! \return true in case of success, false -- otherwise.
+  asiAsm_EXPORT bool
+    LoadBREP(const TCollection_AsciiString& filename);
+
   //! Saves the document to file.
   //! \param[in] filename target filename.
   //! \return true in case of success, false -- otherwise.
