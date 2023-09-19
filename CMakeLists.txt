@@ -7,7 +7,7 @@ project (AnalysisSitus CXX)
 set (INSTALL_DIR "" CACHE PATH "Path where to install Analysis Situs.")
 set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}" CACHE INTERNAL "" FORCE)
 
-# Directories for embedded unit tests.
+# Directories for embedded unit tests, plugins and documentation.
 set (ASI_TEST_DUMPING "${CMAKE_BINARY_DIR}" CACHE PATH "Dumping directory for tests.")
 set (ASI_TEST_DATA    "${CMAKE_SOURCE_DIR}/data" CACHE PATH "Directory which contains test data.")
 set (ASI_TEST_SCRIPTS "${CMAKE_SOURCE_DIR}/scripts" CACHE PATH "Directory which contains test scripts.")
