@@ -227,6 +227,12 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
      ->StartTableHCell("table_class cell_class")
      ->AddText(asiTestEngine_Macro_RESULT)
      ->EndTableHCell()
+     ->StartTableHCell("table_class cell_class")
+     ->AddText(asiTestEngine_Macro_ELAPSED)
+     ->EndTableHCell()
+     ->StartTableHCell("table_class cell_class")
+     ->AddText(asiTestEngine_Macro_COMMENTS)
+     ->EndTableHCell()
      ->EndTableRow();
 
   /* =======================================
@@ -248,31 +254,54 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
        ->StartTableHCell("table_class cell_class header_cell_class")
        ->AddText( "Case ID: ")
        ->AddText( CaseLauncher->CaseID() )
-       ->EndTableHCell()
        ->EndTableHCell();
 
-    // Finish row with local statistics
+    // Add local statistics
     Rdr->StartTableHCell( (nFailed == 0) ? "table_class cell_class good_cell_class"
                                          : "table_class cell_class bad_cell_class" );
     Rdr->AddText(passedPercent)->AddText("%")->EndTableHCell();
+
+    // Placeholders for elapsed time and comment.
+    Rdr->StartTableHCell("table_class cell_class header_cell_class")
+       ->AddText( "&nbsp;")
+       ->EndTableHCell()
+       ->StartTableHCell("table_class cell_class header_cell_class")
+       ->AddText( "&nbsp;")
+       ->EndTableHCell();
+
+    // Finish row.
     Rdr->EndTableRow();
 
     // Add rows for Test Functions
     for ( auto& resFn: CaseLauncher->Results() )
     {
       // Add table row
-      Rdr->StartTableRow()
-         ->StartTableCell("table_class cell_class");
-      Rdr->AddText(resFn.name);
+      Rdr->StartTableRow();
+      //
+      Rdr->StartTableCell("table_class cell_class")
+         ->AddText(resFn.name)
+         ->EndTableCell();
 
       // Result of Test Function
       if ( resFn.ok)
         Rdr->StartTableCell("table_class cell_class good_cell_class")->AddText(asiTestEngine_Macro_OK);
       else
         Rdr->StartTableCell("table_class cell_class bad_cell_class")->AddText(asiTestEngine_Macro_FAILED);
+      //
+      Rdr->EndTableCell();
+
+      // Timing.
+      Rdr->StartTableCell("table_class cell_class")
+         ->AddText(resFn.elapsedTimeSec)
+         ->EndTableCell();
+
+      // Comment.
+      Rdr->StartTableCell("table_class cell_class")
+         ->AddText(resFn.comments)
+         ->EndTableCell();
 
       // Finish row
-      Rdr->EndTableCell()->EndTableRow();
+      Rdr->EndTableRow();
     }
   }
 

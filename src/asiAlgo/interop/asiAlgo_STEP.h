@@ -55,8 +55,8 @@ public:
   //! Ctor accepting progress notifier and imperative plotter.
   //! \param[in] progress progress notifier.
   //! \param[in] plotter  imperative plotter.
-  asiAlgo_STEP(ActAPI_ProgressEntry progress,
-               ActAPI_PlotterEntry  plotter = nullptr)
+  asiAlgo_STEP(ActAPI_ProgressEntry progress = nullptr,
+               ActAPI_PlotterEntry  plotter  = nullptr)
   //
   : asiAlgo_BaseSTEP(progress, plotter) {}
 
