@@ -82,7 +82,7 @@
 <h2 id="toc-asm-xde-new">asm-xde-new</h2>
 
 <p>
-The <span class="code-inline">asm-xde-new</span> function constructs a new empty XDE document and sets it as a Tcl variable.
+The <span class="code-inline"><a href='../commands.html#asm-xde-new'>asm-xde-new</a></span> function constructs a new empty XDE document and sets it as a Tcl variable.
 </p>
 
 <pre class="code">
@@ -94,7 +94,7 @@ asm-xde-new -model M
 <h2 id="toc-asm-xde-load">asm-xde-load</h2>
 
 <p>
-The <span class="code-inline">asm-xde-load</span> function reads a CAD file of any supported format to the XDE document.
+The <span class="code-inline"><a href='../commands.html#asm-xde-load'>asm-xde-load</a></span> function reads a CAD file of any supported format to the XDE document.
 </p>
 
 <pre class="code">
@@ -118,7 +118,7 @@ It is possible to work with several models as you can give them distinct names.
 <h2 id="toc-asm-xde-save">asm-xde-save</h2>
 
 <p>
-The <span class="code-inline">asm-xde-save</span> function stores the XDE document in the native OpenCascade's binary format (.xbf).
+The <span class="code-inline"><a href='../commands.html#asm-xde-save'>asm-xde-save</a></span> function stores the XDE document in the native OpenCascade's binary format (.xbf).
 </p>
 
 <pre class="code">
@@ -130,7 +130,7 @@ asm-xde-save -model M -filename as1-oc-214.xbf
 <h2 id="toc-asm-xde-release">asm-xde-release</h2>
 
 <p>
-The <span class="code-inline">asm-xde-release</span> function closes the XDE document with the given name and unsets the corresponding Tcl variable.
+The <span class="code-inline"><a href='../commands.html#asm-xde-release'>asm-xde-release</a></span> function closes the XDE document with the given name and unsets the corresponding Tcl variable.
 </p>
 
 <pre class="code">
@@ -146,7 +146,7 @@ Use this function to clean up the memory occupied by a model. This function can 
 <h2 id="toc-asm-xde-browse">asm-xde-browse</h2>
 
 <p>
-The <span class="code-inline">asm-xde-browse</span> function opens a GUI dialog for observing the XDE document's structure. This structure is basically the scene tree for the assembly.
+The <span class="code-inline"><a href='../commands.html#asm-xde-browse'>asm-xde-browse</a></span> function opens a GUI dialog for observing the XDE document's structure. This structure is basically the scene tree for the assembly.
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-browse_01.png"/></div>
@@ -187,7 +187,7 @@ The lack of synchronization is the as-designed behavior. We wanted Analysis Situ
 <h2 id="toc-asm-xde-xcompounds">asm-xde-xcompounds</h2>
 
 <p>
-The <span class="code-inline">asm-xde-xcompounds</span> function turns the compound-type parts into subassemblies.
+The <span class="code-inline"><a href='../commands.html#asm-xde-xcompounds'>asm-xde-xcompounds</a></span> function turns the compound-type parts into subassemblies.
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-xcompounds_01.png"/></div>
@@ -207,7 +207,7 @@ You can optionally pass the IDs of the assembly items of interest in the case yo
 <h2 id="toc-asm-xde-print-structure">asm-xde-print-structure</h2>
 
 <p>
-The <span class="code-inline">asm-xde-print-structure</span> function prints the hierarchical structure of the CAD assembly to the Log Window. You may control the level down to which the exploration is done.
+The <span class="code-inline"><a href='../commands.html#asm-xde-print-structure'>asm-xde-print-structure</a></span> function prints the hierarchical structure of the CAD assembly to the Log Window. You may control the level down to which the exploration is done.
 </p>
 
 <pre class="code">
@@ -219,7 +219,7 @@ asm-xde-print-structure -model M [-level &lt;level&gt;]
 <h2 id="toc-asm-xde-show-summary">asm-xde-show-summary</h2>
 
 <p>
-The <span class="code-inline">asm-xde-show-summary</span> function counts the number of parts, subassemblies and their instances in the XDE document. A GUI dialog is shown to consult the summary.
+The <span class="code-inline"><a href='../commands.html#asm-xde-show-summary'>asm-xde-show-summary</a></span> function counts the number of parts, subassemblies and their instances in the XDE document. A GUI dialog is shown to consult the summary.
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-show-summary_01.png"/></div>
@@ -233,7 +233,7 @@ asm-xde-show-summary -model M
 <h2 id="toc-asm-xde-get-parts">asm-xde-get-parts</h2>
 
 <p>
-The <span class="code-inline">asm-xde-get-parts</span> function returns the IDs of all unique parts in the model. The following code snippet illustrates how to initialize a Tcl list from the API function's outcome. The last two commands print the number of the extracted part IDs and the IDs themselves. A common practice is to use the extracted IDs later on in a pipeline for automatic assembly processing.
+The <span class="code-inline"><a href='../commands.html#asm-xde-get-parts'>asm-xde-get-parts</a></span> function returns the IDs of all unique parts in the model. The following code snippet illustrates how to initialize a Tcl list from the API function's outcome. The last two commands print the number of the extracted part IDs and the IDs themselves. A common practice is to use the extracted IDs later on in a pipeline for automatic assembly processing.
 </p>
 
 <pre class="code">
@@ -255,7 +255,7 @@ set parts [asm-xde-get-parts -model M -items 0:1:1:1/0:1:1:1:1/0:1:1:2:1/0:1:1:3
 <h2 id="toc-asm-xde-get-leaves">asm-xde-get-leaves</h2>
 
 <p>
-The <span class="code-inline">asm-xde-get-leaves</span> function returns the IDs of the leaf assembly items for the passed items.
+The <span class="code-inline"><a href='../commands.html#asm-xde-get-leaves'>asm-xde-get-leaves</a></span> function returns the IDs of the leaf assembly items for the passed items.
 </p>
 
 <pre class="code">
@@ -267,7 +267,7 @@ set leaves [asm-xde-get-leaves -model M -items 0:1:1:1/0:1:1:1:1/0:1:1:2:1/0:1:1
 <h2 id="toc-asm-xde-find-item">asm-xde-find-items</h2>
 
 <p>
-The <span class="code-inline">asm-xde-find-items</span> function searches for assembly items having the passed name. The name is taken from the OCAF label being visited on iterating the assembly graph in the depth-first manner.
+The <span class="code-inline"><a href='../commands.html#asm-xde-find-items'>asm-xde-find-items</a></span> function searches for assembly items having the passed name. The name is taken from the OCAF label being visited on iterating the assembly graph in the depth-first manner.
 </p>
 
 <pre class="code">
@@ -283,7 +283,7 @@ Since the object's name does not have to be unique, this function might return s
 <h2 id="toc-asm-xde-add-part">asm-xde-add-part</h2>
 
 <p>
-The <span class="code-inline">asm-xde-add-part</span> function adds the active part of Analysis Situs to the XDE document as another root. If the <span class="code-inline">-name</span> key is passed, the new part will get the specified name. If not, it will get the "Unnamed" label as its name. The function returns the persistent ID of the newly added part. The B-rep geometry of the active part is set as the part's representation within the XDE document.
+The <span class="code-inline"><a href='../commands.html#asm-xde-add-part'>asm-xde-add-part</a></span> function adds the active part of Analysis Situs to the XDE document as another root. If the <span class="code-inline">-name</span> key is passed, the new part will get the specified name. If not, it will get the "Unnamed" label as its name. The function returns the persistent ID of the newly added part. The B-rep geometry of the active part is set as the part's representation within the XDE document.
 </p>
 
 <pre class="code">
@@ -302,7 +302,7 @@ asm-xde-release -model M
 <h2 id="toc-asm-xde-save-gltf">asm-xde-save-gltf</h2>
 
 <p>
-The <span class="code-inline">asm-xde-save-gltf</span> function saves the specified XDE document to glTF file. The visualizaton facets should be precomputed in the stored CAD shapes with <a href="#toc-asm-xde-generate-facets">asm-xde-generate-facets</a> beforehand.
+The <span class="code-inline"><a href='../commands.html#asm-xde-save-gltf'>asm-xde-save-gltf</a></span> function saves the specified XDE document to a glTF file. The visualizaton facets should be precomputed in the stored CAD shapes with <a href="#toc-asm-xde-generate-facets">asm-xde-generate-facets</a> beforehand. Make sure that Analysis Situs is compiled with RAPIDJSON dependency to use glTF export.
 </p>
 
 <div align="center"><img src="../imgs/xde-gltf_01.png"/></div>
@@ -312,7 +312,7 @@ The <span class="code-inline">asm-xde-save-gltf</span> function saves the specif
 <h2 id="toc-asm-xde-save-fbx">asm-xde-save-fbx</h2>
 
 <p>
-The <span class="code-inline">asm-xde-save-fbx</span> function saves the specified XDE document to FBX file. The visualizaton facets should be precomputed in the stored CAD shapes. For FBX export, the Autodesk's FBX SDK is used.
+The <span class="code-inline"><a href='../commands.html#asm-xde-save-fbx'>asm-xde-save-fbx</a></span> function saves the specified XDE document to an FBX file. The visualizaton facets should be precomputed in the stored CAD shapes with the <span class="code-inline"><a href='../commands.html#asm-xde-generate-facets'>asm-xde-generate-facets</a></span> function. For FBX export, the Autodesk's FBX SDK is used (therefore, it should be enabled in CMake when Analysis Situs is compiled from sources).
 </p>
 
 <div align="center"><img src="../imgs/xde-fbx-unity_01.png"/></div>
@@ -332,7 +332,7 @@ asm-xde-save-fbx -model M -filename box-colored.fbx
 <h2 id="toc-asm-xde-save-step">asm-xde-save-step</h2>
 
 <p>
-The <span class="code-inline">asm-xde-save-step</span> function exports the entire document or a specified part to a STEP file.
+The <span class="code-inline"><a href='../commands.html#asm-xde-save-step'>asm-xde-save-step</a></span> function exports the entire document or a specified part to a STEP file.
 </p>
 
 <!-- ========================================================================== -->
@@ -340,7 +340,7 @@ The <span class="code-inline">asm-xde-save-step</span> function exports the enti
 <h2 id="toc-asm-xde-generate-facets">asm-xde-generate-facets</h2>
 
 <p>
-The <span class="code-inline">asm-xde-generate-facets</span> function triangulates B-rep shapes available in the XDE document. You will need facets to take advantage of mesh-based algorithms or if you want to export meshes, e.g., to glTF format. Analysis Situs does not construct visualization meshes automatically as this data is often not needed.
+The <span class="code-inline"><a href='../commands.html#asm-xde-generate-facets'>asm-xde-generate-facets</a></span> function triangulates B-rep shapes available in the XDE document. You will need facets to take advantage of mesh-based algorithms or if you want to export meshes, e.g., to glTF format. Analysis Situs does not construct visualization meshes automatically as this data is often not needed. Also, meshing large assemblies may take significant amount of time, so we keep visualization meshes disabled to allow for working with large assemblies (in the command line).
 </p>
 
 <!-- ========================================================================== -->
@@ -348,7 +348,7 @@ The <span class="code-inline">asm-xde-generate-facets</span> function triangulat
 <h2 id="toc-asm-xde-set-as-var">asm-xde-set-as-var</h2>
 
 <p>
-The <span class="code-inline">asm-xde-set-as-var</span> function sets the passed assembly item as a project variable.
+The <span class="code-inline"><a href='../commands.html#asm-xde-set-as-var'>asm-xde-set-as-var</a></span> function sets the passed assembly item as a project variable.
 </p>
 
 <!-- ========================================================================== -->
@@ -356,7 +356,7 @@ The <span class="code-inline">asm-xde-set-as-var</span> function sets the passed
 <h2 id="toc-asm-xde-set-name">asm-xde-set-name</h2>
 
 <p>
-The <span class="code-inline">asm-xde-set-name</span> function assigns the passed name to a part/subassembly or its instance referenced by given assembly item ID. By default, the name is set for a prototype (i.e., the object being referenced). To name an instance, pass <span class="code-inline">-instance</span> key.
+The <span class="code-inline"><a href='../commands.html#asm-xde-set-name'>asm-xde-set-name</a></span> function assigns the passed name to a part/subassembly or its instance referenced by given assembly item ID. By default, the name is set for a prototype (i.e., the object being referenced). To name an instance, pass <span class="code-inline">-instance</span> key.
 </p>
 
 <div align="center"><img src="../imgs/asm-xde-set-name_01.png"/></div>
@@ -366,8 +366,28 @@ The <span class="code-inline">asm-xde-set-name</span> function assigns the passe
 <h2 id="toc-asm-xde-set-name">asm-xde-remove-parts</h2>
 
 <p>
-The <span class="code-inline">asm-xde-remove-parts</span> function removes the specified parts with all their occurrences in the model. All empty subassemblies that may remain after this operation are cleaned up automatically. In the case you want to remove all parts except for the selected subset, pass the <span class="code-inline">-invert</span> keyword.
+The <span class="code-inline"><a href='../commands.html#asm-xde-remove-parts'>asm-xde-remove-parts</a></span> function removes the specified parts with all their occurrences in the model. All empty subassemblies that may remain after this operation are cleaned up automatically. In the case you want to remove all parts except for the selected subset, pass the <span class="code-inline">-invert</span> keyword.
 </p>
+
+<!-- ========================================================================== -->
+
+<h2 id="toc-asm-xde-unload">asm-xde-unload</h2>
+
+<p>
+The <span class="code-inline"><a href='../commands.html#asm-xde-unload'>asm-xde-unload</a></span> function breaks down the entire assembly document onto individual parts. This feature is especially useful for large assemblies that cannot be processed as a whole and require further decomposition. As a result, all unique parts get exported into the corresponding STEP files having filenames derived from the part names (if there are several parts with the same name, a unique integer index is added as a suffix).
+</p>
+
+<p>
+The following image illustrates the contents of the output directory specified via <span class="code-inline">-path</span> keyword. Each part is exported as a separate STEP file.
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-xde-unload_01.png"/></div>
+
+<p>
+In the same output directory, the <span class="code-inline"><a href='../commands.html#asm-xde-unload'>asm-xde-unload</a></span> function puts a file named "bom.csv" (stands for "Bill of materials"). This file contains information on part occurrences and their corresponding filenames:
+</p>
+
+<div align="center"><img src="../imgs/asm/asm-xde-unload_02.png"/></div>
 
 <!-- ========================================================================== -->
 

@@ -71,6 +71,7 @@
 // Qt includes
 #pragma warning(push, 0)
 #include <QDialog>
+#include <QDir>
 #include <QMainWindow>
 #pragma warning(pop)
 
@@ -1698,6 +1699,134 @@ int ASMXDE_DisplayJson(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
+                  int                          argc,
+                  const char**                 argv)
+{
+  // Read model.
+  std::string name;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "model", name) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Model name is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Get the XDE document.
+  Handle(asiTcl_Variable) var = interp->GetVar(name);
+  //
+  if ( var.IsNull() || !var->IsKind( STANDARD_TYPE(cmdAsm_XdeModel) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "There is no XDE model named '%1'."
+                                                        << name);
+    return TCL_ERROR;
+  }
+  //
+  Handle(Doc) xdeDoc = Handle(cmdAsm_XdeModel)::DownCast(var)->GetDocument();
+
+  // Read path.
+  t_asciiString path;
+  //
+  if ( !interp->GetKeyValue(argc, argv, "path", path) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Output path is not specified.");
+    return TCL_ERROR;
+  }
+
+  // Check the output directory.
+  QDir qPath( path.ToCString() );
+  //
+  if ( !qPath.exists() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The specified output directory '%1' does not exist."
+                                                        << path);
+    return TCL_ERROR;
+  }
+
+  // Check if the "plain" export mode is requested.
+  const bool isPlain = interp->HasKeyword(argc, argv, "plain");
+
+  // BOM filename.
+  std::string bomFilename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
+  bomFilename += "bom.csv";
+
+  // Filenames used for unique parts.
+  NCollection_DataMap<PartId, std::string, PartId::Hasher> partFilenames;
+
+  // Export.
+  if ( isPlain )
+  {
+    // Get unique parts.
+    PartIds pids;
+    xdeDoc->GetParts(pids);
+
+    // Count parts.
+    NCollection_DataMap<PartId, int, PartId::Hasher> partQuantities;
+    xdeDoc->CountParts(partQuantities);
+
+    // Create file for BOM output.
+    std::ofstream bomFile;
+    bomFile.open(bomFilename, std::ios::out | std::ios::trunc);
+
+    // Iterate over the unique parts.
+    for ( PartIds::Iterator pit(pids); pit.More(); pit.Next() )
+    {
+      int nextUniqueId = 1;
+
+      // Next part.
+      const PartId& pid       = pit.Value();
+      TopoDS_Shape  partShape = xdeDoc->GetShape(pid);
+      t_extString   partName  = xdeDoc->GetPartName(pid);
+
+      // Prepare a filename.
+      std::string filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
+      filename += ExtStr2StdStr(partName);
+      filename += ".stp";
+
+      // Make sure that such a file does not exist yet.
+      while ( QFile::exists( filename.c_str() ) )
+      {
+        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Filename '%1' has been already used."
+                                                             << filename);
+
+        // Recompose the filename with unique index.
+        filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
+        filename += ExtStr2StdStr(partName);
+        filename += asiAlgo_Utils::Str::ToString(nextUniqueId++);
+        filename += ".stp";
+      }
+
+      // Write STEP file.
+      asiAlgo_STEP stepWriter( interp->GetProgress() );
+      //
+      if ( !stepWriter.Write( partShape, filename.c_str() ) )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot export part %1 to '%2'."
+                                                            << pid << filename);
+        continue;
+      }
+
+      // Keep track of filenames.
+      partFilenames.Bind( pid, asiAlgo_Utils::Str::BaseFilename(filename, true) );
+
+      // Add to the BOM file.
+      bomFile << pid << ", " << partFilenames(pid) << ", " << partQuantities(pid) << "\n";
+    }
+
+    bomFile.close();
+  }
+  else
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, pass the '-plain' keyword as subdirectories for "
+                                                           "assembly unloading are not currently supported.");
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
                           const Handle(Standard_Transient)& cmdAsm_NotUsed(data))
 {
@@ -1852,7 +1981,7 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("asm-xde-save-step",
     //
     "asm-xde-save-step -model <M> [-part <id>] -filename <filename>\n"
-    "\t Exports the passed XDE model to STEP format.",
+    "\t Exports the passed XDE model or its individual part to a STEP file.",
     //
     __FILE__, group, ASMXDE_SaveSTEP);
 
@@ -1932,4 +2061,19 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
     "\t Displays shapes out of JSON representing a scene tree.",
     //
     __FILE__, group, ASMXDE_DisplayJson);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("asm-xde-unload",
+    //
+    "asm-xde-unload -model <M> -path <dir> [-plain]\n"
+    "\n"
+    "\t Unloads all parts and (optionally) subassemblies of the model <M>\n"
+    "\t to the directory specified via the '-path' keyword. If the '-plain'\n"
+    "\t keyword is specified, then all unique parts will be dumped as a plain\n"
+    "\t list of CAD files without any intermediate subdirectories for the\n"
+    "\t assembly components.\n"
+    "\n"
+    "\t The default format for the exported part files is STEP.",
+    //
+    __FILE__, group, ASMXDE_Unload);
 }
