@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: repatch faces</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/canonical conversion
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1>Convert to canonical form</h1>
+
+<p>
+Generalized surface representations in NURBS are sometimes employed to communicate CAD designs, even though simpler (canonical) forms of geometry could have been used.
+</p>
+
+<div align="center"><a href="../imgs/canrec_01.png"><img src="../imgs/canrec_01.png" width="60%"/></a></div>
+
+<p>
+In many ways, the presence of freeform geometry representing canonical shapes is problematic. For instance, in feature recognition scenarios, it would be impossible to locate a cylindrical hole or shaft due to the absence of formal cylinders in the analyzed model. The same holds true for planes, cones, spheres, toroidal surfaces, surfaces of linear extrusions, and other geometries that possess their own distinctive characteristics.
+</p>
+
+<p>
+Analysis Situs is capable of converting freeform geometries to analytical form with a prescribed tolerance. To perform conversion, use the <span class="code-inline"><a href="../commands.html#convert-to-canonical">convert-to-canonical</a></span> Tcl command for the active part.
+</p>
+
+<div align="center"><a href="../imgs/canrec_02.png"><img src="../imgs/canrec_02.png" width="60%"/></a></div>
+
+<p class="note">
+  Read more about canonical conversion and similar algorithms in the <a href="https://quaoar.su/blog/page/modification-and-modifier-tools-of-opencascade">Manifold Geometry</a> blog.
+</p>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
