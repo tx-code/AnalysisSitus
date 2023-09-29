@@ -1810,7 +1810,7 @@ int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
       partFilenames.Bind( pid, asiAlgo_Utils::Str::BaseFilename(filename, true) );
 
       // Add to the BOM file.
-      bomFile << pid << ", " << partFilenames(pid) << ", " << partQuantities(pid) << "\n";
+      bomFile << pid.ToString() << ", " << partFilenames(pid) << ", " << partQuantities(pid) << "\n";
     }
 
     bomFile.close();
