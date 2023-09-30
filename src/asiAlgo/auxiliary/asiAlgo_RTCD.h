@@ -178,9 +178,37 @@ namespace RTCD
     Vector e;    //!< Positive halfwidth extents of OBB along each axis.
   };
 
+  //! A plane in 3D space can be thought of as a flat surface extending indefinitely
+  //! in all directions.
+  struct Plane
+  {
+    Vector n; //!< Plane normal. Points `x` on the plane satisfy `Dot(n,x) = d`.
+    double d; //!< `d = dot(n,p)` for a given point `p` on the plane.
+  };
+
+  //! Given three noncollinear points (ordered ccw), computes plane equation.
+  asiAlgo_EXPORT Plane
+    ComputePlane(Point a, Point b, Point c);
+
   //! Computes dot product of two vectors.
   asiAlgo_EXPORT double
     Dot(const Vector& V1, const Vector& V2);
+
+  //! Computes cross product of two vectors.
+  asiAlgo_EXPORT Vector
+    Cross(const Vector& V1, const Vector& V2);
+
+  //! Computes square modulus of the passed vector.
+  asiAlgo_EXPORT double
+    SquareModulus(const Vector& V);
+
+  //! Computes modulus of the passed vector.
+  asiAlgo_EXPORT double
+    Modulus(const Vector& V);
+
+  //! Normalizes the passed vector.
+  asiAlgo_EXPORT Vector
+    Normalize(const Vector& V);
 
   //! Given point `p`, returns point `q` on (or in) OBB `b`,
   //! closest to `p`.

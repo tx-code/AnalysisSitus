@@ -230,9 +230,56 @@ bool RTCD::AABB::IsOut(const gp_Pln& P,
 
 //-----------------------------------------------------------------------------
 
+RTCD::Plane RTCD::ComputePlane(Point a, Point b, Point c)
+{
+  Plane p;
+  p.n = Normalize( Cross(b - a, c - a) );
+  p.d = Dot( p.n, Vector(a) );
+  return p;
+}
+
+//-----------------------------------------------------------------------------
+
 double RTCD::Dot(const Vector& V1, const Vector& V2)
 {
   return V1.x*V2.x + V1.y*V2.y + V1.z*V2.z;
+}
+
+//-----------------------------------------------------------------------------
+
+RTCD::Vector RTCD::Cross(const Vector& V1, const Vector& V2)
+{
+  const double x = V1.y*V2.z - V1.z*V2.y;
+  const double y = V1.z*V2.x - V1.x*V2.z;
+  const double z = V1.x*V2.y - V1.y*V2.x;
+
+  return Vector(x, y, z);
+}
+
+//-----------------------------------------------------------------------------
+
+double RTCD::SquareModulus(const Vector& V)
+{
+  return V.x*V.x + V.y*V.y + V.z*V.z;
+}
+
+//-----------------------------------------------------------------------------
+
+double RTCD::Modulus(const Vector& V)
+{
+  return sqrt( SquareModulus(V) );
+}
+
+//-----------------------------------------------------------------------------
+
+RTCD::Vector RTCD::Normalize(const Vector& V)
+{
+  const double modulus = Modulus(V);
+  const double x = (V.x / modulus);
+  const double y = (V.y / modulus);
+  const double z = (V.z / modulus);
+
+  return Vector(x, y, z);
 }
 
 //-----------------------------------------------------------------------------
