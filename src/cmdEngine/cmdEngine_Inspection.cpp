@@ -4490,6 +4490,129 @@ int ENGINE_CheckDistanceToBbox(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_CheckDistanceToCHull(const Handle(asiTcl_Interp)& interp,
+                                int                          argc,
+                                const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get part shape.
+  Handle(asiData_PartNode)
+    partNode = cmdEngine::cf->Model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part Node is null or ill-defined.");
+    return TCL_OK;
+  }
+  //
+  TopoDS_Shape partSh = partNode->GetShape();
+
+  // Access selected faces (if any).
+  asiAlgo_Feature selected;
+  //
+  if ( !cmdEngine::cf.IsNull() )
+  {
+    asiEngine_Part( cmdEngine::cf->Model,
+                    cmdEngine::cf->ViewerPart->PrsMgr() ).GetHighlightedFaces(selected);
+  }
+
+  // Get the face in question.
+  int fid = 0;
+  interp->GetKeyValue<int>(argc, argv, "fid", fid);
+  //
+  if ( fid ) selected.Add(fid);
+
+  // Compute convex hull.
+  asiAlgo_RecognizeConvexHull recCHull(partSh);
+  //
+  if ( !recCHull.Perform() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Failed to compute convex hull.");
+    return TCL_ERROR;
+  }
+
+  // Extract halfspaces.
+  std::vector<RTCD::Plane> halfspaces;
+  recCHull.GetHullPlanes(halfspaces);
+
+  /* For diagnostic dump */
+  t_axField                         distAxes;
+  Handle(asiAlgo_BaseCloud<double>) distHits = new asiAlgo_BaseCloud<double>;
+  distAxes.Alloc();
+
+  // Iterate over all faces of interest.
+  double minDist = DBL_MAX;
+  //
+  for ( TColStd_MapIteratorOfPackedMapOfInteger fit(selected); fit.More(); fit.Next() )
+  {
+    const int faceId = fit.Key();
+
+    // Get face.
+    const TopoDS_Face&
+      face = TopoDS::Face( M->GetPartNode()->GetAAG()->GetMapOfFaces()(faceId) );
+
+    // Get face points using its triangulation.
+    std::vector< std::pair<int, gp_Ax1> > probes;
+    //
+    if ( !asiAlgo_Utils::GetFacePointsByFacets(face, 0., probes) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot sample points on the face %1." << fid);
+      return TCL_ERROR;
+    }
+
+    for ( const auto& probe : probes )
+    {
+      const gp_Pnt& xyz = probe.second.Location();
+      const gp_Dir& N   = probe.second.Direction();
+
+      distAxes.origins->AddElement( xyz );
+      distAxes.vectors->AddElement( N.XYZ() );
+
+      // Compose a probe point.
+      RTCD::Point  p( xyz.X(), xyz.Y(), xyz.Z() );
+      RTCD::Vector d( N.X(),   N.Y(),   N.Z() );
+
+      // Test w.r.t. AABB.
+      double tmin, tmax, dd = 0;
+      RTCD::Point q;
+      //
+      if ( RTCD::IntersectRayPolyhedron(p, d, halfspaces, tmin, tmax) )
+      {
+        double t = tmax;
+        q = p + d * t;
+
+        distHits->AddElement(q.x, q.y, q.z);
+
+        dd = (q - p).Modulus();
+
+        if ( dd < minDist )
+          minDist = dd;
+      }
+      else
+      {
+        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Cannot compute distance from the face %1." << fid);
+        continue;
+      }
+    }
+
+    TCollection_AsciiString distAxName("distAxes "), distHitName("distHit ");
+    distAxName += fid;
+    distHitName += fid;
+
+    interp->GetPlotter().REDRAW_POINTS  (distAxName,  distAxes.origins->GetCoordsArray(), Color_Yellow);
+    interp->GetPlotter().REDRAW_VECTORS (distAxName,  distAxes.origins->GetCoordsArray(), distAxes.vectors->GetCoordsArray(), Color_Violet);
+    interp->GetPlotter().REDRAW_POINTS  (distHitName, distHits->GetCoordsArray(), Color_Red);
+
+    interp->GetProgress().SendLogMessage(LogInfo(Normal) << "Min distance to polyhedron from face %1: %2." << fid << minDist);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_CheckCanonical(const Handle(asiTcl_Interp)& interp,
                           int                          argc,
                           const char**                 argv)
@@ -5169,6 +5292,14 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Checks distance from the selected (or specified) face to AABB.",
     //
     __FILE__, group, ENGINE_CheckDistanceToBbox);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("check-distance-to-chull",
+    //
+    "check-distance-to-chull [-fid <fid>]\n"
+    "\t Checks distance from the selected (or specified) face to convex hull.",
+    //
+    __FILE__, group, ENGINE_CheckDistanceToCHull);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-canonical",

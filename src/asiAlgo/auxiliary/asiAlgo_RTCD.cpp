@@ -423,28 +423,28 @@ int RTCD::IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, double &tmax
 
 //-----------------------------------------------------------------------------
 
-int RTCD::IntersectSegmentPolyhedron(Point a, Point b, Plane p[], int n,
-                                     double& tfirst, double& tlast)
+int RTCD::IntersectRayPolyhedron(Point                     p,
+                                 Vector                    d,
+                                 const std::vector<Plane>& planes,
+                                 double&                   tfirst,
+                                 double&                   tlast)
 {
-  // Compute direction vector for the segment
-  Vector d = b - a;
-
   // Set initial interval to being the whole segment. For a ray, tlast should be
-  // set to +FLT_MAX. For a line, additionally tfirst should be set to –FLT_MAX
-  tfirst = 0.0f;
-  tlast  = 1.0f;
+  // set to +DBL_MAX. For a line, additionally tfirst should be set to –DBL_MAX
+  tfirst = 0.01f;
+  tlast  = DBL_MAX;
 
   // Intersect segment against each plane
-  for ( int i = 0; i < n; i++ )
+  for ( const auto& plane : planes )
   {
-    double denom = Dot(p[i].n, d);
-    double dist  = p[i].d - Dot( p[i].n, Vector(a) );
+    double denom = Dot(plane.n, d);
+    double dist  = plane.d - Dot( plane.n, Vector(p) );
 
     // Test if segment runs parallel to the plane
     if ( denom == 0.0f )
     {
       // If so, return "no intersection" if segment lies outside plane
-      if ( dist > 0.0f )
+      if ( dist < 0.0f )
         return 0;
     }
     else
