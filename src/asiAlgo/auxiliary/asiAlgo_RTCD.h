@@ -261,6 +261,13 @@ namespace RTCD
   //! \sa sec. 5.3.3 in RTCD.
   asiAlgo_EXPORT int
     IntersectRayAABB(Point p, Vector d, AABB a, double &tmin, double &tmax);
+
+  //! Intersects segment `S(t) = A + t*(B - A), 0 <= t <= 1` against convex
+  //! polyhedron specified by the `n` halfspaces defined by the planes `p[]`. On exit,
+  //! `tfirst` and `tlast` define the intersection, if any.
+  asiAlgo_EXPORT int
+    IntersectSegmentPolyhedron(Point a, Point b, Plane p[], int n,
+                               double& tfirst, double& tlast);
 }
 
 #endif
