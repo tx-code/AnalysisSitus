@@ -42,6 +42,7 @@
 #include <asiAlgo_MeshGen.h>
 #include <asiAlgo_MeshMerge.h>
 #include <asiAlgo_MeshSmooth.h>
+#include <asiAlgo_RTCD.h>
 #include <asiAlgo_Timer.h>
 
 // asiTcl includes
@@ -2247,6 +2248,83 @@ int MOBIUS_POLY_NetGen(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int MOBIUS_POLY_MakePlane(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+#if defined USE_MOBIUS
+  // Get triangulation.
+  Handle(asiData_TriangulationNode)
+    tris_n = cmdMobius::model->GetTriangulationNode();
+
+  asiEngine_Triangulation trisApi( cmdMobius::model,
+                                   cmdMobius::cf->ViewerPart->PrsMgr(),
+                                   interp->GetProgress(),
+                                   interp->GetPlotter() );
+
+  // Get the active mesh.
+  t_ptr<t_mesh> mesh = ::GetActiveMesh(interp, argc, argv);
+
+  // Check if there's any user selection to process.
+  TColStd_PackedMapOfInteger facetIds;
+  trisApi.GetHighlightedFacets(facetIds);
+  //
+  if ( facetIds.Extent() != 1 )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, select one triangle.");
+    return TCL_ERROR;
+  }
+
+  TIMER_NEW
+  TIMER_GO
+
+  poly_TriangleHandle th( facetIds.GetMinimalMapped() );
+
+  poly_Triangle<> t;
+  mesh->GetTriangle(th, t);
+
+  t_xyz P[3];
+  mesh->GetVertex( t.hVertices[0], P[0] );
+  mesh->GetVertex( t.hVertices[1], P[1] );
+  mesh->GetVertex( t.hVertices[2], P[2] );
+
+  RTCD::Point a( P[0].X(), P[0].Y(), P[0].Z() );
+  RTCD::Point b( P[1].X(), P[1].Y(), P[1].Z() );
+  RTCD::Point c( P[2].X(), P[2].Y(), P[2].Z() );
+
+  interp->GetPlotter().REDRAW_POINT( "a", gp_Pnt(a.x, a.y, a.z), Color_Red );
+  interp->GetPlotter().REDRAW_POINT( "b", gp_Pnt(b.x, b.y, b.z), Color_Green );
+  interp->GetPlotter().REDRAW_POINT( "c", gp_Pnt(c.x, c.y, c.z), Color_Blue );
+
+  RTCD::Plane        plane    = RTCD::ComputePlane(a, b, c);
+  Handle(Geom_Plane) occPlane = plane.ConvertToOpenCascade();
+
+  // Move origin to the midpoint just for better visualization.
+  t_xyz Pm = (P[0] + P[1] + P[2])/3.;
+  //
+  gp_Trsf T;
+  T.SetTranslation( occPlane->Location(), cascade::GetOpenCascadePnt(Pm) );
+  //
+  occPlane->Transform(T);
+
+  interp->GetPlotter().REDRAW_SURFACE( "halfspace", occPlane, Color_White );
+
+  TIMER_FINISH
+  TIMER_COUT_RESULT_NOTIFIER(interp->GetProgress(), "Make plane")
+
+  return TCL_OK;
+#else
+  (void) argc;
+  (void) argv;
+
+  interp->GetProgress().SendLogMessage(LogErr(Normal) << "Mobius is not available.");
+
+  return TCL_ERROR;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
                         const Handle(Standard_Transient)& data)
 {
@@ -2463,6 +2541,15 @@ void cmdMobius::Factory(const Handle(asiTcl_Interp)&      interp,
     "\t it is expected to be followed by the face ID to extract as a subdomain.",
     //
     __FILE__, group, MOBIUS_POLY_NetGen);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("poly-make-plane",
+    //
+    "poly-make-plane\n"
+    "\n"
+    "\t Constructs a plane on the selected facet.",
+    //
+    __FILE__, group, MOBIUS_POLY_MakePlane);
 }
 
 // Declare entry point PLUGINFACTORY

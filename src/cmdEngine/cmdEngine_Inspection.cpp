@@ -4149,6 +4149,9 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
   // Whether to draw the visual debugging entities.
   const bool toDraw = interp->HasKeyword(argc, argv, "draw");
 
+  // RTCD halfspaces.
+  const bool isRTCD = interp->HasKeyword(argc, argv, "rtcd");
+
   /* =====================
    *  Perform recognition.
    * ===================== */
@@ -4190,6 +4193,28 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
 
   // Draw hull.
   interp->GetPlotter().REDRAW_TRIANGULATION("hull", recognizer.GetHullMesh(), Color_Default, 1.0);
+
+  if ( isRTCD )
+  {
+    std::vector<RTCD::Plane> planes;
+    recognizer.GetHullPlanes(planes);
+    //
+    for ( const auto& plane : planes )
+    {
+      Handle(Geom_Plane) occPlane = plane.ConvertToOpenCascade();
+
+      // Move the anchor points.
+      if ( plane.anchor.has_value() )
+      {
+        gp_Trsf T;
+        T.SetTranslation( occPlane->Location(), plane.anchor->ConvertToOpenCascade() );
+        //
+        occPlane->Transform(T);
+      }
+
+      interp->GetPlotter().DRAW_SURFACE( occPlane, Color_White, "halfspace" );
+    }
+  }
 
   return TCL_OK;
 }
@@ -5106,12 +5131,13 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("recognize-hull",
     //
-    "recognize-hull [-toler <tol>] [-num <numPts>] [-draw]\n"
+    "recognize-hull [-toler <tol>] [-num <numPts>] [-draw] [-rtcd]\n"
     "\t Builds convex hull of the workpiece and selects all faces lying on it.\n"
     "\t Pass tolerance with the '-toler' keyword to specify the precision of PMC\n"
     "\t over the boundary. Use the '-num' keyword to specify the number of sampling\n"
     "\t points for the faces. Pass the '-draw' keyword to dump visual debugging\n"
-    "\t entities, such as the convex hull, BVH, projection points, etc.",
+    "\t entities, such as the convex hull, BVH, projection points, etc. Pass the\n"
+    "\t '-rtcd' flag to draw halfspace planes",
     //
     __FILE__, group, ENGINE_RecognizeHull);
 

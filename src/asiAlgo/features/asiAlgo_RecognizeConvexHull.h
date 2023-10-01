@@ -33,6 +33,7 @@
 // asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 #include <asiAlgo_Recognizer.h>
+#include <asiAlgo_RTCD.h>
 
 class TopoDS_Face;
 
@@ -108,6 +109,13 @@ public:
   //! \return the constructed hull.
   asiAlgo_EXPORT const Handle(Poly_Triangulation)&
     GetHullMesh() const;
+
+  //! Returns the computed convex hull as a collection of planes
+  //! in the format of `RTCD` ("Real-time collision detection")
+  //! namespace. This representation is useful for computations
+  //! based on halfspaces.
+  asiAlgo_EXPORT void
+    GetHullPlanes(std::vector<RTCD::Plane>& planes) const;
 
 public:
 
