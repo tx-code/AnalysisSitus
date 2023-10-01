@@ -20,6 +20,8 @@
 #define TL_OPTIONAL_VERSION_MINOR 0
 #define TL_OPTIONAL_VERSION_PATCH 0
 
+#include <asiAlgo.h>
+
 #include <exception>
 #include <functional>
 #include <new>

@@ -141,6 +141,30 @@ const Handle(Poly_Triangulation)& asiAlgo_RecognizeConvexHull::GetHullMesh() con
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_RecognizeConvexHull::GetHullPlanes(std::vector<RTCD::Plane>& planes) const
+{
+  for ( int i = 1; i <= m_hullMesh->NbTriangles(); ++i )
+  {
+    int N[3];
+    m_hullMesh->Triangle(i).Get(N[0], N[1], N[2]);
+
+    RTCD::Point a = m_hullMesh->Node(N[0]);
+    RTCD::Point b = m_hullMesh->Node(N[1]);
+    RTCD::Point c = m_hullMesh->Node(N[2]);
+
+    RTCD::Plane plane = RTCD::ComputePlane(a, b, c);
+
+    // Set optional anchor point.
+    RTCD::Point mid = ( RTCD::Vector(a) + RTCD::Vector(b) + RTCD::Vector(c) )*(1./3.);
+    //
+    plane.anchor = mid;
+
+    planes.push_back(plane);
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_RecognizeConvexHull::Perform()
 {
   // Clean up the result.
@@ -276,7 +300,7 @@ bool asiAlgo_RecognizeConvexHull::Perform()
     if ( numOk == numProbes )
       convexHullFaces.Add(f);
 
-    if (m_bCacheSampl)
+    if ( m_bCacheSampl )
     {
       Handle(asiAlgo_AttrFaceUniformGrid) 
         ug = new asiAlgo_AttrFaceUniformGrid(sampleFace.GetResult());

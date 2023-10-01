@@ -240,6 +240,13 @@ RTCD::Plane RTCD::ComputePlane(Point a, Point b, Point c)
 
 //-----------------------------------------------------------------------------
 
+Handle(Geom_Plane) RTCD::Plane::ConvertToOpenCascade() const
+{
+  return new Geom_Plane(n.x, n.y, n.z, -d);
+}
+
+//-----------------------------------------------------------------------------
+
 double RTCD::Dot(const Vector& V1, const Vector& V2)
 {
   return V1.x*V2.x + V1.y*V2.y + V1.z*V2.z;

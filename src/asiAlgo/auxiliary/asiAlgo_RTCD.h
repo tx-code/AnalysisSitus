@@ -32,11 +32,12 @@
 #define asiAlgo_RTCD_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
+#include <asiAlgo_Optional.h>
 
 // OpenCascade includes
 #include <Bnd_Box.hxx>
 #include <Bnd_Box2d.hxx>
+#include <Geom_Plane.hxx>
 #include <gp_Pln.hxx>
 
 //! Algorithms from "Real-Time Collision Detection" by Christer Ericson.
@@ -54,6 +55,11 @@ namespace RTCD
     double operator[](const int i) const
     {
       return ((i == 0) ? x : ((i == 1) ? y : z));
+    }
+
+    Vector operator+(const Vector& other)
+    {
+      return Vector(x + other.x, y + other.y, z + other.z);
     }
 
     Vector operator-(const Vector& other)
@@ -90,8 +96,19 @@ namespace RTCD
     Point(const double _x,
           const double _y,
           const double _z) : x(_x), y(_y), z(_z) {}
+    Point(const gp_Pnt& P)
+    {
+      x = P.X();
+      y = P.Y();
+      z = P.Z();
+    }
 
     asiAlgo_EXPORT Point(const Vector& V);
+
+    gp_Pnt ConvertToOpenCascade() const
+    {
+      return gp_Pnt(x, y, z);
+    }
 
     double operator[](const int i) const
     {
@@ -179,11 +196,17 @@ namespace RTCD
   };
 
   //! A plane in 3D space can be thought of as a flat surface extending indefinitely
-  //! in all directions.
+  //! in all directions. This structure defines plane in the "constant-normal" form
+  //! according to the sec. 3.6 of RTCD ook.
   struct Plane
   {
-    Vector n; //!< Plane normal. Points `x` on the plane satisfy `Dot(n,x) = d`.
-    double d; //!< `d = dot(n,p)` for a given point `p` on the plane.
+    Vector              n;      //!< Plane normal. Points `x` on the plane satisfy `Dot(n,x) = d`.
+    double              d;      //!< `d = dot(n,p)` for a given point `p` on the plane.
+    tl::optional<Point> anchor; //!< Optional anchor point.
+
+    //! Converts this plane to the OpenCascade-ish rep.
+    asiAlgo_EXPORT Handle(Geom_Plane)
+      ConvertToOpenCascade() const;
   };
 
   //! Given three noncollinear points (ordered ccw), computes plane equation.
