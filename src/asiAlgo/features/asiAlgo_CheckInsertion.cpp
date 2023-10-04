@@ -66,6 +66,9 @@ asiAlgo_InsertionType
     }
   }
 
+  if ( EdgesCommon.IsEmpty() )
+    return InsertionType_Undefined; // No common edges, i.e., feature face is not inserted.
+
   // Soft insertion is realized if all common edges are used in the
   // internal wires of master face
   TopoDS_Wire masterOuterWire = ShapeAnalysis::OuterWire(masterFace);
