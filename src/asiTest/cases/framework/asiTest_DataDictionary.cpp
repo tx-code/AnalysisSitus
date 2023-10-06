@@ -38,7 +38,7 @@
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_DataDictionary::testRead(const int funcID)
+outcome asiTest_DataDictionary::testRead(const int funcID, const bool)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();

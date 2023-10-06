@@ -52,49 +52,49 @@ outcome asiTest_ExchangeAstra::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_load_001(const int funcID)
+outcome asiTest_ExchangeAstra::test_load_001(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_read_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_load_002(const int funcID)
+outcome asiTest_ExchangeAstra::test_load_002(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_read_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_save_001(const int funcID)
+outcome asiTest_ExchangeAstra::test_save_001(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_write_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_save_002(const int funcID)
+outcome asiTest_ExchangeAstra::test_save_002(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_write_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_save_003(const int funcID)
+outcome asiTest_ExchangeAstra::test_save_003(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_write_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_save_004(const int funcID)
+outcome asiTest_ExchangeAstra::test_save_004(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_write_04.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ExchangeAstra::test_save_005(const int funcID)
+outcome asiTest_ExchangeAstra::test_save_005(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_write_05.tcl");
 }

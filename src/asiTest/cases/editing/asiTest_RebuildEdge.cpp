@@ -55,7 +55,7 @@ outcome asiTest_RebuildEdge::runTestScript(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_RebuildEdge::testRebuildEdge001(const int funcID)
+outcome asiTest_RebuildEdge::testRebuildEdge001(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/rebuild-edge/rebuild-edge_001.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_RebuildEdge::testRebuildEdge001(const int funcID)
 //! Test scenario 002.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_RebuildEdge::testRebuildEdge002(const int funcID)
+outcome asiTest_RebuildEdge::testRebuildEdge002(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/rebuild-edge/rebuild-edge_002.tcl");
 }

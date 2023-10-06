@@ -68,6 +68,12 @@ public:
     return "Tools";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -99,31 +105,31 @@ public:
 // Test functions:
 private:
 
-  static outcome insert_001  (const int funcID);
-  static outcome insert_002a (const int funcID);
-  static outcome insert_002b (const int funcID);
-  static outcome insert_002c (const int funcID);
-  static outcome insert_002d (const int funcID);
-  static outcome insert_002e (const int funcID);
-  static outcome insert_002f (const int funcID);
-  static outcome insert_002g (const int funcID);
-  static outcome insert_002h (const int funcID);
-  static outcome insert_002i (const int funcID);
-  static outcome insert_002j (const int funcID);
-  static outcome insert_002k (const int funcID);
-  static outcome insert_003  (const int funcID);
-  static outcome insert_004  (const int funcID);
+  static outcome insert_001  (const int funcID, const bool);
+  static outcome insert_002a (const int funcID, const bool);
+  static outcome insert_002b (const int funcID, const bool);
+  static outcome insert_002c (const int funcID, const bool);
+  static outcome insert_002d (const int funcID, const bool);
+  static outcome insert_002e (const int funcID, const bool);
+  static outcome insert_002f (const int funcID, const bool);
+  static outcome insert_002g (const int funcID, const bool);
+  static outcome insert_002h (const int funcID, const bool);
+  static outcome insert_002i (const int funcID, const bool);
+  static outcome insert_002j (const int funcID, const bool);
+  static outcome insert_002k (const int funcID, const bool);
+  static outcome insert_003  (const int funcID, const bool);
+  static outcome insert_004  (const int funcID, const bool);
 
-  static outcome modify_001  (const int funcID);
-  static outcome modify_002  (const int funcID);
+  static outcome modify_001  (const int funcID, const bool);
+  static outcome modify_002  (const int funcID, const bool);
 
-  static outcome remove_001  (const int funcID);
-  static outcome remove_002  (const int funcID);
-  static outcome remove_003  (const int funcID);
-  static outcome remove_004  (const int funcID);
-  static outcome remove_005  (const int funcID);
+  static outcome remove_001  (const int funcID, const bool);
+  static outcome remove_002  (const int funcID, const bool);
+  static outcome remove_003  (const int funcID, const bool);
+  static outcome remove_004  (const int funcID, const bool);
+  static outcome remove_005  (const int funcID, const bool);
 
-  static outcome complex_001 (const int funcID);
+  static outcome complex_001 (const int funcID, const bool);
 
 private:
 

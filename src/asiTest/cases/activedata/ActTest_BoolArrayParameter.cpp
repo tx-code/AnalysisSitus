@@ -41,7 +41,7 @@
 //! Performs test on accessing value of BoolArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BoolArrayParameter::accessValue(const int funcID)
+outcome ActTest_BoolArrayParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -116,7 +116,7 @@ outcome ActTest_BoolArrayParameter::accessValue(const int funcID)
 //! Performs test on accessing particular elements of BoolArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BoolArrayParameter::accessElements(const int funcID)
+outcome ActTest_BoolArrayParameter::accessElements(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

@@ -355,7 +355,7 @@ bool asiTest_AAG::checkNamesVersusIds(const Handle(asiAlgo_AAG)&    aag,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator001(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator001(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_001,
@@ -365,7 +365,7 @@ outcome asiTest_AAG::testNeighborsIterator001(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator002(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator002(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -375,7 +375,7 @@ outcome asiTest_AAG::testNeighborsIterator002(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator003(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator003(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -385,7 +385,7 @@ outcome asiTest_AAG::testNeighborsIterator003(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator004(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator004(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -395,7 +395,7 @@ outcome asiTest_AAG::testNeighborsIterator004(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator005(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator005(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -405,7 +405,7 @@ outcome asiTest_AAG::testNeighborsIterator005(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator006(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator006(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -415,7 +415,7 @@ outcome asiTest_AAG::testNeighborsIterator006(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator007(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator007(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -425,7 +425,7 @@ outcome asiTest_AAG::testNeighborsIterator007(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator008(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator008(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -435,7 +435,7 @@ outcome asiTest_AAG::testNeighborsIterator008(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNeighborsIterator009(const int funcID)
+outcome asiTest_AAG::testNeighborsIterator009(const int funcID, const bool)
 {
   return testAllNeighborsIterator( funcID,
                                    filename_brep_002,
@@ -445,21 +445,21 @@ outcome asiTest_AAG::testNeighborsIterator009(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testJSON01(const int funcID)
+outcome asiTest_AAG::testJSON01(const int funcID, const bool)
 {
   return testAAG2JSON(funcID, filename_brep_001, filename_json_001);
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testJSON02(const int funcID)
+outcome asiTest_AAG::testJSON02(const int funcID, const bool)
 {
   return testAAG2JSON(funcID, filename_brep_003, filename_json_002);
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNaming01(const int funcID)
+outcome asiTest_AAG::testNaming01(const int funcID, const bool)
 {
   // Make a unit box as a working body.
   TopoDS_Shape box = BRepPrimAPI_MakeBox(1, 1, 1);
@@ -469,28 +469,28 @@ outcome asiTest_AAG::testNaming01(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNaming02(const int funcID)
+outcome asiTest_AAG::testNaming02(const int funcID, const bool)
 {
   return testAAGIndices( funcID, readBRep(filename_brep_004) );
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNaming03(const int funcID)
+outcome asiTest_AAG::testNaming03(const int funcID, const bool)
 {
   return testAAGIndices( funcID, readBRep(filename_brep_005) );
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testNaming04(const int funcID)
+outcome asiTest_AAG::testNaming04(const int funcID, const bool)
 {
   return testAAGIndices( funcID, readBRep(filename_brep_006) );
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testCollapse01(const int funcID)
+outcome asiTest_AAG::testCollapse01(const int funcID, const bool)
 {
   // 3 9 10 13
   TopoDS_Shape shape = readBRep(filename_brep_007);
@@ -506,7 +506,7 @@ outcome asiTest_AAG::testCollapse01(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testCollapse02(const int funcID)
+outcome asiTest_AAG::testCollapse02(const int funcID, const bool)
 {
   TopoDS_Shape shape = readBRep(filename_brep_007);
 
@@ -518,7 +518,7 @@ outcome asiTest_AAG::testCollapse02(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AAG::testCollapse03(const int funcID)
+outcome asiTest_AAG::testCollapse03(const int funcID, const bool)
 {
   TopoDS_Shape shape = readBRep(filename_brep_007);
 

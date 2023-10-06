@@ -52,49 +52,49 @@ outcome asiTest_JoinSurf::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test01(const int funcID)
+outcome asiTest_JoinSurf::test01(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test02(const int funcID)
+outcome asiTest_JoinSurf::test02(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test03(const int funcID)
+outcome asiTest_JoinSurf::test03(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test04(const int funcID)
+outcome asiTest_JoinSurf::test04(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_04.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test05(const int funcID)
+outcome asiTest_JoinSurf::test05(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_05.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test06(const int funcID)
+outcome asiTest_JoinSurf::test06(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_06.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinSurf::test07(const int funcID)
+outcome asiTest_JoinSurf::test07(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-surf_07.tcl");
 }

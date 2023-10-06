@@ -116,8 +116,15 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
    *  Launch Test Cases one by one
    * ============================== */
 
-  bool isOk = true;
-  int numTotal = 0, numFailed = 0;
+  // Failed outcomes.
+  std::vector<outcome> failedOutcomes;
+  std::vector<int>     failedFuncIds;
+
+  bool isOk      = true;
+  int  numTotal  = 0;
+  int  numFailed = 0;
+  int  numGenRef = 0;
+
   for ( int l = 0; l < (int) m_launchers.size(); ++l )
   {
     const Handle(asiTestEngine_CaseLauncherAPI)& CaseLauncher = m_launchers.at(l);
@@ -131,18 +138,75 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
                                        << CaseLauncher->NumberOfFailed() << ")\n";
     }
 
-    numTotal += CaseLauncher->NumberOfExecuted();
+    numTotal  += CaseLauncher->NumberOfExecuted();
     numFailed += CaseLauncher->NumberOfFailed();
+    numGenRef += CaseLauncher->NumberOfGenRef();
 
     if ( !nextOk && isOk )
       isOk = false;
+
+    // Collect failed outcomes.
+    std::vector<outcome> caseOutcomes = CaseLauncher->Results();
+    //
+    for ( size_t k = 0; k < caseOutcomes.size(); ++k )
+    {
+      if ( !caseOutcomes[k].ok )
+      {
+        failedOutcomes .push_back( caseOutcomes[k] );
+        failedFuncIds  .push_back( (int) (k + 1) );
+      }
+    }
   }
 
   if ( out )
   {
     *out << "\t***\n";
-    *out << "\tTotal executed: " << numTotal << "\n";
-    *out << "\tTotal failed: " << numFailed << "\n";
+    *out << "\tTotal executed: " << numTotal  << "\n";
+    *out << "\tTotal failed:   " << numFailed << "\n";
+    *out << "\tTotal genref:   " << numGenRef << "\n";
+
+    if ( numFailed )
+    {
+#if defined WIN32
+      // 0 for background Color (Black)
+      // 4 for text color (Red)
+      system("Color 04");
+#endif
+
+      *out << "\tFailed cases:";
+      //
+      for ( const auto& failedOutcome : failedOutcomes )
+      {
+        *out << "\n\t[x]\t" << failedOutcome.name;
+      }
+      //
+      *out << "\n\t";
+      //
+      for ( const auto failedFuncId : failedFuncIds )
+      {
+        *out << " " << failedFuncId;
+      }
+      //
+      *out << "\n";
+      *out << "\t... Alter `GenRefIds()` with `genrefIds.insert({...})` to generate refs.\n";
+    }
+#if defined WIN32
+    else
+    {
+      if ( numGenRef )
+      {
+        // 0 for background Color (Black)
+        // E for text color (Yellow)
+        system("Color 0E");
+      }
+      else
+      {
+        // 0 for background Color (Black)
+        // A for text color (Light Green)
+        system("Color 0A");
+      }
+    }
+#endif
   }
 
   /* ================
@@ -151,10 +215,13 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
 
   if ( out )
     *out << "\t***\n";
-  if ( this->generateReport(out) )
+
+  std::string reportFilename;
+
+  if ( this->generateReport(out, reportFilename) )
   {
     if ( out )
-      *out << "\tReport generation succeeded\n";
+      *out << "\tReport generation succeeded: " << reportFilename << "\n";
   }
   else
   {
@@ -167,9 +234,11 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
 
 //! Generates HTML report for the Test Cases identified by the managed
 //! Launchers.
-//! \param out [in] output stream.
+//! \param[in]  out      the output stream.
+//! \param[out] filename the filename of the generated report.
 //! \return true in case of success, false -- otherwise.
-bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
+bool asiTestEngine_Launcher::generateReport(std::ostream* out,
+                                            std::string&  filename) const
 {
   /* ===========================
    *  Render header information
@@ -315,13 +384,13 @@ bool asiTestEngine_Launcher::generateReport(std::ostream* out) const
   Rdr->EndBody()->EndHtml();
 
   // Filename for HTML report
-  std::string
-    filename = asiAlgo_Utils::Str::Slashed(current_temp_dir) +
-               asiTestEngine_Macro_REPORT_FN + asiTestEngine_Macro_DOT + asiTestEngine_Macro_REPORT_EXT;
+  filename = asiAlgo_Utils::Str::Slashed(current_temp_dir) +
+             asiTestEngine_Macro_REPORT_FN + asiTestEngine_Macro_DOT + asiTestEngine_Macro_REPORT_EXT;
 
   // Create file for HTML report
   std::ofstream file;
   file.open(filename.c_str(), std::ios::out | std::ios::trunc);
+  //
   if ( !file.is_open() )
   {
     if ( out )

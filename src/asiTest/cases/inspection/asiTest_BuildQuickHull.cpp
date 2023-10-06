@@ -55,7 +55,7 @@ outcome asiTest_BuildQuickHull::runTestScript(const int   funcID,
 //! Test scenario 01.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_BuildQuickHull::test_build_quick_hull_01(const int funcID)
+outcome asiTest_BuildQuickHull::test_build_quick_hull_01(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/build-quick-hull/build_quick_hull_01.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_BuildQuickHull::test_build_quick_hull_01(const int funcID)
 //! Test scenario 02.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_BuildQuickHull::test_build_quick_hull_02(const int funcID)
+outcome asiTest_BuildQuickHull::test_build_quick_hull_02(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/build-quick-hull/build_quick_hull_02.tcl");
 }

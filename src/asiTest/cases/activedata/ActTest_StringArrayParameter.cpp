@@ -41,7 +41,7 @@
 //! Performs test on accessing value of StringArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_StringArrayParameter::accessValue(const int funcID)
+outcome ActTest_StringArrayParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -120,7 +120,7 @@ outcome ActTest_StringArrayParameter::accessValue(const int funcID)
 //! Performs test on accessing individual elements of StringArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_StringArrayParameter::accessElements(const int funcID)
+outcome ActTest_StringArrayParameter::accessElements(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

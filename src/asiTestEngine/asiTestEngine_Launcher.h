@@ -58,6 +58,9 @@ public:
   virtual int
     NumberOfFailed() const = 0;
 
+  virtual int
+    NumberOfGenRef() const = 0;
+
   virtual AsiTestFunction
     TestFunction(const int idx) const = 0;
 
@@ -82,7 +85,9 @@ public:
 
   //! Default constructor.
   asiTestEngine_CaseLauncher() : asiTestEngine_CaseLauncherAPI()
-  {}
+  {
+    m_iNumGenRef = 0;
+  }
 
 public:
 
@@ -95,12 +100,27 @@ public:
     asiTestFunctions functions;
     CaseType::Functions(functions);
 
+    // Boolean flags for the test functions asked for genref
+    std::set<int> genrefIds;
+    CaseType::GenRefIds(genrefIds);
+
     // Run functions one by one
     bool areAllOk = true;
     for ( int f = 0; f < (int) functions.Size(); ++f )
     {
       const AsiTestFunction& func = functions.Func(f);
-      outcome res = ( *func )( f + 1 );
+
+      // Check if update is asked for the reference data
+      bool genref = false;
+      //
+      if ( genrefIds.find(f + 1) != genrefIds.end() )
+      {
+        genref = true;
+        ++m_iNumGenRef;
+      }
+
+      // Run test.
+      outcome res = ( *func )( f + 1, genref );
 
       m_funcResults.push_back(res);
 
@@ -139,6 +159,12 @@ public:
     return numFailed;
   }
 
+  //! \return number of Test Functions with generated refs.
+  virtual int NumberOfGenRef() const
+  {
+    return m_iNumGenRef;
+  }
+
   //! Returns Test Function referred to by the given 0-based index.
   //! \param idx [in] index of the Test Function to access.
   //! \return Test Function.
@@ -175,6 +201,7 @@ private:
 private:
 
   std::vector<outcome> m_funcResults; //!< Execution results.
+  int                  m_iNumGenRef;  //!< Number of functions with regenerated reference data.
 
 };
 
@@ -201,8 +228,12 @@ public:
 
 protected:
 
-  bool generateReport(std::ostream* out) const;
-  std::string uniqueDirName() const;
+  asiTestEngine_EXPORT bool
+    generateReport(std::ostream* out,
+                   std::string&  filename) const;
+
+  asiTestEngine_EXPORT std::string
+    uniqueDirName() const;
 
 private:
 

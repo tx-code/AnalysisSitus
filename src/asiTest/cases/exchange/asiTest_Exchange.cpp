@@ -55,7 +55,7 @@ outcome asiTest_Exchange::runTestScript(const int   funcID,
 //! Test scenario 1.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_1(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_1.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_Exchange::test_general_exchange_1(const int funcID)
 //! Test scenario 2.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_2(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_2.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_Exchange::test_general_exchange_2(const int funcID)
 //! Test scenario 3.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_3(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_3(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_3.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_Exchange::test_general_exchange_3(const int funcID)
 //! Test scenario 4.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_4(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_4(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_4.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_Exchange::test_general_exchange_4(const int funcID)
 //! Test scenario 5.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_5(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_5(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_5.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_Exchange::test_general_exchange_5(const int funcID)
 //! Test scenario 6.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_Exchange::test_general_exchange_6(const int funcID)
+outcome asiTest_Exchange::test_general_exchange_6(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/general/general_exchange_6.tcl");
 }

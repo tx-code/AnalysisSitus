@@ -76,6 +76,12 @@ public:
     return "Tools";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -105,26 +111,26 @@ public:
 // Test functions:
 private:
 
-  static outcome testCopyPaste_PlainToPlain                     (const int funcID); // Case 1
-  static outcome testCopyPaste_TreeToPlain                      (const int funcID); // Case 2
-  static outcome testCopyPaste_TreeWithReferencesToPlain_1      (const int funcID); // Case 3.1
-  static outcome testCopyPaste_TreeWithReferencesToPlain_2      (const int funcID); // Case 3.2
-  static outcome testCopyPaste_TreeWithReferencesToPlain_3      (const int funcID); // Case 3.3
-  static outcome testCopyPaste_TreeWithReferencesToPlain_4      (const int funcID); // Case 3.4
-  static outcome testCopyPaste_TreeWithReferencesToPlain_5      (const int funcID); // Case 3.5
-  static outcome testCopyPaste_TreeWithEvalReferencesToPlain    (const int funcID); // Case 4
-  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_1  (const int funcID); // Case 5.1
-  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_2  (const int funcID); // Case 5.2
-  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_3  (const int funcID); // Case 5.3
-  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_4  (const int funcID); // Case 5.4
-  static outcome testCopyPaste_TreeWithListReferenceToPlain_1   (const int funcID); // Case 6.1
-  static outcome testCopyPaste_TreeWithListReferenceToPlain_2   (const int funcID); // Case 6.2
-  static outcome testCopyPaste_TreeWithListReferenceToPlain_3   (const int funcID); // Case 6.3
-  static outcome testCopyPaste_TreeWithListReferenceToPlain_4   (const int funcID); // Case 6.4
-  static outcome testCopyPaste_PlainMeshToPlain                 (const int funcID); // Case 7
-  static outcome testCopyPaste_PasteWithDEAD_DFunctionArgument  (const int funcID); // Case 8
-  static outcome testCopyPaste_PasteWithDEAD_DFunctionResult    (const int funcID); // Case 9
-  static outcome testCopyPaste_PasteWithDEADReference           (const int funcID); // Case 10
+  static outcome testCopyPaste_PlainToPlain                     (const int funcID, const bool); // Case 1
+  static outcome testCopyPaste_TreeToPlain                      (const int funcID, const bool); // Case 2
+  static outcome testCopyPaste_TreeWithReferencesToPlain_1      (const int funcID, const bool); // Case 3.1
+  static outcome testCopyPaste_TreeWithReferencesToPlain_2      (const int funcID, const bool); // Case 3.2
+  static outcome testCopyPaste_TreeWithReferencesToPlain_3      (const int funcID, const bool); // Case 3.3
+  static outcome testCopyPaste_TreeWithReferencesToPlain_4      (const int funcID, const bool); // Case 3.4
+  static outcome testCopyPaste_TreeWithReferencesToPlain_5      (const int funcID, const bool); // Case 3.5
+  static outcome testCopyPaste_TreeWithEvalReferencesToPlain    (const int funcID, const bool); // Case 4
+  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_1  (const int funcID, const bool); // Case 5.1
+  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_2  (const int funcID, const bool); // Case 5.2
+  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_3  (const int funcID, const bool); // Case 5.3
+  static outcome testCopyPaste_TreeWithPlainReferenceToPlain_4  (const int funcID, const bool); // Case 5.4
+  static outcome testCopyPaste_TreeWithListReferenceToPlain_1   (const int funcID, const bool); // Case 6.1
+  static outcome testCopyPaste_TreeWithListReferenceToPlain_2   (const int funcID, const bool); // Case 6.2
+  static outcome testCopyPaste_TreeWithListReferenceToPlain_3   (const int funcID, const bool); // Case 6.3
+  static outcome testCopyPaste_TreeWithListReferenceToPlain_4   (const int funcID, const bool); // Case 6.4
+  static outcome testCopyPaste_PlainMeshToPlain                 (const int funcID, const bool); // Case 7
+  static outcome testCopyPaste_PasteWithDEAD_DFunctionArgument  (const int funcID, const bool); // Case 8
+  static outcome testCopyPaste_PasteWithDEAD_DFunctionResult    (const int funcID, const bool); // Case 9
+  static outcome testCopyPaste_PasteWithDEADReference           (const int funcID, const bool); // Case 10
 
 private:
 

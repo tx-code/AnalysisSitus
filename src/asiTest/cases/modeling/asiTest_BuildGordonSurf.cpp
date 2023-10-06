@@ -52,105 +52,105 @@ outcome asiTest_BuildGordonSurf::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test01(const int funcID)
+outcome asiTest_BuildGordonSurf::test01(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test02(const int funcID)
+outcome asiTest_BuildGordonSurf::test02(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test03(const int funcID)
+outcome asiTest_BuildGordonSurf::test03(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test04(const int funcID)
+outcome asiTest_BuildGordonSurf::test04(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_04.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test05(const int funcID)
+outcome asiTest_BuildGordonSurf::test05(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_05.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test06(const int funcID)
+outcome asiTest_BuildGordonSurf::test06(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_06.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test07(const int funcID)
+outcome asiTest_BuildGordonSurf::test07(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_07.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test08(const int funcID)
+outcome asiTest_BuildGordonSurf::test08(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_08.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test09(const int funcID)
+outcome asiTest_BuildGordonSurf::test09(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_09.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test10(const int funcID)
+outcome asiTest_BuildGordonSurf::test10(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_10.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test11(const int funcID)
+outcome asiTest_BuildGordonSurf::test11(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_11.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test12(const int funcID)
+outcome asiTest_BuildGordonSurf::test12(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_12.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test13(const int funcID)
+outcome asiTest_BuildGordonSurf::test13(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_13.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test14(const int funcID)
+outcome asiTest_BuildGordonSurf::test14(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_14.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_BuildGordonSurf::test15(const int funcID)
+outcome asiTest_BuildGordonSurf::test15(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/build-gordon_15.tcl");
 }

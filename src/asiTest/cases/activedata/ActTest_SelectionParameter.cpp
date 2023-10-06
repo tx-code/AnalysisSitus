@@ -42,7 +42,7 @@
 //! SelectionParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_SelectionParameter::accessSelectionMask(const int funcID)
+outcome ActTest_SelectionParameter::accessSelectionMask(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -100,7 +100,7 @@ outcome ActTest_SelectionParameter::accessSelectionMask(const int funcID)
 //! Performs test on accessing individual masked IDs of SelectionParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int funcID)
+outcome ActTest_SelectionParameter::accessSelectionMaskIDs(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

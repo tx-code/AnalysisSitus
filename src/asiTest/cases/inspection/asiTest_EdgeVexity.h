@@ -61,6 +61,12 @@ public:
     return "inspection";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -117,48 +123,48 @@ private:
 
 private:
 
-  static outcome test001(const int funcID);
-  static outcome test002(const int funcID);
-  static outcome test003(const int funcID);
-  static outcome test004(const int funcID);
-  static outcome test005(const int funcID);
-  static outcome test006(const int funcID);
-  static outcome test007(const int funcID);
-  static outcome test008(const int funcID);
-  static outcome test009(const int funcID);
-  static outcome test010(const int funcID);
-  static outcome test011(const int funcID);
-  static outcome test012(const int funcID);
-  static outcome test013(const int funcID);
-  static outcome test014(const int funcID);
-  static outcome test015(const int funcID);
-  static outcome test016(const int funcID);
-  static outcome test017(const int funcID);
-  static outcome test018(const int funcID);
-  static outcome test019(const int funcID);
-  static outcome test020(const int funcID);
-  static outcome test021(const int funcID);
-  static outcome test022(const int funcID);
-  static outcome test023(const int funcID);
-  static outcome test024(const int funcID);
-  static outcome test025(const int funcID);
-  static outcome test026(const int funcID);
-  static outcome test027(const int funcID);
-  static outcome test028(const int funcID);
-  static outcome test029(const int funcID);
-  static outcome test030(const int funcID);
-  static outcome test031(const int funcID);
-  static outcome test032(const int funcID);
-  static outcome test033(const int funcID);
-  static outcome test034(const int funcID);
-  static outcome test035(const int funcID);
-  static outcome test036(const int funcID);
-  static outcome test037(const int funcID);
-  static outcome test038(const int funcID);
-  static outcome test039(const int funcID);
-  static outcome test040(const int funcID);
-  static outcome test041(const int funcID);
-  static outcome test042(const int funcID);
+  static outcome test001(const int funcID, const bool);
+  static outcome test002(const int funcID, const bool);
+  static outcome test003(const int funcID, const bool);
+  static outcome test004(const int funcID, const bool);
+  static outcome test005(const int funcID, const bool);
+  static outcome test006(const int funcID, const bool);
+  static outcome test007(const int funcID, const bool);
+  static outcome test008(const int funcID, const bool);
+  static outcome test009(const int funcID, const bool);
+  static outcome test010(const int funcID, const bool);
+  static outcome test011(const int funcID, const bool);
+  static outcome test012(const int funcID, const bool);
+  static outcome test013(const int funcID, const bool);
+  static outcome test014(const int funcID, const bool);
+  static outcome test015(const int funcID, const bool);
+  static outcome test016(const int funcID, const bool);
+  static outcome test017(const int funcID, const bool);
+  static outcome test018(const int funcID, const bool);
+  static outcome test019(const int funcID, const bool);
+  static outcome test020(const int funcID, const bool);
+  static outcome test021(const int funcID, const bool);
+  static outcome test022(const int funcID, const bool);
+  static outcome test023(const int funcID, const bool);
+  static outcome test024(const int funcID, const bool);
+  static outcome test025(const int funcID, const bool);
+  static outcome test026(const int funcID, const bool);
+  static outcome test027(const int funcID, const bool);
+  static outcome test028(const int funcID, const bool);
+  static outcome test029(const int funcID, const bool);
+  static outcome test030(const int funcID, const bool);
+  static outcome test031(const int funcID, const bool);
+  static outcome test032(const int funcID, const bool);
+  static outcome test033(const int funcID, const bool);
+  static outcome test034(const int funcID, const bool);
+  static outcome test035(const int funcID, const bool);
+  static outcome test036(const int funcID, const bool);
+  static outcome test037(const int funcID, const bool);
+  static outcome test038(const int funcID, const bool);
+  static outcome test039(const int funcID, const bool);
+  static outcome test040(const int funcID, const bool);
+  static outcome test041(const int funcID, const bool);
+  static outcome test042(const int funcID, const bool);
 
 };
 

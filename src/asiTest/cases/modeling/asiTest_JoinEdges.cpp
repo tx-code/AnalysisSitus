@@ -52,28 +52,28 @@ outcome asiTest_JoinEdges::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinEdges::test01(const int funcID)
+outcome asiTest_JoinEdges::test01(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-edges_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinEdges::test02(const int funcID)
+outcome asiTest_JoinEdges::test02(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-edges_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinEdges::test03(const int funcID)
+outcome asiTest_JoinEdges::test03(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-edges_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_JoinEdges::test04(const int funcID)
+outcome asiTest_JoinEdges::test04(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/join-edges_04.tcl");
 }

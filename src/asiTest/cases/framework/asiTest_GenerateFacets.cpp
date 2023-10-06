@@ -55,7 +55,7 @@ outcome asiTest_GenerateFacets::runTestScript(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_GenerateFacets::test_generate_facets_001(const int funcID)
+outcome asiTest_GenerateFacets::test_generate_facets_001(const int funcID, const bool)
 {
   return runTestScript(funcID, "facets/generate_facets_001.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_GenerateFacets::test_generate_facets_001(const int funcID)
 //! Test scenario 002.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_GenerateFacets::test_generate_facets_002(const int funcID)
+outcome asiTest_GenerateFacets::test_generate_facets_002(const int funcID, const bool)
 {
   return runTestScript(funcID, "facets/generate_facets_002.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_GenerateFacets::test_generate_facets_002(const int funcID)
 //! Test scenario 003.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_GenerateFacets::test_generate_facets_003(const int funcID)
+outcome asiTest_GenerateFacets::test_generate_facets_003(const int funcID, const bool)
 {
   return runTestScript(funcID, "facets/generate_facets_003.tcl");
 }

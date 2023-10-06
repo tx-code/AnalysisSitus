@@ -45,7 +45,7 @@
 //! Performs complex test on TimeStamp functionality.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStamp::cumulTest(const int funcID)
+outcome ActTest_TimeStamp::cumulTest(const int funcID, const bool)
 {
   TEST_PRINT_DECOR_L("Generating UniqueTime structure for current time")
 
@@ -77,7 +77,7 @@ outcome ActTest_TimeStamp::cumulTest(const int funcID)
 //! Integer Parameters.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStamp::accessMTime(const int funcID)
+outcome ActTest_TimeStamp::accessMTime(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

@@ -55,7 +55,7 @@ outcome asiTest_ChangeColor::runTestScript(const int   funcID,
 //! Test scenario 1.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_1(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_1.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_ChangeColor::test_color_part_1(const int funcID)
 //! Test scenario 2.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_2(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_2.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_ChangeColor::test_color_part_2(const int funcID)
 //! Test scenario 3.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_3(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_3(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_3.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_ChangeColor::test_color_part_3(const int funcID)
 //! Test scenario 4.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_4(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_4(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_4.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_ChangeColor::test_color_part_4(const int funcID)
 //! Test scenario 5.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_face_5(const int funcID)
+outcome asiTest_ChangeColor::test_color_face_5(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/face_color_5.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_ChangeColor::test_color_face_5(const int funcID)
 //! Test scenario 6.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_face_6(const int funcID)
+outcome asiTest_ChangeColor::test_color_face_6(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/face_color_6.tcl");
 }
@@ -115,7 +115,7 @@ outcome asiTest_ChangeColor::test_color_face_6(const int funcID)
 //! Test scenario 7.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_7(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_7(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_7.tcl");
 }
@@ -125,7 +125,7 @@ outcome asiTest_ChangeColor::test_color_part_7(const int funcID)
 //! Test scenario 8.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_8(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_8(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_8.tcl");
 }
@@ -135,7 +135,7 @@ outcome asiTest_ChangeColor::test_color_part_8(const int funcID)
 //! Test scenario 9.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_9(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_9(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_9.tcl");
 }
@@ -145,7 +145,7 @@ outcome asiTest_ChangeColor::test_color_part_9(const int funcID)
 //! Test scenario 10.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_10(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_10(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_10.tcl");
 }
@@ -155,7 +155,7 @@ outcome asiTest_ChangeColor::test_color_part_10(const int funcID)
 //! Test scenario 11.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_11(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_11(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_11.tcl");
 }
@@ -165,7 +165,7 @@ outcome asiTest_ChangeColor::test_color_part_11(const int funcID)
 //! Test scenario 12.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_12(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_12(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_12.tcl");
 }
@@ -175,7 +175,7 @@ outcome asiTest_ChangeColor::test_color_part_12(const int funcID)
 //! Test scenario 13.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ChangeColor::test_color_part_13(const int funcID)
+outcome asiTest_ChangeColor::test_color_part_13(const int funcID, const bool)
 {
   return runTestScript(funcID, "colors/part_color_13.tcl");
 }

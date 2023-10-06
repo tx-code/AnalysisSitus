@@ -66,6 +66,12 @@ public:
     return "Tools";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -79,10 +85,10 @@ public:
 // Test functions:
 private:
 
-  static outcome namedEngineCommits   (const int funcID);
-  static outcome namedEngineUndos     (const int funcID);
-  static outcome namedEngineRedos     (const int funcID);
-  static outcome namedEngineUndoLimit (const int funcID);
+  static outcome namedEngineCommits   (const int funcID, const bool);
+  static outcome namedEngineUndos     (const int funcID, const bool);
+  static outcome namedEngineRedos     (const int funcID, const bool);
+  static outcome namedEngineUndoLimit (const int funcID, const bool);
 
 };
 

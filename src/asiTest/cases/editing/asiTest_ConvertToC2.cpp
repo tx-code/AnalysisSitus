@@ -55,7 +55,7 @@ outcome asiTest_ConvertToC2::runTestScript(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ConvertToC2::test001(const int funcID)
+outcome asiTest_ConvertToC2::test001(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-c2/convert-to-c2_01.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_ConvertToC2::test001(const int funcID)
 //! Test scenario 002.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ConvertToC2::test002(const int funcID)
+outcome asiTest_ConvertToC2::test002(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-c2/convert-to-c2_02.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_ConvertToC2::test002(const int funcID)
 //! Test scenario 003.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ConvertToC2::test003(const int funcID)
+outcome asiTest_ConvertToC2::test003(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-c2/convert-to-c2_03.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_ConvertToC2::test003(const int funcID)
 //! Test scenario 004.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ConvertToC2::test004(const int funcID)
+outcome asiTest_ConvertToC2::test004(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-c2/convert-to-c2_04.tcl");
 }

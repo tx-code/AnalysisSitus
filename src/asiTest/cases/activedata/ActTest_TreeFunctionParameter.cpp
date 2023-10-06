@@ -80,7 +80,7 @@ public:
 //! Attributes which are forming the core of the OCCT TFunction mechanism.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::accessFunction(const int funcID)
+outcome ActTest_TreeFunctionParameter::accessFunction(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -364,7 +364,7 @@ outcome ActTest_TreeFunctionParameter::accessFunction(const int funcID)
 //! the corresponding Function from Execution Graph.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::disconnect_soft(const int funcID)
+outcome ActTest_TreeFunctionParameter::disconnect_soft(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -445,7 +445,7 @@ outcome ActTest_TreeFunctionParameter::disconnect_soft(const int funcID)
 //! up along with all references to the root TDF Label of Tree Function.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeFunctionParameter::disconnect_full(const int funcID)
+outcome ActTest_TreeFunctionParameter::disconnect_full(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

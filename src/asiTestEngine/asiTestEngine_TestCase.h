@@ -49,9 +49,13 @@
   asiTestEngine_TestCase::StrStrMap asiTestEngine_TestCase::m_varExpansion;
 
 //! Pointer to Test Function.
-//! Please note that {funcID} should be normally passed by Test Case. The
-//! convention is to have {funcID} as 1-based integer number.
-typedef outcome (*AsiTestFunction)(const int funcID);
+//! Please note that `funcID` should be normally passed by Test Case. The
+//! convention is to have `funcID` as 1-based integer number. Another
+//! argument is `genref` to let the function know that the test engine
+//! asks this function to regerenate its reference data. A test function
+//! is free to ignore the latter flag if it is incapable of doing that.
+typedef outcome (*AsiTestFunction)(const int  funcID,
+                                   const bool genref);
 
 //! Collection of pointers to Test Functions
 class asiTestFunctions

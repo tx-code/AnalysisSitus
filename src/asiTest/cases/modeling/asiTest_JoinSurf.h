@@ -61,6 +61,12 @@ public:
     return "re";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -82,13 +88,13 @@ private:
 
 private:
 
-  static outcome test01(const int funcID);
-  static outcome test02(const int funcID);
-  static outcome test03(const int funcID);
-  static outcome test04(const int funcID);
-  static outcome test05(const int funcID);
-  static outcome test06(const int funcID);
-  static outcome test07(const int funcID);
+  static outcome test01(const int funcID, const bool);
+  static outcome test02(const int funcID, const bool);
+  static outcome test03(const int funcID, const bool);
+  static outcome test04(const int funcID, const bool);
+  static outcome test05(const int funcID, const bool);
+  static outcome test06(const int funcID, const bool);
+  static outcome test07(const int funcID, const bool);
 
 };
 

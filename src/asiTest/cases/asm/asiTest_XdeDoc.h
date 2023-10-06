@@ -68,6 +68,12 @@ public:
     return "asm";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void) genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -90,8 +96,8 @@ private:
 
 private:
 
-  static outcome testFindItems (const int funcID);
-  static outcome testAddPart   (const int funcID);
+  static outcome testFindItems (const int funcID, const bool);
+  static outcome testAddPart   (const int funcID, const bool);
 
 };
 

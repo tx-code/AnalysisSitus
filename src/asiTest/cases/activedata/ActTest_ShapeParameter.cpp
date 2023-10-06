@@ -46,7 +46,7 @@
 //! Performs test on accessing value of ShapeParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ShapeParameter::accessValue(const int funcID)
+outcome ActTest_ShapeParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -98,7 +98,7 @@ outcome ActTest_ShapeParameter::accessValue(const int funcID)
 //! reversed face.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ShapeParameter::accessReversedValue(const int funcID)
+outcome ActTest_ShapeParameter::accessReversedValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

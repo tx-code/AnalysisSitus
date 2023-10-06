@@ -60,7 +60,7 @@
 //! Performs test on Copy method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PlainToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -200,7 +200,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainToPlain(const int funcID)
 //! ---------------------------------------------------------------------------
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -309,7 +309,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeToPlain(const int funcID)
 //! See case 3.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -453,7 +453,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_1(const
 //! See case 3.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -641,7 +641,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_2(const
 //! See case 3.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -828,7 +828,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_3(const
 //! See case 3.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -982,7 +982,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_4(const
 //! See case 3.5 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithReferencesToPlain_5");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1182,7 +1182,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithReferencesToPlain_5(const
 //! See case 4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithEvalReferencesToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1396,7 +1396,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithEvalReferencesToPlain(con
 //! See case 5.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1536,7 +1536,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_1(c
 //! See case 5.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1671,7 +1671,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_2(c
 //! See case 5.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -1814,7 +1814,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_3(c
 //! See case 5.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithPlainReferenceToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2022,7 +2022,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithPlainReferenceToPlain_4(c
 //! See case 6.1 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_1");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2164,7 +2164,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_1(co
 //! See case 6.2 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_2");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2303,7 +2303,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_2(co
 //! See case 6.3 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_3");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2444,7 +2444,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_3(co
 //! See case 6.4 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_TreeWithListReferenceToPlain_4");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2596,7 +2596,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_TreeWithListReferenceToPlain_4(co
 //! See case 7 in UNIT-TESTING section of reference documentation.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PlainMeshToPlain");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2713,7 +2713,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PlainMeshToPlain(const int funcID
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEAD_DFunctionArgument");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -2860,7 +2860,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionArgument(c
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEAD_DFunctionResult");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;
@@ -3007,7 +3007,7 @@ outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEAD_DFunctionResult(con
 //! been deleted between Copy & Paste invocations.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int funcID)
+outcome ActTest_CopyPasteEngine::testCopyPaste_PasteWithDEADReference(const int funcID, const bool)
 {
   TCollection_AsciiString fn_name("testCopyPaste_PasteWithDEADReference");
   Handle(ActTest_DummyModel) M = new ActTest_DummyModel;

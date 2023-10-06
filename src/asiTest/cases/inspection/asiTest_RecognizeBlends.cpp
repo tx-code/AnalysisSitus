@@ -174,7 +174,7 @@ outcome asiTest_RecognizeBlends::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_boxblend_01_f3(const int funcID)
+outcome asiTest_RecognizeBlends::test_boxblend_01_f3(const int funcID, const bool)
 {
   return runtest(funcID,
                  filename_boxblend_01,
@@ -184,7 +184,7 @@ outcome asiTest_RecognizeBlends::test_boxblend_01_f3(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_boxblend_02_f3(const int funcID)
+outcome asiTest_RecognizeBlends::test_boxblend_02_f3(const int funcID, const bool)
 {
   return runtest(funcID,
                  filename_boxblend_02,
@@ -194,7 +194,7 @@ outcome asiTest_RecognizeBlends::test_boxblend_02_f3(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_bb_boxblend_03_f29(const int funcID)
+outcome asiTest_RecognizeBlends::test_bb_boxblend_03_f29(const int funcID, const bool)
 {
   return runtest(funcID,
                  filename_bb_boxblend_03,
@@ -204,7 +204,7 @@ outcome asiTest_RecognizeBlends::test_bb_boxblend_03_f29(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_boxblend_05(const int funcID)
+outcome asiTest_RecognizeBlends::test_boxblend_05(const int funcID, const bool)
 {
   return runtest(funcID,
                  filename_boxblend_05,
@@ -214,7 +214,7 @@ outcome asiTest_RecognizeBlends::test_boxblend_05(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_task_166(const int funcID)
+outcome asiTest_RecognizeBlends::test_task_166(const int funcID, const bool)
 {
   return runtest(funcID,
                  filename_task_166,
@@ -224,7 +224,7 @@ outcome asiTest_RecognizeBlends::test_task_166(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeBlends::test_task_166_tcl(const int funcID)
+outcome asiTest_RecognizeBlends::test_task_166_tcl(const int funcID, const bool)
 {
   return runTestScript(funcID, filename_task_166_tcl);
 }

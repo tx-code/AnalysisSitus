@@ -39,7 +39,7 @@
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_Utils::testMapShapes1(const int funcID)
+outcome asiTest_Utils::testMapShapes1(const int funcID, const bool)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -82,7 +82,7 @@ outcome asiTest_Utils::testMapShapes1(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_Utils::testRanges1(const int funcID)
+outcome asiTest_Utils::testRanges1(const int funcID, const bool)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -116,7 +116,7 @@ outcome asiTest_Utils::testRanges1(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_Utils::testRanges2(const int funcID)
+outcome asiTest_Utils::testRanges2(const int funcID, const bool)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();
@@ -150,7 +150,7 @@ outcome asiTest_Utils::testRanges2(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_Utils::testRanges3(const int funcID)
+outcome asiTest_Utils::testRanges3(const int funcID, const bool)
 {
   // Get common facilities.
   Handle(asiTest_CommonFacilities) cf = asiTest_CommonFacilities::Instance();

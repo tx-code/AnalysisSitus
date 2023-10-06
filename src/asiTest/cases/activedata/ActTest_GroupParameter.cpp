@@ -41,7 +41,7 @@
 //! Performs test on accessing type of GroupParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_GroupParameter::testGroupType(const int funcID)
+outcome ActTest_GroupParameter::testGroupType(const int funcID, const bool)
 {
   TEST_PRINT_DECOR_L("Create new GROUP Parameter");
 

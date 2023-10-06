@@ -52,63 +52,63 @@ outcome asiTest_ConvertToBezier::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test001(const int funcID)
+outcome asiTest_ConvertToBezier::test001(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test002(const int funcID)
+outcome asiTest_ConvertToBezier::test002(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test003(const int funcID)
+outcome asiTest_ConvertToBezier::test003(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test004(const int funcID)
+outcome asiTest_ConvertToBezier::test004(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_04.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test005(const int funcID)
+outcome asiTest_ConvertToBezier::test005(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_05.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test006(const int funcID)
+outcome asiTest_ConvertToBezier::test006(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_06.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test007(const int funcID)
+outcome asiTest_ConvertToBezier::test007(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_07.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test008(const int funcID)
+outcome asiTest_ConvertToBezier::test008(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_08.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertToBezier::test009(const int funcID)
+outcome asiTest_ConvertToBezier::test009(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/convert-to-bezier/convert-to-bezier_09.tcl");
 }

@@ -52,7 +52,7 @@ outcome asiTest_AppSurf::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_AppSurf::testRussianNames(const int funcID)
+outcome asiTest_AppSurf::testRussianNames(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/re_approx-surf_05.tcl");
 }

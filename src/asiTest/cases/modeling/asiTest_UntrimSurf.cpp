@@ -52,63 +52,63 @@ outcome asiTest_UntrimSurf::runTestScript(const int   funcID,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test01(const int funcID)
+outcome asiTest_UntrimSurf::test01(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_01.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test02(const int funcID)
+outcome asiTest_UntrimSurf::test02(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_02.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test03(const int funcID)
+outcome asiTest_UntrimSurf::test03(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_03.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test04(const int funcID)
+outcome asiTest_UntrimSurf::test04(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_04.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test05(const int funcID)
+outcome asiTest_UntrimSurf::test05(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_05.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test06(const int funcID)
+outcome asiTest_UntrimSurf::test06(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_06.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test07(const int funcID)
+outcome asiTest_UntrimSurf::test07(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_07.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test08(const int funcID)
+outcome asiTest_UntrimSurf::test08(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_08.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_UntrimSurf::test09(const int funcID)
+outcome asiTest_UntrimSurf::test09(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/untrim-surf_09.tcl");
 }
