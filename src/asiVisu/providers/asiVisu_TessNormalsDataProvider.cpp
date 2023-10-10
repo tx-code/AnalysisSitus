@@ -240,6 +240,13 @@ bool asiVisu_TessNormalsDataProvider::HasOrientationTip() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_TessNormalsDataProvider::IsRescaleByLongest() const
+{
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiVisu_TessNormalsDataProvider::elementNodes(const Handle(ActData_Mesh)&             mesh,
                                                    const Handle(ActData_Mesh_Element)&     elem,
                                                    std::vector<Handle(ActData_Mesh_Node)>& nodes) const

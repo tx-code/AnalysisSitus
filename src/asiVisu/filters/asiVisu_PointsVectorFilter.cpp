@@ -50,9 +50,10 @@ vtkStandardNewMacro(asiVisu_PointsVectorFilter)
 //! Default constructor.
 asiVisu_PointsVectorFilter::asiVisu_PointsVectorFilter()
 {
-  m_fMaxModulus =  1.0;
-  m_fMinScalar  =  VTK_FLOAT_MAX;
-  m_fMaxScalar  = -VTK_FLOAT_MAX;
+  m_fMaxModulus     =  1.0;
+  m_fMinScalar      =  VTK_FLOAT_MAX;
+  m_fMaxScalar      = -VTK_FLOAT_MAX;
+  m_bScaleByLongest = true;
 }
 
 //! Destructor.
@@ -167,18 +168,23 @@ int asiVisu_PointsVectorFilter::RequestData(vtkInformation*,
   // Loop over all vectors calibrating their magnitudes by the maximum one
   for ( vtkIdType vecId = 0; vecId < newCellVectors->GetNumberOfTuples(); ++vecId )
   {
-    double* aVecCoords = newCellVectors->GetTuple(vecId);
+    double* pVecCoords = newCellVectors->GetTuple(vecId);
 
-    double aVecModulus = 0.0;
-    for ( int k = 0; k < 3; k++ )
-      aVecModulus += aVecCoords[k] * aVecCoords[k];
-    aVecModulus = Sqrt(aVecModulus);
+    if ( m_bScaleByLongest )
+    {
+      double vecModulus = 0.0;
+      //
+      for ( int k = 0; k < 3; k++ )
+        vecModulus += pVecCoords[k] * pVecCoords[k];
+      //
+      vecModulus = Sqrt(vecModulus);
 
-    double aModFactor = (m_fMaxScalar ? m_fMaxModulus * (aVecModulus / m_fMaxScalar) : 0.0);
-    for ( int k = 0; k < 3; k++ )
-      aVecCoords[k] *= aModFactor;
+      double aModFactor = (m_fMaxScalar ? m_fMaxModulus * (vecModulus / m_fMaxScalar) : 0.0);
+      for ( int k = 0; k < 3; k++ )
+        pVecCoords[k] *= aModFactor;
+    }
 
-    newCellVectors->SetTuple(vecId, aVecCoords);
+    newCellVectors->SetTuple(vecId, pVecCoords);
   }
 
   // Set vectors
@@ -197,13 +203,15 @@ int asiVisu_PointsVectorFilter::RequestData(vtkInformation*,
 //! \param vecTuple [in] vectorial data.
 void asiVisu_PointsVectorFilter::adjustMinMax(const asiVisu_VectorTuple& vecTuple)
 {
-  double aVecModulus = 0.0;
+  double vecModulus = 0.0;
+  //
   for ( int k = 0; k < 3; k++ )
-    aVecModulus += vecTuple.F[k] * vecTuple.F[k];
-  aVecModulus = Sqrt(aVecModulus);
+    vecModulus += vecTuple.F[k] * vecTuple.F[k];
+  //
+  vecModulus = Sqrt(vecModulus);
 
-  if ( aVecModulus > m_fMaxScalar )
-    m_fMaxScalar = aVecModulus;
-  if ( aVecModulus < m_fMinScalar )
-    m_fMinScalar = aVecModulus;
+  if ( vecModulus > m_fMaxScalar )
+    m_fMaxScalar = vecModulus;
+  if ( vecModulus < m_fMinScalar )
+    m_fMinScalar = vecModulus;
 }

@@ -123,6 +123,13 @@ bool asiVisu_FaceNormalsDataProvider::HasOrientationTip() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_FaceNormalsDataProvider::IsRescaleByLongest() const
+{
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
 //! \return working face.
 TopoDS_Face asiVisu_FaceNormalsDataProvider::GetFace() const
 {

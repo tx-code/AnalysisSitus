@@ -1679,7 +1679,7 @@ int MOBIUS_POLY_Check(const Handle(asiTcl_Interp)& interp,
 
   for ( TColStd_PackedMapOfInteger::Iterator fit(facetIds); fit.More(); fit.Next() )
   {
-    const poly_TriangleHandle ht( fit.Key() - 1 );
+    const poly_TriangleHandle ht( fit.Key() );
 
     const double L = mesh->ComputeMaxLen(ht);
     const double A = mesh->ComputeArea(ht);

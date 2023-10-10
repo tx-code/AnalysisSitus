@@ -64,6 +64,13 @@ double asiVisu_IVVectorFieldDataProvider::GetMaxVectorModulus() const
 
 //-----------------------------------------------------------------------------
 
+bool asiVisu_IVVectorFieldDataProvider::IsRescaleByLongest() const
+{
+  return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->IsRescaleByLongest();
+}
+
+//-----------------------------------------------------------------------------
+
 double asiVisu_IVVectorFieldDataProvider::GetScaleCoeff() const
 {
   return Handle(asiData_IVVectorFieldNode)::DownCast(m_source)->GetScaleCoeff();

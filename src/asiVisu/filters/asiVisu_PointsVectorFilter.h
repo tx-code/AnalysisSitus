@@ -65,6 +65,18 @@ public:
   {
     m_normals     = normals;
     m_fMaxModulus = maxModulus;
+
+    this->Modified();
+  }
+
+  //! Sets the Boolean flag indicating whether all vectors should be rescaled
+  //! respectively to the longest vector in the field.
+  //! \param[in] on the Boolean value to set.
+  void SetRescaleByLongest(const bool on)
+  {
+    m_bScaleByLongest = on;
+
+    this->Modified();
   }
 
   //! Gets maximum scalar value obtained during the filtering process.
@@ -124,6 +136,9 @@ private:
 
   //! Minimal scalar value obtained during the filtering process.
   double m_fMinScalar;
+
+  //! Indicates whether to rescale the entire vector field by the longest vector.
+  bool m_bScaleByLongest;
 
 };
 

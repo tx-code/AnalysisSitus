@@ -70,6 +70,9 @@ public:
   asiVisu_EXPORT virtual bool
     HasOrientationTip() const;
 
+  asiVisu_EXPORT virtual bool
+    IsRescaleByLongest() const;
+
 private:
 
   void

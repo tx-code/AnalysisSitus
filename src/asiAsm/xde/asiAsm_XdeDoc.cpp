@@ -101,11 +101,25 @@ using namespace asiAsm::xde;
 
 Doc::Doc(ActAPI_ProgressEntry progress,
          ActAPI_PlotterEntry  plotter)
+//
 : Standard_Transient (),
   m_progress         (progress),
   m_plotter          (plotter)
 {
   this->NewDocument();
+}
+
+//-----------------------------------------------------------------------------
+
+Doc::Doc(const Handle(TDocStd_Document)& doc,
+         ActAPI_ProgressEntry            progress,
+         ActAPI_PlotterEntry             plotter)
+//
+: Standard_Transient (),
+  m_progress         (progress),
+  m_plotter          (plotter)
+{
+  this->init(doc);
 }
 
 //-----------------------------------------------------------------------------

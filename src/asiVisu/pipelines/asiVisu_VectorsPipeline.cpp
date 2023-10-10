@@ -110,6 +110,8 @@ void asiVisu_VectorsPipeline::SetInput(const Handle(asiVisu_DataProvider)& dataP
     //
     vecFilter->SetNormals( DP->GetVectorsd(),
                            DP->GetMaxVectorModulus() );
+    //
+    vecFilter->SetRescaleByLongest( DP->IsRescaleByLongest() );
 
     // Transform glyphs
     vtkTransformPolyDataFilter*

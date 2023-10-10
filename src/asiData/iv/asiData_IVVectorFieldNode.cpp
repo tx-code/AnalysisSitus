@@ -50,6 +50,7 @@ asiData_IVVectorFieldNode::asiData_IVVectorFieldNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Int,       PID_Color);
   REGISTER_PARAMETER(Bool,      PID_DrawTip);
   REGISTER_PARAMETER(Real,      PID_ScaleCoeff);
+  REGISTER_PARAMETER(Bool,      PID_RescaleByLongest);
 }
 
 //! Returns new DETACHED instance of the Node ensuring its correct
@@ -64,19 +65,21 @@ Handle(ActAPI_INode) asiData_IVVectorFieldNode::Instance()
 void asiData_IVVectorFieldNode::Init()
 {
   // Initialize properties.
-  this->InitParameter (PID_Name,       "Name",            "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_GroupPrs,   "Presentation",    "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_HasColor,   "Colorized",       "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_Color,      "Color",           "PrsCustomColor", ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_DrawTip,    "Orientation tip", "",               ParameterFlag_IsVisible, true);
-  this->InitParameter (PID_ScaleCoeff, "Scale",           "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Name,             "Name",            "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_GroupPrs,         "Presentation",    "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_HasColor,         "Colorized",       "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_Color,            "Color",           "PrsCustomColor", ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_DrawTip,          "Orientation tip", "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_ScaleCoeff,       "Scaling coeff.",  "",               ParameterFlag_IsVisible, true);
+  this->InitParameter (PID_RescaleByLongest, "Rescale",         "",               ParameterFlag_IsVisible, true);
   //
-  this->SetPoints     ( nullptr );
-  this->SetVectors    ( nullptr );
-  this->SetDrawTip    ( true );
-  this->SetHasColor   ( false );
-  this->SetColor      ( 16777215 );
-  this->SetScaleCoeff ( 1 );
+  this->SetPoints           ( nullptr );
+  this->SetVectors          ( nullptr );
+  this->SetDrawTip          ( true );
+  this->SetHasColor         ( false );
+  this->SetColor            ( 16777215 );
+  this->SetScaleCoeff       ( 1 );
+  this->SetRescaleByLongest ( true );
 }
 
 //-----------------------------------------------------------------------------
@@ -197,4 +200,18 @@ void asiData_IVVectorFieldNode::SetScaleCoeff(const double coeff)
 double asiData_IVVectorFieldNode::GetScaleCoeff() const
 {
   return ActParamTool::AsReal( this->Parameter(PID_ScaleCoeff) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_IVVectorFieldNode::IsRescaleByLongest() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_RescaleByLongest) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_IVVectorFieldNode::SetRescaleByLongest(const bool on)
+{
+  ActParamTool::AsBool( this->Parameter(PID_RescaleByLongest) )->SetValue(on);
 }

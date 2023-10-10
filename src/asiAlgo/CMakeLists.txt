@@ -359,6 +359,7 @@ set (features_H_FILES
   features/asiAlgo_CheckDihedralAngle.h
   features/asiAlgo_CheckInsertion.h
   features/asiAlgo_CheckVertexVexity.h
+  features/asiAlgo_ConvexHull.h
   features/asiAlgo_ExtractFeatures.h
   features/asiAlgo_ExtractFeaturesResult.h
   features/asiAlgo_FeatureAngleType.h

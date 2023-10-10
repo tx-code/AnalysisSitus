@@ -37,11 +37,13 @@
 #include <asiAlgo_BuildConvexHull.h>
 #include <asiAlgo_BVHFacets.h>
 #include <asiAlgo_FeatureAttrConvexHull.h>
+#include <asiAlgo_MeshGen.h>
 #include <asiAlgo_ProjectPointOnMesh.h>
 #include <asiAlgo_SampleFace.h>
 
 // OpenCascade includes
 #include <BRepAdaptor_Surface.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 #include <BRepTools.hxx>
 #include <TopExp_Explorer.hxx>
 
@@ -141,26 +143,12 @@ const Handle(Poly_Triangulation)& asiAlgo_RecognizeConvexHull::GetHullMesh() con
 
 //-----------------------------------------------------------------------------
 
-void asiAlgo_RecognizeConvexHull::GetHullPlanes(std::vector<RTCD::Plane>& planes) const
+asiAlgo_ConvexHull asiAlgo_RecognizeConvexHull::GetHull() const
 {
-  for ( int i = 1; i <= m_hullMesh->NbTriangles(); ++i )
-  {
-    int N[3];
-    m_hullMesh->Triangle(i).Get(N[0], N[1], N[2]);
+  asiAlgo_ConvexHull res;
+  res.Mesh = m_hullMesh;
 
-    RTCD::Point a = m_hullMesh->Node(N[0]);
-    RTCD::Point b = m_hullMesh->Node(N[1]);
-    RTCD::Point c = m_hullMesh->Node(N[2]);
-
-    RTCD::Plane plane = RTCD::ComputePlane(a, b, c);
-
-    // Set optional anchor point.
-    RTCD::Point mid = ( RTCD::Vector(a) + RTCD::Vector(b) + RTCD::Vector(c) )*(1./3.);
-    //
-    plane.anchor = mid;
-
-    planes.push_back(plane);
-  }
+  return res;
 }
 
 //-----------------------------------------------------------------------------
@@ -193,11 +181,11 @@ bool asiAlgo_RecognizeConvexHull::Perform()
 #endif
   }
 
+  const TopoDS_Shape& shape = m_aag->GetMasterShape();
+
   /* ===================
    *  Build convex hull.
    * =================== */
-
-  const TopoDS_Shape& shape = m_aag->GetMasterShape();
 
 #if defined COUT_DEBUG
   TIMER_NEW

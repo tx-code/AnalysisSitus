@@ -82,14 +82,25 @@ public:
 
 public:
 
-  //! Ctor. Created DETACHED Model instance, i.e. the facade is not attached
+  //! Ctor. Creates a DETACHED Model instance, i.e. the facade is not attached
   //! to any OCAF Document, so you cannot read data unless you load it.
   //!
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
   asiAsm_EXPORT
     Doc(ActAPI_ProgressEntry progress = nullptr,
         ActAPI_PlotterEntry  plotter  = nullptr);
+
+  //! Ctor. Creates an ATTACHED Model instance, i.e. the facade takes over
+  //! the passed OCAF Document.
+  //!
+  //! \param[in] doc      the document to take over.
+  //! \param[in] progress the progress notifier.
+  //! \param[in] plotter  the imperative plotter.
+  asiAsm_EXPORT
+    Doc(const Handle(TDocStd_Document)& doc,
+        ActAPI_ProgressEntry            progress = nullptr,
+        ActAPI_PlotterEntry             plotter  = nullptr);
 
 /* Construction and initialization */
 public:

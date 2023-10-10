@@ -4196,10 +4196,11 @@ int ENGINE_RecognizeHull(const Handle(asiTcl_Interp)& interp,
 
   if ( isRTCD )
   {
-    std::vector<RTCD::Plane> planes;
-    recognizer.GetHullPlanes(planes);
+    asiAlgo_ConvexHull chull = recognizer.GetHull();
     //
-    for ( const auto& plane : planes )
+    chull.ComputeHullPlanes();
+
+    for ( const auto& plane : chull.Halfspaces )
     {
       Handle(Geom_Plane) occPlane = plane.ConvertToOpenCascade();
 
@@ -4524,6 +4525,33 @@ int ENGINE_CheckDistanceToCHull(const Handle(asiTcl_Interp)& interp,
   //
   if ( fid ) selected.Add(fid);
 
+  // Read directions.
+  std::vector<gp_Dir> dirs;
+  int dirIdx = -1;
+  //
+  if ( interp->HasKeyword(argc, argv, "dir", dirIdx) )
+  {
+    int k = dirIdx;
+    //
+    while ( (k + 1 < argc) && !interp->IsKeyword(argv[++k]) )
+    {
+      const double dirx = atof(argv[k]);
+      const double diry = atof(argv[++k]);
+      const double dirz = atof(argv[++k]);
+
+      gp_Vec vec(dirx, diry, dirz);
+      //
+      if ( vec.Magnitude() < gp::Resolution() )
+      {
+        interp->GetProgress().SendLogMessage(LogErr(Normal) << "The direction vector (%1, %2, %3) has zero modulus."
+                                                            << dirx << diry << dirz);
+        return TCL_ERROR;
+      }
+
+      dirs.push_back( vec.XYZ() );
+    }
+  }
+
   // Compute convex hull.
   asiAlgo_RecognizeConvexHull recCHull(partSh);
   //
@@ -4533,9 +4561,10 @@ int ENGINE_CheckDistanceToCHull(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
+  asiAlgo_ConvexHull chull = recCHull.GetHull();
+
   // Extract halfspaces.
-  std::vector<RTCD::Plane> halfspaces;
-  recCHull.GetHullPlanes(halfspaces);
+  chull.ComputeHullPlanes();
 
   /* For diagnostic dump */
   t_axField                         distAxes;
@@ -4562,8 +4591,11 @@ int ENGINE_CheckDistanceToCHull(const Handle(asiTcl_Interp)& interp,
       return TCL_ERROR;
     }
 
-    for ( const auto& probe : probes )
+    for ( auto& probe : probes )
     {
+      if ( !dirs.empty() )
+        probe.second = gp_Ax1( probe.second.Location(), dirs[0] );
+
       const gp_Pnt& xyz = probe.second.Location();
       const gp_Dir& N   = probe.second.Direction();
 
@@ -4574,11 +4606,11 @@ int ENGINE_CheckDistanceToCHull(const Handle(asiTcl_Interp)& interp,
       RTCD::Point  p( xyz.X(), xyz.Y(), xyz.Z() );
       RTCD::Vector d( N.X(),   N.Y(),   N.Z() );
 
-      // Test w.r.t. AABB.
+      // Test w.r.t. convex hull.
       double tmin, tmax, dd = 0;
       RTCD::Point q;
       //
-      if ( RTCD::IntersectRayPolyhedron(p, d, halfspaces, tmin, tmax) )
+      if ( RTCD::IntersectRayPolyhedron(p, d, chull.Halfspaces, tmin, tmax) )
       {
         double t = tmax;
         q = p + d * t;
@@ -5296,7 +5328,7 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-distance-to-chull",
     //
-    "check-distance-to-chull [-fid <fid>]\n"
+    "check-distance-to-chull [-fid <fid>] [-dir <x> <y> <z>]\n"
     "\t Checks distance from the selected (or specified) face to convex hull.",
     //
     __FILE__, group, ENGINE_CheckDistanceToCHull);

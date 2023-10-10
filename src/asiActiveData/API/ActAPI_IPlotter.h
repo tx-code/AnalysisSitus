@@ -253,6 +253,24 @@ public:
   //-------------------------------------------------------------------------//
 
   virtual void
+    DRAW_VECTORS(const Handle(HRealArray)&,
+                 const Handle(HRealArray)&,
+                 const ActAPI_Color&,
+                 const bool, // with tip
+                 const bool, // rescale
+                 const t_extString&) {}
+
+  virtual void
+    REDRAW_VECTORS(const t_extString&,
+                   const Handle(HRealArray)&,
+                   const Handle(HRealArray)&,
+                   const ActAPI_Color&,
+                   const bool,    // with tip
+                   const bool) {} // rescale
+
+  //-------------------------------------------------------------------------//
+
+  virtual void
     DRAW_AXES(const gp_Pnt&,
               const gp_Dir&,
               const gp_Dir&,
@@ -843,6 +861,36 @@ public:
     if ( m_iv.IsNull() ) return;
     //
     m_iv->REDRAW_VECTORS(name, points, vectors, color);
+  }
+
+//-------------------------------------------------------------------------//
+
+  virtual void
+    DRAW_VECTORS(const Handle(HRealArray)& points,
+                 const Handle(HRealArray)& vectors,
+                 const ActAPI_Color&       color,
+                 const bool                tips,
+                 const bool                rescale,
+                 const t_extString&        name)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->DRAW_VECTORS(points, vectors, color, tips, rescale, name);
+  }
+
+//-------------------------------------------------------------------------//
+
+  virtual void
+    REDRAW_VECTORS(const t_extString&        name,
+                   const Handle(HRealArray)& points,
+                   const Handle(HRealArray)& vectors,
+                   const ActAPI_Color&       color,
+                   const bool                tips,
+                   const bool                rescale)
+  {
+    if ( m_iv.IsNull() ) return;
+    //
+    m_iv->REDRAW_VECTORS(name, points, vectors, color, tips, rescale);
   }
 
 //---------------------------------------------------------------------------//

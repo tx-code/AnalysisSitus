@@ -183,6 +183,22 @@ public:
                    const ActAPI_Color&) override;
 
   asiUI_EXPORT virtual void
+    DRAW_VECTORS(const Handle(HRealArray)&,
+                 const Handle(HRealArray)&,
+                 const ActAPI_Color&,
+                 const bool,
+                 const bool,
+                 const t_extString&) override;
+
+  asiUI_EXPORT virtual void
+    REDRAW_VECTORS(const t_extString&,
+                   const Handle(HRealArray)&,
+                   const Handle(HRealArray)&,
+                   const ActAPI_Color&,
+                   const bool,
+                   const bool) override;
+
+  asiUI_EXPORT virtual void
     DRAW_VECTOR_AT(const gp_Pnt&,
                    const gp_Vec&,
                    const ActAPI_Color&,
@@ -665,6 +681,8 @@ protected:
     draw_vectors(const Handle(HRealArray)& points,
                  const Handle(HRealArray)& vectors,
                  const ActAPI_Color&       color,
+                 const bool                tips,
+                 const bool                rescale,
                  const t_extString&        name,
                  const bool                newPrimitive);
 

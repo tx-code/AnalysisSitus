@@ -96,28 +96,40 @@ public:
   //! \return true/false.
   virtual bool Launch()
   {
-    // Collect Test Functions to run
+    // Collect Test Functions to run.
     asiTestFunctions functions;
     CaseType::Functions(functions);
 
-    // Boolean flags for the test functions asked for genref
+    // Boolean flags for the test functions asked for genref.
     std::set<int> genrefIds;
     CaseType::GenRefIds(genrefIds);
 
-    // Run functions one by one
+    // Special treatment for 0: means "all cases".
+    const bool allGenref = ( genrefIds.find(0) != genrefIds.end() );
+
+    // Run functions one by one.
     bool areAllOk = true;
     for ( int f = 0; f < (int) functions.Size(); ++f )
     {
       const AsiTestFunction& func = functions.Func(f);
 
-      // Check if update is asked for the reference data
+      // Check if update is asked for the reference data.
       bool genref = false;
       //
-      if ( genrefIds.find(f + 1) != genrefIds.end() )
+      if ( allGenref || ( genrefIds.find(f + 1) != genrefIds.end() ) )
       {
         genref = true;
         ++m_iNumGenRef;
       }
+
+      // This condition means that we've got a query to generate reference
+      // data for some selected tests. If so, let's not execute any other
+      // tests as normally the collect code does not want other tests to run
+      // in such scenarios.
+      const bool quickGen = !allGenref && !genrefIds.empty();
+      //
+      if ( quickGen && !genref )
+        continue;
 
       // Run test.
       outcome res = ( *func )( f + 1, genref );

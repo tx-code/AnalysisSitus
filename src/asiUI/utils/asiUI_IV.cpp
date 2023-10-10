@@ -469,7 +469,7 @@ void asiUI_IV::DRAW_VECTORS(const Handle(HRealArray)& points,
                             const ActAPI_Color&       color,
                             const t_extString&        name)
 {
-  this->draw_vectors(points, vectors, color, name, true);
+  this->draw_vectors(points, vectors, color, true, true, name, true);
 }
 
 //---------------------------------------------------------------------------//
@@ -479,7 +479,31 @@ void asiUI_IV::REDRAW_VECTORS(const t_extString&        name,
                               const Handle(HRealArray)& vectors,
                               const ActAPI_Color&       color)
 {
-  this->draw_vectors(points, vectors, color, name, false);
+  this->draw_vectors(points, vectors, color, true, true, name, false);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::DRAW_VECTORS(const Handle(HRealArray)& points,
+                            const Handle(HRealArray)& vectors,
+                            const ActAPI_Color&       color,
+                            const bool                tips,
+                            const bool                rescale,
+                            const t_extString&        name)
+{
+  this->draw_vectors(points, vectors, color, tips, rescale, name, true);
+}
+
+//---------------------------------------------------------------------------//
+
+void asiUI_IV::REDRAW_VECTORS(const t_extString&        name,
+                              const Handle(HRealArray)& points,
+                              const Handle(HRealArray)& vectors,
+                              const ActAPI_Color&       color,
+                              const bool                tips,
+                              const bool                rescale)
+{
+  this->draw_vectors(points, vectors, color, tips, rescale, name, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -500,7 +524,7 @@ void asiUI_IV::DRAW_VECTOR_AT(const gp_Pnt&       P,
   vectors->ChangeValue(1) = V.Y();
   vectors->ChangeValue(2) = V.Z();
 
-  this->draw_vectors(points, vectors, color, name, true);
+  this->draw_vectors(points, vectors, color, true, true, name, true);
 }
 
 //---------------------------------------------------------------------------//
@@ -521,7 +545,7 @@ void asiUI_IV::REDRAW_VECTOR_AT(const t_extString&  name,
   vectors->ChangeValue(1) = V.Y();
   vectors->ChangeValue(2) = V.Z();
 
-  this->draw_vectors(points, vectors, color, name, false);
+  this->draw_vectors(points, vectors, color, true, true, name, false);
 }
 
 //---------------------------------------------------------------------------//
@@ -542,7 +566,7 @@ void asiUI_IV::DRAW_VECTORS_AT(const gp_Pnt&              origin,
 
   this->draw_vectors( posCloud->GetCoordsArray(),
                       vecCloud->GetCoordsArray(),
-                      color, name, true );
+                      color, true, true, name, true );
 }
 
 //---------------------------------------------------------------------------//
@@ -563,7 +587,7 @@ void asiUI_IV::REDRAW_VECTORS_AT(const t_extString&         name,
 
   this->draw_vectors( posCloud->GetCoordsArray(),
                       vecCloud->GetCoordsArray(),
-                      color, name, false );
+                      color, true, true, name, false );
 }
 
 //---------------------------------------------------------------------------//
@@ -1463,6 +1487,7 @@ void asiUI_IV::draw_points(const Handle(HRealArray)& coords,
   // Update persistent color.
   points_n->SetHasColor(true);
   points_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+  points_n->SetPointSize(8);
 
   // Commit transaction.
   if ( isTx )
@@ -1495,6 +1520,8 @@ void asiUI_IV::draw_points(const std::vector<gp_XYZ>& pts,
 void asiUI_IV::draw_vectors(const Handle(HRealArray)& points,
                             const Handle(HRealArray)& vectors,
                             const ActAPI_Color&       color,
+                            const bool                tips,
+                            const bool                rescale,
                             const t_extString&        name,
                             const bool                newPrimitive)
 {
@@ -1541,8 +1568,10 @@ void asiUI_IV::draw_vectors(const Handle(HRealArray)& points,
   }
 
   // Update persistent color.
-  vf_n->SetHasColor(true);
-  vf_n->SetColor( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+  vf_n->SetHasColor         ( true );
+  vf_n->SetColor            ( asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() ) );
+  vf_n->SetDrawTip          ( tips );
+  vf_n->SetRescaleByLongest ( rescale );
 
   // Commit transaction
   if ( isTx )

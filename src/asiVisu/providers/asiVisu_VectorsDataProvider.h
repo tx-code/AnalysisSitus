@@ -40,8 +40,6 @@
 //! Data provider for a vector field.
 class asiVisu_VectorsDataProvider : public asiVisu_DataProvider
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiVisu_VectorsDataProvider, asiVisu_DataProvider)
 
@@ -71,6 +69,9 @@ public:
 
   virtual double
     GetScaleCoeff() const = 0;
+
+  virtual bool
+    IsRescaleByLongest() const = 0;
 
 protected:
 

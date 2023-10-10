@@ -53,7 +53,7 @@ namespace RTCD
 
     Vector() : x(0.), y(0.), z(0.) {}
     Vector(const double _x, const double _y, const double _z) : x(_x), y(_y), z(_z) {}
-    explicit Vector(const Point& P);
+    asiAlgo_EXPORT explicit Vector(const Point& P);
 
     double operator[](const int i) const
     {

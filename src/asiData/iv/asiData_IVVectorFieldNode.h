@@ -56,24 +56,25 @@ public:
   //! IDs for the underlying Parameters.
   enum ParamId
   {
-  //------------------//
-  // Common           //
-  //------------------//
-    PID_Name,         //!< Name of the Node.
-  //------------------//
-  // Geometry         //
-  //------------------//
-    PID_Points,       //!< Coordinates of vector positions.
-    PID_Vectors,      //!< Coordinates of vectors.
-  //------------------//
-  // Presentation     //
-  //------------------//
-    PID_GroupPrs,     //!< Presentation group.
-    PID_DrawTip,      //!< Whether to draw tip for the vectors.
-    PID_HasColor,     //!< Indicates whether the Color Parameter is active.
-    PID_Color,        //!< Color.
-    PID_ScaleCoeff,   //!< Scaling coefficient.
-  //------------------//
+  //----------------------//
+  // Common               //
+  //----------------------//
+    PID_Name,             //!< Name of the Node.
+  //----------------------//
+  // Geometry             //
+  //----------------------//
+    PID_Points,           //!< Coordinates of vector positions.
+    PID_Vectors,          //!< Coordinates of vectors.
+  //----------------------//
+  // Presentation         //
+  //----------------------//
+    PID_GroupPrs,         //!< Presentation group.
+    PID_DrawTip,          //!< Whether to draw tip for the vectors.
+    PID_HasColor,         //!< Indicates whether the Color Parameter is active.
+    PID_Color,            //!< Color.
+    PID_ScaleCoeff,       //!< Scaling coefficient.
+    PID_RescaleByLongest, //!< Indicates whether to rescale the field w.r.t. the longest vector.
+  //----------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -139,6 +140,16 @@ public:
   //! \return scaling coefficient.
   asiData_EXPORT double
     GetScaleCoeff() const;
+
+  //! \return the Boolean flag indicating whether to rescale the vector field by the
+  //!         longest vector.
+  asiData_EXPORT bool
+    IsRescaleByLongest() const;
+
+  //! Sets the Boolean flag indicating whether the stored vector field is supposed
+  //! to be rescaled w.r.t. the longest vector.
+  asiData_EXPORT void
+    SetRescaleByLongest(const bool);
 
 // Initialization:
 public:

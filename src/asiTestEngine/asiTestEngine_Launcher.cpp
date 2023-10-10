@@ -182,9 +182,12 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
       //
       *out << "\n\t";
       //
-      for ( const auto failedFuncId : failedFuncIds )
+      for ( size_t f = 0; f < failedFuncIds.size(); ++f )
       {
-        *out << " " << failedFuncId;
+        *out << failedFuncIds[f];
+        //
+        if ( f < failedFuncIds.size() - 1 )
+          *out << ", ";
       }
       //
       *out << "\n";
