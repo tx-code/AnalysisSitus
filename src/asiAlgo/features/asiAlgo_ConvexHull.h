@@ -36,8 +36,10 @@
 // OpenCascade includes
 #include <Poly_Triangulation.hxx>
 
-// Mobius includes
-#include <mobius/poly_Jacobian.h>
+#if defined USE_MOBIUS
+  // Mobius includes
+  #include <mobius/poly_Jacobian.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -72,6 +74,7 @@ struct asiAlgo_ConvexHull
       RTCD::Point b = Mesh->Node(N[1]);
       RTCD::Point c = Mesh->Node(N[2]);
 
+#if defined USE_MOBIUS
       // Make sure that skewed triangles are skipped.
       mobius::t_xyz v0(a.x, a.y, a.z);
       mobius::t_xyz v1(b.x, b.y, b.z);
@@ -93,6 +96,7 @@ struct asiAlgo_ConvexHull
       //
       if ( jacobian < 0.1 )
         continue;
+#endif
 
       RTCD::Plane plane = RTCD::ComputePlane(a, b, c);
 
