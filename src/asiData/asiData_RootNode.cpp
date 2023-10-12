@@ -41,6 +41,7 @@ asiData_RootNode::asiData_RootNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Name, PID_Name);
   REGISTER_PARAMETER(Bool, PID_PrsHlr);
   REGISTER_PARAMETER(Bool, PID_IsCoincidentTopo);
+  REGISTER_PARAMETER(Bool, PID_IsEnabledHiddenInHlr);
 }
 
 //-----------------------------------------------------------------------------
@@ -54,13 +55,15 @@ Handle(ActAPI_INode) asiData_RootNode::Instance()
 
 void asiData_RootNode::Init()
 {
-  this->InitParameter(PID_Name,             "Name",               "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_PrsHlr,           "Hidden lines",       "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCoincidentTopo, "Resolve coin. topo", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,                 "Name",                          "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PrsHlr,               "HLR for meshes",                "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCoincidentTopo,     "Resolve coin. topo",            "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsEnabledHiddenInHlr, "Extract hidden in precise HLR", "", ParameterFlag_IsVisible, true);
 
   // Set defaults.
-  this->SetHlr(false);
-  this->SetResolveCoincidentTopo(false);
+  this->SetHlr                   (false);
+  this->SetResolveCoincidentTopo (false);
+  this->SetEnabledHiddenInHlr    (false);
 }
 
 //-----------------------------------------------------------------------------
@@ -95,12 +98,26 @@ void asiData_RootNode::SetHlr(const bool isHlr)
 
 void asiData_RootNode::SetResolveCoincidentTopo(const bool on)
 {
-  ActParamTool::AsBool(this->Parameter(PID_IsCoincidentTopo))->SetValue(on);
+  ActParamTool::AsBool( this->Parameter(PID_IsCoincidentTopo) )->SetValue(on);
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiData_RootNode::IsResolveCoincidentTopo() const
 {
-  return ActParamTool::AsBool(this->Parameter(PID_IsCoincidentTopo))->GetValue();
+  return ActParamTool::AsBool( this->Parameter(PID_IsCoincidentTopo) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_RootNode::SetEnabledHiddenInHlr(const bool on)
+{
+  ActParamTool::AsBool( this->Parameter(PID_IsEnabledHiddenInHlr) )->SetValue(on);
+}
+
+//-----------------------------------------------------------------------------
+
+bool asiData_RootNode::IsEnabledHiddenInHlr() const
+{
+  return ActParamTool::AsBool( this->Parameter(PID_IsEnabledHiddenInHlr) )->GetValue();
 }

@@ -82,7 +82,7 @@
 <h2 id="toc-modes-facets">Facets</h2>
 
 <p>
-  To enable the visualization of the B-rep facets backing the precise geometry, press "W" ("wireframe") key whenever the focus is set to the viewer. The facets are rendered in hidden line removal mode, so you see only the visible features of a model. To get back to the shaded view, press "S" ("shading").
+  To enable the visualization of the B-rep facets backing the precise geometry, press "W" ("wireframe") key whenever the focus is set to the viewer. To get back to the shaded view, press "S" ("shading").
 </p>
 
 <div align="center"><img src="../imgs/mesh-hlr.png"/></div>
@@ -98,6 +98,36 @@
 </p>
 
 <div align="center"><img src="../imgs/brep-hlr-precise.png"/></div>
+
+<p>
+  If you want to keep the HLR projection of a part with all hidden edges visualized, head over to the root Node ("Analysis Situs" in the project tree) and turn on the "Extract hidden in precise HLR" flag:
+</p>
+
+<div align="center"><img src="../imgs/precise-hlr-setting.png"/></div>
+
+<p>
+  For example, a planar part with normal HLR is projeced as follows:
+</p>
+
+<div align="center"><img src="../imgs/precise-hlr-clean.png"/></div>
+
+<p>
+  By enabling the extraction mode for the hidden edges, you can also see some potentially unexpected features in the thickness of the part:
+</p>
+
+<div align="center"><img src="../imgs/precise-hlr-hidden.png"/></div>
+
+<p>
+  To disable visualization of vertices for the projection, select the "HLR" Node in the project tree and choose the "Pure wireframe" option for the display mode:
+</p>
+
+<div align="center"><img src="../imgs/precise-hlr-pure-wireframe.png"/></div>
+
+<p>
+  The visualization result becomes cleaner, i.e., the vertices of the projected edges are not rendered anymore:
+</p>
+
+<div align="center"><img src="../imgs/precise-hlr-hidden-clean.png"/></div>
 
 <!-- [END] contents -->
 </div>

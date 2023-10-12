@@ -597,10 +597,22 @@ void asiUI_ViewerPart::onBuildHLR()
   TIMER_NEW
   TIMER_GO
 
+  // Set a filter for the hidden edges.
+  asiAlgo_BuildHLR::t_outputEdges filter;
+  //
+  if ( Handle(asiData_RootNode)::DownCast( m_model->GetRootNode() )->IsEnabledHiddenInHlr() )
+  {
+    filter.OutputHiddenSharpEdges   = true;
+    filter.OutputHiddenOutlineEdges = true;
+    filter.OutputHiddenSmoothEdges  = true;
+    filter.OutputHiddenIsoLines     = true;
+    filter.OutputHiddenSewnEdges    = true;
+  }
+
   // Build HLR.
   asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
   //
-  if ( !buildHLR.Perform( gp_Dir(dX, dY, dZ) ) )
+  if ( !buildHLR.Perform(gp_Dir(dX, dY, dZ), asiAlgo_BuildHLR::Mode_Precise, filter) )
   {
     m_progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
     return;

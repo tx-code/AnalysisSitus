@@ -776,15 +776,40 @@ int ENGINE_MakePoint(const Handle(asiTcl_Interp)& interp,
                      int                          argc,
                      const char**                 argv)
 {
-  if ( argc != 5 )
+  double px;
+  double py;
+  double pz;
+
+  if ( argc == 5 )
   {
-    return interp->ErrorOnWrongArgs(argv[0]);
+    px = atof(argv[2]);
+    py = atof(argv[3]);
+    pz = atof(argv[4]);
+  }
+  else
+  {
+    asiEngine_Part partApi( cmdEngine::cf->Model,
+                            cmdEngine::cf->ViewerPart->PrsMgr() );
+
+    // Get highlighted faces and edges.
+    TColStd_PackedMapOfInteger vertIndices;
+    //
+    partApi.GetHighlightedVertices(vertIndices);
+
+    // Take all vertices
+    const TopTools_IndexedMapOfShape&
+      allVertices = cmdEngine::cf->Model->GetPartNode()->GetAAG()->RequestMapOfVertices();
+
+    // Extract the selected ones.
+    TopoDS_Shape VS = allVertices.FindKey( vertIndices.GetMinimalMapped() );
+    //
+    gp_Pnt P = BRep_Tool::Pnt( TopoDS::Vertex(VS) );
+
+    px = P.X();
+    py = P.Y();
+    pz = P.Z();
   }
 
-  const double px = atof(argv[2]);
-  const double py = atof(argv[3]);
-  const double pz = atof(argv[4]);
-  //
   interp->GetPlotter().REDRAW_POINT(argv[1], gp_Pnt(px, py, pz), Color_Yellow);
 
   return TCL_OK;
@@ -1481,18 +1506,32 @@ int ENGINE_HLR(const Handle(asiTcl_Interp)& interp,
    *  Perform HLR algorithm
    * ======================= */
 
-  asiAlgo_BuildHLR buildHLR( partShape, interp->GetProgress(), interp->GetPlotter() );
+  // Set a filter for the hidden edges.
+  asiAlgo_BuildHLR::t_outputEdges filter;
   //
-  if ( !buildHLR.Perform(dir) )
+  if ( Handle(asiData_RootNode)::DownCast( cmdEngine::model->GetRootNode() )->IsEnabledHiddenInHlr() )
+  {
+    filter.OutputHiddenSharpEdges   = true;
+    filter.OutputHiddenOutlineEdges = true;
+    filter.OutputHiddenSmoothEdges  = true;
+    filter.OutputHiddenIsoLines     = true;
+    filter.OutputHiddenSewnEdges    = true;
+  }
+
+  asiAlgo_BuildHLR buildHLR( partShape,
+                             interp->GetProgress(),
+                             interp->GetPlotter() );
+  //
+  if ( !buildHLR.Perform(dir, asiAlgo_BuildHLR::Mode_Precise, filter) )
   {
     interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
     return TCL_ERROR;
   }
 
-  TopoDS_Shape result = buildHLR.GetResult();
+  const TopoDS_Shape& result = buildHLR.GetResult();
 
   // Draw the result.
-  interp->GetPlotter().REDRAW_SHAPE(argv[1], result, Color_Black);
+  interp->GetPlotter().REDRAW_SHAPE(argv[1], result, Color_White);
 
   return TCL_OK;
 }
@@ -2471,8 +2510,9 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("make-point",
     //
-    "make-point <pointName> <x> <y> <z>\n"
-    "\t Creates a point with the passed coordinates.",
+    "make-point [<pointName> <x> <y> <z>]\n"
+    "\t Creates a point with the passed coordinates. If nothing is passed, the\n"
+    "\t point is created using the coordinates of the selected vertex.",
     //
     __FILE__, group, ENGINE_MakePoint);
 

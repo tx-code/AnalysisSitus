@@ -4809,6 +4809,62 @@ int ENGINE_NegativeVolume(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_GetDominatingPlane(const Handle(asiTcl_Interp)& interp,
+                              int                          argc,
+                              const char**                 argv)
+{
+  if ( argc != 4 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Get Part Node and shape.
+  Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
+  //
+  if ( partNode.IsNull() || !partNode->IsWellFormed() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Part is not initialized.");
+    return TCL_OK;
+  }
+  //
+  Handle(asiAlgo_AAG) G = partNode->GetAAG();
+
+  // Iterate over all faces.
+  int    resFid  = 0;
+  double maxArea = 0;
+  gp_Dir norm    = gp::DZ();
+  //
+  for( asiAlgo_AAGRandomIterator it(G); it.More(); it.Next() )
+  {
+    const int          fid  = it.GetFaceId();
+    const TopoDS_Face& face = G->GetFace(fid);
+    Handle(Geom_Plane) pln;
+
+    if ( asiAlgo_Utils::IsPlanar(face, pln) )
+    {
+      const double faceArea = asiAlgo_Utils::CacheFaceArea(fid, G);
+      //
+      if ( faceArea > maxArea )
+      {
+        resFid  = fid;
+        maxArea = faceArea;
+        norm    = pln->Axis().Direction();
+      }
+    }
+  }
+
+  // Set Tcl variables.
+  int varIdx = 0;
+  //
+  interp->SetVarFundamental<int>( argv[++varIdx], norm.X() );
+  interp->SetVarFundamental<int>( argv[++varIdx], norm.Y() );
+  interp->SetVarFundamental<int>( argv[++varIdx], norm.Z() );
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
                                     const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -5348,4 +5404,13 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t Computes negative volumes.",
     //
     __FILE__, group, ENGINE_NegativeVolume);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("get-dominating-plane",
+    //
+    "get-dominating-plane <nx> <ny> <nz> [-orient]\n"
+    "\t Attempts to find the largest planar face in the model and returns\n"
+    "\t the components of its normal vector.",
+    //
+    __FILE__, group, ENGINE_GetDominatingPlane);
 }

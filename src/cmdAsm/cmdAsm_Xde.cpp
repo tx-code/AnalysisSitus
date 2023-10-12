@@ -1778,6 +1778,10 @@ int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
       TopoDS_Shape  partShape = xdeDoc->GetShape(pid);
       t_extString   partName  = xdeDoc->GetPartName(pid);
 
+      // Remove unacceptable characters.
+      partName.RemoveAll( '<' );
+      partName.RemoveAll( '>' );
+
       // Prepare a filename.
       std::string filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
       filename += ExtStr2StdStr(partName);

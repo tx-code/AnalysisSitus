@@ -57,11 +57,12 @@ public:
   //! IDs for the underlying Parameters.
   enum ParamId
   {
-  //------------------------//
-    PID_Name,               //!< Name of the Node.
-    PID_PrsHlr,             //!< Indicates whether HLR is enabled in the active renderer.
-    PID_IsCoincidentTopo,   //!< Indicates whether to resolve coincident topology in 3D.
-  //------------------------//
+  //--------------------------//
+    PID_Name,                 //!< Name of the Node.
+    PID_PrsHlr,               //!< Indicates whether HLR is enabled in the active renderer.
+    PID_IsCoincidentTopo,     //!< Indicates whether to resolve coincident topology in 3D.
+    PID_IsEnabledHiddenInHlr, //!< Indicates whether precise HLR should output hidden edges as well.
+  //-----------------------=--//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -103,6 +104,15 @@ public:
   //! \return true if coincident topology in 3D is resolved.
   asiData_EXPORT bool
     IsResolveCoincidentTopo() const;
+
+  //! Enables/disables the extraction of hidden edges in the precise HLR mode.
+  //! \param[in] on value to set.
+  asiData_EXPORT void
+    SetEnabledHiddenInHlr(const bool on);
+
+  //! \return true if the hidden edge extraction mode is enabled for precise HLR.
+  asiData_EXPORT bool
+    IsEnabledHiddenInHlr() const;
 
 // Initialization:
 public:

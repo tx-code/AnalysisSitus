@@ -144,36 +144,6 @@ proc build-block {L0 B0 a1Deg a2Deg} {
 
 <div align="center"><img src="../imgs/active_script_03.png"/></div>
 
-<h2>Convert BREP to STEP</h2>
-
-<p>
-  The following code visits all BREP files in a directory and converts them to STEP:
-</p>
-
-<pre class="code">
-set workdir   MyWorkDir
-set targetdir MyTargetDir
-
-# Get all BREP files available in the input directory.
-set filenames [glob -directory $workdir -- "*.brep"]
-
-notifier -init
-
-foreach inFilename $filenames {
-  puts "Next file: $inFilename"
-  set basename [lindex [file split $inFilename] end]
-  set basename [file rootname $basename]
-
-  puts "Target output file: $targetdir/$basename.stp"
-  load-brep $inFilename
-  save-step "$targetdir/$basename.stp"
-
-  notifier -step
-}
-
-notifier -finish
-</pre>
-
 <!-- [END] contents -->
 </div>
 <br/>
