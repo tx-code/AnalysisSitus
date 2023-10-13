@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: build on Linux</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/build on Linux
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-overview">Build on Linux</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-get-ready">Getting ready</h2>
+
+<p>
+  This guide is a step-by-step tutorial explaining how to build Analysis Situs from sources on Linux OS. Ubuntu 22.04 is used as a reference system, although the compilation process should be similar for other Linux distributives. It should be noted that Analysis Situs is a C++-written project whose language support is deliverately narrowed down to C++11 standard for the sake of better compatibility with older compilers.
+</p>
+
+<p>
+  Analysis Situs is entirely free and can be compiled without any commercial products or 3-rd parties. Still, for comfortable development under Linux OS, the authors of Analysis Situs recommend using the following proprietary software (although you may freely choose the free alternatives to the packages listed below):
+</p>
+
+<ol>
+  <li>GitKraken as a git client.</li>
+  <li>CLion as a C++ IDE.</li>
+</ol>
+
+<p>
+  The compilation procedure given below assumes that you have a "clean" installation of Linux. As a result, it goes through all of the steps to install the required third-party dependencies, some of which your system may already have installed. If this is the case, you may skip the corresponding steps. Also, keep in mind that Analysis Situs is a rapidly evolving project. Although we try to minimize the dependencies and keep the compilation process as clean as possible, some inconsistencies may pop up. Please, <a href='http://quaoar.su/blog/contact'>report</a>, if you encounter any.
+</p>
+
+<h2 id="toc-tools">Install development tools</h2>
+
+<h3 id="toc-tools-cmake">CMake</h3>
+
+<p>
+Analysis Situs is configured with CMake. To install CMake, you go like this:
+</p>
+
+<pre class="code">
+sudo apt install cmake-qt-gui
+</pre>
+
+<p>
+To make sure that CMake is installed properly, run it like this from the Terminal:
+</p>
+
+<pre class="code">
+cmake-gui&
+</pre>
+
+<p>
+You should be able to see the CMake window:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/cmake.png"/></div>
+
+<p>
+It is recommended to try to configure the project for the first time to observe all missing dependencies. To do that, you have to input the source and the build directories, then press "Configure" and choose "Unix Makefiles" as the generator:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/cmake-filled.png"/></div>
+
+<p>
+The next stage is to specify "/usr/lib" as the value of "3RDPARTY_DIR" and set "INSTALL_DIR" to the directory where Analysis Situs will be copied upon successful compilation. Also, specify "Release" as "CMAKE_BUILD_TYPE" to compile the project in the optimized mode (for debugging, you may want to type "Debug").
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/cmake-filled2.png"/></div>
+
+<p>
+Keep the CMake GUI dialog open and proceed with installation of other 3-rd party libraries following this guide.
+</p>
+
+<h3 id="toc-tools-rapidjson">Rapidjson</h3>
+
+<p>
+To install Rapidjson, use the following command:
+</p>
+
+<pre class="code">
+sudo apt-get -y install rapidjson-dev
+</pre>
+
+<h3 id="toc-tools-eigen">Eigen</h3>
+
+<p>
+Eigen is a header-only library for linear algebra. Install the development version as follows:
+</p>
+
+<pre class="code">
+sudo apt-get -y install libeigen3-dev
+</pre>
+
+<h3 id="toc-tools-opencascade-deps">OpenCascade dependencies</h3>
+
+<p>
+Tcl/Tk and freeimage are the dependencies of OpenCascade. Install with:
+</p>
+
+<pre class="code">
+sudo apt-get install -y tcl tcl-dev tk tk-dev libfreeimage-dev
+</pre>
+
+<p>
+Other dependencies for graphics are to be installed in the following way:
+</p>
+
+<pre class="code">
+sudo apt-get install -y libxmu-dev libxi-dev
+sudo apt-get install -y libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev libosmesa6-dev
+</pre>
+
+<h3 id="toc-tools-opencascade">OpenCascade</h3>
+
+<p>
+Analysis Situs uses OpenCascade 7.6 as a geometric kernel. We prefer to build OpenCascade from sources. To do that, execute the following commands one after another (make sure to set your working directory properly):
+</p>
+
+<pre class="code">
+mkdir /home/quaoar/work/opencascade
+cd /home/quaoar/work/opencascade
+wget https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_6_0.tar.gz
+tar zxvf V7_6_0.tar.gz
+mkdir /home/quaoar/work/opencascade/OCCT-7_6_0/build
+cd /home/quaoar/work/opencascade/OCCT-7_6_0/build
+cmake .. \
+    -DCMAKE_BUILD_TYPE=release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DUSE_FREEIMAGE=ON
+make -j8
+sudo make install
+</pre>
+
+<p>
+It should be noted that here we install OpenCascade into the system directory "/usr". That is why you would need administrative permissions for "make install".
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/opencascade-install.png"/></div>
+
+<p>
+At this point, it might be interesting to check that OpenCascade has been installed successfully by giving it a test run. For that, you can go like this:
+</p>
+
+<pre class="code">
+cd /usr/bin
+./draw.sh
+</pre>
+
+<p>
+In the launched DRAW session, give the following commands:
+</p>
+
+<pre class="code">
+pload ALL
+box a 0 0 0 1 1 1
+vinit
+display a
+vfit
+</pre>
+
+<p>
+It should be noted that on Linux, OpenCascade uses MESA (i.e. software rendering), so you should be able to work with 3D graphics even without video drivers preinstalled.
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/opencascade-draw.png"/></div>
+
+<h3 id="toc-tools-qt">Qt</h3>
+
+<p>
+Qt is the UI framework used by Analysis Situs. Install it with the following commands:
+</p>
+
+<pre class="code">
+sudo apt-get update
+sudo apt-get -y install libqt5x11extras5-dev
+sudo apt-get -y install qttools5-dev
+</pre>
+
+<h3 id="toc-tools-vtk">VTK</h3>
+
+<p>
+The visualization in Analysis Situs is based entirely on VTK framework. Unlike Qt, here it is necessary to have a specific version of the library. We prefer to build VTK from sources. To do that, use the following commands:
+</p>
+
+<pre class="code">
+cd /home/quaoar/work
+wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+tar xvfz ./VTK-8.2.0.tar.gz
+cd /home/quaoar/work/VTK-8.2.0
+mkdir build
+cd /home/quaoar/work/VTK-8.2.0/build
+cmake .. \
+    -DVTK_Group_Qt=ON \
+    -DVTK_QT_VERSION=5 \
+    -DVTK_RENDERING_BACKEND=OpenGL2 \
+    -DVTK_Group_Imaging=YES \
+    -DVTK_Group_Qt=YES \
+    -DVTK_Group_Views=YES \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
+make -j8
+sudo make install
+</pre>
+
+<p>
+It might happen that you encounter compilation or linking problems because VTK-8.2 is quite obsolete, while gcc compiler, Qt and potentially something else in your Linux environment is more up-to-date. For example, VTK-8.2 would not see any compilation issues on Ubuntu 20.04, while on Ubuntu 22.04 the situation becomes worse. Ideally, Analysis Situs should be migrated to a newer version of VTK, but that was hardly possible <a href="https://quaoar.su/blog/page/what-enduring-software-is">last time we tried it</a>.
+</p>
+
+<h2 id="toc-tools-getting-back-to-cmake">Generate Makefiles</h2>
+
+<p>
+At this point you can try reconfiguring Analysis Situs in CMake:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/cmake-build-cache.png"/></div>
+
+<p>
+Once the configuration is done, you can head over to the build directory of Analysis Situs and try making it for the first time:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/compilation-log.png"/></div>
+
+<pre class="code">
+make
+make install
+</pre>
+
+<p>
+To run Analysis Situs, navigate to the installation directory and run its bash executable like this:
+</p>
+
+<pre class="code">
+./asiExe.sh
+</pre>
+
+<div align="center"><img src="../imgs/build-on-linux/analysis-situs-ui.png"/></div>
+
+<p>
+To test if Analysis Situs is operational, consider executing the following commands in the "Active Script" console:
+</p>
+
+<pre class="code">
+make-box a 0 0 0 1 1 1
+set-as-part a
+</pre>
+
+<p>
+Pay attention to the visualization of edges. If your video-driver is fine, you should be able to see them.
+</p>
+
+<h2 id="toc-dockerfile">Dockerfile</h2>
+
+<p>
+The procedure detailed above is automated in the <a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/Dockerfile?ref_type=heads">Dockerfile</a> available in your working copy of Analysis Situs. Therefore, you may prefer to build Analysis Situs with UI in a Docker container.
+</p>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

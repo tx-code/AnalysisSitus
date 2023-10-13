@@ -10,8 +10,8 @@ doc/reference/generated/
 test/results/*
 test/dumping/*
 include/
-build*/    
-install*/   
+build/    
+install/   
 .vscode
 *.exe
 *.psess
@@ -85,16 +85,8 @@ log.txt
 
 .idea/vcs.xml
 
-build-oroox/
-
-install-oroox/
-
 build-occt-760/
-
 install-occt-760/
-
 build-occt-760-ox/
-
 install-occt-760-ox/
-
 build-occt760/
