@@ -798,6 +798,33 @@ void asiUI_ObjectBrowser::onSaveToBREP()
     shape = topoNode->GetShape();
   }
 
+  /* BOUNDARY EDGES */
+  else if ( selected_n->IsKind( STANDARD_TYPE(asiData_BoundaryEdgesNode) ) )
+  {
+    Handle(asiData_BoundaryEdgesNode)
+      edgesNode = Handle(asiData_BoundaryEdgesNode)::DownCast(selected_n);
+
+    TopoDS_Compound edgesComp;
+
+    TopoDS_Shape S1 = ActParamTool::AsShape( edgesNode->Parameter(asiData_BoundaryEdgesNode::PID_Red) )      ->GetShape();
+    TopoDS_Shape S2 = ActParamTool::AsShape( edgesNode->Parameter(asiData_BoundaryEdgesNode::PID_Green) )    ->GetShape();
+    TopoDS_Shape S3 = ActParamTool::AsShape( edgesNode->Parameter(asiData_BoundaryEdgesNode::PID_Ordinary) ) ->GetShape();
+
+    // Compose the shape to export.
+    BRep_Builder().MakeCompound(edgesComp);
+    //
+    if ( !S1.IsNull() )
+      BRep_Builder().Add(edgesComp, S1);
+    //
+    if ( !S2.IsNull() )
+      BRep_Builder().Add(edgesComp, S2);
+    //
+    if ( !S3.IsNull() )
+      BRep_Builder().Add(edgesComp, S3);
+
+    shape = edgesComp;
+  }
+
   /* CURVE */
   else if ( selected_n->IsKind( STANDARD_TYPE(asiData_IVCurveNode) ) )
   {
@@ -1677,6 +1704,12 @@ void asiUI_ObjectBrowser::populateContextMenu(const Handle(ActAPI_HNodeList)& ac
           pMenu->addSeparator();
           pMenu->addAction( "Make partition", this, SLOT( onPartition () ) );
         }
+      }
+
+      if ( node->IsKind( STANDARD_TYPE(asiData_BoundaryEdgesNode) ) )
+      {
+        pMenu->addSeparator();
+        pMenu->addAction( "Save to BREP...", this, SLOT( onSaveToBREP () ) );
       }
 
       if ( node->IsKind( STANDARD_TYPE(asiData_IVTopoItemNode) ) )
