@@ -72,6 +72,10 @@ If you do not have the working copy of Analysis Situs yet, proceed to the "<a hr
 Run IDE and open your working directory of Analysis Situs. CLion will propose to create build configurations. Go ahead and create both "Debug" and "Release" configurations using the "Profiles" list on the left. These profiles correspond to the different values of CMAKE_BUILD_TYPE variable, i.e., they would control CMake generator in the same way as you would normally do from native CMake. You do not have to specify anything else in the "Open Project Wizard" dialog, so click "OK" and proceed.
 </p>
 
+<p class="note">
+CLion should recognize your app as a "CMake Application". If that does not happen, try configuring CMake for the first time: upon successful configuration, the IDE will identify your app correctly.
+</p>
+
 <div align="center"><img src="../imgs/build-on-linux/clion01.png"/></div>
 
 <p>
@@ -87,8 +91,10 @@ CMake variables in CLion are configured rigth in the CMakeCache.txt file. To jum
 <div align="center"><img src="../imgs/build-on-linux/clion03.png"/></div>
 
 <p>
-Now you are supposed to set the variables, save the CMakeCache.txt file and reconfigure the project. We recommend you to follow our "<a href="./features_build-linux">Build on Linux</a>" tutorial or read the contents of the <a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/Dockerfile?ref_type=heads">Dockerfile</a> shipped with Analysis Situs for defining those variables.
+Now you are supposed to set the variables, save the CMakeCache.txt file and reconfigure the project. We recommend you to follow our "<a href="./features_build-linux">Build on Linux</a>" tutorial or read the contents of the <a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/Dockerfile?ref_type=heads">Dockerfile</a> shipped with Analysis Situs for defining those variables. Whether a certain configuration is ready or not is depicted with a small icon in the "CMake" bottom panel:
 </p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion06.png"/></div>
 
 <p>
 To run Analysis Situs from IDE, make sure to configure runtime environment variables in the "Run/Debug Configurations" dialog. You will have to specify the LD_LIBRARY_PATH variable and also the working directory of the application, so that it will be able to dynamically load its plugins.
