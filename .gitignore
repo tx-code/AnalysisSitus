@@ -1,17 +1,18 @@
 products
 3rd-parties-arc
-cmake-*
 3rd-parties
 custom.bat
-win64/
-win32/
-tmp/
-doc/reference/generated/
+win64
+win32
+tmp
+doc/reference/generated
 test/results/*
 test/dumping/*
-include/
-build/    
-install/   
+include
+build
+cmake-build-debug
+cmake-build-release
+install
 .vscode
 *.exe
 *.psess
@@ -85,8 +86,8 @@ log.txt
 
 .idea/vcs.xml
 
-build-occt-760/
-install-occt-760/
-build-occt-760-ox/
-install-occt-760-ox/
-build-occt760/
+./build-occt-760/
+./install-occt-760/
+./build-occt-760-ox/
+./install-occt-760-ox/
+./build-occt760/
