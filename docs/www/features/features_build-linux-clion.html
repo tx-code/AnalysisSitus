@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Analysis Situs: build on Linux in CLion</title>
+  <link rel="shortcut icon" type="image/png" href="../imgs/favicon.png"/>
+  <link rel="stylesheet" type="text/css" href="../css/situ-main-style.css">
+
+  <!-- [begin] Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112292727-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-112292727-2');
+  </script>
+  <!-- [end] Google Analytics -->
+
+  <!--
+     Quick navigation script. Use a div with "toc-panel" class having a
+     nested div with "toc" id to place the navigation panel.
+    -->
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="../js/toc.js"></script>
+
+ </head>
+<body>
+
+<a name="top"></a> <!-- anchor for 'back to top' link -->
+<table width="100%"><tr><td>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td align="left" class="header">
+    <span class="header-logo"><a href="../index.html" class="header-href">Analysis&nbsp;Situs</a></span>
+    &nbsp;
+    ./<a class="header-href" href="../features.html">features</a>/build on Linux in CLion
+  </td>
+</tr>
+</table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td class="header-menu"><a href='http://quaoar.su/blog/page/analysis-situs'>Download</a></td>
+  <td class="header-menu"><a href="../features.html">Features</a></td>
+  <td class="header-menu"><a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a></td>
+  <td class="header-menu"><a href="http://analysissitus.org/forum/index.php">Forum</a></td>
+  <td class="header-menu"><a href="http://quaoar.su/blog/contact">Ask for support</a></td>
+</tr>
+</table>
+</td></tr></table>
+
+<div class="content-body">
+<!-- [BEGIN] contents -->
+
+<h1 id="toc-overview">Build on Linux in CLion</h1>
+
+<div class="toc-panel"><div id="toc"></div></div>
+
+<h2 id="toc-get-started">Getting started</h2>
+
+<p>
+In what follows, we assume that you already have the CLion IDE installed. If that is not the case, head over to the web-site of JetBrains and <a href="https://www.jetbrains.com/clion/">download</a> the IDE from there. You may also want to read about our experience with CLion covering its pros and cons on the Manifold Geometry blog: "<a href="https://quaoar.su/blog/page/getting-started-with-clion">Getting started with CLion</a>".
+</p>
+
+<p>
+If you do not have the working copy of Analysis Situs yet, proceed to the "<a href="https://gitlab.com/ssv/AnalysisSitus">Source code</a>" link and clone our git repository locally to your filesystem into any preferred destination.
+</p>
+
+<div align="center"><a href="https://gitlab.com/ssv/AnalysisSitus"><img src="../imgs/build-on-linux/clone.png"/></a></div>
+
+<p>
+Run IDE and open your working directory of Analysis Situs. CLion will propose to create build configurations. Go ahead and create both "Debug" and "Release" configurations using the "Profiles" list on the left. These profiles correspond to the different values of CMAKE_BUILD_TYPE variable, i.e., they would control CMake generator in the same way as you would normally do from native CMake. You do not have to specify anything else in the "Open Project Wizard" dialog, so click "OK" and proceed.
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion01.png"/></div>
+
+<p>
+CLion shows the entire contents of your working directory in the project browser to the left. The IDE also attempts to configure the project for the first time and fails because of undefined CMake variables.
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion02.png"/></div>
+
+<p>
+CMake variables in CLion are configured rigth in the CMakeCache.txt file. To jump into the contents of this file, use a little icon in the bottom panel:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion03.png"/></div>
+
+<p>
+Now you are supposed to set the variables, save the CMakeCache.txt file and reconfigure the project. We recommend you to follow our "<a href="./features_build-linux">Build on Linux</a>" tutorial or read the contents of the <a href="https://gitlab.com/ssv/AnalysisSitus/-/blob/master/Dockerfile?ref_type=heads">Dockerfile</a> shipped with Analysis Situs for defining those variables.
+</p>
+
+<p>
+To run Analysis Situs from IDE, make sure to configure runtime environment variables in the "Run/Debug Configurations" dialog. You will have to specify the LD_LIBRARY_PATH variable and also the working directory of the application, so that it will be able to dynamically load its plugins.
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion04.png"/></div>
+
+<p>
+If everything is configured correctly, you should be able to run Analysis Situs from IDE (by pressing the green "play" tool button). Make sure that the app loads all plugins successfully by looking at the "Logger" window:
+</p>
+
+<div align="center"><img src="../imgs/build-on-linux/clion05.png"/></div>
+
+<p>
+Find out more debugging tips and tricks on our Manifold Geometry blog here:
+</p>
+
+<ul>
+  <li><a href="https://quaoar.su/blog/page/debugging-hints-on-linux-clion">Debugging journey on Linux / CLion</a></li>
+</ul>
+
+<!-- [END] contents -->
+</div>
+<br/>
+<table class="footer" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td>
+    Copyright &copy; Analysis&nbsp;Situs 2015-present &nbsp; | &nbsp; <a class="footer-href" href="#top">^^^</a>  &nbsp; | &nbsp; <a href="http://quaoar.su/blog/contact" class="footer-href">contact us</a> &nbsp; | &nbsp; <a href="https://www.youtube.com/channel/UCc0exKIoqbeOSqKoc1RnfBQ" class="icon brands fa-youtube"></a> &nbsp; | &nbsp; <a href="https://analysis-situs.medium.com/" class="icon brands fa-medium"></a> &nbsp; | &nbsp; <a href="https://www.linkedin.com/in/sergey-slyadnev-277496b1" class="icon brands fa-linkedin"></a>
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
