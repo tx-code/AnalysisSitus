@@ -64,7 +64,7 @@ endif()
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Eigen.cmake)
 
 # Rapidjson
-set (USE_RAPIDJSON OFF CACHE BOOL "Rapidjson is optional 3-rd party. It enables glTF export.")
+set (USE_RAPIDJSON ON CACHE BOOL "Rapidjson is optional 3-rd party. It enables glTF export.")
 #
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_Rapidjson.cmake)
 
