@@ -129,7 +129,7 @@ asiTcl_Plugin::Status
               << ", so skipped as a non-plugin lib."
               << std::endl;
     //
-    return Status_Failed;
+    return Status_NotPlugin;
   }
 
   // Let interpreter store all loaded plugins
