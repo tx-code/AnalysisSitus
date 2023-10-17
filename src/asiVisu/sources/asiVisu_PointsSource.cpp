@@ -45,11 +45,6 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
-// Instantiate for allowed types
-template class asiVisu_PointsSource<double>;
-template class asiVisu_PointsSource<float>;
-
-//-----------------------------------------------------------------------------
 
 template<>
 asiVisu_PointsSource<double>* asiVisu_PointsSource<double>::New()
@@ -231,3 +226,9 @@ vtkIdType asiVisu_PointsSource<REAL_TYPE>::registerVertex(const vtkIdType n,
   //
   return cellID;
 }
+
+//-----------------------------------------------------------------------------
+
+// Instantiate for allowed types
+template class asiVisu_PointsSource<double>;
+template class asiVisu_PointsSource<float>;

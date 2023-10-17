@@ -50,11 +50,6 @@
 #endif
 
 //-----------------------------------------------------------------------------
-
-// Instantiate for allowed types
-template class asiAlgo_KHull2d<gp_XY>;
-
-//-----------------------------------------------------------------------------
 // Custom data associated with each point in a cloud
 //-----------------------------------------------------------------------------
 
@@ -725,3 +720,8 @@ std::vector<int>
 
   return res;
 }
+
+//-----------------------------------------------------------------------------
+
+// Instantiate for allowed types
+template class asiAlgo_KHull2d<gp_XY>;
