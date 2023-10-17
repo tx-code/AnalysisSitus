@@ -91,3 +91,13 @@ log.txt
 ./build-occt-760-ox/
 ./install-occt-760-ox/
 ./build-occt760/
+
+build-install-oroox/
+
+build-occt760/
+
+build-occt760-oroox/
+
+build-occt770-huawei/
+
+install-occt760/
