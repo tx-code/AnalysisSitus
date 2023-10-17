@@ -1,0 +1,154 @@
+/* Custom style overrides by Quaoar Studio LLC team */
+
+body {
+
+/* Colors used. */
+
+  --product-text: #1b1b22;
+
+  --tree-bg: #2a2a35;
+  --tree-sel: #174b57;
+  --tree-text: #acafc2;
+  --tree-arrow: #a3bec7;
+  
+  --bar-bg: #5c626c;
+  --bar-text: #ffffff;
+  --bar-sel: #4e5364;
+  
+  --title-bg: #e3e5eb;
+
+  --topics-even: #f2f3f6;
+  --topics-arrow: #2a2a35;
+
+  --main-text: #1b1b22;
+  --main-link: #045a40;
+
+  --code-bg: #f2f3f6;
+  --code-border: #c8c9cd;
+}
+
+/* Product title and version. */
+
+#product {
+  padding: 10px;
+}
+
+#product a {
+  color: var(--product-text);
+}
+
+/* The horizontal menu bar on the top. */
+
+#main-menu {             
+  background-image: none;
+  background-color: var(--bar-bg);
+}
+
+#main-menu a {
+  color: var(--bar-text);
+  background-image: none;
+  background-color: var(--bar-bg);
+  text-shadow: none;
+}
+
+#main-menu a:hover {
+  background-image: none;
+  background-color: var(--bar-sel);
+  text-shadow: none; 
+}
+
+/* Article title. */
+
+div.headertitle {
+  background-color: var(--title-bg);
+  margin: 0px;
+}
+
+div.header {
+  border: none;
+}
+
+/* Sidebar and navigation tree. */
+
+.ui-resizable-e {
+  background-image: none;
+  background-color: var(--tree-bg);
+}
+
+#nav-tree {
+  background-image: none;
+  background-color: var(--tree-bg);
+}
+
+#nav-tree a {
+  color: var(--tree-text);
+}
+
+#nav-tree .arrow {
+  color: var(--tree-arrow);
+}
+
+#nav-tree .selected {
+  background-image: none;
+  background-color: var(--tree-sel);
+  text-shadow: none;
+}
+
+#nav-sync {
+	visibility: hidden;
+	/* Found no way to disable it in the Doxygen project, so doing it here. */
+}
+
+/* The horizontal bar on the bottom */
+/* It is actually disabled, but still customizing it here in case we ever want to use it. */
+
+.navpath ul {
+  background-image: none;
+  background-color: var(--bar-bg);
+  border-top: 2px solid;
+  border-color: var(--bar-bg);
+}
+
+.navpath li.navelem a, .navpath li.navelem a:hover {
+  color: var(--bar-text);
+  text-shadow: none;
+}
+
+.navpath li {
+  background-image: none;
+}
+
+/* Tables. */
+
+table.doxtable th {
+  background-color: var(--bar-bg);
+}
+
+/* Topics list. */
+
+tr.even td {
+  background-color: var(--topics-even);
+}
+
+.contents .arrow {
+  color: var(--topics-arrow);
+}
+
+/* Article text. */
+
+.contents {
+  color: var(--main-text);
+}
+
+.contents a, .contents a:visited {
+  color: var(--main-link);
+}
+
+/* Code blocks. */
+
+div.fragment {
+  padding: 8px;
+  background-color: var(--code-bg);
+  border-color: var(--code-border);
+  border-radius: 3px;
+}

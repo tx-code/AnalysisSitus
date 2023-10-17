@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_Algo
+//!
 //! Runs APPSURF2 surface fitting algorithm.
 class asiAlgo_AppSurf2 : public mobius::core_IAlgorithm
 {

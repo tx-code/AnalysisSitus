@@ -1,0 +1,102 @@
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+PROJECT_NAME     = "Analysis Situs // SDK"
+PROJECT_LOGO     = @DOXYGEN_LOGO@
+PROJECT_NUMBER   = @VERSION_WITH_TIMESTAMP@
+OUTPUT_DIRECTORY = @DOXYGEN_OUTPUT_DIR@
+EXAMPLE_PATH     = @DOXYGEN_INPUT_DIR@
+CREATE_SUBDIRS   = NO # We experience problems with HTML otherwise
+OUTPUT_LANGUAGE  = English
+TAB_SIZE         = 5
+
+#---------------------------------------------------------------------------
+# Configuration options related to warning and progress messages
+#---------------------------------------------------------------------------
+QUIET    = NO
+WARNINGS = YES
+
+#---------------------------------------------------------------------------
+# Input related options
+#---------------------------------------------------------------------------
+INPUT         = @DOXYGEN_INPUT_DIR@
+FILE_PATTERNS = *.c \
+                *.cc \
+                *.cxx \
+                *.cpp \
+                *.c++ \
+                *.ixx \
+                *.ipp \
+                *.i++ \
+                *.h \
+                *.hh \
+                *.hxx \
+                *.hpp \
+                *.h++
+IMAGE_PATH     = @DOXYGEN_API_IMGS@
+RECURSIVE      = YES
+EXTRACT_STATIC = YES
+
+#---------------------------------------------------------------------------
+# Input preprocessing options
+#---------------------------------------------------------------------------
+INHERIT_DOCS         = YES
+INLINE_INFO          = YES
+GENERATE_TESTLIST    = YES
+ENABLE_PREPROCESSING = YES
+MACRO_EXPANSION      = YES
+EXPAND_ONLY_PREDEF   = YES
+PREDEFINED           = "Handle(x)=Handle_##x"
+
+#---------------------------------------------------------------------------
+# HTML related options
+#---------------------------------------------------------------------------
+GENERATE_HTML         = YES
+HTML_OUTPUT           = .
+HTML_HEADER           = @DOXYGEN_STATIC@/header.html
+HTML_FOOTER           = @DOXYGEN_STATIC@/footer.html
+HTML_EXTRA_STYLESHEET = @DOXYGEN_STATIC@/custom.css
+TOC_EXPAND            = YES
+DISABLE_INDEX         = NO
+GENERATE_TREEVIEW     = YES
+TREEVIEW_WIDTH        = 300
+
+#---------------------------------------------------------------------------
+# MathJax related option
+#---------------------------------------------------------------------------
+USE_MATHJAX          = @DOXYGEN_USE_MATHJAX@
+MATHJAX_RELPATH      = file:///@DOXYGEN_MATHJAX@
+MATHJAX_EXTENSIONS   = TeX/AMSmath TeX/AMSsymbols
+MATHJAX_CODEFILE     = @DOXYGEN_STATIC@/mathjax-config.js
+
+#---------------------------------------------------------------------------
+# Graphviz related options
+#---------------------------------------------------------------------------
+HAVE_DOT = @DOXYGEN_USE_GRAPHVIZ@
+DOT_PATH = @GRAPHVIZ_EXE@
+DOT_GRAPH_MAX_NODES = 80
+
+#---------------------------------------------------------------------------
+# SORT related options
+#---------------------------------------------------------------------------
+SORT_GROUP_NAMES = NO
+
+#---------------------------------------------------------------------------
+# LaTeX related option
+#---------------------------------------------------------------------------
+GENERATE_LATEX = NO
+
+#---------------------------------------------------------------------------
+# RTF related options
+#---------------------------------------------------------------------------
+GENERATE_RTF = NO
+
+#---------------------------------------------------------------------------
+# Search engine
+#---------------------------------------------------------------------------
+SEARCHENGINE = YES
+
+#---------------------------------------------------------------------------
+# TAG files
+#---------------------------------------------------------------------------
+GENERATE_TAGFILE  = @DOXYGEN_INDEX_LOC@

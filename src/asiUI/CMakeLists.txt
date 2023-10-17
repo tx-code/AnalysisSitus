@@ -366,6 +366,7 @@ set (utils_H_FILES
   utils/asiUI_PrimDataAdaptor.h
 )
 set (utils_H_UI_FILES
+  utils/asiUI_InputEventFilter.h
   utils/asiUI_OverrideCursor.h
   utils/asiUI_PrimDataView.h
   utils/asiUI_ProgressListener.h
@@ -378,6 +379,7 @@ set (utils_CPP_FILES
   utils/asiUI_Common.cpp
   utils/asiUI_CommonFacilities.cpp
   utils/asiUI_DataAdaptor.cpp
+  utils/asiUI_InputEventFilter.cpp
   utils/asiUI_IV.cpp
   utils/asiUI_Logger.cpp
   utils/asiUI_OverrideCursor.cpp

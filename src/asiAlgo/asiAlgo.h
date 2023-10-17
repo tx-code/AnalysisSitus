@@ -44,6 +44,12 @@
 #endif
 
 //-----------------------------------------------------------------------------
+// DOXY group definition
+//-----------------------------------------------------------------------------
+//! \defgroup ASI_Algo Algorithms
+//!
+//! Algorithms of Analysis Situs.
+//-----------------------------------------------------------------------------
 
 #define ASI_TEST_DATA    "ASI_TEST_DATA"
 #define ASI_TEST_DUMPING "ASI_TEST_DUMPING"

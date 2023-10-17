@@ -33,6 +33,7 @@
 
 // asiUI includes
 #include <asiUI_HistoryGraph.h>
+#include <asiUI_InputEventFilter.h>
 
 // asiEngine includes
 #include <asiEngine_Part.h>
@@ -42,6 +43,8 @@
 
 // asiTcl includes
 #include <asiTcl_PluginMacro.h>
+
+asiUI_InputEventFilter* pEventFilter = nullptr;
 
 //-----------------------------------------------------------------------------
 
@@ -323,6 +326,45 @@ int ENGINE_SelectVertices(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_FreezeViewer(const Handle(asiTcl_Interp)& interp,
+                        int                          argc,
+                        const char**                 argv)
+{
+  (void) interp;
+
+  if ( cmdEngine::cf.IsNull() )
+    return TCL_OK;
+
+  if ( !pEventFilter )
+    pEventFilter = new asiUI_InputEventFilter;
+
+  pEventFilter->AddObject(cmdEngine::cf->ViewerPart);
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_UnfreezeViewer(const Handle(asiTcl_Interp)& interp,
+                          int                          argc,
+                          const char**                 argv)
+{
+  (void) interp;
+
+  if ( cmdEngine::cf.IsNull() )
+    return TCL_OK;
+
+  if ( pEventFilter )
+  {
+    pEventFilter->ExcludeObject(cmdEngine::cf->ViewerPart);
+    delete pEventFilter; pEventFilter = nullptr;
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
                                 const Handle(Standard_Transient)& cmdEngine_NotUsed(data))
 {
@@ -425,4 +467,20 @@ void cmdEngine::Commands_Viewer(const Handle(asiTcl_Interp)&      interp,
     "\t Selects vertices specified with their 1-based IDs or all vertices.",
     //
     __FILE__, group, ENGINE_SelectVertices);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("freeze-viewer",
+    //
+    "freeze-viewer\n"
+    "\t Disables all events in the 3D viewer.",
+    //
+    __FILE__, group, ENGINE_FreezeViewer);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("unfreeze-viewer",
+    //
+    "unfreeze-viewer\n"
+    "\t Enables all events in the 3D viewer.",
+    //
+    __FILE__, group, ENGINE_UnfreezeViewer);
 }

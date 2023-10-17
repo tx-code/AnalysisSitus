@@ -33,7 +33,10 @@ message (STATUS "Analysis Situs VERSION_PATCH: ${VERSION_PATCH}")
 # Distribution parameters
 #------------------------------------------------------------------------------
 
-# set type of application distribution
+# Documentation.
+set (DISTRIBUTION_GENERATE_DOC OFF CACHE BOOL "Indicates whether to generate Doxygen-based documentation.")
+
+# Set type of application distribution (Complete or SDK)
 if (NOT DISTRIBUTION_TYPE)
   set (DISTRIBUTION_TYPE "Complete" CACHE STRING "Select distribution type." FORCE)
   set_property(CACHE DISTRIBUTION_TYPE PROPERTY STRINGS "Complete" "Algo")
@@ -185,6 +188,15 @@ if (USE_FBX_SDK)
   set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};${3RDPARTY_FBX_SDK_DLL_DIR}")
 endif()
 
+# Doxygen for documentation
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_Doxygen.cmake)
+
+# Mathjax for documentation
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_Mathjax.cmake)
+
+# Graphviz for documentation
+include (${CMAKE_SOURCE_DIR}/cmake/asitus_Graphviz.cmake)
+
 set (3RDPARTY_DLL_PATH "${3RDPARTY_DLL_PATH};\
 ${3RDPARTY_OCCT_DLL_DIR};\
 ${3RDPARTY_vtk_DLL_DIR};")
@@ -276,6 +288,34 @@ if (NOT BUILD_ALGO_ONLY)
     add_subdirectory(${CMAKE_SOURCE_DIR}/setup)
   endif()
 
+endif()
+
+#------------------------------------------------------------------------------
+# Documentation is added AFTER all targets
+#------------------------------------------------------------------------------
+
+if (DISTRIBUTION_GENERATE_DOC AND NOT "${DOXYGEN_EXE}" STREQUAL "" AND EXISTS "${DOXYGEN_EXE}")
+
+  # Path to the logo, which is used by all types of documentation.
+  set (DOXYGEN_LOGO "${CMAKE_SOURCE_DIR}/docs/imgs/logobird.svg")
+
+  set (DOXYGEN_STATIC "${CMAKE_SOURCE_DIR}/docs/static")
+
+  if (EXISTS "${MATHJAX_EXE}")
+    set (DOXYGEN_USE_MATHJAX "YES")
+    set (DOXYGEN_MATHJAX "${MATHJAX_DIR}")
+  else()
+    set (DOXYGEN_USE_MATHJAX "NO")
+  endif()
+
+  set (USE_GRAPHVIZ ON CACHE BOOL "Using of Graphviz for diagrams in documentation")
+  if (EXISTS "${GRAPHVIZ_EXE}" AND USE_GRAPHVIZ)
+    set (DOXYGEN_USE_GRAPHVIZ "YES")
+  else()
+    set (DOXYGEN_USE_GRAPHVIZ "NO")
+  endif()
+
+  add_subdirectory(${CMAKE_SOURCE_DIR}/docs/docapi)
 endif()
 
 #-------------------------------------------------------------------------------
