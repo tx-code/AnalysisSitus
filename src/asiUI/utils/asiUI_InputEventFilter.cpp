@@ -47,19 +47,26 @@ asiUI_InputEventFilter::asiUI_InputEventFilter()
   m_pCursor()
 {
   // events that will be filtered out
-  m_TypeOfFilteredEvents.insert(QEvent::Close);
-  m_TypeOfFilteredEvents.insert(QEvent::Shortcut);
-  m_TypeOfFilteredEvents.insert(QEvent::KeyPress);
-  m_TypeOfFilteredEvents.insert(QEvent::KeyRelease);
-  m_TypeOfFilteredEvents.insert(QEvent::ContextMenu);
-  m_TypeOfFilteredEvents.insert(QEvent::MouseMove);
-  m_TypeOfFilteredEvents.insert(QEvent::MouseButtonPress);
-  m_TypeOfFilteredEvents.insert(QEvent::MouseButtonRelease);
-  m_TypeOfFilteredEvents.insert(QEvent::MouseButtonDblClick);
+  for ( int evt = 0; evt < QEvent::User; ++evt )
+    m_TypeOfFilteredEvents.insert( (QEvent::Type) evt );
 
-  // events that will be postponed until the event
-  // filter is detached.
-  m_TypeOfDelayedEvents.insert(QEvent::DeferredDelete);
+  /*
+    You may want to exclude specific event types.
+
+    m_TypeOfFilteredEvents.insert(QEvent::Shortcut);
+    m_TypeOfFilteredEvents.insert(QEvent::KeyPress);
+    m_TypeOfFilteredEvents.insert(QEvent::KeyRelease);
+    m_TypeOfFilteredEvents.insert(QEvent::ContextMenu);
+    m_TypeOfFilteredEvents.insert(QEvent::MouseMove);
+    m_TypeOfFilteredEvents.insert(QEvent::MouseButtonPress);
+    m_TypeOfFilteredEvents.insert(QEvent::MouseButtonRelease);
+    m_TypeOfFilteredEvents.insert(QEvent::MouseButtonDblClick);
+    m_TypeOfFilteredEvents.insert(QEvent::Resize);
+
+    // events that will be postponed until the event
+    // filter is detached.
+    m_TypeOfDelayedEvents.insert(QEvent::DeferredDelete);
+  */
 
   m_pCursor.suspend();
   QApplication::instance()->installEventFilter(this);
