@@ -31,11 +31,6 @@
 // Own include
 #include <asiAlgo_PointWithAttr.h>
 
-// Instantiate for allowed types
-template class asiAlgo_PointWithAttrCloud<gp_XY>;
-
-//-----------------------------------------------------------------------------
-
 template <typename TCoord>
 asiAlgo_PointWithAttrCloud<TCoord>::asiAlgo_PointWithAttrCloud()
 {}
@@ -81,3 +76,8 @@ void asiAlgo_PointWithAttrCloud<TCoord>::AddElement(const asiAlgo_PointWithAttr<
 {
   m_pts.push_back(coord);
 }
+
+//-----------------------------------------------------------------------------
+
+// Instantiate for allowed types
+template class asiAlgo_PointWithAttrCloud<gp_XY>;

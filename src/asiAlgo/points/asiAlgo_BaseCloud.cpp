@@ -49,10 +49,6 @@
 #pragma warning(default : 4702 4701)
 #pragma warning(pop)
 
-// Instantiate for allowed types
-template class asiAlgo_BaseCloud<double>;
-template class asiAlgo_BaseCloud<float>;
-
 //-----------------------------------------------------------------------------
 
 namespace
@@ -453,3 +449,7 @@ bool asiAlgo_BaseCloud<TCoordType>::SaveAs(const char* filename) const
   FILE.close();
   return true;
 }
+
+// Instantiate for allowed types
+template class asiAlgo_BaseCloud<double>;
+template class asiAlgo_BaseCloud<float>;

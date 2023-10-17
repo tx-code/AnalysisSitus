@@ -35,11 +35,6 @@
 #include <gce_MakeLin2d.hxx>
 
 //-----------------------------------------------------------------------------
-
-// Instantiate for allowed types
-template class asiAlgo_QuickHull2d<gp_XY>;
-
-//-----------------------------------------------------------------------------
 // Function: constructor
 //-----------------------------------------------------------------------------
 
@@ -338,3 +333,8 @@ void asiAlgo_QuickHull2d<TPoint>::addNode(PNode* node)
   DRAW_POINT( gp_Pnt( P.X(), P.Y(), 0.0 ), pole, Draw_bleu, Draw_Square )
 #endif
 }
+
+//-----------------------------------------------------------------------------
+
+// Instantiate for allowed types
+template class asiAlgo_QuickHull2d<gp_XY>;
