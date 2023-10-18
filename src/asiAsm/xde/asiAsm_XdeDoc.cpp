@@ -44,13 +44,12 @@
 
 // OpenCascade includes
 #include <APIHeaderSection_MakeHeader.hxx>
-#include <BinTools.hxx>
-#include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
 #include <CDM_MetaData.hxx>
 #include <gp_Quaternion.hxx>
 #include <IGESCAFControl_Reader.hxx>
 #include <Interface_Static.hxx>
+#include <OSD_OpenFile.hxx>
 #include <Quantity_ColorRGBA.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <STEPCAFControl_Writer.hxx>
@@ -98,6 +97,10 @@ using namespace asiAsm::xde;
 #if defined FILE_DEBUG
   #pragma message("===== warning: FILE_DEBUG is enabled")
 #endif
+
+//-----------------------------------------------------------------------------
+
+const static int MIN_BINBREP_SIZEOF = 2048;
 
 //-----------------------------------------------------------------------------
 
@@ -480,32 +483,10 @@ bool Doc::LoadBREP(const TCollection_AsciiString& filename)
   }
 
   TopoDS_Shape shape;
-  BRep_Builder BuildTool;
+  bool res = asiAlgo_Utils::ReadBRep(filename, shape);
 
-  try
-  {
-    if (!IsAscii(filename))
-    {
-      if (!BinTools::Read(shape, filename.ToCString()))
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "BREP reader failed: Error occurred while reading BREP file\n\t'%1'." << filename);
-        return false;
-      }
-    }
-    else
-    {
-      if (!BRepTools::Read(shape, filename.ToCString(), BuildTool))
-      {
-        m_progress.SendLogMessage(LogErr(Normal) << "BREP reader failed: Error occurred while reading BREP file\n\t'%1'." << filename);
-        return false;
-      }
-    }
-  }
-  catch (...)
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "BREP reader failed: An exception was raised during BREP import\n\t'%1'." << filename);
+  if (!res)
     return false;
-  }
 
   // Expand XDE structures for the imported shape
   Handle(XCAFDoc_ShapeTool) ShapeTool = this->GetShapeTool();
@@ -514,7 +495,7 @@ bool Doc::LoadBREP(const TCollection_AsciiString& filename)
 
   TCollection_ExtendedString createdName("");
 
-  createdName = asiAlgo_Utils::GetBaseFilename(filename);
+  createdName = asiAlgo_Utils::Str::BaseFilename(filename, false);
 
   TDataStd_Name::Set(newPartL, createdName);
 
