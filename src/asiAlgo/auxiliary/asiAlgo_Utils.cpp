@@ -65,6 +65,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #include <asiAlgo_IGES.h>
 #include <asiAlgo_FeatureAttrAngle.h>
 #include <asiAlgo_FeatureAttrArea.h>
+#include <asiAlgo_FeatureAttrAxialRange.h>
 #include <asiAlgo_FeatureAttrUVBounds.h>
 #include <asiAlgo_FeatureFaces.h>
 #include <asiAlgo_PLY.h>
@@ -211,8 +212,6 @@ typedef rapidjson::Document::Object    t_jsonObject;
 #ifdef __unix
 #define fopen_s(pFile, filename, mode) ((*(pFile))=fopen((filename), (mode)))
 #endif
-
-#define asiAlgo_RangeLinPrec 0.01
 
 //-----------------------------------------------------------------------------
 
@@ -2538,6 +2537,65 @@ void asiAlgo_Utils::CacheFaceUVBounds(const int                  fid,
     umax = uvAttr->uMax;
     vmin = uvAttr->vMin;
     vmax = uvAttr->vMax;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+double asiAlgo_Utils::ComputeFaceLength(const TopoDS_Face& face,
+                                        const gp_Ax1&      axis,
+                                        const bool         useTriangulation,
+                                        double&            hmin,
+                                        double&            hmax)
+{
+  // Get all vertices here
+  std::vector<gp_XYZ> pts;
+  GetFacePoints(face, true, useTriangulation, pts);
+
+  // Project to axis.
+  double dotMin =  DBL_MAX;
+  double dotMax = -DBL_MAX;
+  for ( const auto& pnt : pts )
+  {
+    const double dot = ( pnt - axis.Location().XYZ() ).Dot( axis.Direction().XYZ() );
+
+    if ( dot < dotMin )
+      dotMin = dot;
+    if ( dot > dotMax )
+      dotMax = dot;
+  }
+
+  hmin = dotMin;
+  hmax = dotMax;
+
+  return Abs(dotMax - dotMin);
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_Utils::CacheFaceRange(const int                  fid,
+                                   const Handle(asiAlgo_AAG)& aag,
+                                   const gp_Ax1&              ax,
+                                   double&                    hmin,
+                                   double&                    hmax)
+{
+  // Access the AAG attribute.
+  Handle(asiAlgo_FeatureAttrAxialRange)
+    rangeAttr = aag->ATTR_NODE<asiAlgo_FeatureAttrAxialRange>(fid);
+
+  // Compute or use the cached values.
+  if ( rangeAttr.IsNull() )
+  {
+    // Compute axial range.
+    ComputeFaceLength(aag->GetFace(fid), ax, false, hmin, hmax);
+
+    // Store in AAG.
+    aag->SetNodeAttribute( fid, new asiAlgo_FeatureAttrAxialRange(hmin, hmax) );
+  }
+  else
+  {
+    hmin = rangeAttr->hMin;
+    hmax = rangeAttr->hMax;
   }
 }
 
@@ -5939,22 +5997,49 @@ bool asiAlgo_Utils::IsOnCylinder(const Handle(Geom_Curve)& curve,
 //-----------------------------------------------------------------------------
 
 void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
+                                  const bool           midPoints,
+                                  const bool           triangPoints,
                                   std::vector<gp_XYZ>& pts)
 {
-  TopTools_IndexedMapOfShape faceVerts;
-  TopExp::MapShapes(face, TopAbs_VERTEX, faceVerts);
-  //
-  for ( int v = 1; v <= faceVerts.Extent(); ++v )
-    pts.push_back(BRep_Tool::Pnt(TopoDS::Vertex(faceVerts(v))).XYZ());
+  // Add triangulation points. Triangulation
+  // also includes the original vertices.
+  if ( triangPoints )
+  {
+    TopLoc_Location loc;
+
+    const Handle(Poly_Triangulation)&
+      poly = BRep_Tool::Triangulation(face, loc);
+
+    if ( !poly.IsNull() )
+    {
+      for ( int iNode = 1; iNode <= poly->NbNodes(); ++iNode )
+      {
+        // Make sure to apply location.
+        gp_XYZ P = poly->Node(iNode).Transformed(loc).XYZ();
+        pts.push_back(P);
+      }
+    }
+  }
+  else
+  {
+    TopTools_IndexedMapOfShape faceVerts;
+    TopExp::MapShapes(face, TopAbs_VERTEX, faceVerts);
+    //
+    for ( int v = 1; v <= faceVerts.Extent(); ++v )
+      pts.push_back(BRep_Tool::Pnt(TopoDS::Vertex(faceVerts(v))).XYZ());
+  }
 
   // Add midpoints from edges.
-  TopTools_IndexedMapOfShape faceEdges;
-  TopExp::MapShapes(face, TopAbs_EDGE, faceEdges);
-  //
-  for ( int e = 1; e <= faceEdges.Extent(); ++e )
+  if ( midPoints )
   {
-    BRepAdaptor_Curve bac(TopoDS::Edge(faceEdges(e)));
-    pts.push_back(bac.Value(( bac.FirstParameter() + bac.LastParameter() ) * 0.5).XYZ());
+    TopTools_IndexedMapOfShape faceEdges;
+    TopExp::MapShapes(face, TopAbs_EDGE, faceEdges);
+    //
+    for (int e = 1; e <= faceEdges.Extent(); ++e)
+    {
+      BRepAdaptor_Curve bac( TopoDS::Edge( faceEdges(e) ) );
+      pts.push_back( bac.Value( (bac.FirstParameter() + bac.LastParameter() ) * 0.5).XYZ() );
+    }
   }
 }
 
@@ -6195,11 +6280,27 @@ bool asiAlgo_Utils::Graphics::GeneratePicture(const TopoDS_Shape&   shape,
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::Range::Contains(const t_range& range1,
-                                    const t_range& range2)
+                                    const t_range& range2,
+                                    const bool     strict,
+                                    const double   tol)
 {
-  if ( (range1.second > range2.second) && (range1.first < range2.first) )
+  if ( strict )
   {
-    return true;
+    if ( (range1.second > range2.second) && (range1.first < range2.first) )
+    {
+      return true;
+    }
+  }
+  else // Not strict.
+  {
+    const bool le = ( Abs(range1.first  - range2.first)  < tol );
+    const bool re = ( Abs(range1.second - range2.second) < tol );
+
+    if ( ((range1.second > range2.second) || re) &&
+         ((range1.first < range2.first)   || le) )
+    {
+      return true;
+    }
   }
 
   return false;

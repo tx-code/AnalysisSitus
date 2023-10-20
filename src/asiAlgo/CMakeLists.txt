@@ -364,6 +364,7 @@ set (features_H_FILES
   features/asiAlgo_ExtractFeaturesResult.h
   features/asiAlgo_FeatureAngleType.h
   features/asiAlgo_FeatureAttrArea.h
+  features/asiAlgo_FeatureAttrAxialRange.h
   features/asiAlgo_FeatureAttrBaseFace.h
   features/asiAlgo_FeatureAttrConvexHull.h
   features/asiAlgo_FeatureAttr.h

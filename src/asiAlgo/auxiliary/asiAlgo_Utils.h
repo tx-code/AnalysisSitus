@@ -96,6 +96,7 @@
 //-----------------------------------------------------------------------------
 
 #define asiAlgo_TooSmallValue 1.0e-4
+#define asiAlgo_RangeLinPrec  0.01
 #define asiAlgo_SlashStr      "/"
 
 //-----------------------------------------------------------------------------
@@ -544,10 +545,15 @@ namespace asiAlgo_Utils
     //! Checks if the first range contains the second one.
     //! \param[in] range1 the first range to check.
     //! \param[in] range2 the second range to check.
+    //! \param[in] strict the Boolean flag indicating whether the range
+    //!                   check should use strict inequality checks.
+    //! \param[in] tol    the tolerance to use for non-strict inequality test.
     //! \return true/false.
     asiAlgo_EXPORT bool
       Contains(const t_range& range1,
-               const t_range& range2);
+               const t_range& range2,
+               const bool     strict,
+               const double   tol = asiAlgo_RangeLinPrec);
 
     //! Checks if the passed ranges are geometrically coincident.
     //! \param[in] range1 the first range to check.
@@ -1346,6 +1352,35 @@ namespace asiAlgo_Utils
                       double&                    umax,
                       double&                    vmin,
                       double&                    vmax);
+
+  //! Computes length of the passed face by projecting its vertices
+  //! to the given axis.
+  //! \param[in]  face the face in question.
+  //! \param[in]  axis the axis in question.
+  //! \param[in]  tris the Boolean flag indicating whether to use triangulation
+  //!                  or just get start/middle/end vertices of each edge.
+  //! \param[out] hmin the lower bound of the axial range.
+  //! \param[out] hmax the upper bound of the axial range.
+  //! \return the computed face length w.r.t. the passed axis.
+  asiAlgo_EXPORT double
+    ComputeFaceLength(const TopoDS_Face& face,
+                      const gp_Ax1&      axis,
+                      const bool         useTriangulation,
+                      double&            hmin,
+                      double&            hmax);
+
+  //! Handles getting face axial range using the AAG as a cache.
+  //! \param[in]  fid  the AAG node id of the face.
+  //! \param[in]  aag  the AAG instance.
+  //! \param[in]  ax   the axis of rotation.
+  //! \param[out] hmin the left bound.
+  //! \param[out] hmax the right bound.
+  asiAlgo_EXPORT void
+    CacheFaceRange(const int                  fid,
+                    const Handle(asiAlgo_AAG)& aag,
+                    const gp_Ax1&              ax,
+                    double&                    hmin,
+                    double&                    hmax);
 
   //! Finds trasformation to move the reference frame `B` so that it is
   //! superimposed with the reference frame `A`.
@@ -2341,10 +2376,14 @@ namespace asiAlgo_Utils
                  ActAPI_PlotterEntry       plotter = nullptr);
 
   //! Returns a set of points presumably lying on the given face.
-  //! \param[in]  face the face in question.
-  //! \param[out] pts  the sampled points on a face.
+  //! \param[in]  face         the face in question.
+  //! \param[in]  midPoints    the Boolean flag indicating whether to add each edge's middle points.
+  //! \param[in]  triangPoints the Boolean flag indicating whether to add face triangulation points.
+  //! \param[out] pts          the sampled points.
   asiAlgo_EXPORT void
     GetFacePoints(const TopoDS_Face&   face,
+                  const bool           midPoints,
+                  const bool           triangPoints,
                   std::vector<gp_XYZ>& pts);
 
   //! Returns a set of points lying on the triangulation of the given face.
