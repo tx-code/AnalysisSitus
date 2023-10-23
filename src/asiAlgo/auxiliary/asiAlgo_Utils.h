@@ -561,7 +561,7 @@ namespace asiAlgo_Utils
     //! \return true/false.
     asiAlgo_EXPORT bool
       Coincide(const t_range& range1,
-                const t_range& range2);
+               const t_range& range2);
 
     //! Checks if the passed `range1` left-overlaps or included into `range2`.
     //! Run this function twice with the swapped arguments to perform full test.
