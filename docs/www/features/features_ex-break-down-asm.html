@@ -52,9 +52,11 @@
 </p>
 
 <pre class="code">
-set workdir [pwd]
+set workdir [pwd] # Set working directory to the current one (where app is launched)
+puts [glob $workdir/*] # List all files in the working directory
 set basename "assy"
-asm-xde-load -model M -filename "$workdir/$basename.STEP"
+set ext "stp"
+asm-xde-load -model M -filename "$workdir/$basename.$ext"
 asm-xde-xcompounds -model M
 asm-xde-browse -model M
 file mkdir "$workdir/$basename"
