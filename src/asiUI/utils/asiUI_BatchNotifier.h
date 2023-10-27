@@ -42,8 +42,6 @@
 //! Notification tool to take care of algorithmic messages.
 class asiUI_BatchNotifier : public ActAPI_IProgressNotifier
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiUI_BatchNotifier, ActAPI_IProgressNotifier)
 
@@ -51,14 +49,15 @@ public:
 
   //! Constructor.
   //! \param[in] logger logger.
-  asiUI_BatchNotifier(const Handle(ActAPI_ILogger)& logger);
+  asiUI_EXPORT
+    asiUI_BatchNotifier(const Handle(ActAPI_ILogger)& logger);
 
 // Thread-unsafe methods:
 public:
 
   //! Cleans up the internal state of the Progress Notifier, so that it
   //! becomes ready to track another job.
-  virtual void
+  asiUI_EXPORT virtual void
     Reset();
 
   //! Initializes the Progress Notifier with the deterministic capacity
@@ -72,61 +71,61 @@ public:
   //! shown to the user).
   //!
   //! \param[in] capacity capacity to set (infinite by default: INT_MAX).
-  virtual void
+  asiUI_EXPORT virtual void
     Init(const int capacity = INT_MAX);
 
   //! Returns the capacity value.
   //! \return requested capacity value.
-  virtual int
+  asiUI_EXPORT virtual int
     Capacity() const;
 
   //! Returns true if the capacity value is infinite.
   //! \return true/false.
-  virtual bool
+  asiUI_EXPORT virtual bool
     IsInfinite() const;
 
   //! Sets message localization key.
   //! \param[in] msgKey localization key to set.
-  virtual void
+  asiUI_EXPORT virtual void
     SetMessageKey(const TCollection_AsciiString& msgKey);
 
   //! Returns message localization key.
   //! \return localization key.
-  virtual TCollection_AsciiString
+  asiUI_EXPORT virtual TCollection_AsciiString
     MessageKey() const;
 
   //! Sets the ultimate progress status for the job.
   //! \param[in] status progress status to set.
-  virtual void
+  asiUI_EXPORT virtual void
     SetProgressStatus(const ActAPI_ProgressStatus status);
 
   //! Returns current progress status.
   //! \return ultimate progress status.
-  virtual ActAPI_ProgressStatus
+  asiUI_EXPORT virtual ActAPI_ProgressStatus
     ProgressStatus() const;
 
   //! Requests job cancellation.
-  virtual void
+  asiUI_EXPORT virtual void
     Cancel();
 
   //! Checks whether the job is being cancelled.
   //! \return true/false.
-  virtual bool
+  asiUI_EXPORT virtual bool
     IsCancelling();
 
   //! Checks whether the job is in running state.
   //! \return true/false.
-  virtual bool
+  asiUI_EXPORT virtual bool
     IsRunning();
 
   //! Checks whether the job is in failed state.
   //! \return true/false.
-  virtual bool
+  asiUI_EXPORT virtual bool
     IsFailed();
 
   //! Returns the currently cumulated progress value.
   //! \return current cumulative progress.
-  virtual int
+  asiUI_EXPORT virtual int
     CurrentProgress() const;
 
 // Methods to be used by parallel algorithms (should be thread-safe):
@@ -134,12 +133,12 @@ public:
 
   //! Thread-safe method used to increment the progress value by the passed step.
   //! \param[in] progressStep progress value to increment by.
-  virtual void
+  asiUI_EXPORT virtual void
     StepProgress(const int progressStep);
 
   //! Thread-safe method used to set the progress value.
   //! \param[in] progress progress value to set.
-  virtual void
+  asiUI_EXPORT virtual void
     SetProgress(const int progress);
 
   //! Thread-safe method used to send a logging message. Normally, this is
@@ -149,7 +148,7 @@ public:
   //! \param[in] severity  message severity (info, warning, error).
   //! \param[in] priority  message priority (normal, high).
   //! \param[in] arguments message arguments (if any).
-  virtual void
+  asiUI_EXPORT virtual void
     SendLogMessage(const std::string&              message,
                    const ActAPI_LogMessageSeverity severity,
                    const ActAPI_LogMessagePriority priority  = Priority_Normal,
@@ -159,7 +158,7 @@ public:
   //! Normally, this is not GUI directly as Progress Notifier is designed for
   //! usage in multi-threaded environment.
   //! \param[in] logStream logging stream.
-  virtual void
+  asiUI_EXPORT virtual void
     SendLogMessage(const ActAPI_LogStream& logStream);
 
 // Concurrent collections:
