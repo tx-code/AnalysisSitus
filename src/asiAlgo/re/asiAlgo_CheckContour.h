@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 06 October 2018
+// Created on: 04 November 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,32 +48,30 @@ class asiAlgo_CheckContour : public ActAPI_IAlgorithm
 public:
 
   //! Ctor.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
   asiAlgo_EXPORT
-    asiAlgo_CheckContour(ActAPI_ProgressEntry progress,
-                         ActAPI_PlotterEntry  plotter);
+    asiAlgo_CheckContour(ActAPI_ProgressEntry progress = nullptr,
+                         ActAPI_PlotterEntry  plotter  = nullptr);
 
 public:
 
   //! Returns true if the passed contour is a single wire. Returns false
   //! otherwise.
-  //! \param[in] contour contour to check.
+  //! \param[in] Contour the contour to check.
   //! \return true/false.
   asiAlgo_EXPORT bool
-    Check_isSingleWire(const TopoDS_Shape& contour) const;
+    IsSingleWire(const TopoDS_Shape& Contour) const;
 
   //! Checks whether the passed contour is connected or not.
-  //! \param[in] contour        contour to check.
-  //! \param[in] doCheckSharing indicates whether to check topological
-  //!                           sharing. If not, the passed precision
-  //!                           is used to check geometric coincidence.
-  //! \param[in] prec           precision to check geometric coincidence.
+  //! \param[in] Contour        the contour to check.
+  //! \param[in] doCheckSharing the Boolean flag that indicates whether to check topological
+  //!                           sharing. If not, the passed precision is used to check
+  //!                           geometric coincidence.
+  //! \param[in] prec           the precision to check geometric coincidence.
   //! \return true/false.
   asiAlgo_EXPORT bool
-    Check_connectedWire(const TopoDS_Shape& contour,
-                        const bool          doCheckSharing,
-                        const double        prec) const;
+    IsConnectedWire(const TopoDS_Shape& Contour,
+                    const bool          doCheckSharing,
+                    const double        prec) const;
 
 };
 

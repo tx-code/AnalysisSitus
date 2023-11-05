@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
-// Created on: 06 October 2018
+// Created on: 04 November 2023
 //-----------------------------------------------------------------------------
-// Copyright (c) 2018-present, Sergey Slyadnev
+// Copyright (c) 2023-present, Sergey Slyadnev
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,40 +41,38 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
 
-#undef DRAW_DEBUG
-#if defined DRAW_DEBUG
-  #pragma message("===== warning: DRAW_DEBUG is enabled")
-#endif
-
 //-----------------------------------------------------------------------------
 
 asiAlgo_CheckContour::asiAlgo_CheckContour(ActAPI_ProgressEntry progress,
                                            ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm(progress, plotter)
-{}
+{
+}
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_CheckContour::Check_isSingleWire(const TopoDS_Shape& contour) const
+bool asiAlgo_CheckContour::IsSingleWire(const TopoDS_Shape& Contour) const
 {
   int nWires = 0;
-  for ( TopExp_Explorer exp(contour, TopAbs_WIRE); exp.More(); exp.Next() )
+  for ( TopExp_Explorer exp(Contour, TopAbs_WIRE); exp.More(); exp.Next() )
+  {
     nWires++;
-
+  }
   if ( nWires > 1 )
+  {
     return false;
-
+  }
   return true;
 }
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_CheckContour::Check_connectedWire(const TopoDS_Shape& contour,
-                                               const bool          doCheckSharing,
-                                               const double        prec) const
+bool asiAlgo_CheckContour::IsConnectedWire(const TopoDS_Shape& Contour,
+                                           const bool          doCheckSharing,
+                                           const double        prec) const
 {
   // Extract wire.
-  TopExp_Explorer exp(contour, TopAbs_WIRE);
+  TopExp_Explorer exp(Contour, TopAbs_WIRE);
   TopoDS_Wire W = TopoDS::Wire( exp.Current() );
 
   // Prepare wire data.
@@ -99,7 +97,7 @@ bool asiAlgo_CheckContour::Check_connectedWire(const TopoDS_Shape& contour,
   else if ( !nEdges )
     return false;
 
-  // Check connectivity.
+  // Check connectivity
   for ( int e = 1; e <= nEdges; ++e )
   {
     const int e_next = ( e == nEdges ? 1 : e + 1 );

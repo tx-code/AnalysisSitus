@@ -49,23 +49,14 @@ enum asiTest_CaseID
   CaseID_ConcatPCurves,
   CaseID_ConvertToC2,
   CaseID_ConvertToBezier,
-
-/* ------------------------------------------------------------------------ */
-
   CaseID_ChangeColor,
   CaseID_DataDictionary,
   CaseID_GenerateFacets,
   CaseID_Utils,
-
-/* ------------------------------------------------------------------------ */
-
   CaseID_Exchange,
   CaseID_ExchangeAstra,
   CaseID_ExchangeMesh,
   CaseID_ExchangeShape,
-
-/* ------------------------------------------------------------------------ */
-
   CaseID_AAG,
   CaseID_BuildQuickHull,
   CaseID_ComputeNegativeVolume,
@@ -76,13 +67,11 @@ enum asiTest_CaseID
   CaseID_RecognizeCavities,
   CaseID_RecognizeConvexHull,
   CaseID_RecognizeHoles,
-
-/* ------------------------------------------------------------------------ */
-
   CaseID_AppSurf,
   CaseID_BuildGordonSurf,
   CaseID_UntrimSurf,
   CaseID_JoinSurf,
+  CaseID_ReapproxContour,
 
 /* ------------------------------------------------------------------------ */
 

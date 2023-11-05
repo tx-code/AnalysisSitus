@@ -62,12 +62,26 @@
 #include <BOPAlgo_Builder.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 
+#include <GC_MakeArcOfCircle.hxx>
+
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
               int                          argc,
               const char**                 argv)
 {
+  gp_Pnt p1 (0, 0, 0);
+  gp_Pnt p2(2, 2, 0);
+  gp_Pnt center(2, 0, 0);
+  gp_Circ circ(gp_Ax2(center, gp_Dir(0, 0, 1)), 2);
+  gp_Circ circ2(gp_Ax2(center, gp_Dir(0, 0, 1)), 3);
+
+  Handle(Geom_TrimmedCurve) anArcOfCircle =  GC_MakeArcOfCircle(circ, p2, p1, true);
+  Handle(Geom_TrimmedCurve) anArcOfCircle2 = GC_MakeArcOfCircle(circ2, p2, p1, false);
+
+  interp->GetPlotter().REDRAW_CURVE("c1", anArcOfCircle,  Color_Red, true);
+  interp->GetPlotter().REDRAW_CURVE("c2", anArcOfCircle2, Color_Red, true);
+
   return TCL_OK;
 }
 

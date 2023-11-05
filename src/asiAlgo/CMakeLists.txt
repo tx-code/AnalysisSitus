@@ -79,7 +79,6 @@ set (aux_H_FILES
   auxiliary/asiAlgo_BVHFacets.h
   auxiliary/asiAlgo_BVHIterator.h
   auxiliary/asiAlgo_CheckClearance.h
-  auxiliary/asiAlgo_CheckContour.h
   auxiliary/asiAlgo_CheckThickness.h
   auxiliary/asiAlgo_CheckToler.h
   auxiliary/asiAlgo_CheckValidity.h
@@ -115,7 +114,6 @@ set (aux_H_FILES
   auxiliary/asiAlgo_PointInPoly.h
   auxiliary/asiAlgo_ProjectPointOnMesh.h
   auxiliary/asiAlgo_QuickHull.h
-  auxiliary/asiAlgo_ReapproxContour.h
   auxiliary/asiAlgo_ResampleADF.h
   auxiliary/asiAlgo_RTCD.h
   auxiliary/asiAlgo_SampleFace.h
@@ -138,7 +136,6 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_BVHFacets.cpp
   auxiliary/asiAlgo_BVHIterator.cpp
   auxiliary/asiAlgo_CheckClearance.cpp
-  auxiliary/asiAlgo_CheckContour.cpp
   auxiliary/asiAlgo_CheckThickness.cpp
   auxiliary/asiAlgo_CheckToler.cpp
   auxiliary/asiAlgo_CheckValidity.cpp
@@ -163,7 +160,6 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_PointInPoly.cpp
   auxiliary/asiAlgo_ProjectPointOnMesh.cpp
   auxiliary/asiAlgo_QuickHull.cpp
-  auxiliary/asiAlgo_ReapproxContour.cpp
   auxiliary/asiAlgo_ResampleADF.cpp
   auxiliary/asiAlgo_RTCD.cpp
   auxiliary/asiAlgo_SampleFace.cpp
@@ -564,16 +560,20 @@ set (points_CPP_FILES
 #------------------------------------------------------------------------------
 
 set (re_H_FILES
+  re/asiAlgo_CheckContour.h
   re/asiAlgo_CheckDeviations.h
   re/asiAlgo_InterpolateSurfMesh.h
   re/asiAlgo_PatchJointAdaptor.h
   re/asiAlgo_PlateOnEdges.h
+  re/asiAlgo_ReapproxContour.h
 )
 set (re_CPP_FILES
+  re/asiAlgo_CheckContour.cpp
   re/asiAlgo_CheckDeviations.cpp
   re/asiAlgo_InterpolateSurfMesh.cpp
   re/asiAlgo_PatchJointAdaptor.cpp
   re/asiAlgo_PlateOnEdges.cpp
+  re/asiAlgo_ReapproxContour.cpp
 )
 
 #------------------------------------------------------------------------------

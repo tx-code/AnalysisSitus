@@ -204,6 +204,13 @@ set (cases_modeling_CPP_FILES
   cases/modeling/asiTest_UntrimSurf.cpp
 )
 
+set (cases_re_H_FILES
+  cases/re/asiTest_ReapproxContour.h
+)
+set (cases_re_CPP_FILES
+  cases/re/asiTest_ReapproxContour.cpp
+)
+
 #------------------------------------------------------------------------------
 # Add sources
 #------------------------------------------------------------------------------
@@ -298,6 +305,16 @@ foreach (FILE ${cases_modeling_CPP_FILES})
   source_group ("Source Files\\Cases\\Modeling" FILES "${FILE}")
 endforeach (FILE)
 
+foreach (FILE ${cases_re_H_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Header Files\\Cases\\RE" FILES "${FILE}")
+endforeach (FILE)
+
+foreach (FILE ${cases_re_CPP_FILES})
+  set (src_files ${src_files} ${FILE})
+  source_group ("Source Files\\Cases\\RE" FILES "${FILE}")
+endforeach (FILE)
+
 #------------------------------------------------------------------------------
 # Resources
 #------------------------------------------------------------------------------
@@ -318,6 +335,7 @@ set (asiTest_include_dir_loc "${CMAKE_CURRENT_SOURCE_DIR};\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/exchange;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/framework;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/modeling;\
+  ${CMAKE_CURRENT_SOURCE_DIR}/cases/re;\
   ${CMAKE_CURRENT_SOURCE_DIR}/cases/inspection;")
 #
 set (asiTest_include_dir ${asiTest_include_dir_loc} PARENT_SCOPE)

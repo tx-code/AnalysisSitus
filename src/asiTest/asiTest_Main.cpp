@@ -52,6 +52,7 @@
 #include <asiTest_JoinSurf.h>
 #include <asiTest_GenerateFacets.h>
 #include <asiTest_KEV.h>
+#include <asiTest_ReapproxContour.h>
 #include <asiTest_RebuildEdge.h>
 #include <asiTest_RecognizeBlends.h>
 #include <asiTest_RecognizeCavities.h>
@@ -141,6 +142,7 @@ int main(int argc, char* argv[])
   TEST_LOAD_MODULE("cmdEngine")
   TEST_LOAD_MODULE("cmdAsm")
   TEST_LOAD_MODULE("cmdTest")
+  TEST_LOAD_MODULE("cmdRE")
 
   // Populate launchers.
   std::cout << "asiTest : main()" << std::endl;
@@ -174,6 +176,7 @@ int main(int argc, char* argv[])
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ChangeColor>           );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ComputeNegativeVolume> );
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_BuildQuickHull>        );
+  CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_ReapproxContour>       );
 
   // Data exchange tests.
   CaseLaunchers.push_back( new asiTestEngine_CaseLauncher<asiTest_Exchange>      );

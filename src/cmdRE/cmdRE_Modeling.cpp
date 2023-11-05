@@ -41,6 +41,7 @@
 #include <asiAlgo_PlateOnEdges.h>
 #include <asiAlgo_ProjectPointOnMesh.h>
 #include <asiAlgo_PurifyCloud.h>
+#include <asiAlgo_ReapproxContour.h>
 #include <asiAlgo_Timer.h>
 #include <asiAlgo_Utils.h>
 
@@ -2286,6 +2287,73 @@ int RE_SmoothenEdges(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int RE_ApproxContour(const Handle(asiTcl_Interp)& interp,
+                     int                          argc,
+                     const char**                 argv)
+{
+  Handle(asiEngine_Model)
+    M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
+
+  // Get part.
+  Handle(asiData_PartNode) partNode = M->GetPartNode();
+
+  // Part shape.
+  TopoDS_Shape partShape = partNode->GetShape();
+
+  // Precision.
+  double prec = 1.;
+  interp->GetKeyValue(argc, argv, "prec", prec);
+
+  // Barrier angle.
+  double angDeg = BarrierAngleDeg;
+  interp->GetKeyValue(argc, argv, "ang", angDeg);
+
+  TopoDS_Shape ContourWire;
+  gp_Pnt       ContourCenter;
+  gp_Vec       ContourOrientation;
+
+  // Reapproximate contour.
+  asiAlgo_ReapproxContour reapproxContour( partShape,
+                                           prec,
+                                           angDeg,
+                                           false,
+                                           interp->GetProgress(),
+                                           interp->HasKeyword(argc, argv, "diagnostics") ? interp->GetPlotter()
+                                                                                         : nullptr );
+  //
+  TopoDS_Wire ReapproxWire;
+  if ( reapproxContour(ReapproxWire, true, true) )
+  {
+    ContourWire        = ReapproxWire;
+    ContourCenter      = reapproxContour.Center();
+    ContourOrientation = reapproxContour.Orientation();
+  }
+
+  if ( interp->HasKeyword(argc, argv, "apply") )
+  {
+    // Modify Data Model.
+    cmdRE::model->OpenCommand();
+    {
+      asiEngine_Part(cmdRE::model).Update(ContourWire);
+    }
+    cmdRE::model->CommitCommand();
+
+    // Update UI.
+    if ( cmdRE::cf && cmdRE::cf->ViewerPart )
+      cmdRE::cf->ViewerPart->PrsMgr()->Actualize(partNode);
+  }
+  else
+  {
+    interp->GetPlotter().REDRAW_SHAPE     ("ContourWire",        ContourWire,   Color_Red, 1., true);
+    interp->GetPlotter().REDRAW_POINT     ("ContourCenter",      ContourCenter, Color_Red);
+    interp->GetPlotter().REDRAW_VECTOR_AT ("ContourOrientation", ContourCenter, ContourOrientation, Color_Red);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
                               const Handle(Standard_Transient)& cmdRE_NotUsed(data))
 {
@@ -2475,4 +2543,12 @@ void cmdRE::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     "\t Enables smoothing for all regular edges.",
     //
     __FILE__, group, RE_SmoothenEdges);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("re-approx-contour",
+    //
+    "re-approx-contour [-prec <precision>] [-ang <barrierAngDeg>] [-apply] [-diagnostics]\n"
+    "\t Reapproximates the presumably polygonal contour with spline curves.",
+    //
+    __FILE__, group, RE_ApproxContour);
 }
