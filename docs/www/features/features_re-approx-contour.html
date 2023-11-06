@@ -63,6 +63,18 @@ Contour reapproximation is a multi-stage process. First, the input contour is se
 To reapproximate a contour, make sure it is loaded into the active part of Analysis Situs. Once there, perform <span class="code-inline"><a href="../commands.html#re-approx-contour">re-approx-contour</a></span> Tcl command.
 </p>
 
+<p>
+You can make segmentation explicit in the viewer by passing the optional <span class="code-inline">-diagnostics</span> key to the command. The green ball glyphs depict the inserted breakpoints where a new contour gets its vertices.
+</p>
+
+<div align="center"><img src="../imgs/re-approx-contour-segments.png"/></div>
+
+<p>
+For better control over segmentation, use the optional <span class="code-inline">-ang</span> key followed by the barrier angle specified in degrees.
+</p>
+
+<div align="center"><img src="../imgs/re-approx-contour-segments-ang50.png"/></div>
+
 <!-- [END] contents -->
 </div>
 <br/>
