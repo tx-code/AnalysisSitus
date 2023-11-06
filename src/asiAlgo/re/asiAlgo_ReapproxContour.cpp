@@ -53,8 +53,9 @@
 #include <TopoDS.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
-#define ToDeg(Rad) Rad*180.0/M_PI
-#define ToRad(Rad) Rad*M_PI/180.0
+#define ToDeg(Rad)   Rad*180.0/M_PI
+#define ToRad(Rad)   Rad*M_PI/180.0
+#define ConfusionTol 0.15
 
 int ranged(const int I, const int NUM)
 {
@@ -209,26 +210,26 @@ bool asiAlgo_ReapproxContour::doSegmentation(NCollection_Sequence<Segment>& Segm
    * ================================== */
 
   ///
-  std::vector<gp_XYZ> initPs;
-  for ( TColgp_SequenceOfPnt::Iterator it(pts); it.More(); it.Next() )
-  {
-    initPs.push_back( it.Value().XYZ() );
-  }
-  //
-  m_plotter.REDRAW_POINTS("pts", initPs, Color_Orange);
+  //std::vector<gp_XYZ> initPs;
+  //for ( TColgp_SequenceOfPnt::Iterator it(pts); it.More(); it.Next() )
+  //{
+  //  initPs.push_back( it.Value().XYZ() );
+  //}
+  ////
+  //m_plotter.REDRAW_POINTS("pts", initPs, Color_Orange);
   ///
 
   TColgp_SequenceOfPnt refined_pts;
   this->makeCoarser(pts, m_fPrec, refined_pts);
 
   ///
-  std::vector<gp_XYZ> Ps;
-  for ( TColgp_SequenceOfPnt::Iterator it(refined_pts); it.More(); it.Next() )
-  {
-    Ps.push_back( it.Value().XYZ() );
-  }
-  //
-  m_plotter.REDRAW_POINTS("refined_pts", Ps, Color_Red);
+  //std::vector<gp_XYZ> Ps;
+  //for ( TColgp_SequenceOfPnt::Iterator it(refined_pts); it.More(); it.Next() )
+  //{
+  //  Ps.push_back( it.Value().XYZ() );
+  //}
+  ////
+  //m_plotter.REDRAW_POINTS("refined_pts", Ps, Color_Red);
   ///
 
   /* ===========================================================

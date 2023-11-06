@@ -105,3 +105,10 @@ outcome asiTest_ReapproxContour::test008(const int funcID, const bool)
 {
   return runTestScript(funcID, "re/approx-contour_08.tcl");
 }
+
+//-----------------------------------------------------------------------------
+
+outcome asiTest_ReapproxContour::test009(const int funcID, const bool)
+{
+  return runTestScript(funcID, "re/approx-contour_09.tcl");
+}

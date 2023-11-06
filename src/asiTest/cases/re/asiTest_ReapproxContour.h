@@ -97,6 +97,7 @@ private:
   static outcome test006(const int funcID, const bool);
   static outcome test007(const int funcID, const bool);
   static outcome test008(const int funcID, const bool);
+  static outcome test009(const int funcID, const bool);
 
 };
 
