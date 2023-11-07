@@ -1743,9 +1743,6 @@ int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
     return TCL_ERROR;
   }
 
-  // Check if the "plain" export mode is requested.
-  const bool isPlain = interp->HasKeyword(argc, argv, "plain");
-
   // BOM filename.
   std::string bomFilename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
   bomFilename += "bom.csv";
@@ -1753,78 +1750,68 @@ int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
   // Filenames used for unique parts.
   NCollection_DataMap<PartId, std::string, PartId::Hasher> partFilenames;
 
-  // Export.
-  if ( isPlain )
+  // Get unique parts.
+  PartIds pids;
+  xdeDoc->GetParts(pids);
+
+  // Count parts.
+  NCollection_DataMap<PartId, int, PartId::Hasher> partQuantities;
+  xdeDoc->CountParts(partQuantities);
+
+  // Create file for BOM output.
+  std::ofstream bomFile;
+  bomFile.open(bomFilename, std::ios::out | std::ios::trunc);
+
+  // Iterate over the unique parts.
+  for ( PartIds::Iterator pit(pids); pit.More(); pit.Next() )
   {
-    // Get unique parts.
-    PartIds pids;
-    xdeDoc->GetParts(pids);
+    int nextUniqueId = 1;
 
-    // Count parts.
-    NCollection_DataMap<PartId, int, PartId::Hasher> partQuantities;
-    xdeDoc->CountParts(partQuantities);
+    // Next part.
+    const PartId& pid       = pit.Value();
+    TopoDS_Shape  partShape = xdeDoc->GetShape(pid);
+    t_extString   partName  = xdeDoc->GetPartName(pid);
 
-    // Create file for BOM output.
-    std::ofstream bomFile;
-    bomFile.open(bomFilename, std::ios::out | std::ios::trunc);
+    // Remove unacceptable characters.
+    partName.RemoveAll( '<' );
+    partName.RemoveAll( '>' );
 
-    // Iterate over the unique parts.
-    for ( PartIds::Iterator pit(pids); pit.More(); pit.Next() )
+    // Prepare a filename.
+    std::string filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
+    filename += ExtStr2StdStr(partName);
+    filename += ".stp";
+
+    // Make sure that such a file does not exist yet.
+    while ( QFile::exists( filename.c_str() ) )
     {
-      int nextUniqueId = 1;
+      interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Filename '%1' has been already used."
+                                                            << filename);
 
-      // Next part.
-      const PartId& pid       = pit.Value();
-      TopoDS_Shape  partShape = xdeDoc->GetShape(pid);
-      t_extString   partName  = xdeDoc->GetPartName(pid);
-
-      // Remove unacceptable characters.
-      partName.RemoveAll( '<' );
-      partName.RemoveAll( '>' );
-
-      // Prepare a filename.
-      std::string filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
+      // Recompose the filename with unique index.
+      filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
       filename += ExtStr2StdStr(partName);
+      filename += asiAlgo_Utils::Str::ToString(nextUniqueId++);
       filename += ".stp";
-
-      // Make sure that such a file does not exist yet.
-      while ( QFile::exists( filename.c_str() ) )
-      {
-        interp->GetProgress().SendLogMessage(LogWarn(Normal) << "Filename '%1' has been already used."
-                                                             << filename);
-
-        // Recompose the filename with unique index.
-        filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
-        filename += ExtStr2StdStr(partName);
-        filename += asiAlgo_Utils::Str::ToString(nextUniqueId++);
-        filename += ".stp";
-      }
-
-      // Write STEP file.
-      asiAlgo_STEP stepWriter( interp->GetProgress() );
-      //
-      if ( !stepWriter.Write( partShape, filename.c_str() ) )
-      {
-        interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot export part %1 to '%2'."
-                                                            << pid << filename);
-        continue;
-      }
-
-      // Keep track of filenames.
-      partFilenames.Bind( pid, asiAlgo_Utils::Str::BaseFilename(filename, true) );
-
-      // Add to the BOM file.
-      bomFile << pid.ToString() << ", " << partFilenames(pid) << ", " << partQuantities(pid) << "\n";
     }
 
-    bomFile.close();
+    // Write STEP file.
+    asiAlgo_STEP stepWriter( interp->GetProgress() );
+    //
+    if ( !stepWriter.Write( partShape, filename.c_str() ) )
+    {
+      interp->GetProgress().SendLogMessage(LogErr(Normal) << "Cannot export part %1 to '%2'."
+                                                          << pid << filename);
+      continue;
+    }
+
+    // Keep track of filenames.
+    partFilenames.Bind( pid, asiAlgo_Utils::Str::BaseFilename(filename, true) );
+
+    // Add to the BOM file.
+    bomFile << pid.ToString() << ", " << partFilenames(pid) << ", " << partQuantities(pid) << "\n";
   }
-  else
-  {
-    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Please, pass the '-plain' keyword as subdirectories for "
-                                                           "assembly unloading are not currently supported.");
-    return TCL_ERROR;
-  }
+
+  bomFile.close();
 
   return TCL_OK;
 }
@@ -2069,13 +2056,12 @@ void cmdAsm::Commands_XDE(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("asm-xde-unload",
     //
-    "asm-xde-unload -model <M> -path <dir> [-plain]\n"
+    "asm-xde-unload -model <M> -path <dir>\n"
     "\n"
-    "\t Unloads all parts and (optionally) subassemblies of the model <M>\n"
-    "\t to the directory specified via the '-path' keyword. If the '-plain'\n"
-    "\t keyword is specified, then all unique parts will be dumped as a plain\n"
-    "\t list of CAD files without any intermediate subdirectories for the\n"
-    "\t assembly components.\n"
+    "\t Unloads all unique parts from the model <M> to the directory specified\n"
+    "\t with the '-path' keyword. Together with a plain list of parts, a BOM\n"
+    "\t file (bom.csv) is generated in the CSV format to indicate how many occurrences\n"
+    "\t each extracted part has got."
     "\n"
     "\t The default format for the exported part files is STEP.",
     //

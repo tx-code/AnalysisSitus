@@ -48,19 +48,36 @@
 <h1>Break down assembly onto parts</h1>
 
 <p>
+Analysis Situs is meant for use with individual parts rather than assemblies, but it provides a <a href="./features_asm-xde-document.html">wide set of commands</a> to bridge that gap. One frequently encountering demand is to extract all unique parts from an assembly
+</p>
+
+<div align="center"><a href="../imgs/asm/ex-unload-parts_01.png"><img src="../imgs/asm/ex-unload-parts_01.png" width="60%"/></a></div>
+
+<p>
   To break down an assembly to a plain list of parts with BOM (bill of materials), use the following script:
 </p>
 
 <pre class="code">
-set workdir [pwd] # Set working directory to the current one (where app is launched)
-puts [glob $workdir/*] # List all files in the working directory
+# Set working directory to the current one (where app is launched)
+set workdir [pwd]
+
+# List all files in the working directory
+puts [glob $workdir/*]
+
+# Set working variables.
 set basename "assy"
 set ext "stp"
+
+# Load the assembly, expand all compound parts and view.
 asm-xde-load -model M -filename "$workdir/$basename.$ext"
 asm-xde-xcompounds -model M
 asm-xde-browse -model M
+
+# Create the target directory for dump.
 file mkdir "$workdir/$basename"
-asm-xde-unload -model M -path "$workdir/$basename" -plain
+
+# Finally, unload all unique parts.
+asm-xde-unload -model M -path "$workdir/$basename"
 </pre>
 
 <!-- [END] contents -->
