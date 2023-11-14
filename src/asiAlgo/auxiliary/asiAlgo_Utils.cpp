@@ -1955,6 +1955,17 @@ bool asiAlgo_Utils::IsCircular(const TopoDS_Edge& edge)
 
 //-----------------------------------------------------------------------------
 
+bool asiAlgo_Utils::IsCircular(const TopoDS_Edge& edge,
+                               gp_Circ&           circ)
+{
+  double f, l;
+  Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+
+  return IsCircular(curve, circ);
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_Utils::IsCircular(const Handle(Geom_Curve)& curve)
 {
   gp_Circ circ;

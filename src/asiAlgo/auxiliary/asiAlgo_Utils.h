@@ -1095,6 +1095,14 @@ namespace asiAlgo_Utils
   asiAlgo_EXPORT bool
     IsCircular(const TopoDS_Edge& edge);
 
+  //! Checks if the passed edge is circular and returns the circle props.
+  //! \param[in]  edge the edge to check.
+  //! \param[out] circ the extracted circle.
+  //! \return true/false.
+  asiAlgo_EXPORT bool
+    IsCircular(const TopoDS_Edge& edge,
+               gp_Circ&           circ);
+
   //! Checks if the passed curve is circular.
   //! \param[in] curve curve to check.
   //! \return true/false.
