@@ -139,18 +139,18 @@ namespace asiAlgo_PartBodyTypeUtils
   //! Checks if the passed enum encodes a tube.
   //! \param[in] type object type to check.
   //! \return true/false.
-  inline bool IsTube(const asiAlgo_PartBodyType type)
+  inline bool IsProfile(const asiAlgo_PartBodyType type)
   {
     switch ( type )
     {
       case PartBodyType_RectTube:
       case PartBodyType_CylTube:
+      case PartBodyType_OtherTube:
+      case PartBodyType_Profile:
         return true;
       case PartBodyType_Unrecognized:
       case PartBodyType_FlatShape:
       case PartBodyType_FoldedSheetMetal:
-      case PartBodyType_OtherTube:
-      case PartBodyType_Profile:
       case PartBodyType_CncMilling:
       case PartBodyType_CncLathe:
       case PartBodyType_CncLatheMilling:
