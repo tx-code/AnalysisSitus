@@ -94,7 +94,7 @@ qt5_use_modules(asiTestEngine Core)
 # Installation
 #------------------------------------------------------------------------------
 
-if (WIN32)
+if (NOT BUILD_ALGO_ONLY)
   install (TARGETS asiTestEngine CONFIGURATIONS Release        RUNTIME DESTINATION bin  LIBRARY DESTINATION bin  COMPONENT Runtime)
   install (TARGETS asiTestEngine CONFIGURATIONS RelWithDebInfo RUNTIME DESTINATION bini LIBRARY DESTINATION bini COMPONENT Runtime)
   install (TARGETS asiTestEngine CONFIGURATIONS Debug          RUNTIME DESTINATION bind LIBRARY DESTINATION bind COMPONENT Runtime)
