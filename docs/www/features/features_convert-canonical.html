@@ -63,6 +63,20 @@ Analysis Situs is capable of converting freeform geometries to analytical form w
 
 <div align="center"><a href="../imgs/canrec_02.png"><img src="../imgs/canrec_02.png" width="60%"/></a></div>
 
+<p>
+  Canonical conversion has no effect on a part's topology. This operator only replaces freeform curves and surfaces with analytical curves and surfaces if such conversion does not change the input shape too much (i.e., it can be done within the specified tolerance). The following example shows a flat hem on a sheet metal part designed as a spline surface:
+</p>
+
+<div align="center"><a href="../imgs/convert-canonical-sm.png"><img src="../imgs/convert-canonical-sm.png" width="60%"/></a></div>
+
+<p>
+  In the example above, a plain cylinder would be a better surface type. Otherwise, such a part may exhibit inconsistent or incorrect behavior in later workflows, such as not being unfolded and having a limited scope of possible shape editing API.
+</p>
+
+<p>
+  The canonical conversion operator can substitute freetype surfaces with simple types of geometry (spheres, cylinders, cones, etc.) as well as with composite types, such as <a href="https://quaoar.su/blog/page/on-recognizing-canonical-surfaces-linear-extrusions">linear extrusion surfaces</a>.
+</p>
+
 <p class="note">
   Read more about canonical conversion and similar algorithms in the <a href="https://quaoar.su/blog/page/modification-and-modifier-tools-of-opencascade">Manifold Geometry</a> blog.
 </p>

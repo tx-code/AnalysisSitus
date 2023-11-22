@@ -71,6 +71,7 @@
 #define asiPropName_Radius                                "radius"
 #define asiPropName_Angle                                 "angle"
 #define asiPropName_Segments                              "segments"
+#define asiPropName_FaceIds                               "faceIds"
 
 // JSON properties
 #define asiPropName_ExtrasCanRecSummary                   "canrecSummary"
