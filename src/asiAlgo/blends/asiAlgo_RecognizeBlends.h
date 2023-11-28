@@ -88,6 +88,13 @@ public:
   asiAlgo_EXPORT void
     SetAllowLinearExtrusions(const bool on);
 
+  //! Sets the collection of face IDs to exclude from recognition. Use this
+  //! method to pass any already recognized features, e.g., drilled holes,
+  //! engravings, etc.
+  //! \param[in] excluded the face IDs to set.
+  asiAlgo_EXPORT void
+    SetExcludedFaces(const asiAlgo_Feature& excluded);
+
   //! Performs recognition of fillets for the entire model.
   //! \param[in] radius radius of interest.
   //! \return true in case of success, false -- otherwise.
@@ -115,8 +122,9 @@ public:
 
 protected:
 
-  bool m_bAllowCones;         //!< Whether to allow conical EBFs.
-  bool m_bAllowLinExtrusions; //!< Whether to allow linear extrusion EBFs.
+  bool            m_bAllowCones;         //!< Whether to allow conical EBFs.
+  bool            m_bAllowLinExtrusions; //!< Whether to allow linear extrusion EBFs.
+  asiAlgo_Feature m_excluded;            //!< Excluded faces.
 
 };
 

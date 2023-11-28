@@ -44,7 +44,6 @@
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
 
-
 //-----------------------------------------------------------------------------
 
 namespace
@@ -164,6 +163,13 @@ namespace asiAlgo_AAGIterationRule
 
   public:
 
+    //! Sets the faces to exclude from processing.
+    //! \param[in] excluded the face IDs to exclude.
+    void SetExcludedFaces(const asiAlgo_Feature& excluded)
+    {
+      m_excluded = excluded;
+    }
+
     //! Enables blocking mode of the rule.
     void SetBlockingOn()
     {
@@ -189,6 +195,9 @@ namespace asiAlgo_AAGIterationRule
     bool IsBlocking(const int asiAlgo_NotUsed(current),
                     const int next)
     {
+      if ( m_excluded.Contains(next) )
+        return false;
+
       // If there are some nodal attributes for this face, we check whether
       // it has already been recognized as a blend candidate.
       if ( m_aag->HasNodeAttributes(next) )
@@ -214,6 +223,7 @@ namespace asiAlgo_AAGIterationRule
     Handle(asiAlgo_RecognizeEBF) m_localReco;       //!< Local recognizer.
     double                       m_fMaxRadius;      //!< Max allowed radius.
     bool                         m_bBlockingModeOn; //!< Blocking mode.
+    asiAlgo_Feature              m_excluded;        //!< Excluded faces.
   };
 
   //! This rule recognizes vertex-blend faces (VBFs).
@@ -238,6 +248,13 @@ namespace asiAlgo_AAGIterationRule
     }
 
   public:
+
+    //! Sets the faces to exclude from processing.
+    //! \param[in] excluded the face IDs to exclude.
+    void SetExcludedFaces(const asiAlgo_Feature& excluded)
+    {
+      m_excluded = excluded;
+    }
 
     //! Enables blocking mode of the rule.
     void SetBlockingOn()
@@ -264,6 +281,9 @@ namespace asiAlgo_AAGIterationRule
     bool IsBlocking(const int asiAlgo_NotUsed(current),
                     const int next)
     {
+      if ( m_excluded.Contains(next) )
+        return false;
+
       // Try recognizing the face even if it has been already attributed.
       // At this stage, we can precise EBFs as VBFs.
       if ( !m_localReco->Perform(next) )
@@ -277,6 +297,7 @@ namespace asiAlgo_AAGIterationRule
     Handle(asiAlgo_AAG)          m_aag;             //!< AAG instance.
     Handle(asiAlgo_RecognizeVBF) m_localReco;       //!< Local recognizer.
     bool                         m_bBlockingModeOn; //!< Blocking mode.
+    asiAlgo_Feature              m_excluded;        //!< Excluded faces.
   };
 
   //! This rule converts terminating edges to cross edges if the terminating
@@ -411,6 +432,13 @@ void asiAlgo_RecognizeBlends::SetAllowLinearExtrusions(const bool on)
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_RecognizeBlends::SetExcludedFaces(const asiAlgo_Feature& excluded)
+{
+  m_excluded = excluded;
+}
+
+//-----------------------------------------------------------------------------
+
 bool asiAlgo_RecognizeBlends::Perform(const double radius)
 {
   /* ===========================================
@@ -451,6 +479,9 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
   // by neighbors.
   ebfRule->SetBlockingOff();
 
+  // Exclude specific faces.
+  ebfRule->SetExcludedFaces(m_excluded);
+
   // Select seed face from those existing on the stack.
   asiAlgo_AdjacencyMx::t_mx::Iterator mxIt(m_aag->GetNeighborhood().mx);
   const int seedFaceId = mxIt.Key();
@@ -477,6 +508,9 @@ bool asiAlgo_RecognizeBlends::Perform(const double radius)
   // Rule is used in non-blocking mode to allow full traverse of the model
   // by neighbors.
   vbfRule->SetBlockingOff();
+
+  // Exclude specific faces.
+  vbfRule->SetExcludedFaces(m_excluded);
 
   // Prepare neighborhood iterator with customized propagation rule.
   asiAlgo_AAGNeighborsIterator<asiAlgo_AAGIterationRule::RecognizeVertexBlends>
