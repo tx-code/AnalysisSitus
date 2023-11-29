@@ -59,7 +59,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
 
   // Initialize Node
   iv_n->Init();
-  iv_n->SetName("Imperative Viewer");
+  iv_n->SetName("Geometric Set");
   iv_n->SetUserFlags(NodeFlag_IsStructural);
 
   // Create underlying Points 2D
@@ -160,7 +160,7 @@ Handle(asiData_IVNode) asiEngine_IV::Create_IV()
     // Initialize
     Handle(asiData_IVTopoNode) iv_topo_n = Handle(asiData_IVTopoNode)::DownCast(iv_topo_base);
     iv_topo_n->Init();
-    iv_topo_n->SetName("Topology");
+    iv_topo_n->SetName("Shapes");
     iv_topo_n->SetUserFlags(NodeFlag_IsStructural);
 
     // Add as child
