@@ -170,14 +170,32 @@ namespace
     }
     else
     {
-      // Put faces in a compound.
-      TopoDS_Compound comp;
-      BRep_Builder().MakeCompound(comp);
+      // Put faces in a shell.
+      TopoDS_Shell shell;
+      BRep_Builder().MakeShell(shell);
       //
       for ( int k = 1; k <= faces.Extent(); ++k )
-        BRep_Builder().Add( comp, faces(k) );
+        BRep_Builder().Add( shell, faces(k) );
       //
-      oneShape = comp;
+      oneShape = shell;
+
+      // Check if the shell is valid by checking how many connected components it's going to yield.
+      Handle(asiAlgo_AAG) shell_G = new asiAlgo_AAG(shell, true);
+      //
+      const int numCC = shell_G->GetConnectedComponentsNb();
+
+      // If there's no single connected component, let's drop everything into a compound.
+      if ( numCC != 1 )
+      {
+        // Put faces in a compound.
+        TopoDS_Compound comp;
+        BRep_Builder().MakeCompound(comp);
+        //
+        for ( int k = 1; k <= faces.Extent(); ++k )
+          BRep_Builder().Add( comp, faces(k) );
+        //
+        oneShape = comp;
+      }
     }
 
     return oneShape;
