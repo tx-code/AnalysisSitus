@@ -1540,18 +1540,26 @@ namespace asiAlgo_Utils
         TopoDS_Shape&       result);
 
   //! Performs "same domain" expansion on faces and edges.
-  //! \param[in,out] shape shape to modify.
+  //! \param[in,out] shape    the shape to modify.
+  //! \param[in]     linToler the linear maximization tolerance.
+  //! \param[in]     angToler the angular maximization tolerance.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
-    MaximizeFaces(TopoDS_Shape& shape);
+    MaximizeFaces(TopoDS_Shape& shape,
+                  const double  linToler = Precision::Confusion(),
+                  const double  angToler = 0.1);
 
   //! Performs "same domain" expansion on faces and edges.
-  //! \param[in,out] shape   shape to modify.
-  //! \param[out]    history modification history.
+  //! \param[in,out] shape    the shape to modify.
+  //! \param[out]    history  the modification history.
+  //! \param[in]     linToler the linear maximization tolerance.
+  //! \param[in]     angToler the angular maximization tolerance.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     MaximizeFaces(TopoDS_Shape&              shape,
-                  Handle(BRepTools_History)& history);
+                  Handle(BRepTools_History)& history,
+                  const double               linToler = Precision::Confusion(),
+                  const double               angToler = 0.1);
 
   //! Converts the passed shape to a canonical form.
   //! \param[in,out] shape         the shape to convert.

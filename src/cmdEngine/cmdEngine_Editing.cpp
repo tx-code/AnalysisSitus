@@ -3185,11 +3185,6 @@ int ENGINE_MaximizeFaces(const Handle(asiTcl_Interp)& interp,
                          int                          argc,
                          const char**                 argv)
 {
-  if ( argc != 1 )
-  {
-    return interp->ErrorOnWrongArgs(argv[0]);
-  }
-
   // Get Part Node.
   Handle(asiData_PartNode) partNode = cmdEngine::model->GetPartNode();
   //
@@ -3201,10 +3196,20 @@ int ENGINE_MaximizeFaces(const Handle(asiTcl_Interp)& interp,
   //
   TopoDS_Shape shape = partNode->GetShape();
 
+  // Get the linear tolerance.
+  double linToler = Precision::Confusion();
+  //
+  interp->GetKeyValue(argc, argv, "linTol", linToler);
+
+  // Get the angular tolerance.
+  double angToler = 0.1;
+  //
+  interp->GetKeyValue(argc, argv, "angTol", angToler);
+
   // Modify shape.
   cmdEngine::model->OpenCommand();
   {
-    if ( !asiAlgo_Utils::MaximizeFaces(shape) )
+    if ( !asiAlgo_Utils::MaximizeFaces(shape, linToler, angToler) )
     {
       interp->GetProgress().SendLogMessage(LogErr(Normal) << "Face maximization failed.");
       //
@@ -4564,7 +4569,7 @@ void cmdEngine::Commands_Editing(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("maximize-faces",
     //
-    "maximize-faces\n"
+    "maximize-faces [-linTol <l>] [-angTol <a>]\n"
     "\t Maximizes canonical faces.",
     //
     __FILE__, group, ENGINE_MaximizeFaces);

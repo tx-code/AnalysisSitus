@@ -3180,21 +3180,27 @@ bool asiAlgo_Utils::Sew(const TopoDS_Shape& shape,
 
 //-----------------------------------------------------------------------------
 
-bool asiAlgo_Utils::MaximizeFaces(TopoDS_Shape& shape)
+bool asiAlgo_Utils::MaximizeFaces(TopoDS_Shape& shape,
+                                  const double  linToler,
+                                  const double  angToler)
 {
   Handle(BRepTools_History) history;
-  return MaximizeFaces(shape, history);
+  return MaximizeFaces(shape, history, linToler, angToler);
 }
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_Utils::MaximizeFaces(TopoDS_Shape&              shape,
-                                  Handle(BRepTools_History)& history)
+                                  Handle(BRepTools_History)& history,
+                                  const double               linToler,
+                                  const double               angToler)
 {
   ShapeUpgrade_UnifySameDomain Unify(shape);
   try
   {
-    Unify.SetAngularTolerance(1e-1);
+    Unify.SetLinearTolerance  (linToler);
+    Unify.SetAngularTolerance (angToler);
+    //
     Unify.Build();
   }
   catch ( ... )
