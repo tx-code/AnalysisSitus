@@ -48,6 +48,12 @@
 // STD includes
 #include <fstream>
 
+#ifndef _WIN32
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif // !_WIN32
+
+
 // Initialize static variable used to store current temp dir name.
 std::string asiTestEngine_Launcher::current_temp_dir;
 
@@ -91,6 +97,13 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
       *out << "\tFailed to create directory: " << fullDirName.c_str() << "\n";
     return false;
   }
+#else
+  if ( mkdir( fullDirName.c_str(), S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
+  {
+    if ( out )
+      *out << "\tFailed to create directory: " << fullDirName.c_str() << "\n";
+    return false;
+  }
 #endif
 
   // TODO: for Windows only (!!!)
@@ -104,9 +117,10 @@ bool asiTestEngine_Launcher::Launch(std::ostream* out) const
     return false;
   }
 #else
+  if ( mkdir( current_temp_dir_files().c_str(), S_IRWXU | S_IRWXG | S_IRWXO ) == -1 )
   {
     if ( out )
-      *out << "\tTests are not yet supported on linux." << "\n";
+      *out << "\tFailed to create directory: " << current_temp_dir_files().c_str() << "\n";
 
     return false;
   }

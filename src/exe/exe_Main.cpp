@@ -449,7 +449,12 @@ int main(int argc, char** argv)
     std::cout << "Looking for plugins at "
               << pluginDirStr.ToCString() << "..." << std::endl;
     //
-    QStringList cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+	QStringList cmdLibs;
+#if defined WIN32
+    cmdLibs = pluginDir.entryList(QStringList() << "*.dll", QDir::Files);
+#else
+    cmdLibs = pluginDir.entryList(QStringList() << "*.so", QDir::Files);
+#endif
     //
     foreach ( QString cmdLib, cmdLibs )
     {
