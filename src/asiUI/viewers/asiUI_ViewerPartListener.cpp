@@ -94,6 +94,8 @@
   using namespace mobius;
 #endif
 
+//-----------------------------------------------------------------------------
+
 namespace
 {
 #if defined USE_MOBIUS
@@ -155,29 +157,45 @@ namespace
 
 #endif
 
-  //! Prepares one shape out of the passed collection of faces. Is there
-  //! is only one face passed, it will be returned without any processing.
-  //! For multiple faces, a compound is constructed and returned.
-  //! \param[in] faces the faces to process.
+  //! Prepares one shape out of the passed collection of subshapes. Is there
+  //! is only one subshape passed, it will be returned without any changes.
+  //! For multiple subshapes, a compound is constructed and returned. This
+  //! function also tries to guess if the user wanted to keep subshapes in
+  //! meaningful groups, e.g., faces in a shell. If so, instead of a compound,
+  //! this function might return a more appropriate shape type.
+  //!
+  //! \param[in] subshapes the subshapes to collect into a single shape.
   //! \return one shape.
-  TopoDS_Shape FacesAsOneShape(const TopTools_IndexedMapOfShape& faces)
+  TopoDS_Shape SubShapesAsOneShape(const TopTools_IndexedMapOfShape& subshapes)
   {
     TopoDS_Shape oneShape;
     //
-    if ( faces.Extent() == 1 )
+    if ( subshapes.Extent() == 1 )
     {
-      oneShape = faces(1);
+      return subshapes(1);
     }
-    else
+
+    // Check if all passed subshapes are of the same type.
+    std::unordered_set<TopAbs_ShapeEnum> types;
+    //
+    for ( int k = 1; k <= subshapes.Extent(); ++k )
+    {
+      types.insert( { subshapes(k).ShapeType() } );
+    }
+    //
+    const bool isSameType   = (types.size() == 1);
+    const bool isFaceSet    = isSameType && ( types.find(TopAbs_FACE) != types.end() );
+    bool       makeCompound = true;
+
+    // Special case for face sets.
+    if ( isFaceSet )
     {
       // Put faces in a shell.
       TopoDS_Shell shell;
       BRep_Builder().MakeShell(shell);
       //
-      for ( int k = 1; k <= faces.Extent(); ++k )
-        BRep_Builder().Add( shell, faces(k) );
-      //
-      oneShape = shell;
+      for ( int k = 1; k <= subshapes.Extent(); ++k )
+        BRep_Builder().Add( shell, subshapes(k) );
 
       // Check if the shell is valid by checking how many connected components it's going to yield.
       Handle(asiAlgo_AAG) shell_G = new asiAlgo_AAG(shell, true);
@@ -185,17 +203,24 @@ namespace
       const int numCC = shell_G->GetConnectedComponentsNb();
 
       // If there's no single connected component, let's drop everything into a compound.
-      if ( numCC != 1 )
+      if ( numCC == 1 )
       {
-        // Put faces in a compound.
-        TopoDS_Compound comp;
-        BRep_Builder().MakeCompound(comp);
-        //
-        for ( int k = 1; k <= faces.Extent(); ++k )
-          BRep_Builder().Add( comp, faces(k) );
-        //
-        oneShape = comp;
+        makeCompound = false;
+        oneShape     = shell;
       }
+    }
+
+    // Common case.
+    if ( makeCompound )
+    {
+      // Put subshapes in a compound.
+      TopoDS_Compound comp;
+      BRep_Builder().MakeCompound(comp);
+      //
+      for ( int k = 1; k <= subshapes.Extent(); ++k )
+        BRep_Builder().Add( comp, subshapes(k) );
+      //
+      oneShape = comp;
     }
 
     return oneShape;
@@ -207,7 +232,7 @@ namespace
   Handle(Poly_Triangulation) FacesAsOneMesh(const TopTools_IndexedMapOfShape& faces)
   {
     asiAlgo_MeshMerge::t_faceElems history;
-    return asiAlgo_MeshMerge::PutTogether( FacesAsOneShape(faces), history );
+    return asiAlgo_MeshMerge::PutTogether( SubShapesAsOneShape(faces), history );
   }
 }
 
@@ -761,7 +786,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
       return;
 
     // Prepare a shape to dump
-    TopoDS_Shape shape2Save = ::FacesAsOneShape(selected);
+    TopoDS_Shape shape2Save = ::SubShapesAsOneShape(selected);
 
     // Save shape
     if ( !asiAlgo_Utils::WriteBRep( shape2Save, QStr2AsciiStr(filename) ) )
@@ -974,7 +999,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     TopoDS_Shape partSh = part_n->GetShape();
 
     // Shape of interest
-    TopoDS_Shape shape = ::FacesAsOneShape(selected);
+    TopoDS_Shape shape = ::SubShapesAsOneShape(selected);
     //
     if ( shape.ShapeType() != TopAbs_FACE )
     {
@@ -1035,7 +1060,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
 
     // Prepare a shape to set as a variable
-    TopoDS_Shape shape2Var = ::FacesAsOneShape(selected);
+    TopoDS_Shape shape2Var = ::SubShapesAsOneShape(selected);
 
     // Add variable via the imperative plotter
     m_plotter.DRAW_SHAPE(shape2Var, Color_Yellow, "var");
@@ -1194,7 +1219,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
     asiEngine_Part( m_model, m_pViewer->PrsMgr() ).GetHighlightedSubShapes(selected);
 
     // Get shape to serialize.
-    TopoDS_Shape shape2Serialize = ::FacesAsOneShape(selected);
+    TopoDS_Shape shape2Serialize = ::SubShapesAsOneShape(selected);
 
     // Serialize and dump.
     std::string buff;
