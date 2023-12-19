@@ -52,6 +52,7 @@
 // Common props
 #define asiPropName_Sdk                                   "sdk"
 #define asiPropName_SdkVersion                            "sdkVersion"
+#define asiPropName_SdkHash                               "sdkHash"
 #define asiPropName_ProcessingTime                        "processingTime"
 #define asiPropName_UnitScaleFactor                       "unitScaleFactor"
 #define asiPropName_OriginalUnitString                    "originalUnitString"
