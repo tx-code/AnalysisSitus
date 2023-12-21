@@ -1,98 +1,194 @@
-Release notes:
-
 -------------------------------------------------------------------------------
-v1.2.0, 11 December 2022
+v1.2.0, 31 December 2023
 
 Milestone "ver 1.2": https://gitlab.com/ssv/AnalysisSitus/-/milestones/1#tab-issues
 -------------------------------------------------------------------------------
-- Add integration with NetGen.
-- Add Collpase() method for virtual collapsing of graph nodes.
-- Add IGES import.
-- Introduce 'dump-autoread' command for saving and autoloading script window contents.
-- Make it possible to drag & drop filenames into the scripting window.
-- Enable interactive selection of edges in the wireframe mode.
-- Enable "Explore..." action for the Part Node.
-- Get rid of optionals and avoid using C++17 for better compatibility with older envs.
-- Add point size parameter for point clouds visualization.
-- Add color parameter for point clouds.
-- Read part color defined in a STEP file into the Color parameter of the active part.
-- Fix incorrect colors of imported STEP file for a turned part.
-- Make it possible to select all faces with "Ctrl+A" key combination.
-- Add color parameter for curves in the imperative viewer.
-- Turn on visibility of the part on 'set-as-part' command.
-- Add a bunch of useful interfaces to the imperative viewer.
-- Introduce visual presentation parameters for vectors in the imperative viewer.
-- If a cylinder/cone is selected, allow measuring its angle (#124).
-- Make app icon red for the debug builds.
-- Introduce a tool for checking the validity of facets (#127).
-- Add a bunch of fixes for SDK installation.
-- Enable /runcommand syntax for batch.
-- Fix minor bug with color persistence in IV topo shapes.
+
+## Infrastructure/Configuration
+
+- Make application icon red to distinguish between release and debug builds.
+- Make application load custom plugins from `asi-plugins` directory.
+- Rework executable to allow for true headless batch mode (no UI, no attempts to construct windows).
+- #153: make `asiExe` the default startup project in cmake.
+- Make Analysis Situs read cbf (binary OCAF) files by double click.
+- Port baseline of Analysis Situs to OpenCascade 7.6.0 (ver 7.7.0 has also been checked).
+- Move explicit class template instantiations to after it's full definition. C++11 requires a member function of a class template precede the explicit instantiation of that entity (https://timsong-cpp.github.io/cppwp/n3337/temp.explicit#4).
+- Update `Dockerfile` to the one provided by JohannesV (brings Analysis Situs GUI to Linux natively with little to no efforts). See http://analysissitus.org/forum/index.php?threads/compilation-on-linux.5.
+- Add `Dockerfile` for the server executable of Analysis Situs.
+- Add compilation guides for Linux (https://analysissitus.org/features/features_build-linux.html).
+- Add tutorial for building Analysis Situs in CLion (https://analysissitus.org/features/features_build-linux-clion.html).
+- #170: get rid of "Metadata Element" Nodes to save space and compactify OCAF storage.
+- #171: reuse labels of dead Nodes to expand the newly allocated Nodes (thus avoiding hidden memory leaks in OCAF).
+- #169: fix missing function names in the test report.
+
+## Console Commands
+
+- #110: paste file path on drag&drop to Tcl console to ease loading CAD files in UI.
+- #109: add `check-volume` Tcl command.
+- #123: introduce `dump-autoread` command for saving and autoloading Active Script contents.
+- #93: automatically turn on part visibility on `set-as-part` command.
+- #127: introduce a tool for checking the validity of facets.
 - Add Tcl command to save XDE to STEP.
-- Introduce specific treatment for seams on rotational surfaces (#133).
-- Let convert-to-bsurf command operate on the entire part.
-- Add yet another inspection tool to analyze vertex vexity.
 - Add "find vertex" GUI dialog and `select-vertices` Tcl command.
-- Add unit tests for the active data framework.
-- Add optional vertex adjacency relations to AAG.
-- Add non-manifold dihedral angle type.
-- Enable subdomains in thickness calculator.
-- Add SVG export.
-- Make topo killer allow reducing shape dimensionality.
-- Read original units from STEP files (#154).
-- Add distance field based on boundary crossing splitting criterion.
-- Add UV bounds AAG attribute.
-- Print OpenCascade version in the console on start.
-- Introduce check-clearance Tcl command.
-- Add "clear" toolbar button.
-- Configure num of UV isolines in the Hatching Node.
-- Fix isoparametric lines are rendered far from the face location (#160).
-- Add point-solid classifier.
-- Add visualization facilities for discrete model (#164).
-- Fix 'save-step' command that does not pass colors through (#138).
-- Fix crash on adding BREP model to empty project.
-- Fix weird result of blend recognition (#166).
-- Fix incorrect construction of grid (discrete case) (#165).
-- Store vexity array in VBFs.
-- Make recognition of conical EBFs an option.
-- Add possibility to generate facets for the active part without using XDE assets (#139).
+- Let `convert-to-bsurf` command operate on the entire part.
+- Make `check-area` accept a face index.
+- Introduce `check-clearance` Tcl command.
+- #164: add visualization facilities for a discrete model of a B-rep face.
+- #138: fix `save-step` command that does not pass colors through.
+- #139: add possibility to generate facets for the active part without using XDE API.
 - Polish helping hints for Tcl commands.
 - Add `dfbrowse` command for the active project.
-- Get rid of metadata element nodes (#170).
-- Active Data: reuse labels of dead Nodes to expand newly added Nodes on.
-- Hide "check dihedral angle" if only one face is selected (#126).
-- Make asiExe the default startup project in cmake (#153).
-- Add control of accuracy over surface entities (#100).
-- Make edge/face/vertex finders work on nested arrays of indices (#172).
-- Fix lost colors after part transformation and saving to STEP (#179).
-- Add "Del" shortcut as defeaturing hotkey (#144).
-- Move "resolve coincident topology" setting to Analysis Situs Node (#92).
-- Add a function to reset colors in an XDE document.
-- Add possibility to check thickness by click on a face (#57).
-- Expose persistent props of curvature combs for edges (#180).
-- Introduce help command to return the hints for commands (#149).
-- Add possibility to save individual STEP files from XDE parts.
-- Introduce JSON viewer with collapsible sections (#173).
-- Show face/edge ID on detection (mouse move) (#21).
-- Redesign command list dialog (#72).
-- Add RTCD::IntersectRayAABB for point-to-bbox checking.
-- Add sparse-point-cloud Tcl command.
-- UI: Active Script - sort list of completer (#187).
-- Add inner points for planar faces in repatch.
-- Add asiAlgo_Utils::Str::AmendedFilename().
-- Shift selection is not synchronized between UV and 3D viewers (#175).
-- Make it possible to remove nodes (#193).
-- Add coloring of the mesh edges (#190).
+- Add `sparse-point-cloud` Tcl command.
+- Restore `save-as` and `load` commands for native file format (cbf).
+- #200: fix colors not exported by `save-gltf` command.
+- Add `poly-grow-region` command.
+- Add `poly-count-ccomps` command.
+- Add `asm-xde-transform` command.
+- Add `check-canonical` command.
+- Make `push-pull work` in the negative direction w.r.t. the selected base face.
+- Add `load-astra` command.
+- Speed up `poly-find-adjacent -v` command.
+- Add `convert-surf-c2` command for converting splines to class C2.
+- Add `asm-xde-unload` command to break down assemblies onto individual part files.
+- Introduce `check-distance-to-chull` command.
+- Introduce `re-approx-contour` command.
+
+## AAG
+
+- Add `Collapse()` method in the C++ API of AAG for virtual collapsing of graph nodes.
+- Propagate dihedral angle in AAG collapse.
+- Add possibility to request optional vertex adjacency relations in AAG.
+- Introduce optional domain indices for vertex adjacency arcs in AAG.
+- Add "face UV bounds" AAG attribute for the sake of caching in performance-sensitive applications.
+- Cache uniform grid during convex hull recognition.
+- Add "non-manifold" dihedral angle type.
+
+## UI
+
+- #96: make it possible to select all faces with "Ctrl+A" key combination.
+- #114: allow selecting edges in the wireframe mode.
+- #115: add "Explore..." action for the Part Node.
+- #119: add a parameter to control point size.
+- #120: add color parameter to point clouds.
+- #124: if a cylinder/cone is selected, allow measuring its angle.
+- Add "clear" toolbar button to clean up the entire project.
+- #160: fix isoparametric lines rendered far from face location.
+- #126: hide "check dihedral angle" if a single face is selected.
+- #100: add control of meshing accuracy over surface entities.
+- #144: add "Del" shortcut as a defeaturing hotkey.
+- #173: introduce JSON viewer with collapsible sections.
+- #92: move "resolve coincident topology" setting to the root Node.
+- #172: make edge/face/vertex finders work on nested arrays of indices to facilitate "garbage copy/paste" scenarios.
+- #57: add possibility to check precise thickness by click on a face.
+- #72: redesign command list dialog to make it more user-friendly.
+- #149: introduce `help` command to print a command usage hint.
+- #21: show face/edge ID on detection (mouse move).
+- #187: sort auto-completer's hints lexicographically.
+- #175: fix shift selection not synchronized between UV and 3D viewers.
+- #185: add possibility to scale up and down the text rendered in the JSON viewer by <mouse wheel> + <Ctrl>.
+- #197: make it possible to delete [multiple] selected Nodes.
+- #177: slightly improve UI in the Active Script panel.
+- #189: introduce ergonomy improvements in the JSON editor.
+- #201: fix broken separation of command signatures and descriptions in the "Available commands" dialog.
+- Clean up all presentations on `load` Tcl command.
+- Make feature comment property visible in the parameter editor.
+- #218: fix invisible center of rotation in the 3D viewer.
+- Add a couple of context-menu actions for checking duplicated face IDs in features.
+- Add "Set as part" context menu command for IV curves and surfaces.
+- Add "Fit all" context menu action to all 3D/2D viewers.
+- Add a context menu action for spline conversion.
+- Add a button to detach all faces in the active part.
+- Add the possibility to scale up and down the UV space of a selected face with <U> and <V> hotkeys.
+- Configure the number of UV isolines in the Hatching Node.
+- #180: expose persistent props of curvature combs for edges.
+- #190: add coloring option for mesh edges (links).
+- #236, #240, #241: introduce "Fit surface" dialog with two approximation modes: PLATE and APPSURF2.
+- Add context menu for curve concatenation.
+- Fire pcurve concatenation in the Domain Viewer by <J> ("join") hotkey.
+- Fix XML format for floating-point values to trim digits after comma nicely.
+- #250: fix plot 2D dialog incorrectly rendered on linux.
+- Output serial IDs in the assembly graph.
+- Introduce interactive tools to study results of thickness and clearance analyses.
+- Enable UTF-8 or local codepage arguments for logging.
+
+## Imperative Viewer (renamed to "Geometric Set")
+
+- #121, 122: introduce visual presentation parameters for vectors in the imperative viewer.
 - Add IV interface for local axes frames.
-- Add simple recognition of linearly extruded surfaces; Add 'check-canonical' command.
-- Add possibility to scale up and down the text in the JSON viewer (#185).
-- Make push-pull work in the negative direction as well.
-- Fix UpdateAssemblies() and add asm-xde-transform.
-- Fix problem in FBX reader (#207).
-- Restore 'save-as' and 'load' commands for native file format (cbf).
-- Disable cell locators again (45DQW005A.stp, issue #211).
-- Make feature comment visible in the parameter editor.
+- Unify visualization of single IV vectors with the visualization for vector fields.
+- Make it possible to pass unicode strings to imperative plotter as object names.
+- Fix color and the orientation tip passing through for IV's 2D curves.
+- Ensure that 2D links are created under "Curves 2D" section of IV ("Geometric Set").
+- Introduce rescaling option in the vector fields.
+
+## Interoperability
+
+- #259: fix glTF exporter ending up with a broken glb file for a provided assembly.
+- Load IGES import for XDE documents.
+- Add `asm-xde-reset-colors` function to reset all colors in an XDE document.
+- Add possibility to save individual STEP files from XDE parts.
+- #116: do not ignore solids, shells, compounds when reading colors from STEP.
+- Read part color defined in a STEP file into the "Color" parameter of the active part.
+- #89: fix incorrect colors of imported STEP file for a turned part.
+- #56: fix incomplete glTF scene for "as1" assembly.
+- #154: read original units from STEP files.
+- #179: fix colors happened to be lost after part transformation and saving to STEP.
+- #207: fix problem in FBX reader.
+- #220: add functions for interoperability with the legendary ASTRA system.
+- Load IGES entities with names.
+- Fix `UpdateAssemblies()` C++ function in the XDE interface.
+- Fix missed colors in an XDE document.
+- #258: fix subshape names coming from STEP files.
+- Add an argument to configure the output STEP file units in the XDE interface.
+- Add Scene Tree data structure for assemblies together with serialization/deserialization logic (see https://analysissitus.org/features/features_asm-json-hierarchy.html).
+- Add some handy XDE-oriented data structures, prohibit export of pcurves from assembly docs.
+- Add an option to dump BREPs for `asiData_BoundaryEdgesNode`.
+- Compose shells out of selected faces on export to BREP (whenever possible).
+
+## Algorithms
+
+- Introduce an algorithm to extract solid bodies for negative features.
+- Let topology killer reduce shape dimensionality if needed.
+- Enhance distance field SVO ctor with boundary-crossing splitting criterion.
+- #133: fix seam edge vexity for conical surfaces; add test cases.
+- #257: add SVG export.
+- Enable subdomains in thickness calculator.
+- #166: fix weird result of blend recognition.
+- #165: fix incorrect construction of a face sampling grid (discrete case).
+- Add gap filler for contours.
 - Add a function to automatically reorient a part.
+- #157: Protect against infinite recursion in 2D convex hull.
+- Fix polyline conversion for contours.
+- Report blend face vexity in the fillet recognizer.
+- Make recognition of conical EBFs an option.
+- Add cross-edge length to blend props.
+- Allow passing excluded faces to blend recognition.
+- Add inner points for planar faces in the REPATCH algorithm.
+- Add canonical recognition for linearly extruded surfaces.
+- #227: fix incorrect result of `check-vertex-vexity` command.
+- Build OBB, cylinder and sphere; refactor OBB algorithms.
+- Improve hole recognizer.
+- Rework line-arc converter.
+- Allow toroidal subfeatures in drilled holes.
+- Add mesh-based slicer.
+- Introduce pcurve concatenation algorithm.
+- Introduce Gordon surface modeling functions.
+- Add UNTRIM operator for converting trimmed surfaces to untrimmed surfaces (prototype version).
+- Add JOINSURF operator for merging neighbor spline surfaces into a single one (prototype version).
+- Introduce fuzzy tolerance in `bop-fuse` command.
+- Add computation of optimal bounding cylinder.
+- Add an algorithm to convert curves and surfaces to 3-degree Bezier segments.
+- Add processing for linear extrusions, also in fillet recognition.
+- Add data structure for segments (edges) of wire.
+- Make `asiAlgo_CheckInsertion` return "undefined" enum if two faces have no edge in common.
+- Add more customization to HLR; improve Tcl commands; update docs.
+- Fix `asiAlgo_ReapproxContour::makeCoarser()`.
+- Pass linear and angular tolerances to face maximization.
+- Add more handy functions in the `asiAlgo_Utils` namespace: `IsConical()`, `IsStriaght()`, `IsCircular()`, `GeneratePixmap()`, `CacheFaceUVBounds()`, `IsTypeOf()`, `ConnectEdgesToWires()`, `ComputeFaceLength()`, `CacheFaceRange()`, `Str::AmendedFilename()`.
+- Add `RTCD::IntersectRayAABB()` for point-to-bbox checking.
+- Let `RTCD` AABB be initialized from a two-dimensional OpenCascade bbox. Draw convex hull meshes.
+- Add `Plane` structure and a couple of useful functions to `RTCD` namespace.
+
 -------------------------------------------------------------------------------
 v1.1.0, 13 September 2021
 -------------------------------------------------------------------------------
