@@ -41,7 +41,7 @@
 //! Performs test on accessing value of RealArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_RealArrayParameter::accessValue(const int funcID)
+outcome ActTest_RealArrayParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -118,7 +118,7 @@ outcome ActTest_RealArrayParameter::accessValue(const int funcID)
 //! Performs test on accessing particular elements of RealArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_RealArrayParameter::accessElements(const int funcID)
+outcome ActTest_RealArrayParameter::accessElements(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

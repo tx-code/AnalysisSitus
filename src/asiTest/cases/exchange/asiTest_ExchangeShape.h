@@ -61,6 +61,12 @@ public:
     return "exchange";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -80,13 +86,13 @@ private:
   static outcome runTestScript(const int   funcID,
                                const char* filename);
 
-  static outcome test_load_step_1(const int funcID);
-  static outcome test_write_step_2(const int funcID);
-  static outcome test_write_step_3(const int funcID);
-  static outcome test_load_iges_1(const int funcID);
-  static outcome test_load_brep_1(const int funcID);
-  static outcome test_write_brep_2(const int funcID);
-  static outcome test_write_brep_3(const int funcID);
+  static outcome test_load_step_1(const int funcID, const bool);
+  static outcome test_write_step_2(const int funcID, const bool);
+  static outcome test_write_step_3(const int funcID, const bool);
+  static outcome test_load_iges_1(const int funcID, const bool);
+  static outcome test_load_brep_1(const int funcID, const bool);
+  static outcome test_write_brep_2(const int funcID, const bool);
+  static outcome test_write_brep_3(const int funcID, const bool);
 
 };
 

@@ -274,7 +274,7 @@ outcome ActTest_MeshAttrBase::populateMeshQuadrangles(TDF_Label&         meshLab
 //! Performs test on accessing data stored in MeshAttrBean.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrBean::meshBeanTest(const int funcID)
+outcome ActTest_MeshAttrBean::meshBeanTest(const int funcID, const bool)
 {
   TEST_PRINT_DECOR_L("Create new Mesh Attribute");
 
@@ -380,7 +380,7 @@ outcome ActTest_MeshAttrBean::meshBeanTest(const int funcID)
 //! UNDO and REDO actions.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int funcID)
+outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int funcID, const bool)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -474,7 +474,7 @@ outcome ActTest_MeshAttrTransactional::meshTransUndoRedoTest1(const int funcID)
 //! Performs test of Mesh Attribute with ABORT action.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int funcID)
+outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int funcID, const bool)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -501,7 +501,7 @@ outcome ActTest_MeshAttrTransactional::meshTransAbortTest1(const int funcID)
 //! Performs test of Mesh Attribute with ABORT action.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int funcID)
+outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int funcID, const bool)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;
@@ -537,7 +537,7 @@ outcome ActTest_MeshAttrTransactional::meshTransAbortTest2(const int funcID)
 //! Performs test on saving and restoring Mesh Attribute.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int funcID)
+outcome ActTest_MeshAttrPersistent::meshSaveOpenTest(const int funcID, const bool)
 {
   // Collection of resulting mesh elements (nodes, triangles, quadrangles)
   DatumIdList NODE_IDS, TRIANGLE_IDS, QUADRANGLE_IDS;

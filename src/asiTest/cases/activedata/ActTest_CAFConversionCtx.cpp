@@ -125,7 +125,7 @@ namespace Aux
 //! Performs test on atomic insertion No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_001(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_001(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -186,7 +186,7 @@ outcome ActTest_CAFConversionCtx::insert_001(const int funcID)
 //! Performs test on atomic insertion No. 002 (a).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002a(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002a(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -245,7 +245,7 @@ outcome ActTest_CAFConversionCtx::insert_002a(const int funcID)
 //! Performs test on atomic insertion No. 002 (b).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002b(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002b(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -304,7 +304,7 @@ outcome ActTest_CAFConversionCtx::insert_002b(const int funcID)
 //! Performs test on atomic insertion No. 002 (c).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002c(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002c(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -363,7 +363,7 @@ outcome ActTest_CAFConversionCtx::insert_002c(const int funcID)
 //! Performs test on atomic insertion No. 002 (d).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002d(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002d(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -433,7 +433,7 @@ outcome ActTest_CAFConversionCtx::insert_002d(const int funcID)
 //! Performs test on atomic insertion No. 002 (e).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002e(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002e(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -508,7 +508,7 @@ outcome ActTest_CAFConversionCtx::insert_002e(const int funcID)
 //! Performs test on atomic insertion No. 002 (f).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002f(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002f(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -582,7 +582,7 @@ outcome ActTest_CAFConversionCtx::insert_002f(const int funcID)
 //! Performs test on atomic insertion No. 002 (g).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002g(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002g(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -652,7 +652,7 @@ outcome ActTest_CAFConversionCtx::insert_002g(const int funcID)
 //! Performs test on atomic insertion No. 002 (h).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002h(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002h(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -731,7 +731,7 @@ outcome ActTest_CAFConversionCtx::insert_002h(const int funcID)
 //! Performs test on atomic insertion No. 002 (i).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002i(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002i(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -807,7 +807,7 @@ outcome ActTest_CAFConversionCtx::insert_002i(const int funcID)
 //! Performs test on atomic insertion No. 002 (j).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002j(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002j(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -866,7 +866,7 @@ outcome ActTest_CAFConversionCtx::insert_002j(const int funcID)
 //! Performs test on atomic insertion No. 002 (k).
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_002k(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_002k(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -925,7 +925,7 @@ outcome ActTest_CAFConversionCtx::insert_002k(const int funcID)
 //! Performs test on atomic insertion No. 003.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_003(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_003(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -984,7 +984,7 @@ outcome ActTest_CAFConversionCtx::insert_003(const int funcID)
 //! Performs test on atomic insertion No. 004.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::insert_004(const int funcID)
+outcome ActTest_CAFConversionCtx::insert_004(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1130,7 +1130,7 @@ outcome ActTest_CAFConversionCtx::insert_004(const int funcID)
 //! Performs test on atomic modification No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::modify_001(const int funcID)
+outcome ActTest_CAFConversionCtx::modify_001(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1213,7 +1213,7 @@ outcome ActTest_CAFConversionCtx::modify_001(const int funcID)
 //! Performs test on atomic modification No. 002.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::modify_002(const int funcID)
+outcome ActTest_CAFConversionCtx::modify_002(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1255,7 +1255,7 @@ outcome ActTest_CAFConversionCtx::modify_002(const int funcID)
 //! Performs test on atomic removal No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_001(const int funcID)
+outcome ActTest_CAFConversionCtx::remove_001(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1310,7 +1310,7 @@ outcome ActTest_CAFConversionCtx::remove_001(const int funcID)
 //! Performs test on atomic removal No. 002.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_002(const int funcID)
+outcome ActTest_CAFConversionCtx::remove_002(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1365,7 +1365,7 @@ outcome ActTest_CAFConversionCtx::remove_002(const int funcID)
 //! Performs test on atomic removal No. 003.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_003(const int funcID)
+outcome ActTest_CAFConversionCtx::remove_003(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1422,7 +1422,7 @@ outcome ActTest_CAFConversionCtx::remove_003(const int funcID)
 //! Performs test on atomic removal No. 004.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_004(const int funcID)
+outcome ActTest_CAFConversionCtx::remove_004(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1477,7 +1477,7 @@ outcome ActTest_CAFConversionCtx::remove_004(const int funcID)
 //! Performs test on atomic removal No. 005.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::remove_005(const int funcID)
+outcome ActTest_CAFConversionCtx::remove_005(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project
@@ -1569,7 +1569,7 @@ outcome ActTest_CAFConversionCtx::remove_005(const int funcID)
 //! Performs test on complex modification No. 001.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_CAFConversionCtx::complex_001(const int funcID)
+outcome ActTest_CAFConversionCtx::complex_001(const int funcID, const bool)
 {
   /* =======================
    *  Create ABC-01 Project

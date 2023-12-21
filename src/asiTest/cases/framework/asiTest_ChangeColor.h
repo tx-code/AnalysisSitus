@@ -61,6 +61,12 @@ public:
     return "framework";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -86,19 +92,19 @@ private:
   static outcome runTestScript(const int   funcID,
                                const char* filename);
 
-  static outcome test_color_part_1(const int funcID);
-  static outcome test_color_part_2(const int funcID);
-  static outcome test_color_part_3(const int funcID);
-  static outcome test_color_part_4(const int funcID);
-  static outcome test_color_face_5(const int funcID);
-  static outcome test_color_face_6(const int funcID);
-  static outcome test_color_part_7(const int funcID);
-  static outcome test_color_part_8(const int funcID);
-  static outcome test_color_part_9(const int funcID);
-  static outcome test_color_part_10(const int funcID);
-  static outcome test_color_part_11(const int funcID);
-  static outcome test_color_part_12(const int funcID);
-  static outcome test_color_part_13(const int funcID);
+  static outcome test_color_part_1(const int funcID, const bool);
+  static outcome test_color_part_2(const int funcID, const bool);
+  static outcome test_color_part_3(const int funcID, const bool);
+  static outcome test_color_part_4(const int funcID, const bool);
+  static outcome test_color_face_5(const int funcID, const bool);
+  static outcome test_color_face_6(const int funcID, const bool);
+  static outcome test_color_part_7(const int funcID, const bool);
+  static outcome test_color_part_8(const int funcID, const bool);
+  static outcome test_color_part_9(const int funcID, const bool);
+  static outcome test_color_part_10(const int funcID, const bool);
+  static outcome test_color_part_11(const int funcID, const bool);
+  static outcome test_color_part_12(const int funcID, const bool);
+  static outcome test_color_part_13(const int funcID, const bool);
 
 };
 

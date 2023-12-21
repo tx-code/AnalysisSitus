@@ -55,7 +55,7 @@ outcome asiTest_InvertShells::runtest(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_InvertShells::test001(const int funcID)
+outcome asiTest_InvertShells::test001(const int funcID, const bool)
 {
   return runtest(funcID, "editing/invert-shell/invert-shell_01.tcl");
 }

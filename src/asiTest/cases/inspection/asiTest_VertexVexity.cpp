@@ -55,7 +55,7 @@ outcome asiTest_VertexVexity::runtest(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_VertexVexity::test001(const int funcID)
+outcome asiTest_VertexVexity::test001(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/vertex-vexity_001.tcl");
 }

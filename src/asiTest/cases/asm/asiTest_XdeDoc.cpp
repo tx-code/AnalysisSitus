@@ -113,7 +113,7 @@ bool asiTest_XdeDoc::areEqual(const asiAsm::xde::PartIds& pids1,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_XdeDoc::testFindItems(const int funcID)
+outcome asiTest_XdeDoc::testFindItems(const int funcID, const bool)
 {
   outcome res(DescriptionFn(), funcID);
 
@@ -154,7 +154,7 @@ outcome asiTest_XdeDoc::testFindItems(const int funcID)
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_XdeDoc::testAddPart(const int funcID)
+outcome asiTest_XdeDoc::testAddPart(const int funcID, const bool)
 {
   outcome res(DescriptionFn(), funcID);
 

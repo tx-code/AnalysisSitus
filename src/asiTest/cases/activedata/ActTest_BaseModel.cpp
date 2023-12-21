@@ -74,7 +74,7 @@
 //! Performs test on HasOpenCommand method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::testHasOpenCommand(const int funcID)
+outcome ActTest_BaseModelPersistence::testHasOpenCommand(const int funcID, const bool)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
 
@@ -93,7 +93,7 @@ outcome ActTest_BaseModelPersistence::testHasOpenCommand(const int funcID)
 //! Performs test on NewEmpty method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::newEmptyModel(const int funcID)
+outcome ActTest_BaseModelPersistence::newEmptyModel(const int funcID, const bool)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
 
@@ -111,7 +111,7 @@ outcome ActTest_BaseModelPersistence::newEmptyModel(const int funcID)
 //! Performs test on Open method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::loadModel(const int funcID)
+outcome ActTest_BaseModelPersistence::loadModel(const int funcID, const bool)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
   TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
@@ -250,7 +250,7 @@ outcome ActTest_BaseModelPersistence::loadModel(const int funcID)
 //! Performs test on Save method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::saveModel(const int funcID)
+outcome ActTest_BaseModelPersistence::saveModel(const int funcID, const bool)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
   TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID )
@@ -309,7 +309,7 @@ outcome ActTest_BaseModelPersistence::saveModel(const int funcID)
 //! Performs test on Release method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelPersistence::releaseModel(const int funcID)
+outcome ActTest_BaseModelPersistence::releaseModel(const int funcID, const bool)
 {
   Handle(ActAPI_IModel) M = new ActTest_DummyModel;
   TEST_VERIFY( M->NewEmpty(), DescriptionFn(), funcID );
@@ -642,7 +642,7 @@ void ActTest_BaseModelStructure::init(Handle(ActAPI_IModel)& M,
 //! Test function for FindNode method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::findNode(const int funcID)
+outcome ActTest_BaseModelStructure::findNode(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -665,7 +665,7 @@ outcome ActTest_BaseModelStructure::findNode(const int funcID)
 //! Test function for DeleteNode method.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteRootNode(const int funcID)
+outcome ActTest_BaseModelStructure::deleteRootNode(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -701,7 +701,7 @@ outcome ActTest_BaseModelStructure::deleteRootNode(const int funcID)
 //! initial hierarchy.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int funcID)
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -773,7 +773,7 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D(const int funcID)
 //! initial hierarchy. Introduces additional dependencies via References.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int funcID)
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -888,7 +888,7 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_D_AsReferenced(const int f
 //! initial hierarchy.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int funcID)
+outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -986,7 +986,7 @@ outcome ActTest_BaseModelStructure::deleteSubTreeNode_C(const int funcID)
 //! Test function for accessing Tree Function observers of Node D.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelStructure::accessObservers_D(const int funcID)
+outcome ActTest_BaseModelStructure::accessObservers_D(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1123,7 +1123,7 @@ void ActTest_BaseModelEvaluation::init(Handle(ActAPI_IModel)& M,
 //! evaluation mechanism.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::removeVariable(const int funcID)
+outcome ActTest_BaseModelEvaluation::removeVariable(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1329,7 +1329,7 @@ outcome ActTest_BaseModelEvaluation::removeVariable(const int funcID)
 //! if there are some loops in it. Simple loop exists.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops1(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops1(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1381,7 +1381,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops1(const int funcID)
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops2(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops2(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1447,7 +1447,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops2(const int funcID)
 //! if there are some loops in it. One loop exists.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops3(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops3(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1517,7 +1517,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops3(const int funcID)
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops4(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops4(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1574,7 +1574,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops4(const int funcID)
 //! if there are some loops in it. No loops exist.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops5(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops5(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1645,7 +1645,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops5(const int funcID)
 //! </pre>
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::checkLoops6(const int funcID)
+outcome ActTest_BaseModelEvaluation::checkLoops6(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1701,7 +1701,7 @@ outcome ActTest_BaseModelEvaluation::checkLoops6(const int funcID)
 //! Test function for renaming functionality for Variable Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable1(const int funcID)
+outcome ActTest_BaseModelEvaluation::renameVariable1(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1748,7 +1748,7 @@ outcome ActTest_BaseModelEvaluation::renameVariable1(const int funcID)
 //! Test function for renaming functionality for Variable Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable2(const int funcID)
+outcome ActTest_BaseModelEvaluation::renameVariable2(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1806,7 +1806,7 @@ outcome ActTest_BaseModelEvaluation::renameVariable2(const int funcID)
 //! test some special characters in Variable names, e.g. "_".
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::renameVariable3(const int funcID)
+outcome ActTest_BaseModelEvaluation::renameVariable3(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;
@@ -1850,7 +1850,7 @@ outcome ActTest_BaseModelEvaluation::renameVariable3(const int funcID)
 //! Test for AddVariable functionality on BaseModel.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_BaseModelEvaluation::addVariable(const int funcID)
+outcome ActTest_BaseModelEvaluation::addVariable(const int funcID, const bool)
 {
   // Create and populate sample Model
   Handle(ActAPI_IModel) M;

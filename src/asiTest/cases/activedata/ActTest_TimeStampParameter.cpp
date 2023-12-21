@@ -44,7 +44,7 @@
 //! Performs test on accessing value of TimeStampParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStampParameter::accessValue(const int funcID)
+outcome ActTest_TimeStampParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -88,7 +88,7 @@ outcome ActTest_TimeStampParameter::accessValue(const int funcID)
 //! Performs test on accessing value of TimeStampParameter by portions.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TimeStampParameter::accessValueByPortions(const int funcID)
+outcome ActTest_TimeStampParameter::accessValueByPortions(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

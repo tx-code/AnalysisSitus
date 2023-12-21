@@ -41,7 +41,7 @@
 //! Performs test on accessing value of ComplexArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ComplexArrayParameter::accessValue(const int funcID)
+outcome ActTest_ComplexArrayParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -121,7 +121,7 @@ outcome ActTest_ComplexArrayParameter::accessValue(const int funcID)
 //! Performs test on accessing particular elements of ComplexArrayParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ComplexArrayParameter::accessElements(const int funcID)
+outcome ActTest_ComplexArrayParameter::accessElements(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

@@ -42,7 +42,7 @@
 //! is well-formed, while Redo one is empty.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int funcID)
+outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int funcID, const bool)
 {
   const Standard_Integer NbCommits = 4;
   TCollection_AsciiString Names[] = {"TR 1", "TR 2", "TR 3", "TR 4"};
@@ -89,7 +89,7 @@ outcome ActTest_ExtTransactionEngine::namedEngineCommits(const int funcID)
 //! collections' contents.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int funcID)
+outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int funcID, const bool)
 {
   const Standard_Integer NbCommits = 5,
                          NbUndos = 2;
@@ -151,7 +151,7 @@ outcome ActTest_ExtTransactionEngine::namedEngineUndos(const int funcID)
 //! checks the UR collections' contents.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int funcID)
+outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int funcID, const bool)
 {
   const Standard_Integer NbCommits = 5,
                          NbUndos = 4,
@@ -221,7 +221,7 @@ outcome ActTest_ExtTransactionEngine::namedEngineRedos(const int funcID)
 //! Checks if Undo Limit works ;)
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int funcID)
+outcome ActTest_ExtTransactionEngine::namedEngineUndoLimit(const int funcID, const bool)
 {
   ActTest_DocAlloc docAlloc;
   Handle(TDocStd_Document) doc = docAlloc.Doc;

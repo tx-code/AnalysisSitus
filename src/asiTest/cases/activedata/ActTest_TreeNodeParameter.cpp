@@ -45,7 +45,7 @@
 //! Performs test on accessing USER tree of Parameters defined by Tree Nodes.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_TreeNodeParameter::accessUserTree(const int funcID)
+outcome ActTest_TreeNodeParameter::accessUserTree(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

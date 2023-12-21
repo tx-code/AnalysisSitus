@@ -33,7 +33,7 @@
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_RecognizeHoles::testAll(const int /*funcID*/)
+outcome asiTest_RecognizeHoles::testAll(const int /*funcID*/, const bool)
 {
   // Get filename of script to execute.
   TCollection_AsciiString fullFilename = GetPath("inspection/recognize-holes");

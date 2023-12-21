@@ -41,7 +41,7 @@
 //! Performs test on accessing value of NameParameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_NameParameter::accessValue(const int funcID)
+outcome ActTest_NameParameter::accessValue(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

@@ -59,6 +59,12 @@ public:
     return "ActTest_TriangulationParameter";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns Test Case description directory.
   //! \return description directory for the Test Case.
   static std::string DescriptionDir()
@@ -76,7 +82,7 @@ public:
 // Test functions:
 private:
 
-  static outcome accessValue(const int funcID);
+  static outcome accessValue(const int funcID, const bool);
 
 };
 

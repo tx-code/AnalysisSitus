@@ -55,7 +55,7 @@ outcome asiTest_FaceGrid::runTestScript(const int   funcID,
 //! Test scenario 01.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_01(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_01(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_01.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_FaceGrid::test_face_grid_01(const int funcID)
 //! Test scenario 02.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_02(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_02(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_02.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_FaceGrid::test_face_grid_02(const int funcID)
 //! Test scenario 03.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_03(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_03(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_03.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_FaceGrid::test_face_grid_03(const int funcID)
 //! Test scenario 04.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_04(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_04(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_04.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_FaceGrid::test_face_grid_04(const int funcID)
 //! Test scenario 05.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_05(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_05(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_05.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_FaceGrid::test_face_grid_05(const int funcID)
 //! Test scenario 06.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_06(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_06(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_06.tcl");
 }
@@ -115,7 +115,7 @@ outcome asiTest_FaceGrid::test_face_grid_06(const int funcID)
 //! Test scenario 07.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_07(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_07(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_07.tcl");
 }
@@ -125,7 +125,7 @@ outcome asiTest_FaceGrid::test_face_grid_07(const int funcID)
 //! Test scenario 08.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_08(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_08(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_08.tcl");
 }
@@ -135,7 +135,7 @@ outcome asiTest_FaceGrid::test_face_grid_08(const int funcID)
 //! Test scenario 09.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_09(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_09(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_09.tcl");
 }
@@ -145,7 +145,7 @@ outcome asiTest_FaceGrid::test_face_grid_09(const int funcID)
 //! Test scenario 10.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_FaceGrid::test_face_grid_10(const int funcID)
+outcome asiTest_FaceGrid::test_face_grid_10(const int funcID, const bool)
 {
   return runTestScript(funcID, "inspection/face-grid/face_grid_10.tcl");
 }

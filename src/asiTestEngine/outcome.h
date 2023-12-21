@@ -58,6 +58,7 @@ public:
   std::string elapsedTimeSec; //!< Elapsed (wall) time in seconds.
   int         memBefore;      //!< Consumed memory [MiB] before function execution.
   int         memAfter;       //!< Consumed memory [MiB] after function execution.
+  std::string comments;       //!< Whatever extra comments by a test function.
 
 public:
 

@@ -55,7 +55,7 @@ outcome asiTest_IsContourClosed::runtest(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test001(const int funcID)
+outcome asiTest_IsContourClosed::test001(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_001.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_IsContourClosed::test001(const int funcID)
 //! Test scenario 002.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test002(const int funcID)
+outcome asiTest_IsContourClosed::test002(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_002.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_IsContourClosed::test002(const int funcID)
 //! Test scenario 003.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test003(const int funcID)
+outcome asiTest_IsContourClosed::test003(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_003.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_IsContourClosed::test003(const int funcID)
 //! Test scenario 004.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test004(const int funcID)
+outcome asiTest_IsContourClosed::test004(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_004.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_IsContourClosed::test004(const int funcID)
 //! Test scenario 005.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test005(const int funcID)
+outcome asiTest_IsContourClosed::test005(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_005.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_IsContourClosed::test005(const int funcID)
 //! Test scenario 006.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test006(const int funcID)
+outcome asiTest_IsContourClosed::test006(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_006.tcl");
 }
@@ -115,7 +115,7 @@ outcome asiTest_IsContourClosed::test006(const int funcID)
 //! Test scenario 007.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test007(const int funcID)
+outcome asiTest_IsContourClosed::test007(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_007.tcl");
 }
@@ -125,7 +125,7 @@ outcome asiTest_IsContourClosed::test007(const int funcID)
 //! Test scenario 008.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_IsContourClosed::test008(const int funcID)
+outcome asiTest_IsContourClosed::test008(const int funcID, const bool)
 {
   return runtest(funcID, "inspection/is-contour-closed_008.tcl");
 }

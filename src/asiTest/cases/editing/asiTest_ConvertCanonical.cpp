@@ -92,70 +92,70 @@ outcome asiTest_ConvertCanonical::runTest(const double tol,
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test001(const int funcID)
+outcome asiTest_ConvertCanonical::test001(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_001.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test002(const int funcID)
+outcome asiTest_ConvertCanonical::test002(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_002.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test003(const int funcID)
+outcome asiTest_ConvertCanonical::test003(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_003.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test004(const int funcID)
+outcome asiTest_ConvertCanonical::test004(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_004.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test005(const int funcID)
+outcome asiTest_ConvertCanonical::test005(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_005.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test006(const int funcID)
+outcome asiTest_ConvertCanonical::test006(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_006.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test007(const int funcID)
+outcome asiTest_ConvertCanonical::test007(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_007.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test008(const int funcID)
+outcome asiTest_ConvertCanonical::test008(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_008.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test009(const int funcID)
+outcome asiTest_ConvertCanonical::test009(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_009.tcl");
 }
 
 //-----------------------------------------------------------------------------
 
-outcome asiTest_ConvertCanonical::test010(const int funcID)
+outcome asiTest_ConvertCanonical::test010(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/canrec/canrec_010.tcl");
 }

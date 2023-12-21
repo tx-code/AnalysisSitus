@@ -61,6 +61,12 @@ public:
     return "inspection";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -71,7 +77,7 @@ public:
 
 private:
 
-  static outcome testAll(const int funcID);
+  static outcome testAll(const int funcID, const bool);
 
 };
 

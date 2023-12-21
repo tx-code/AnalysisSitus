@@ -55,7 +55,7 @@ outcome asiTest_ExchangeAstra::runTestScript(const int   funcID,
 //! Test scenario 1.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeAstra::test_load_001(const int funcID)
+outcome asiTest_ExchangeAstra::test_load_001(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_read_01.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_ExchangeAstra::test_load_001(const int funcID)
 //! Test scenario 2.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeAstra::test_load_002(const int funcID)
+outcome asiTest_ExchangeAstra::test_load_002(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/ASTRA/astra_read_02.tcl");
 }

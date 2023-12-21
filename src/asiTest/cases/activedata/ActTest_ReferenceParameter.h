@@ -66,6 +66,12 @@ public:
     return "Parameters";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -76,7 +82,7 @@ public:
 // Test functions:
 private:
 
-  static outcome testReference(const int funcID);
+  static outcome testReference(const int funcID, const bool);
 
 };
 

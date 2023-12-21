@@ -126,6 +126,12 @@ public:
     return "Mesh";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -136,7 +142,7 @@ public:
 // Test functions:
 private:
 
-  static outcome meshBeanTest(const int funcID);
+  static outcome meshBeanTest(const int funcID, const bool);
 
 };
 
@@ -170,6 +176,12 @@ public:
     return "Mesh";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -182,9 +194,9 @@ public:
 // Test functions:
 private:
 
-  static outcome meshTransUndoRedoTest1 (const int funcID);
-  static outcome meshTransAbortTest1    (const int funcID);
-  static outcome meshTransAbortTest2    (const int funcID);
+  static outcome meshTransUndoRedoTest1 (const int funcID, const bool);
+  static outcome meshTransAbortTest1    (const int funcID, const bool);
+  static outcome meshTransAbortTest2    (const int funcID, const bool);
 
 };
 
@@ -218,6 +230,12 @@ public:
     return "Mesh";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -228,7 +246,7 @@ public:
 // Test functions:
 private:
 
-  static outcome meshSaveOpenTest(const int funcID);
+  static outcome meshSaveOpenTest(const int funcID, const bool);
 
 };
 

@@ -61,6 +61,12 @@ public:
     return "editing";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -138,65 +144,65 @@ private:
 
 private:
 
-  static outcome testSuppressBlend001(const int funcID);
-  static outcome testSuppressBlend002(const int funcID);
-  static outcome testSuppressBlend003(const int funcID);
-  static outcome testSuppressBlend004(const int funcID);
-  static outcome testSuppressBlend005(const int funcID);
-  static outcome testSuppressBlend006(const int funcID);
-  static outcome testSuppressBlend007(const int funcID);
-  static outcome testSuppressBlend008(const int funcID);
-  static outcome testSuppressBlend009(const int funcID);
-  static outcome testSuppressBlend010(const int funcID);
-  static outcome testSuppressBlend011(const int funcID);
-  static outcome testSuppressBlend012(const int funcID);
-  static outcome testSuppressBlend013(const int funcID);
-  static outcome testSuppressBlend014(const int funcID);
-  static outcome testSuppressBlend015(const int funcID);
-  static outcome testSuppressBlend016(const int funcID);
-  static outcome testSuppressBlend017(const int funcID);
-  static outcome testSuppressBlend018(const int funcID);
-  static outcome testSuppressBlend019(const int funcID);
-  static outcome testSuppressBlend020(const int funcID);
-  static outcome testSuppressBlend021(const int funcID);
-  static outcome testSuppressBlend022(const int funcID);
-  static outcome testSuppressBlend023(const int funcID);
-  static outcome testSuppressBlend024(const int funcID);
-  static outcome testSuppressBlend025(const int funcID);
-  static outcome testSuppressBlend026(const int funcID);
-  static outcome testSuppressBlend027(const int funcID);
-  static outcome testSuppressBlend028(const int funcID);
-  static outcome testSuppressBlend029(const int funcID);
-  static outcome testSuppressBlend030(const int funcID);
-  static outcome testSuppressBlend031(const int funcID);
-  static outcome testSuppressBlend032(const int funcID);
-  static outcome testSuppressBlend033(const int funcID);
-  static outcome testSuppressBlend034(const int funcID);
-  static outcome testSuppressBlend035(const int funcID);
-  static outcome testSuppressBlend036(const int funcID);
-  static outcome testSuppressBlend037(const int funcID);
-  static outcome testSuppressBlend038(const int funcID);
-  static outcome testSuppressBlend039(const int funcID);
-  static outcome testSuppressBlend040(const int funcID);
-  static outcome testSuppressBlend041(const int funcID);
-  static outcome testSuppressBlend042(const int funcID);
-  static outcome testSuppressBlend043(const int funcID);
-  static outcome testSuppressBlend044(const int funcID);
-  static outcome testSuppressBlend045(const int funcID);
-  static outcome testSuppressBlend046(const int funcID);
-  static outcome testSuppressBlend047(const int funcID);
-  static outcome testSuppressBlend048(const int funcID);
-  static outcome testSuppressBlend049(const int funcID);
-  static outcome testSuppressBlend050(const int funcID);
-  static outcome testSuppressBlend051(const int funcID);
-  static outcome testSuppressBlend052(const int funcID);
-  static outcome testSuppressBlend053(const int funcID);
-  static outcome testSuppressBlend054(const int funcID);
-  static outcome testSuppressBlend055(const int funcID);
-  static outcome testSuppressBlend056(const int funcID);
-  static outcome testSuppressBlend057(const int funcID);
-  static outcome testSuppressBlend058(const int funcID);
-  static outcome testSuppressBlend059(const int funcID);
+  static outcome testSuppressBlend001(const int funcID, const bool);
+  static outcome testSuppressBlend002(const int funcID, const bool);
+  static outcome testSuppressBlend003(const int funcID, const bool);
+  static outcome testSuppressBlend004(const int funcID, const bool);
+  static outcome testSuppressBlend005(const int funcID, const bool);
+  static outcome testSuppressBlend006(const int funcID, const bool);
+  static outcome testSuppressBlend007(const int funcID, const bool);
+  static outcome testSuppressBlend008(const int funcID, const bool);
+  static outcome testSuppressBlend009(const int funcID, const bool);
+  static outcome testSuppressBlend010(const int funcID, const bool);
+  static outcome testSuppressBlend011(const int funcID, const bool);
+  static outcome testSuppressBlend012(const int funcID, const bool);
+  static outcome testSuppressBlend013(const int funcID, const bool);
+  static outcome testSuppressBlend014(const int funcID, const bool);
+  static outcome testSuppressBlend015(const int funcID, const bool);
+  static outcome testSuppressBlend016(const int funcID, const bool);
+  static outcome testSuppressBlend017(const int funcID, const bool);
+  static outcome testSuppressBlend018(const int funcID, const bool);
+  static outcome testSuppressBlend019(const int funcID, const bool);
+  static outcome testSuppressBlend020(const int funcID, const bool);
+  static outcome testSuppressBlend021(const int funcID, const bool);
+  static outcome testSuppressBlend022(const int funcID, const bool);
+  static outcome testSuppressBlend023(const int funcID, const bool);
+  static outcome testSuppressBlend024(const int funcID, const bool);
+  static outcome testSuppressBlend025(const int funcID, const bool);
+  static outcome testSuppressBlend026(const int funcID, const bool);
+  static outcome testSuppressBlend027(const int funcID, const bool);
+  static outcome testSuppressBlend028(const int funcID, const bool);
+  static outcome testSuppressBlend029(const int funcID, const bool);
+  static outcome testSuppressBlend030(const int funcID, const bool);
+  static outcome testSuppressBlend031(const int funcID, const bool);
+  static outcome testSuppressBlend032(const int funcID, const bool);
+  static outcome testSuppressBlend033(const int funcID, const bool);
+  static outcome testSuppressBlend034(const int funcID, const bool);
+  static outcome testSuppressBlend035(const int funcID, const bool);
+  static outcome testSuppressBlend036(const int funcID, const bool);
+  static outcome testSuppressBlend037(const int funcID, const bool);
+  static outcome testSuppressBlend038(const int funcID, const bool);
+  static outcome testSuppressBlend039(const int funcID, const bool);
+  static outcome testSuppressBlend040(const int funcID, const bool);
+  static outcome testSuppressBlend041(const int funcID, const bool);
+  static outcome testSuppressBlend042(const int funcID, const bool);
+  static outcome testSuppressBlend043(const int funcID, const bool);
+  static outcome testSuppressBlend044(const int funcID, const bool);
+  static outcome testSuppressBlend045(const int funcID, const bool);
+  static outcome testSuppressBlend046(const int funcID, const bool);
+  static outcome testSuppressBlend047(const int funcID, const bool);
+  static outcome testSuppressBlend048(const int funcID, const bool);
+  static outcome testSuppressBlend049(const int funcID, const bool);
+  static outcome testSuppressBlend050(const int funcID, const bool);
+  static outcome testSuppressBlend051(const int funcID, const bool);
+  static outcome testSuppressBlend052(const int funcID, const bool);
+  static outcome testSuppressBlend053(const int funcID, const bool);
+  static outcome testSuppressBlend054(const int funcID, const bool);
+  static outcome testSuppressBlend055(const int funcID, const bool);
+  static outcome testSuppressBlend056(const int funcID, const bool);
+  static outcome testSuppressBlend057(const int funcID, const bool);
+  static outcome testSuppressBlend058(const int funcID, const bool);
+  static outcome testSuppressBlend059(const int funcID, const bool);
 
 };
 

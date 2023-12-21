@@ -55,7 +55,7 @@ outcome asiTest_ExchangeMesh::runTestScript(const int   funcID,
 //! Test scenario 1.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_write_stl_1(const int funcID)
+outcome asiTest_ExchangeMesh::test_write_stl_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STL/stl_write_1.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_ExchangeMesh::test_write_stl_1(const int funcID)
 //! Test scenario 2.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_write_stl_2(const int funcID)
+outcome asiTest_ExchangeMesh::test_write_stl_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STL/stl_write_2.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_ExchangeMesh::test_write_stl_2(const int funcID)
 //! Test scenario 3.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_load_stl_3(const int funcID)
+outcome asiTest_ExchangeMesh::test_load_stl_3(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STL/stl_read_3.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_ExchangeMesh::test_load_stl_3(const int funcID)
 //! Test scenario 4.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_load_ply_1(const int funcID)
+outcome asiTest_ExchangeMesh::test_load_ply_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/PLY/ply_read_1.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_ExchangeMesh::test_load_ply_1(const int funcID)
 //! Test scenario 5.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_write_ply_2(const int funcID)
+outcome asiTest_ExchangeMesh::test_write_ply_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/PLY/ply_write_2.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_ExchangeMesh::test_write_ply_2(const int funcID)
 //! Test scenario 6.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_load_obj_1(const int funcID)
+outcome asiTest_ExchangeMesh::test_load_obj_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/OBJ/obj_load_1.tcl");
 }
@@ -115,7 +115,7 @@ outcome asiTest_ExchangeMesh::test_load_obj_1(const int funcID)
 //! Test scenario 7.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeMesh::test_load_obj_2(const int funcID)
+outcome asiTest_ExchangeMesh::test_load_obj_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/OBJ/obj_load_2.tcl");
 }

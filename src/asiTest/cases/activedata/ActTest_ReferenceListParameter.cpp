@@ -41,7 +41,7 @@
 //! Test function for Reference List Parameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ReferenceListParameter::testReferences(const int funcID)
+outcome ActTest_ReferenceListParameter::testReferences(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document
@@ -126,7 +126,7 @@ outcome ActTest_ReferenceListParameter::testReferences(const int funcID)
 //! Test function for Reference List Parameter.
 //! \param funcID [in] ID of test function.
 //! \return true if test is passed, false -- otherwise.
-outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(const int funcID)
+outcome ActTest_ReferenceListParameter::testReferenceListParameter_SwapTargets(const int funcID, const bool)
 {
   /* ====================================
    *  Initialize underlying CAF document

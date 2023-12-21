@@ -57,6 +57,8 @@
 #define asiTestEngine_Macro_DESCR_EXT    "descr"
 #define asiTestEngine_Macro_RESULT       "Result"
 #define asiTestEngine_Macro_TEST         "Test"
+#define asiTestEngine_Macro_ELAPSED      "Elapsed time (sec)"
+#define asiTestEngine_Macro_COMMENTS     "Comments"
 #define asiTestEngine_Macro_FAILED       "Failed"
 #define asiTestEngine_Macro_OK           "Ok"
 

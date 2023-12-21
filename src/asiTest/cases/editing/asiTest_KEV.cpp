@@ -55,7 +55,7 @@ outcome asiTest_KEV::runTestScript(const int   funcID,
 //! Test scenario 001.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_KEV::testKEV001(const int funcID)
+outcome asiTest_KEV::testKEV001(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/kev/kev_001.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_KEV::testKEV001(const int funcID)
 //! Test scenario 002.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_KEV::testKEV002(const int funcID)
+outcome asiTest_KEV::testKEV002(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/kev/kev_002.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_KEV::testKEV002(const int funcID)
 //! Test scenario 003.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_KEV::testKEV003(const int funcID)
+outcome asiTest_KEV::testKEV003(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/kev/kev_003.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_KEV::testKEV003(const int funcID)
 //! Test scenario 004.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_KEV::testKEV004(const int funcID)
+outcome asiTest_KEV::testKEV004(const int funcID, const bool)
 {
   return runTestScript(funcID, "editing/kev/kev_004.tcl");
 }

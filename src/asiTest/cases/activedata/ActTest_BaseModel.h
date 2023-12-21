@@ -67,6 +67,12 @@ public:
     return "Model";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -81,11 +87,11 @@ public:
 // Test functions:
 private:
 
-  static outcome testHasOpenCommand (const int funcID);
-  static outcome newEmptyModel      (const int funcID);
-  static outcome loadModel          (const int funcID);
-  static outcome saveModel          (const int funcID);
-  static outcome releaseModel       (const int funcID);
+  static outcome testHasOpenCommand (const int funcID, const bool);
+  static outcome newEmptyModel      (const int funcID, const bool);
+  static outcome loadModel          (const int funcID, const bool);
+  static outcome saveModel          (const int funcID, const bool);
+  static outcome releaseModel       (const int funcID, const bool);
 
 };
 
@@ -117,6 +123,12 @@ public:
     return "Model";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -137,12 +149,12 @@ private:
 // Test functions:
 private:
 
-  static outcome findNode                         (const int funcID);
-  static outcome deleteRootNode                   (const int funcID);
-  static outcome deleteSubTreeNode_D              (const int funcID);
-  static outcome deleteSubTreeNode_D_AsReferenced (const int funcID);
-  static outcome deleteSubTreeNode_C              (const int funcID);
-  static outcome accessObservers_D                (const int funcID);
+  static outcome findNode                         (const int funcID, const bool);
+  static outcome deleteRootNode                   (const int funcID, const bool);
+  static outcome deleteSubTreeNode_D              (const int funcID, const bool);
+  static outcome deleteSubTreeNode_D_AsReferenced (const int funcID, const bool);
+  static outcome deleteSubTreeNode_C              (const int funcID, const bool);
+  static outcome accessObservers_D                (const int funcID, const bool);
 
 };
 
@@ -173,6 +185,12 @@ public:
     return "Model";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param functions [out] output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -198,17 +216,17 @@ private:
 // Test functions:
 private:
 
-  static outcome removeVariable  (const int funcID);
-  static outcome checkLoops1     (const int funcID);
-  static outcome checkLoops2     (const int funcID);
-  static outcome checkLoops3     (const int funcID);
-  static outcome checkLoops4     (const int funcID);
-  static outcome checkLoops5     (const int funcID);
-  static outcome checkLoops6     (const int funcID);
-  static outcome renameVariable1 (const int funcID);
-  static outcome renameVariable2 (const int funcID);
-  static outcome renameVariable3 (const int funcID);
-  static outcome addVariable     (const int funcID);
+  static outcome removeVariable  (const int funcID, const bool);
+  static outcome checkLoops1     (const int funcID, const bool);
+  static outcome checkLoops2     (const int funcID, const bool);
+  static outcome checkLoops3     (const int funcID, const bool);
+  static outcome checkLoops4     (const int funcID, const bool);
+  static outcome checkLoops5     (const int funcID, const bool);
+  static outcome checkLoops6     (const int funcID, const bool);
+  static outcome renameVariable1 (const int funcID, const bool);
+  static outcome renameVariable2 (const int funcID, const bool);
+  static outcome renameVariable3 (const int funcID, const bool);
+  static outcome addVariable     (const int funcID, const bool);
 
 };
 

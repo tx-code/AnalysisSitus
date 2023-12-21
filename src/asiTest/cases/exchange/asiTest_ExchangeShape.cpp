@@ -55,7 +55,7 @@ outcome asiTest_ExchangeShape::runTestScript(const int   funcID,
 //! Test scenario 1.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_load_step_1(const int funcID)
+outcome asiTest_ExchangeShape::test_load_step_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STEP/step_read_1.tcl");
 }
@@ -65,7 +65,7 @@ outcome asiTest_ExchangeShape::test_load_step_1(const int funcID)
 //! Test scenario 2.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_write_step_2(const int funcID)
+outcome asiTest_ExchangeShape::test_write_step_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STEP/step_write_2.tcl");
 }
@@ -75,7 +75,7 @@ outcome asiTest_ExchangeShape::test_write_step_2(const int funcID)
 //! Test scenario 3.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_write_step_3(const int funcID)
+outcome asiTest_ExchangeShape::test_write_step_3(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/STEP/step_write_3.tcl");
 }
@@ -85,7 +85,7 @@ outcome asiTest_ExchangeShape::test_write_step_3(const int funcID)
 //! Test scenario 4.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_load_iges_1(const int funcID)
+outcome asiTest_ExchangeShape::test_load_iges_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/IGES/iges_read_1.tcl");
 }
@@ -95,7 +95,7 @@ outcome asiTest_ExchangeShape::test_load_iges_1(const int funcID)
 //! Test scenario 5.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_load_brep_1(const int funcID)
+outcome asiTest_ExchangeShape::test_load_brep_1(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/BREP/brep_read_1.tcl");
 }
@@ -105,7 +105,7 @@ outcome asiTest_ExchangeShape::test_load_brep_1(const int funcID)
 //! Test scenario 6.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_write_brep_2(const int funcID)
+outcome asiTest_ExchangeShape::test_write_brep_2(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/BREP/brep_write_2.tcl");
 }
@@ -115,7 +115,7 @@ outcome asiTest_ExchangeShape::test_write_brep_2(const int funcID)
 //! Test scenario 7.
 //! \param[in] funcID ID of the Test Function.
 //! \return true in case of success, false -- otherwise.
-outcome asiTest_ExchangeShape::test_write_brep_3(const int funcID)
+outcome asiTest_ExchangeShape::test_write_brep_3(const int funcID, const bool)
 {
   return runTestScript(funcID, "exchange/BREP/brep_write_3.tcl");
 }

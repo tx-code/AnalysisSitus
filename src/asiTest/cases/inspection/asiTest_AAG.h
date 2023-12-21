@@ -65,6 +65,12 @@ public:
     return "inspection";
   }
 
+  //! Returns the IDs of the test cases to generate reference data for.
+  static void GenRefIds(std::set<int>& genrefIds)
+  {
+    (void)genrefIds;
+  }
+
   //! Returns pointers to the Test Functions to launch.
   //! \param[out] functions output collection of pointers.
   static void Functions(asiTestFunctions& functions)
@@ -134,24 +140,24 @@ private:
 
 private:
 
-  static outcome testNeighborsIterator001 (const int funcID);
-  static outcome testNeighborsIterator002 (const int funcID);
-  static outcome testNeighborsIterator003 (const int funcID);
-  static outcome testNeighborsIterator004 (const int funcID);
-  static outcome testNeighborsIterator005 (const int funcID);
-  static outcome testNeighborsIterator006 (const int funcID);
-  static outcome testNeighborsIterator007 (const int funcID);
-  static outcome testNeighborsIterator008 (const int funcID);
-  static outcome testNeighborsIterator009 (const int funcID);
-  static outcome testJSON01               (const int funcID);
-  static outcome testJSON02               (const int funcID);
-  static outcome testNaming01             (const int funcID);
-  static outcome testNaming02             (const int funcID);
-  static outcome testNaming03             (const int funcID);
-  static outcome testNaming04             (const int funcID);
-  static outcome testCollapse01           (const int funcID);
-  static outcome testCollapse02           (const int funcID);
-  static outcome testCollapse03           (const int funcID);
+  static outcome testNeighborsIterator001 (const int funcID, const bool);
+  static outcome testNeighborsIterator002 (const int funcID, const bool);
+  static outcome testNeighborsIterator003 (const int funcID, const bool);
+  static outcome testNeighborsIterator004 (const int funcID, const bool);
+  static outcome testNeighborsIterator005 (const int funcID, const bool);
+  static outcome testNeighborsIterator006 (const int funcID, const bool);
+  static outcome testNeighborsIterator007 (const int funcID, const bool);
+  static outcome testNeighborsIterator008 (const int funcID, const bool);
+  static outcome testNeighborsIterator009 (const int funcID, const bool);
+  static outcome testJSON01               (const int funcID, const bool);
+  static outcome testJSON02               (const int funcID, const bool);
+  static outcome testNaming01             (const int funcID, const bool);
+  static outcome testNaming02             (const int funcID, const bool);
+  static outcome testNaming03             (const int funcID, const bool);
+  static outcome testNaming04             (const int funcID, const bool);
+  static outcome testCollapse01           (const int funcID, const bool);
+  static outcome testCollapse02           (const int funcID, const bool);
+  static outcome testCollapse03           (const int funcID, const bool);
 
 };
 
