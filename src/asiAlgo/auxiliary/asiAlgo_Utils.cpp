@@ -966,6 +966,21 @@ std::string asiAlgo_Utils::Json::FromDirAsTuple(const gp_Dir& dir)
 
 //-----------------------------------------------------------------------------
 
+std::string asiAlgo_Utils::Json::FromPointAsTuple(const gp_Pnt& pnt)
+{
+  std::stringstream out;
+
+  out << "[";
+  out << pnt.X();
+  out << ", " << pnt.Y();
+  out << ", " << pnt.Z();
+  out << "]";
+
+  return out.str();
+}
+
+//-----------------------------------------------------------------------------
+
 std::string
   asiAlgo_Utils::Json::FromPair(const tl::optional< std::pair<int, int> >& pair)
 {

@@ -116,9 +116,6 @@ public:
   asiEngine_EXPORT virtual void
     Clear();
 
-  asiEngine_EXPORT void
-    RegisterTreeFunction(const Handle(ActAPI_ITreeFunction)& TF);
-
 //-----------------------------------------------------------------------------
 // Accessors to Nodes:
 public:

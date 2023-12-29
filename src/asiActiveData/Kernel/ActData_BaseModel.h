@@ -337,15 +337,17 @@ protected:
   ActData_EXPORT
     ActData_BaseModel(const Standard_Boolean useExtTransactions = Standard_False);
 
-// Construction internals:
-protected:
+public:
 
   ActData_EXPORT void
-    registerPartition(const Standard_Integer theTypeId,
+    RegisterPartition(const Standard_Integer theTypeId,
                       const Handle(ActAPI_IPartition)& thePartition);
 
   ActData_EXPORT void
-    registerTreeFunction(const Handle(ActAPI_ITreeFunction)& theTreeFunction);
+    RegisterTreeFunction(const Handle(ActAPI_ITreeFunction)& theTreeFunction);
+
+// Construction internals:
+protected:
 
   ActData_EXPORT void
     init(const Handle(TDocStd_Document)& theDoc);

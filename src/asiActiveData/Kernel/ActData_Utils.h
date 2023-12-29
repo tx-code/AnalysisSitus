@@ -65,10 +65,10 @@
   REGISTER_PARAMETER_COMMON(Class, Id, Standard_True)
 
 #define REGISTER_PARTITION(Class, Id) \
-  this->registerPartition( Id, Class::Instance() )
+  this->RegisterPartition( Id, Class::Instance() )
 
 #define REGISTER_TREE_FUNCTION(Class) \
-  this->registerTreeFunction( Class::Instance() )
+  this->RegisterTreeFunction( Class::Instance() )
 
 //! \ingroup AD_DF
 //!

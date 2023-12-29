@@ -64,5 +64,3 @@ void asiAlgo_FindFree::FindEdges(const TopoDS_Shape&         shape,
       freeEdges.Add(E);
   }
 }
-
-//-----------------------------------------------------------------------------

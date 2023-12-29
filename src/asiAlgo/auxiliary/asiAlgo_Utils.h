@@ -396,6 +396,12 @@ namespace asiAlgo_Utils
     asiAlgo_EXPORT std::string
       FromDirAsTuple(const gp_Dir& dir);
 
+    //! Dumps the passed coordinates as a JSON array.
+    //! \param[in] pnt the point to dump.
+    //! \return '[X(), Y(), Z()]' string.
+    asiAlgo_EXPORT std::string
+      FromPointAsTuple(const gp_Pnt& pnt);
+
     //! Dumps the passed pair as a JSON array.
     //! \param[in] pair the pair to dump.
     //! \return a JSON array containing the elements of the pair.

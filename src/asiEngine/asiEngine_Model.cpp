@@ -233,13 +233,6 @@ void asiEngine_Model::Clear()
 
 //-----------------------------------------------------------------------------
 
-void asiEngine_Model::RegisterTreeFunction(const Handle(ActAPI_ITreeFunction)& TF)
-{
-  this->registerTreeFunction(TF);
-}
-
-//-----------------------------------------------------------------------------
-
 //! \return sole Part Node.
 Handle(asiData_PartNode) asiEngine_Model::GetPartNode() const
 {

@@ -1351,7 +1351,7 @@ void ActData_BaseModel::FuncSetExecutionFlags(const Standard_Integer theFlags)
 //! to allow dynamic manipulation with Partitions in runtime.
 //! \param theTypeId [in] Partition type ID.
 //! \param thePartition [in] Partition instance to register in Data Model.
-void ActData_BaseModel::registerPartition(const Standard_Integer theTypeId,
+void ActData_BaseModel::RegisterPartition(const Standard_Integer theTypeId,
                                           const Handle(ActAPI_IPartition)& thePartition)
 {
   // Allocate Partition map if needed
@@ -1376,7 +1376,7 @@ void ActData_BaseModel::registerPartition(const Standard_Integer theTypeId,
 //! involved Tree Functions in its constructor. This mechanism is not intended
 //! to allow dynamic manipulation with Tree Functions in runtime.
 //! \param thePartition [in] Tree Function to register in Data Model.
-void ActData_BaseModel::registerTreeFunction(const Handle(ActAPI_ITreeFunction)& theTreeFunction)
+void ActData_BaseModel::RegisterTreeFunction(const Handle(ActAPI_ITreeFunction)& theTreeFunction)
 {
   // Allocate Tree Function map if needed
   if ( m_treeFunctionMap.IsNull() )
