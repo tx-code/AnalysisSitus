@@ -23,11 +23,10 @@ set (CMAKE_CONFIGURATION_TYPES Release Debug RelWithDebInfo CACHE INTERNAL "" FO
 
 include (${CMAKE_SOURCE_DIR}/cmake/asitus_3rdparty_macros.cmake)
 
-ASITUS_RETRIEVE_VERSION(${CMAKE_SOURCE_DIR}/src/asiAlgo/asiAlgo_Version.h VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
+ASITUS_RETRIEVE_VERSION(${CMAKE_SOURCE_DIR}/src/asiAlgo/asiAlgo_Version.h VERSION_YEAR VERSION_NUM)
 
-message (STATUS "Analysis Situs VERSION_MAJOR: ${VERSION_MAJOR}")
-message (STATUS "Analysis Situs VERSION_MINOR: ${VERSION_MINOR}")
-message (STATUS "Analysis Situs VERSION_PATCH: ${VERSION_PATCH}")
+message (STATUS "Analysis Situs VERSION_YEAR: ${VERSION_YEAR}")
+message (STATUS "Analysis Situs VERSION_NUM:  ${VERSION_NUM}")
 
 #------------------------------------------------------------------------------
 # Distribution parameters

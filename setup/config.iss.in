@@ -1,5 +1,5 @@
-#define MyAppVersion "Analysis Situs @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
-#define MyAppInstName "asitus_@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
+#define MyAppVersion "Analysis Situs @VERSION_YEAR@.@VERSION_NUM@"
+#define MyAppInstName "asitus_@VERSION_YEAR@.@VERSION_NUM@
 #define MyAppExeName "asiExe.exe"
 #define MyAppIcoName "icon.ico"
 #define MyAppDesktopIcoName "icon64.ico"

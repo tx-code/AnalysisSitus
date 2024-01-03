@@ -1570,7 +1570,7 @@ std::string asiAlgo_Utils::SurfaceName(const Handle(Geom_Surface)& surf)
     return "sphere";
   //
   if ( surf->IsInstance( STANDARD_TYPE(Geom_SurfaceOfLinearExtrusion) ) )
-    return "ruled";
+    return "extrusion";
   //
   if ( surf->IsInstance( STANDARD_TYPE(Geom_SurfaceOfRevolution) ) )
     return "revolution";
