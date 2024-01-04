@@ -31,9 +31,11 @@
 // Own include
 #include <asiEngine_Triangulation.h>
 
-// asiVisu includes
-#include <asiVisu_TriangulationNodeInfo.h>
-#include <asiVisu_TriangulationPrs.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_TriangulationNodeInfo.h>
+  #include <asiVisu_TriangulationPrs.h>
+#endif
 
 // asiAlgo includes
 #include <asiAlgo_CheckDeviations.h>
@@ -249,6 +251,8 @@ bool
 #endif
 }
 
+#if !defined BUILD_ALGO_ONLY
+
 //-----------------------------------------------------------------------------
 
 void asiEngine_Triangulation::HighlightFacets(const TColStd_PackedMapOfInteger& facetIndices)
@@ -287,3 +291,5 @@ void asiEngine_Triangulation::GetHighlightedFacets(TColStd_PackedMapOfInteger& f
 
   facetIndices = pickRes->GetPickedElementIds();
 }
+
+#endif

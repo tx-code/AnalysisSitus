@@ -33,12 +33,14 @@
 
 // asiAlgo includes
 #include <asiAlgo_CheckToler.h>
+#include <asiAlgo_CheckValidity.h>
 #include <asiAlgo_Utils.h>
 
-// asiVisu includes
-#include <asiAlgo_CheckValidity.h>
-#include <asiVisu_MeshResultUtils.h>
-#include <asiVisu_Utils.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_MeshResultUtils.h>
+  #include <asiVisu_Utils.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -59,11 +61,13 @@ void asiEngine_TolerantShapes::Populate(const TopoDS_Shape& shape,
   const double maxToler  = checker.GetMaxTolerance(shape) + resolution;
   const double tolerStep = (maxToler - minToler) / numRanges;
 
+#if !defined BUILD_ALGO_ONLY
   // Initialize lookup table.
   vtkSmartPointer<vtkLookupTable>
     lookupTable = asiVisu_MeshResultUtils::InitLookupTable(minToler, maxToler);
   //
   lookupTable->ForceBuild();
+#endif
 
   // Generate tolerance ranges.
   std::vector<double> tolerRanges;
@@ -90,6 +94,7 @@ void asiEngine_TolerantShapes::Populate(const TopoDS_Shape& shape,
     return;
   }
 
+#if !defined BUILD_ALGO_ONLY
   if ( m_prsMgr )
   {
     m_model->GetPartNode()->RemoveUserFlags(NodeFlag_IsPresentationVisible);
@@ -151,6 +156,7 @@ void asiEngine_TolerantShapes::Populate(const TopoDS_Shape& shape,
     if ( m_prsMgr )
       m_prsMgr->Actualize(range_n);
   }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -169,9 +175,11 @@ void asiEngine_TolerantShapes::Clean_All()
 
     nodesToDelete->Append(node);
 
+#if !defined BUILD_ALGO_ONLY
     // Clean up presentation.
     if ( m_prsMgr && m_prsMgr->IsPresented(node) )
       m_prsMgr->DeletePresentation(node);
+#endif
   }
 
   // Delete all Nodes collected for removal.

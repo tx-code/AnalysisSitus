@@ -104,26 +104,30 @@ set (OCCT_LIB_FILES
   TKXDESTEP
   TKXDEIGES
 )
+
 #------------------------------------------------------------------------------
-set (VTK_LIB_FILES
-  vtkCommonCore-8.2
-  vtkCommonDataModel-8.2
-  vtkCommonExecutionModel-8.2
-  vtkCommonMath-8.2
-  vtkCommonTransforms-8.2
-  vtkCommonMisc-8.2
-  vtkFiltersCore-8.2
-  vtkFiltersGeneral-8.2
-  vtkFiltersSources-8.2
-  vtkFiltersGeometry-8.2
-  vtkFiltersParallel-8.2
-  vtkFiltersExtraction-8.2
-  vtkFiltersModeling-8.2
-  vtkIOCore-8.2
-  vtkIOImage-8.2
-  vtkImagingCore-8.2
-  vtkInteractionStyle-8.2
-)
+
+if (NOT BUILD_ALGO_ONLY)
+  set (VTK_LIB_FILES
+    vtkCommonCore-8.2
+    vtkCommonDataModel-8.2
+    vtkCommonExecutionModel-8.2
+    vtkCommonMath-8.2
+    vtkCommonTransforms-8.2
+    vtkCommonMisc-8.2
+    vtkFiltersCore-8.2
+    vtkFiltersGeneral-8.2
+    vtkFiltersSources-8.2
+    vtkFiltersGeometry-8.2
+    vtkFiltersParallel-8.2
+    vtkFiltersExtraction-8.2
+    vtkFiltersModeling-8.2
+    vtkIOCore-8.2
+    vtkIOImage-8.2
+    vtkImagingCore-8.2
+    vtkInteractionStyle-8.2
+  )
+endif()
 
 #------------------------------------------------------------------------------
 # Add sources
@@ -185,7 +189,12 @@ add_library (asiEngine SHARED ${H_FILES} ${CPP_FILES} ${func_H_FILES} ${func_CPP
 # Dependencies
 #------------------------------------------------------------------------------
 
-target_link_libraries(asiEngine asiAlgo asiAsm asiData asiVisu)
+target_link_libraries(asiEngine asiAlgo asiAsm asiData)
+
+if (NOT BUILD_ALGO_ONLY)
+  message (STATUS "... Adding asiVisu dependency for asiEngine.")
+  target_link_libraries(asiEngine asiVisu)
+endif()
 
 if (3RDPARTY_tbb_LIBRARY_DIR_DEBUG)
   link_directories(${3RDPARTY_tbb_LIBRARY_DIR_DEBUG})
@@ -208,20 +217,22 @@ foreach (LIB_FILE ${OCCT_LIB_FILES})
   endif()
 endforeach()
 
-foreach (LIB_FILE ${VTK_LIB_FILES})
-  if (WIN32)
-    set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  else()
-    set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  endif()
+if (NOT BUILD_ALGO_ONLY)
+  foreach (LIB_FILE ${VTK_LIB_FILES})
+    if (WIN32)
+      set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 
-  if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiEngine debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiEngine optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  else()
-    target_link_libraries (asiEngine ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  endif()
-endforeach()
+    if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+      target_link_libraries (asiEngine debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+      target_link_libraries (asiEngine optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    else()
+      target_link_libraries (asiEngine ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    endif()
+  endforeach()
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software
@@ -254,6 +265,9 @@ install (TARGETS asiEngine
          RUNTIME DESTINATION ${SDK_INSTALL_SUBDIR}bind COMPONENT Runtime
          ARCHIVE DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library
          LIBRARY DESTINATION ${SDK_INSTALL_SUBDIR}libd COMPONENT Library)
+
+install (FILES ${H_FILES}      DESTINATION ${SDK_INSTALL_SUBDIR}include)
+install (FILES ${func_H_FILES} DESTINATION ${SDK_INSTALL_SUBDIR}include)
 
 if (MSVC)
   install (FILES ${PROJECT_BINARY_DIR}/../../${PLATFORM}${COMPILER_BITNESS}/${COMPILER}/bind/asiEngine.pdb DESTINATION ${SDK_INSTALL_SUBDIR}bind CONFIGURATIONS Debug)

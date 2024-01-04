@@ -58,6 +58,43 @@ class ActAPI_Color : public Quantity_Color
 {
 public:
 
+  //! Converts integer value to a color.
+  //! \param[in] icolor integer color code.
+  //! \return converted value
+  static ActAPI_Color IntToColor(const int icolor)
+  {
+    unsigned char uRed   = ( icolor >> 16 ) & 0xFF;
+    unsigned char uGreen = ( icolor >>  8 ) & 0xFF;
+    unsigned char uBlue  =   icolor         & 0xFF;
+    return ActAPI_Color(uRed/255., uGreen/255., uBlue/255., Quantity_TOC_RGB);
+  }
+
+  //! Converts RGB color to integer.
+  //! \param[in] r red component.
+  //! \param[in] g green component.
+  //! \param[in] b blue component.
+  //! \return converted value.
+  static int ColorToInt(unsigned int r, unsigned int g, unsigned int b)
+  {
+    return r << 16 | g << 8 | b;
+  }
+
+  //! Converts RGB color to integer.
+  //! \param[in] r red component of the color.
+  //! \param[in] g green component of the color.
+  //! \param[in] b blue component of the color.
+  //! \return converted value.
+  static int ColorToInt(const double r, const double g, const double b)
+  {
+    unsigned char red   = (unsigned char) ( floor(r >= 1.0 ? 255 : r * 256.0) );
+    unsigned char green = (unsigned char) ( floor(g >= 1.0 ? 255 : g * 256.0) );
+    unsigned char blue  = (unsigned char) ( floor(b >= 1.0 ? 255 : b * 256.0) );
+    //
+    return red << 16 | green << 8 | blue;
+  }
+
+public:
+
   //! Ctor.
   ActAPI_Color() : Quantity_Color (),
                    m_bIsDefined   (Standard_False) {}

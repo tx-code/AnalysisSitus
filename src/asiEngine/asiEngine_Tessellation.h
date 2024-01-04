@@ -38,14 +38,31 @@
 #include <asiData_MeshNormsNode.h>
 #include <asiData_TessNode.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+#endif
 
 //! Data Model API for tessellations.
 class asiEngine_Tessellation : public asiEngine_Base
 {
 public:
 
+  //! Ctor.
+  //! \param[in] model    Data Model instance.
+  //! \param[in] progress progress notifier.
+  //! \param[in] plotter  imperative plotter.
+  asiEngine_Tessellation(const Handle(asiEngine_Model)& model,
+                         ActAPI_ProgressEntry           progress = nullptr,
+                         ActAPI_PlotterEntry            plotter  = nullptr)
+  //
+  : asiEngine_Base (model, progress, plotter)
+#if !defined BUILD_ALGO_ONLY
+  , m_prsMgr       (nullptr)
+#endif
+  {}
+
+#if !defined BUILD_ALGO_ONLY
   //! Ctor.
   //! \param[in] model    Data Model instance.
   //! \param[in] prsMgr   Presentation Manager for visual commands.
@@ -59,18 +76,7 @@ public:
   : asiEngine_Base (model, progress, plotter),
     m_prsMgr       (prsMgr)
   {}
-
-  //! Ctor.
-  //! \param[in] model    Data Model instance.
-  //! \param[in] progress progress notifier.
-  //! \param[in] plotter  imperative plotter.
-  asiEngine_Tessellation(const Handle(asiEngine_Model)& model,
-                         ActAPI_ProgressEntry           progress = nullptr,
-                         ActAPI_PlotterEntry            plotter  = nullptr)
-  //
-  : asiEngine_Base (model, progress, plotter),
-    m_prsMgr       (nullptr)
-  {}
+#endif
 
 public:
 
@@ -102,9 +108,11 @@ public:
     ComputeNorms(const Handle(asiData_TessNode)& tessNode,
                  const bool                      doElemNorms);
 
+#if !defined BUILD_ALGO_ONLY
 protected:
 
   vtkSmartPointer<asiVisu_PrsManager> m_prsMgr; //!< Presentation manager.
+#endif
 
 };
 

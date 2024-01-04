@@ -34,10 +34,12 @@
 // asiAlgo includes
 #include <asiAlgo_MeshConvert.h>
 
-// asiVisu includes
-#include <asiVisu_BCurveHandlesPipeline.h>
-#include <asiVisu_BCurveRepersPipeline.h>
-#include <asiVisu_CurvePipeline.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_BCurveHandlesPipeline.h>
+  #include <asiVisu_BCurveRepersPipeline.h>
+  #include <asiVisu_CurvePipeline.h>
+#endif
 
 // Active Data includes
 #include <ActData_UniqueNodeName.h>
@@ -671,6 +673,8 @@ void asiEngine_IV::Clean_Curves()
   this->_cleanChildren(IV_Parent);
 }
 
+#if !defined BUILD_ALGO_ONLY
+
 //-----------------------------------------------------------------------------
 
 //! Enables or disables interactive picking for the curve handles.
@@ -755,6 +759,8 @@ void asiEngine_IV::ActivateCurveRepers(const bool          on,
     }
   }
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 

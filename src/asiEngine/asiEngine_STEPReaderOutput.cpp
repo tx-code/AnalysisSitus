@@ -31,9 +31,11 @@
 // Own include
 #include <asiEngine_STEPReaderOutput.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
-#include <asiVisu_Utils.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+  #include <asiVisu_Utils.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -57,7 +59,7 @@ void asiEngine_STEPReaderOutput::SetColor(const TopoDS_Shape&   subshape,
                                           const ColorAttachment attch)
 {
   // Convert color to a persistent form.
-  const int iCol = asiVisu_Utils::ColorToInt( color.Red(), color.Green(), color.Blue() );
+  const int iCol = ActAPI_Color::ColorToInt( color.Red(), color.Green(), color.Blue() );
 
   // Part color.
   if ( (subshape.ShapeType() < TopAbs_FACE) && (attch == ColorAttachment_SURFACE) )

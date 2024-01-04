@@ -34,8 +34,10 @@
 // asiEngine includes
 #include <asiEngine_Base.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+#endif
 
 class asiAlgo_BVHFacets;
 
@@ -139,6 +141,7 @@ public:
   asiEngine_EXPORT void
     Clean_Curves();
 
+#if !defined BUILD_ALGO_ONLY
   asiEngine_EXPORT void
     ActivateCurveHandles(const bool          on,
                          const bool          create,
@@ -147,6 +150,7 @@ public:
   asiEngine_EXPORT void
     ActivateCurveRepers(const bool          on,
                         asiVisu_PrsManager* pPrsMgr);
+#endif
 
 //---------------------------------------------------------------------------//
 

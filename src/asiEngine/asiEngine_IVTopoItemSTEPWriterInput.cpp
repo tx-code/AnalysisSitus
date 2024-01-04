@@ -31,8 +31,10 @@
 // Own include
 #include <asiEngine_IVTopoItemSTEPWriterInput.h>
 
-// asiVisu includes
-#include <asiVisu_Utils.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_Utils.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -94,24 +96,23 @@ bool asiEngine_IVTopoItemSTEPWriterInput::HasColor(const TopoDS_Shape& /*shape*/
 //-----------------------------------------------------------------------------
 
 Quantity_Color
-asiEngine_IVTopoItemSTEPWriterInput::GetColor(const TopoDS_Shape& /*shape*/) const
+  asiEngine_IVTopoItemSTEPWriterInput::GetColor(const TopoDS_Shape& /*shape*/) const
 {
   if ( m_topoItem.IsNull() || !m_topoItem->IsWellFormed() )
   {
     return Quantity_Color(1., 1., 1., Quantity_TOC_RGB);
   }
 
-  ActAPI_Color color = asiVisu_Utils::IntToColor(m_topoItem->GetColor());
+  ActAPI_Color color = ActAPI_Color::IntToColor(m_topoItem->GetColor());
 
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 
 //-----------------------------------------------------------------------------
 
-Quantity_Color asiEngine_IVTopoItemSTEPWriterInput::
-  GetCommonColor() const
+Quantity_Color asiEngine_IVTopoItemSTEPWriterInput::GetCommonColor() const
 {
-  ActAPI_Color color = asiVisu_Utils::IntToColor( m_topoItem->GetColor() );
+  ActAPI_Color color = ActAPI_Color::IntToColor( m_topoItem->GetColor() );
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 

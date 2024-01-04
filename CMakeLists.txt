@@ -261,7 +261,11 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiData)
 if (NOT BUILD_ALGO_ONLY)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTcl)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiVisu)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiEngine)
+endif()
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiEngine)
+
+if (NOT BUILD_ALGO_ONLY)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiUI)
   add_subdirectory(${CMAKE_SOURCE_DIR}/src/asiTestEngine)
 

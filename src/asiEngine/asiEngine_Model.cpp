@@ -208,7 +208,7 @@ void asiEngine_Model::Clear()
     asiEngine_Curve(this).Clean_All( this->GetPartNode()->GetCurveRepresentation() );
 
     // Delete all tolerant ranges.
-    asiEngine_TolerantShapes(this, nullptr).Clean_All();
+    asiEngine_TolerantShapes(this).Clean_All();
 
     // Clean up triangulation.
     asiEngine_Triangulation(this).Clean_All();

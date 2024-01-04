@@ -37,8 +37,10 @@
 // asiData includes
 #include <asiData_TolerantRangeNode.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -47,6 +49,23 @@ class asiEngine_TolerantShapes : public asiEngine_Base
 {
 public:
 
+  //! Ctor.
+  //! \param[in] model    Data Model instance.
+  //! \param[in] progress progress notifier.
+  //! \param[in] plotter  imperative plotter.
+  asiEngine_TolerantShapes(const Handle(asiEngine_Model)& model,
+                           ActAPI_ProgressEntry           progress = nullptr,
+                           ActAPI_PlotterEntry            plotter  = nullptr)
+  //
+  : asiEngine_Base (model, progress, plotter)
+#if !defined BUILD_ALGO_ONLY
+  , m_prsMgr       (nullptr)
+#endif
+  {
+    m_tolShapes = m_model->GetPartNode()->GetTolerantShapes();
+  }
+
+#if !defined BUILD_ALGO_ONLY
   //! Ctor.
   //! \param[in] model    Data Model instance.
   //! \param[in] prsMgr   Presentation Manager.
@@ -62,6 +81,7 @@ public:
   {
     m_tolShapes = m_model->GetPartNode()->GetTolerantShapes();
   }
+#endif
 
 public:
 
@@ -91,8 +111,11 @@ public:
 
 protected:
 
-  Handle(asiData_TolerantShapesNode)  m_tolShapes; //!< Tolerant shapes Node.
-  vtkSmartPointer<asiVisu_PrsManager> m_prsMgr;    //!< Presentation Manager.
+  Handle(asiData_TolerantShapesNode) m_tolShapes; //!< Tolerant shapes Node.
+
+#if !defined BUILD_ALGO_ONLY
+  vtkSmartPointer<asiVisu_PrsManager> m_prsMgr; //!< Presentation Manager.
+#endif
 
 };
 

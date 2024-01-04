@@ -36,11 +36,13 @@
 #include <asiEngine_STEPReaderOutput.h>
 #include <asiEngine_TolerantShapes.h>
 
-// asiVisu includes
-#include <asiVisu_PartPrs.h>
-#include <asiVisu_PartNodeInfo.h>
-#include <asiVisu_PrsManager.h>
-#include <asiVisu_Utils.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PartPrs.h>
+  #include <asiVisu_PartNodeInfo.h>
+  #include <asiVisu_PrsManager.h>
+  #include <asiVisu_Utils.h>
+#endif
 
 // asiData includes
 #include <asiData_MetadataAttr.h>
@@ -56,10 +58,12 @@
 // Active Data includes
 #include <ActData_ParameterFactory.h>
 
-// VTK includes
-#pragma warning(push, 0)
-#include <vtkProperty.h>
-#pragma warning(pop)
+#if !defined BUILD_ALGO_ONLY
+  // VTK includes
+  #pragma warning(push, 0)
+  #include <vtkProperty.h>
+  #pragma warning(pop)
+#endif
 
 // OCCT includes
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
@@ -726,9 +730,11 @@ Handle(asiData_PartNode) asiEngine_Part::Update(const TopoDS_Shape&            m
   if ( part_n->HasNaming() )
     part_n->GetNaming()->Actualize(model);
 
+#if !defined BUILD_ALGO_ONLY
   // Actualize presentation.
   if ( m_prsMgr )
     m_prsMgr->Actualize(part_n);
+#endif
 
   return part_n;
 }
@@ -870,7 +876,11 @@ void asiEngine_Part::Clean(const bool cleanMeta,
   part_n->SetTransformation(0., 0., 0., 0., 0., 0.);
 
   // Clean up tolerant shapes.
+#if !defined BUILD_ALGO_ONLY
   asiEngine_TolerantShapes tolApi(m_model, m_prsMgr, m_progress, m_plotter);
+#else
+  asiEngine_TolerantShapes tolApi(m_model, m_progress, m_plotter);
+#endif
   //
   tolApi.Clean_All();
 
@@ -1070,6 +1080,8 @@ void asiEngine_Part::GetSubShapeIndices(const TopTools_IndexedMapOfShape& subSha
 }
 
 //-----------------------------------------------------------------------------
+
+#if !defined BUILD_ALGO_ONLY
 
 void asiEngine_Part::HighlightFace(const int faceIndex)
 {
@@ -1282,11 +1294,14 @@ void asiEngine_Part::GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndi
   }
 }
 
+#endif
+
 //-----------------------------------------------------------------------------
 
 void asiEngine_Part::TransferMetadata(const asiAsm::xde::PartId&      pid,
                                       const Handle(asiAsm::xde::Doc)& xdeDoc)
 {
+#if !defined BUILD_ALGO_ONLY
   Handle(asiData_MetadataNode) N = this->GetMetadata();
 
   // Get all metadata records.
@@ -1306,4 +1321,8 @@ void asiEngine_Part::TransferMetadata(const asiAsm::xde::PartId&      pid,
     TDF_Label ssLab = xdeDoc->AddSubShape(pid, shape);
     xdeDoc->SetColor(ssLab, color);
   }
+#else
+  (void) pid;
+  (void) xdeDoc;
+#endif
 }

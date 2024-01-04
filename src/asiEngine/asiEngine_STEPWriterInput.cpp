@@ -31,9 +31,11 @@
 // Own include
 #include <asiEngine_STEPWriterInput.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
-#include <asiVisu_Utils.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+  #include <asiVisu_Utils.h>
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -106,7 +108,7 @@ Quantity_Color
 
   const int icolor = map.FindFromKey(shape);
 
-  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+  ActAPI_Color color = ActAPI_Color::IntToColor(icolor);
 
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
@@ -117,7 +119,7 @@ Quantity_Color asiEngine_STEPWriterInput::GetCommonColor() const
 {
   const int icolor = m_model->GetPartNode()->GetColor();
 
-  ActAPI_Color color = asiVisu_Utils::IntToColor(icolor);
+  ActAPI_Color color = ActAPI_Color::IntToColor(icolor);
   return Quantity_Color(color.Red(), color.Green(), color.Blue(), Quantity_TOC_RGB);
 }
 

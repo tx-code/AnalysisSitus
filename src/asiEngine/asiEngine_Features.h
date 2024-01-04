@@ -34,8 +34,10 @@
 // asiEngine includes
 #include <asiEngine_Base.h>
 
-// asiVisu includes
-#include <asiVisu_PrsManager.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_PrsManager.h>
+#endif
 
 //-----------------------------------------------------------------------------
 

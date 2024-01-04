@@ -41,8 +41,10 @@
 // asiAsm includes
 #include <asiAsm_XdeDoc.h>
 
-// asiVisu includes
-#include <asiVisu_Selection.h>
+#if !defined BUILD_ALGO_ONLY
+  // asiVisu includes
+  #include <asiVisu_Selection.h>
+#endif
 
 // OCCT includes
 #include <BRepAdaptor_Surface.hxx>
@@ -50,8 +52,10 @@
 #include <math_BullardGenerator.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
-// VTK includes
-#include <vtkSmartPointer.h>
+#if !defined BUILD_ALGO_ONLY
+  // VTK includes
+  #include <vtkSmartPointer.h>
+#endif
 
 class asiVisu_PrsManager;
 
@@ -60,6 +64,7 @@ class asiEngine_Part : public asiEngine_Base
 {
 public:
 
+#if !defined BUILD_ALGO_ONLY
   //! Ctor.
   //! \param[in] model    Data Model instance.
   //! \param[in] prsMgr   Presentation Manager for visual commands.
@@ -71,6 +76,7 @@ public:
                  ActAPI_PlotterEntry                        plotter  = nullptr)
   //
   : asiEngine_Base(model, progress, plotter), m_prsMgr(prsMgr) {}
+#endif
 
   //! Ctor.
   //! \param[in] model    Data Model instance.
@@ -80,7 +86,11 @@ public:
                  ActAPI_ProgressEntry           progress = nullptr,
                  ActAPI_PlotterEntry            plotter  = nullptr)
   //
-  : asiEngine_Base(model, progress, plotter), m_prsMgr(nullptr) {}
+  : asiEngine_Base(model, progress, plotter)
+#if !defined BUILD_ALGO_ONLY
+  , m_prsMgr(nullptr)
+#endif
+  {}
 
 public:
 
@@ -316,6 +326,9 @@ public:
                        TColStd_PackedMapOfInteger&       edgeIndices,
                        TColStd_PackedMapOfInteger&       vertexIndices);
 
+#if !defined BUILD_ALGO_ONLY
+public:
+
   //! Highlights a single face.
   //! \param[in] faceIndex face to highlight.
   asiEngine_EXPORT void
@@ -370,6 +383,10 @@ public:
   //! \param[out] vertIndices indices of the highlighted vertices.
   asiEngine_EXPORT void
     GetHighlightedVertices(TColStd_PackedMapOfInteger& vertIndices);
+
+#endif
+
+public:
 
   //! Finds a pair face for the given seed face.
   //! \param[in]  aag         the attributed adjacency graph to access faces by IDs.
@@ -541,9 +558,13 @@ public:
     TransferMetadata(const asiAsm::xde::PartId&      pid,
                      const Handle(asiAsm::xde::Doc)& xdeDoc);
 
+#if !defined BUILD_ALGO_ONLY
+
 protected:
 
   vtkSmartPointer<asiVisu_PrsManager> m_prsMgr; //!< Presentation Manager.
+
+#endif
 
 };
 
