@@ -244,26 +244,29 @@ set (OCCT_LIB_FILES
   TKXDESTEP
   TKXDEIGES
 )
+
 #------------------------------------------------------------------------------
-set (VTK_LIB_FILES
-  vtkCommonCore-8.2
-  vtkCommonDataModel-8.2
-  vtkCommonExecutionModel-8.2
-  vtkCommonMath-8.2
-  vtkCommonTransforms-8.2
-  vtkCommonMisc-8.2
-  vtkFiltersCore-8.2
-  vtkFiltersGeneral-8.2
-  vtkFiltersSources-8.2
-  vtkFiltersGeometry-8.2
-  vtkFiltersParallel-8.2
-  vtkFiltersExtraction-8.2
-  vtkFiltersModeling-8.2
-  vtkIOCore-8.2
-  vtkIOImage-8.2
-  vtkImagingCore-8.2
-  vtkInteractionStyle-8.2
-)
+if (NOT BUILD_ALGO_ONLY)
+  set (VTK_LIB_FILES
+    vtkCommonCore-8.2
+    vtkCommonDataModel-8.2
+    vtkCommonExecutionModel-8.2
+    vtkCommonMath-8.2
+    vtkCommonTransforms-8.2
+    vtkCommonMisc-8.2
+    vtkFiltersCore-8.2
+    vtkFiltersGeneral-8.2
+    vtkFiltersSources-8.2
+    vtkFiltersGeometry-8.2
+    vtkFiltersParallel-8.2
+    vtkFiltersExtraction-8.2
+    vtkFiltersModeling-8.2
+    vtkIOCore-8.2
+    vtkIOImage-8.2
+    vtkImagingCore-8.2
+    vtkInteractionStyle-8.2
+  )
+endif()
 
 #------------------------------------------------------------------------------
 # Add sources
@@ -393,20 +396,22 @@ foreach (LIB_FILE ${OCCT_LIB_FILES})
   endif()
 endforeach()
 
-foreach (LIB_FILE ${VTK_LIB_FILES})
-  if (WIN32)
-    set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  else()
-    set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  endif()
+if (NOT BUILD_ALGO_ONLY)
+  foreach (LIB_FILE ${VTK_LIB_FILES})
+    if (WIN32)
+      set (LIB_FILENAME "${LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set (LIB_FILENAME "lib${LIB_FILE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 
-  if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
-    target_link_libraries (asiData debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
-    target_link_libraries (asiData optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  else()
-    target_link_libraries (asiData ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
-  endif()
-endforeach()
+    if (3RDPARTY_vtk_LIBRARY_DIR_DEBUG AND EXISTS "${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME}")
+      target_link_libraries (asiData debug ${3RDPARTY_vtk_LIBRARY_DIR_DEBUG}/${LIB_FILENAME})
+      target_link_libraries (asiData optimized ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    else()
+      target_link_libraries (asiData ${3RDPARTY_vtk_LIBRARY_DIR}/${LIB_FILENAME})
+    endif()
+  endforeach()
+endif()
 
 #------------------------------------------------------------------------------
 # Installation of Analysis Situs as a software

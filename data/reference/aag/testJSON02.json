@@ -10,7 +10,7 @@
       "surface": "plane"
     },
     "4": {
-      "surface": "ruled"
+      "surface": "extrusion"
     },
     "5": {
       "surface": "plane"
