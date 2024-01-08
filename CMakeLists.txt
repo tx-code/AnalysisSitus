@@ -144,6 +144,22 @@ if (NOT BUILD_ALGO_ONLY)
   else()
     unset (INSTANT_MESHES_EXE CACHE)
   endif()
+else()
+  ASITUS_UNSET_3RDPARTY("vtk")
+  ASITUS_UNSET_3RDPARTY("tcl")
+  ASITUS_UNSET_3RDPARTY("freetype")
+
+  ASITUS_UNSET         ("3RDPARTY_QT_DIR")
+  ASITUS_UNSET         ("QMAKE_EXECUTABLE")
+  ASITUS_UNSET         ("USE_CONSOLE")
+  ASITUS_UNSET         ("USE_INSTANT_MESHES")
+  ASITUS_UNSET         ("INNOSETUP_EXE")
+
+  ASITUS_UNSET         ("ASI_TEST_DATA")
+  ASITUS_UNSET         ("ASI_TEST_DUMPING")
+  ASITUS_UNSET         ("ASI_TEST_SCRIPTS")
+  ASITUS_UNSET         ("ASI_PLUGINS_DIR")
+  ASITUS_UNSET         ("ASI_DOCS")
 endif()
 
 # Set paths to dynamically linked libs
