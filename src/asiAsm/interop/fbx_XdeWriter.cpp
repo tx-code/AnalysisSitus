@@ -158,7 +158,16 @@ namespace
     // Store normals.
     if ( storeNormals && triangulation->HasNormals() )
     {
-      const TShort_Array1OfShortReal& normalsArray = triangulation->Normals();
+      NCollection_Array1<gp_Vec3f>& __norms = triangulation->InternalNormals();
+      TShort_Array1OfShortReal      normalsArray( 1, __norms.Length()*3 );
+      int                           nidx = 1;
+      //
+      for ( int n = __norms.Lower(); n <= __norms.Upper(); ++n )
+      {
+        normalsArray(nidx++) = __norms(n).x();
+        normalsArray(nidx++) = __norms(n).y();
+        normalsArray(nidx++) = __norms(n).z();
+      }
 
       FbxGeometryElementNormal*
         fbxNormalElement = fbxMesh->CreateElementNormal();
@@ -179,7 +188,14 @@ namespace
     // Store UV Nodes.
     if ( triangulation->HasUVNodes() )
     {
-      const TColgp_Array1OfPnt2d& uvNodes = triangulation->UVNodes();
+      Poly_ArrayOfUVNodes& __uvNodes = triangulation->InternalUVNodes();
+      TColgp_Array1OfPnt2d uvNodes( 1, __uvNodes.Length() );
+      int                  nidx = 1;
+      //
+      for ( int n = __uvNodes.Lower(); n <= __uvNodes.Upper(); ++n )
+      {
+        uvNodes(nidx++) = uvNodes(n);
+      }
 
       FbxGeometryElementUV* fbxUVElement = fbxMesh->CreateElementUV("UV");
       fbxUVElement->SetMappingMode(FbxLayerElement::eByControlPoint);

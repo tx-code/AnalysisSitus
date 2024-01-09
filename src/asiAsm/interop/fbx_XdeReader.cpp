@@ -279,7 +279,11 @@ namespace
       bool hasUVNodes = (fbxMesh->GetElementUVCount() > 0);
 
       Handle(Poly_Triangulation) triangulation = new Poly_Triangulation(nbNodes, nbTriangles, hasUVNodes);
-      triangulation->ChangeNodes() = nodes;
+
+      for ( int n = nodes.Lower(); n <= nodes.Upper(); ++n )
+        triangulation->SetNode( n, nodes(n) );
+
+      //triangulation->ChangeNodes() = nodes;
       triangulation->ChangeTriangles() = trianglesPoly;
 
       if (hasUVNodes)
@@ -291,7 +295,10 @@ namespace
           gp_Pnt2d point(fbxUVs->GetDirectArray()[nodeIt][0], fbxUVs->GetDirectArray()[nodeIt][1]);
           nodesUV.SetValue(nodeIt + 1, point);
         }
-        triangulation->ChangeUVNodes() = nodesUV;
+
+        for ( int n = nodesUV.Lower(); n <= nodesUV.Upper(); ++n )
+        triangulation->SetUVNode( n, nodesUV(n) );
+        //triangulation->ChangeUVNodes() = nodesUV;
       }
 
       if (fbxMesh->GetElementNormalCount() > 0)

@@ -46,7 +46,7 @@
 
 //-----------------------------------------------------------------------------
 
-#define ASITUS_VERSION_STRING "2024.1"
+#define ASITUS_VERSION_STRING "2024.1dev"
 #define ASITUS_APP_NAME "Analysis Situs"
 
 namespace asi
