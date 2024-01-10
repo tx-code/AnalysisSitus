@@ -1357,47 +1357,50 @@ bool asiAlgo_ConvertCurve::FixGaps(const TopoDS_Wire&   input,
   sfw.FixReorderMode() = true;
 
   const bool isOk = sfw.FixGaps3d();
-  TopoDS_Wire wire = sfw.Wire();
-
-  Handle(TopTools_HSequenceOfShape) inputEdges = new TopTools_HSequenceOfShape;
-  for (TopExp_Explorer expE(wire, TopAbs_EDGE); expE.More(); expE.Next())
+  if (!isOk)
   {
-    const TopoDS_Edge& edge = TopoDS::Edge(expE.Current());
+    return false;
+  }
 
-    double f, l;
-    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+  Handle(ShapeExtend_WireData) sbwd = sfw.WireData();
+  Handle(ShapeExtend_WireData) inSbwd = new ShapeExtend_WireData(input);
 
-    if (curve.IsNull())
+  for (Standard_Integer i = 1; i <= sbwd->NbEdges(); i++)
+  {
+    const TopoDS_Edge& edge = sbwd->Edge(i);
+    // Check if the edge was in the input wire or not.
+    // If it's not it is necessary to check new edge,
+    // Otherwise continue the search.
+    if (inSbwd->Index(edge))
     {
       continue;
     }
 
-    // Skip already 'good' types of curves.
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
     Handle(Geom_Line) baseLine;
     Handle(Geom_Circle) baseCirc;
 
-    if (asiAlgo_Utils::IsTypeOf<Geom_Line>(curve, baseLine) ||
-      asiAlgo_Utils::IsTypeOf<Geom_Circle>(curve, baseCirc))
+    // Check if the curve is not a line or a circle.
+    if (curve.IsNull() || asiAlgo_Utils::IsTypeOf<Geom_Line>(curve, baseLine) ||
+                          asiAlgo_Utils::IsTypeOf<Geom_Circle>(curve, baseCirc))
     {
-      inputEdges->Append(edge);
       continue;
     }
 
     TopoDS_Edge res = BRepLib_MakeEdge(curve, f, l);
 
+    // Cut the edge by two parameters f and l.
     BRep_Builder bb;
-
     bb.SameRange(res, Standard_False);
     bb.UpdateEdge(res, 0.001);
     bb.Range(res, f, l, true);
 
-    inputEdges->Append(res);
+    // Replace the old edge with a new one.
+    sbwd->Set(res, i);
   }
-
-  Handle(TopTools_HSequenceOfShape) wires = new TopTools_HSequenceOfShape();
-  ShapeAnalysis_FreeBounds::ConnectEdgesToWires(inputEdges, sewTol, false, wires);
-
-  result = TopoDS::Wire(wires->First());
+  // Make a wire.
+  result = sbwd->WireAPIMake();
 
   return isOk;
 }
