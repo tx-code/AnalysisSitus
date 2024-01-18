@@ -32,7 +32,9 @@
 #define asiAlgo_WriteSVG_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
+#include <asiAlgo_Optional.h>
+
+// Active Data includes
 #include <ActAPI_IProgressNotifier.h>
 #include <ActAPI_IPlotter.h>
 
@@ -46,11 +48,13 @@ namespace asiAlgo_WriteSVG
   //! Auxiliary structure to control drawing settings. 
   struct t_drawingStyle
   {
-    int   CanvasPadding       = 25;
-    float PaddingScaleCoeff   = 0.01f;  //!< Coeff controlling a ratio between padding and canvas size.
-    float LineWidthScaleCoeff = 0.3f;   //!< Coeff controlling a line width which is defined as a ratio between image and canvas sizes
-    float DiscrCurveLinDefl   = 0.001f;
-    float DiscrCurveAngDefl   = (float)(0.5 * M_PI / 180.0);
+    int    CanvasPadding       = 25;
+    double PaddingScaleCoeff   = 0.01f;  //!< Coeff controlling a ratio between padding and canvas size.
+    double LineWidthScaleCoeff = 0.3f;   //!< Coeff controlling a line width which is defined as a ratio between image and canvas sizes
+    double DiscrCurveLinDefl   = 0.001f;
+    double DiscrCurveAngDefl   = (float)(0.5 * M_PI / 180.0);
+
+    tl::optional<double> CanvasMaxDim; //!< Max canvas dimension (optional).
   };
 
   //! Saves the passed data to SVG after preprocessing it with HLR algorithm.
@@ -71,7 +75,9 @@ namespace asiAlgo_WriteSVG
                  ActAPI_PlotterEntry            plotter  = nullptr);
 
   //! Saves the passed data to SVG.
-  //! The given shape is expected to be planar and located in XOY. 
+  //! The given shape is expected to be planar and located in XOY plane. If not,
+  //! make sure to relocate the drawing to XOY before using this function.
+  //!
   //! \param[in] shape   the shape to dump to SVG.
   //! \param[in] path    the SVG path to save to.
   //! \param[in] tol     the discretization tolerance for edges.

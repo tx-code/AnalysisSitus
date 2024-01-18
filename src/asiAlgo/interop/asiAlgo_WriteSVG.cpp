@@ -58,6 +58,7 @@
 namespace svg
 {
   void printCircle(const BRepAdaptor_Curve& c,
+                   const double             scale,
                    std::ostream&            out,
                    ActAPI_PlotterEntry      plotter = nullptr)
   {
@@ -65,16 +66,16 @@ namespace svg
     //       Y direction of image goes from top to down what is opposite for geometry,
     //       so by flipping makes the coordinate systemes coplanar.
 
-    gp_Circ       circ = c.Circle();
-    const gp_Pnt& p    = circ.Location();
+    gp_Circ circ = c.Circle();
+    gp_Pnt  p    = circ.Location().XYZ() * scale;
 
-    const double r = circ.Radius();
+    const double r = scale * circ.Radius();
     const double f = c.FirstParameter();
     const double l = c.LastParameter();
 
-    gp_Pnt s = c.Value( f );
-    gp_Pnt m = c.Value( ( l + f ) / 2.0 );
-    gp_Pnt e = c.Value( l );
+    gp_Pnt s = c.Value( f ).XYZ()             * scale;
+    gp_Pnt m = c.Value( (l + f) * 0.5 ).XYZ() * scale;
+    gp_Pnt e = c.Value( l ).XYZ()             * scale;
 
     gp_Vec v1( m, s );
     gp_Vec v2( m, e );
@@ -114,6 +115,7 @@ namespace svg
                     int                      id,
                     const double             angDef,
                     const double             linDef,
+                    const double             scale,
                     std::ostream&            out,
                     ActAPI_PlotterEntry      plotter = nullptr)
   {
@@ -134,7 +136,10 @@ namespace svg
 
       for ( int i = nodes.Lower(); i <= nodes.Upper(); i++ )
       {
-        gp_Pnt placedNode = nodes(i).Transformed(location);
+        gp_XYZ placedNode = nodes(i).Transformed(location).XYZ();
+        //
+        placedNode *= scale;
+
         out << c << " " << placedNode.X() << " " << -placedNode.Y() << " ";
         c = 'L';
       }
@@ -150,8 +155,8 @@ namespace svg
       double f = bac.FirstParameter();
       double l = bac.LastParameter();
 
-      gp_Pnt s = bac.Value( f );
-      gp_Pnt e = bac.Value( l );
+      gp_Pnt s = bac.Value( f ).XYZ() * scale;
+      gp_Pnt e = bac.Value( l ).XYZ() * scale;
 
       char c = 'M';
 
@@ -181,7 +186,9 @@ namespace svg
 
         for ( int index = 1; index <= nbPnt; ++index )
         {
-          gp_Pnt pnt = bac.Value(pntGen.Parameter(index));
+          gp_XYZ pnt = bac.Value( pntGen.Parameter(index) ).XYZ();
+          pnt *= scale;
+
           out << c << " " << pnt.X() << " " << -pnt.Y() << " ";
           c = 'L';
         }
@@ -196,24 +203,25 @@ namespace svg
   std::string exportEdges(const TopoDS_Shape& input,
                           const double        angDef,
                           const double        linDef,
+                          const double        s,
                           ActAPI_PlotterEntry plotter  = nullptr)
   {
     std::stringstream result;
 
     TopExp_Explorer edges( input, TopAbs_EDGE );
 
-    for ( int i = 1 ; edges.More(); edges.Next(), i++ )
+    for ( int i = 1; edges.More(); edges.Next(), ++i )
     {
       const TopoDS_Edge& edge = TopoDS::Edge( edges.Current() );
 
       BRepAdaptor_Curve adapt( edge );
       if ( adapt.GetType() == GeomAbs_Circle )
       {
-        printCircle( adapt, result, plotter);
+        printCircle(adapt, s, result, plotter);
       }
       else
       {
-        printGeneric( adapt, i, angDef, linDef, result, plotter );
+        printGeneric(adapt, i, angDef, linDef, s, result, plotter );
       }
     }
 
@@ -239,6 +247,7 @@ namespace svg
                   const double        lineWidth,
                   const double        angDef,
                   const double        linDef,
+                  const double        s,
                   std::stringstream&  result,
                   ActAPI_PlotterEntry plotter = nullptr)
   {
@@ -252,12 +261,12 @@ namespace svg
       " stroke=\"rgb(0, 0, 0)\""
       " stroke-linecap=\"round\""
       " stroke-linejoin=\"round\""
-      " stroke-width=\"" + std::to_string( lineWidth ) + "\">\n";
+      " stroke-width=\"" + std::to_string(lineWidth) + "\">\n";
 
     BRepMesh_IncrementalMesh(shape, linDef);
 
     result << style.c_str()
-           << exportEdges(shape, angDef, linDef, plotter)
+           << exportEdges(shape, angDef, linDef, s, plotter)
            << "</g>"
            << std::endl;
   }
@@ -318,25 +327,46 @@ bool asiAlgo_WriteSVG::Write(const TopoDS_Shape&            shape,
   double xMin, yMin, zMin, xMax, yMax, zMax;
   asiAlgo_Utils::Bounds(shape, xMin, yMin, zMin, xMax, yMax, zMax, tol, true);
 
-  // Compute line width.
-  const double width        = std::abs(xMax - xMin);
-  const double height       = std::abs(yMax - yMin);
-  const double maxDimension = Max(width, height);
-
-  const double scaledPadding = maxDimension * style.CanvasPadding * style.PaddingScaleCoeff;
-  const int    canvasWidth   = (int)std::round(width  + scaledPadding * 2);
-  const int    canvasHeight  = (int)std::round(height + scaledPadding * 2);
-
-  const double maxDimensionCanvas = Max(canvasWidth, canvasHeight);
+  // Compute scaling (if any).
+  double scaleCoeff = 1.;
   //
-  const double scaledLineWidth = maxDimension / maxDimensionCanvas * style.LineWidthScaleCoeff;
+  if ( style.CanvasMaxDim.has_value() )
+  {
+    if ( Abs(xMax - xMin) > Abs(yMax - yMin) )
+    {
+      scaleCoeff = *(style.CanvasMaxDim) / Abs(xMax - xMin);
+    }
+    else
+    {
+      scaleCoeff = *(style.CanvasMaxDim) / Abs(yMax - yMin);
+    }
+  }
+  //
+  xMin *= scaleCoeff;
+  yMin *= scaleCoeff;
+  zMin *= scaleCoeff;
+  xMax *= scaleCoeff;
+  yMax *= scaleCoeff;
+  zMax *= scaleCoeff;
+
+  // Working vars.
+  const double width              = Abs(xMax - xMin);
+  const double height             = Abs(yMax - yMin);
+  const double maxDimension       = Max(width, height);
+  const double scaledPadding      = maxDimension * style.CanvasPadding * style.PaddingScaleCoeff;
+  const int    canvasWidth        = (int)std::round(width  + scaledPadding * 2);
+  const int    canvasHeight       = (int)std::round(height + scaledPadding * 2);
+  const double maxDimensionCanvas = Max(canvasWidth, canvasHeight);
+  const double scaledLineWidth    = maxDimension / maxDimensionCanvas * style.LineWidthScaleCoeff;
 
   // Get results.
   std::stringstream result;
-
-  svg::printEdges(shape, 
-                  scaledLineWidth, 
-                  style.DiscrCurveAngDefl, style.DiscrCurveLinDefl,
+  //
+  svg::printEdges(shape,
+                  scaledLineWidth,
+                  style.DiscrCurveAngDefl,
+                  style.DiscrCurveLinDefl,
+                  scaleCoeff,
                   result,
                   plotter);
 
