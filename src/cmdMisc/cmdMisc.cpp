@@ -4109,7 +4109,7 @@ void cmdMisc::Factory(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("misc-convert-curves",
     //
     "misc-convert-curves\n"
-    "\t Converts to arcs and lines.",
+    "\t Converts all wires of the active part to a series of arcs and lines.",
     //
     __FILE__, group, MISC_ConvertCurves);
 

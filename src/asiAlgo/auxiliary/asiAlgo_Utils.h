@@ -495,7 +495,7 @@ namespace asiAlgo_Utils
 
   namespace Graphics
   {
-    //! Default copmonent of color of shape.
+    //! Default color of shape for offscreen rendering.
     static constexpr double CompColorOfShape()
     {
       return 200.0 / 255.0;

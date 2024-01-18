@@ -6067,10 +6067,24 @@ void asiAlgo_Utils::GetFacePoints(const TopoDS_Face&   face,
     TopTools_IndexedMapOfShape faceEdges;
     TopExp::MapShapes(face, TopAbs_EDGE, faceEdges);
     //
-    for (int e = 1; e <= faceEdges.Extent(); ++e)
+    for ( int e = 1; e <= faceEdges.Extent(); ++e )
     {
       BRepAdaptor_Curve bac( TopoDS::Edge( faceEdges(e) ) );
-      pts.push_back( bac.Value( (bac.FirstParameter() + bac.LastParameter() ) * 0.5).XYZ() );
+      //
+      const double f = bac.FirstParameter();
+      const double l = bac.LastParameter();
+
+      std::vector<double> params;
+      params.push_back( (f + l) * 0.5 );
+
+      if ( bac.GetType() == GeomAbs_Circle )
+      {
+        params.push_back( (3*f + l) * 0.25 );
+        params.push_back( (f + 3*l) * 0.25 );
+      }
+
+      for ( const auto p : params )
+        pts.push_back( bac.Value(p).XYZ() );
     }
   }
 }

@@ -2461,7 +2461,8 @@ void cmdEngine::Commands_Modeling(const Handle(asiTcl_Interp)&      interp,
     //
     "make-wire <result> <edgeName1> [<edgeName2> [...]]\n"
     "\n"
-    "\t Creates a wire from the passed series of edges.",
+    "\t Creates a wire from the passed series of edges. The edge names here\n"
+    "\t correspond to the object names from the Geometric Set.",
     //
     __FILE__, group, ENGINE_MakeWire);
 
