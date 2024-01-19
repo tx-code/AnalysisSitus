@@ -70,12 +70,165 @@
 #pragma warning(pop)
 
 // OCCT includes
+#include <BRepPrimAPI_MakeBox.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
+
+namespace
+{
+  void MakeHLR(const Handle(asiEngine_Model)&             model,
+               const vtkSmartPointer<asiVisu_PrsManager>& prsMgr,
+               const asiAlgo_BuildHLR::Mode               mode,
+               const t_asciiString&                       name,
+               const ActAPI_Color&                        color,
+               ActAPI_ProgressEntry                       progress,
+               ActAPI_PlotterEntry                        plotter)
+  {
+    // Read part shape.
+    TopoDS_Shape partShape = model->GetPartNode()->GetShape();
+    //
+    if ( partShape.IsNull() )
+      return;
+
+    // Read projection direction.
+    double dX, dY, dZ;
+    //
+    prsMgr->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
+
+    TIMER_NEW
+    TIMER_GO
+
+    // Set a filter for the hidden edges.
+    asiAlgo_BuildHLR::t_outputEdges filter;
+    //
+    if ( Handle(asiData_RootNode)::DownCast( model->GetRootNode() )->IsEnabledHiddenInHlr() )
+    {
+      filter.OutputHiddenSharpEdges   = true;
+      filter.OutputHiddenOutlineEdges = true;
+      filter.OutputHiddenSmoothEdges  = true;
+      filter.OutputHiddenIsoLines     = true;
+      filter.OutputHiddenSewnEdges    = true;
+    }
+
+    // Build HLR.
+    asiAlgo_BuildHLR buildHLR(partShape, progress, plotter);
+    //
+    if ( !buildHLR.Perform(gp_Dir(dX, dY, dZ), mode, filter) )
+    {
+      progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
+      return;
+    }
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(progress, "HLR projection")
+
+    // Draw the result with the default color.
+    plotter.REDRAW_SHAPE(name, buildHLR.GetResult(), color);
+  }
+
+  void MakeHLRBox(const Handle(asiEngine_Model)& model,
+                  const asiAlgo_BuildHLR::Mode   mode,
+                  const t_asciiString&           name,
+                  const ActAPI_Color&            color,
+                  ActAPI_ProgressEntry           progress,
+                  ActAPI_PlotterEntry            plotter)
+  {
+    // Read part shape.
+    TopoDS_Shape partShape = model->GetPartNode()->GetShape();
+    //
+    if ( partShape.IsNull() )
+      return;
+
+    // Bounding box of the shape.
+    double xMin, yMin, zMin, xMax, yMax, zMax;
+    asiAlgo_Utils::Bounds(partShape, xMin, yMin, zMin, xMax, yMax, zMax, 0., false);
+
+    const double padding = Min(xMax - xMin, Min(yMax - yMin, zMax - zMin))*0.2;
+    //
+    xMin -= padding;
+    yMin -= padding;
+    zMin -= padding;
+    xMax += padding;
+    yMax += padding;
+    zMax += padding;
+
+    // Create bounding box to draw it.
+    TopoDS_Shape bndbox = BRepPrimAPI_MakeBox( gp_Pnt(xMin, yMin, zMin), gp_Pnt(xMax, yMax, zMax) );
+    //
+    plotter.REDRAW_SHAPE("bbox", bndbox, ActAPI_Color(40./255., 40./255., 40./255., Quantity_TOC_RGB), 1.0);
+
+    // Projection directions.
+    std::vector<gp_Dir> dirs;
+    dirs.push_back(  gp::DX() );
+    dirs.push_back( -gp::DX() );
+    dirs.push_back(  gp::DY() );
+    dirs.push_back( -gp::DY() );
+    dirs.push_back(  gp::DZ() );
+    dirs.push_back( -gp::DZ() );
+
+    // Set a filter for the hidden edges.
+    asiAlgo_BuildHLR::t_outputEdges filter;
+    //
+    if ( Handle(asiData_RootNode)::DownCast( model->GetRootNode() )->IsEnabledHiddenInHlr() )
+    {
+      filter.OutputHiddenSharpEdges   = true;
+      filter.OutputHiddenOutlineEdges = true;
+      filter.OutputHiddenSmoothEdges  = true;
+      filter.OutputHiddenIsoLines     = true;
+      filter.OutputHiddenSewnEdges    = true;
+    }
+
+    TIMER_NEW
+    TIMER_GO
+
+    // Prepare HLR tool.
+    asiAlgo_BuildHLR buildHLR( partShape,
+                               progress,
+                               plotter );
+    //
+    for ( const auto& dir : dirs )
+    {
+      if ( !buildHLR.Perform(dir, mode, filter) )
+      {
+        progress.SendLogMessage( LogErr(Normal) << "Cannot build HLR for direction (%1,%2,%3)."
+                                                << dir.X() << dir.Y() << dir.Z() );
+        continue;
+      }
+
+      TopoDS_Shape proj = buildHLR.GetResult();
+
+      // Prepare a local reference frame for the projection.
+      double projXmin, projYmin, projZmin, projXmax, projYmax, projZmax;
+      asiAlgo_Utils::Bounds(proj, projXmin, projYmin, projZmin, projXmax, projYmax, projZmax, 0., false);
+      //
+      gp_Ax3               T_B( gp_Pnt( (projXmin + projXmax)*0.5,
+                                        (projYmin + projYmax)*0.5,
+                                        (projZmin + projZmax)*0.5), dir );
+      tl::optional<gp_Ax3> T_A = asiAlgo_Utils::GetBboxSideFrame(dir, xMin, yMin, zMin, xMax, yMax, zMax);
+      //
+      if ( !T_A.has_value() )
+        continue;
+
+      gp_Trsf T = asiAlgo_Utils::GetAlignmentTrsf(*T_A, T_B);
+      //
+      proj.Move(T);
+
+      std::string projName = name.ToCString();
+      projName += "_";
+      projName += asiAlgo_Utils::DirName(dir);
+
+      // Draw the result with the default color.
+      plotter.REDRAW_SHAPE(projName.c_str(), proj, color);
+    }
+
+    TIMER_FINISH
+    TIMER_COUT_RESULT_NOTIFIER(progress, "HLR box projection")
+  }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -216,6 +369,14 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR_DISCR) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR_DISCR, m_partCallback);
 
+    // Set observer for HLR (box mode)
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR_BOX) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR_BOX, m_partCallback);
+
+    // Set observer for discrete HLR (box mode)
+    if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_BUILD_HLR_DISCR_BOX) )
+      m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_BUILD_HLR_DISCR_BOX, m_partCallback);
+
     // Set observer for defeaturing
     if ( !m_prs_mgr->GetDefaultInteractorStyle()->HasObserver(EVENT_DEFEATURE) )
       m_prs_mgr->GetDefaultInteractorStyle()->AddObserver(EVENT_DEFEATURE, m_partCallback);
@@ -234,6 +395,8 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
     connect( m_partCallback, SIGNAL( refineTessellation() ), this, SLOT( onRefineTessellation() ) );
     connect( m_partCallback, SIGNAL( buildHLR() ),           this, SLOT( onBuildHLR() ) );
     connect( m_partCallback, SIGNAL( buildHLRDiscr() ),      this, SLOT( onBuildHLRDiscr() ) );
+    connect( m_partCallback, SIGNAL( buildHLRBox() ),        this, SLOT( onBuildHLRBox() ) );
+    connect( m_partCallback, SIGNAL( buildHLRDiscrBox() ),   this, SLOT( onBuildHLRDiscrBox() ) );
     connect( m_partCallback, SIGNAL( selectAll() ),          this, SLOT( onSelectAll() ) );
     connect( m_partCallback, SIGNAL( defeature() ),          this, SLOT( onDefeature() ) );
 
@@ -583,46 +746,13 @@ void asiUI_ViewerPart::onRefineTessellation()
 //! Callback for constructing HLR representation.
 void asiUI_ViewerPart::onBuildHLR()
 {
-  // Read part shape.
-  TopoDS_Shape partShape = m_model->GetPartNode()->GetShape();
-  //
-  if ( partShape.IsNull() )
-    return;
-
-  // Read projection direction.
-  double dX, dY, dZ;
-  //
-  this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
-
-  TIMER_NEW
-  TIMER_GO
-
-  // Set a filter for the hidden edges.
-  asiAlgo_BuildHLR::t_outputEdges filter;
-  //
-  if ( Handle(asiData_RootNode)::DownCast( m_model->GetRootNode() )->IsEnabledHiddenInHlr() )
-  {
-    filter.OutputHiddenSharpEdges   = true;
-    filter.OutputHiddenOutlineEdges = true;
-    filter.OutputHiddenSmoothEdges  = true;
-    filter.OutputHiddenIsoLines     = true;
-    filter.OutputHiddenSewnEdges    = true;
-  }
-
-  // Build HLR.
-  asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
-  //
-  if ( !buildHLR.Perform(gp_Dir(dX, dY, dZ), asiAlgo_BuildHLR::Mode_Precise, filter) )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
-    return;
-  }
-
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(m_progress, "HLR projection")
-
-  // Draw the result with the default color.
-  m_plotter.REDRAW_SHAPE("HLR", buildHLR.GetResult(), Color_White);
+  ::MakeHLR(m_model,
+            this->PrsMgr(),
+            asiAlgo_BuildHLR::Mode_Precise,
+           "HLR",
+            Color_White,
+            m_progress,
+            m_plotter);
 }
 
 //-----------------------------------------------------------------------------
@@ -630,34 +760,39 @@ void asiUI_ViewerPart::onBuildHLR()
 //! Callback for constructing discrete HLR representation.
 void asiUI_ViewerPart::onBuildHLRDiscr()
 {
-  // Read part shape.
-  TopoDS_Shape partShape = m_model->GetPartNode()->GetShape();
-  //
-  if ( partShape.IsNull() )
-    return;
+  ::MakeHLR(m_model,
+            this->PrsMgr(),
+            asiAlgo_BuildHLR::Mode_Discrete,
+           "DHLR",
+            ActAPI_Color(40./255., 190./255., 255./255., Quantity_TOC_RGB),
+            m_progress,
+            m_plotter);
+}
 
-  // Read projection direction.
-  double dX, dY, dZ;
-  //
-  this->PrsMgr()->GetRenderer()->GetActiveCamera()->GetViewPlaneNormal(dX, dY, dZ);
+//-----------------------------------------------------------------------------
 
-  TIMER_NEW
-  TIMER_GO
+//! Callback for constructing boxy HLR representation.
+void asiUI_ViewerPart::onBuildHLRBox()
+{
+  ::MakeHLRBox(m_model,
+               asiAlgo_BuildHLR::Mode_Precise,
+              "HLR",
+               Color_White,
+               m_progress,
+               m_plotter);
+}
 
-  // Build HLR.
-  asiAlgo_BuildHLR buildHLR(partShape, m_progress, m_plotter);
-  //
-  if ( !buildHLR.Perform( gp_Dir(dX, dY, dZ), asiAlgo_BuildHLR::Mode_Discrete ) )
-  {
-    m_progress.SendLogMessage(LogErr(Normal) << "Cannot build discrete HLR.");
-    return;
-  }
+//-----------------------------------------------------------------------------
 
-  TIMER_FINISH
-  TIMER_COUT_RESULT_NOTIFIER(m_progress, "HLR discrete projection")
-
-  // Draw the result with the default color.
-  m_plotter.REDRAW_SHAPE("DHLR", buildHLR.GetResult(), Color_Blue);
+//! Callback for constructing discrete boxy HLR representation.
+void asiUI_ViewerPart::onBuildHLRDiscrBox()
+{
+  ::MakeHLRBox(m_model,
+               asiAlgo_BuildHLR::Mode_Discrete,
+              "DHLR",
+               ActAPI_Color(40./255., 190./255., 255./255., Quantity_TOC_RGB),
+               m_progress,
+               m_plotter);
 }
 
 //-----------------------------------------------------------------------------

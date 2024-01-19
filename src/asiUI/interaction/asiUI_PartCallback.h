@@ -76,6 +76,8 @@ signals:
   void refineTessellation();
   void buildHLR();
   void buildHLRDiscr();
+  void buildHLRBox();
+  void buildHLRDiscrBox();
   void selectAll();
   void defeature();
 

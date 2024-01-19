@@ -43,8 +43,6 @@
 //! as a compound of edges representing the extracted feature lines.
 class asiAlgo_BuildHLR : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildHLR, ActAPI_IAlgorithm)
 

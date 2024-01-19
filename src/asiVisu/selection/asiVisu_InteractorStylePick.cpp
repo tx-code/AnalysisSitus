@@ -216,6 +216,10 @@ void asiVisu_InteractorStylePick::OnKeyPress()
     this->Interactor->GetAltKey() ? this->InvokeEvent(EVENT_BUILD_HLR_DISCR) :
                                     this->InvokeEvent(EVENT_BUILD_HLR);
   //
+  else if ( key == "b" )
+    this->Interactor->GetAltKey() ? this->InvokeEvent(EVENT_BUILD_HLR_DISCR_BOX) :
+                                    this->InvokeEvent(EVENT_BUILD_HLR_BOX);
+  //
   else if ( key == "Delete" )
     this->InvokeEvent(EVENT_DEFEATURE);
 }

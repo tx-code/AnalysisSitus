@@ -96,6 +96,8 @@
 #define EVENT_DEFEATURE           (vtkCommand::UserEvent + 1014)
 #define EVENT_SCALE_U             (vtkCommand::UserEvent + 1015)
 #define EVENT_SCALE_V             (vtkCommand::UserEvent + 1016)
+#define EVENT_BUILD_HLR_BOX       (vtkCommand::UserEvent + 1017)
+#define EVENT_BUILD_HLR_DISCR_BOX (vtkCommand::UserEvent + 1018)
 
 // For interactive picking:
 #define EVENT_DETECT_WORLD_POINT  (vtkCommand::UserEvent + 2010) // World picker.

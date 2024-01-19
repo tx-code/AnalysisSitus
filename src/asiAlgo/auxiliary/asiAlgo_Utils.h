@@ -618,6 +618,12 @@ namespace asiAlgo_Utils
 
   } // Range namespace.
 
+  //! Returns a human-readable name of the passed direction.
+  //! \param[in] dir the direction to get a string name for.
+  //! \return label.
+  asiAlgo_EXPORT std::string
+    DirName(const gp_Dir& dir);
+
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.
   //! \return label.
@@ -1326,6 +1332,17 @@ namespace asiAlgo_Utils
            double& XMin, double& YMin, double& ZMin,
            double& XMax, double& YMax, double& ZMax,
            const double tolerance = 0.0);
+
+  //! Computes the reference axes on a side of a bounding box which
+  //! corresponds to the passed direction vector `dir`.
+  asiAlgo_EXPORT tl::optional<gp_Ax3>
+    GetBboxSideFrame(const gp_Dir& dir,
+                     const double  xMin,
+                     const double  yMin,
+                     const double  zMin,
+                     const double  xMax,
+                     const double  yMax,
+                     const double  zMax);
 
   //! Computes axis-aligned bounding box volume of the passed shape.
   //! \param[in] shape     the shape in question.

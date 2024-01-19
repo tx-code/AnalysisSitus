@@ -90,6 +90,12 @@ void asiUI_PartCallback::Execute(vtkObject*    asiVisu_NotUsed(pCaller),
   if ( eventId == EVENT_BUILD_HLR_DISCR )
     emit buildHLRDiscr();
 
+  if ( eventId == EVENT_BUILD_HLR_BOX )
+    emit buildHLRBox();
+
+  if ( eventId == EVENT_BUILD_HLR_DISCR_BOX )
+    emit buildHLRDiscrBox();
+
   if ( eventId == EVENT_SELECT_ALL )
     emit selectAll();
 

@@ -202,6 +202,7 @@ typedef rapidjson::Document::Object    t_jsonObject;
 
 #define BUFSIZE              1000
 #define NUM_INTEGRATION_BINS 500
+#define ASI_FORTRAN_BUFSIZE  15
 
 #undef COUT_DEBUG
 #if defined COUT_DEBUG
@@ -434,6 +435,41 @@ protected:
 
 };
 
+namespace
+{
+
+  void fixprint(char *s, const int len)
+  {
+    if ( s[0] == '-' )
+    {
+      for ( int j = 2; j < len; ++j  )
+        s[j-1] = s[j];
+    
+      s[len-1] = '\0'; // Zero-trailing.
+    }
+  }
+
+  char* format_fortran_float(char*    result,
+                             unsigned width,
+                             double   number)
+  {
+    int exponent = 0;
+    for (; fabs(number) > 1.0; exponent++) number /= 10;
+  
+    sprintf( result, "%.*fE%+03d", 7, number, exponent );
+  
+    fixprint(result, width);
+  
+    return result;
+  }
+
+  char* fortranize(const double val,
+                   char*        buff)
+  {
+    return format_fortran_float(buff, ASI_FORTRAN_BUFSIZE, val);
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 void asiAlgo_Utils::Str::FileNameAndExtension(const TCollection_AsciiString& fullPath,
@@ -609,7 +645,6 @@ TCollection_AsciiString
   strOUT.append(asiAlgo_SlashStr);
   return strOUT.c_str();
 }
-
 
 //-----------------------------------------------------------------------------
 
@@ -1227,6 +1262,54 @@ std::string asiAlgo_Utils::FaceGeometryName(const TopoDS_Face& face)
 {
   Handle(Geom_Surface) surf = BRep_Tool::Surface(face);
   return SurfaceName(surf);
+}
+
+//-----------------------------------------------------------------------------
+
+std::string asiAlgo_Utils::DirName(const gp_Dir& dir)
+{
+  if ( dir.IsEqual( gp::DX(), Precision::Angular() ) )
+  {
+    return "X+";
+  }
+
+  if ( dir.IsEqual( -gp::DX(), Precision::Angular() ) )
+  {
+    return "X-";
+  }
+
+  if ( dir.IsEqual( gp::DY(), Precision::Angular() ) )
+  {
+    return "Y+";
+  }
+
+  if ( dir.IsEqual( -gp::DY(), Precision::Angular() ) )
+  {
+    return "Y-";
+  }
+
+  if ( dir.IsEqual( gp::DZ(), Precision::Angular() ) )
+  {
+    return "Z+";
+  }
+
+  if ( dir.IsEqual( -gp::DZ(), Precision::Angular() ) )
+  {
+    return "Z-";
+  }
+
+  char buff[ASI_FORTRAN_BUFSIZE];
+  std::string xStr = ::fortranize(dir.X(), buff);
+  std::string yStr = ::fortranize(dir.Y(), buff);
+  std::string zStr = ::fortranize(dir.Z(), buff);
+  //
+  std::string res = xStr;
+  res += "_";
+  res += yStr;
+  res += "_";
+  res += zStr;
+
+  return res;
 }
 
 //-----------------------------------------------------------------------------
@@ -2485,6 +2568,48 @@ bool asiAlgo_Utils::Bounds(const Handle(Poly_Triangulation)& mesh,
   }
   bndBox.Enlarge( mesh->Deflection() );
   return true;
+}
+
+//-----------------------------------------------------------------------------
+
+tl::optional<gp_Ax3>
+  asiAlgo_Utils::GetBboxSideFrame(const gp_Dir& dir,
+                                  const double  xMin,
+                                  const double  yMin,
+                                  const double  zMin,
+                                  const double  xMax,
+                                  const double  yMax,
+                                  const double  zMax)
+{
+  tl::optional<gp_Ax3> T_A;
+
+  // Find local axes for the bbox side.
+  if ( dir.IsEqual( gp::DX(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt(xMax, (yMin + yMax)*0.5, (zMin + zMax)*0.5), gp::DX() );
+  }
+  else if ( dir.IsEqual( -gp::DX(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt(xMin, (yMin + yMax)*0.5, (zMin + zMax)*0.5), -gp::DX() );
+  }
+  else if ( dir.IsEqual( gp::DY(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMax, (zMin + zMax)*0.5), gp::DY() );
+  }
+  else if ( dir.IsEqual( -gp::DY(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMin, (zMin + zMax)*0.5), -gp::DY() );
+  }
+  else if ( dir.IsEqual( gp::DZ(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMax), gp::DZ() );
+  }
+  else if ( dir.IsEqual( -gp::DZ(), Precision::Angular() ) )
+  {
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMin), -gp::DZ() );
+  }
+
+  return T_A;
 }
 
 //-----------------------------------------------------------------------------

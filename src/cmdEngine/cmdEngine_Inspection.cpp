@@ -2050,7 +2050,7 @@ int ENGINE_CheckAABB(const Handle(asiTcl_Interp)& interp,
                                                      bbox.CornerMax().Y(),
                                                      bbox.CornerMax().Z() ) );
   //
-  interp->GetPlotter().REDRAW_SHAPE("bounding box", bndbox, Color_Yellow, 1.0, true);
+  interp->GetPlotter().REDRAW_SHAPE("bbox", bndbox, Color_Yellow, 1.0, true);
 
   return TCL_OK;
 }
