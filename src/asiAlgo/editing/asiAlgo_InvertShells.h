@@ -37,6 +37,9 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+// OCCT includes
+#include <BRepTools_History.hxx>
+
 //-----------------------------------------------------------------------------
 
 //! Utility to invert orientations of all shells in the given shape.
@@ -68,6 +71,12 @@ public:
     return m_result;
   }
 
+  //! \return history.
+  const Handle(BRepTools_History)& GetHistory() const
+  {
+    return m_history;
+  }
+
 protected:
 
   //! Recursive routine which builds a new topological graph in bottom-up
@@ -84,8 +93,9 @@ protected:
 
 protected:
 
-  TopoDS_Shape m_shape;  //!< Input shape.
-  TopoDS_Shape m_result; //!< Result model.
+  TopoDS_Shape              m_shape;   //!< Input shape.
+  TopoDS_Shape              m_result;  //!< Result model.
+  Handle(BRepTools_History) m_history; //!< History.
 
 };
 

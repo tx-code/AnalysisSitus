@@ -35,6 +35,7 @@
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS_Iterator.hxx>
 
 //-----------------------------------------------------------------------------
@@ -43,17 +44,60 @@ asiAlgo_InvertShells::asiAlgo_InvertShells(const TopoDS_Shape&  shape,
                                            ActAPI_ProgressEntry progress,
                                            ActAPI_PlotterEntry  plotter)
 : ActAPI_IAlgorithm(progress, plotter),
-  m_shape(shape)
+  m_shape(shape),
+  m_history(new BRepTools_History())
 {}
 
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_InvertShells::Perform()
 {
+  if (m_history.IsNull())
+  {
+    m_history = new BRepTools_History();
+  }
+
   if ( m_shape.ShapeType() == TopAbs_SHELL ||
        m_shape.ShapeType() == TopAbs_FACE )
   {
-    m_result = BRepBuilderAPI_Copy(m_shape).Shape().Reversed();
+    BRepBuilderAPI_Copy copyAlgo;
+    copyAlgo.Perform(m_shape);
+    m_result = copyAlgo.Shape().Reversed();
+
+    if (m_shape.ShapeType() == TopAbs_FACE)
+    {
+      if (copyAlgo.IsDeleted(m_shape))
+      {
+        const TopTools_ListOfShape& modifiedShapes = copyAlgo.Modified(m_shape);
+        for (TopTools_ListOfShape::Iterator itM(modifiedShapes); itM.More(); itM.Next())
+        {
+          m_history->AddModified(m_shape, itM.Value());
+        }
+
+        const TopTools_ListOfShape& generatedShapes = copyAlgo.Generated(m_shape);
+        for (TopTools_ListOfShape::Iterator itG(generatedShapes); itG.More(); itG.Next())
+        {
+          m_history->AddGenerated(m_shape, itG.Value());
+        }
+      }
+    }
+    else
+    {
+      for (TopExp_Explorer exp(m_shape, TopAbs_FACE); exp.More(); exp.Next())
+      {
+        const TopTools_ListOfShape& modifiedShapes = copyAlgo.Modified(exp.Value());
+        for (TopTools_ListOfShape::Iterator itM(modifiedShapes); itM.More(); itM.Next())
+        {
+          m_history->AddModified(exp.Value(), itM.Value());
+        }
+
+        const TopTools_ListOfShape& generatedShapes = copyAlgo.Generated(exp.Value());
+        for (TopTools_ListOfShape::Iterator itG(generatedShapes); itG.More(); itG.Next())
+        {
+          m_history->AddGenerated(exp.Value(), itG.Value());
+        }
+      }
+    }
 
     m_progress.SendLogMessage(LogInfo(Normal) << "Reverse isolated shell (face).");
   }
