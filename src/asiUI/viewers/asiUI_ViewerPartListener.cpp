@@ -271,7 +271,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(const Handle(asiUI_WidgetFact
   m_pCheckDihAngle       (nullptr),
   m_pAddAsFeature        (nullptr),
   m_pGetAsBLOB           (nullptr),
-  m_pMeasureLength       (nullptr),
+  m_pMeasureMinDist      (nullptr),
   m_pGetSpannedAngle     (nullptr),
   m_pCheckThickness      (nullptr),
   m_pJoinEdges           (nullptr)
@@ -310,7 +310,7 @@ asiUI_ViewerPartListener::asiUI_ViewerPartListener(asiUI_ViewerPart*            
   m_pCheckDihAngle       (nullptr),
   m_pAddAsFeature        (nullptr),
   m_pGetAsBLOB           (nullptr),
-  m_pMeasureLength       (nullptr),
+  m_pMeasureMinDist      (nullptr),
   m_pGetSpannedAngle     (nullptr),
   m_pCheckThickness      (nullptr),
   m_pJoinEdges           (nullptr)
@@ -744,7 +744,7 @@ void asiUI_ViewerPartListener::populateMenu(QMenu& menu)
          (edgeIndices.Extent() == 2) ||
          (faceIndices.Extent() == 2) )
     {
-      m_pMeasureLength = menu.addAction("Measure distance");
+      m_pMeasureMinDist = menu.addAction("Min distance");
     }
     if (edgeIndices.Extent() == 2)
     {
@@ -1236,9 +1236,9 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
   }
 
   //---------------------------------------------------------------------------
-  // ACTION: measure distance
+  // ACTION: measure min distance
   //---------------------------------------------------------------------------
-  else if ( pAction == m_pMeasureLength )
+  else if ( pAction == m_pMeasureMinDist )
   {
     asiEngine_Part partApi( m_model, m_pViewer->PrsMgr() );
 
@@ -1273,8 +1273,8 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
         TCollection_AsciiString distName("distance");
         distName += isol;
 
-        m_plotter.REDRAW_LINK(distName, P1, P2, Color_White);
-        m_progress.SendLogMessage( LogInfo(Normal) << "Distance between shapes: %1."
+        m_plotter.REDRAW_SHAPE(distName, BRepBuilderAPI_MakeEdge(P1, P2), Color_White);
+        m_progress.SendLogMessage( LogInfo(Normal) << "Min distance between shapes: %1."
                                                    << P1.Distance(P2) );
       }
     }

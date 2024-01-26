@@ -622,7 +622,7 @@ namespace asiAlgo_Utils
   //! \param[in] dir the direction to get a string name for.
   //! \return label.
   asiAlgo_EXPORT std::string
-    DirName(const gp_Dir& dir);
+    DirectionName(const gp_Dir& dir);
 
   //! Returns geometry of a face as a string label.
   //! \param face [in] face to inspect.

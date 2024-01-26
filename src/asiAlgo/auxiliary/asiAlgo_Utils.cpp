@@ -1266,7 +1266,7 @@ std::string asiAlgo_Utils::FaceGeometryName(const TopoDS_Face& face)
 
 //-----------------------------------------------------------------------------
 
-std::string asiAlgo_Utils::DirName(const gp_Dir& dir)
+std::string asiAlgo_Utils::DirectionName(const gp_Dir& dir)
 {
   if ( dir.IsEqual( gp::DX(), Precision::Angular() ) )
   {

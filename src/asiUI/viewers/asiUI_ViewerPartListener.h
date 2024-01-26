@@ -174,7 +174,7 @@ protected:
   QAction* m_pCheckDihAngle;
   QAction* m_pAddAsFeature;
   QAction* m_pGetAsBLOB;
-  QAction* m_pMeasureLength;
+  QAction* m_pMeasureMinDist;
   QAction* m_pGetSpannedAngle;
   QAction* m_pCheckThickness;
   QAction* m_pJoinEdges;

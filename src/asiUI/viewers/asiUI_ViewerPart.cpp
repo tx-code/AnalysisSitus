@@ -219,7 +219,7 @@ namespace
 
       std::string projName = name.ToCString();
       projName += "_";
-      projName += asiAlgo_Utils::DirName(dir);
+      projName += asiAlgo_Utils::DirectionName(dir);
 
       // Draw the result with the default color.
       plotter.REDRAW_SHAPE(projName.c_str(), proj, color);
