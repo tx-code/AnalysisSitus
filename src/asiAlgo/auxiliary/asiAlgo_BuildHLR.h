@@ -83,6 +83,18 @@ public:
     {}
   };
 
+  
+  //! Data to pass to a thread function.
+  struct t_threadData : public Standard_Transient
+  {
+    TopoDS_Shape                    input;
+    gp_Dir                          dir;
+    asiAlgo_BuildHLR::t_outputEdges style;
+    TopoDS_Shape                    output;
+
+    t_threadData() = default;
+  };
+
 public:
 
   //! Ctor.
@@ -99,11 +111,24 @@ public:
   //! Performs HLR.
   //! \param[in] projectionDir the direction of projection to use.
   //! \param[in] mode          the HLR computation mode (precise is the default).
+  //! \param[in] visibility    the projection styles.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     Perform(const gp_Dir&        projectionDir,
             const Mode           mode       = Mode_Precise,
             const t_outputEdges& visibility = t_outputEdges());
+
+  //! Runs HLR in parallel threads.
+  //! \param[in] projectionDir the direction of projection to use.
+  //! \param[in] timeout       the timeout for processing.
+  //! \param[in] visibility    the projection styles.
+  //! \return true in case of success, false -- otherwise.
+  asiAlgo_EXPORT bool
+    PerformParallel(const gp_Dir&        projectionDir,
+                    const int            timeout_ms = 500,
+                    const t_outputEdges& visibility = t_outputEdges());
+
+public:
 
   //! \return the extracted feature lines.
   asiAlgo_EXPORT const TopoDS_Shape&
@@ -111,29 +136,13 @@ public:
 
 protected:
 
-  //! Runs precise HLR.
-  //! \param[in] projectionDir the direction of projection to use.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT bool
-    performPrecise(const gp_Dir&       projectionDir,
-                   const t_outputEdges visibility);
+  TopoDS_Shape m_input;  //!< Input shape.
+  TopoDS_Shape m_result; //!< Result shape.
 
-  //! Runs discrete HLR.
-  //! \param[in] projectionDir the direction of projection to use.
-  //! \return true in case of success, false -- otherwise.
-  asiAlgo_EXPORT bool
-    performDiscrete(const gp_Dir& projectionDir);
+public:
 
-  //! Build 3Ds curves out of the 2D curves constructed by HLR.
-  //! \param[in] shape the input shape.
-  //! \return the shape with reconstructed 3D curves.
-  asiAlgo_EXPORT const TopoDS_Shape&
-    build3dCurves(const TopoDS_Shape& shape);
+  static t_threadData ThreadData[2];
 
-protected:
-
-  TopoDS_Shape  m_input;      //!< Input shape.
-  TopoDS_Shape  m_result;     //!< Result shape.
 };
 
 #endif

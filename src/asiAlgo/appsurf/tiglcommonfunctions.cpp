@@ -452,8 +452,8 @@ gp_Pnt GetCentralFacePoint(const TopoDS_Face& face)
 
         Geom2dAPI_InterCurveCurve intersector(uiso, hcurve);
         for (int ipoint = 0; ipoint < intersector.NbPoints(); ++ipoint) {
-            gp_Pnt2d p = intersector.Point(ipoint+1);
-            intersections.push_back(p.Y());
+            gp_Pnt2d P = intersector.Point(ipoint+1);
+            intersections.push_back(P.Y());
         }
     }
 
@@ -767,11 +767,12 @@ asiAlgo_EXPORT bool GetIntersectionPoint(const TopoDS_Wire& wire1, const TopoDS_
 
                     //make sure the intersectionPoints are unique
                     bool foundIntersectionPoint = false;
-                    for (unsigned int i=0;i<intersectionPoints.size(); i++ ) {
-                        if ( intersectionPoint.Center.Distance( intersectionPoints[i].Center ) < tolerance ) {
+                    for (unsigned int ii = 0; ii < intersectionPoints.size(); ii++ )
+                    {
+                        if ( intersectionPoint.Center.Distance( intersectionPoints[ii].Center ) < tolerance ) {
                             foundIntersectionPoint = true;
-                            if ( intersectionPoint.SquareDistance< intersectionPoints[i].SquareDistance ) {
-                                intersectionPoints[i]=intersectionPoint;
+                            if ( intersectionPoint.SquareDistance< intersectionPoints[ii].SquareDistance ) {
+                                intersectionPoints[ii]=intersectionPoint;
                             }
                         }
                     }
@@ -1341,13 +1342,14 @@ bool GetMinMaxPoint(const TopoDS_Shape& shape, const gp_Vec& dir, gp_Pnt& minPnt
     }
 
     // initialize values
-    const TopoDS_Vertex& v = TopoDS::Vertex(explorer.Current());
-    gp_Pnt p = BRep_Tool::Pnt(v);
+    const TopoDS_Vertex& V = TopoDS::Vertex(explorer.Current());
+    gp_Pnt p = BRep_Tool::Pnt(V);
     minPnt = p;
     maxPnt = p;
     explorer.Next();
 
-    for (; explorer.More(); explorer.Next()) {
+    for (; explorer.More(); explorer.Next())
+    {
         const TopoDS_Vertex& v = TopoDS::Vertex(explorer.Current());
         p = BRep_Tool::Pnt(v);
         gp_Vec offset(minPnt, p);

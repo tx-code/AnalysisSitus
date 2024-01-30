@@ -38,10 +38,12 @@
 
 asiData_RootNode::asiData_RootNode() : ActData_BaseNode()
 {
-  REGISTER_PARAMETER(Name, PID_Name);
-  REGISTER_PARAMETER(Bool, PID_PrsHlr);
-  REGISTER_PARAMETER(Bool, PID_IsCoincidentTopo);
-  REGISTER_PARAMETER(Bool, PID_IsEnabledHiddenInHlr);
+  REGISTER_PARAMETER(Name,  PID_Name);
+  REGISTER_PARAMETER(Bool,  PID_IsCoincidentTopo);
+  REGISTER_PARAMETER(Group, PID_GroupHlr);
+  REGISTER_PARAMETER(Bool,  PID_PrsMeshHlr);
+  REGISTER_PARAMETER(Bool,  PID_IsEnabledHiddenInHlr);
+  REGISTER_PARAMETER(Int,   PID_HlrTimeout);
 }
 
 //-----------------------------------------------------------------------------
@@ -55,15 +57,18 @@ Handle(ActAPI_INode) asiData_RootNode::Instance()
 
 void asiData_RootNode::Init()
 {
-  this->InitParameter(PID_Name,                 "Name",                          "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_PrsHlr,               "HLR for meshes",                "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsCoincidentTopo,     "Resolve coin. topo",            "", ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_IsEnabledHiddenInHlr, "Extract hidden in precise HLR", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Name,                 "Name",                  "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsCoincidentTopo,     "Resolve coin. topo",    "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_GroupHlr,             "HLR",                   "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PrsMeshHlr,           "Render HLR for meshes", "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_IsEnabledHiddenInHlr, "Project hidden edges",  "", ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_HlrTimeout,           "Projection timeout",    "", ParameterFlag_IsVisible, true);
 
   // Set defaults.
-  this->SetHlr                   (false);
+  this->SetMeshHlr               (false);
   this->SetResolveCoincidentTopo (false);
   this->SetEnabledHiddenInHlr    (false);
+  this->SetHlrTimeout            (500);
 }
 
 //-----------------------------------------------------------------------------
@@ -82,16 +87,16 @@ void asiData_RootNode::SetName(const TCollection_ExtendedString& name)
 
 //-----------------------------------------------------------------------------
 
-bool asiData_RootNode::IsHlr() const
+bool asiData_RootNode::IsMeshHlr() const
 {
-  return ActParamTool::AsBool( this->Parameter(PID_PrsHlr) )->GetValue();
+  return ActParamTool::AsBool( this->Parameter(PID_PrsMeshHlr) )->GetValue();
 }
 
 //-----------------------------------------------------------------------------
 
-void asiData_RootNode::SetHlr(const bool isHlr)
+void asiData_RootNode::SetMeshHlr(const bool isHlr)
 {
-  ActParamTool::AsBool( this->Parameter(PID_PrsHlr) )->SetValue(isHlr);
+  ActParamTool::AsBool( this->Parameter(PID_PrsMeshHlr) )->SetValue(isHlr);
 }
 
 //-----------------------------------------------------------------------------
@@ -120,4 +125,18 @@ void asiData_RootNode::SetEnabledHiddenInHlr(const bool on)
 bool asiData_RootNode::IsEnabledHiddenInHlr() const
 {
   return ActParamTool::AsBool( this->Parameter(PID_IsEnabledHiddenInHlr) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+void asiData_RootNode::SetHlrTimeout(const int timeout)
+{
+  ActParamTool::AsInt( this->Parameter(PID_HlrTimeout) )->SetValue(timeout);
+}
+
+//-----------------------------------------------------------------------------
+
+int asiData_RootNode::GetHlrTimeout() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_HlrTimeout) )->GetValue();
 }

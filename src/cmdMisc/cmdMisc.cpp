@@ -3732,8 +3732,8 @@ int MISC_ConvertCurves(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int MISC_CheckGaps(const Handle(asiTcl_Interp)& interp,
-                   int                          argc,
-                   const char**                 argv)
+                   int                          /*argc*/,
+                   const char**                 /*argv*/)
 {
   Handle(asiEngine_Model)
     M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
@@ -3782,8 +3782,8 @@ int MISC_CheckGaps(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
-                    int                          argc,
-                    const char**                 argv)
+                    int                          /*argc*/,
+                    const char**                 /*argv*/)
 {
   Handle(asiEngine_Model)
     M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );
@@ -3841,8 +3841,8 @@ int MISC_RepairGaps(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int MISC_TestSection(const Handle(asiTcl_Interp)& interp,
-                     int                          argc,
-                     const char**                 argv)
+                     int                          /*argc*/,
+                     const char**                 /*argv*/)
 {
   Handle(asiEngine_Model)
     M = Handle(asiEngine_Model)::DownCast( interp->GetModel() );

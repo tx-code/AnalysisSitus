@@ -59,10 +59,12 @@ public:
   {
   //--------------------------//
     PID_Name,                 //!< Name of the Node.
-    PID_PrsHlr,               //!< Indicates whether HLR is enabled in the active renderer.
     PID_IsCoincidentTopo,     //!< Indicates whether to resolve coincident topology in 3D.
-    PID_IsEnabledHiddenInHlr, //!< Indicates whether precise HLR should output hidden edges as well.
-  //-----------------------=--//
+    PID_GroupHlr,             //!< "HLR" group.
+    PID_PrsMeshHlr,           //!< Indicates whether HLR is enabled in the active renderer.
+    PID_IsEnabledHiddenInHlr, //!< Indicates whether HLR should output hidden edges as well.
+    PID_HlrTimeout,           //!< Timeout for precise HLR (in milliseconds).
+  //--------------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
 
@@ -89,12 +91,12 @@ public:
 
   //! \return true if real-time HLR is enabled.
   asiData_EXPORT bool
-    IsHlr() const;
+    IsMeshHlr() const;
 
   //! Sets real-time HLR mode for the active renderer.
   //! \param[in] isHlr the Boolean value to set.
   asiData_EXPORT void
-    SetHlr(const bool isHlr);
+    SetMeshHlr(const bool isHlr);
 
   //! Enables/disables resolving the coincident topology in VTK mapper.
   //! \param[in] on value to set.
@@ -113,6 +115,15 @@ public:
   //! \return true if the hidden edge extraction mode is enabled for precise HLR.
   asiData_EXPORT bool
     IsEnabledHiddenInHlr() const;
+
+  //! Sets timeout (in ms) for HLR projections.
+  //! \param[in] timeout the timeout to set.
+  asiData_EXPORT void
+    SetHlrTimeout(const int timeout);
+
+  //! \return timeout (in ms) for HLR projections.
+  asiData_EXPORT int
+    GetHlrTimeout() const;
 
 // Initialization:
 public:

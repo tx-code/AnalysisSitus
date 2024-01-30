@@ -327,8 +327,8 @@ int ENGINE_SelectVertices(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_FreezeViewer(const Handle(asiTcl_Interp)& interp,
-                        int                          argc,
-                        const char**                 argv)
+                        int                          /*argc*/,
+                        const char**                 /*argv*/)
 {
   (void) interp;
 
@@ -346,8 +346,8 @@ int ENGINE_FreezeViewer(const Handle(asiTcl_Interp)& interp,
 //-----------------------------------------------------------------------------
 
 int ENGINE_UnfreezeViewer(const Handle(asiTcl_Interp)& interp,
-                          int                          argc,
-                          const char**                 argv)
+                          int                          /*argc*/,
+                          const char**                 /*argv*/)
 {
   (void) interp;
 

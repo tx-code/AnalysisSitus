@@ -188,7 +188,7 @@ void asiUI_ParameterEditorListenerDefault::afterParameterChanged(const Handle(Ac
   {
     Handle(asiData_RootNode) root_n = Handle(asiData_RootNode)::DownCast(N);
 
-    if ( pid == asiData_RootNode::PID_PrsHlr )
+    if ( pid == asiData_RootNode::PID_PrsMeshHlr )
     {
       if ( m_cf->ViewerPart )
       {

@@ -94,6 +94,10 @@ namespace
     if ( partShape.IsNull() )
       return;
 
+    // Root Node stores global HLR settings.
+    Handle(asiData_RootNode)
+      rootNode = Handle(asiData_RootNode)::DownCast( model->GetRootNode() );
+
     // Read projection direction.
     double dX, dY, dZ;
     //
@@ -105,7 +109,7 @@ namespace
     // Set a filter for the hidden edges.
     asiAlgo_BuildHLR::t_outputEdges filter;
     //
-    if ( Handle(asiData_RootNode)::DownCast( model->GetRootNode() )->IsEnabledHiddenInHlr() )
+    if ( rootNode->IsEnabledHiddenInHlr() )
     {
       filter.OutputHiddenSharpEdges   = true;
       filter.OutputHiddenOutlineEdges = true;
@@ -114,13 +118,27 @@ namespace
       filter.OutputHiddenSewnEdges    = true;
     }
 
-    // Build HLR.
+    // Build HLR. In precise mode, we use timeout to be able to fallback to the
+    // discrete HLR if the precise one takes too long (i.e., exceeds the timeout
+    // defined in the root Node).
     asiAlgo_BuildHLR buildHLR(partShape, progress, plotter);
     //
-    if ( !buildHLR.Perform(gp_Dir(dX, dY, dZ), mode, filter) )
+    if ( mode == asiAlgo_BuildHLR::Mode_Precise )
     {
-      progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
-      return;
+      if ( !buildHLR.PerformParallel(gp_Dir(dX, dY, dZ), rootNode->GetHlrTimeout(), filter) )
+      {
+        progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR: try increasing timeout or use "
+                                                  "\"Alt+H\" key combination for enforced discrete HLR.");
+        return;
+      }
+    }
+    else
+    {
+      if ( !buildHLR.Perform(gp_Dir(dX, dY, dZ), asiAlgo_BuildHLR::Mode_Discrete, filter) )
+      {
+        progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
+        return;
+      }
     }
 
     TIMER_FINISH

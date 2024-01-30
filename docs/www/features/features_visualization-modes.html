@@ -94,16 +94,16 @@
 <h2 id="toc-modes-hlr">Hidden line removal (HLR)</h2>
 
 <p>
-  Press "H" ("hidden") key to render the hidden line image of the active Part. The "Alt + H" combination is reserved for a discrete HLR which is designed to work faster at the expense of presicion loss.
+  To render the current Part's hidden line view, press the "H" ("hidden") key. The "Alt + H" combination is reserved for a discrete HLR that is intended to perform faster at the cost of precision loss. Pressing the "H" button starts HLR in two threads: one for the "precise" mode and one for the discrete mode. The application sets up a timeout for both threads. You may configure this timeout (in milliseconds) in the root "Analysis Situs" Node. Often, the precise HLR exceeds the timeout, while the discrete mode does not. In this case, the discrete HLR view will be displayed. If you wish to enforce the precise mode, consider increasing the default timeout (0.5 seconds).
 </p>
 
 <div align="center"><img src="../imgs/brep-hlr-precise.png"/></div>
 
 <p>
-  If you want to keep the HLR projection of a part with all hidden edges visualized, head over to the root Node ("Analysis Situs" in the project tree) and turn on the "Extract hidden in precise HLR" flag:
+  To preserve the HLR projection of a part with all hidden edges shown, navigate to the root Node ("Analysis Situs" in the project tree) and enable the "Project hidden edges" flag:
 </p>
 
-<div align="center"><img src="../imgs/precise-hlr-setting.png"/></div>
+<div align="center"><a href="../imgs/precise-hlr-setting.png"><img src="../imgs/precise-hlr-setting.png" width="50%"/></a></div>
 
 <p>
   For example, a planar part with normal HLR is projeced as follows:
@@ -112,19 +112,19 @@
 <div align="center"><img src="../imgs/precise-hlr-clean.png"/></div>
 
 <p>
-  By enabling the extraction mode for the hidden edges, you can also see some potentially unexpected features in the thickness of the part:
+  Enabling the extraction option for the hidden edges allows you to view certain potentially unexpected features in the part's thickness:
 </p>
 
 <div align="center"><img src="../imgs/precise-hlr-hidden.png"/></div>
 
 <p>
-  To disable visualization of vertices for the projection, select the "HLR" Node in the project tree and choose the "Pure wireframe" option for the display mode:
+  To disable vertice visualization for the projection, pick the "HLR" Node in the project tree and set the display mode to "Pure wireframe":
 </p>
 
 <div align="center"><img src="../imgs/precise-hlr-pure-wireframe.png"/></div>
 
 <p>
-  The visualization result becomes cleaner, i.e., the vertices of the projected edges are not rendered anymore:
+  The visualization results become cleaner, i.e., the vertices of the projected edges are no longer rendered.
 </p>
 
 <div align="center"><img src="../imgs/precise-hlr-hidden-clean.png"/></div>
@@ -132,7 +132,7 @@
 <h2 id="toc-modes-hlr-box">"Black box" HLR</h2>
 
 <p>
-  Press "B" (precise) or "Alt + B" (discrete) for getting all HLR projections in a "black box" mode. All 6 projection views are generated and placed at the sides of the active part's bounding box.
+  Press "B" (precise) or "Alt + B" (discrete) to view all HLR projections in "black box" mode. All six projection views are created and placed on the sides of the active part's bounding box. It should be noted that box projection does not use a timeout, therefore exact HLR may take a long time to converge.
 </p>
 
 <div align="center"><img src="../imgs/bbox-hlr.gif"/></div>

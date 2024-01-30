@@ -67,8 +67,8 @@
 //-----------------------------------------------------------------------------
 
 int MISC_Test(const Handle(asiTcl_Interp)& interp,
-              int                          argc,
-              const char**                 argv)
+              int                          /*argc*/,
+              const char**                 /*argv*/)
 {
   gp_Pnt p1 (0, 0, 0);
   gp_Pnt p2(2, 2, 0);

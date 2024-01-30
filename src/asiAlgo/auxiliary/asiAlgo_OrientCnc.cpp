@@ -150,9 +150,9 @@ bool asiAlgo_OrientCnc::Perform()
 
     for ( const auto& cylAxis: cylAxes )
     {
-      int curCount = std::count_if( cylAxes.begin(), cylAxes.end(),
-                                   [cylAxis](const gp_Dir& other) { return cylAxis.IsParallel( other, Precision::Angular() ); }
-      );
+      int curCount = int( std::count_if( cylAxes.begin(), cylAxes.end(),
+                                        [cylAxis](const gp_Dir& other) { return cylAxis.IsParallel( other, Precision::Angular() ); }
+                                       ) );
 
       if ( curCount > bestCount )
       {

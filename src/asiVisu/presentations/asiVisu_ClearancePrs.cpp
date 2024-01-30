@@ -110,7 +110,7 @@ void asiVisu_ClearancePrs::deRenderPipelines(vtkRenderer*) const
 //! Callback for highlighting.
 void asiVisu_ClearancePrs::highlight(vtkRenderer*                        renderer,
                                      const Handle(asiVisu_PickerResult)& pickRes,
-                                     const asiVisu_SelectionNature       selNature) const
+                                     const asiVisu_SelectionNature       /*selNature*/) const
 {
   Handle(asiVisu_CellPickerResult)
     cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
@@ -140,7 +140,7 @@ void asiVisu_ClearancePrs::highlight(vtkRenderer*                        rendere
 
 //! Callback for highlighting reset.
 void asiVisu_ClearancePrs::unHighlight(vtkRenderer*                  renderer,
-                                       const asiVisu_SelectionNature selNature) const
+                                       const asiVisu_SelectionNature /*selNature*/) const
 {
   // Pipeline for the field.
   Handle(asiVisu_SpherePipeline)
