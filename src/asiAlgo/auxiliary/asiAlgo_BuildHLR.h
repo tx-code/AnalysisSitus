@@ -83,14 +83,13 @@ public:
     {}
   };
 
-  
   //! Data to pass to a thread function.
-  struct t_threadData : public Standard_Transient
+  struct t_threadData
   {
-    TopoDS_Shape                    input;
-    gp_Dir                          dir;
-    asiAlgo_BuildHLR::t_outputEdges style;
-    TopoDS_Shape                    output;
+    TopoDS_Shape  input;
+    gp_Dir        dir;
+    t_outputEdges style;
+    TopoDS_Shape  output;
 
     t_threadData() = default;
   };
