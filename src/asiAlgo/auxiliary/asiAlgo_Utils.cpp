@@ -444,7 +444,7 @@ namespace
     {
       for ( int j = 2; j < len; ++j  )
         s[j-1] = s[j];
-    
+
       s[len-1] = '\0'; // Zero-trailing.
     }
   }
@@ -455,11 +455,11 @@ namespace
   {
     int exponent = 0;
     for (; fabs(number) > 1.0; exponent++) number /= 10;
-  
+
     sprintf( result, "%.*fE%+03d", 7, number, exponent );
-  
+
     fixprint(result, width);
-  
+
     return result;
   }
 
@@ -1096,7 +1096,7 @@ std::string asiAlgo_Utils::Json::FromVector(const std::vector<int>& v)
   for ( const auto& value : v )
   {
     out << value;
-    if ( i != v.size() - 1 )
+    if ( i != int( v.size() ) - 1 )
     {
       out << ", ";
     }

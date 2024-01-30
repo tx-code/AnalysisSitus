@@ -353,6 +353,7 @@ void glTFMaterialMap::DefineMaterial(const glTFXdeVisualStyle&      style,
         }
         break;
       }
+      case Graphic3d_AlphaMode_MaskBlend:
       case Graphic3d_AlphaMode_Opaque:
       {
         break;

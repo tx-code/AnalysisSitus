@@ -69,17 +69,17 @@
 
 namespace
 {
-  template<class Pt> 
-  static inline void GetReversedParameters(const Pt& p11, 
+  template<class Pt>
+  static inline void GetReversedParameters(const Pt& p11,
                                            const Pt& p12,
                                            const Pt& p21,
                                            const Pt& p22,
-                                           bool& isRev1, 
+                                           bool& isRev1,
                                            bool& isRev2)
   {
     isRev1 = Standard_False;
     isRev2 = Standard_False;
-    //gka protection against crossing seem on second face 
+    //gka protection against crossing seem on second face
 
     double d11   = p11.Distance(p21);
     double d21   = p12.Distance(p21);
@@ -94,19 +94,6 @@ namespace
       isRev1 = (d12 < d22 ? Standard_True  : Standard_False);
       isRev2 = Standard_True;
     }
-  }
-
-  //! Restores the validity of the passed wire.
-  TopoDS_Wire FixWire(const TopoDS_Wire& W,
-                      const double       tol)
-  {
-    ShapeFix_Wire wireFixer;
-    wireFixer.Load(W);
-    wireFixer.FixReorder();
-    wireFixer.FixClosed(tol);
-    wireFixer.FixGaps2d();
-    wireFixer.FixConnected();
-    return wireFixer.Wire();
   }
 
   template<class Curve>
@@ -132,9 +119,9 @@ namespace
   }
 
   template<class Curve>
-  static inline Curve GetCurveCopy(const Curve&              curve, 
+  static inline Curve GetCurveCopy(const Curve&              curve,
                                    double&                   first,
-                                   double&                   last, 
+                                   double&                   last,
                                    const TopAbs_Orientation& orient)
   {
     if ( orient == TopAbs_REVERSED ) {

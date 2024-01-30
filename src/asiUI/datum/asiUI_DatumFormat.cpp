@@ -43,7 +43,7 @@
 
 #define MAX_NB_SIGNIFICANT_DIGITS 16
 
-//! Check whether the format string correspond to 
+//! Check whether the format string correspond to
 bool asiUI_DatumFormat::isFormatX(const QString& theFormat)
 {
   const static QRegExp aFmtPattern("^%[0-9]+\\.?[0-9]*[xX][0-9]*$");
@@ -84,7 +84,7 @@ public:
     const char* strPtr = m_Format.toStdString().c_str();
 #pragma warning (push)
 #pragma warning (disable: 4840)
-    QString res = str.sprintf(strPtr, theValue);
+    QString res = str.asprintf(strPtr, theValue);
 #pragma warning (pop)
     return res;
   }
@@ -223,7 +223,7 @@ protected:
 
     int aPosOfDecimal = aLeft.length();
 
-    
+
     aOnlyValue = aSplitAtDec.join(aDecimalChar);
 
     // remove trailing zeroes
@@ -416,7 +416,7 @@ protected:
 
     // remove trailing zeroes, but keep number of significant
     // digits (even zeroes) specified by format.
-    int aKeepSignificant = theIsLong 
+    int aKeepSignificant = theIsLong
       ? qMax(0, aNbHighOrder + 1)
       : qMax(0, aNbHighOrder + m_iDecimals);
 

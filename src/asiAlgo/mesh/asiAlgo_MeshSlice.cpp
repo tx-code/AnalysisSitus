@@ -629,7 +629,7 @@ bool asiAlgo_MeshSlice::Perform(const int numSlices)
 
       // Find intersected faces.
       {
-        for ( int index = 1; index <= facesBySlice.size(); ++index )
+        for ( int index = 1; index <= int( facesBySlice.size() ); ++index )
         {
           faceSelector.Define( index );
 

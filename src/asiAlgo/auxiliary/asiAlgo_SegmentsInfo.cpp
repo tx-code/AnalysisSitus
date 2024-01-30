@@ -149,7 +149,7 @@ bool asiAlgo_SegmentsInfo::AreEqual(const asiAlgo_SegmentsInfoVec& v1,
   }
 
   // Compare pairs of elements.
-  for ( int i = 0; i < v1.size(); ++i )
+  for ( int i = 0; i < (int) ( v1.size() ); ++i )
   {
     if ( !v1[i].IsEqual( v2[i], linToler, angTolerDeg ) )
     {
