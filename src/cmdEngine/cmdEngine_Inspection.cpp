@@ -5189,10 +5189,10 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   //-------------------------------------------------------------------------//
   interp->AddCommand("draw-plot",
     //
-    "draw-plot <x1> <f1> <x2> <f2> [<x3> <f3> [...]] [-log] [-numFunc <numFunc>]\n"
+    "draw-plot <x1> <f1_1> [<f2_1> ...] <x2> <f1_2> [<f2_2> ...] [...] [-log] [-numFunc <numFunc>]\n"
     "\t Draws two-dimensional plot of the given values.\n"
-    "\t If the <numFunc> value is passed with the '-numFunc' key,\n"
-    "\t several plots can be rendered at once.",
+    "\t If the <numFunc> value is passed with the '-numFunc' key, then\n"
+    "\t several functions can be plotted at once.",
     //
     __FILE__, group, ENGINE_DrawPlot);
 

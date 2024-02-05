@@ -171,8 +171,7 @@ public:
                              vtkPropCollection* thePropsToSkip);
 
   asiVisu_EXPORT static void
-    ResetCamera(vtkRenderer*       theRenderer,
-                vtkPropCollection* thePropsToSkip);
+    ResetCamera(vtkRenderer* renderer);
 
   asiVisu_EXPORT static bool
     AdjustCamera(vtkRenderer*       theRenderer,

@@ -143,7 +143,7 @@ void asiUI_ViewerHost::Repaint()
 //! Resets view.
 void asiUI_ViewerHost::onResetView()
 {
-  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer(), m_prs_mgr->PropsByTrihedron() );
+  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer() );
   this->Repaint();
 }
 

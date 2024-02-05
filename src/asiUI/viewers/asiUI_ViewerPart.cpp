@@ -503,7 +503,7 @@ void asiUI_ViewerPart::Repaint()
 //! Resets view.
 void asiUI_ViewerPart::onResetView()
 {
-  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer(), m_prs_mgr->PropsByTrihedron() );
+  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer() );
   //
   this->Repaint();
 }
@@ -827,7 +827,7 @@ void asiUI_ViewerPart::onContextMenu(const QPoint& pos)
 
 void asiUI_ViewerPart::onDefaultView()
 {
-  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer(), m_prs_mgr->PropsByTrihedron() );
+  asiVisu_Utils::ResetCamera( m_prs_mgr->GetRenderer() );
   asiVisu_Utils::AdjustCamera( m_prs_mgr->GetRenderer(), m_prs_mgr->PropsByTrihedron() );
   //
   this->Repaint();

@@ -161,20 +161,15 @@ int asiVisu_Utils::ComputeVisiblePropBounds(vtkRenderer*       theRenderer,
 
 //! Resets camera's parameters. The resulting state of the camera depends
 //! on the contents of the active scene.
-//! \param theRenderer    [in] renderer instance.
-//! \param thePropsToSkip [in] props to ignore when calculating the bounding
-//!                            box of the scene.
-void asiVisu_Utils::ResetCamera(vtkRenderer*       theRenderer,
-                                vtkPropCollection* thePropsToSkip)
+//! \param renderer [in] renderer instance.
+void asiVisu_Utils::ResetCamera(vtkRenderer* renderer)
 {
   static double RESET_COEFF = 3.0;
 
-  vtkCamera* anActiveCamera = theRenderer->GetActiveCamera();
-  anActiveCamera->SetPosition(1, -1, 1);
-  anActiveCamera->SetViewUp(0, 0, 1);
-
-  if ( AdjustCamera(theRenderer, thePropsToSkip, true) )
-    anActiveCamera->SetParallelScale( RESET_COEFF * anActiveCamera->GetParallelScale() );
+  vtkCamera* pActiveCamera = renderer->GetActiveCamera();
+  pActiveCamera->SetPosition   (1, 1, 1);
+  pActiveCamera->SetViewUp     (0, 1, 0);
+  pActiveCamera->SetFocalPoint (0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -316,9 +311,9 @@ void asiVisu_Utils::AdjustCameraClippingRange(vtkRenderer* theRenderer)
 void asiVisu_Utils::CameraOnTop(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (0, 0, 1);
-  activeCamera->SetViewUp     (0, 1, 0);
-  activeCamera->SetFocalPoint (0, 0, 0);
+  activeCamera->SetPosition   (0, 1,  0);
+  activeCamera->SetViewUp     (0, 0, -1);
+  activeCamera->SetFocalPoint (0, 0,  0);
 }
 
 //-----------------------------------------------------------------------------
@@ -328,9 +323,9 @@ void asiVisu_Utils::CameraOnTop(vtkRenderer* renderer)
 void asiVisu_Utils::CameraOnBottom(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (0, 0, -1);
-  activeCamera->SetViewUp     (0, 1,  0);
-  activeCamera->SetFocalPoint (0, 0,  0);
+  activeCamera->SetPosition   (0, -1,  0);
+  activeCamera->SetViewUp     (0,  1, -1);
+  activeCamera->SetFocalPoint (0,  0,  0);
 }
 
 //-----------------------------------------------------------------------------
@@ -340,8 +335,8 @@ void asiVisu_Utils::CameraOnBottom(vtkRenderer* renderer)
 void asiVisu_Utils::CameraOnFront(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (1, 0, 0);
-  activeCamera->SetViewUp     (0, 0, 1);
+  activeCamera->SetPosition   (0, 0, 1);
+  activeCamera->SetViewUp     (0, 1, 0);
   activeCamera->SetFocalPoint (0, 0, 0);
 }
 
@@ -352,9 +347,9 @@ void asiVisu_Utils::CameraOnFront(vtkRenderer* renderer)
 void asiVisu_Utils::CameraOnBack(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (-1, 0, 0);
-  activeCamera->SetViewUp     ( 0, 0, 1);
-  activeCamera->SetFocalPoint ( 0, 0, 0);
+  activeCamera->SetPosition   (0, 0, -1);
+  activeCamera->SetViewUp     (0, 1,  0);
+  activeCamera->SetFocalPoint (0, 0,  0);
 }
 
 //-----------------------------------------------------------------------------
@@ -364,9 +359,9 @@ void asiVisu_Utils::CameraOnBack(vtkRenderer* renderer)
 void asiVisu_Utils::CameraOnLeft(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (0, -1, 0);
-  activeCamera->SetViewUp     (0,  0, 1);
-  activeCamera->SetFocalPoint (0,  0, 0);
+  activeCamera->SetPosition   (-1, 0, 0);
+  activeCamera->SetViewUp     ( 0, 1, 0);
+  activeCamera->SetFocalPoint ( 0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -376,8 +371,8 @@ void asiVisu_Utils::CameraOnLeft(vtkRenderer* renderer)
 void asiVisu_Utils::CameraOnRight(vtkRenderer* renderer)
 {
   vtkCamera* activeCamera = renderer->GetActiveCamera();
-  activeCamera->SetPosition   (0, 1, 0);
-  activeCamera->SetViewUp     (0, 0, 1);
+  activeCamera->SetPosition   (1, 0, 0);
+  activeCamera->SetViewUp     (0, 1, 0);
   activeCamera->SetFocalPoint (0, 0, 0);
 }
 

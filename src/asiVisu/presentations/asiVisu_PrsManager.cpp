@@ -1132,7 +1132,7 @@ void asiVisu_PrsManager::Initialize(QWidget* pWidget, const bool isOffscreen)
     m_renderWindow->AddRenderer(m_renderer);
     m_renderWindow->Render();
 
-    asiVisu_Utils::ResetCamera( m_renderer, this->PropsByTrihedron() );
+    asiVisu_Utils::ResetCamera(m_renderer);
   }
 }
 

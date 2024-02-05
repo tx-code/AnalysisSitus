@@ -87,16 +87,26 @@ namespace hlr
 
     // V -- visible
     // H -- hidden
-    TopoDS_Shape V  = Build3dCurves( shapes.VCompound       () ); // "hard edges" visible
-    TopoDS_Shape V1 = Build3dCurves( shapes.Rg1LineVCompound() ); // "smooth edges" visible
-    TopoDS_Shape VN = Build3dCurves( shapes.RgNLineVCompound() ); // "contour edges" visible
-    TopoDS_Shape VO = Build3dCurves( shapes.OutLineVCompound() ); // "outline" visible
-    TopoDS_Shape VI = Build3dCurves( shapes.IsoLineVCompound() ); // "isolines" visible (precise HLR only)
-    TopoDS_Shape H  = Build3dCurves( shapes.HCompound       () ); // "hard edges" hidden
-    TopoDS_Shape H1 = Build3dCurves( shapes.Rg1LineHCompound() ); // "smooth edges" hidden
-    TopoDS_Shape HN = Build3dCurves( shapes.RgNLineHCompound() ); // "contour edges" hidden
-    TopoDS_Shape HO = Build3dCurves( shapes.OutLineHCompound() ); // "outline" hidden
-    TopoDS_Shape HI = Build3dCurves( shapes.IsoLineHCompound() ); // "isolines" hidden (precise HLR only)
+    TopoDS_Shape V, V1, VN, VO, VI;
+    TopoDS_Shape H, H1, HN, HO, HI;
+
+    try
+    {
+      V  = Build3dCurves( shapes.VCompound       () ); // "hard edges" visible
+      V1 = Build3dCurves( shapes.Rg1LineVCompound() ); // "smooth edges" visible
+      VN = Build3dCurves( shapes.RgNLineVCompound() ); // "contour edges" visible
+      VO = Build3dCurves( shapes.OutLineVCompound() ); // "outline" visible
+      VI = Build3dCurves( shapes.IsoLineVCompound() ); // "isolines" visible (precise HLR only)
+      H  = Build3dCurves( shapes.HCompound       () ); // "hard edges" hidden
+      H1 = Build3dCurves( shapes.Rg1LineHCompound() ); // "smooth edges" hidden
+      HN = Build3dCurves( shapes.RgNLineHCompound() ); // "contour edges" hidden
+      HO = Build3dCurves( shapes.OutLineHCompound() ); // "outline" hidden
+      HI = Build3dCurves( shapes.IsoLineHCompound() ); // "isolines" hidden (precise HLR only)
+    }
+    catch ( ... )
+    {
+      return TopoDS_Shape();
+    }
 
     TopoDS_Compound C;
     BRep_Builder().MakeCompound(C);
@@ -153,24 +163,41 @@ namespace hlr
     // the "curved" version of HLR.
     Handle(HLRBRep_PolyAlgo) polyAlgo = new HLRBRep_PolyAlgo;
     //
-    polyAlgo->Projector(projector);
-    polyAlgo->Load(shape);
-    polyAlgo->Update();
+    try
+    {
+      polyAlgo->Projector(projector);
+      polyAlgo->Load(shape);
+      polyAlgo->Update();
+    }
+    catch ( ... )
+    {
+      // Sometimes crashes.
+      return TopoDS_Shape();
+    }
 
     // Create topological entities.
     HLRBRep_PolyHLRToShape shapes;
-    shapes.Update(polyAlgo);
+    //
+    try
+    {
+      shapes.Update(polyAlgo);
+    }
+    catch ( ... )
+    {
+      // Sometimes crashes.
+      return TopoDS_Shape();
+    }
 
     // V -- visible
     // H -- hidden
-    TopoDS_Shape V  = shapes.VCompound       (); // "hard edges" visible
-    TopoDS_Shape V1 = shapes.Rg1LineVCompound(); // "smooth edges" visible
-    TopoDS_Shape VN = shapes.RgNLineVCompound(); // "contour edges" visible
-    TopoDS_Shape VO = shapes.OutLineVCompound(); // "outline" visible
-    TopoDS_Shape H  = shapes.HCompound       (); // "hard edges" hidden
-    TopoDS_Shape H1 = shapes.Rg1LineHCompound(); // "smooth edges" hidden
-    TopoDS_Shape HN = shapes.RgNLineHCompound(); // "contour edges" hidden
-    TopoDS_Shape HO = shapes.OutLineHCompound(); // "outline" hidden
+    TopoDS_Shape V  = Build3dCurves( shapes.VCompound       () ); // "hard edges" visible
+    TopoDS_Shape V1 = Build3dCurves( shapes.Rg1LineVCompound() ); // "smooth edges" visible
+    TopoDS_Shape VN = Build3dCurves( shapes.RgNLineVCompound() ); // "contour edges" visible
+    TopoDS_Shape VO = Build3dCurves( shapes.OutLineVCompound() ); // "outline" visible
+    TopoDS_Shape H  = Build3dCurves( shapes.HCompound       () ); // "hard edges" hidden
+    TopoDS_Shape H1 = Build3dCurves( shapes.Rg1LineHCompound() ); // "smooth edges" hidden
+    TopoDS_Shape HN = Build3dCurves( shapes.RgNLineHCompound() ); // "contour edges" hidden
+    TopoDS_Shape HO = Build3dCurves( shapes.OutLineHCompound() ); // "outline" hidden
 
     TopoDS_Compound C;
     BRep_Builder().MakeCompound(C);
