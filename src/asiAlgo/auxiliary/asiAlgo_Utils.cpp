@@ -2584,29 +2584,29 @@ tl::optional<gp_Ax3>
   tl::optional<gp_Ax3> T_A;
 
   // Find local axes for the bbox side.
-  if ( dir.IsEqual( gp::DX(), Precision::Angular() ) )
+  if ( dir.IsEqual( gp::DX(), Precision::Angular() ) ) // RIGHT
   {
-    T_A = gp_Ax3( gp_Pnt(xMax, (yMin + yMax)*0.5, (zMin + zMax)*0.5), gp::DX() );
+    T_A = gp_Ax3( gp_Pnt(xMax, (yMin + yMax)*0.5, (zMin + zMax)*0.5), gp::DX(), gp::DZ() );
   }
-  else if ( dir.IsEqual( -gp::DX(), Precision::Angular() ) )
+  else if ( dir.IsEqual( -gp::DX(), Precision::Angular() ) ) // LEFT
   {
-    T_A = gp_Ax3( gp_Pnt(xMin, (yMin + yMax)*0.5, (zMin + zMax)*0.5), -gp::DX() );
+    T_A = gp_Ax3( gp_Pnt(xMin, (yMin + yMax)*0.5, (zMin + zMax)*0.5), -gp::DX(), -gp::DZ() );
   }
-  else if ( dir.IsEqual( gp::DY(), Precision::Angular() ) )
+  else if ( dir.IsEqual( gp::DY(), Precision::Angular() ) ) // TOP
   {
-    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMax, (zMin + zMax)*0.5), gp::DY() );
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMax, (zMin + zMax)*0.5), gp::DY(), gp::DZ() );
   }
-  else if ( dir.IsEqual( -gp::DY(), Precision::Angular() ) )
+  else if ( dir.IsEqual( -gp::DY(), Precision::Angular() ) ) // BOTTOM
   {
-    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMin, (zMin + zMax)*0.5), -gp::DY() );
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, yMin, (zMin + zMax)*0.5), -gp::DY(), -gp::DZ() );
   }
-  else if ( dir.IsEqual( gp::DZ(), Precision::Angular() ) )
+  else if ( dir.IsEqual( gp::DZ(), Precision::Angular() ) ) // FRONT
   {
-    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMax), gp::DZ() );
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMax), gp::DZ(), gp::DX() );
   }
-  else if ( dir.IsEqual( -gp::DZ(), Precision::Angular() ) )
+  else if ( dir.IsEqual( -gp::DZ(), Precision::Angular() ) ) // BACK
   {
-    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMin), -gp::DZ() );
+    T_A = gp_Ax3( gp_Pnt((xMin + xMax)*0.5, (yMin + yMax)*0.5, zMin), -gp::DZ(), -gp::DX() );
   }
 
   return T_A;

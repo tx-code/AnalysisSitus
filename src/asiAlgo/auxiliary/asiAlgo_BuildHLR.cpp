@@ -78,9 +78,17 @@ namespace hlr
 
     gp_Ax2 transform(gp::Origin(), direction);
     HLRAlgo_Projector projector(transform);
-    brep_hlr->Projector(projector);
-    brep_hlr->Update();
-    brep_hlr->Hide();
+
+    try
+    {
+      brep_hlr->Projector(projector);
+      brep_hlr->Update();
+      brep_hlr->Hide();
+    }
+    catch ( ... )
+    {
+      return TopoDS_Shape();
+    }
 
     // Extract the result sets.
     HLRBRep_HLRToShape shapes(brep_hlr);

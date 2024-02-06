@@ -161,6 +161,10 @@ namespace
     if ( partShape.IsNull() )
       return;
 
+    // Root Node stores global HLR settings.
+    Handle(asiData_RootNode)
+      rootNode = Handle(asiData_RootNode)::DownCast( model->GetRootNode() );
+
     // Bounding box of the shape.
     double xMin, yMin, zMin, xMax, yMax, zMax;
     asiAlgo_Utils::Bounds(partShape, xMin, yMin, zMin, xMax, yMax, zMax, 0., false);
@@ -210,11 +214,22 @@ namespace
     //
     for ( const auto& dir : dirs )
     {
-      if ( !buildHLR.Perform(dir, mode, filter) )
+      if ( mode == asiAlgo_BuildHLR::Mode_Precise )
       {
-        progress.SendLogMessage( LogErr(Normal) << "Cannot build HLR for direction (%1,%2,%3)."
-                                                << dir.X() << dir.Y() << dir.Z() );
-        continue;
+        if ( !buildHLR.PerformParallel(dir, rootNode->GetHlrTimeout(), filter) )
+        {
+          progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR: try increasing timeout or use "
+                                                    "\"Alt+H\" key combination for enforced discrete HLR.");
+          return;
+        }
+      }
+      else
+      {
+        if ( !buildHLR.Perform(dir, asiAlgo_BuildHLR::Mode_Discrete, filter) )
+        {
+          progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR.");
+          return;
+        }
       }
 
       TopoDS_Shape proj = buildHLR.GetResult();
@@ -226,6 +241,7 @@ namespace
       gp_Ax3               T_B( gp_Pnt( (projXmin + projXmax)*0.5,
                                         (projYmin + projYmax)*0.5,
                                         (projZmin + projZmax)*0.5), dir );
+      //
       tl::optional<gp_Ax3> T_A = asiAlgo_Utils::GetBboxSideFrame(dir, xMin, yMin, zMin, xMax, yMax, zMax);
       //
       if ( !T_A.has_value() )
