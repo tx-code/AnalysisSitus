@@ -38,6 +38,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <ElCLib.hxx>
@@ -1069,6 +1070,72 @@ namespace
 
 //-----------------------------------------------------------------------------
 
+bool ConvertEdges2ArcLines(const TopoDS_Shape&                shape,
+                           double                             tolerance,
+                           Handle(TopTools_HSequenceOfShape)& inputEdges,
+                           Handle(ShapeBuild_ReShape)&        ctx,
+                           Handle(TopTools_HSequenceOfShape)& resWires,
+                           ActAPI_ProgressEntry               progress,
+                           ActAPI_PlotterEntry                plotter)
+{
+  bool isSomethingDone = false;
+  for ( TopExp_Explorer expE(shape, TopAbs_EDGE); expE.More(); expE.Next() )
+  {
+    const TopoDS_Edge& edge = TopoDS::Edge( expE.Current() );
+
+    Handle(TopTools_HSequenceOfShape) localInputEdges = new TopTools_HSequenceOfShape;
+
+    double f, l;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve( edge, f, l );
+
+    convert2ArcLinesStatus status =
+      convert2ArcLines( curve, f, l, tolerance, localInputEdges, progress, plotter );
+
+    if ( status == convert2ArcLinesStatus_Failed )
+    {
+      continue;
+    }
+    else if ( status == convert2ArcLinesStatus_IsLineOrArc )
+    {
+      inputEdges->Append(edge);
+      continue;
+    }
+
+    isSomethingDone = true;
+
+    TopTools_SequenceOfShape::Iterator newEdgesIter( *localInputEdges );
+    for ( ; newEdgesIter.More(); newEdgesIter.Next() )
+    {
+      if ( edge.Orientation() == TopAbs_REVERSED )
+      {
+        newEdgesIter.ChangeValue().Reverse();
+      }
+
+      inputEdges->Append( newEdgesIter.Value() );
+    }
+  }
+
+  if ( isSomethingDone )
+  {
+    resWires = new TopTools_HSequenceOfShape();
+
+    ShapeAnalysis_FreeBounds::ConnectEdgesToWires( inputEdges, sewTol, false, resWires );
+
+    if ( resWires->Length() == 1 && !resWires->First().IsNull() )
+    {
+      ctx->Replace(shape, resWires->First());
+    }
+    else
+    {
+      progress.SendLogMessage(LogWarn(Normal) << "Failed to convert bsplines to lines and arcs.");
+    }
+    return true;
+  }
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_ConvertCurve::Convert2ArcLines(TopoDS_Shape&        shape,
                                             double               tolerance,
                                             ActAPI_ProgressEntry progress,
@@ -1076,67 +1143,25 @@ void asiAlgo_ConvertCurve::Convert2ArcLines(TopoDS_Shape&        shape,
 {
   Handle(ShapeBuild_ReShape) ctx = new ShapeBuild_ReShape;
 
-  for ( TopExp_Explorer expW( shape, TopAbs_WIRE ); expW.More(); expW.Next() )
+  TopExp_Explorer expW(shape, TopAbs_WIRE);
+  if ( !expW.More() )
+  {
+    Handle(TopTools_HSequenceOfShape) inputEdges = new TopTools_HSequenceOfShape;
+    Handle(TopTools_HSequenceOfShape) resWires;
+    //
+    bool isSomethingDone =
+      ConvertEdges2ArcLines( shape, tolerance, inputEdges, ctx, resWires, progress, plotter );
+  }
+  for ( ; expW.More(); expW.Next() )
   {
     const TopoDS_Wire& wire = TopoDS::Wire( expW.Current() );
+    Handle(TopTools_HSequenceOfShape) resWires;
 
     Handle(TopTools_HSequenceOfShape) inputEdges = new TopTools_HSequenceOfShape;
 
-    bool isSomethingDone = false;
-
-    for ( TopExp_Explorer expE( wire, TopAbs_EDGE ); expE.More(); expE.Next() )
-    {
-      const TopoDS_Edge& edge = TopoDS::Edge( expE.Current() );
-
-      Handle(TopTools_HSequenceOfShape) localInputEdges = new TopTools_HSequenceOfShape;
-
-      double f, l;
-      Handle(Geom_Curve) curve = BRep_Tool::Curve( edge, f, l );
-
-      convert2ArcLinesStatus status =
-        convert2ArcLines( curve, f, l, tolerance, localInputEdges, progress, plotter );
-
-      if ( status == convert2ArcLinesStatus_Failed )
-      {
-        continue;
-      }
-      else if ( status == convert2ArcLinesStatus_IsLineOrArc )
-      {
-        inputEdges->Append( edge );
-
-        continue;
-      }
-
-      isSomethingDone = true;
-
-      TopTools_SequenceOfShape::Iterator newEdgesIter( *localInputEdges );
-      for ( ; newEdgesIter.More(); newEdgesIter.Next() )
-      {
-        if ( edge.Orientation() == TopAbs_REVERSED )
-        {
-          newEdgesIter.ChangeValue().Reverse();
-        }
-
-        inputEdges->Append( newEdgesIter.Value() );
-      }
-    }
-
+    bool isSomethingDone =
+      ConvertEdges2ArcLines( wire, tolerance, inputEdges, ctx, resWires, progress, plotter );
     //
-    if ( isSomethingDone )
-    {
-      Handle(TopTools_HSequenceOfShape) wires = new TopTools_HSequenceOfShape();
-
-      ShapeAnalysis_FreeBounds::ConnectEdgesToWires( inputEdges, sewTol, false, wires );
-
-      if ( wires->Length() == 1 && !wires->First().IsNull() )
-      {
-        ctx->Replace( wire, wires->First() );
-      }
-      else
-      {
-        progress.SendLogMessage( LogWarn(Normal) << "Failed to convert bsplines to lines and arcs." );
-      }
-    }
   }
 
   shape = ctx->Apply( shape );
