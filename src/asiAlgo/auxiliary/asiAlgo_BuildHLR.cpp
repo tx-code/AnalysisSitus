@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo_Timer.h>
+#include <asiAlgo_Thread.h>
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
@@ -44,7 +45,6 @@
 #include <HLRBRep_HLRToShape.hxx>
 #include <HLRBRep_PolyAlgo.hxx>
 #include <HLRBRep_PolyHLRToShape.hxx>
-#include <OSD_Thread.hxx>
 #include <TopExp_Explorer.hxx>
 
 //-----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ namespace hlr
   //! Thread function for precise HLR.
   void* ThreadHLR(void* pData)
 {
-  std::cout << "Running HLR in worker thread id: " << OSD_Thread::Current() << std::endl;
+  std::cout << "Running HLR in worker thread id: " << asiAlgo_Thread::Current() << std::endl;
 
   TIMER_NEW
   TIMER_GO
@@ -265,7 +265,7 @@ namespace hlr
   //! Thread function for discrete HLR.
   void* ThreadDHLR(void* pData)
   {
-    std::cout << "Running DHLR in worker thread id: " << OSD_Thread::Current() << std::endl;
+    std::cout << "Running DHLR in worker thread id: " << asiAlgo_Thread::Current() << std::endl;
 
     TIMER_NEW
     TIMER_GO
@@ -324,10 +324,10 @@ bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
                                        const int            timeout_ms,
                                        const t_outputEdges& visibility)
 {
-  std::cout << "Running in master thread id: " << OSD_Thread::Current() << std::endl;
+  std::cout << "Running in master thread id: " << asiAlgo_Thread::Current() << std::endl;
 
   // Prepare threads.
-  OSD_Thread threads[2];
+  asiAlgo_Thread threads[2];
   //
   threads[0].SetFunction(hlr::ThreadHLR);
   threads[1].SetFunction(hlr::ThreadDHLR);

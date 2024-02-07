@@ -590,6 +590,7 @@ set (utils_H_FILES
   utils/asiAlgo_TimeStamp.h
   utils/asiAlgo_Variable.h
   utils/MemTracker.h
+  utils/asiAlgo_Thread.h
 )
 set (utils_CPP_FILES
   utils/asiAlgo_FileDumper.cpp
@@ -598,6 +599,7 @@ set (utils_CPP_FILES
   utils/asiAlgo_ProgressNotifier.cpp
   utils/asiAlgo_TimeStamp.cpp
   utils/MemTracker.cpp
+  utils/asiAlgo_Thread.cpp
 )
 
 if (USE_MOBIUS)
