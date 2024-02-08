@@ -1,6 +1,6 @@
 // Created on: 2006-03-10
 // Created by: Andrey BETENEV
-// Modified by Sergey SLYADNEV 2024-02-07
+// Modified by Sergey SLYADNEV (2024-02-07)
 
 #ifndef asiAlgo_Thread_HeaderFile
 #define asiAlgo_Thread_HeaderFile
@@ -18,51 +18,59 @@
 
 //-----------------------------------------------------------------------------
 
-//! A simple platform-independent interface to execute
-//! and control threads. This class is a patched copy of original
-// OpenCascade's OSD_Thread that fixes timout on Linux.
+//! A simple platform-independent interface to execute and control threads.
+//! This class is a patched copy of original OpenCascade's `OSD_Thread` that
+//! fixes timout conversion from milliseconds to `timespec` for subsequent
+//! use in `pthread_timedjoin_np()` function on Linux.
 class asiAlgo_Thread
 {
 public:
 
-  //! Empty constructor
-  Standard_EXPORT asiAlgo_Thread();
+  //! Empty constructor.
+  asiAlgo_EXPORT asiAlgo_Thread();
 
-  //! Initialize the tool by the thread function
+  //! Initializes the tool by the thread function.
   //!
   //! Note: On Windows, you might have to take an address of the thread
-  //! function explicitly to pass it to this constructor without compiler error
-  Standard_EXPORT asiAlgo_Thread(const OSD_ThreadFunction& func);
+  //! function explicitly to pass it to this constructor without compiler error.
+  asiAlgo_EXPORT asiAlgo_Thread(const OSD_ThreadFunction& func);
 
-  //! Copy constructor
-  Standard_EXPORT asiAlgo_Thread(const asiAlgo_Thread& other);
+  //! Copy constructor.
+  asiAlgo_EXPORT asiAlgo_Thread(const asiAlgo_Thread& other);
 
   //! Copy thread handle from other OSD_Thread object.
-  Standard_EXPORT void Assign (const asiAlgo_Thread& other);
-void operator = (const asiAlgo_Thread& other)
-{
-  Assign(other);
-}
+  asiAlgo_EXPORT void
+    Assign (const asiAlgo_Thread& other);
+
+  void operator = (const asiAlgo_Thread& other)
+  {
+    Assign(other);
+  }
 
   //! Destructor. Detaches the thread if it wasn't done already.
-  Standard_EXPORT ~asiAlgo_Thread();
+  asiAlgo_EXPORT
+    ~asiAlgo_Thread();
 
-  Standard_EXPORT void SetPriority (const Standard_Integer thePriority);
+  asiAlgo_EXPORT void
+    SetPriority(const int priority);
 
-  //! Initialize the tool by the thread function.
+  //! Initializes the tool by the thread function.
   //! If the current thread handle is not null, nullifies it.
   //!
   //! Note: On Windows, you might have to take an address of the thread
   //! function explicitly to pass it to this method without compiler error
-  Standard_EXPORT void SetFunction (const OSD_ThreadFunction& func);
+  asiAlgo_EXPORT void
+    SetFunction(const OSD_ThreadFunction& func);
 
   //! Starts a thread with thread function given in constructor,
-  //! passing the specified input data (as void *) to it.
-  //! The parameter \a WNTStackSize (on Windows only)
+  //! passing the specified input data (as `void *`) to it.
+  //! The parameter `WNTStackSize` (on Windows only)
   //! specifies size of the stack to be allocated for the thread
-  //! (by default - the same as for the current executable).
+  //! (by default it is the same as for the current executable).
   //! Returns True if thread started successfully
-  Standard_EXPORT Standard_Boolean Run (const Standard_Address data = 0, const Standard_Integer WNTStackSize = 0);
+  asiAlgo_EXPORT bool
+    Run(void*     data         = 0,
+        const int WNTStackSize = 0);
 
   //! Detaches the execution thread from this Thread object,
   //! so that it cannot be waited.
@@ -71,44 +79,49 @@ void operator = (const asiAlgo_Thread& other)
   //! (the handle is closed).
   //! However, the purpose is the same: to instruct the system to
   //! release all thread data upon its completion.
-  Standard_EXPORT void Detach();
+  asiAlgo_EXPORT void
+    Detach();
 
   //! Waits till the thread finishes execution.
-  Standard_Boolean Wait()
+  bool Wait()
   {
-    Standard_Address aRes = 0;
-    return Wait (aRes);
+    void* pRes = 0;
+    return Wait(pRes);
   }
 
-  //! Wait till the thread finishes execution.
+  //! Waits till the thread finishes execution.
   //! Returns True if wait was successful, False in case of error.
   //!
-  //! If successful and \a result argument is provided, saves the pointer
-  //! (void*) returned by the thread function in \a result.
+  //! If successful and `result` argument is provided, saves the pointer
+  //! (void*) returned by the thread function in `result`.
   //!
   //! Note however that it is advisable not to rely upon returned result
   //! value, as it is not always the value actually returned by the thread
   //! function. In addition, on Windows it is converted via DWORD.
-  Standard_EXPORT Standard_Boolean Wait (Standard_Address& theResult);
+  asiAlgo_EXPORT bool
+    Wait(void*& result);
 
   //! Waits for some time and if the thread is finished,
   //! it returns the result.
   //! The function returns false if the thread is not finished yet.
-  Standard_EXPORT Standard_Boolean Wait (const Standard_Integer time, Standard_Address& theResult);
+  asiAlgo_EXPORT bool
+    Wait(const int time, void*& theResult);
 
   //! Returns ID of the currently controlled thread ID,
   //! or 0 if no thread is run
-  Standard_EXPORT Standard_ThreadId GetId() const;
+  asiAlgo_EXPORT Standard_ThreadId
+    GetId() const;
 
-  //! Auxiliary: returns ID of the current thread
-  Standard_EXPORT static Standard_ThreadId Current();
+  //! Auxiliary: returns ID of the current thread.
+  asiAlgo_EXPORT static Standard_ThreadId
+    Current();
 
 private:
 
   OSD_ThreadFunction myFunc;
-  OSD_PThread myThread;
-  Standard_ThreadId myThreadId;
-  Standard_Integer myPriority;
+  OSD_PThread        myThread;
+  Standard_ThreadId  myThreadId;
+  Standard_Integer   myPriority;
 
 };
 
