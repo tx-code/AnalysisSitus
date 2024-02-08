@@ -106,6 +106,8 @@ namespace
     TIMER_NEW
     TIMER_GO
 
+    asiAlgo_BuildHLR::ClearThreads(progress);
+
     // Set a filter for the hidden edges.
     asiAlgo_BuildHLR::t_outputEdges filter;
     //
@@ -206,6 +208,8 @@ namespace
 
     TIMER_NEW
     TIMER_GO
+
+    asiAlgo_BuildHLR::ClearThreads(progress);
 
     // Prepare HLR tool.
     asiAlgo_BuildHLR buildHLR( partShape,

@@ -90,6 +90,7 @@ set (aux_H_FILES
   auxiliary/asiAlgo_Collections.h
   auxiliary/asiAlgo_CompleteEdgeLoop.h
   auxiliary/asiAlgo_ComputeNegativeVolume.h
+  auxiliary/asiAlgo_ConcurrentSet.h
   auxiliary/asiAlgo_ConvertCurve.h
   auxiliary/asiAlgo_CSG.h
   auxiliary/asiAlgo_DesignLaw.h
@@ -143,6 +144,7 @@ set (aux_CPP_FILES
   auxiliary/asiAlgo_ClassifyPointFace.cpp
   auxiliary/asiAlgo_CompleteEdgeLoop.cpp
   auxiliary/asiAlgo_ComputeNegativeVolume.cpp
+  auxiliary/asiAlgo_ConcurrentSet.cpp
   auxiliary/asiAlgo_ConvertCurve.cpp
   auxiliary/asiAlgo_DesignLaw.cpp
   auxiliary/asiAlgo_DivideByContinuity.cpp

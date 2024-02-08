@@ -121,7 +121,7 @@ private:
   OSD_ThreadFunction myFunc;
   OSD_PThread        myThread;
   Standard_ThreadId  myThreadId;
-  Standard_Integer   myPriority;
+  int                myPriority;
 
 };
 

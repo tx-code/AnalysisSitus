@@ -32,7 +32,8 @@
 #define asiAlgo_BuildHLR_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
+#include <asiAlgo_ConcurrentSet.h>
+#include <asiAlgo_Thread.h>
 
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
@@ -96,6 +97,12 @@ public:
 
 public:
 
+  //! Cleans up shared static data for threading.
+  asiAlgo_EXPORT static void
+    ClearThreads(ActAPI_ProgressEntry progress = nullptr);
+
+public:
+
   //! Ctor.
   //! \param[in] shape    B-rep shape of a CAD part to analyze.
   //! \param[in] progress progress notifier.
@@ -140,7 +147,8 @@ protected:
 
 public:
 
-  static t_threadData ThreadData[2];
+  static t_threadData                             __ThreadData[2];
+  static asiAlgo_ConcurrentSet<Standard_ThreadId> __ThreadsAbandoned;
 
 };
 

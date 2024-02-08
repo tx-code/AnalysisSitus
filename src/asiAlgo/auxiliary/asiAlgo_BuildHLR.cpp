@@ -33,7 +33,6 @@
 
 // asiAlgo includes
 #include <asiAlgo_Timer.h>
-#include <asiAlgo_Thread.h>
 
 // OpenCascade includes
 #include <BRep_Builder.hxx>
@@ -51,8 +50,11 @@
 
 // Initialize static thread data for HLR algorithms.
 asiAlgo_BuildHLR::t_threadData
-  asiAlgo_BuildHLR::ThreadData[2] = { asiAlgo_BuildHLR::t_threadData(),
-                                      asiAlgo_BuildHLR::t_threadData() };
+  asiAlgo_BuildHLR::__ThreadData[2] = { asiAlgo_BuildHLR::t_threadData(),
+                                        asiAlgo_BuildHLR::t_threadData() };
+
+// Collection of abandonned threads.
+asiAlgo_ConcurrentSet<Standard_ThreadId> asiAlgo_BuildHLR::__ThreadsAbandoned;
 
 //-----------------------------------------------------------------------------
 
@@ -252,9 +254,13 @@ namespace hlr
   asiAlgo_BuildHLR::t_threadData*
     pThreadData = reinterpret_cast<asiAlgo_BuildHLR::t_threadData*>(pData);
 
-  pThreadData->output = HLR(pThreadData->input,
-                            pThreadData->dir,
-                            pThreadData->style);
+  TopoDS_Shape proj = HLR(pThreadData->input,
+                          pThreadData->dir,
+                          pThreadData->style);
+
+  // The current thread is allowed to touch the output only if it's not marked "abandonned".
+  if ( !asiAlgo_BuildHLR::__ThreadsAbandoned.contains( asiAlgo_Thread::Current() ) )
+    pThreadData->output = proj;
 
   TIMER_FINISH
   TIMER_COUT_RESULT_MSG("HLR finished")
@@ -273,15 +279,29 @@ namespace hlr
     asiAlgo_BuildHLR::t_threadData*
       pThreadData = reinterpret_cast<asiAlgo_BuildHLR::t_threadData*>(pData);
 
-    pThreadData->output = DHLR(pThreadData->input,
-                               pThreadData->dir,
-                               pThreadData->style);
+    TopoDS_Shape proj = DHLR(pThreadData->input,
+                             pThreadData->dir,
+                             pThreadData->style);
+
+    // The current thread is allowed to touch the output only if it's not marked "abandonned".
+    if ( !asiAlgo_BuildHLR::__ThreadsAbandoned.contains( asiAlgo_Thread::Current() ) )
+      pThreadData->output = proj;
 
     TIMER_FINISH
     TIMER_COUT_RESULT_MSG("DHLR finished")
 
     return NULL;
   }
+}
+
+//-----------------------------------------------------------------------------
+
+void asiAlgo_BuildHLR::ClearThreads(ActAPI_ProgressEntry progress)
+{
+  progress.SendLogMessage( LogInfo(Normal) << "Num. of abandoned threads prior to HLR run: %1."
+                                           << (int) ( __ThreadsAbandoned.size() ) );
+  //
+  __ThreadsAbandoned.clear_unsafe();
 }
 
 //-----------------------------------------------------------------------------
@@ -338,20 +358,20 @@ bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
    * as long as the assigned thread is running.
    */
 
-  ThreadData[0].input  = BRepBuilderAPI_Copy(m_input, true, true);
-  ThreadData[0].dir    = projectionDir;
-  ThreadData[0].style  = visibility;
-  ThreadData[0].output = TopoDS_Shape();
+  __ThreadData[0].input  = BRepBuilderAPI_Copy(m_input, true, true);
+  __ThreadData[0].dir    = projectionDir;
+  __ThreadData[0].style  = visibility;
+  __ThreadData[0].output = TopoDS_Shape();
   //
-  ThreadData[1].input  = BRepBuilderAPI_Copy(m_input, true, true); // copy mesh for DHLR
-  ThreadData[1].dir    = projectionDir;
-  ThreadData[1].style  = visibility;
-  ThreadData[1].output = TopoDS_Shape();
+  __ThreadData[1].input  = BRepBuilderAPI_Copy(m_input, true, true); // copy mesh for DHLR
+  __ThreadData[1].dir    = projectionDir;
+  __ThreadData[1].style  = visibility;
+  __ThreadData[1].output = TopoDS_Shape();
 
   // Run threads.
   for ( int i = 0; i < 2; ++i )
   {
-    if ( !threads[i].Run(&ThreadData[i]) )
+    if ( !threads[i].Run(&__ThreadData[i]) )
       std::cerr << "Error: cannot start thread " << i << std::endl;
   }
 
@@ -363,10 +383,16 @@ bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
     // If that thread has already terminated, then pthread_join() returns
     // immediately.
     if ( !threads[i].Wait(timeout_ms, res) )
+    {
+      __ThreadsAbandoned.insert( threads[i].GetId() );
+
       std::cerr << "Error: cannot get result of thread " << threads[i].GetId() << std::endl;
+    }
   }
 
-  m_result = ThreadData[0].output.IsNull() ? ThreadData[1].output : ThreadData[0].output;
+  m_result = __ThreadData[0].output.IsNull() ?
+             __ThreadData[1].output : __ThreadData[0].output;
+
   return !m_result.IsNull();
 }
 
