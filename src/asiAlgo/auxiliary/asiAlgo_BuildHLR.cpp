@@ -49,11 +49,9 @@
 //-----------------------------------------------------------------------------
 
 // Initialize static thread data for HLR algorithms.
-asiAlgo_BuildHLR::t_threadData
-  asiAlgo_BuildHLR::__ThreadData[2] = { asiAlgo_BuildHLR::t_threadData(),
-                                        asiAlgo_BuildHLR::t_threadData() };
+asiAlgo_BuildHLR::t_threadData asiAlgo_BuildHLR::__ThreadData[12];
 
-// Collection of abandonned threads.
+// Collection of abandoned threads.
 asiAlgo_ConcurrentSet<Standard_ThreadId> asiAlgo_BuildHLR::__ThreadsAbandoned;
 
 //-----------------------------------------------------------------------------
@@ -258,7 +256,7 @@ namespace hlr
                           pThreadData->dir,
                           pThreadData->style);
 
-  // The current thread is allowed to touch the output only if it's not marked "abandonned".
+  // The current thread is allowed to touch the output only if it's not marked "abandoned".
   if ( !asiAlgo_BuildHLR::__ThreadsAbandoned.contains( asiAlgo_Thread::Current() ) )
     pThreadData->output = proj;
 
@@ -283,7 +281,7 @@ namespace hlr
                              pThreadData->dir,
                              pThreadData->style);
 
-    // The current thread is allowed to touch the output only if it's not marked "abandonned".
+    // The current thread is allowed to touch the output only if it's not marked "abandoned".
     if ( !asiAlgo_BuildHLR::__ThreadsAbandoned.contains( asiAlgo_Thread::Current() ) )
       pThreadData->output = proj;
 
@@ -341,6 +339,7 @@ bool asiAlgo_BuildHLR::Perform(const gp_Dir&        projectionDir,
 //-----------------------------------------------------------------------------
 
 bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
+                                       const size_t         memChunk,
                                        const int            timeout_ms,
                                        const t_outputEdges& visibility)
 {
@@ -358,20 +357,20 @@ bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
    * as long as the assigned thread is running.
    */
 
-  __ThreadData[0].input  = BRepBuilderAPI_Copy(m_input, true, true);
-  __ThreadData[0].dir    = projectionDir;
-  __ThreadData[0].style  = visibility;
-  __ThreadData[0].output = TopoDS_Shape();
+  __ThreadData[memChunk + 0].input  = BRepBuilderAPI_Copy(m_input, true, true);
+  __ThreadData[memChunk + 0].dir    = projectionDir;
+  __ThreadData[memChunk + 0].style  = visibility;
+  __ThreadData[memChunk + 0].output = TopoDS_Shape();
   //
-  __ThreadData[1].input  = BRepBuilderAPI_Copy(m_input, true, true); // copy mesh for DHLR
-  __ThreadData[1].dir    = projectionDir;
-  __ThreadData[1].style  = visibility;
-  __ThreadData[1].output = TopoDS_Shape();
+  __ThreadData[memChunk + 1].input  = BRepBuilderAPI_Copy(m_input, true, true); // copy mesh for DHLR
+  __ThreadData[memChunk + 1].dir    = projectionDir;
+  __ThreadData[memChunk + 1].style  = visibility;
+  __ThreadData[memChunk + 1].output = TopoDS_Shape();
 
   // Run threads.
   for ( int i = 0; i < 2; ++i )
   {
-    if ( !threads[i].Run(&__ThreadData[i]) )
+    if ( !threads[i].Run(&__ThreadData[memChunk + i]) )
       std::cerr << "Error: cannot start thread " << i << std::endl;
   }
 
@@ -390,8 +389,8 @@ bool asiAlgo_BuildHLR::PerformParallel(const gp_Dir&        projectionDir,
     }
   }
 
-  m_result = __ThreadData[0].output.IsNull() ?
-             __ThreadData[1].output : __ThreadData[0].output;
+  m_result = __ThreadData[memChunk + 0].output.IsNull() ?
+             __ThreadData[memChunk + 1].output : __ThreadData[memChunk + 0].output;
 
   return !m_result.IsNull();
 }

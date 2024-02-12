@@ -126,11 +126,13 @@ public:
 
   //! Runs HLR in parallel threads.
   //! \param[in] projectionDir the direction of projection to use.
-  //! \param[in] timeout       the timeout for processing.
+  //! \param[in] memChunk      the memory chunk index from 0 to 10.
+  //! \param[in] timeout_ms    the timeout for processing.
   //! \param[in] visibility    the projection styles.
   //! \return true in case of success, false -- otherwise.
   asiAlgo_EXPORT bool
     PerformParallel(const gp_Dir&        projectionDir,
+                    const size_t         memChunk,
                     const int            timeout_ms = 500,
                     const t_outputEdges& visibility = t_outputEdges());
 
@@ -147,7 +149,19 @@ protected:
 
 public:
 
-  static t_threadData                             __ThreadData[2];
+  // X+ precise  [0]
+  //    discrete [1]
+  // X- precise  [2]
+  //    discrete [3]
+  // Y+ precise  [4]
+  //    discrete [5]
+  // Y- precise  [6]
+  //    discrete [7]
+  // Z+ precise  [8]
+  //    discrete [9]
+  // Z- precise  [10]
+  //    discrete [11]
+  static t_threadData                             __ThreadData[12];
   static asiAlgo_ConcurrentSet<Standard_ThreadId> __ThreadsAbandoned;
 
 };

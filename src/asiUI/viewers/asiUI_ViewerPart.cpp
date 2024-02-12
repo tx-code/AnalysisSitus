@@ -127,7 +127,7 @@ namespace
     //
     if ( mode == asiAlgo_BuildHLR::Mode_Precise )
     {
-      if ( !buildHLR.PerformParallel(gp_Dir(dX, dY, dZ), rootNode->GetHlrTimeout(), filter) )
+      if ( !buildHLR.PerformParallel(gp_Dir(dX, dY, dZ), 0, rootNode->GetHlrTimeout(), filter) )
       {
         progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR: try increasing timeout or use "
                                                   "\"Alt+H\" key combination for enforced discrete HLR.");
@@ -216,11 +216,13 @@ namespace
                                progress,
                                plotter );
     //
+    size_t memchunk = 0;
+    //
     for ( const auto& dir : dirs )
     {
       if ( mode == asiAlgo_BuildHLR::Mode_Precise )
       {
-        if ( !buildHLR.PerformParallel(dir, rootNode->GetHlrTimeout(), filter) )
+        if ( !buildHLR.PerformParallel(dir, memchunk, rootNode->GetHlrTimeout(), filter) )
         {
           progress.SendLogMessage(LogErr(Normal) << "Cannot build HLR: try increasing timeout or use "
                                                     "\"Alt+H\" key combination for enforced discrete HLR.");
@@ -235,6 +237,8 @@ namespace
           return;
         }
       }
+      //
+      memchunk += 2;
 
       TopoDS_Shape proj = buildHLR.GetResult();
 
