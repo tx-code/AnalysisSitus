@@ -42,14 +42,14 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to intersect mesh with a plane. This algorithm is based on VTK
 //! cutter which returns an unordered set of points. As the second (and
 //! optional) stage, we sort the obtained points with concave hull utility,
 //! thus making the section ready for subsequent curve approximation.
 class asiAlgo_MeshInterPlane : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshInterPlane, ActAPI_IAlgorithm)
 

@@ -40,12 +40,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! This class represents a 0-dimensional intersection point between a curve
 //! and a surface.
 class asiAlgo_IntersectionPointCS : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IntersectionPointCS, Standard_Transient)
 
@@ -96,6 +96,8 @@ public:
 
 };
 
+//! \ingroup ASI_MODELING
+//!
 //! Collection of intersection points.
 typedef NCollection_Sequence<Handle(asiAlgo_IntersectionPointCS)> asiAlgo_IntersectionPointsCS;
 

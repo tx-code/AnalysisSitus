@@ -46,6 +46,8 @@
 // Single point with additional information
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Point enriched with additional information used in algorithms.
 template <typename TCoord>
 struct asiAlgo_PointWithAttr
@@ -83,6 +85,8 @@ struct asiAlgo_PointWithAttr
 // Point cloud
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Point cloud where each element is enriched with metadata. This class is
 //! to some extent similar to asiAlgo_BaseCloud, though, unlike the latter,
 //! it allows storing not only point coordinates but also custom attributes.

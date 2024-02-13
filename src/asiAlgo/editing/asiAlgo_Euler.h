@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Base class for Euler operators.
 class asiAlgo_Euler : public ActAPI_IAlgorithm
 {

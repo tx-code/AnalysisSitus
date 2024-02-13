@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utilities for detection of free geometry in CAD.
 namespace asiAlgo_FindFree
 {

@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to intersect curves.
 class asiAlgo_IntersectCurves : public ActAPI_IAlgorithm
 {

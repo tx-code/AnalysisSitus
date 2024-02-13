@@ -46,7 +46,9 @@
 
 //-----------------------------------------------------------------------------
 
-//! JOIN operator for concatenating the passed natural-bounded surfaces into
+//! \ingroup ASI_MODELING
+//!
+//! JOINSURF operator for concatenating the passed natural-bounded surfaces into
 //! a single surface.
 class asiAlgo_JoinSurf : public ActAPI_IAlgorithm
 {

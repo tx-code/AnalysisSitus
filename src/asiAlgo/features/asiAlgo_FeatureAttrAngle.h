@@ -31,17 +31,17 @@
 #ifndef asiAlgo_FeatureAttrAngle_h
 #define asiAlgo_FeatureAttrAngle_h
 
-// Feature includes
+// asiAlgo includes
 #include <asiAlgo_FeatureAttrAdjacency.h>
 #include <asiAlgo_FeatureAngleType.h>
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute storing information about feature angle between faces.
 class asiAlgo_FeatureAttrAngle : public asiAlgo_FeatureAttrAdjacency
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrAngle, asiAlgo_FeatureAttrAdjacency)
 
@@ -98,6 +98,22 @@ public:
   virtual const char* GetName() const override
   {
     return "Dihedral angle";
+  }
+
+protected:
+
+  //! Dumps extra props to JSON.
+  virtual void dumpJSON(Standard_OStream& out,
+                        const int         indent) const
+  {
+    std::string ws(indent, ' ');
+    std::string nl = "\n" + ws;
+
+    out << "," << nl << std::quoted(asiPropName_AngleType) << ": "
+                     << std::quoted( asiAlgo_FeatureAngle::ToString(m_angleType) );
+
+    out << "," << nl << std::quoted(asiPropName_Value) << ": "
+                     << m_fAngleRad;
   }
 
 public:

@@ -2452,7 +2452,7 @@ int ENGINE_CheckEdgeVexity(const Handle(asiTcl_Interp)& interp,
   *interp << angleType;
 
   interp->GetProgress().SendLogMessage( LogInfo(Normal) << "Edge vexity: %1."
-                                                        << asiAlgo_Utils::FeatureAngleToString(angleType) );
+                                                        << asiAlgo_FeatureAngle::ToString(angleType) );
 
   // Update UI.
   if ( cmdEngine::cf && cmdEngine::cf->ViewerPart )
@@ -3705,6 +3705,9 @@ int ENGINE_CheckThickness(const Handle(asiTcl_Interp)& interp,
     if ( cmdEngine::cf->ViewerPart )
       cmdEngine::cf->ViewerPart->PrsMgr()->Actualize(TN);
   }
+
+  // Return the minimal detected wall thickness.
+  (*interp) << ActParamTool::AsReal( TN->Parameter(asiData_ThicknessNode::PID_ScalarMin) )->GetValue();
 
   return TCL_OK;
 }
@@ -5284,7 +5287,8 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
   interp->AddCommand("check-thickness",
     //
     "check-thickness [-owner <ownerId>]\n"
-    "\t Checks the thickness distribution over the passed owner shape or mesh.",
+    "\t Checks the thickness distribution over the passed owner shape or mesh.\n"
+    "\t Returns the minimal detected wall thickness.",
     //
     __FILE__, group, ENGINE_CheckThickness);
 

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Hasher which does not take into account neither locations nor
 //! orientations of shapes.
 class asiAlgo_ShapePartnerHasher

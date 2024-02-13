@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to project straight line segments on mesh.
 class asiAlgo_MeshProjectLine : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshProjectLine, ActAPI_IAlgorithm)
 

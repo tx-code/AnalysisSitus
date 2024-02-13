@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Concurrent set to be accessed from parallel worker threads. This class is not
 //! efficient as it uses mutex locks. Any TBB version of the same tool is expected
 //! to behave better in terms of performance.

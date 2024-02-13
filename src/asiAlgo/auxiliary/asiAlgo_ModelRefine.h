@@ -39,7 +39,9 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 
- //! asiAlgo_ModelRefine namespace.
+//! \ingroup ASI_MODELING
+//!
+//! asiAlgo_ModelRefine namespace.
 namespace asiAlgo_ModelRefine
 {
 

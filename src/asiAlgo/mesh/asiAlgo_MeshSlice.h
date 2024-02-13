@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Slices the given CAD/mesh model along the specified direction by the
 //! passed number of planes.
 class asiAlgo_MeshSlice : public ActAPI_IAlgorithm

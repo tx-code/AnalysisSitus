@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Fillet chain properties.
 struct asiAlgo_BlendChainProps
 {

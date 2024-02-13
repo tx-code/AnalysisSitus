@@ -116,7 +116,7 @@ asiUI_DatumSpinBox::Editor::Editor(const QString& theDicID,
   if ( aDicItem.IsNull() )
     return;
 
-  const asiUI_WidgetParameterMap& aParamMap = aDicItem->GetWidgetParams();
+  const asiAlgo_WidgetParameterMap& aParamMap = aDicItem->GetWidgetParams();
 
   TCollection_AsciiString aStepOption("step");
   if ( !aParamMap.IsBound(aStepOption) )

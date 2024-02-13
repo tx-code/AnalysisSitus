@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to detect feature hints. A feature hint is an imprint of one
 //! feature on another. This utility can be helpful in finding feature
 //! interactions which is known to be a major cornerstone in feature

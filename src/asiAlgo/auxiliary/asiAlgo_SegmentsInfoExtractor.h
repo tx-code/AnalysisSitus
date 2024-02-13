@@ -46,67 +46,69 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Class to extract segments information from the passed wire.
 class asiAlgo_SegmentsInfoExtractor
 {
-  public:
+public:
 
-    //! Constructor.
-    //! Extracts information about segments (edges) from the passed wire.
-    //! \param[in] wire   the wire to extract segments information from.
-    //! \param[in] normal the normal for the plane which contains the passed wire.
-    asiAlgo_EXPORT
-      asiAlgo_SegmentsInfoExtractor(const TopoDS_Wire& wire,
-                                    const gp_Dir&      normal);
+  //! Constructor.
+  //! Extracts information about segments (edges) from the passed wire.
+  //! \param[in] wire   the wire to extract segments information from.
+  //! \param[in] normal the normal for the plane which contains the passed wire.
+  asiAlgo_EXPORT
+    asiAlgo_SegmentsInfoExtractor(const TopoDS_Wire& wire,
+                                  const gp_Dir&      normal);
 
-    //! Constructor.
-    //! Extracts information about segments (edges) from the passed wire.
-    //! Computes the normal by itself using points from the wire.
-    //!
-    //! \param[in] wire the wire to extract segments information from.
-    asiAlgo_EXPORT
-      asiAlgo_SegmentsInfoExtractor(const TopoDS_Wire& wire);
+  //! Constructor.
+  //! Extracts information about segments (edges) from the passed wire.
+  //! Computes the normal by itself using points from the wire.
+  //!
+  //! \param[in] wire the wire to extract segments information from.
+  asiAlgo_EXPORT
+    asiAlgo_SegmentsInfoExtractor(const TopoDS_Wire& wire);
 
-    //! Destructor.
-    asiAlgo_EXPORT
-      ~asiAlgo_SegmentsInfoExtractor();
+  //! Destructor.
+  asiAlgo_EXPORT
+    ~asiAlgo_SegmentsInfoExtractor();
 
-    //! Returns resulting vector of segments infomation data structures.
-    asiAlgo_EXPORT
-      const asiAlgo_SegmentsInfoVec& Result() { return m_infoVec; }
+  //! Returns resulting vector of segments infomation data structures.
+  asiAlgo_EXPORT
+    const asiAlgo_SegmentsInfoVec& Result() { return m_infoVec; }
 
-  private:
+private:
 
-    double angleToDegree(const double& angle);
+  double angleToDegree(const double& angle);
 
-    double angleTo(const TopoDS_Edge& edge,
-                   const TopoDS_Edge& nextEdge,
-                   const gp_Dir&      normal);
+  double angleTo(const TopoDS_Edge& edge,
+                  const TopoDS_Edge& nextEdge,
+                  const gp_Dir&      normal);
 
-    bool curveDirection(const Handle(Geom_Curve)& curve,
-                        const gp_Pnt&             commonPoint,
-                        const gp_Pnt&             firstPoint,
-                        const gp_Pnt&             secondPoint,
-                        gp_Dir&                   curveDir);
+  bool curveDirection(const Handle(Geom_Curve)& curve,
+                      const gp_Pnt&             commonPoint,
+                      const gp_Pnt&             firstPoint,
+                      const gp_Pnt&             secondPoint,
+                      gp_Dir&                   curveDir);
 
-    void curveAngularity(const Handle(Geom_Curve)& curve,
-                         const double              U1,
-                         const double              U2,
-                         double&                   edgeRadius,
-                         double&                   edgeAngle);
+  void curveAngularity(const Handle(Geom_Curve)& curve,
+                        const double              U1,
+                        const double              U2,
+                        double&                   edgeRadius,
+                        double&                   edgeAngle);
 
-    void angularity(const TopoDS_Edge& edge,
-                    double&            edgeRadius,
-                    double&            edgeAngle);
+  void angularity(const TopoDS_Edge& edge,
+                  double&            edgeRadius,
+                  double&            edgeAngle);
 
-  private:
+private:
 
-    asiAlgo_SegmentsInfoExtractor();
+  asiAlgo_SegmentsInfoExtractor();
 
-  private:
+private:
 
-    asiAlgo_SegmentsInfoVec m_infoVec; //!< Resulting vector of segments information.
-    double                  m_tol;     //!< Machinery precision.
+  asiAlgo_SegmentsInfoVec m_infoVec; //!< Resulting vector of segments information.
+  double                  m_tol;     //!< Machinery precision.
 };
 
 #endif

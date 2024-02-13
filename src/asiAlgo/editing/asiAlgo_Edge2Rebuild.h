@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Descriptor of an edge which should be rebuilt at resolution stage for a
 //! certain topological condition. Generally, one can rebuild an edge entirely.
 //! However, in some conditions, it may not be necessary to reconstruct some
@@ -124,6 +126,8 @@ struct asiAlgo_Edge2Rebuild
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Collection of edges to rebuild at geometry normalization stage. This
 //! structure not only wraps the underlying map of edges, but also controls
 //! frozen vertices. I.e., if one edge is added several times, this structure

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to recognize B-spline and Bezier surfaces as canonical surfaces,
 //! such as planes, cylinders, cones, spheres, toruses.
 class asiAlgo_ConvertCanonicalSurface

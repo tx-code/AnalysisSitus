@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Parameters for inequality optimizer.
 class asiAlgo_IneqOptParams : public Standard_Transient
 {
-public:
-
   // OCCT RTTI.
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IneqOptParams, Standard_Transient)
 

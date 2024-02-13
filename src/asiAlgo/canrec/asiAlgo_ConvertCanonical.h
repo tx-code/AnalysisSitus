@@ -44,12 +44,12 @@ class ShapeBuild_ReShape;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Converts all freeform surfaces and curves of the given shape to
 //! a canonical form.
 class asiAlgo_ConvertCanonical : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ConvertCanonical, ActAPI_IAlgorithm)
 

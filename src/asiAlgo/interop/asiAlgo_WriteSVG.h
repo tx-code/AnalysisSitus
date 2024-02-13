@@ -42,6 +42,8 @@
 #include <TCollection_AsciiString.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 
+//! \ingroup ASI_INTEROP
+//!
 //! Services to save a drawing as an SVG file.
 namespace asiAlgo_WriteSVG
 {

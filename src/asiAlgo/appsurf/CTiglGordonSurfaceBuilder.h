@@ -26,6 +26,8 @@
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_BSplineCurve.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl
 {
 

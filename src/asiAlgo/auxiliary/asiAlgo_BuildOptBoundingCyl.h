@@ -38,6 +38,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Constructs tight bounding cylinder for a part.
 class asiAlgo_BuildOptBoundingCyl : public ActAPI_IAlgorithm
 {

@@ -32,7 +32,6 @@
 #define asiAlgo_Classifier_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
 #include <asiAlgo_Membership.h>
 
 // OCCT includes
@@ -42,6 +41,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Common classification functions.
 namespace asiAlgo_Classifier
 {

@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to analyze dihedral angles.
 class asiAlgo_CheckDihedralAngle : public ActAPI_IAlgorithm
 {

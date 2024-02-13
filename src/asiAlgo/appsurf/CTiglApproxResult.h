@@ -23,6 +23,8 @@
 
 #include <Geom_BSplineCurve.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl
 {
 

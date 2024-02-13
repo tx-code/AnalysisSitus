@@ -240,7 +240,7 @@ asiUI_DatumPathEdit::Editor::Editor(const QString& theDicID,
     m_Type = Qtx::PT_Directory;
   
   // widget parameters
-  const asiUI_WidgetParameterMap& aWidgetParams = anItem->GetWidgetParams();
+  const asiAlgo_WidgetParameterMap& aWidgetParams = anItem->GetWidgetParams();
 
   // load filter string parameter
   TCollection_AsciiString aFilterStr("filter");

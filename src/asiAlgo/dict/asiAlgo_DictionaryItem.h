@@ -46,13 +46,17 @@
 class asiAlgo_DictionaryUnitSystem;
 class asiAlgo_DictionaryGroup;
 
-typedef NCollection_DataMap<TCollection_AsciiString,
-                            TCollection_AsciiString> asiUI_WidgetParameterMap;
-
 #pragma warning(disable: 4263)
+
+//! \ingroup ASI_CORE
+//!
+typedef NCollection_DataMap<TCollection_AsciiString,
+                            TCollection_AsciiString> asiAlgo_WidgetParameterMap;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Datum Dictionary item.
 //! The items provides datum definition, including:
 //! - dimensions;
@@ -169,7 +173,7 @@ public:
   }
 
   //! Get map of widget parameters.
-  const asiUI_WidgetParameterMap& GetWidgetParams() const
+  const asiAlgo_WidgetParameterMap& GetWidgetParams() const
   {
     return m_WidgetParams;
   }
@@ -330,7 +334,7 @@ private:
   TCollection_AsciiString m_ListRef;
 
   //! Editor widget parameters.
-  asiUI_WidgetParameterMap m_WidgetParams;
+  asiAlgo_WidgetParameterMap m_WidgetParams;
 
   //! Editor widget type.
   WidgetType m_WidgetType;

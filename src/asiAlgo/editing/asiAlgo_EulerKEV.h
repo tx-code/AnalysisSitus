@@ -40,11 +40,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! KEV (Kill Edge-Vertex) Euler operator.
 class asiAlgo_EulerKEV : public asiAlgo_Euler
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_EulerKEV, asiAlgo_Euler)
 

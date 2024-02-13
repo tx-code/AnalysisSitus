@@ -46,6 +46,8 @@ class asiAlgo_MeshField;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Data structure for mesh with optional fields.
 struct asiAlgo_MeshWithFields
 {

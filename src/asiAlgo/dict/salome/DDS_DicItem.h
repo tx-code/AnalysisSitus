@@ -45,6 +45,8 @@ class DDS_Dictionary;
 //  optional  : format, units,
 //              min value, max value, default value.
 
+//! \ingroup ASI_CORE
+//!
 class DDS_DicItem : public Standard_Transient
 {
 public:
@@ -253,6 +255,8 @@ public:
   DEFINE_STANDARD_RTTI_INLINE(DDS_DicItem, Standard_Transient)
 };
 
+//! \ingroup ASI_CORE
+//!
 typedef NCollection_Sequence<Handle(DDS_DicItem)> DDS_BaseCollectionOfDicItems;
 
 DEFINE_INDEXEDDATAMAP(DDS_IndexedDataMapOfDicItems, DDS_BaseCollectionOfDicItems,

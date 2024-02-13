@@ -42,10 +42,16 @@
 //-----------------------------------------------------------------------------
 
 class asiAlgo_SegmentsInfo;
+
+
+//! \ingroup ASI_MODELING
+//!
 typedef std::vector< asiAlgo_SegmentsInfo > asiAlgo_SegmentsInfoVec;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Segments information.
 class asiAlgo_SegmentsInfo
 {

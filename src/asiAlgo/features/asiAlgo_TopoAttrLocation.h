@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute storing locations of sub-shapes.
 class asiAlgo_TopoAttrLocation : public asiAlgo_TopoAttr
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TopoAttrLocation, asiAlgo_TopoAttr)
 

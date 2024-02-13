@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Point cloud processing utilities.
 namespace asiAlgo_PointCloudUtils
 {

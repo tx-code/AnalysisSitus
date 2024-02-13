@@ -50,6 +50,8 @@ class BRepTools_History;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! \brief History graph for topological elements.
 //!
 //! This utility class serves tracking history of topological modifications.

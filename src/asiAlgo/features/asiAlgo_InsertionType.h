@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Type of feature insertion.
 enum asiAlgo_InsertionType
 {

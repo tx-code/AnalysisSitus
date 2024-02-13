@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to check thickness of a CAD part.
 class asiAlgo_CheckThickness : public ActAPI_IAlgorithm
 {

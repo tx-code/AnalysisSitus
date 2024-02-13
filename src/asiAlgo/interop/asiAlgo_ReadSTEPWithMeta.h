@@ -39,6 +39,8 @@
 #include <STEPControl_Reader.hxx>
 #include <XSControl_WorkSession.hxx>
 
+//! \ingroup ASI_INTEROP
+//!
 //! STEP reader enriched with possibility to read not only shapes but
 //! also some metadata such as colors.
 class asiAlgo_ReadSTEPWithMeta : public asiAlgo_BaseSTEP

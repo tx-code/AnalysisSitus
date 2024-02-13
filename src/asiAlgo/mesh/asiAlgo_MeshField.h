@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Base class for a field (scalar, vector) associated with mesh.
 class asiAlgo_MeshField : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshField, Standard_Transient)
 
@@ -51,11 +51,11 @@ public:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Scalar field.
 class asiAlgo_MeshScalarField : public asiAlgo_MeshField
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshScalarField, asiAlgo_MeshField)
 

@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to re-host faces so that they share the same underlying surface.
 class asiAlgo_RehostFaces
 {

@@ -50,6 +50,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Services to convert mesh from one format to another.
 namespace asiAlgo_MeshConvert
 {

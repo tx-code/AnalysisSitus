@@ -41,6 +41,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Mesh information.
 struct asiAlgo_MeshInfo
 {

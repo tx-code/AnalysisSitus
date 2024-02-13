@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Subclass of BRepTools_Modification to provide better error reporting.
 class asiAlgo_BRepNormalization : public BRepTools_Modification
 {

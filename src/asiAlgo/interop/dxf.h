@@ -32,6 +32,8 @@
 
 typedef int Aci_t; // AutoCAD color index
 
+//! \ingroup ASI_INTEROP
+//!
 typedef enum
 {
     eUnspecified = 0,   // Unspecified (No units)
@@ -58,6 +60,8 @@ typedef enum
 } eDxfUnits_t;
 
 
+//! \ingroup ASI_INTEROP
+//!
 //spline data for reading
 struct SplineData
 {
@@ -83,6 +87,8 @@ struct SplineData
     std::list<double> fitz;
 };
 
+//! \ingroup ASI_INTEROP
+//!
 //***************************
 //data structures for writing
 //added by Wandererfan 2018 (wandererfan@gmail.com) for FreeCAD project
@@ -93,6 +99,8 @@ struct point3D
     double z;
 };
 
+//! \ingroup ASI_INTEROP
+//!
 struct SplineDataOut
 {
     point3D norm;
@@ -109,6 +117,8 @@ struct SplineDataOut
     std::vector<point3D> fit;
 };
 
+//! \ingroup ASI_INTEROP
+//!
 struct LWPolyDataOut
 {
     double nVert;
@@ -124,6 +134,8 @@ struct LWPolyDataOut
 };
 //********************
 
+//! \ingroup ASI_INTEROP
+//!
 class CDxfWrite : public ActAPI_IAlgorithm
 {
 private:

@@ -44,6 +44,8 @@ class LDOM_Element;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Data dictionary group. The data dictionary group can be a "datum" or
 //! a "valueList" used by a datum. A datum is a descriptor of a property
 //! manipulated by the user. Basically, such properties are represented by

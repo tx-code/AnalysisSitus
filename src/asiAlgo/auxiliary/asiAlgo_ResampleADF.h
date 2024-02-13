@@ -48,6 +48,8 @@
 #include <string>
 #include <ostream>
 
+//! \ingroup ASI_MODELING
+//!
 //! Resamples an Adaptive Distance Field to generate a uniform
 //! voxelization.
 class asiAlgo_ResampleADF : public ActAPI_IAlgorithm

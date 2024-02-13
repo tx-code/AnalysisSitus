@@ -40,6 +40,8 @@
 // OCCT includes
 #include <Message_ProgressRange.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to suppress hard features.
 class asiAlgo_SuppressHard : public ActAPI_IAlgorithm
 {

@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Settings for the visual appearance of parts/assemblies when making snapshots.
 struct asiAlgo_VisualSettings
 {

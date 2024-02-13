@@ -51,6 +51,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Builds Gordon surface.
 class asiAlgo_BuildGordonSurf : public ActAPI_IAlgorithm
 {

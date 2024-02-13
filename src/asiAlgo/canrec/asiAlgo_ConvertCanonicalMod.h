@@ -49,12 +49,12 @@ class Geom2d_Curve;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Modification class to perform canonical conversion at the level of
 //! elementary B-rep shapes.
 class asiAlgo_ConvertCanonicalMod : public asiAlgo_BRepNormalization
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ConvertCanonicalMod, asiAlgo_BRepNormalization)
 

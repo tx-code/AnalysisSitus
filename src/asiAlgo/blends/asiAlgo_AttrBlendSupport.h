@@ -40,11 +40,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute to mark a face as a blend support face.
 class asiAlgo_AttrBlendSupport : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AttrBlendSupport, asiAlgo_FeatureAttrFace)
 
 public:

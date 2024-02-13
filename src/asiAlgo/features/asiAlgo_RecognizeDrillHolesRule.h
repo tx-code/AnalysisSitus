@@ -34,6 +34,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Feature rule for drilled holes.
 class asiAlgo_RecognizeDrillHolesRule : public asiAlgo_RecognitionRule
 {

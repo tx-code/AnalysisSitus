@@ -41,11 +41,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Modification for geometric adjustment of a single edge.
 class asiAlgo_ModConstructEdge : public asiAlgo_ModBase
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ModConstructEdge, asiAlgo_ModBase)
 

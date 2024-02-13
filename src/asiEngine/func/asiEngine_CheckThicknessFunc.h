@@ -45,8 +45,6 @@ class asiEngine_Model;
 //! Tree function for thickness analysis
 class asiEngine_CheckThicknessFunc : public ActData_BaseTreeFunction
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiEngine_CheckThicknessFunc, ActData_BaseTreeFunction)
 

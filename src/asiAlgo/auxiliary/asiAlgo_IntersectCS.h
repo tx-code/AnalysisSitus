@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Curve-Surface intersection tool.
 class asiAlgo_IntersectCS : public ActAPI_IAlgorithm
 {

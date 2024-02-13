@@ -41,11 +41,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to check deviations between a CAD part and a point cloud.
 class asiAlgo_CheckDeviations : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_CheckDeviations, ActAPI_IAlgorithm)
 

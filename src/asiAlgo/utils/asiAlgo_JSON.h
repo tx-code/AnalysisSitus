@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Utility class to process JSON objects.
 class asiAlgo_JSON
 {

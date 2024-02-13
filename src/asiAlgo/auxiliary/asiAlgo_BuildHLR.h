@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Performs hidden line removal for the input shape. The result is returned
 //! as a compound of edges representing the extracted feature lines.
 class asiAlgo_BuildHLR : public ActAPI_IAlgorithm

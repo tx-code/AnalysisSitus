@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Attribute to set a uniform grid to a face.
 class asiAlgo_AttrFaceUniformGrid : public asiAlgo_FeatureAttrFace
 {

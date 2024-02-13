@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Converts curves and surfaces to 3-degree Bezier form whenever possible.
 class asiAlgo_ConvertToBezier : public ActAPI_IAlgorithm
 {

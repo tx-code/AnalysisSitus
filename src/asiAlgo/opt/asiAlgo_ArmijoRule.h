@@ -41,6 +41,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Armijo rule for adaptive selection of step length in inexact line search.
 template <typename T_DIMENSION>
 class asiAlgo_ArmijoRule

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Counters for different types of geometric primitives in a shape.
 struct asiAlgo_GeomSummary
 {

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Optimizer of homogeneous resource distribution in the presence of inequality
 //! constraints. The algorithm is based on the ideas of M. Kh. Prilutskii
 //! which are best described in his Russian paper
@@ -54,8 +56,6 @@
 //! find a point X within the best region.
 class asiAlgo_IneqOpt : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI.
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IneqOpt, ActAPI_IAlgorithm)
 

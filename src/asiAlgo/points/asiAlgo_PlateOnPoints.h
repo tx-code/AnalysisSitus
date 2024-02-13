@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build a plate surface on the given point set.
 class asiAlgo_PlateOnPoints : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_PlateOnPoints, ActAPI_IAlgorithm)
 

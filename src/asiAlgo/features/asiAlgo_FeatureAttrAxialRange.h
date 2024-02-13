@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Axial range of the face as its projection to the axis stored in
 //! this same attribute.
 class asiAlgo_FeatureAttrAxialRange : public asiAlgo_FeatureAttr
@@ -77,6 +79,19 @@ public:
   virtual const char* GetName() const override
   {
     return "Axial range";
+  }
+
+protected:
+
+  //! Dumps extra props to JSON.
+  virtual void dumpJSON(Standard_OStream& out,
+                        const int         indent) const
+  {
+    std::string ws(indent, ' ');
+    std::string nl = "\n" + ws;
+
+    out << "," << nl << std::quoted(asiPropName_Hmin) << ": " << hMin;
+    out << "," << nl << std::quoted(asiPropName_Hmax) << ": " << hMin;
   }
 
 public:

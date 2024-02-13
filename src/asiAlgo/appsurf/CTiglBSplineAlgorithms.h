@@ -36,6 +36,8 @@
 
 #include <BSplCLib_EvaluatorFunction.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl
 {
 

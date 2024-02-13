@@ -32,6 +32,8 @@
 class LDOM_Element;
 class TCollection_AsciiString;
 
+//! \ingroup ASI_CORE
+//!
 class DDS_Dictionary : public Standard_Transient
 {
 public:

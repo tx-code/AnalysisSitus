@@ -40,6 +40,8 @@ DEFINE_STANDARD_HANDLE(asiAlgo_UnifySameDomain, Standard_Transient)
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! This tool tries to unify faces and edges of the shape which lie on the same geometry.
 //! Faces/edges are considering as 'same-domain' if a group of neighbouring faces/edges
 //! are lying on coincident surfaces/curves.

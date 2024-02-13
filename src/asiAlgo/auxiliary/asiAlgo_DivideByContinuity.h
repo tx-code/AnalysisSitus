@@ -43,11 +43,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Tool to split shape by continuity.
 class asiAlgo_DivideByContinuity : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_DivideByContinuity, ActAPI_IAlgorithm)
 

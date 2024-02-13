@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Supported file types.
 enum asiAlgo_FileFormat
 {
@@ -79,6 +81,8 @@ enum asiAlgo_FileFormat
   FileFormat_Last //!< Last item for convenient iteration over enum.
 };
 
+//! \ingroup ASI_INTEROP
+//!
 //! Utility for recognizing CAD data formats and filtering out
 //! unavailable converters.
 class asiAlgo_FileFormatTool

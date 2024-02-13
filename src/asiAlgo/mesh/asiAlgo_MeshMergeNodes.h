@@ -46,6 +46,8 @@
 // STL includes
 #include <vector>
 
+//! \ingroup ASI_MODELING
+//!
 //! Merges coincident mesh nodes.
 class asiAlgo_MeshMergeNodes
 {

@@ -41,19 +41,27 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
+//! \ingroup ASI_CORE
+//!
 //! Indexed map of shapes distinguished only by their TShape pointers.
 typedef NCollection_DataMap<int, TopoDS_Shape> asiAlgo_DataMapOfShape;
 
+//! \ingroup ASI_CORE
+//!
 //! Indexed map of shapes distinguished only by their TShape pointers.
 typedef NCollection_IndexedMap<TopoDS_Shape,
                                asiAlgo_ShapePartnerHasher> asiAlgo_IndexedMapOfTShape;
 
+//! \ingroup ASI_CORE
+//!
 //! Indexed data map of shapes and their ancestors distinguished only by their
 //! TShape pointers.
 typedef NCollection_IndexedDataMap<TopoDS_Shape,
                                    TopTools_ListOfShape,
                                    asiAlgo_ShapePartnerHasher> asiAlgo_IndexedDataMapOfTShapeListOfShape;
 
+//! \ingroup ASI_CORE
+//!
 //! Data map of shapes and their images distinguished only by their
 //! TShape pointers.
 typedef NCollection_DataMap<TopoDS_Shape,

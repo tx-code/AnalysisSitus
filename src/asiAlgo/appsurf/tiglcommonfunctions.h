@@ -42,6 +42,8 @@
 #include <algorithm>
 #include <memory>
 
+//! \ingroup ASI_MODELING
+//!
 enum TiglContinuity
 {
     C0 = 0,
@@ -49,6 +51,8 @@ enum TiglContinuity
     C2 = 2
 };
 
+//! \ingroup ASI_MODELING
+//!
 // helper function for std::find
 struct IsInsideTolerance
 {

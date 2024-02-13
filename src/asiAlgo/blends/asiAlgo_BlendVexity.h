@@ -34,6 +34,8 @@
 // asiAlgo includes
 #include <asiAlgo.h>
 
+//! \ingroup ASI_AFR
+//!
 //! Blend convexity.
 enum asiAlgo_BlendVexity
 {

@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to detect terminating edges.
 class asiAlgo_FindTermEdges : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FindTermEdges, ActAPI_IAlgorithm)
 

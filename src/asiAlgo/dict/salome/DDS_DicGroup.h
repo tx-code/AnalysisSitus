@@ -33,6 +33,8 @@
 
 class LDOM_Element;
 
+//! \ingroup ASI_CORE
+//!
 class DDS_DicGroup : public Standard_Transient
 {
 public:
@@ -90,6 +92,8 @@ public:
   DEFINE_STANDARD_RTTI_INLINE(DDS_DicGroup, Standard_Transient)
 };
 
+//! \ingroup ASI_CORE
+//!
 typedef NCollection_Sequence<Handle(DDS_DicGroup)> DDS_BaseCollectionOfDicGroups;
 DEFINE_INDEXEDDATAMAP(DDS_IndexedDataMapOfDicGroups, DDS_BaseCollectionOfDicGroups,
                       TCollection_AsciiString, Handle(DDS_DicGroup))

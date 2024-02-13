@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Output data adaptor for the STEP read with metadata.
 class asiAlgo_ReadSTEPWithMetaOutput : public Standard_Transient
 {

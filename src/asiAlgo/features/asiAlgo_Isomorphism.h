@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! \brief Solves subgraph isomorphism problem.
 class asiAlgo_Isomorphism : public ActAPI_IAlgorithm
 {

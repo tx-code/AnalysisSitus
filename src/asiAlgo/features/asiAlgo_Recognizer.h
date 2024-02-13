@@ -44,13 +44,13 @@ class asiAlgo_AAG;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Abstract base class for feature recognizers. It provides a unified
 //! usage pattern, data structures and a fixed call procedure for all AAG-based
 //! feature identification algorithms.
 class asiAlgo_Recognizer : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_Recognizer, ActAPI_IAlgorithm)
 

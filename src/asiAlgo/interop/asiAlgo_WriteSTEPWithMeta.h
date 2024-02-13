@@ -43,12 +43,12 @@
 #include <STEPControl_Writer.hxx>
 #include <TopTools_MapOfShape.hxx>
 
+//! \ingroup ASI_INTEROP
+//!
 //! STEP writer enriched with possibility to write not only shapes but
 //! also some metadata such as colors.
 class asiAlgo_WriteSTEPWithMeta : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_WriteSTEPWithMeta, ActAPI_IAlgorithm)
 

@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Type of semantic code.
 enum class asiAlgo_SemanticCodeType
 {
@@ -54,6 +56,8 @@ enum class asiAlgo_SemanticCodeType
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Diagnostic code for reporting design issues and geometry
 //! processing problems. This is normally a part body-level warning
 //! code enriched with geometric semantics.
@@ -164,6 +168,8 @@ struct asiAlgo_SemanticCode
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! A collection of codes with their associated feature faces. The standard
 //! OpenCascade's map is subclassed to provide merge logic for codes.
 class asiAlgo_SemanticCodes : public NCollection_IndexedMap<asiAlgo_SemanticCode,

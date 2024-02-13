@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Distance function to be used for spatial shape representations, such as
 //! Discrete Distance Fields (DDF).
 class asiAlgo_MeshDistanceFunc : public mobius::poly_DistanceFunc

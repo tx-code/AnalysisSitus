@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute storing sub-shape orientation.
 class asiAlgo_TopoAttrOrientation : public asiAlgo_TopoAttr
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TopoAttrOrientation, asiAlgo_TopoAttr)
 

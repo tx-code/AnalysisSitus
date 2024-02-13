@@ -35,11 +35,11 @@
 #include <asiAlgo_BlendTopoCondition.h>
 #include <asiAlgo_Utils.h>
 
+//! \ingroup ASI_AFR
+//!
 //! Topological condition for ordinary vertex blends in a chain.
 struct asiAlgo_BlendTopoConditionFFOrdinaryVBF : public asiAlgo_BlendTopoCondition
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BlendTopoConditionFFOrdinaryVBF, asiAlgo_BlendTopoCondition)
 

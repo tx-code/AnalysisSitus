@@ -48,6 +48,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Contour re-approximation (healing) is a common tool which is designed to
 //! fix the following problems in the input wires:
 //!

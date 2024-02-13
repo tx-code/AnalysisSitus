@@ -85,7 +85,7 @@ asiUI_DatumPathItem::asiUI_DatumPathItem(const QString& theDictId,
   };
 
   // widget parameters
-  const asiUI_WidgetParameterMap& aWidgetParams = anItem->GetWidgetParams();
+  const asiAlgo_WidgetParameterMap& aWidgetParams = anItem->GetWidgetParams();
 
   // load filter string parameter
   TCollection_AsciiString aFilterStr("filter");

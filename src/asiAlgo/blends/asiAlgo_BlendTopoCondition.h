@@ -51,11 +51,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Base class for topological conditions on blends.
 class asiAlgo_BlendTopoCondition : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BlendTopoCondition, Standard_Transient)
 
@@ -187,10 +187,14 @@ protected:
 
 };
 
+//! \ingroup ASI_AFR
+//!
 //! Convenience type alias. Maps ID of a blend face to the data structure
 //! which is the descriptor of topological situation around that face.
 typedef NCollection_DataMap<int, Handle(asiAlgo_BlendTopoCondition)> asiAlgo_BlendTopoConditionMap;
 
+//! \ingroup ASI_AFR
+//!
 //! Shared version of asiAlgo_BlendTopoConditionMap.
 typedef NCollection_Shared<asiAlgo_BlendTopoConditionMap> asiAlgo_HBlendTopoConditionMap;
 

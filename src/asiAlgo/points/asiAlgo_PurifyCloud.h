@@ -47,6 +47,8 @@
 // Two-dimensional inspector for cloud purification
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Inspector tool (see OCCT Cell Filter) for purification of
 //! points which are coincident with a certain tolerance.
 template <typename TPoint>
@@ -148,6 +150,8 @@ private:
 // Three-dimensional inspector
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Inspector tool (see OCCT Cell Filter) for purification of
 //! points which are coincident with a certain tolerance.
 class asiAlgo_Inspector3d
@@ -249,6 +253,8 @@ private:
 // Purification algorithm
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Auxiliary functions for purification of point clouds. These tools
 //! allow reducing the number of points by getting rid of those which
 //! fall into the given tolerant sphere.

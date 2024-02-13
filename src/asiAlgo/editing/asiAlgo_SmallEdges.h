@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Fixes small edges.
 class asiAlgo_SmallEdges : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_SmallEdges, ActAPI_IAlgorithm)
 

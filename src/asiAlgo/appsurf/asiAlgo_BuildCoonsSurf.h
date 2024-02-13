@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build Coons (4-sided) surfaces in form of B-surfaces.
 class asiAlgo_BuildCoonsSurf : public ActAPI_IAlgorithm
 {

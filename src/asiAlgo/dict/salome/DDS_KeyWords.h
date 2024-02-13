@@ -31,6 +31,8 @@
 
 class TCollection_AsciiString;
 
+//! \ingroup ASI_CORE
+//!
 class DDS_KeyWords : public Standard_Transient
 {
 public:

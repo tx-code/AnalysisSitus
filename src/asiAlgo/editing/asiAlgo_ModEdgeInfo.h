@@ -45,12 +45,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Data structure representing a local topological situation surrounding
 //! the given edge of interest.
 class asiAlgo_ModEdgeInfo : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ModEdgeInfo, Standard_Transient)
 

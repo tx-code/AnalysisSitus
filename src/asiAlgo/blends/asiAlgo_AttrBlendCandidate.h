@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute to mark a face as a blend candidate.
 class asiAlgo_AttrBlendCandidate : public asiAlgo_FeatureAttrFace
 {

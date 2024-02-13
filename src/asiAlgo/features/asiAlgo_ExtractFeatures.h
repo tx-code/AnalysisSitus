@@ -42,6 +42,8 @@
 
 class asiAlgo_FeatureAttrFace;
 
+//! \ingroup ASI_AFR
+//!
 //! \brief Function to filter the extracted faces by attributes.
 class asiAlgo_ExtractFeaturesFilter : public Standard_Transient
 {
@@ -63,6 +65,8 @@ public:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! \brief Extracts feature faces from AAG using the hooked attributes.
 //!        This tool is designed to finalize feature recognition process.
 //!

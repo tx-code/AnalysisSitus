@@ -28,6 +28,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! RNG (Random number generator) based on code presented by Ian C. Bullard (more
 //! accurate than standard C rand() and at least 10 times faster).
 class asiAlgo_BullardRNG

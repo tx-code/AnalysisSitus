@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to reorient normal field with respect to a sample vector.
 class asiAlgo_ReorientNorms : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ReorientNorms, ActAPI_IAlgorithm)
 

@@ -36,13 +36,13 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute for feature faces. This attribute brings feature ID which
 //! allows marking faces as belonging to the same group.
 class asiAlgo_FeatureAttrFace : public asiAlgo_FeatureAttr
 {
-friend class asiAlgo_AAG;
-
-public:
+  friend class asiAlgo_AAG;
 
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrFace, asiAlgo_FeatureAttr)
 

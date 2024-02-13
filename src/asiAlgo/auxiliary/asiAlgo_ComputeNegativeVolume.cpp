@@ -7,7 +7,7 @@
 #include "asiAlgo_ComputeNegativeVolume.h"
 
 // asiAlgo includes
-#include <asiAlgo_ClassifyPt.h>
+#include <asiAlgo_ClassifyPointSolid.h>
 #include <asiAlgo_Cloudify.h>
 #include <asiAlgo_BuildConvexHull.h>
 #include <asiAlgo_InvertFaces.h>
@@ -763,7 +763,7 @@ private: //! @name Private methods performing the operation
               asiAlgo_Cloudify cloudify;
               cloudify.Sample_Faces(solid, point_cloud);
 
-              ClassifyPt classifyPt(hull);
+              asiAlgo_ClassifyPointSolid classifyPt(hull);
               for (int index = 0; index < point_cloud->GetNumberOfElements(); ++index)
               {
                 gp_XYZ point = point_cloud->GetElement(index);
@@ -832,7 +832,7 @@ private: //! @name Private methods performing the operation
               asiAlgo_Cloudify cloudify;
               cloudify.Sample_Faces(*itSolids, point_cloud);
 
-              ClassifyPt classifyPt(hullCutShape);
+              asiAlgo_ClassifyPointSolid classifyPt(hullCutShape);
               for (int index = 0; index < point_cloud->GetNumberOfElements(); ++index)
               {
                 gp_XYZ point = point_cloud->GetElement(index);

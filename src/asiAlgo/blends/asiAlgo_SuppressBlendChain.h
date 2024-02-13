@@ -39,12 +39,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to suppress the previously recognized blend chain starting from
 //! the given seed face(s).
 class asiAlgo_SuppressBlendChain : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_SuppressBlendChain, ActAPI_IAlgorithm)
 

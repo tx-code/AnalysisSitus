@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Unit system is a helper class for defining preferred unit
 //! system for dictionary items.
 //! The class can be used to define a local unit system for

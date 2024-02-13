@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! AAG attribute to store UV bounds of a face.
 class asiAlgo_FeatureAttrUVBounds : public asiAlgo_FeatureAttr
 {
@@ -86,6 +88,21 @@ public:
   virtual const char* GetName() const override
   {
     return "UV bounds";
+  }
+
+protected:
+
+  //! Dumps extra props to JSON.
+  virtual void dumpJSON(Standard_OStream& out,
+                        const int         indent) const
+  {
+    std::string ws(indent, ' ');
+    std::string nl = "\n" + ws;
+
+    out << "," << nl << std::quoted(asiPropName_Umin) << ": " << uMin;
+    out << "," << nl << std::quoted(asiPropName_Umax) << ": " << uMax;
+    out << "," << nl << std::quoted(asiPropName_Vmin) << ": " << vMin;
+    out << "," << nl << std::quoted(asiPropName_Vmax) << ": " << vMax;
   }
 
 public:

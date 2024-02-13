@@ -37,6 +37,8 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to suppress "soft" (isolated) features.
 class asiAlgo_SuppressSoft : public ActAPI_IAlgorithm
 {

@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build Oriented Bounding Box on mesh by finding eigen vectors
 //! of a covariance matrix.
 class asiAlgo_MeshOBB : public ActAPI_IAlgorithm

@@ -18,6 +18,8 @@
 // Standard includes
 #include <vector>
 
+//! \ingroup ASI_CORE
+//!
 //! A single checkpoint for memory tracking.
 struct t_memCheckPoint
 {
@@ -32,6 +34,8 @@ struct t_memCheckPoint
   : name(_name), mem(_mem) {}
 };
 
+//! \ingroup ASI_CORE
+//!
 //! Singleton tracker.
 class IMemTracker
 {

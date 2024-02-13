@@ -41,6 +41,8 @@ class TopoDS_Shape;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Serializes and deserializes B-rep shapes to and from binary buffer,
 //! optionally using the base64 binary-to-text encoding scheme.
 //!

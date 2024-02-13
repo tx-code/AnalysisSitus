@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Abstract AAG iterator.
 class asiAlgo_AAGIterator : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AAGIterator, Standard_Transient)
 
@@ -99,11 +99,11 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Random-order AAG iterator.
 class asiAlgo_AAGRandomIterator : public asiAlgo_AAGIterator
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AAGRandomIterator, asiAlgo_AAGIterator)
 
@@ -141,11 +141,11 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Random-order AAG iterator limited by a set of node indices.
 class asiAlgo_AAGSetIterator : public asiAlgo_AAGIterator
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AAGSetIterator, asiAlgo_AAGIterator)
 
@@ -187,6 +187,8 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Collection of rules for parameterized neighborhood iterator.
 //! \sa asiAlgo_AAGNeighborsIterator
 namespace asiAlgo_AAGIterationRule
@@ -235,6 +237,8 @@ namespace asiAlgo_AAGIterationRule
   };
 }
 
+//! \ingroup ASI_AFR
+//!
 //! AAG iterator visiting neighbor faces for the given seed in depth-first order.
 //! Seed faces are also traversed by this iterator. Use this iterator to visit
 //! all nodes constituting a connected component in AAG.

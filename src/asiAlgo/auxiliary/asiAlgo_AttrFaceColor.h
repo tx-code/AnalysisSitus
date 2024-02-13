@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Attribute to colorize a face.
 class asiAlgo_AttrFaceColor : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AttrFaceColor, asiAlgo_FeatureAttrFace)
 
 public:

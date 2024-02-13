@@ -23,6 +23,8 @@ const static double REAL_MAX = std::numeric_limits<double>::max();
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! RNG (Random number generator) based on code presented by Ian C. Bullard (more
 //! accurate than standard C rand() and at least 10 times faster).
 class BullardRNG
@@ -62,6 +64,8 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! BVH-based accelerating structure representing CAD model's
 //! facets in computations.
 class ModelBvh : public BVH_PrimitiveSet<double, 3>
@@ -315,6 +319,8 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Distance function to be used for spatial shape representations.
 class MeshDist : public Standard_Transient
 {
@@ -764,6 +770,9 @@ protected:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
+//! Point-solid PMC.
 class asiAlgo_ClassifyPointSolid
 {
 public:

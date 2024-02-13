@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! This class represents feature extraction result.
 //!
 //! \sa asiAlgo_AAG, asiAlgo_ExtractFeatures

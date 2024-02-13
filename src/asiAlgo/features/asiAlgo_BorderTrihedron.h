@@ -37,6 +37,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Border trihedron associated with a sheet face at connection zones.
 class asiAlgo_BorderTrihedron
 {

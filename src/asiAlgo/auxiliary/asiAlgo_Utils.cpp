@@ -1315,38 +1315,6 @@ std::string asiAlgo_Utils::DirectionName(const gp_Dir& dir)
 //-----------------------------------------------------------------------------
 
 TCollection_AsciiString
-  asiAlgo_Utils::FeatureAngleToString(const asiAlgo_FeatureAngleType angle)
-{
-  TCollection_AsciiString result;
-
-  switch ( angle )
-  {
-    case FeatureAngleType_Concave:
-      result = "concave";
-      break;
-    case FeatureAngleType_Convex:
-      result = "convex";
-      break;
-    case FeatureAngleType_Smooth:
-      result = "smooth";
-      break;
-    case FeatureAngleType_SmoothConcave:
-      result = "smooth concave";
-      break;
-    case FeatureAngleType_SmoothConvex:
-      result = "smooth convex";
-      break;
-    case FeatureAngleType_Undefined:
-    default:
-      result = "undefined";
-  }
-
-  return result;
-}
-
-//-----------------------------------------------------------------------------
-
-TCollection_AsciiString
   asiAlgo_Utils::NamedShapeToString(const TopoDS_Shape&           subShape,
                                     const int                     pedigreeId,
                                     const int                     globalId,

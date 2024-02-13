@@ -1156,7 +1156,7 @@ void asiUI_ViewerPartListener::executeAction(QAction* pAction)
 
     m_progress.SendLogMessage( LogInfo(Normal) << "Angle is %1 degrees, %2."
                                                << Abs(angleRad)*180./M_PI
-                                               << asiAlgo_Utils::FeatureAngleToString(angleType) );
+                                               << asiAlgo_FeatureAngle::ToString(angleType) );
 
     double colorR, colorG, colorB;
     asiVisu_Utils::ColorForFeatureAngle(angleType, colorR, colorG, colorB);

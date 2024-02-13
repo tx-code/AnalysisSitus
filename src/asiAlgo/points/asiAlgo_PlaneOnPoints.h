@@ -31,7 +31,7 @@
 #ifndef asiAlgo_PlaneOnPoints_h
 #define asiAlgo_PlaneOnPoints_h
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo_BaseCloud.h>
 
 // Active Data includes
@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build a plane on the given point set.
 class asiAlgo_PlaneOnPoints : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_PlaneOnPoints, ActAPI_IAlgorithm)
 

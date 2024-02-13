@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Simple cloud of elements (points or vectors).
 template <typename TCoordType>
 class asiAlgo_BaseCloud : public Standard_Transient

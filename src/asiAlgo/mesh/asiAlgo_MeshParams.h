@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Meshing parameters.
 struct asiAlgo_MeshParams
 {

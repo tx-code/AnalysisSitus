@@ -65,6 +65,8 @@
 #define asiPropName_Quantity                              "numOccurrences"
 #define asiPropName_Bodies                                "bodies"
 #define asiPropName_Type                                  "type"
+#define asiPropName_AngleType                             "angleType"
+#define asiPropName_Value                                 "value"
 #define asiPropName_Volume                                "volume"
 #define asiPropName_CuttingLength                         "cuttingLength"
 #define asiPropName_NextSegment                           "nextSegment"
@@ -73,6 +75,12 @@
 #define asiPropName_Angle                                 "angle"
 #define asiPropName_Segments                              "segments"
 #define asiPropName_FaceIds                               "faceIds"
+#define asiPropName_Hmin                                  "hmin"
+#define asiPropName_Hmax                                  "hmax"
+#define asiPropName_Umin                                  "umin"
+#define asiPropName_Umax                                  "umax"
+#define asiPropName_Vmin                                  "vmin"
+#define asiPropName_Vmax                                  "vmax"
 
 // JSON properties
 #define asiPropName_ExtrasCanRecSummary                   "canrecSummary"

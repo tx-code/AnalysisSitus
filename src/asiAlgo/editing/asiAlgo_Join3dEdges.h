@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to join edge chains.
 class asiAlgo_Join3dEdges
 {

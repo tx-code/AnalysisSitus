@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Point-Face classifier.
 class asiAlgo_ClassifyPointFace
 {

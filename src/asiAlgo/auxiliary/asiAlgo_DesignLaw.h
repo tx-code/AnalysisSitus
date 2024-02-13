@@ -31,7 +31,7 @@
 #ifndef asiAlgo_DesignLaw_h
 #define asiAlgo_DesignLaw_h
 
-// A-Situs (calculus) includes
+// asiAlgo includes
 #include <asiAlgo_FuncUnivariate.h>
 
 // OCCT includes
@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Evolution law for a scalar design variable.
 class asiAlgo_DesignLaw : public asiAlgo_FuncUnivariate
 {

@@ -45,11 +45,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Geometric operator to rebuild edge from its adjacent surfaces.
 class asiAlgo_RebuildEdge : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RebuildEdge, ActAPI_IAlgorithm)
 

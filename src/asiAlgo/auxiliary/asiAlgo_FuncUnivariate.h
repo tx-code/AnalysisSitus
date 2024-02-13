@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Interface for univariate function f(x) in explicit form.
 class asiAlgo_FuncUnivariate : public Standard_Transient
 {

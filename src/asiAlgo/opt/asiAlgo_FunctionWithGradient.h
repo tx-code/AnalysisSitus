@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Base class for objective functions to optimize with gradient-wise methods.
 template <typename T_DIMENSION>
 class asiAlgo_FunctionWithGradient : public asiAlgo_Function<T_DIMENSION>

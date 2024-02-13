@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Vertices which are not meant to be recomputed when geometry is normalized.
 //! This structure is a part of knowledge-guided computation principle
 //! used in defeaturing tools.

@@ -37,6 +37,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Summary on canonical conversion.
 struct asiAlgo_ConvertCanonicalSummary
 {

@@ -129,6 +129,8 @@ public:
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Depth-first iterator for BVH structure.
 //!
 //! Stored data of each BVH node has the following meaning:

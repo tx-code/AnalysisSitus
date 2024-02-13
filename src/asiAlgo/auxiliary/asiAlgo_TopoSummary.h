@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #pragma once
+
 // asiAlgo includes
 #include <asiAlgo.h>
 
@@ -37,6 +38,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Counters for different types of topological primitives in a shape.
 struct asiAlgo_TopoSummary
 {
@@ -122,4 +125,3 @@ struct asiAlgo_TopoSummary
     progress.SendLogMessage(LogInfo(Normal) << "\tNum. vertexes:      %1" << nbVertexes);
   }
 };
-

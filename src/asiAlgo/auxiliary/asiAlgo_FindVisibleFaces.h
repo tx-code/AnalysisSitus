@@ -43,11 +43,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Finds all visible faces of a CAD part.
 class asiAlgo_FindVisibleFaces : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FindVisibleFaces, ActAPI_IAlgorithm)
 

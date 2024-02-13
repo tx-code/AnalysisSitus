@@ -49,6 +49,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Canonical recognition tool.
 class asiAlgo_RecognizeCanonical : public ActAPI_IAlgorithm
 {

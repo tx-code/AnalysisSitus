@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Convex hull defined as a polyhedron in 3D.
 struct asiAlgo_ConvexHull
 {

@@ -33,6 +33,7 @@
 
 // asiAlgo includes
 #include <asiAlgo.h>
+#include <asiAlgo_JsonDict.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>
@@ -45,6 +46,8 @@ class asiAlgo_AAG;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Base class for all feature attributes.
 class asiAlgo_FeatureAttr : public Standard_Transient
 {
@@ -90,9 +93,10 @@ public:
     char sguid[Standard_GUID_SIZE_ALLOC];
     this->GetGUID().ToCString(sguid);
 
-    out << "\n" << ws.c_str() << "{";
-    out << "\n" << ws.c_str() << "  \"guid\": " << "\"" << sguid << "\"";
-    out << ",\n" << ws.c_str() << "  \"name\": " << "\"" << this->GetName() << "\"";
+    out << "\n"  << ws.c_str() << "{";
+    out << "\n"  << ws.c_str() << "  \"type\": " << "\"" << this->DynamicType()->Name() << "\"";
+    out << ",\n" << ws.c_str() << "  \"guid\": " << "\"" << sguid                       << "\"";
+    out << ",\n" << ws.c_str() << "  \"name\": " << "\"" << this->GetName()             << "\"";
     //
     this->dumpJSON(out, numSpaces + 2);
     //

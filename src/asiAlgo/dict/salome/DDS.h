@@ -33,10 +33,14 @@
 
 #define UNIT_SYSTEM_SI "SI"
 
+//! \ingroup ASI_CORE
+//!
 typedef enum { DDS_MT_OK, DDS_MT_WARNING,
                DDS_MT_ERROR, DDS_MT_ALARM,
                DDS_MT_INFO, DDS_MT_NONE } DDS_MsgType;
 
+//! \ingroup ASI_CORE
+//!
 typedef NCollection_Sequence<TCollection_AsciiString> DDS_BaseColOfAsciiString;
 
 #endif

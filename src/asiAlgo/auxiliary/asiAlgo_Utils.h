@@ -107,6 +107,8 @@ class asiAlgo_AAG;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Auxiliary functions facilitating working with OCCT topological shapes.
 namespace asiAlgo_Utils
 {
@@ -629,10 +631,6 @@ namespace asiAlgo_Utils
   //! \return label.
   asiAlgo_EXPORT std::string
     FaceGeometryName(const TopoDS_Face& face);
-
-  //! Converts the passed feature angle to string,
-  asiAlgo_EXPORT TCollection_AsciiString
-    FeatureAngleToString(const asiAlgo_FeatureAngleType angle);
 
   //! Converts the passed named shape to string.
   asiAlgo_EXPORT TCollection_AsciiString

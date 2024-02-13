@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Type of CSG operation.
 enum asiAlgo_CSG
 {
@@ -48,6 +50,8 @@ enum asiAlgo_CSG
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Auxiliary functions.
 namespace asiAlgo_CSGUtils
 {

@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Algorithm computing a non-convex hull of two-dimensional point cloud
 //! using a k-nearest neighbors approach described in a paper of A. Moreira
 //! and M.Y. Santos "Concave Hull: A K-nearest Neighbours Approach

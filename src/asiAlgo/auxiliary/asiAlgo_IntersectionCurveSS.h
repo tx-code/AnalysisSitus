@@ -31,7 +31,7 @@
 #ifndef asiAlgo_IntersectionCurveSS_h
 #define asiAlgo_IntersectionCurveSS_h
 
-// Analysis Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
 
 // OCCT includes
@@ -41,12 +41,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Curve representing 1-dimensional intersection between two surfaces. The
 //! first intersected surface corresponds to the parameters with index 1.
 class asiAlgo_IntersectionCurveSS : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IntersectionCurveSS, Standard_Transient)
 
@@ -80,6 +80,8 @@ public:
 
 };
 
+//! \ingroup ASI_MODELING
+//!
 //! Collection of intersection curves.
 typedef NCollection_Sequence<Handle(asiAlgo_IntersectionCurveSS)> asiAlgo_IntersectionCurvesSS;
 

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to invert orientations of faces.
 class asiAlgo_InvertFaces : public ActAPI_IAlgorithm
 {

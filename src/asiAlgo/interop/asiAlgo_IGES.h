@@ -30,7 +30,7 @@
 
 #pragma once
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
 
 // Active Data includes
@@ -44,11 +44,11 @@ class TopoDS_Shape;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! IGES interoperability tool.
 class asiAlgo_IGES : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IGES, ActAPI_IAlgorithm)
 
@@ -86,4 +86,3 @@ private:
   asiAlgo_EXPORT void
     clearSession(const Handle(XSControl_WorkSession)& WS);
 };
-

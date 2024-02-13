@@ -30,6 +30,8 @@
 
 class gp_Pnt;
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl {
 
 struct ProjectResult

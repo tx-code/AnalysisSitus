@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Range of a two-sided inequality.
 struct t_ineqRange
 {
@@ -56,6 +58,8 @@ struct t_ineqRange
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! N-dimensional coordinates (vector or point).
 template <typename T>
 struct t_ineqNCoord
@@ -171,6 +175,8 @@ struct t_ineqNCoord
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! System of inequalities.
 class asiAlgo_IneqSystem : public Standard_Transient
 {

@@ -46,6 +46,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Services related to mesh generation.
 namespace asiAlgo_MeshGen
 {

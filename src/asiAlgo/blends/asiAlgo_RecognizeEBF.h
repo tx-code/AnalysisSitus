@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to recognize blend faces of EBF type (edge-blend face).
 //! This utility accepts a single face and populates the corresponding AAG
 //! node with a blend candidate attribute if the recognition is successful.

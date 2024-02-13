@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Surface-Surface intersection tool.
 class asiAlgo_IntersectSS : public ActAPI_IAlgorithm
 {

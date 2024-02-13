@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Base class for all topological attributes.
 class asiAlgo_TopoAttr : public Standard_Transient
 {

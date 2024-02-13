@@ -48,6 +48,8 @@
 
 class asiAlgp_OutPLYFile;
 
+//! \ingroup ASI_INTEROP
+//!
 //! Services to work with ply files.
 class asiAlgo_PLY : public ActAPI_IAlgorithm
 {

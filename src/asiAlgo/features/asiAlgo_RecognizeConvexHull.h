@@ -40,6 +40,8 @@ class TopoDS_Face;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Recognizes all faces lying on a convex hull of the CAD part.
 class asiAlgo_RecognizeConvexHull : public asiAlgo_Recognizer
 {
@@ -144,4 +146,3 @@ protected:
   //! Constructed hull as a mesh.
   Handle(Poly_Triangulation) m_hullMesh;
 };
-

@@ -43,6 +43,8 @@
 // Standard includes
 #include <vector>
 
+//! \ingroup ASI_MODELING
+//!
 //! Algorithms from "Real-Time Collision Detection" by Christer Ericson.
 namespace RTCD
 {

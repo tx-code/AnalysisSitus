@@ -44,6 +44,8 @@ const static double REAL_MAX = std::numeric_limits<double>::max();
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Tools for calculation distances and projections of points to
 //! segments and triangles
 class asiAlgo_BVHAlgo : public ActAPI_IAlgorithm

@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Adaptor for working with a joint curve between two surface patches in
 //! natural bounds.
 class asiAlgo_PatchJointAdaptor : public ActAPI_IAlgorithm

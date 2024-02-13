@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to check validity of shapes.
 class asiAlgo_CheckValidity : public ActAPI_IAlgorithm
 {

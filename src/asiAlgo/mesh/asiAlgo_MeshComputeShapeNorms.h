@@ -49,6 +49,8 @@ class Prs3d_Drawer;
 class Poly_Triangulation;
 class Poly_Connect;
 
+//! \ingroup ASI_MODELING
+//!
 //! Originates from StdPrs_ToolTriangulatedShape.
 class asiAlgo_MeshComputeShapeNorms
 {

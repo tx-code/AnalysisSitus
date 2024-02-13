@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Abstract class for feature recognition rules used in recognizers. The idea
 //! behind any "rule" is to provide the recognition logic at certain AAG iterator's
 //! position. I.e., whenever we are at the rule's `recognize()` method, we start from

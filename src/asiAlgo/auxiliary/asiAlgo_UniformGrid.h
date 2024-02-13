@@ -37,6 +37,8 @@
 // OpenCascade includes
 #include <Standard_Type.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 //! Convenience class for a three-dimensional array which represents a
 //! uniform voxelization.
 template <typename T>

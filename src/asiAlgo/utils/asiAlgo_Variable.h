@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Variable type.
 enum asiAlgo_VariableType
 {
@@ -49,6 +51,8 @@ enum asiAlgo_VariableType
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Variable.
 class asiAlgo_Variable
 {

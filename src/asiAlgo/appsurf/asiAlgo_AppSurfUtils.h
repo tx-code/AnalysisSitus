@@ -48,6 +48,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Common function for PLATE, APPSURF1 and APPSURF2.
 namespace asiAlgo_AppSurfUtils
 {

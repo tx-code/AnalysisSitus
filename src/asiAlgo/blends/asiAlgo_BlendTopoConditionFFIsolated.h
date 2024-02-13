@@ -35,11 +35,11 @@
 #include <asiAlgo_BlendTopoConditionFF.h>
 #include <asiAlgo_Utils.h>
 
+//! \ingroup ASI_AFR
+//!
 //! Topological condition for isolated face-face blends.
 struct asiAlgo_BlendTopoConditionFFIsolated : public asiAlgo_BlendTopoConditionFF
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BlendTopoConditionFFIsolated, asiAlgo_BlendTopoConditionFF)
 

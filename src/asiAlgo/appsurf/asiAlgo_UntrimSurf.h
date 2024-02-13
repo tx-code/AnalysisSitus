@@ -46,6 +46,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! UNTRIM operator for turning a rectangular trimmed surface into a
 //! surface in natural bounds.
 class asiAlgo_UntrimSurf : public ActAPI_IAlgorithm

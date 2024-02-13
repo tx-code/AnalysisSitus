@@ -30,6 +30,8 @@
 
 class math_Matrix;
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl
 {
 

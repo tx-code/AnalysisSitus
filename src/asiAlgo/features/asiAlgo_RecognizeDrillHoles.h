@@ -38,6 +38,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to recognize drilled holes.
 class asiAlgo_RecognizeDrillHoles : public asiAlgo_Recognizer
 {

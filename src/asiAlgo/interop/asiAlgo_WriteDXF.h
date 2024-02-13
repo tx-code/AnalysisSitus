@@ -34,6 +34,8 @@ class Poly_Polygon3D;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Exports B-rep wireframe to DXF.
 //!
 //! The code is originally taken from FreeCAD (LGPL terms). We use protected

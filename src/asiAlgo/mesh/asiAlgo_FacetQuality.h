@@ -43,6 +43,8 @@
 #define FQ_Name_Fine      "fine"
 #define FQ_Name_VeryFine  "very-fine"
 
+//! \ingroup ASI_MODELING
+//!
 //! This enumeration defines levels of detail to use in a faceter. Each item in
 //! this enumeration corresponds to a pair of angular and linear deflection
 //! values. Those values are chosen algorithmically, depending on the extent
@@ -58,6 +60,8 @@ enum class asiAlgo_FacetQuality
   VeryFine
 };
 
+//! \ingroup ASI_MODELING
+//!
 //! Quality names.
 static std::unordered_map<std::string, asiAlgo_FacetQuality>
   asiAlgo_FacetQualityNames = { {FQ_Name_VeryRough, asiAlgo_FacetQuality::VeryRough},
@@ -66,6 +70,8 @@ static std::unordered_map<std::string, asiAlgo_FacetQuality>
                                 {FQ_Name_Fine,      asiAlgo_FacetQuality::Fine},
                                 {FQ_Name_VeryFine,  asiAlgo_FacetQuality::VeryFine} };
 
+//! \ingroup ASI_MODELING
+//!
 //! Returns facet quality by its predefined string identifier.
 //! \param[in] name the name to match with a facet quality level.
 //! \return facet quality enum.
@@ -79,6 +85,8 @@ inline asiAlgo_FacetQuality asiAlgo_FacetQualityFromString(const char* name)
   return (*fq).second;
 }
 
+//! \ingroup ASI_MODELING
+//!
 //! This function returns a pair of linear and angular deflection values for the
 //! requested quality level. The linear deflection is derived from the passed
 //! `minLinDefl` value by scaling it by a prescribed coefficient. The value of

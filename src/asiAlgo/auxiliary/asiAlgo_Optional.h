@@ -104,6 +104,8 @@ namespace tl {
 #define TL_OPTIONAL_11_CONSTEXPR constexpr
 #endif
 
+//! \ingroup ASI_CORE
+//!
 namespace tl {
 #ifndef TL_MONOSTATE_INPLACE_MUTEX
 #define TL_MONOSTATE_INPLACE_MUTEX

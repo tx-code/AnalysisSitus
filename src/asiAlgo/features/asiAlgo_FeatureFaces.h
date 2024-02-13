@@ -41,16 +41,23 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Feature ID.
 typedef int asiAlgo_FeatureId;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Feature as a set of indices of faces.
 typedef TColStd_PackedMapOfInteger asiAlgo_Feature;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
+//! Technical namespace for common functions.
 namespace asiAlgo
 {
   //! Dumps the passed feature face IDs to the standard output and
@@ -69,16 +76,22 @@ namespace asiAlgo
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Features by indices.
 typedef NCollection_DataMap<asiAlgo_FeatureId, asiAlgo_Feature> asiAlgo_Features;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Handy typedef for indices of feature faces organized by feature types.
 typedef NCollection_DataMap<int, asiAlgo_Features> asiAlgo_FeaturesByType;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Undefined GUID.
 typedef Standard_GUID asiAlgo_BadGuid;
 

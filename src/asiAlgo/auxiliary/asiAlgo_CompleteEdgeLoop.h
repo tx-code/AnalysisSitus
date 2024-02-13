@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Constructs edge loop starting from the given seed edges.
 class asiAlgo_CompleteEdgeLoop : public ActAPI_IAlgorithm
 {

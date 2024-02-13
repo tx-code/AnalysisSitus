@@ -44,11 +44,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build interpolation surface by mesh.
 class asiAlgo_InterpolateSurfMesh : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_InterpolateSurfMesh, ActAPI_IAlgorithm)
 

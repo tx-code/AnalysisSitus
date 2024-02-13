@@ -40,6 +40,8 @@ struct t_interInfo;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Finds collisions between AABBs and meshes.
 //!
 //! The algorithm is based on the paper

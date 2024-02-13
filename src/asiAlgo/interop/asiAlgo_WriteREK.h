@@ -38,6 +38,8 @@
 #include <string>
 #include <ostream>
 
+//! \ingroup ASI_INTEROP
+//!
 //! Writes the voxelization in Fraunhofer Raw Volumes file format (REK).
 class asiAlgo_WriteREK
 {

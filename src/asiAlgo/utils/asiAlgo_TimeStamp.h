@@ -44,14 +44,14 @@
 // TimeStamp structure
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Utility class representing general-purpose timestamp down to the
 //! seconds. Actually this class extends time_t value with addendum
 //! integer value required for uniqueness (this integer is meaningless,
 //! it has nothing related to timing).
 class asiAlgo_TimeStamp : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TimeStamp, Standard_Transient)
 
@@ -184,6 +184,8 @@ public:
 // TimeStampTool utility
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Auxiliary class generating unique and monotonic timestamps.
 //! This class operates with standard time_t type not attempting to cast it
 //! to any primitive (like integer, long etc). As this timestamp allows

@@ -42,11 +42,11 @@ class asiAlgo_History;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to suppress blends incrementally.
 class asiAlgo_SuppressBlendsInc : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_SuppressBlendsInc, ActAPI_IAlgorithm)
 

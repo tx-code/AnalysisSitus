@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! This class attempts to find a proper orientation for the passed shape in
 //! the assumption that it has a bunch of typical CNC features. This algorithm is
 //! designed in a way to stay independent from feature recognizers and any specific

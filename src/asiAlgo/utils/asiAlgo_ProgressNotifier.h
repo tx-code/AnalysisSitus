@@ -42,6 +42,8 @@
   #include <atomic.h>
 #endif
 
+//! \ingroup ASI_CORE
+//!
 //! Notification tool to take care of algorithmic messages.
 class asiAlgo_ProgressNotifier : public ActAPI_IProgressNotifier
 {

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Recognizes all negative features in a CAD part. Their shape
 //! does not matter. A feature to recognize is expected to terminate
 //! at inner contours of its base faces.

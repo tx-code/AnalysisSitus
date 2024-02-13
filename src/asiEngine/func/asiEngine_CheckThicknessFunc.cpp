@@ -108,7 +108,6 @@ int asiEngine_CheckThicknessFunc::execute(const Handle(ActAPI_HParameterList)& i
     TIMER_NEW
     TIMER_GO
 
-    //
     algo.SetIsCustomDir(isCustomDir);
     algo.SetCustomDir( t_xyz(dx, dy, dz) );
 

@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utilities to deal with Euler characteristics of a CAD model.
 namespace asiAlgo_EulerPoincare
 {

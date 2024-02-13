@@ -42,12 +42,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Point representing 0-dimensional intersection between two curves in 3D. The
 //! first intersected curve corresponds to the parameters with index 1, e.g. W1.
 class asiAlgo_IntersectionPointCC : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_IntersectionPointCC, Standard_Transient)
 
@@ -181,6 +181,8 @@ public:
 
 };
 
+//! \ingroup ASI_MODELING
+//!
 //! Collection of intersection points.
 typedef NCollection_Sequence<Handle(asiAlgo_IntersectionPointCC)> asiAlgo_IntersectionPointsCC;
 

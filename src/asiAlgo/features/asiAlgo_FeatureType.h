@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Enumeration for basic feature types.
 enum asiAlgo_FeatureType
 {

@@ -49,6 +49,8 @@
 #define ASITUS_VERSION_STRING "2024.1dev"
 #define ASITUS_APP_NAME "Analysis Situs"
 
+//! \ingroup ASI_CORE
+//!
 namespace asi
 {
   //! Returns build number as the compilation timestamp.

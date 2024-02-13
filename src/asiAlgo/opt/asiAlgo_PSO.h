@@ -43,6 +43,8 @@
 // Optimization tool
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Particle Swarm Optimizer.
 template <typename T_DIMENSION>
 class asiAlgo_PSO

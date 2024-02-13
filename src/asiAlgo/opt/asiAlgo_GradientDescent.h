@@ -43,10 +43,8 @@
   #pragma message("===== warning: COUT_DEBUG is enabled")
 #endif
 
-//-----------------------------------------------------------------------------
-// Optimization tool
-//-----------------------------------------------------------------------------
-
+//! \ingroup ASI_CORE
+//!
 //! Gradient descent optimization.
 template <typename T_DIMENSION>
 class asiAlgo_GradientDescent

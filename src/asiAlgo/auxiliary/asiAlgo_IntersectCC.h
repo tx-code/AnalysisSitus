@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Curve-curve intersection tool in three-dimensional space.
 class asiAlgo_IntersectCC : public ActAPI_IAlgorithm
 {

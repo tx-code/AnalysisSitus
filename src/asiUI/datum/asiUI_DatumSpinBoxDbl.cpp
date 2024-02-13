@@ -143,7 +143,7 @@ asiUI_DatumSpinBoxDbl::SpinBoxImpl::SpinBoxImpl(const QString& theDictId,
   if ( aDictItem.IsNull() )
     return;
 
-  const asiUI_WidgetParameterMap& aParamMap = aDictItem->GetWidgetParams();
+  const asiAlgo_WidgetParameterMap& aParamMap = aDictItem->GetWidgetParams();
 
   TCollection_AsciiString aStepOption("step");
   if ( !aParamMap.IsBound(aStepOption) )

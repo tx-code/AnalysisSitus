@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Recognized part types. The type is resolved at the level of a single part
 //! body as there could be compound parts which are not recognizable unless
 //! exploded to the primitive bodies, such as solids.
@@ -58,6 +60,8 @@ enum asiAlgo_PartBodyType
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Auxiliary functions for working with body types.
 namespace asiAlgo_PartBodyTypeUtils
 {

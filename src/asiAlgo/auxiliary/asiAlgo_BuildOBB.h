@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build Oriented Bounding Box on part.
 class asiAlgo_BuildOBB : public ActAPI_IAlgorithm
 {

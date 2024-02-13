@@ -46,6 +46,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to check feature clearances in a CAD part.
 class asiAlgo_CheckClearance : public ActAPI_IAlgorithm
 {

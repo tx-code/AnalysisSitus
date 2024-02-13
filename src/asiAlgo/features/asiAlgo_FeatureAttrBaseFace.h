@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute to mark a face as a base face.
 class asiAlgo_FeatureAttrBaseFace : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrBaseFace, asiAlgo_FeatureAttrFace)
 
 public:

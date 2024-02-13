@@ -55,6 +55,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! BVH-based accelerating structure representing CAD model's
 //! facets in computations.
 class asiAlgo_BVHFacets : public BVH_PrimitiveSet<double, 3>

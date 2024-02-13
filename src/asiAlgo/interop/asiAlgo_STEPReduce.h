@@ -34,6 +34,8 @@
 // Active Data includes
 #include <ActAPI_IAlgorithm.h>
 
+//! \ingroup ASI_INTEROP
+//!
 //! Utility class to compress STEP files by getting rid of
 //! redundancy in them.
 class asiAlgo_STEPReduce : public ActAPI_IAlgorithm

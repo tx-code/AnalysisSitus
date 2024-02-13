@@ -44,11 +44,11 @@
 // STL includes
 #include <vector>
 
+//! \ingroup ASI_MODELING
+//!
 //! \brief Constructs convex hull on the given set of points.
 class asiAlgo_BuildConvexHull : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BuildConvexHull, ActAPI_IAlgorithm)
 

@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to delete edges from the model.
 class asiAlgo_DeleteEdges
 {

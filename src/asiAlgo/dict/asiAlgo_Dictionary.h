@@ -48,6 +48,8 @@
 
 class asiAlgo_DictionaryImpl;
 
+//! \ingroup ASI_CORE
+//!
 //! Data dictionary is used to provide data definitions specified in an XML
 //! file. This file describes different physical quantities and their
 //! compositions which are bound to the Data Model parameters using the so
@@ -116,6 +118,8 @@ private:
 //                  SUIT Level Implementation
 // ----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! SUIT data dictionary. Implements updated dictionary format.
 //! This class is wrapped by asiAlgo_Dictionary class to provide a
 //! convenient interface to all of methods that comply with its

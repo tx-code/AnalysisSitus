@@ -52,6 +52,8 @@ class asiAlgo_IntersectBoxMesh;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Distance field represented by voxelization and its associated real
 //! function to calculate the distance values.
 class asiAlgo_BoundaryDistanceField : public mobius::poly_BaseDistanceField

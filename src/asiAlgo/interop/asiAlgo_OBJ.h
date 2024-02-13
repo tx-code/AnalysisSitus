@@ -31,7 +31,7 @@
 #ifndef asiAlgo_OBJ_h
 #define asiAlgo_OBJ_h
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
 
 // OCCT includes
@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Services to work with obj files.
 namespace asiAlgo_OBJ
 {

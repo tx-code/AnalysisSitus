@@ -40,6 +40,8 @@
 // OpenCascade includes
 #include <Poly_Triangulation.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 //! Smoothing services.
 namespace asiAlgo_MeshSmooth
 {

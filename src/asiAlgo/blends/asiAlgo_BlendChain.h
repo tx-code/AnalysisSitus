@@ -35,6 +35,8 @@
 #include <asiAlgo_BlendChainProps.h>
 #include <asiAlgo_FeatureFaces.h>
 
+//! \ingroup ASI_AFR
+//!
 //! Blend chain.
 typedef std::pair<asiAlgo_Feature, asiAlgo_BlendChainProps> asiAlgo_BlendChain;
 

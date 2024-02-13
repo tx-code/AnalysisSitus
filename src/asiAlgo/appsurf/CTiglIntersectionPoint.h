@@ -22,12 +22,16 @@
 #include <vector>
 #include <gp_Pnt.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 //This struct is used by GetIntersectionPoint(const TopoDS_Wire& wire1, const TopoDS_Wire& wire2,[...]) in tiglcommonfunctions.h
 struct IntersectionPoint {
     double SquareDistance;
     gp_Pnt Center;
 };
 
+//! \ingroup ASI_MODELING
+//!
 typedef std::vector<IntersectionPoint> intersectionPointList;
 
 #endif // PNAMEDSHAPE_H

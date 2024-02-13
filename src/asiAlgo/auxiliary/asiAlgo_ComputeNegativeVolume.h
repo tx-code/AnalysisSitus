@@ -16,6 +16,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! The class for computing negative volumes of features.
 class ComputeNegativeVolumeAlgo : public ActAPI_IAlgorithm
 {

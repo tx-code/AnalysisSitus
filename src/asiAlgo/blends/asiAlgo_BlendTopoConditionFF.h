@@ -39,13 +39,13 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Base class for topological conditions on blends between two faces. For this
 //! topological condition to realize, the blend face should be enclosed between
 //! two support faces connected to the blend face be means of "spring" edges.
 class asiAlgo_BlendTopoConditionFF : public asiAlgo_BlendTopoCondition
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BlendTopoConditionFF, asiAlgo_BlendTopoCondition)
 

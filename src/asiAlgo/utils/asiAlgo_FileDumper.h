@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Utility class providing functionality for dumping of algorithmic data
 //! to ASCII files in different manners.
 //!

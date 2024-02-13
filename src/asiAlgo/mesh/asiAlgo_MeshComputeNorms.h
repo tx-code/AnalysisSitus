@@ -42,11 +42,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to compute normal field on mesh.
 class asiAlgo_MeshComputeNorms : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_MeshComputeNorms, ActAPI_IAlgorithm)
 

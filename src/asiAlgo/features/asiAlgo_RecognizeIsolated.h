@@ -42,14 +42,15 @@ class TopoDS_Face;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Recognizes isolated features, i.e., the features that start from internal
 //! contours of the picked faces (one or several).
 //!
-//! \todo enable storing the detected feature faces in AAG, else -- it is not a "recognizer" but a "finder."
+//! \todo enable storing the detected feature faces in AAG, else -- it is not
+//!       a "recognizer" but a "finder."
 class asiAlgo_RecognizeIsolated : public asiAlgo_Recognizer
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeIsolated, asiAlgo_Recognizer)
 

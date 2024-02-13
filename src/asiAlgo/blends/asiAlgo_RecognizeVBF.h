@@ -41,13 +41,13 @@ class asiAlgo_AttrBlendCandidate;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to recognize blend faces of VBF (vertex-blend face) type.
 //! This utility accepts a single face and populates the corresponding AAG
 //! node with a blend candidate attribute if the recognition is successful.
 class asiAlgo_RecognizeVBF : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeVBF, ActAPI_IAlgorithm)
 

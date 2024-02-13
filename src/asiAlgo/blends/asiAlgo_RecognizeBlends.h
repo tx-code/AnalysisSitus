@@ -37,6 +37,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to recognize blends.
 class asiAlgo_RecognizeBlends : public asiAlgo_Recognizer
 {

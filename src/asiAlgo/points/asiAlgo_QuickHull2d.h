@@ -44,6 +44,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Algorithm constructing convex hull of two-dimensional point cloud
 //! by Quick Hull (divide and conquer) method.
 template <typename TPoint>

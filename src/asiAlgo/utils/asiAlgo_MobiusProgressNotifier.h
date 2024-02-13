@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Notification tool to take care of algorithmic messages from Mobius.
 class asiAlgo_MobiusProgressNotifier : public mobius::core_IProgressNotifier
 {

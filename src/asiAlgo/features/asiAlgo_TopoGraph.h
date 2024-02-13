@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! \brief Topology graph for any B-Rep part.
 //!
 //! This tool gives clear TopoDS-agnostic interface to the graph representing
@@ -66,8 +68,6 @@
 //!       between them are not the same in different geometric kernels.
 class asiAlgo_TopoGraph : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TopoGraph, Standard_Transient)
 

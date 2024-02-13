@@ -43,6 +43,8 @@ class LDOM_Element;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Data dictionary definition of a dimension as described in the XML
 //! defintion file. This class provides information on the employed units.
 class asiAlgo_DictionaryDimension : public Standard_Transient
@@ -113,6 +115,8 @@ private:
   int m_iSI;
 };
 
+//! \ingroup ASI_CORE
+//!
 //! Short-cut for a collection of dimensions.
 typedef std::vector<Handle(asiAlgo_DictionaryDimension)> asiAlgo_DictionaryDimensions;
 

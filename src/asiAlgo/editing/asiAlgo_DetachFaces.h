@@ -35,11 +35,12 @@
 #include <asiAlgo.h>
 
 // OCCT includes
-//#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to detach faces.
 class asiAlgo_DetachFaces
 {
@@ -63,9 +64,8 @@ public:
 
 protected:
 
-  TopoDS_Shape                              m_master; //!< Master model.
-  TopoDS_Shape                              m_result; //!< Result.
-  //TopTools_IndexedDataMapOfShapeListOfShape m_M;      //!< Sub-shapes with ancestors.
+  TopoDS_Shape m_master; //!< Master model.
+  TopoDS_Shape m_result; //!< Result.
 
 };
 

@@ -41,7 +41,9 @@
 
 //-----------------------------------------------------------------------------
 
-//! Function to perform conversion of spline and ellipse curves to arcs and lines.
+//! \ingroup ASI_MODELING
+//!
+//! Functions to perform conversion of spline and ellipse curves to arcs and lines.
 namespace asiAlgo_ConvertCurve
 {
   asiAlgo_EXPORT void

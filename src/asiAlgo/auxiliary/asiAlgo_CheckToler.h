@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to check tolerances in a B-Rep model.
 class asiAlgo_CheckToler : public ActAPI_IAlgorithm
 {

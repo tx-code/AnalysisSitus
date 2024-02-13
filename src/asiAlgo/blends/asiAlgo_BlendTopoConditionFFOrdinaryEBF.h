@@ -35,11 +35,11 @@
 #include <asiAlgo_BlendTopoConditionFF.h>
 #include <asiAlgo_Utils.h>
 
+//! \ingroup ASI_AFR
+//!
 //! Topological condition for ordinary edge blends in a chain.
 struct asiAlgo_BlendTopoConditionFFOrdinaryEBF : public asiAlgo_BlendTopoConditionFF
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_BlendTopoConditionFFOrdinaryEBF, asiAlgo_BlendTopoConditionFF)
 

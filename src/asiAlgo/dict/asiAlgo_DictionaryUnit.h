@@ -40,6 +40,8 @@
 // Standard includes
 #include <vector>
 
+//! \ingroup ASI_CORE
+//!
 //! Data dictionary definition of a measurement unit described in an XML file.
 //!
 //! This class provides information on:
@@ -50,8 +52,6 @@
 //! "to SI" conversion: `SI_value = k*non_SI_value + b`.
 class asiAlgo_DictionaryUnit : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_DictionaryUnit, Standard_Transient)
 
@@ -102,6 +102,8 @@ private:
   double                  m_fOffset; //!< Conversion offset.
 };
 
+//! \ingroup ASI_CORE
+//!
 //! Short-cut for a collection of units.
 typedef std::vector<Handle(asiAlgo_DictionaryUnit)> asiAlgo_DictionaryUnits;
 

@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to detect smooth (G1-continuous) edges.
 class asiAlgo_FindSmoothEdges : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FindSmoothEdges, ActAPI_IAlgorithm)
 

@@ -47,6 +47,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility for killing topological entities and reduction of topological
 //! graph. Such reduction is possible in two ways:
 //!
@@ -63,8 +65,6 @@
 //! recorded modification.
 class asiAlgo_TopoKill : public ActAPI_IAlgorithm
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TopoKill, ActAPI_IAlgorithm)
 

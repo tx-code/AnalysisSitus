@@ -45,6 +45,8 @@ class gp_Circ;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Converts the input curve to a canonical form.
 class asiAlgo_ConvertCanonicalCurve
 {

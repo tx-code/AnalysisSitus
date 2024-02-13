@@ -45,6 +45,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Performs geometric modifications on a shape.
 //!
 //! This class is a slightly reworked version of BRepTools_Modifier from

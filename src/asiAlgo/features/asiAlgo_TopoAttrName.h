@@ -39,12 +39,12 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute storing names of sub-shapes. This attribute was originally
 //! developed to support topological naming services.
 class asiAlgo_TopoAttrName : public asiAlgo_TopoAttr
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_TopoAttrName, asiAlgo_TopoAttr)
 

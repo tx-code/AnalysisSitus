@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Auxiliary unoriented link structure.
 struct asiAlgo_MeshLink
 {

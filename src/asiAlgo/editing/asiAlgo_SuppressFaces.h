@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to delete faces.
 class asiAlgo_SuppressFaces : public Standard_Transient
 {

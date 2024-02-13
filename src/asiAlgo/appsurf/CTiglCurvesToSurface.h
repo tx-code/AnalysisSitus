@@ -27,6 +27,8 @@
 
 #include <Geom_RectangularTrimmedSurface.hxx>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl {
 
 class CTiglCurvesToSurface

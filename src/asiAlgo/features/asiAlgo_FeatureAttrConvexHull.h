@@ -36,11 +36,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute to mark a face as belonging to the convex hull.
 class asiAlgo_FeatureAttrConvexHull : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrConvexHull, asiAlgo_FeatureAttrFace)
 
 public:

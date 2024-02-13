@@ -41,6 +41,8 @@ class BRepTools_History;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Performs feature suppression.
 class asiAlgo_SuppressFeatures : public ActAPI_IAlgorithm
 {

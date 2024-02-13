@@ -40,11 +40,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Input data provider for the STEP writer with metadata.
 class asiAlgo_WriteSTEPWithMetaInput : public Standard_Transient
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_WriteSTEPWithMetaInput, Standard_Transient)
 

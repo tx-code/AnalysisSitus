@@ -40,11 +40,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! KEF (Kill Edge-Face) Euler operator.
 class asiAlgo_EulerKEF : public asiAlgo_Euler
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_EulerKEF, asiAlgo_Euler)
 

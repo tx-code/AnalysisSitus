@@ -41,6 +41,8 @@ class STEPControl_Writer;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! Base class for STEP interoperability interfaces.
 class asiAlgo_BaseSTEP : public ActAPI_IAlgorithm
 {

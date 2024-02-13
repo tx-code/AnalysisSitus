@@ -53,6 +53,8 @@ class asiAlgo_AAGRandomIterator;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! \brief Attributed Adjacency Graph for faces of a CAD model.
 //!
 //! Attributed Adjacency Graph (AAG) is a complementary structure for

@@ -26,6 +26,8 @@
 #include <math_Matrix.hxx>
 #include <vector>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl
 {
 

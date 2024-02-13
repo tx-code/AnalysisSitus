@@ -43,11 +43,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Base class for homeomorphic (topology-preserving) modifications of a shape.
 class asiAlgo_ModBase : public asiAlgo_BRepNormalization
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_ModBase, asiAlgo_BRepNormalization)
 

@@ -30,17 +30,17 @@
 
 #pragma once
 
-// Feature includes
+// asiAlgo includes
 #include <asiAlgo_FeatureAttrAdjacency.h>
 #include <asiAlgo_FeatureAngleType.h>
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute storing information about feature area.
 class asiAlgo_FeatureAttrArea : public asiAlgo_FeatureAttr
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrArea, asiAlgo_FeatureAttr)
 
@@ -81,6 +81,19 @@ public:
     return "Area";
   }
 
+protected:
+
+  //! Dumps extra props to JSON.
+  virtual void dumpJSON(Standard_OStream& out,
+                        const int         indent) const
+  {
+    std::string ws(indent, ' ');
+    std::string nl = "\n" + ws;
+
+    out << "," << nl << std::quoted(asiPropName_Value) << ": "
+                     << m_fArea;
+  }
+
 public:
 
   //! \return area value.
@@ -91,7 +104,6 @@ public:
 
 protected:
 
-  double    m_fArea; //!< Area.
+  double m_fArea; //!< Bounded surface area.
 
 };
-

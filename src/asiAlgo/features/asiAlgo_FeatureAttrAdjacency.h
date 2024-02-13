@@ -39,11 +39,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Attribute to store actual realization of adjacency between faces.
 class asiAlgo_FeatureAttrAdjacency : public asiAlgo_FeatureAttr
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_FeatureAttrAdjacency, asiAlgo_FeatureAttr)
 
 public:

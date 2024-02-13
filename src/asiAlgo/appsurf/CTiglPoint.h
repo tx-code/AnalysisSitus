@@ -30,6 +30,8 @@
 #include "gp_XYZ.hxx"
 #include <iostream>
 
+//! \ingroup ASI_MODELING
+//!
 namespace tigl 
 {
 

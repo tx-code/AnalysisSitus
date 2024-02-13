@@ -40,11 +40,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! KFMV (Kill Face Make Vertex) Euler operator.
 class asiAlgo_EulerKFMV : public asiAlgo_Euler
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_EulerKFMV, asiAlgo_Euler)
 

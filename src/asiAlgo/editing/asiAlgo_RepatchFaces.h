@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to repatch faces.
 class asiAlgo_RepatchFaces : public ActAPI_IAlgorithm
 {

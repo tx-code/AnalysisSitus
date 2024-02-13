@@ -38,6 +38,8 @@ struct ProjectionInfoMesh;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility for point-to-mesh projection.
 class asiAlgo_ProjectPointOnMesh : public asiAlgo_BVHAlgo
 {

@@ -36,11 +36,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Recognition rule for cavities.
 class asiAlgo_RecognizeCavitiesRule : public asiAlgo_RecognitionRule
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_RecognizeCavitiesRule, asiAlgo_RecognitionRule)
 

@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_INTEROP
+//!
 //! STEP interoperability tool.
 class asiAlgo_STEP : public asiAlgo_BaseSTEP
 {

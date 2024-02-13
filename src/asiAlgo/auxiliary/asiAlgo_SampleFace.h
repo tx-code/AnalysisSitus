@@ -48,6 +48,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Samples the UV domain of a face by overlaying a uniform grid.
 class asiAlgo_SampleFace : public ActAPI_IAlgorithm
 {

@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Oriented Bounding Box.
 struct asiAlgo_OBB
 {

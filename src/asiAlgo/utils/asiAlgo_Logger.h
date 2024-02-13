@@ -47,6 +47,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Logger for algorithmic messages.
 class asiAlgo_Logger : public ActAPI_ILogger
 {

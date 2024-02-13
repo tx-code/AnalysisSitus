@@ -52,6 +52,8 @@ class TopoDS_Edge;
   #undef Status
 #endif
 
+//! \ingroup ASI_MODELING
+//!
 //! This class provides analysis of a wire to be compliant to
 //! CAS.CADE requirements.
 //!

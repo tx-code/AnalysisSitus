@@ -40,6 +40,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Utility to analyze vertex vexity.
 class asiAlgo_CheckVertexVexity : public ActAPI_IAlgorithm
 {

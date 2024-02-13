@@ -31,7 +31,7 @@
 #ifndef asiAlgo_FindSameHosts_h
 #define asiAlgo_FindSameHosts_h
 
-// A-Situs includes
+// asiAlgo includes
 #include <asiAlgo.h>
 
 // OCCT includes
@@ -41,6 +41,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to find unique host surfaces.
 class asiAlgo_FindSameHosts
 {

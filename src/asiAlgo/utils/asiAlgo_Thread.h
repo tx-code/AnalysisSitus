@@ -18,6 +18,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! A simple platform-independent interface to execute and control threads.
 //! This class is a patched copy of original OpenCascade's `OSD_Thread` that
 //! fixes timout conversion from milliseconds to `timespec` for subsequent

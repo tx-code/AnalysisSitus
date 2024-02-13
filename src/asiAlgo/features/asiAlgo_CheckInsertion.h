@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Checks if a set of feature faces is isolated in another face set.
 class asiAlgo_CheckInsertion : public ActAPI_IAlgorithm
 {

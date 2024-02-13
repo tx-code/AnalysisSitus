@@ -51,6 +51,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Adjacency matrix.
 class asiAlgo_AdjacencyMx
 {

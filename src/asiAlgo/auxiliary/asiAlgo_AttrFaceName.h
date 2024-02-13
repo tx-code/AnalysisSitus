@@ -35,11 +35,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_CORE
+//!
 //! Attribute to name a face.
 class asiAlgo_AttrFaceName : public asiAlgo_FeatureAttrFace
 {
-public:
-
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_AttrFaceName, asiAlgo_FeatureAttrFace)
 
 public:
@@ -102,4 +102,3 @@ private:
 
   TCollection_ExtendedString m_name;
 };
-

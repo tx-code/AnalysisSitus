@@ -46,6 +46,8 @@ class GeomPlate_BuildPlateSurface;
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build a plate surface on the given edge set.
 class asiAlgo_PlateOnEdges : public ActAPI_IAlgorithm
 {

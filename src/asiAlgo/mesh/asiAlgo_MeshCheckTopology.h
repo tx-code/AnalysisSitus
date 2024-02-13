@@ -46,6 +46,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! This utility class checks the topology of the `Poly_Triangulation` meshes
 //! distributed by B-rep faces. The following errors are reported:
 //!

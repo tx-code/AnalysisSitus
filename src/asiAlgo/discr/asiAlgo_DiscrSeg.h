@@ -39,7 +39,7 @@
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup ASIEXT_Faceter
+//! \ingroup ASI_CORE
 //!
 //! Module namespace.
 namespace asiAlgo

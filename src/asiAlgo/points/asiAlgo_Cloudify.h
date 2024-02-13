@@ -43,6 +43,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to build a point cloud by sampling a CAD model.
 class asiAlgo_Cloudify : public ActAPI_IAlgorithm
 {

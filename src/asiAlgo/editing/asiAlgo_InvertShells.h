@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Utility to invert orientations of all shells in the given shape.
 class asiAlgo_InvertShells : public ActAPI_IAlgorithm
 {

@@ -36,6 +36,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_AFR
+//!
 //! Type of angle. Numerical values associated with the items are taken
 //! from fundamental paper of Joshi "Graph-based heuristics for recognition
 //! of machined features from a 3D solid model", 1988.
@@ -52,6 +54,8 @@ enum asiAlgo_FeatureAngleType
   FeatureAngleType_LAST
 };
 
+//! \ingroup ASI_AFR
+//!
 //! Auxiliary functions for dealing with feature angles.
 namespace asiAlgo_FeatureAngle
 {
@@ -103,6 +107,32 @@ namespace asiAlgo_FeatureAngle
       return true;
 
     return false;
+  }
+
+  //! Converts the passed feature angle type to string.
+  //! \param[in] angle the angle type to convert to string.
+  //! \return string representation of the passed angle type.
+  inline const char*
+    ToString(const asiAlgo_FeatureAngleType angle)
+  {
+    switch ( angle )
+    {
+      case FeatureAngleType_Concave:
+        return "concave";
+      case FeatureAngleType_Convex:
+        return "convex";
+      case FeatureAngleType_Smooth:
+        return "smooth";
+      case FeatureAngleType_SmoothConcave:
+        return "smooth concave";
+      case FeatureAngleType_SmoothConvex:
+        return "smooth convex";
+      case FeatureAngleType_Undefined:
+      default:
+        break;
+    }
+
+    return "undefined";
   }
 };
 

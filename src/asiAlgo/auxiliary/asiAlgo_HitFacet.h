@@ -36,11 +36,11 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Finds a facet which is intersected by the probe ray.
 class asiAlgo_HitFacet : public asiAlgo_BVHAlgo
 {
-public:
-
   // OCCT RTTI
   DEFINE_STANDARD_RTTI_INLINE(asiAlgo_HitFacet, asiAlgo_BVHAlgo)
 

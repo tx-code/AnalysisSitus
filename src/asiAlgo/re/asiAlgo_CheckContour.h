@@ -42,6 +42,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Contour checking tool.
 class asiAlgo_CheckContour : public ActAPI_IAlgorithm
 {

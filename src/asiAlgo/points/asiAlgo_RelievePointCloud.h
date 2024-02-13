@@ -39,6 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
+//! \ingroup ASI_MODELING
+//!
 //! Relieves point clouds.
 class asiAlgo_RelievePointCloud
 {
