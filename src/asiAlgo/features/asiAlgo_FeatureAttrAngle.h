@@ -109,10 +109,10 @@ protected:
     std::string ws(indent, ' ');
     std::string nl = "\n" + ws;
 
-    out << "," << nl << std::quoted(asiPropName_AngleType) << ": "
-                     << std::quoted( asiAlgo_FeatureAngle::ToString(m_angleType) );
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_AngleType) << ": "
+                     << asiAlgo_Utils::Str::Quoted( asiAlgo_FeatureAngle::ToString(m_angleType) );
 
-    out << "," << nl << std::quoted(asiPropName_Value) << ": "
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Value) << ": "
                      << m_fAngleRad;
   }
 

@@ -98,6 +98,7 @@
 #define asiAlgo_TooSmallValue 1.0e-4
 #define asiAlgo_RangeLinPrec  0.01
 #define asiAlgo_SlashStr      "/"
+#define asiAlgo_QuoteStr      "\""
 
 //-----------------------------------------------------------------------------
 
@@ -171,6 +172,22 @@ namespace asiAlgo_Utils
       SubStr(const std::string& source,
              const int          idx_F,
              const int          length);
+
+    //! Returns the passed string ensuring that it is surrounded with quote
+    //! characters. This is an equivalent function for `std::quoted()` to
+    //! be used in C++11 development environment.
+    //! \param[in] strIN input string.
+    //! \return modified string.
+    asiAlgo_EXPORT std::string
+      Quoted(const char* strIN);
+
+    //! Returns the passed string ensuring that it is surrounded with quote
+    //! characters. This is an equivalent function for `std::quoted()` to
+    //! be used in C++11 development environment.
+    //! \param[in] strIN input string.
+    //! \return modified string.
+    asiAlgo_EXPORT std::string
+      Quoted(const std::string& strIN);
 
     //! Returns the passed string ensuring that it has a trailing slash.
     //! \param[in] strIN input string.

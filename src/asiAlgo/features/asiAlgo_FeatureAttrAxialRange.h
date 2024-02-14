@@ -90,8 +90,8 @@ protected:
     std::string ws(indent, ' ');
     std::string nl = "\n" + ws;
 
-    out << "," << nl << std::quoted(asiPropName_Hmin) << ": " << hMin;
-    out << "," << nl << std::quoted(asiPropName_Hmax) << ": " << hMin;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Hmin) << ": " << hMin;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Hmax) << ": " << hMin;
   }
 
 public:

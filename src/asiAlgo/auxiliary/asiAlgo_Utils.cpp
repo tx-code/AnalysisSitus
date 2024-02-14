@@ -606,6 +606,39 @@ std::string asiAlgo_Utils::Str::SubStr(const std::string& source,
 
 //-----------------------------------------------------------------------------
 
+std::string asiAlgo_Utils::Str::Quoted(const char* strIN)
+{
+  return Quoted( std::string(strIN) );
+}
+
+//-----------------------------------------------------------------------------
+
+std::string asiAlgo_Utils::Str::Quoted(const std::string& strIN)
+{
+  if ( !strIN.length() )
+    return "\"\"";
+
+  char cf = strIN.at(0);
+  char ce = strIN.at(strIN.length() - 1);
+
+  if ( (cf == *asiAlgo_QuoteStr) && (ce == *asiAlgo_QuoteStr) )
+    return strIN;
+
+  std::string strOUT;
+
+  if ( cf != *asiAlgo_QuoteStr )
+    strOUT += asiAlgo_QuoteStr;
+  //
+  strOUT += strIN;
+  //
+  if ( ce != *asiAlgo_QuoteStr )
+    strOUT += asiAlgo_QuoteStr;
+
+  return strOUT;
+}
+
+//-----------------------------------------------------------------------------
+
 std::string asiAlgo_Utils::Str::Slashed(const char* strIN)
 {
   return Slashed( std::string(strIN) );

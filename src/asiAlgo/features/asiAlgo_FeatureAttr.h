@@ -32,8 +32,8 @@
 #define asiAlgo_FeatureAttr_h
 
 // asiAlgo includes
-#include <asiAlgo.h>
 #include <asiAlgo_JsonDict.h>
+#include <asiAlgo_Utils.h>
 
 // Active Data includes
 #include <ActAPI_IPlotter.h>

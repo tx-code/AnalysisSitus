@@ -99,10 +99,10 @@ protected:
     std::string ws(indent, ' ');
     std::string nl = "\n" + ws;
 
-    out << "," << nl << std::quoted(asiPropName_Umin) << ": " << uMin;
-    out << "," << nl << std::quoted(asiPropName_Umax) << ": " << uMax;
-    out << "," << nl << std::quoted(asiPropName_Vmin) << ": " << vMin;
-    out << "," << nl << std::quoted(asiPropName_Vmax) << ": " << vMax;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Umin) << ": " << uMin;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Umax) << ": " << uMax;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Vmin) << ": " << vMin;
+    out << "," << nl << asiAlgo_Utils::Str::Quoted(asiPropName_Vmax) << ": " << vMax;
   }
 
 public:
