@@ -222,11 +222,31 @@ int ENGINE_DisableBrowser(const Handle(asiTcl_Interp)& interp,
 }
 
 //-----------------------------------------------------------------------------
+#define DEBUG_GENERATE_PIXMAP
+#include <BRepPreviewAPI_MakeBox.hxx>
+#include <Image_AlienPixMap.hxx>
 
 int ENGINE_ShowCommands(const Handle(asiTcl_Interp)& interp,
                         int                          argc,
                         const char**                 argv)
 {
+#ifdef DEBUG_GENERATE_PIXMAP
+  gp_Pnt thePntMin (0, 0, 0);
+  gp_Pnt thePntMax (100, 100, 100);
+  int width = 200;
+  int height = 300;
+
+  BRepPreviewAPI_MakeBox aMakeBox;
+  aMakeBox.Init (thePntMin, thePntMax);
+  TopoDS_Shape shape = aMakeBox.Shape();
+  Handle(Image_AlienPixMap) pixmap =
+    asiAlgo_Utils::Graphics::GeneratePixmap(shape, width, height);
+  pixmap->Save("d:/tmp/pixmap.png");
+
+  return 0;
+#endif
+
+
   if ( argc != 1 )
   {
     return interp->ErrorOnWrongArgs(argv[0]);
