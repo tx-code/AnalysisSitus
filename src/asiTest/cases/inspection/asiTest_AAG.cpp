@@ -38,8 +38,8 @@
 // OCCT includes
 #include <BRepPrimAPI_MakeBox.hxx>
 
-#define FILE_DEBUG
-#if defined FILE_DEBUG
+#undef FILE_DEBUG_GENREF
+#if defined FILE_DEBUG_GENREF
   #pragma message("===== warning: FILE_DEBUG is enabled")
 #endif
 
@@ -217,10 +217,10 @@ outcome asiTest_AAG::testAAG2JSON(const int   funcID,
 
   res = testAAG2JSON(funcID, aag, shortFilenameRef);
 
-#if defined FILE_DEBUG
-  std::string dumpname(shortFilename);
-  asiAlgo_Utils::Str::ReplaceAll(dumpname, "/", "-");
-  dumpname += ".json";
+#if defined FILE_DEBUG_GENREF
+  std::string
+    dumpname = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestData() )
+             + shortFilenameRef;
   //
   std::ofstream filestream(dumpname);
   //
@@ -235,6 +235,8 @@ outcome asiTest_AAG::testAAG2JSON(const int   funcID,
   filestream << "\n";
   //
   filestream.close();
+
+  return res.failure();
 #endif
 
   return res;

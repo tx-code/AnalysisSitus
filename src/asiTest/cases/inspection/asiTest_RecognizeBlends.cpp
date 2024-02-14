@@ -35,9 +35,9 @@
 #include <asiAlgo_AAG.h>
 #include <asiAlgo_RecognizeBlends.h>
 
-#undef FILE_DEBUG
-#if defined FILE_DEBUG
-  #pragma message("===== warning: FILE_DEBUG is enabled")
+#undef FILE_DEBUG_GENREF
+#if defined FILE_DEBUG_GENREF
+  #pragma message("===== warning: FILE_DEBUG_GENREF is enabled")
 #endif
 
 //-----------------------------------------------------------------------------
@@ -106,10 +106,10 @@ outcome asiTest_RecognizeBlends::runtest(const int   funcID,
   //
   ss << "\n";
 
-#if defined FILE_DEBUG
-  std::string dumpname(shortFilename);
-  asiAlgo_Utils::Str::ReplaceAll(dumpname, "/", "-");
-  dumpname += ".json";
+#if defined FILE_DEBUG_GENREF
+  std::string
+    dumpname = asiAlgo_Utils::Str::Slashed( asiAlgo_Utils::Env::AsiTestData() )
+             + shortFilenameRef;
   //
   std::ofstream filestream(dumpname);
   //
@@ -124,6 +124,8 @@ outcome asiTest_RecognizeBlends::runtest(const int   funcID,
   filestream << "\n";
   //
   filestream.close();
+
+  return res.failure();
 #endif
 
   // Read JSON from file.

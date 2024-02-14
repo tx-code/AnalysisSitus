@@ -43,8 +43,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -52,8 +55,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -61,8 +67,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -70,8 +79,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -100,8 +112,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -166,8 +181,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -190,8 +208,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -223,8 +244,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -232,8 +256,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -241,8 +268,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -250,8 +280,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -259,8 +292,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -268,8 +304,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -277,8 +316,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -286,8 +328,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -295,8 +340,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -304,8 +352,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -313,8 +364,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth convex",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -322,8 +376,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -331,8 +388,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -370,8 +430,11 @@
       "surface": "torus",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth convex",
+          "value": 3.1415926535897931
         }
       ]
     },
@@ -388,8 +451,11 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_FeatureAttrAngle",
           "guid": "adcc7a78-e062-4ce2-b394-7f25ddfd555e",
-          "name": "Dihedral angle"
+          "name": "Dihedral angle",
+          "angleType": "smooth concave",
+          "value": 3.1415926535897931
         }
       ]
     }

@@ -4,6 +4,7 @@
       "surface": "torus",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendCandidate",
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "vertex",
@@ -20,6 +21,7 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendCandidate",
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
@@ -36,6 +38,7 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendCandidate",
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
@@ -52,6 +55,7 @@
       "surface": "plane",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendSupport",
           "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
           "name": "blend support"
         }
@@ -70,10 +74,12 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendSupport",
           "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
           "name": "blend support"
         },
         {
+          "type": "asiAlgo_AttrBlendCandidate",
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
@@ -141,6 +147,7 @@
       "surface": "plane",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendSupport",
           "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
           "name": "blend support"
         }
@@ -150,6 +157,7 @@
       "surface": "plane",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendSupport",
           "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
           "name": "blend support"
         }
@@ -159,6 +167,7 @@
       "surface": "plane",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendSupport",
           "guid": "5e0875bf-2779-4db4-9d26-667424ccc2c1",
           "name": "blend support"
         }
@@ -168,6 +177,7 @@
       "surface": "cylinder",
       "attributes": [
         {
+          "type": "asiAlgo_AttrBlendCandidate",
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
