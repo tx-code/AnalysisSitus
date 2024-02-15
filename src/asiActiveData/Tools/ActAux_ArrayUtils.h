@@ -39,7 +39,7 @@
 // OCCT includes
 #include <TCollection_AsciiString.hxx>
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Auxiliary functions for working with arrays & matrices.
 class ActAux_ArrayUtils

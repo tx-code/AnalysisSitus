@@ -50,7 +50,7 @@ class ActData_Mesh;
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Wrapper for Quantity_Color which allows undefined colors (we need such
 //! for "default color" option in imperative plotter).
@@ -146,7 +146,7 @@ protected:
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for Imperative Viewer. A particular algorithm may benefit
 //! from immediate plotting of its geometric variables in a unified way
@@ -665,7 +665,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Safe entry to IV.
 class ActAPI_PlotterEntry

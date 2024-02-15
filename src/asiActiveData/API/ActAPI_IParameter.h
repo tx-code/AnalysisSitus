@@ -45,18 +45,18 @@
 // Active Data (API) forward declarations
 class ActAPI_INode;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! ID in form of CAF entry, e.g. "0:1:1".
 typedef TCollection_AsciiString ActAPI_ParameterId;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Parameter IDs.
 typedef NCollection_Sequence<ActAPI_ParameterId>   ActAPI_ParameterIdList;
 typedef NCollection_Shared<ActAPI_ParameterIdList> ActAPI_HParameterIdList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Parameter IDs.
 typedef NCollection_IndexedMap<ActAPI_ParameterId> ActAPI_ParameterIdMap;
@@ -66,7 +66,7 @@ typedef NCollection_Shared<ActAPI_ParameterIdMap>  ActAPI_HParameterIdMap;
 // Common enumerations
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Enumeration for all Parameter types available in Active Data.
 //! The proposed "palette" of basic types seems to suit well many CAD/CAM/CAE
@@ -115,7 +115,7 @@ enum ActAPI_ParameterType
                                 //! Other IDs will be Parameter_LASTFREE + ...
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Modification marker for Nodal Parameters. When any Parameter is being
 //! updated, user normally specifies the corresponding modification type in
@@ -131,7 +131,7 @@ enum ActAPI_ModificationType
 // Basic interface for Parameters
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Base interface for Nodal Parameter.
 class ActAPI_IUserParameter : public ActAPI_IDataCursor
@@ -210,19 +210,19 @@ public:
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for map of Parameters.
 typedef NCollection_Map<Handle(ActAPI_IUserParameter), ActAPI_IDataCursor::Hasher> ActAPI_ParameterMap;
 typedef NCollection_Shared<ActAPI_ParameterMap>                                    ActAPI_HParameterMap;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for list of Parameters.
 typedef NCollection_Sequence<Handle(ActAPI_IUserParameter)> ActAPI_ParameterList;
 typedef NCollection_Shared<ActAPI_ParameterList>            ActAPI_HParameterList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for list of Parameter types. We use Integer instead of
 //! actual items from ActAPI_ParameterType enumeration in order to allow
@@ -230,7 +230,7 @@ typedef NCollection_Shared<ActAPI_ParameterList>            ActAPI_HParameterLis
 typedef NCollection_Sequence<Standard_Integer>       ActAPI_ParameterTypeList;
 typedef NCollection_Shared<ActAPI_ParameterTypeList> ActAPI_HParameterTypeList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for sparse collection of Parameters.
 typedef std::map<int, Handle(ActAPI_IUserParameter)>   ActAPI_IndexedParameterMap;
@@ -240,7 +240,7 @@ typedef NCollection_Shared<ActAPI_IndexedParameterMap> ActAPI_HIndexedParameterM
 // Parameter streaming
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Class providing a convenient way for assembling Parameter lists.
 class ActAPI_ParameterStream
@@ -274,7 +274,7 @@ public:
 //! Convenient shortcut.
 typedef ActAPI_ParameterStream ActParamStream;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Class providing a convenient way for assembling Parameter type lists.
 class ActAPI_ParameterTypeStream
@@ -310,7 +310,7 @@ public:
 // Parameter along with owning Node
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Parameter belonging to Data Node.
 struct ActAPI_NodalParameter
@@ -348,7 +348,7 @@ struct ActAPI_NodalParameter
   {}
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for ordered collection of Parameters with bound
 //! information of their parent Data Nodes.
@@ -359,7 +359,7 @@ typedef NCollection_Shared<ActAPI_NodalParameterList> ActAPI_HNodalParameterList
 // Parameter along with owning Node TYPE
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Relative ID of Parameter along with a particular Nodal type. This
 //! information is enough to refer to a given Parameter type in any
@@ -392,14 +392,14 @@ struct ActAPI_ParameterLocator
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for ordered collection of Parameters with bound
 //! information of their parent Data Nodes.
 typedef NCollection_Sequence<ActAPI_ParameterLocator>   ActAPI_ParameterLocatorList;
 typedef NCollection_Shared<ActAPI_ParameterLocatorList> ActAPI_HParameterLocatorList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Class providing a convenient way for assembling Parameter Locator
 //! structures.
@@ -445,7 +445,7 @@ public:
 // Extended Parameter Locator to represent unique Parameter ID
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! This structure represents global ID (GID) of a Parameter composed of
 //! its local ID and ID of the parent Node.
@@ -506,7 +506,7 @@ struct ActAPI_ParameterGID
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for ordered collection of Parameters with bound
 //! information of their parent Data Nodes.

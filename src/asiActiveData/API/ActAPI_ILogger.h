@@ -79,12 +79,12 @@
 #define ActAPI_LogStr_True TCollection_AsciiString("true")
 #define ActAPI_LogStr_False TCollection_AsciiString("false")
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for logging arguments of heterogeneous types.
 typedef NCollection_Sequence<Handle(ActAPI_VariableBase)> ActAPI_LogArguments;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Priority of logged message.
 enum ActAPI_LogMessagePriority
@@ -93,7 +93,7 @@ enum ActAPI_LogMessagePriority
   Priority_High        //!< Important.
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Severity of logged message.
 enum ActAPI_LogMessageSeverity
@@ -104,7 +104,7 @@ enum ActAPI_LogMessageSeverity
   Severity_Error            //!< Error message.
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Generic logging message.
 struct ActAPI_LogMessage
@@ -159,12 +159,12 @@ struct ActAPI_LogMessage
   }
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cut for list of messages in OCCT thread-unsafe form.
 typedef NCollection_Sequence<ActAPI_LogMessage> ActAPI_LogMessageList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Logging tool.
 class ActAPI_ILogger : public Standard_Transient
@@ -236,7 +236,7 @@ protected:
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Convenience tool for message streaming.
 class ActAPI_LogStream

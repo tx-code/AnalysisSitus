@@ -39,7 +39,7 @@
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for algorithms.
 class ActAPI_IAlgorithm : public Standard_Transient

@@ -36,7 +36,7 @@
 // Active Data (API) includes
 #include <ActAPI_IDataCursor.h>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Transaction result.
 class ActAPI_TxRes : public Standard_Transient

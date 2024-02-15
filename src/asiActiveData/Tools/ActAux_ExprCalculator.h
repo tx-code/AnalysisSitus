@@ -45,7 +45,7 @@
 
 DEFINE_STANDARD_HANDLE(ActAux_ExprCalculator, Standard_Transient)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Calculates mathematical expressions passing the list of variables to apply.
 class ActAux_ExprCalculator : public Standard_Transient

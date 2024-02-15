@@ -40,18 +40,18 @@
 #include <OSD_File.hxx>
 #include <TCollection_AsciiString.hxx>
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Function to filter strings.
 typedef Standard_Boolean (*ActAux_StrFilter)(const TCollection_AsciiString& theString);
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Function to compare strings.
 typedef Standard_Boolean (*ActAux_StrComparator)(const TCollection_AsciiString& theString1,
                                                  const TCollection_AsciiString& theString2);
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Auxiliary functionality.
 namespace ActAux_Utils

@@ -46,7 +46,7 @@
 
 DEFINE_STANDARD_HANDLE(ActAux_TimeStamp, Standard_Transient)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Extends time_t value with addendum integer value for uniqueness.
 class ActAux_TimeStamp : public Standard_Transient
@@ -174,7 +174,7 @@ public:
   }
 };
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Auxiliary class generating unique and guaranteed to increase timestamps.
 //! This class operates with standard time_t type not attempting to cast it

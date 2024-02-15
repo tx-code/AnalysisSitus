@@ -42,18 +42,18 @@
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! ID in form of CAF entry, e.g. "0:1:1".
 typedef TCollection_AsciiString ActAPI_NodeId;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Node IDs.
 typedef NCollection_Sequence<ActAPI_NodeId>   ActAPI_NodeIdList;
 typedef NCollection_Shared<ActAPI_NodeIdList> ActAPI_HNodeIdList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Node IDs.
 typedef NCollection_IndexedMap<ActAPI_NodeId> ActAPI_NodeIdMap;
@@ -61,13 +61,13 @@ typedef NCollection_Shared<ActAPI_NodeIdMap>  ActAPI_HNodeIdMap;
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Nodes.
 typedef NCollection_Sequence<Handle(ActAPI_INode)> ActAPI_NodeList;
 typedef NCollection_Shared<ActAPI_NodeList>        ActAPI_HNodeList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for map of Nodes.
 typedef NCollection_Map<Handle(ActAPI_INode), ActAPI_IDataCursor::Hasher> ActAPI_NodeMap;
@@ -75,7 +75,7 @@ typedef NCollection_Shared<ActAPI_NodeMap>                                ActAPI
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Iterator for Nodal Parameters.
 class ActAPI_IParamIterator : public Standard_Transient
@@ -110,7 +110,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Iterator for child Nodes.
 class ActAPI_IChildIterator : public Standard_Transient
@@ -145,7 +145,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for Active Data Nodes. Active Data uses OCCT OCAF component
 //! for persistence mechanism along with widely spread useful services, e.g.

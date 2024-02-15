@@ -48,7 +48,7 @@
 // Shared Integer
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Integer value for chaining into Transaction Data.
 class ActAPI_TxPrimDataInt : public Standard_Transient
@@ -88,7 +88,7 @@ private:
 // Shared Real
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Real value for chaining into Transaction Data.
 class ActAPI_TxPrimDataReal : public Standard_Transient
@@ -128,7 +128,7 @@ private:
 // Shared Boolean
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Boolean value for chaining into Transaction Data.
 class ActAPI_TxPrimDataBool : public Standard_Transient
@@ -168,7 +168,7 @@ private:
 // Shared String
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! ASCII string value for chaining into Transaction Data.
 class ActAPI_TxPrimDataString : public Standard_Transient
@@ -208,7 +208,7 @@ private:
 // Addendum
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Collection of Python variables
 typedef NCollection_Sequence<Handle(Standard_Transient)> ActAPI_TxPrimDataSeq;
@@ -218,7 +218,7 @@ typedef NCollection_Shared<ActAPI_TxPrimDataSeq>         ActAPI_HTxPrimDataSeq;
 // Application-specific Transaction Data
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Container for associating Data Model Transactions with
 //! application-specific data.
@@ -373,7 +373,7 @@ private:
 // Addendum
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for collection of Transaction Data structures.
 typedef NCollection_Sequence<ActAPI_TxData>  ActAPI_TxDataSeq;

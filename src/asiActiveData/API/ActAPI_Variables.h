@@ -52,7 +52,7 @@
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableBase, Standard_Transient)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Base class for Variables.
 class ActAPI_VariableBase : public Standard_Transient
@@ -81,7 +81,7 @@ protected:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableInt, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Integer variable.
 class ActAPI_VariableInt : public ActAPI_VariableBase
@@ -141,7 +141,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableReal, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Real variable.
 class ActAPI_VariableReal : public ActAPI_VariableBase
@@ -201,7 +201,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableRealArray, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Real array variable.
 class ActAPI_VariableRealArray : public ActAPI_VariableBase
@@ -261,7 +261,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableBool, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Bool variable.
 class ActAPI_VariableBool : public ActAPI_VariableBase
@@ -321,7 +321,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableString, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! String variable.
 class ActAPI_VariableString : public ActAPI_VariableBase
@@ -381,7 +381,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(ActAPI_VariableShape, ActAPI_VariableBase)
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Variable of CAD shape type.
 class ActAPI_VariableShape : public ActAPI_VariableBase
@@ -439,7 +439,7 @@ public:
 // Auxiliary
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Collection of variables.
 #if defined ActiveData_USE_TBB
@@ -448,7 +448,7 @@ typedef tbb::concurrent_vector<Handle(ActAPI_VariableBase)> ActAPI_VariableList;
 typedef std::vector<Handle(ActAPI_VariableBase)> ActAPI_VariableList;
 #endif
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shared collection of variables (designed for manipulation by Handle).
 typedef NCollection_Shared<ActAPI_VariableList> ActAPI_HVariableList;

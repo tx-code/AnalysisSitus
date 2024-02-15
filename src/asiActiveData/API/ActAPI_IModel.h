@@ -51,30 +51,30 @@
 // Standard includes
 #include <vector>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 // Active Data (API) forward declarations
 class ActAPI_ITreeFunction;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for map of registered Partitions.
 typedef NCollection_DataMap<Standard_Integer,
                             Handle(ActAPI_IPartition)> PartitionMap;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for map of registered Partitions operated by Handle.
 typedef NCollection_Shared<PartitionMap> HPartitionMap;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for map of registered Tree Functions.
 typedef NCollection_DataMap<Standard_GUID,
                             Handle(ActAPI_ITreeFunction),
                             ActiveData::GuidHasher> TreeFunctionMap;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Type definition for map of registered Tree Functions operated by Handle.
 typedef NCollection_Shared<TreeFunctionMap> HTreeFunctionMap;
@@ -83,7 +83,7 @@ typedef NCollection_Shared<TreeFunctionMap> HTreeFunctionMap;
 // Model
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for ACT Data Models.
 class ActAPI_IModel : public Standard_Transient

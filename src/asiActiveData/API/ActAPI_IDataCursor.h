@@ -45,18 +45,18 @@
 #include <TCollection_AsciiString.hxx>
 #include <TDF_Label.hxx>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! ID in form of CAF entry, e.g. "0:1:1".
 typedef TCollection_AsciiString ActAPI_DataObjectId;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Data Object IDs.
 typedef NCollection_Sequence<ActAPI_DataObjectId>   ActAPI_DataObjectIdList;
 typedef NCollection_Shared<ActAPI_DataObjectIdList> ActAPI_HDataObjectIdList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Data Object IDs.
 typedef NCollection_IndexedMap<ActAPI_DataObjectId> ActAPI_DataObjectIdMap;
@@ -66,7 +66,7 @@ typedef NCollection_Shared<ActAPI_DataObjectIdMap>  ActAPI_HDataObjectIdMap;
 // Data Cursor
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for Data Cursors. Defines common public methods for consulting
 //! the underlying Data Object and its verification against the rules defined
@@ -188,13 +188,13 @@ private:
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Short-cuts for collection of Data Cursors.
 typedef NCollection_Sequence<Handle(ActAPI_IDataCursor)> ActAPI_DataCursorList;
 typedef NCollection_Shared<ActAPI_DataCursorList>        ActAPI_HDataCursorList;
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for map of Data Cursors.
 typedef NCollection_Map<Handle(ActAPI_IDataCursor), ActAPI_IDataCursor::Hasher> ActAPI_DataCursorMap;

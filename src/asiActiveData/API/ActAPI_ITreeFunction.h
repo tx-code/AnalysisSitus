@@ -40,7 +40,7 @@
 #include <Standard_GUID.hxx>
 #include <Standard_Type.hxx>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Tree Function interface.
 class ActAPI_ITreeFunction : public Standard_Transient
@@ -89,7 +89,7 @@ typedef NCollection_Shared<ActAPI_FuncGUIDList> ActAPI_HFuncGUIDList;
 // Tree Function streaming
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Class providing a convenient way for assembling Tree Function GUIDs.
 class ActAPI_FuncGUIDStream

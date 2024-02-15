@@ -39,7 +39,7 @@
 // OCCT includes
 #include <Standard_Type.hxx>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for ACT data Partitions.
 class ActAPI_IPartition : public ActAPI_IDataCursor
@@ -90,7 +90,7 @@ public:
 
 };
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Shortcuts for list of Parameters.
 typedef NCollection_Sequence<Handle(ActAPI_IPartition)> ActAPI_PartitionList;

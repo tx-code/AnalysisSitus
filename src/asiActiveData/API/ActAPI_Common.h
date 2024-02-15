@@ -74,18 +74,10 @@
   ASSERT(expr, Standard_ProgramError::Raise( \
       "*** ERROR: ASSERT in file " __FILE__ ": \n" mess " (" #expr ")" ) )
 
-//-----------------------------------------------------------------------------
-// DOXY group definition
-//-----------------------------------------------------------------------------
-//! \defgroup API API
-//!
-//! ACT API is an entry point to framework. It enumerates its basic entities.
-//-----------------------------------------------------------------------------
-
 typedef TCollection_AsciiString    t_asciiString;
 typedef TCollection_ExtendedString t_extString;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Complex number.
 struct ComplexNumber
@@ -190,90 +182,90 @@ struct ComplexNumber
 
 };
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of complex numbers.
 typedef NCollection_Array1<ComplexNumber> ComplexArray;
 NCOLLECTION_HARRAY1(HComplexArray, ComplexNumber)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for two-dimensional static array of complex numbers.
 typedef NCollection_Array2<ComplexNumber> ComplexMatrix;
 NCOLLECTION_HARRAY2(HComplexMatrix, ComplexNumber)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of OCCT shapes.
 typedef NCollection_Array1<TopoDS_Shape> ShapeArray;
 NCOLLECTION_HARRAY1(HShapeArray, TopoDS_Shape)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of integers.
 typedef TColStd_Array1OfInteger  IntArray;
 typedef TColStd_HArray1OfInteger HIntArray;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for two-dimensional static array of integers.
 typedef TColStd_Array2OfInteger  IntMatrix;
 typedef TColStd_HArray2OfInteger HIntMatrix;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of reals.
 typedef TColStd_Array1OfReal  RealArray;
 typedef TColStd_HArray1OfReal HRealArray;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for two-dimensional static array of reals.
 typedef TColStd_Array2OfReal  RealMatrix;
 typedef TColStd_HArray2OfReal HRealMatrix;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of Booleans.
 typedef TColStd_Array1OfBoolean  BoolArray;
 typedef TColStd_HArray1OfBoolean HBoolArray;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for two-dimensional static array of Booleans.
 typedef TColStd_Array2OfBoolean  BoolMatrix;
 typedef TColStd_HArray2OfBoolean HBoolMatrix;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for one-dimensional static array of strings.
 typedef TColStd_Array1OfExtendedString  StringArray;
 typedef TColStd_HArray1OfExtendedString HStringArray;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for two-dimensional static array of strings.
 typedef NCollection_Array2<TCollection_ExtendedString> StringMatrix;
 NCOLLECTION_HARRAY2(HStringMatrix, TCollection_ExtendedString)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for dynamic ordered direct-access collection of 3D points.
 typedef NCollection_Sequence<gp_XYZ>  PointList;
 typedef NCollection_Shared<PointList> HPointList;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Shortcut for dynamic ordered direct-access collection of ASCII strings.
 typedef NCollection_Sequence<TCollection_AsciiString> StringList;
 typedef NCollection_Shared<StringList>                HStringList;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Global namespace.
 namespace ActiveData
 {
-  //! \ingroup AD_ALGO
+  //! \ingroup AD_DF
   //!
   //! Hasher for GUIDs.
   struct GuidHasher
@@ -300,12 +292,12 @@ namespace ActiveData
   };
 } // ActiveData namespace.
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Mapping between integers.
 typedef NCollection_DataMap<Standard_Integer, Standard_Integer> IntIntMap;
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Mapping between integers and reals.
 typedef NCollection_DataMap<Standard_Integer, Standard_Real> IntRealMap;

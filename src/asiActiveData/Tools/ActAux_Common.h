@@ -45,14 +45,4 @@
 // Macro to silent compiler warnings on unused function arguments
 #define ActAux_NotUsed(x)
 
-//-----------------------------------------------------------------------------
-// DOXY group definition
-//-----------------------------------------------------------------------------
-//! \defgroup AD_ALGO Algorithmic layer
-//!
-//! ACT Algorithmic Layer is a holder of Data Model independent functionality
-//! used by ACT Framework itself or by specific Framework-based applications.
-//! It is simply a collection of atomic algorithms.
-//-----------------------------------------------------------------------------
-
 #endif

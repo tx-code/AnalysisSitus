@@ -50,7 +50,7 @@
 
 DEFINE_STANDARD_HANDLE(ActAux_SpyLog, Standard_Transient)
 
-//! \ingroup AD_ALGO
+//! \ingroup AD_DF
 //!
 //! Journal for logging of usage statistics.
 class ActAux_SpyLog : public Standard_Transient

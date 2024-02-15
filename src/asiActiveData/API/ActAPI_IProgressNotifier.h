@@ -39,7 +39,7 @@
 // OCCT includes
 #include <Standard_Type.hxx>
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Progress status.
 enum ActAPI_ProgressStatus
@@ -55,7 +55,7 @@ enum ActAPI_ProgressStatus
 // Progress Notifier
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Interface for Progress Notifier concept. Progress Notifier provides
 //! messaging mechanism for communications between algorithmic and GUI layers.
@@ -196,7 +196,7 @@ public:
 // Progress Entry
 //-----------------------------------------------------------------------------
 
-//! \ingroup AD_API
+//! \ingroup AD_DF
 //!
 //! Convenient way to work with Progress Notifier. This class is mostly
 //! useful due to its NULL-safe approach to working with the underlying
