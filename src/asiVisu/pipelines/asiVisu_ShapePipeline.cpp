@@ -71,9 +71,6 @@ asiVisu_ShapePipeline::asiVisu_ShapePipeline(bool isScalarMode)
   m_dmFilter->SetDisplayMode(ShapeDisplayMode_Shaded);
 
   // Set line width.
-  this->Actor()->GetProperty()->SetLineWidth(1);
-  this->Actor()->GetProperty()->SetPointSize(8);
-  //
   asiVisu_Utils::ApplyLightingRulesDark( this->Actor() );
 
   // Compose pipeline.

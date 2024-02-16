@@ -53,7 +53,9 @@ asiVisu_IVTopoItemPrs::asiVisu_IVTopoItemPrs(const Handle(ActAPI_INode)& N)
                                         ActParamStream() << N->Parameter(asiData_IVTopoItemNode::PID_Geometry)
                                                          << N->Parameter(asiData_IVTopoItemNode::PID_TessLinDefl)
                                                          << N->Parameter(asiData_IVTopoItemNode::PID_TessAngDefl)
-                                                         << N->Parameter(asiData_IVTopoItemNode::PID_PointSize) );
+                                                         << N->Parameter(asiData_IVTopoItemNode::PID_PointSize)
+                                                         << N->Parameter(asiData_IVTopoItemNode::PID_Opacity)
+                                                         << N->Parameter(asiData_IVTopoItemNode::PID_LineWidth) );
 
   // Main pipeline
   Handle(asiVisu_ShapePipeline) pl = new asiVisu_ShapePipeline(false);
@@ -151,4 +153,16 @@ void asiVisu_IVTopoItemPrs::afterUpdatePipelines() const
     ActAPI_Color color = asiVisu_Utils::IntToColor( N->GetColor() );
     this->Colorize(color);
   }
+
+  /* Set opacity */
+
+  const double opacity = DP->GetOpacity();
+
+  pl->Actor()->GetProperty()->SetOpacity(opacity);
+
+  /* Set line width */
+
+  const double lw = DP->GetLineWidth();
+
+  pl->Actor()->GetProperty()->SetLineWidth(lw);
 }

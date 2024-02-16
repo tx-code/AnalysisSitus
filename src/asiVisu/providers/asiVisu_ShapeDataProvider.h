@@ -71,6 +71,12 @@ public:
   asiVisu_EXPORT virtual double
     GetPointSize() const;
 
+  asiVisu_EXPORT virtual double
+    GetOpacity() const;
+
+  asiVisu_EXPORT virtual double
+    GetLineWidth() const;
+
 public:
 
   asiVisu_EXPORT Handle(asiVisu_ShapeDataProvider)

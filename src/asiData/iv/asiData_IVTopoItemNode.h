@@ -81,6 +81,8 @@ public:
     PID_HasColor,     //!< Indicates whether the Color Parameter is active.
     PID_Color,        //!< Color.
     PID_PointSize,    //!< Point size for vertices.
+    PID_Opacity,      //!< Opacity coefficient from 0 to 1.
+    PID_LineWidth,    //!< Line width.
   //------------------//
     PID_Last = PID_Name + ActData_BaseNode::RESERVED_PARAM_RANGE
   };
@@ -149,6 +151,18 @@ public:
 
   asiData_EXPORT void
     SetPointSize(const double sz);
+
+  asiData_EXPORT double
+    GetOpacity() const;
+
+  asiData_EXPORT void
+    SetOpacity(const double val);
+
+  asiData_EXPORT double
+    GetLineWidth() const;
+
+  asiData_EXPORT void
+    SetLineWidth(const double val);
 
 // Initialization:
 public:

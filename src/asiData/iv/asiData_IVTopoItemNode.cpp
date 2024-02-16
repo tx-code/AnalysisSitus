@@ -52,6 +52,8 @@ asiData_IVTopoItemNode::asiData_IVTopoItemNode() : ActData_BaseNode()
   REGISTER_PARAMETER(Bool,  PID_HasColor);
   REGISTER_PARAMETER(Int,   PID_Color);
   REGISTER_PARAMETER(Real,  PID_PointSize);
+  REGISTER_PARAMETER(Real,  PID_Opacity);
+  REGISTER_PARAMETER(Real,  PID_LineWidth);
 
   // Non-standard Parameters.
   this->registerParameter(PID_BVH, asiData_BVHParameter::Instance(), false);
@@ -81,6 +83,8 @@ void asiData_IVTopoItemNode::Init()
   this->SetColor             ( 150 << 16 | 150 << 8 | 150 );
   this->SetBVH               ( nullptr );
   this->SetPointSize         ( 5 );
+  this->SetOpacity           ( 1.0 );
+  this->SetLineWidth         ( 1.0 );
 
   // Initialize Parameter flags.
   this->InitParameter(PID_Name,        "Name",               "", ParameterFlag_IsVisible, true);
@@ -92,7 +96,9 @@ void asiData_IVTopoItemNode::Init()
   this->InitParameter(PID_DisplayMode, "Display mode",  "IVPrsDisplayMode", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_HasColor,    "Colorized",     "",                 0,                       true);
   this->InitParameter(PID_Color,       "Color",         "PrsCustomColor",   ParameterFlag_IsVisible, true);
-  this->InitParameter(PID_PointSize,   "Point size",    "",                 ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_PointSize,   "Point size",    "PrsPointSize",     ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_Opacity,     "Opacity",       "PrsOpacityCoeff",  ParameterFlag_IsVisible, true);
+  this->InitParameter(PID_LineWidth,   "Line width",    "PrsLineWidth",     ParameterFlag_IsVisible, true);
 }
 
 //-----------------------------------------------------------------------------
@@ -252,4 +258,38 @@ double asiData_IVTopoItemNode::GetPointSize() const
 void asiData_IVTopoItemNode::SetPointSize(const double sz)
 {
   ActParamTool::AsReal( this->Parameter(PID_PointSize) )->SetValue(sz);
+}
+
+//-----------------------------------------------------------------------------
+
+//! \return the stored opacity coefficient.
+double asiData_IVTopoItemNode::GetOpacity() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_Opacity) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Sets the opacity coefficient to store.
+//! \param[in] val the value to set.
+void asiData_IVTopoItemNode::SetOpacity(const double val)
+{
+  ActParamTool::AsReal( this->Parameter(PID_Opacity) )->SetValue(val);
+}
+
+//-----------------------------------------------------------------------------
+
+//! \return the stored line width value.
+double asiData_IVTopoItemNode::GetLineWidth() const
+{
+  return ActParamTool::AsReal( this->Parameter(PID_LineWidth) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+//! Sets the line width value to store.
+//! \param[in] val the value to set.
+void asiData_IVTopoItemNode::SetLineWidth(const double val)
+{
+  ActParamTool::AsReal( this->Parameter(PID_LineWidth) )->SetValue(val);
 }

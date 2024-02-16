@@ -38,6 +38,24 @@
     <description>Edge discretization step in model units.</description>
   </datum>
 
+  <datum id="PrsOpacityCoeff" format="%5.5x" label="Opacity">
+    <domain type="Float" min="0" max="1" default="1"/>
+    <ui widget="SpinBox" widgetParams="step=0.1"/>
+    <description>Opacity coefficient (as in VTK).</description>
+  </datum>
+
+  <datum id="PrsLineWidth" format="%5.5x" label="Line width">
+    <domain type="Float" min="0" max="50" default="1"/>
+    <ui widget="SpinBox" widgetParams="step=0.5"/>
+    <description>Line width (as in VTK).</description>
+  </datum>
+
+  <datum id="PrsPointSize" format="%5.5x" label="Point size">
+    <domain type="Float" min="0" max="50" default="5"/>
+    <ui widget="SpinBox" widgetParams="step=0.5"/>
+    <description>Point size (as in VTK).</description>
+  </datum>
+
   <datum id="Fairing_coeff" format="%5.5x" label="Fairing coeff.">
     <domain type="Float" min="0" max="1e99" default="0.001"/>
     <ui widget="SpinBox" widgetParams="step=0.1"/>

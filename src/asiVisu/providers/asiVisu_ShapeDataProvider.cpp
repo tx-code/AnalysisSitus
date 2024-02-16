@@ -79,7 +79,7 @@ TopoDS_Shape asiVisu_ShapeDataProvider::GetShape() const
 //! \return linear deflection.
 double asiVisu_ShapeDataProvider::GetLinearDeflection() const
 {
-  if ( m_params->Length() != 3 )
+  if ( m_params->Length() < 3 )
     return 0.;
 
   return ActParamTool::AsReal( m_params->Value(2) )->GetValue();
@@ -90,7 +90,7 @@ double asiVisu_ShapeDataProvider::GetLinearDeflection() const
 //! \return angular deflection.
 double asiVisu_ShapeDataProvider::GetAngularDeflection() const
 {
-  if ( m_params->Length() != 3 )
+  if ( m_params->Length() < 3 )
     return 0.;
 
   return ActParamTool::AsReal( m_params->Value(3) )->GetValue();
@@ -100,11 +100,32 @@ double asiVisu_ShapeDataProvider::GetAngularDeflection() const
 
 double asiVisu_ShapeDataProvider::GetPointSize() const
 {
-  if ( m_params->Length() != 4 )
+  if ( m_params->Length() < 4 )
     return 5.;
 
   return ActParamTool::AsReal( m_params->Value(4) )->GetValue();
 }
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_ShapeDataProvider::GetOpacity() const
+{
+  if ( m_params->Length() < 5 )
+    return 1.;
+
+  return ActParamTool::AsReal( m_params->Value(5) )->GetValue();
+}
+
+//-----------------------------------------------------------------------------
+
+double asiVisu_ShapeDataProvider::GetLineWidth() const
+{
+  if ( m_params->Length() < 6 )
+    return 1.;
+
+  return ActParamTool::AsReal( m_params->Value(6) )->GetValue();
+}
+
 
 //-----------------------------------------------------------------------------
 
