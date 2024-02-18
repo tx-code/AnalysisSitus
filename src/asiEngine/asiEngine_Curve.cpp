@@ -69,23 +69,25 @@ Handle(asiData_CurvatureCombsNode)
 
   // Initialize
   Handle(asiData_CurvatureCombsNode) combs_n = Handle(asiData_CurvatureCombsNode)::DownCast(node);
-  combs_n->Init();
-  combs_n->SetUserFlags(NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible);
-  combs_n->SetName("Curvature combs");
-  combs_n->SetScaleFactor(scaleFactor);
-  combs_n->SetNbOfPoints(numberOfPoints);
-  combs_n->SetAmplificationFactor(amplFactor);
+  //
+  combs_n->Init                   ( );
+  combs_n->SetUserFlags           ( NodeFlag_IsPresentedInPartView | NodeFlag_IsPresentationVisible );
+  combs_n->SetName                ( "Curvature combs" );
+  combs_n->SetScaleFactor         ( scaleFactor );
+  combs_n->SetNbOfPoints          ( numberOfPoints );
+  combs_n->SetAmplificationFactor ( amplFactor );
+  combs_n->SetEdgeId              ( partNode->GetCurveRepresentation()->GetSelectedEdge() );
   //
   combs_n->ConnectReference(asiData_CurvatureCombsNode::PID_RefCurve, parent);
 
   // Attach tree function.
   node->ConnectTreeFunction(asiData_CurvatureCombsNode::PID_CurvatureCombsFunc,
                             asiEngine_CurvatureCombsFunc::GUID(),
-                            ActParamStream() << node->Parameter(asiData_CurvatureCombsNode::PID_NumPoints)
+                            ActParamStream() << node->Parameter(asiData_CurvatureCombsNode::PID_EdgeId)
+                                             << node->Parameter(asiData_CurvatureCombsNode::PID_NumPoints)
                                              << node->Parameter(asiData_CurvatureCombsNode::PID_ScaleFactor)
                                              << node->Parameter(asiData_CurvatureCombsNode::PID_AmplificationFactor)
-                                             << partNode->Parameter(asiData_PartNode::PID_AAG)
-                                             << parent->Parameter(asiData_CurveNode::PID_SelectedEdge),
+                                             << partNode->Parameter(asiData_PartNode::PID_AAG),
                             ActParamStream() << node->Parameter(asiData_CurvatureCombsNode::PID_Points)
                                              << node->Parameter(asiData_CurvatureCombsNode::PID_PointsStatuses)
                                              << node->Parameter(asiData_CurvatureCombsNode::PID_Parameters)
@@ -122,10 +124,11 @@ Handle(asiData_CurvatureCombsNode)
     Handle(asiData_CurvatureCombsNode)
       combs_n = Handle(asiData_CurvatureCombsNode)::DownCast(node);
 
-    // Update
-    combs_n->SetScaleFactor(scaleFactor);
-    combs_n->SetNbOfPoints(numberOfPoints);
-    combs_n->SetAmplificationFactor(amplFactor);
+    // Update.
+    combs_n->SetScaleFactor         ( scaleFactor );
+    combs_n->SetNbOfPoints          ( numberOfPoints );
+    combs_n->SetAmplificationFactor ( amplFactor );
+    combs_n->SetEdgeId              ( partNode->GetCurveRepresentation()->GetSelectedEdge() );
   }
 
   return Handle(asiData_CurvatureCombsNode)::DownCast(node);

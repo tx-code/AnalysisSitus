@@ -51,22 +51,29 @@ int asiEngine_CurvatureCombsFunc::execute(const Handle(ActAPI_HParameterList)& i
 {
   ActAPI_ProgressEntry progress = this->GetProgressNotifier();
 
-  Handle(ActData_IntParameter)     numPtsParam       = Handle(ActData_IntParameter)::DownCast(inputs->Value(1));
-  //Handle(ActData_RealParameter)    scaleFactorParam  = Handle(ActData_RealParameter)::DownCast(inputs->Value(2));
-  Handle(ActData_RealParameter)    amplFactorParam   = Handle(ActData_RealParameter)::DownCast(inputs->Value(3));
-  Handle(ActData_UserExtParameter) aagParam         = Handle(ActData_UserExtParameter)::DownCast(inputs->Value(4));
-  Handle(ActData_IntParameter)     selectedEdgeParam = Handle(ActData_IntParameter)::DownCast(inputs->Value(5));
-  if ( numPtsParam.IsNull()     || //scaleFactorParam.IsNull() ||
+  Handle(ActData_IntParameter)     edgeIdParam       = ActParamTool::AsInt  ( inputs->Value(1) );
+  Handle(ActData_IntParameter)     numPtsParam       = ActParamTool::AsInt  ( inputs->Value(2) );
+  Handle(ActData_RealParameter)    scaleFactorParam  = ActParamTool::AsReal ( inputs->Value(3) );
+  Handle(ActData_RealParameter)    amplFactorParam   = ActParamTool::AsReal ( inputs->Value(4) );
+  Handle(ActData_UserExtParameter) aagParam          = Handle(ActData_UserExtParameter)::DownCast( inputs->Value(5) );
+
+  if ( numPtsParam.IsNull()     || scaleFactorParam.IsNull() ||
        amplFactorParam.IsNull() || aagParam.IsNull()         ||
-       selectedEdgeParam.IsNull() )
+       edgeIdParam.IsNull() )
   {
     return 1;
   }
 
-  Handle(ActAPI_INode) ownerNode = aagParam->GetNode();
-  Handle(asiAlgo_AAG) aag = Handle(asiData_AAGParameter)::DownCast(ownerNode->Parameter(aagParam->GetParamId()))->GetAAG();
+  const int selectedEdgeId = edgeIdParam->GetValue();
+  //
+  if ( !selectedEdgeId )
+    return 1;
+
+  Handle(ActAPI_INode)              ownerNode = aagParam->GetNode();
+  Handle(asiAlgo_AAG)               aag       = Handle(asiData_AAGParameter)::DownCast(ownerNode->Parameter(aagParam->GetParamId()))->GetAAG();
   const TopTools_IndexedMapOfShape& subShapes = aag->RequestMapOfSubShapes();
-  const TopoDS_Shape& edgeShape = subShapes(selectedEdgeParam->GetValue());
+  const TopoDS_Shape&               edgeShape = subShapes(selectedEdgeId);
+
   if ( edgeShape.ShapeType() != TopAbs_EDGE )
   {
     progress.SendLogMessage(LogErr(Normal) << "Unexpected topological type of the selected edge.");
@@ -133,11 +140,11 @@ int asiEngine_CurvatureCombsFunc::execute(const Handle(ActAPI_HParameterList)& i
 ActAPI_ParameterTypeStream
   asiEngine_CurvatureCombsFunc::inputSignature() const
 {
-  return ActAPI_ParameterTypeStream() << Parameter_Int  // Number of points.
+  return ActAPI_ParameterTypeStream() << Parameter_Int  // Edge ID.
+                                      << Parameter_Int  // Number of points.
                                       << Parameter_Real // Scale factor.
                                       << Parameter_Real // Amplification factor.
                                       << Parameter_AAG  // AAG.
-                                      << Parameter_Int  // Selected edge.
 
   ;
 }

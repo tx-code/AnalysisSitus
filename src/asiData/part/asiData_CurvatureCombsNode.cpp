@@ -41,6 +41,7 @@
 asiData_CurvatureCombsNode::asiData_CurvatureCombsNode() : ActData_BaseNode()
 {
   REGISTER_PARAMETER(Name,         PID_Name);
+  REGISTER_PARAMETER(Int,          PID_EdgeId);
   REGISTER_PARAMETER(RealArray,    PID_Points);
   REGISTER_PARAMETER(Int,          PID_NumPoints);
   REGISTER_PARAMETER(BoolArray,    PID_PointsStatuses);
@@ -70,6 +71,7 @@ void asiData_CurvatureCombsNode::Init()
 {
   // Initialize Parameters
   this->InitParameter(PID_Name,                "Name",                              "", 0,                       false);
+  this->InitParameter(PID_EdgeId,              "Edge GID",                          "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_Points,              "Discretization points",             "", 0,                       false);
   this->InitParameter(PID_NumPoints,           "Number of discretization points",   "", ParameterFlag_IsVisible, true);
   this->InitParameter(PID_PointsStatuses,      "Statuses of discretization points", "", 0,                       false);
@@ -88,7 +90,8 @@ void asiData_CurvatureCombsNode::Init()
 
   ActParamTool::AsInt( this->Parameter(PID_NumPoints) )->SetValue(0);
 
-  // Set default values
+  // Set default values.
+  this->SetEdgeId(0);
   this->SetScaleFactor(1.0);
   this->SetAmplificationFactor(1.0);
 }
@@ -117,6 +120,16 @@ void asiData_CurvatureCombsNode::SetName(const TCollection_ExtendedString& name)
 // Handy accessors
 //-----------------------------------------------------------------------------
 
+void asiData_CurvatureCombsNode::SetEdgeId(const int edgeId)
+{
+  ActParamTool::AsInt( this->Parameter(PID_EdgeId) )->SetValue(edgeId);
+}
+
+int asiData_CurvatureCombsNode::GetEdgeId() const
+{
+  return ActParamTool::AsInt( this->Parameter(PID_EdgeId) )->GetValue();
+}
+
 void asiData_CurvatureCombsNode::SetPoints(const std::vector<gp_Pnt>& points)
 {
   // Prepare the array of coordinates
@@ -135,7 +148,6 @@ void asiData_CurvatureCombsNode::SetPoints(const std::vector<gp_Pnt>& points)
   {
     ActParamTool::AsInt( this->Parameter(PID_NumPoints) )->SetValue(0);
   }
-
 }
 
 //-----------------------------------------------------------------------------

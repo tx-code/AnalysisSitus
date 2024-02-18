@@ -990,7 +990,7 @@ void asiUI_ControlsAnalysis::onFindConvexOnly()
 void asiUI_ControlsAnalysis::onEdgeCurvature()
 {
   /* ================
-   *  Prepare inputs
+   *  Prepare inputs.
    * ================ */
 
   // Get numerical values.
@@ -1015,8 +1015,18 @@ void asiUI_ControlsAnalysis::onEdgeCurvature()
     m_notifier.SendLogMessage(LogErr(Normal) << "Curve Node is null or ill-defined.");
     return;
   }
+
+  // Check if there is any edge selected.
+  const int selEdge = curveNode->GetSelectedEdge();
+  //
+  if ( !selEdge )
+  {
+    m_notifier.SendLogMessage(LogErr(Normal) << "Please, select any edge to proceed with this function.");
+    return;
+  }
+
   /* ==========================
-   *  Evaluate curvature combs
+   *  Evaluate curvature combs.
    * ========================== */
 
   // Create curvature combs.

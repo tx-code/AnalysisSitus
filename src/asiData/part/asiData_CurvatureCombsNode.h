@@ -55,6 +55,7 @@ public:
   enum ParamId
   {
     PID_Name,                //!< Name of the Node.
+    PID_EdgeId,              //!< ID of the edge.
     PID_Points,              //!< Discretization points.
     PID_NumPoints,           //!< Number of discretization points.
     PID_PointsStatuses,      //!< Statuses of the discretization points.
@@ -90,6 +91,12 @@ public:
 
 // Handy accessors to the stored data:
 public:
+
+  asiData_EXPORT void
+    SetEdgeId(const int edgeId);
+
+  asiData_EXPORT int
+    GetEdgeId() const;
 
   asiData_EXPORT void
     SetPoints(const std::vector<gp_Pnt>& points);
