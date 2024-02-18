@@ -1775,6 +1775,8 @@ int ASMXDE_Unload(const Handle(asiTcl_Interp)& interp,
     // Remove unacceptable characters.
     partName.RemoveAll( '<' );
     partName.RemoveAll( '>' );
+    partName.RemoveAll( '/' );
+    partName.RemoveAll( '\\' );
 
     // Prepare a filename.
     std::string filename = asiAlgo_Utils::Str::Slashed( path.ToCString() );
