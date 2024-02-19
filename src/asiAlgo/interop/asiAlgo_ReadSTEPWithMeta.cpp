@@ -38,6 +38,7 @@
 #include <STEPControl_Controller.hxx>
 #include <STEPConstruct.hxx>
 #include <STEPConstruct_Styles.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepRepr_NextAssemblyUsageOccurrence.hxx>
 #include <StepRepr_ProductDefinitionShape.hxx>
 #include <StepRepr_RepresentedDefinition.hxx>
@@ -52,6 +53,11 @@
 #include <TransferBRep.hxx>
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
+
+#undef ENTITY_DEBUG
+#if defined ENTITY_DEBUG
+  #pragma message("===== warning: ENTITY_DEBUG is enabled")
+#endif
 
 typedef NCollection_DataMap<TopoDS_Shape, Handle(StepBasic_ProductDefinition), TopTools_ShapeMapHasher> DataMapOfShapePD;
 
@@ -103,13 +109,46 @@ IFSelect_ReturnStatus asiAlgo_ReadSTEPWithMeta::ReadFile(const char* filename)
 
   if ( status == IFSelect_RetDone )
   {
+    // Get STEP model.
+    Handle(StepData_StepModel) stepModel = m_reader.StepModel();
+    Interface_EntityIterator entIt = stepModel->Entities();
+  
+    // Print number of entities.
+    m_progress.SendLogMessage(LogInfo(Normal) << "Read %1 entities from STEP file." << entIt.NbEntities() );
+ 
+#if defined ENTITY_DEBUG
+    // Iterate all entities.
+    NCollection_DataMap<Standard_CString, int> entSummary;
+    //
+    for ( ; entIt.More(); entIt.Next() )
+    {
+      const Handle(Standard_Transient)& ent     = entIt.Value();
+      const Handle(Standard_Type)&      entType = ent->DynamicType();
+
+      int* pNum = entSummary.ChangeSeek( entType->Name() );
+      //
+      if ( !pNum )
+        entSummary.Bind( entType->Name(), 1 );
+      else
+        pNum++;
+    }
+    //
+    for ( NCollection_DataMap<Standard_CString, int>::Iterator it(entSummary); it.More(); it.Next() )
+    {
+      m_progress.SendLogMessage( LogInfo(Normal) << "%1 : %2" << it.Key() << it.Value() );
+    }
+#endif
+
     // Get units used in CAD file.
     TColStd_SequenceOfAsciiString lengthNames, angleNames, solidAngleNames;
     m_reader.FileUnits(lengthNames, angleNames, solidAngleNames);
     //
-    m_unitString   = lengthNames.First();
-    m_fLengthScale = lengthNames.IsEmpty() ? 1.0
-                                           : fromSiName(m_unitString);
+    if ( !lengthNames.IsEmpty() )
+    {
+      m_unitString   = lengthNames.First();
+      m_fLengthScale = lengthNames.IsEmpty() ? 1.0
+                                             : fromSiName(m_unitString);
+    }
   }
 
   return status;
