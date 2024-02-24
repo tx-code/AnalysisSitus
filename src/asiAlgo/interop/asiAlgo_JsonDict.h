@@ -74,6 +74,7 @@
 #define asiPropName_Radius                                "radius"
 #define asiPropName_Angle                                 "angle"
 #define asiPropName_Segments                              "segments"
+#define asiPropName_FaceId                                "faceId"
 #define asiPropName_FaceIds                               "faceIds"
 #define asiPropName_Hmin                                  "hmin"
 #define asiPropName_Hmax                                  "hmax"

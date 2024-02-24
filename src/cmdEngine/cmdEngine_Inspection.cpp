@@ -1783,6 +1783,118 @@ int ENGINE_EvalSurf(const Handle(asiTcl_Interp)& interp,
 
 //-----------------------------------------------------------------------------
 
+int ENGINE_EvalIsoU(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc != 3 && argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Find Surface Node by name.
+  Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[1]);
+  //
+  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a surface."
+                                                        << argv[1]);
+    return TCL_OK;
+  }
+  //
+  Handle(asiData_IVSurfaceNode)
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
+
+  // Get surface.
+  Handle(Geom_Surface) occtSurface = surfNode->GetSurface();
+  //
+  if ( occtSurface.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The surface in question is null.");
+    return TCL_OK;
+  }
+
+  // Get parameter values.
+  const double isoParam = atof(argv[2]);
+
+  // Get the optional parameter on curve.
+  double paramOnCurve = 0;
+  const bool hasParamOnCurve = interp->GetKeyValue(argc, argv, "v", paramOnCurve);
+
+  // Extract isoparametric curve.
+  Handle(Geom_Curve) iso = occtSurface->UIso(isoParam);
+  //
+  interp->GetPlotter().REDRAW_CURVE("uiso", iso, Color_Red);
+
+  // Evaluate curve at the given parameter value.
+  if ( hasParamOnCurve )
+  {
+    gp_Pnt P = iso->Value(paramOnCurve);
+    //
+    interp->GetPlotter().REDRAW_POINT("P", P, Color_Green);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
+int ENGINE_EvalIsoV(const Handle(asiTcl_Interp)& interp,
+                    int                          argc,
+                    const char**                 argv)
+{
+  if ( argc != 3 && argc != 5 )
+  {
+    return interp->ErrorOnWrongArgs(argv[0]);
+  }
+
+  // Find Surface Node by name.
+  Handle(ActAPI_INode) node = cmdEngine::model->FindNodeByName(argv[1]);
+  //
+  if ( node.IsNull() || !node->IsKind( STANDARD_TYPE(asiData_IVSurfaceNode) ) )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "Node '%1' is not a surface."
+                                                        << argv[1]);
+    return TCL_OK;
+  }
+  //
+  Handle(asiData_IVSurfaceNode)
+    surfNode = Handle(asiData_IVSurfaceNode)::DownCast(node);
+
+  // Get surface.
+  Handle(Geom_Surface) occtSurface = surfNode->GetSurface();
+  //
+  if ( occtSurface.IsNull() )
+  {
+    interp->GetProgress().SendLogMessage(LogErr(Normal) << "The surface in question is null.");
+    return TCL_OK;
+  }
+
+  // Get parameter values.
+  const double isoParam = atof(argv[2]);
+
+  // Get the optional parameter on curve.
+  double paramOnCurve = 0;
+  const bool hasParamOnCurve = interp->GetKeyValue(argc, argv, "u", paramOnCurve);
+
+  // Extract isoparametric curve.
+  Handle(Geom_Curve) iso = occtSurface->VIso(isoParam);
+  //
+  interp->GetPlotter().REDRAW_CURVE("viso", iso, Color_Green);
+
+  // Evaluate curve at the given parameter value.
+  if ( hasParamOnCurve )
+  {
+    gp_Pnt P = iso->Value(paramOnCurve);
+    //
+    interp->GetPlotter().REDRAW_POINT("P", P, Color_Red);
+  }
+
+  return TCL_OK;
+}
+
+//-----------------------------------------------------------------------------
+
 int ENGINE_CheckToler(const Handle(asiTcl_Interp)& interp,
                       int                          argc,
                       const char**                 argv)
@@ -5006,6 +5118,24 @@ void cmdEngine::Commands_Inspection(const Handle(asiTcl_Interp)&      interp,
     "\t to evaluate (0 for value evaluation).",
     //
     __FILE__, group, ENGINE_EvalSurf);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("eval-iso-u",
+    //
+    "eval-iso-u <surfName> <u> [-v <v>]\n"
+    "\t Evaluates an isoparametric curve `Cu(t)` on the surface <surfName>.\n"
+    "\t The optional parameter <v> can be passed to evaluate `Cu(v)`.",
+    //
+    __FILE__, group, ENGINE_EvalIsoU);
+
+  //-------------------------------------------------------------------------//
+  interp->AddCommand("eval-iso-v",
+    //
+    "eval-iso-v <surfName> <v> [-u <u>]\n"
+    "\t Evaluates an isoparametric curve `Cv(t)` on the surface <surfName>.\n"
+    "\t The optional parameter <u> can be passed to evaluate `Cv(u)`.",
+    //
+    __FILE__, group, ENGINE_EvalIsoV);
 
   //-------------------------------------------------------------------------//
   interp->AddCommand("check-toler",
