@@ -750,6 +750,12 @@ public:
   asiAlgo_EXPORT void
     RemoveNodeAttributes();
 
+  //! Cleans up all the attributes assigned with the AAG nodes except for
+  //! the ones having the GUIDs from the passed `keep` collection.
+  //! \param[in] keep the attribute types to keep alive on removal.
+  asiAlgo_EXPORT void
+    RemoveNodeAttributes(const NCollection_Map<Standard_GUID, Standard_GUID>& keep);
+
   //! Sets the entire collection of nodal attributes.
   //! \param[in] attrs attributes to set.
   asiAlgo_EXPORT void

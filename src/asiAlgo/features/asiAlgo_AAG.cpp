@@ -850,6 +850,43 @@ void asiAlgo_AAG::RemoveNodeAttributes()
 
 //-----------------------------------------------------------------------------
 
+void asiAlgo_AAG::RemoveNodeAttributes(const NCollection_Map<Standard_GUID, Standard_GUID>& keep)
+{
+  for ( t_node_attributes::Iterator it(m_nodeAttributes); it.More(); it.Next() )
+  {
+    const t_topoId    fid   = it.Key();
+    const t_attr_set& attrs = it.Value();
+
+    // Collect the attributes to remove. We cannot unbind attributes right
+    // in the following loop as such modification would mess up the
+    // iterator (crashes on Linux while pretends to be Ok on Windows).
+    std::vector<Standard_GUID> toRemove;
+    //
+    for ( asiAlgo_AAG::t_attr_set::Iterator ait(attrs); ait.More(); ait.Next() )
+    {
+      const Handle(asiAlgo_FeatureAttr)& A = ait.GetAttr();
+      //
+      if ( A.IsNull() )
+        continue;
+
+      const Standard_GUID& nextGuid = ait.GetGUID();
+      //
+      if ( !keep.Contains(nextGuid) )
+      {
+        toRemove.push_back(nextGuid);
+      }
+    }
+
+    // Remove the attributes having the GUIDs marked for removal.
+    for ( const auto& guid : toRemove )
+    {
+      this->RemoveNodeAttribute(fid, guid);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 void asiAlgo_AAG::SetNodeAttributes(const t_node_attributes& attrs)
 {
   m_nodeAttributes = attrs;
