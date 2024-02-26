@@ -123,13 +123,15 @@ protected:
     std::string ws; // whitespace.
     for ( int k = 0; k < numSpaces; ++k ) ws += " ";
 
-    out << ",\n" << ws.c_str() << "\"kind\": "                << "\"" << kindToString(this->Kind)              << "\"";
-    out << ",\n" << ws.c_str() << "\"vexity\": "              << "\"" << vexitiesToString(this->Vexities)      << "\"";
-    out << ",\n" << ws.c_str() << "\"confirmed\": "           << "\"" << this->Confirmed                       << "\"";
-    out << ",\n" << ws.c_str() << "\"numSmoothEdges\": "      << "\"" << this->SmoothEdgeIndices.Extent()      << "\"";
-    out << ",\n" << ws.c_str() << "\"numSpringEdges\": "      << "\"" << this->SpringEdgeIndices.Extent()      << "\"";
-    out << ",\n" << ws.c_str() << "\"numCrossEdges\": "       << "\"" << this->CrossEdgeIndices.Extent()       << "\"";
-    out << ",\n" << ws.c_str() << "\"numTerminatingEdges\": " << "\"" << this->TerminatingEdgeIndices.Extent() << "\"";
+    out << ",\n" << ws.c_str() << "\"kind\": "                << asiAlgo_Utils::Str::Quoted( kindToString(this->Kind) );
+    out << ",\n" << ws.c_str() << "\"vexity\": "              << vexitiesToString(this->Vexities);
+    out << ",\n" << ws.c_str() << "\"confirmed\": "           << this->Confirmed ? "true" : "false";
+    out << ",\n" << ws.c_str() << "\"numSmoothEdges\": "      << this->SmoothEdgeIndices.Extent();
+    out << ",\n" << ws.c_str() << "\"numSpringEdges\": "      << this->SpringEdgeIndices.Extent();
+    out << ",\n" << ws.c_str() << "\"numCrossEdges\": "       << this->CrossEdgeIndices.Extent();
+    out << ",\n" << ws.c_str() << "\"numTerminatingEdges\": " << this->TerminatingEdgeIndices.Extent();
+    out << ",\n" << ws.c_str() << "\"length\": "              << this->Length;
+    out << ",\n" << ws.c_str() << "\"radii\": "               << asiAlgo_Utils::Json::FromIterable< std::set<double> >(this->Radii);
   }
 
   //! Converts blend kind enum to string.
@@ -150,30 +152,46 @@ protected:
   }
 
   //! Converts blend vexity enum to string.
+  //! \param[in] vx blend vexity in question.
+  //! \return string representation of a blend vexity.
+  static std::string vexityToString(const asiAlgo_BlendVexity vx)
+  {
+    switch ( vx )
+    {
+      case BlendVexity_Uncertain: return "uncertain";
+      case BlendVexity_Concave:   return "concave";
+      case BlendVexity_Convex:    return "convex";
+      default: break;
+    }
+
+    return "undefined";
+  }
+
+  //! Converts the passed blend vexities to string.
   //! \param[in] vexities blend vexities in question.
   //! \return string representation of a blend vexity.
   static std::string
     vexitiesToString(const std::vector<asiAlgo_BlendVexity>& vexities)
   {
-    std::string res;
-    for ( size_t k = 0; k < vexities.size(); ++k )
+    std::stringstream out;
+
+    out << "[";
+    if ( !vexities.empty() )
     {
-      switch ( vexities[k] )
+      auto it = vexities.begin();
+      //
+      out << asiAlgo_Utils::Str::Quoted( vexityToString(*it) );
+      //
+      it++;
+
+      for ( auto end = vexities.end(); it != end; ++it )
       {
-        case BlendVexity_Uncertain: res += "uncertain"; break;
-        case BlendVexity_Concave:   res += "concave"; break;
-        case BlendVexity_Convex:    res += "convex"; break;
-        default: break;
+        out << ", " << asiAlgo_Utils::Str::Quoted( vexityToString(*it) );
       }
-
-      if ( k < vexities.size() - 1 )
-        res += ", ";
     }
+    out << "]";
 
-    if ( vexities.empty() )
-      res = "empty";
-
-    return res;
+    return out.str();
   }
 
 public:
