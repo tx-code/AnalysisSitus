@@ -8,12 +8,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "vertex",
-          "vexity": "convex, convex, convex",
-          "confirmed": "1",
-          "numSmoothEdges": "0",
-          "numSpringEdges": "0",
-          "numCrossEdges": "0",
-          "numTerminatingEdges": "0"
+          "vexity": ["convex", "convex", "convex"],
+          "confirmed": true,
+          "numSmoothEdges": 0,
+          "numSpringEdges": 0,
+          "numCrossEdges": 0,
+          "numTerminatingEdges": 0,
+          "length": 11.969468010177138,
+          "radii": [5.08]
         }
       ]
     },
@@ -25,12 +27,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "3",
-          "numSpringEdges": "2",
-          "numCrossEdges": "1",
-          "numTerminatingEdges": "1"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 3,
+          "numSpringEdges": 2,
+          "numCrossEdges": 1,
+          "numTerminatingEdges": 1,
+          "length": 15.24,
+          "radii": [5.08]
         }
       ]
     },
@@ -42,12 +46,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "3",
-          "numSpringEdges": "2",
-          "numCrossEdges": "2",
-          "numTerminatingEdges": "0"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 3,
+          "numSpringEdges": 2,
+          "numCrossEdges": 2,
+          "numTerminatingEdges": 0,
+          "length": 42.862499910593101,
+          "radii": [5.08]
         }
       ]
     },
@@ -83,12 +89,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "3",
-          "numSpringEdges": "2",
-          "numCrossEdges": "1",
-          "numTerminatingEdges": "1"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 3,
+          "numSpringEdges": 2,
+          "numCrossEdges": 1,
+          "numTerminatingEdges": 1,
+          "length": 80.5872748923302,
+          "radii": [10.16]
         }
       ]
     },
@@ -181,12 +189,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "2",
-          "numSpringEdges": "2",
-          "numCrossEdges": "1",
-          "numTerminatingEdges": "1"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 2,
+          "numSpringEdges": 2,
+          "numCrossEdges": 1,
+          "numTerminatingEdges": 1,
+          "length": 83.127274892330192,
+          "radii": [5.08]
         }
       ]
     }

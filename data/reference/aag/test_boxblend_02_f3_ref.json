@@ -21,12 +21,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "2",
-          "numSpringEdges": "2",
-          "numCrossEdges": "1",
-          "numTerminatingEdges": "1"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 2,
+          "numSpringEdges": 2,
+          "numCrossEdges": 1,
+          "numTerminatingEdges": 1,
+          "length": 0.90000000000000002,
+          "radii": [0.2]
         }
       ]
     },
@@ -64,12 +66,14 @@
           "guid": "7b7c2dd0-5bd6-429e-9b71-5f935bf1e815",
           "name": "blend candidate",
           "kind": "ordinary",
-          "vexity": "convex",
-          "confirmed": "1",
-          "numSmoothEdges": "2",
-          "numSpringEdges": "2",
-          "numCrossEdges": "1",
-          "numTerminatingEdges": "1"
+          "vexity": ["convex"],
+          "confirmed": true,
+          "numSmoothEdges": 2,
+          "numSpringEdges": 2,
+          "numCrossEdges": 1,
+          "numTerminatingEdges": 1,
+          "length": 0.90000000000000002,
+          "radii": [0.2]
         }
       ]
     }

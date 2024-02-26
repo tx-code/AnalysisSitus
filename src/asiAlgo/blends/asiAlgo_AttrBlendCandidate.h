@@ -125,7 +125,7 @@ protected:
 
     out << ",\n" << ws.c_str() << "\"kind\": "                << asiAlgo_Utils::Str::Quoted( kindToString(this->Kind) );
     out << ",\n" << ws.c_str() << "\"vexity\": "              << vexitiesToString(this->Vexities);
-    out << ",\n" << ws.c_str() << "\"confirmed\": "           << this->Confirmed ? "true" : "false";
+    out << ",\n" << ws.c_str() << "\"confirmed\": "           << (this->Confirmed ? "true" : "false");
     out << ",\n" << ws.c_str() << "\"numSmoothEdges\": "      << this->SmoothEdgeIndices.Extent();
     out << ",\n" << ws.c_str() << "\"numSpringEdges\": "      << this->SpringEdgeIndices.Extent();
     out << ",\n" << ws.c_str() << "\"numCrossEdges\": "       << this->CrossEdgeIndices.Extent();
