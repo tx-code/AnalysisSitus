@@ -42,6 +42,7 @@
 #pragma warning(pop)
 
 #define FileLoadPrefix "file:///"
+#define SpaceSpecialCharacter "%20"
 
 #ifdef _WIN32
   #define FileLoadPrefixSubst ""
@@ -70,6 +71,9 @@ protected:
   void dropEvent(QDropEvent *event)
   {
     QString text = event->mimeData()->text();
+
+    // On Linux, %20 are inserted instead of spaces.
+    text.replace(SpaceSpecialCharacter, " ");
 
     // Decorate the dragged in filenames to ease loading.
     if ( text.contains(FileLoadPrefix) )
