@@ -75,6 +75,10 @@ protected:
     // On Linux, %20 are inserted instead of spaces.
     text.replace(SpaceSpecialCharacter, " ");
 
+    // Get rid of EOL.
+    text.replace("\r", "");
+    text.replace("\n", "");
+
     // Decorate the dragged in filenames to ease loading.
     if ( text.contains(FileLoadPrefix) )
     {
