@@ -465,7 +465,7 @@ void asiVisu_Utils::AdjustTrihedron(vtkRenderer*       theRenderer,
   static double SIZE_FACTOR  = 1.5;
   static double EPS_SIZE     = 5.0e-3;
 
-  // Calculate bounds of presented Actors excluding those ones which comprise
+  // Calculate bounds of presented Actors excluding those which comprise
   // the trihedron itself
   double bounds[6];
   ComputeVisiblePropBounds(theRenderer, bounds, thePropsToSkip);
@@ -894,7 +894,7 @@ vtkSmartPointer<vtkLookupTable> asiVisu_Utils::InitAxesLookupTable()
 
   lookup->SetTableValue(VisuAxis_X, 1.0, 0.0, 0.0);
   lookup->SetTableValue(VisuAxis_Y, 0.0, 1.0, 0.0);
-  lookup->SetTableValue(VisuAxis_Z, 0.0, 0.0, 1.0);
+  lookup->SetTableValue(VisuAxis_Z, ZAXIS_R, ZAXIS_G, ZAXIS_B);
 
   return lookup;
 }

@@ -55,6 +55,7 @@
 #pragma warning(push, 0)
 #include <vtkAssembly.h>
 #include <vtkCamera.h>
+#include <vtkProperty.h>
 #include <vtkRenderWindow.h>
 #pragma warning(pop)
 
@@ -464,6 +465,9 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
    * ======================== */
 
   vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+  axes->GetZAxisShaftProperty()->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
+  axes->GetZAxisTipProperty()->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
+
   vtkSmartPointer<vtkAssembly>  assm = vtkSmartPointer<vtkAssembly>::New();
   assm->AddPart(axes);
   //

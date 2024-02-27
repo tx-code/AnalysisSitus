@@ -68,6 +68,10 @@
 #define INF_LIMIT 100
 #define MAX_COLOR_SCALE 255.
 
+#define ZAXIS_R 50./255.
+#define ZAXIS_G 150./255.
+#define ZAXIS_B 255./255.
+
 //-----------------------------------------------------------------------------
 
 //! Pointer to Node allocation routine.
