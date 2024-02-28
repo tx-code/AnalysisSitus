@@ -82,6 +82,9 @@
 #define asiPropName_Umax                                  "umax"
 #define asiPropName_Vmin                                  "vmin"
 #define asiPropName_Vmax                                  "vmax"
+#define asiPropName_AABBDx                                "aabbDx"
+#define asiPropName_AABBDy                                "aabbDy"
+#define asiPropName_AABBDz                                "aabbDz"
 
 // JSON properties
 #define asiPropName_ExtrasCanRecSummary                   "canrecSummary"
