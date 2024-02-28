@@ -1109,6 +1109,9 @@ void asiVisu_PrsManager::Initialize(QWidget* pWidget, const bool isOffscreen)
     m_trihedron = vtkSmartPointer<vtkAxesActor>::New();
     m_trihedron->SetAxisLabels(0);
     m_trihedron->SetConeRadius(0);
+    //
+    m_trihedron->GetXAxisShaftProperty()->SetColor(XAXIS_R, XAXIS_G, XAXIS_B);
+    m_trihedron->GetYAxisShaftProperty()->SetColor(YAXIS_R, YAXIS_G, YAXIS_B);
     m_trihedron->GetZAxisShaftProperty()->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
     //
     m_renderer->AddActor(m_trihedron);

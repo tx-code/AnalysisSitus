@@ -68,6 +68,12 @@
 #define INF_LIMIT 100
 #define MAX_COLOR_SCALE 255.
 
+#define XAXIS_R 250./255.
+#define XAXIS_G 60./255.
+#define XAXIS_B 15./255.
+#define YAXIS_R 140./255.
+#define YAXIS_G 220./255.
+#define YAXIS_B 40./255.
 #define ZAXIS_R 50./255.
 #define ZAXIS_G 150./255.
 #define ZAXIS_B 255./255.

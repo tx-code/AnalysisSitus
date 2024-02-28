@@ -465,8 +465,13 @@ asiUI_ViewerPart::asiUI_ViewerPart(const Handle(asiEngine_Model)& model,
    * ======================== */
 
   vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+  //
+  axes->GetXAxisShaftProperty()->SetColor(XAXIS_R, XAXIS_G, XAXIS_B);
+  axes->GetXAxisTipProperty()  ->SetColor(XAXIS_R, XAXIS_G, XAXIS_B);
+  axes->GetYAxisShaftProperty()->SetColor(YAXIS_R, YAXIS_G, YAXIS_B);
+  axes->GetYAxisTipProperty()  ->SetColor(YAXIS_R, YAXIS_G, YAXIS_B);
   axes->GetZAxisShaftProperty()->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
-  axes->GetZAxisTipProperty()->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
+  axes->GetZAxisTipProperty()  ->SetColor(ZAXIS_R, ZAXIS_G, ZAXIS_B);
 
   vtkSmartPointer<vtkAssembly>  assm = vtkSmartPointer<vtkAssembly>::New();
   assm->AddPart(axes);

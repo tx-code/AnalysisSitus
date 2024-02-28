@@ -892,8 +892,8 @@ vtkSmartPointer<vtkLookupTable> asiVisu_Utils::InitAxesLookupTable()
   lookup->SetRange(range);
   lookup->SetNumberOfColors(VisuAxis_Last);
 
-  lookup->SetTableValue(VisuAxis_X, 1.0, 0.0, 0.0);
-  lookup->SetTableValue(VisuAxis_Y, 0.0, 1.0, 0.0);
+  lookup->SetTableValue(VisuAxis_X, XAXIS_R, XAXIS_G, XAXIS_B);
+  lookup->SetTableValue(VisuAxis_Y, YAXIS_R, YAXIS_G, YAXIS_B);
   lookup->SetTableValue(VisuAxis_Z, ZAXIS_R, ZAXIS_G, ZAXIS_B);
 
   return lookup;
