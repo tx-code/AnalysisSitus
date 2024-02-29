@@ -98,7 +98,7 @@ public:
     return m_fMinScalar;
   }
 
-  //! Set the allowed range for scalar values.
+  //! Sets the allowed range for scalar values.
   void SetScalarRange(const double minBound,
                       const double maxBound)
   {

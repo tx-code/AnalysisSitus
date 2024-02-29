@@ -66,79 +66,40 @@ ActAPI_DataObjectId asiVisu_SphereDataProvider::GetNodeID() const
 
 //-----------------------------------------------------------------------------
 
-void asiVisu_SphereDataProvider::SetFacetId(const int  facetId,
-                                            const bool inward)
+void asiVisu_SphereDataProvider::SetScalarAndCoords(const double scalar,
+                                                    const double v0[3],
+                                                    const double v1[3],
+                                                    const double v2[3])
 {
-  Handle(asiData_MeshParameter) triParam;
-  Handle(HRealArray) scalars;
-  if (m_node->DynamicType() == STANDARD_TYPE(asiData_ThicknessNode))
-  {
-    triParam = Handle(asiData_MeshParameter)::DownCast(m_node->Parameter(asiData_ThicknessNode::PID_Mesh));
-    scalars  = ActParamTool::AsRealArray(m_node->Parameter(asiData_ThicknessNode::PID_ThicknessFieldValues))->GetArray();
-  }
-  else if (m_node->DynamicType() == STANDARD_TYPE(asiData_ClearanceNode))
-  {
-    triParam = Handle(asiData_MeshParameter)::DownCast(m_node->Parameter(asiData_ClearanceNode::PID_Mesh));
-    scalars  = ActParamTool::AsRealArray(m_node->Parameter(asiData_ClearanceNode::PID_ClearanceFieldValues))->GetArray();
-  }
+  m_diameter = scalar;
 
-  // get a scalar assigned to a facet
-  // the scalar means a diameter of a result sphere
-  m_diameter = scalars->Value(facetId);
+  t_xyz p;
+  poly_MeshUtils::ComputeCenter({ v0[0], v0[1], v0[2] },
+                                { v1[0], v1[1], v1[2] },
+                                { v2[0], v2[1], v2[2] }, p);
 
-  // compute a center of the result sphere
-  // the center locates along direction opposite to outward normal 
-  // at the distance of radius of sphere.
-#if defined USE_MOBIUS
-  t_ptr<t_mesh> poly = triParam->GetMesh();
+  t_xyz N;
+  poly_MeshUtils::ComputeNormal({ v0[0], v0[1], v0[2] },
+                                { v1[0], v1[1], v1[2] },
+                                { v2[0], v2[1], v2[2] }, N);
 
-  int i = 0;
-  for (t_mesh::TriangleIterator tit(poly); tit.More(); tit.Next(), i++)
-  {
-    if (i != facetId)
-      continue;
+  N.Reverse();
 
-    poly_TriangleHandle th = tit.Current();
+  core_XYZ c = p + N.Normalized() * (GetDiameter() / 2.);
 
-    // Define an initial sphere
-    poly_Triangle<> t;
-    poly->GetTriangle(th, t);
+  m_loc = cascade::GetOpenCascadePnt(c);
 
-    t_xyz p;
-    poly->ComputeCenter(t.hVertices[0], t.hVertices[1], t.hVertices[2], p);
+  m_points[0][0] = v0[0];
+  m_points[0][1] = v0[1];
+  m_points[0][2] = v0[2];
 
-    t_xyz N;
-    poly->ComputeNormal(th, N);
-    
-    if (inward)
-      N.Reverse();
+  m_points[1][0] = v1[0];
+  m_points[1][1] = v1[1];
+  m_points[1][2] = v1[2];
 
-    core_XYZ c = p + N.Normalized() * GetDiameter() / 2.;
-
-    m_loc = cascade::GetOpenCascadePnt(c);
-
-    t_xyz v0, v1, v2;
-    poly->GetVertex(t.hVertices[0], v0);
-    poly->GetVertex(t.hVertices[1], v1);
-    poly->GetVertex(t.hVertices[2], v2);
-
-    m_points[0][0] = v0.X();
-    m_points[0][1] = v0.Y();
-    m_points[0][2] = v0.Z();
-
-    m_points[1][0] = v1.X();
-    m_points[1][1] = v1.Y();
-    m_points[1][2] = v1.Z();
-
-    m_points[2][0] = v2.X();
-    m_points[2][1] = v2.Y();
-    m_points[2][2] = v2.Z();
-
-    break;
-  }
-#else
-  (void) inward;
-#endif
+  m_points[2][0] = v2[0];
+  m_points[2][1] = v2[1];
+  m_points[2][2] = v2[2];
 }
 
 //-----------------------------------------------------------------------------

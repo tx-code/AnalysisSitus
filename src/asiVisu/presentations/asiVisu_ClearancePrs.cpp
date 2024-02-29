@@ -37,11 +37,13 @@
 #include <asiVisu_MeshResultUtils.h>
 #include <asiVisu_SphereDataProvider.h>
 #include <asiVisu_SpherePipeline.h>
+#include <asiVisu_MeshEScalarFilter.h>
 
 // VTK includes
 #pragma warning(push, 0)
 #include <vtkMapper.h>
 #include <vtkProperty.h>
+#include <vtkCellData.h>
 #pragma warning(pop)
 
 //-----------------------------------------------------------------------------
@@ -115,21 +117,45 @@ void asiVisu_ClearancePrs::highlight(vtkRenderer*                        rendere
   Handle(asiVisu_CellPickerResult)
     cellPickerRes = Handle(asiVisu_CellPickerResult)::DownCast(pickRes);
 
-  const TColStd_PackedMapOfInteger& elemIds = cellPickerRes->GetPickedElementIds();
+  const TColStd_PackedMapOfInteger& cellIds = cellPickerRes->GetPickedCellIds();
 
-  if ( elemIds.IsEmpty() )
+  if ( cellIds.IsEmpty() )
     return;
 
   this->GetPipeline(Pipeline_Sphere)->Actor()->SetVisibility(1);
 
-  const int facetId = elemIds.GetMinimalMapped();
+  const int cellId = cellIds.GetMinimalMapped();
+
+  Handle(asiVisu_MeshEScalarPipeline)
+    mainPl = Handle(asiVisu_MeshEScalarPipeline)::DownCast(this->GetPipeline(Pipeline_Main));
+
+  // Get cell data for the current mesh.
+  vtkDataSet* outputCD = mainPl->Actor()->GetMapper()->GetInput();
+
+  // Get cell with cellId.
+  vtkCell* cell = outputCD->GetCell(cellId);
+
+  // Get scalar.
+  auto scalar = outputCD->GetCellData()->GetScalars()->GetVariantValue(cellId).ToDouble();
+
+  // Get points of the current cell.
+  double p0[3];
+  double p1[3];
+  double p2[3];
+
+  vtkPoints* pnts = cell->GetPoints();
+
+  pnts->GetPoint(0, p0);
+  pnts->GetPoint(1, p1);
+  pnts->GetPoint(2, p2);
 
   // Pipeline for the field.
   Handle(asiVisu_SpherePipeline)
     pl = Handle(asiVisu_SpherePipeline)::DownCast( this->GetPipeline(Pipeline_Sphere) );
 
   Handle(asiVisu_SphereDataProvider) ds = Handle(asiVisu_SphereDataProvider)::DownCast(dataProvider(Pipeline_Sphere));
-  ds->SetFacetId(facetId, false);
+  // Set data to sphere data provider.
+  ds->SetScalarAndCoords(scalar, p0, p1, p2);
 
   pl->SetInput(ds);
 

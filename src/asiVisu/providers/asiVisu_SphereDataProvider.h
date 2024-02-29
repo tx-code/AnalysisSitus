@@ -56,9 +56,11 @@ public:
 
 public:
 
-  //! Defines a facet being a source for getting sphere properties.
-  void SetFacetId(const int  facetId,
-                  const bool inward = true);
+  //! Sets scalar and point coords of the highlighted triangle.
+  void SetScalarAndCoords(const double scalar,
+                          const double v0[3],
+                          const double v1[3],
+                          const double v2[3]);
 
   //! Gets the diameter of the target sphere.
   double GetDiameter() const;
